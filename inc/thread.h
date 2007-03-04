@@ -163,6 +163,19 @@ public:
 		{pthread_rwlock_unlock(&lock);};
 };
 
+class __EXPORT Thread
+{
+private:
+	pthread_t tid;
+	
+protected:
+	virtual ~Thread();
+
+	virtual void run(void);
+	
+	void release(void);
+};
+
 class __EXPORT auto_cancellation
 {
 private:

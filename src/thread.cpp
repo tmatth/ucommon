@@ -253,6 +253,27 @@ void Threadlock::Shlock(void)
 	pthread_rwlock_rdlock(&lock);
 }
 
+Thread::~Thread()
+{
+	release();
+}
+
+void Thread::release(void)
+{
+	pthread_t self = pthread_self();
+
+	if(pthread_equal(tid, self)) {
+		tid = 0;
+		pthread_exit(NULL);
+	}
+
+	if(tid && !pthread_equal(tid, self)) {
+		pthread_cancel(tid);
+		pthread_join(tid, NULL);
+		tid = 0;
+	}
+}
+
 auto_cancellation::auto_cancellation(int ntype, int nmode)
 {
 	pthread_setcanceltype(ntype, &type);
