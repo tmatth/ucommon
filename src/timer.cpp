@@ -1,4 +1,5 @@
 #include <private.h>
+#include <inc/config.h>
 #include <inc/timers.h>
 
 using namespace UCOMMON_NAMESPACE;

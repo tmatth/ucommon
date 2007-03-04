@@ -1,6 +1,7 @@
 #include <private.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inc/config.h>
 #include <inc/object.h>
 
 #if UCOMMON_THREADING > 0

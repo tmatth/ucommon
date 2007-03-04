@@ -1,5 +1,6 @@
 #include <private.h>
 #include <string.h>
+#include <inc/config.h>
 #include <inc/object.h>
 #include <inc/linked.h>
 

@@ -202,9 +202,5 @@ AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_LIBS)
 
-AH_BOTTOM([
-#include <inc/config.h>
-])
-
 AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile inc/config.h)
 

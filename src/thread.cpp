@@ -1,4 +1,5 @@
 #include <private.h>
+#include <inc/config.h>
 #include <inc/access.h>
 #include <inc/thread.h>
 
