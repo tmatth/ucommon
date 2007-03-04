@@ -249,7 +249,7 @@ void cidr::set(const char *cp)
 	case AF_INET:
 		memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
 		bitset((bit_t *)&netmask.ipv4, getMask(cp));
-		strset(cbuf, sizeof(cbuf), cp);
+		cpr_strset(cbuf, sizeof(cbuf), cp);
 		ep = strchr(cp, '/');
 		if(ep)
 			*ep = 0;
@@ -261,7 +261,7 @@ void cidr::set(const char *cp)
 		}
 
 		while(dots++ < 3)
-			stradd(cbuf, sizeof(cbuf), ".0");
+			cpr_stradd(cbuf, sizeof(cbuf), ".0");
 
 #ifdef	_MSWINDOWS_
 		addr = inet_addr(cbuf);
@@ -274,7 +274,7 @@ void cidr::set(const char *cp)
 	case AF_INET6:
 		memset(&netmask.ipv6, 0, sizeof(netmask));
 		bitset((bit_t *)&netmask.ipv6, getMask(cp));
-		strset(cbuf, sizeof(cbuf), cp);
+		cpr_strset(cbuf, sizeof(cbuf), cp);
 		ep = strchr(cp, '/');
 		if(ep)
 			*ep = 0;
@@ -319,7 +319,7 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 {
 	so = ::socket(family, type, protocol);
 	if(so != INVALID_SOCKET)
-		if(bindtoaddr(so, iface, port))
+		if(::cpr_bindaddr(so, iface, port))
 			release();
 }
 
@@ -370,7 +370,7 @@ ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
 {
 	socklen_t slen = 0;
 	if(dest)
-		slen = ::getaddrlen(dest);
+		slen = ::cpr_getaddrlen(dest);
 	
 	return ::sendto(so, data, len, MSG_NOSIGNAL, dest, slen);
 }
@@ -504,22 +504,22 @@ int Socket::setNonBlocking(bool enable)
 
 int Socket::connect(const char *host, const char *svc)
 {
-	return ::connecttoaddr(so, host, svc);
+	return ::cpr_connect(so, host, svc);
 }
 
 int Socket::join(const char *member)
 {
-	return ::jointoaddr(so, member);
+	return ::cpr_joinaddr(so, member);
 }
 
 int Socket::drop(const char *member)
 {
-	return ::droptoaddr(so, member);
+	return ::cpr_dropaddr(so, member);
 }
 
 int Socket::disconnect(void)
 {
-	return ::disconnect(so);
+	return ::cpr_disconnect(so);
 }
 
 bool Socket::isConnected(void) const
@@ -658,7 +658,7 @@ retry:
 	if(so == INVALID_SOCKET)
 		return;
 		
-	if(::bindtoaddr(so, iface, svc)) {
+	if(::cpr_bindaddr(so, iface, svc)) {
 		release();
 		if(family = AF_INET && !strchr(iface, '.')) {
 			family = AF_INET6;
@@ -674,7 +674,7 @@ SOCKET ListenSocket::accept(struct sockaddr *addr)
 {
 	socklen_t len = 0;
 	if(addr) {
-		len = ::getaddrlen(addr);		
+		len = ::cpr_getaddrlen(addr);		
 		return ::accept(so, addr, &len);
 	}
 	else
@@ -707,7 +707,7 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 
 #endif
 
-extern "C" struct addrinfo *getsockhint(SOCKET so, struct addrinfo *hint)
+extern "C" struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *hint)
 {
 	struct sockaddr_storage st;
 	struct sockaddr *sa = (struct sockaddr *)&st;
@@ -723,7 +723,7 @@ extern "C" struct addrinfo *getsockhint(SOCKET so, struct addrinfo *hint)
 	return hint;
 }
 
-extern "C" char *hosttostr(struct sockaddr *sa, char *buf, size_t max)
+extern "C" char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max)
 {
 	socklen_t sl;
 	char *sep = ";";
@@ -760,7 +760,7 @@ extern "C" char *hosttostr(struct sockaddr *sa, char *buf, size_t max)
 	return buf;
 }
 
-extern "C" socklen_t getsockaddr(SOCKET so, struct sockaddr_storage *sa, const char *host, const char *svc)
+extern "C" socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *sa, const char *host, const char *svc)
 {
 	socklen_t len = 0;
 	struct addrinfo hint, *res = NULL;
@@ -770,7 +770,7 @@ extern "C" socklen_t getsockaddr(SOCKET so, struct sockaddr_storage *sa, const c
 		return unixaddr((struct sockaddr_un *)sa, host);
 #endif
 
-	if(!getsockhint(so, &hint) || !svc)
+	if(!cpr_getsockhint(so, &hint) || !svc)
 		return 0;
 
 	if(getaddrinfo(host, svc, &hint, &res) || !res)
@@ -785,7 +785,7 @@ exit:
 	return len;
 }
 
-extern "C" int bindtoaddr(SOCKET so, const char *host, const char *svc)
+extern "C" int cpr_bindaddr(SOCKET so, const char *host, const char *svc)
 {
 	int rtn = -1;
 	int reuse = 1;
@@ -803,10 +803,10 @@ extern "C" int bindtoaddr(SOCKET so, const char *host, const char *svc)
 	};
 #endif
 
-    if(!getsockhint(so, &hint) || !svc)
+    if(!cpr_getsockhint(so, &hint) || !svc)
         return -1;
 
-	if(host && !stricmp(host, "*"))
+	if(host && !cpr_stricmp(host, "*"))
 		host = NULL;
 
 #ifdef	SO_BINDTODEVICE
@@ -832,7 +832,7 @@ exit:
 	return rtn;
 }
 
-extern "C" socklen_t getaddrlen(struct sockaddr *sa)
+extern "C" socklen_t cpr_getaddrlen(struct sockaddr *sa)
 {
 	switch(sa->sa_family)
 	{
@@ -845,7 +845,7 @@ extern "C" socklen_t getaddrlen(struct sockaddr *sa)
 	}
 }
 
-extern "C" int jointoaddr(SOCKET so, const char *host)
+extern "C" int cpr_joinaddr(SOCKET so, const char *host)
 {
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
@@ -858,7 +858,7 @@ extern "C" int jointoaddr(SOCKET so, const char *host)
 		return -1;
 	
 	getsockname(so, (struct sockaddr *)&addr, &len);
-	if(getsockhint(so, &hint) == NULL)
+	if(cpr_getsockhint(so, &hint) == NULL)
 		return -1;
 	rtn = getaddrinfo(host, NULL, &hint, &res);
 	if(rtn)
@@ -887,7 +887,7 @@ exit:
 	return rtn;
 }
 
-extern "C" int droptoaddr(SOCKET so, const char *host)
+extern "C" int cpr_dropaddr(SOCKET so, const char *host)
 {
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
@@ -900,7 +900,7 @@ extern "C" int droptoaddr(SOCKET so, const char *host)
 		return -1;
 	
 	getsockname(so, (struct sockaddr *)&addr, &len);
-	if(getsockhint(so, &hint) == NULL)
+	if(cpr_getsockhint(so, &hint) == NULL)
 		return -1;
 	rtn = getaddrinfo(host, NULL, &hint, &res);
 	if(rtn)
@@ -929,7 +929,7 @@ exit:
 	return rtn;
 }
 
-extern "C" int disconnect(SOCKET so)
+extern "C" int cpr_disconnect(SOCKET so)
 {
 	struct sockaddr_storage saddr;
 	struct sockaddr *addr = (struct sockaddr *)&saddr;
@@ -949,7 +949,7 @@ extern "C" int disconnect(SOCKET so)
 	return connect(so, addr, len);
 }
 
-extern "C" int connecttoaddr(SOCKET so, const char *host, const char *svc)
+extern "C" int cpr_connect(SOCKET so, const char *host, const char *svc)
 {
 	int rtn = -1;
 	struct addrinfo hint, *res = NULL, *node;
@@ -962,7 +962,7 @@ extern "C" int connecttoaddr(SOCKET so, const char *host, const char *svc)
 	}
 #endif
 
-	if(getsockhint(so, &hint))
+	if(cpr_getsockhint(so, &hint))
 		return -1;
 
 	rtn = getaddrinfo(host, svc, &hint, &res);

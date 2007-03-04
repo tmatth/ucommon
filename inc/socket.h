@@ -160,15 +160,15 @@ public:
 END_NAMESPACE
 
 extern "C" {
-	__EXPORT int jointoaddr(SOCKET so, const char *host);
-	__EXPORT int droptoaddr(SOCKET so, const char *host);
-	__EXPORT int bindtoaddr(SOCKET so, const char *host, const char *svc);
-	__EXPORT int disconnect(SOCKET so);
-	__EXPORT int connecttoaddr(SOCKET so, const char *host, const char *svc);
-	__EXPORT char *hosttostr(struct sockaddr *sa, char *buf, size_t max);
-	__EXPORT struct addrinfo *getsockhint(SOCKET so, struct addrinfo *h);
-	__EXPORT socklen_t getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
-	__EXPORT socklen_t getaddrlen(struct sockaddr *addr);
+	__EXPORT int cpr_joinaddr(SOCKET so, const char *host);
+	__EXPORT int cpr_dropaddr(SOCKET so, const char *host);
+	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);
+	__EXPORT int cpr_disconnect(SOCKET so);
+	__EXPORT int cpr_connect(SOCKET so, const char *host, const char *svc);
+	__EXPORT char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max);
+	__EXPORT struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *h);
+	__EXPORT socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
+	__EXPORT socklen_t cpr_getaddrlen(struct sockaddr *addr);
 };
 
 #endif

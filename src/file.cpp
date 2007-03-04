@@ -66,7 +66,7 @@ void auto_close::release(void)
 	type = T_CLOSED;
 }
 
-extern "C" bool isDir(const char *fn)
+extern "C" bool cpr_isdir(const char *fn)
 {
 	struct stat ino;
 
@@ -79,7 +79,7 @@ extern "C" bool isDir(const char *fn)
 	return false;
 }
 
-extern "C" bool isFile(const char *fn)
+extern "C" bool cpr_isfile(const char *fn)
 {
 	struct stat ino;
 

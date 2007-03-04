@@ -44,10 +44,6 @@ AC_CHECK_LIB($clib, stricmp, [
 	AC_DEFINE(HAVE_STRICMP, [1], [string icmp])
 ])
 
-AC_CHECK_LIB($clib, strcasecmp, [
-    AC_DEFINE(HAVE_STRCASECMP, [1], [string icmp])
-])
-
 AC_CHECK_LIB($clib, sysconf, [
 	AC_DEFINE(HAVE_SYSCONF, [1], [system config])
 ])

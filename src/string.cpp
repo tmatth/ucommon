@@ -296,7 +296,7 @@ const char *string::last(const char *clist) const
 	if(!str)
 		return NULL;
 
-	return ::strlast(str->text, clist);
+	return ::cpr_strlast(str->text, clist);
 }
 
 const char *string::first(const char *clist) const
@@ -304,7 +304,7 @@ const char *string::first(const char *clist) const
 	if(!str)
 		return NULL;
 
-	return ::strfirst(str->text, clist);
+	return ::cpr_strfirst(str->text, clist);
 }
 
 const char *string::begin(void) const
@@ -357,7 +357,7 @@ const char *string::rfind(const char *clist, strsize_t offset) const
 	return NULL;
 }
 
-void string::rtrim(const char *clist)
+void string::chop(const char *clist)
 {
 	strsize_t offset;
 
@@ -389,7 +389,7 @@ void string::rtrim(const char *clist)
 void string::strip(const char *clist)
 {
 	trim(clist);
-	rtrim(clist);
+	chop(clist);
 }
 
 void string::trim(const char *clist)
@@ -434,13 +434,13 @@ const char *string::find(const char *clist, strsize_t offset) const
 void string::upper(void)
 {
 	if(str)
-		::strupper(str->text);
+		::cpr_strupper(str->text);
 }
 
 void string::lower(void)
 {
 	if(str)
-		::strlower(str->text);
+		::cpr_strlower(str->text);
 }
 
 strsize_t string::offset(const char *s) const
@@ -469,7 +469,7 @@ strsize_t string::ccount(const char *clist) const
 	if(!str)
 		return 0;
 
-	return strccount(str->text, clist);
+	return ::cpr_strccount(str->text, clist);
 }
 
 strsize_t string::size(void) const
@@ -849,7 +849,7 @@ tokenstring::tokenstring(caddr_t mem, const char *cl) :
 string()
 {
 	clist = cl;
-	token = strtrim(mem, cl);
+	token = ::cpr_strtrim(mem, cl);
 }
 
 const char *tokenstring::get(void)
@@ -861,7 +861,7 @@ const char *tokenstring::get(void)
 
 	if(!token) {
 		cow();
-		rtrim(clist);
+		chop(clist);
 		token = str->text;
 	}
 	else if(!*token)
@@ -889,7 +889,7 @@ const char *tokenstring::get(const char *q)
 
 	if(!token) {
 		cow();
-		rtrim(clist);
+		chop(clist);
 		token = str->text;
 	}
 	else if(!*token)
@@ -936,7 +936,7 @@ const char *tokenstring::next(void)
 
 	if(!p && str) {
 		cow();
-		rtrim(clist);
+		chop(clist);
 		p = str->text;
 	}
 	else if(!p)
@@ -954,7 +954,7 @@ tokenstring &tokenstring::operator=(caddr_t s)
 	if(str)
 		set(s);
 	else
-		token = strtrim(s, clist);
+		token = ::cpr_strtrim(s, clist);
 	return *this;
 }
 
@@ -1017,7 +1017,7 @@ int istring::compare(const char *s) const
 	if(!s)
 		s = "";
 
-	return stricmp(mystr, s);
+	return cpr_stricmp(mystr, s);
 }
 
 void ucc::swap(string &s1, string &s2)
@@ -1027,15 +1027,45 @@ void ucc::swap(string &s1, string &s2)
 	s2.str = s;
 }
 
-extern "C" char *strfill(char *str, size_t size, const char fill)
+extern "C" char *cpr_strdup(const char *cp)
 {
+	char *mem;
+
+	if(!cp)
+		return NULL;
+
+	mem = (char *)malloc(strlen(cp) + 1);
+	crit(mem != NULL);
+	strcpy(mem, cp);
+	return mem;
+}	
+
+extern "C" size_t cpr_strlen(const char *cp)
+{
+	if(!cp)
+		return 0;
+
+	return strlen(cp);
+}
+
+extern "C" char *cpr_strfill(char *str, size_t size, const char fill)
+{
+	if(!str)
+		return NULL;
+
 	memset(str, size - 1, fill);
 	str[size - 1] = 0;
 	return str;
 }
 
-extern "C" char *strfield(char *str, const char *s, const char fill, size_t offset, size_t len)
+extern "C" char *cpr_strfield(char *str, const char *s, const char fill, size_t offset, size_t len)
 {
+	if(!str)
+		return NULL;
+
+	if(!s)
+		s = "";
+
 	size_t size = strlen(str);
 
 	if(!len)
@@ -1051,8 +1081,11 @@ extern "C" char *strfield(char *str, const char *s, const char fill, size_t offs
 	return str;
 }
 
-extern "C" char *strclear(char *str, size_t offset, size_t len, const char fill)
+extern "C" char *cpr_strclear(char *str, size_t offset, size_t len, const char fill)
 {
+	if(!str)
+		return NULL;
+
 	size_t size = strlen(str);
 	if(offset >= size)
 		return str;
@@ -1064,46 +1097,117 @@ extern "C" char *strclear(char *str, size_t offset, size_t len, const char fill)
 	return str;
 }
 	
-extern "C" char *strset(char *str, size_t size, const char *s)
+extern "C" char *cpr_strnset(char *str, size_t size, const char *s, size_t len)
 {
-	size_t l = strlen(s);
+	if(!str)
+		return NULL;
 
 	if(size < 2)
 		return str;
 
+	if(!s)
+		s = "";
+
+	size_t l = strlen(s);
 	if(l >= size)
 		l = size - 1;
 
-	if(!l)
+	if(l > len)
+		l = len;
+
+	if(!l) {
+		*str = 0;
 		return str;
+	}
 
 	memmove(str, s, l);
 	str[l] = 0;
 	return str;
 }
 
-extern "C" char *stradd(char *str, size_t size, const char *s)
+extern "C" char *cpr_strset(char *str, size_t size, const char *s)
 {
+	if(!str)
+		return NULL;
+
+	if(size < 2)
+		return str;
+
+	if(!s)
+		s = "";
+
+	size_t l = strlen(s);
+
+	if(l >= size)
+		l = size - 1;
+
+	if(!l) {
+		*str = 0;
+		return str;
+	}
+
+	memmove(str, s, l);
+	str[l] = 0;
+	return str;
+}
+
+extern "C" char *cpr_strnadd(char *str, size_t size, const char *s, size_t len)
+{
+    if(!str)
+        return NULL;
+
+    if(!s)
+        return str;
+
+    size_t l = strlen(s);
+    size_t o = strlen(str);
+
+	if(o >= (size - 1))
+		return str;
+	cpr_strnset(str + o, size - o, s, l);
+	return str;
+}
+
+extern "C" char *cpr_stradd(char *str, size_t size, const char *s)
+{
+	if(!str)
+		return NULL;
+
+	if(!s)
+		return str;
+
 	size_t l = strlen(s);
 	size_t o = strlen(str);
 
 	if(o >= (size - 1))
 		return str;
 
-	strset(str + o, size - o, s);
+	cpr_strset(str + o, size - o, s);
 	return str;
 }
 
-extern "C" char *strtrim(char *str, const char *clist)
+extern "C" char *cpr_strtrim(char *str, const char *clist)
 {
+	if(!str)
+		return NULL;
+
+	if(!clist)
+		return str;
+
 	while(*str && strchr(clist, *str))
 		++str;
 
 	return str;
 }
 
-extern "C" char *strrtrim(char *str, const char *clist)
+extern "C" char *cpr_strchop(char *str, const char *clist)
 {
+	if(!str)
+		return NULL;
+
+	if(!clist)
+		return str;
+
 	size_t offset = strlen(str);
 	while(offset && strchr(clist, str[offset - 1])) {
 		*(--str) = 0;
@@ -1112,15 +1216,18 @@ extern "C" char *strrtrim(char *str, const char *clist)
 	return str;
 }
 
-extern "C" char *strstrip(char *str, const char *clist)
+extern "C" char *cpr_strstrip(char *str, const char *clist)
 {
-	str = strtrim(str, clist);
-	return strrtrim(str, clist);
+	str = cpr_strtrim(str, clist);
+	return cpr_strchop(str, clist);
 }
 
-extern "C" char *strupper(char *str)
+extern "C" char *cpr_strupper(char *str)
 {
 	char *s = str;
+	if(!str)
+		return NULL;
+
 	while(*str) {
 		*str = toupper(*str);
 		++str;
@@ -1128,9 +1235,12 @@ extern "C" char *strupper(char *str)
 	return s;
 }
 
-extern "C" char *strlower(char *str)
+extern "C" char *cpr_strlower(char *str)
 {
     char *s = str;
+	if(!str)
+		return NULL;
+
     while(*str) {
         *str = tolower(*str);
         ++str;
@@ -1138,7 +1248,7 @@ extern "C" char *strlower(char *str)
     return s;
 }
 
-extern "C" unsigned strccount(const char *str, const char *clist)
+extern "C" unsigned cpr_strccount(const char *str, const char *clist)
 {
 	unsigned count = 0;
 	while(str && *str) {
@@ -1148,8 +1258,14 @@ extern "C" unsigned strccount(const char *str, const char *clist)
 	return count;
 }
 
-extern "C" char *strfind(char *str, const char *clist)
+extern "C" char *cpr_strfind(char *str, const char *clist)
 {
+	if(!str)
+		return NULL;
+
+	if(!clist)
+		return str;
+
 	while(str && *str) {
 		if(strchr(clist, *str))
 			return str;
@@ -1157,8 +1273,14 @@ extern "C" char *strfind(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" char *strrfind(char *str, const char *clist)
+extern "C" char *cpr_strrfind(char *str, const char *clist)
 {
+	if(!str)
+		return NULL;
+
+	if(!clist)
+		return str + strlen(str);
+
 	char *s = str + strlen(str);
 
 	while(s > str) {
@@ -1168,12 +1290,15 @@ extern "C" char *strrfind(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" timeout_t strtotimeout(const char *cp, char **ep, bool sec)
+extern "C" timeout_t cpr_strtotimeout(const char *cp, char **ep, bool sec)
 {
 	char *end, *nend;
 	timeout_t base = strtol(cp, &end, 10);
 	timeout_t rem = 0;
 	unsigned dec = 0;
+
+	if(!cp)
+		return 0;
 
 	if(ep)
 		*ep = NULL;
@@ -1236,12 +1361,15 @@ extern "C" timeout_t strtotimeout(const char *cp, char **ep, bool sec)
 	return base;
 }
 
-extern "C" char *strlast(char *str, const char *clist)
+extern "C" char *cpr_strlast(char *str, const char *clist)
 {
 	char *cp, *lp = NULL;
 
 	if(!str)
 		return NULL;
+
+	if(!clist)
+		return str + strlen(str) - 1;
 
 	while(clist && *clist) {
 		cp = strrchr(str, *(clist++));
@@ -1252,12 +1380,15 @@ extern "C" char *strlast(char *str, const char *clist)
 	return lp;
 }
 
-extern "C" char *strfirst(char *str, const char *clist)
+extern "C" char *cpr_strfirst(char *str, const char *clist)
 {
     char *cp, *fp;
 
     if(!str)
         return NULL;
+
+	if(!clist)
+		return str;
 
 	fp = str + strlen(str);
     while(clist && *clist) {
@@ -1271,3 +1402,156 @@ extern "C" char *strfirst(char *str, const char *clist)
     return fp;
 }
 
+extern "C" char *cpr_strchr(const char *str, char c)
+{
+	if(!str)
+		return NULL;
+
+	return strchr(str, c);
+}
+
+extern "C" char *cpr_strrchr(const char *str, char c)
+{
+    if(!str)
+        return NULL;
+
+    return strrchr(str, c);
+}
+
+extern "C" int cpr_strcmp(const char *s1, const char *s2)
+{
+	if(!s1)
+		s1 = "";
+	if(!s2)
+		s2 = "";
+
+	return strcmp(s1, s2);
+}
+
+extern "C" int cpr_strncmp(const char *s1, const char *s2, size_t s)
+{
+    if(!s1)
+        s1 = "";
+    if(!s2)
+        s2 = "";
+
+    return strncmp(s1, s2, s);
+}
+
+extern "C" int cpr_stricmp(const char *s1, const char *s2)
+{
+	if(!s1)
+		s1 = "";
+
+	if(!s2)
+		s2 = "";
+
+#ifdef	HAVE_STRICMP
+	return stricmp(s1, s2);
+#else
+	return strcasecmp(s1, s2);
+#endif
+}
+
+extern "C" int cpr_strnicmp(const char *s1, const char *s2, size_t s)
+{
+    if(!s1)
+        s1 = "";
+
+    if(!s2)
+        s2 = "";
+
+#ifdef  HAVE_STRICMP
+    return strnicmp(s1, s2, s);
+#else
+    return strncasecmp(s1, s2, s);
+#endif
+}
+
+extern "C" const char *cpr_strstr(const char *body, const char *find)
+{
+	if(!body || !find)
+		return NULL;
+
+	return strstr(body, find);
+}
+
+extern "C" const char *cpr_stristr(const char *body, const char *find)
+{
+    if(!body || !find)
+        return NULL;
+
+#ifdef	HAVE_STRICMP
+	return stristr(body, find);
+#else
+    return strstr(body, find);
+#endif
+}
+
+extern "C" int32_t cpr_strtoint(const char *cp, char **ep)
+{
+	if(!cp) {
+		if(ep)
+			*ep = NULL;
+		return 0;
+	}
+	long value = strtol(cp, ep, 10);
+	return (int32_t)value;
+}	
+
+extern "C" bool cpr_strtobool(const char *cp, char **ep)
+{
+	bool rtn = false;
+
+	if(!cp) {
+		if(ep)
+			*ep = NULL;
+		return false;
+	}
+
+	if(*cp == '1') {
+		rtn = true;
+		++cp;
+		goto exit;
+	}
+	else if(*cp == '0') {
+		++cp;
+		goto exit;
+	}
+
+	if(!cpr_strnicmp(cp, "true", 4)) {
+		cp += 4;
+		rtn = true;
+		goto exit;
+	}
+	else if(!cpr_strnicmp(cp, "yes", 3)) {
+		cp += 3;
+		rtn = true;
+		goto exit;
+	}
+	else if(!cpr_strnicmp(cp, "false", 5)) {
+		cp += 5;
+		goto exit;
+	}
+	else if(!cpr_strnicmp(cp, "no", 2)) {
+		cp += 2;
+		goto exit;
+	}
+
+	if(strchr("yYtT", *cp)) {
+		++cp;
+		rtn = true;
+		goto exit;
+	}
+
+	if(strchr("nNfF", *cp)) {
+		++cp;
+		goto exit;
+	}
+
+exit:
+	if(ep)
+		*ep = (char *)cp;
+
+	return rtn;
+}

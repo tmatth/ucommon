@@ -72,7 +72,7 @@ public:
 	void add(const char *s);
 	void add(char ch);
 	void trim(const char *clist);
-	void rtrim(const char *clist);
+	void chop(const char *clist);
 	void strip(const char *clist);
 	void cut(strsize_t offset, strsize_t size = 0);
 	void clear(strsize_t offset, strsize_t size = 0);
@@ -184,29 +184,36 @@ __EXPORT void swap(string &s1, string &s2);
 END_NAMESPACE
 
 extern "C" {
-
-	__EXPORT char *strset(char *str, size_t size, const char *src);
-	__EXPORT char *stradd(char *str, size_t size, const char *src);
-	__EXPORT char *strtrim(char *str, const char *clist); 
-	__EXPORT char *strrtrim(char *str, const char *clist); 
-	__EXPORT char *strstrip(char *str, const char *clist);
-	__EXPORT char *strupper(char *str);
-	__EXPORT char *strlower(char *str);
-	__EXPORT unsigned strccount(const char *str, const char *clist);
-	__EXPORT char *strfill(char *str, size_t size, const char fill);
-	__EXPORT char *strfield(char *str, const char *s, const char fill, size_t offset = 0, size_t len = 0);
-	__EXPORT char *strclear(char *str, size_t offset, size_t len, const char fill);
-	__EXPORT char *strfind(char *str, const char *clist);
-	__EXPORT char *strrfind(char *str, const char *clist);
-	__EXPORT char *strlast(char *str, const char *clist);
-	__EXPORT char *strfirst(char *str, const char *clist);
-	__EXPORT timeout_t strtotimeout(const char *cp, char **ep = NULL, bool sec = false);
+	__EXPORT const char *cpr_strstr(const char *body, const char *item);
+	__EXPORT const char *cpr_stristr(const char *body, const char *item);
+	__EXPORT int cpr_strcmp(const char *s1, const char *s2);
+	__EXPORT int cpr_strncmp(const char *s1, const char *s2, size_t len);
+    __EXPORT int cpr_stricmp(const char *s1, const char *s2);
+    __EXPORT int cpr_strnicmp(const char *s1, const char *s2, size_t len);
+	__EXPORT char *cpr_strchr(const char *str, char c);
+	__EXPORT char *cpr_strrchr(const char *str, char c);
+	__EXPORT size_t cpr_strlen(const char *cp);
+	__EXPORT char *cpr_strdup(const char *cp);
+	__EXPORT char *cpr_strset(char *str, size_t size, const char *src);
+	__EXPORT char *cpr_strnset(char *str, size_t size, const char *src, size_t len);
+	__EXPORT char *cpr_stradd(char *str, size_t size, const char *src);
+	__EXPORT char *cpr_strnadd(char *str, size_t size, const char *src, size_t len);
+	__EXPORT char *cpr_strtrim(char *str, const char *clist); 
+	__EXPORT char *cpr_strrtrim(char *str, const char *clist); 
+	__EXPORT char *cpr_strstrip(char *str, const char *clist);
+	__EXPORT char *cpr_strupper(char *str);
+	__EXPORT char *cpr_strlower(char *str);
+	__EXPORT unsigned cpr_strccount(const char *str, const char *clist);
+	__EXPORT char *cpr_strfill(char *str, size_t size, const char fill);
+	__EXPORT char *cpr_strfield(char *str, const char *s, const char fill, size_t offset = 0, size_t len = 0);
+	__EXPORT char *cpr_strclear(char *str, size_t offset, size_t len, const char fill);
+	__EXPORT char *cpr_strfind(char *str, const char *clist);
+	__EXPORT char *cpr_strrfind(char *str, const char *clist);
+	__EXPORT char *cpr_strlast(char *str, const char *clist);
+	__EXPORT char *cpr_strfirst(char *str, const char *clist);
+	__EXPORT timeout_t cpr_strtotimeout(const char *cp, char **ep = NULL, bool sec = false);
+	__EXPORT bool cpr_strtobool(const char *cp, char **ep = NULL);
+	__EXPORT int32_t cpr_strtoint(const char *cp, char **ep = NULL);
 };
 
-#ifndef	_MSWINDOWS_
-#define	stricmp strcasecmp
-#define	strnicmp strncasecmp
-#define	stristr strcasestr
-#endif
-	
 #endif

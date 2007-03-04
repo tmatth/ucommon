@@ -50,8 +50,8 @@ public:
 #define	autoclose(x)	auto_close __access_name(__ac__)(x)
 
 extern "C" {
-	__EXPORT bool isFile(const char *fn);	
-	__EXPORT bool isDir(const char *fn);
+	__EXPORT bool cpr_isfile(const char *fn);	
+	__EXPORT bool cpr_isdir(const char *fn);
 }
 
 END_NAMESPACE
