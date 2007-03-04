@@ -1,0 +1,11 @@
+MAINTAINERCLEANFILES = Makefile.in Makefile
+AM_CXXFLAGS = $(UCOMMON_FLAGS)
+CXXLINK = $(LIBTOOL) --tag=CC --mode=link $(CXX) $(AM_CXXFLAGS) $(CFLAGS) \
+    $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LDADD = ../src/libucommon.la @UCOMMON_LIBS@
+
+noinst_PROGRAMS = string
+
+string_SOURCES = string.cpp
+
+

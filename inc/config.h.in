@@ -1,0 +1,79 @@
+#ifndef	_UCOMMON_CONFIG_H_
+#define	_UCOMMON_CONFIG_H_
+
+#define	UCOMMON_VISIBILITY	@UCOMMON_VISIBILITY@
+#define	UCOMMON_THREADING	@UCOMMON_THREADING@
+#define	UCOMMON_NAMESPACE	ucc
+#define	NAMESPACE_UCOMMON	namespace ucc {
+#define	END_NAMESPACE		};
+
+#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
+#define	_MSWINDOWS_
+#define	__EXPORT	__declspec(dllimport)
+#define	__LOCAL
+#elif UCOMMON_VISIBILITY > 0
+#define	__EXPORT	__attribute__ ((visibility("default")))
+#define	__LOCAL		__attribute__ ((visibility("hidden")))
+#else
+#define	__EXPORT
+#define	__LOCAL
+#endif
+
+#ifdef	_MSWINDOWS_
+typedef	signed __int8 int8_t;
+typedef	unsigned __int8 uint8_t;
+typedef	signed __int16 int16_t;
+typedef unsigned __int16 uint16_t;
+typedef signed __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef singed __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+
+#else
+
+#include <sys/types.h>
+#include <stdint.h>
+
+#endif
+
+typedef	int32_t rpcint_t;
+typedef	rpcint_t rpcbool_t;
+typedef	char *rpcstring_t;
+typedef	double rpcdouble_t;
+
+#include <stdlib.h>
+
+__EXPORT void *operator new(size_t size);
+__EXPORT void *operator new[](size_t size);
+__EXPORT void *operator new(size_t size, size_t extra);
+__EXPORT void *operator new(size_t size, caddr_t place, size_t max);
+__EXPORT void *operator new[](size_t size, caddr_t place, size_t max);
+__EXPORT void *operator new(size_t size, caddr_t place);
+__EXPORT void *operator new[](size_t size, caddr_t place);
+__EXPORT void operator delete(void *mem);
+__EXPORT void operator delete[](void *mem);
+
+#ifdef	__GNUC__
+extern "C" __EXPORT void __cxa_pure_virtual(void);
+#endif
+
+#ifndef	DEBUG
+#ifndef	NDEBUG
+#define	NDEBUG
+#endif
+#endif
+
+#ifdef	DEBUG
+#ifdef	NDEBUG
+#undef	NDEBUG
+#endif
+#endif
+
+#ifdef	DEBUG
+#include <assert.h>
+#define	crit(x)	assert(x)
+#else
+#define	crit(x) if(!(x)) abort()
+#endif
+
+#endif

@@ -1,0 +1,500 @@
+#include <private.h>
+#include <string.h>
+#include <inc/object.h>
+#include <inc/linked.h>
+
+using namespace UCOMMON_NAMESPACE;
+
+LinkedObject::LinkedObject(LinkedObject **root)
+{
+	next = *root;
+	*root = this;
+}
+
+LinkedObject::~LinkedObject()
+{
+}
+
+void LinkedObject::purge(LinkedObject *root)
+{
+	LinkedObject *next;
+
+	while(root) {
+		next = root->next;
+		root->release();
+		root = next;
+	}
+}
+
+void LinkedObject::delist(LinkedObject **root)
+{
+	LinkedObject *prev = NULL, *node = *root;
+
+	while(node && node != this) {
+		prev = node;
+		node = node->next;
+	}
+
+	if(!node)
+		return;
+
+	if(!prev)
+		*root = next;
+	else
+		prev->next = next;
+}
+
+NamedObject::NamedObject(OrderedIndex *root, const char *nid) :
+OrderedObject()
+{
+	NamedObject *node = static_cast<NamedObject *>(root->head), *prev = NULL;
+
+	while(node) {
+		if(node->compare(nid)) {
+			if(prev) 
+				prev->next = node->next;
+			else
+				root->head = static_cast<OrderedObject*>(node->next);
+			node->release();
+			break;
+		}
+		prev = node;
+		node = static_cast<NamedObject*>(node->next);
+	}	
+	next = NULL;							
+	id = nid;
+	if(!root->head)
+		root->head = this;
+	if(!root->tail)
+		root->tail = this;
+	else
+		root->tail->next = this;
+}
+
+NamedObject::NamedObject(NamedObject **root, const char *nid, unsigned max) :
+OrderedObject()
+{
+	NamedObject *node, *prev = NULL;
+
+	if(max < 2)
+		max = 1;
+	else
+		max = keyindex(nid, max);
+
+	node = root[max];
+	while(node) {
+		if(node && node->compare(nid)) {
+			if(prev) {
+				prev->next = this;
+				next = node->next;
+			}
+			else
+				root[max] = static_cast<NamedObject*>(node->next);
+			node->release();
+			break;
+		}
+		prev = node;
+		node = static_cast<NamedObject*>(node->next);
+	}		
+
+	if(!prev) {
+		next = root[max];
+		root[max] = this;
+	}
+	id = nid;
+}
+
+NamedList::NamedList(NamedObject **root, const char *id, unsigned max) :
+NamedObject(root, id, max)
+{
+	keyroot = root;
+	keysize = max;
+}
+
+NamedList::~NamedList()
+{
+	delist();
+}
+
+void NamedList::delist(void)
+{
+	if(!keyroot)
+		return;
+	
+	LinkedObject::delist((LinkedObject**)(&keyroot[keyindex(id, keysize)]));	
+	keyroot = NULL;
+}
+
+void LinkedObject::release(void)
+{
+	if(next != this) {
+		next = this;
+		delete this;
+	}
+}
+
+unsigned NamedObject::keyindex(const char *id, unsigned max)
+{
+	unsigned val = 0;
+
+	while(*id)
+		val = (val << 1) ^ (*(id++) & 0x1f);
+
+	return val % max;
+}
+
+bool NamedObject::compare(const char *cid) const
+{
+	if(!strcmp(id, cid))
+		return true;
+
+	return false;
+}
+
+extern "C" {
+
+	static int ncompare(const void *o1, const void *o2)
+	{
+		const NamedObject * const *n1 = static_cast<const NamedObject * const*>(o1);
+		const NamedObject * const*n2 = static_cast<const NamedObject * const*>(o2);
+		return (*n1)->compare((*n2)->getId());
+	}
+};
+
+NamedObject **NamedObject::sort(NamedObject **list, size_t count)
+{
+	if(!count) {
+		while(list[count])
+			++count;
+	}
+	qsort(static_cast<void *>(list), count, sizeof(NamedObject *), &ncompare);
+	return list;
+}
+
+NamedObject **NamedObject::index(NamedObject **idx, unsigned max)
+{
+	NamedObject **op = new NamedObject *[count(idx, max) + 1];
+	unsigned pos = 0;
+	NamedObject *node = skip(idx, NULL, max);
+
+	while(node) {
+		op[pos++] = node;
+		node = skip(idx, node, max);
+	}
+	op[pos] = NULL;
+	return op;
+}
+
+NamedObject *NamedObject::skip(NamedObject **idx, NamedObject *rec, unsigned max)
+{
+	unsigned key = 0;
+	if(rec && !rec->next) 
+		key = keyindex(rec->id, max) + 1;
+		
+	if(!rec || !rec->next) {
+		while(key < max && !idx[key])
+			++key;
+		if(key >= max)
+			return NULL;
+		return idx[key];
+	}
+
+	return static_cast<NamedObject *>(rec->next);
+}
+
+void NamedObject::purge(NamedObject **idx, unsigned max)
+{
+	LinkedObject *root;
+
+	if(max < 2)
+		max = 1;
+
+	while(max--) {
+		root = idx[max];
+		LinkedObject::purge(root);
+	}
+}
+
+unsigned NamedObject::count(NamedObject **idx, unsigned max)
+{
+	unsigned count = 0;
+	LinkedObject *node;
+
+	if(max < 2)
+		max = 1;
+
+	while(max--) {
+		node = idx[max];
+		while(node) {
+			++count;
+			node = node->next;
+		}
+	}
+	return count;
+}
+
+NamedObject *NamedObject::map(NamedObject **idx, const char *id, unsigned max)
+{
+	if(max < 2)
+		return find(*idx, id);
+
+	return find(idx[keyindex(id, max)], id);
+}
+
+NamedObject *NamedObject::find(NamedObject *root, const char *id)
+{
+	while(root)
+	{
+		if(root->compare(id))
+			break;
+		root = static_cast<NamedObject *>(root->next);
+	}
+	return root;
+}
+
+LinkedObject::LinkedObject()
+{
+	next = 0;
+}
+
+OrderedObject::OrderedObject() : LinkedObject()
+{
+}
+
+OrderedObject::OrderedObject(OrderedIndex *root) :
+LinkedObject()
+{
+	if(!root->head)
+		root->head = this;
+	
+	if(root->tail)
+		root->tail->next = this;
+
+	root->tail = this;
+}
+
+LinkedList::LinkedList()
+{
+	root = 0;
+	prev = 0;
+	next = 0;
+}
+
+LinkedList::LinkedList(OrderedIndex *r)
+{
+	root = r;
+	next = prev = 0;
+
+	if(!root->head) {
+		root->head = root->tail = static_cast<OrderedObject *>(this);
+		return;
+	}
+
+	prev = static_cast<LinkedList *>(root->tail);
+	prev->next = this;
+	root->tail = static_cast<OrderedObject *>(this);
+}
+
+void LinkedList::delist(void)
+{
+	if(!root)
+		return;
+
+	if(prev)
+		prev->next = next;
+	else if(root->head == static_cast<OrderedObject *>(this))
+		root->head = static_cast<OrderedObject *>(next);
+
+	if(next)
+		(static_cast<LinkedList *>(next))->prev = prev;
+	else if(root->tail == static_cast<OrderedObject *>(this))
+		root->tail = static_cast<OrderedObject *>(prev);
+
+	root = 0;
+	next = prev = 0;
+}
+
+LinkedList::~LinkedList()
+{
+	delist();
+}
+
+LinkedRing::LinkedRing() :
+LinkedList()
+{}
+
+LinkedRing::LinkedRing(OrderedIndex *r) :
+LinkedList()
+{
+	r = root;
+	if(!r->tail) {
+		r->tail = r->head = static_cast<OrderedObject *>(this);
+		next = prev = this;
+		return;
+	}
+
+	prev = static_cast<LinkedList *>(r->tail);
+	next = (r->tail)
+		->next;
+	(static_cast<LinkedList *>(r->tail->next))->prev = this;
+	r->tail->next = this;
+	r->tail = this;
+}
+
+OrderedIndex::OrderedIndex()
+{
+	head = tail = 0;
+}
+
+OrderedIndex::~OrderedIndex()
+{
+	if(head)
+		LinkedObject::purge(head);
+	head = tail = 0;
+}
+
+LinkedObject **OrderedIndex::index(void)
+{
+	LinkedObject **op = new LinkedObject *[count() + 1];
+	LinkedObject *node = head;
+	unsigned idx = 0;
+
+	while(node) {
+		op[idx++] = node;
+		node = node->next;
+	}
+	op[idx] = NULL;
+	return op;
+}
+
+LinkedObject *OrderedIndex::find(unsigned index)
+{
+	unsigned count = 0;
+	LinkedObject *node = head;
+
+	while(node && ++count < index)
+		node = node->next;
+	
+	return node;
+}
+
+unsigned OrderedIndex::count(void)
+{
+	unsigned count = 0;
+	LinkedObject *node = head;
+
+	while(node) {
+		node = node->next;
+		++count;
+	}
+	return count;
+}
+
+objmap::objmap(NamedList *o)
+{
+	object = o;
+}
+
+void objmap::operator++()
+{
+	if(object)
+		object = static_cast<NamedList *>(NamedObject::skip(object->keyroot, 
+			static_cast<NamedObject*>(object), object->keysize));
+}
+
+objlink::objlink(LinkedObject *o)
+{
+	object = o;
+}
+
+void objlink::operator++()
+{
+	if(object)
+		object = object->next;
+}
+
+objlink &objlink::operator=(LinkedObject *o)
+{
+	object = o;
+	return *this;
+}
+
+objlist::objlist(LinkedList *o)
+{
+	object = o;
+}
+
+objlist::~objlist()
+{
+	if(object)
+		delete object;
+	object = 0;
+}
+
+void objlist::operator--()
+{
+	if(object)
+		object = object->prev;
+}
+
+void objlist::operator++()
+{
+    if(object)
+        object = static_cast<LinkedList *>(object->next);
+}
+
+void objlist::clear(void)
+{
+	object = 0;
+}
+
+void objlist::begin(void)
+{
+	if(object && object->root)
+		object = static_cast<LinkedList *>(object->root->head);
+}
+
+void objlist::end(void)
+{
+	if(object && object->root)
+		object = static_cast<LinkedList *>(object->root->tail);
+}
+
+unsigned objlink::count(void)
+{
+	unsigned count = 0;
+	LinkedObject *node = object;
+
+	while(node) {
+		++count;
+		node = node->next;
+	}
+
+	return count;
+}
+
+unsigned objlist::count(void)
+{
+	if(!object)
+		return 0;
+	if(!object->root)
+		return 1;
+	return object->root->count();
+}
+
+void objring::fifo(void)
+{
+	if(object && object->root) {
+		begin();
+		object->delist();
+	}
+}
+
+void objring::lifo(void)
+{
+    if(object && object->root) {
+        end();
+        object->delist();
+    }
+}
+
