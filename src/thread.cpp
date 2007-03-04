@@ -1,18 +1,168 @@
 #include <private.h>
 #include <inc/config.h>
 #include <inc/access.h>
+#include <inc/timers.h>
 #include <inc/thread.h>
+#include <errno.h>
 
 #if	UCOMMON_THREADING > 0
 
 using namespace UCOMMON_NAMESPACE;
 
 Mutex::attribute Mutex::attr;
+Conditional::attribute Conditional::attr;
 
 Mutex::attribute::attribute()
 {
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+}
+
+Semaphore::Semaphore(unsigned limit)
+{
+	count = limit;
+	waits = 0;
+
+	crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
+	crit(pthread_mutex_init(&mutex, NULL) == 0);
+}
+
+Semaphore::~Semaphore()
+{
+	pthread_cond_destroy(&cond);
+	pthread_mutex_destroy(&mutex);
+}
+
+bool Semaphore::wait(Timer &timer)
+{
+	int rtn = 0;
+	bool result = true;
+	pthread_mutex_lock(&mutex);
+	if(!count) {
+		++waits;
+		while(!count && rtn != ETIMEDOUT)
+			pthread_cond_timedwait(&cond, &mutex, &timer.timer);
+		--waits;
+	}
+	if(rtn == ETIMEDOUT)
+		result = false;
+	else
+		--count;
+	pthread_mutex_unlock(&mutex);
+	return result;
+}
+
+bool Semaphore::wait(timeout_t timeout)
+{
+	if(timeout) {
+		Timer timer;
+		timer += timeout;
+		return wait(timer);
+	}
+	Semaphore::Shlock();
+	return true;
+}
+		
+void Semaphore::Shlock(void)
+{
+	pthread_mutex_lock(&mutex);
+	if(!count) {
+		++waits;
+		while(!count)
+			pthread_cond_wait(&cond, &mutex);
+		--waits;
+	}
+	--count;
+	pthread_mutex_unlock(&mutex);
+}
+
+void Semaphore::Unlock(void)
+{
+	pthread_mutex_lock(&mutex);
+	++count;
+	if(waits)
+		pthread_cond_signal(&cond);
+	pthread_mutex_unlock(&mutex);
+}
+
+Conditional::attribute::attribute()
+{
+	pthread_condattr_init(&attr);
+#ifdef	_POSIX_MONOTONIC_CLOCK
+	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+#else
+	pthread_condattr_setclock(&attr, CLOCK_REALTIME);
+#endif
+}
+
+Conditional::Conditional()
+{
+	crit(pthread_cond_init(&cond, &attr.attr) == 0);
+	crit(pthread_mutex_init(&mutex, NULL) == 0);
+	locker = 0;
+}
+
+void Conditional::Exlock(void)
+{
+	pthread_mutex_lock(&mutex);
+	locker = pthread_self();
+}
+
+void Conditional::Unlock(void)
+{
+	locker = 0;
+	pthread_mutex_unlock(&mutex);
+}
+
+void Conditional::signal(bool broadcast)
+{
+	if(broadcast)
+		pthread_cond_broadcast(&cond);
+	else
+		pthread_cond_signal(&cond);
+}
+
+bool Conditional::wait(timeout_t timeout)
+{
+	if(timeout) {
+		Timer timer;
+		timer += timeout;
+		return wait(timer);
+	}
+
+	pthread_t self = pthread_self();
+	if(!locker || !pthread_equal(locker, self))
+		pthread_mutex_lock(&mutex);
+
+	pthread_cond_wait(&cond, &mutex);
+
+	if(!locker || !pthread_equal(locker, self))
+		pthread_mutex_unlock(&mutex);
+	return true;
+}		
+
+bool Conditional::wait(Timer &timer)
+{
+	int rtn;
+	pthread_t self = pthread_self();
+	if(!locker || !pthread_equal(locker, self))
+		pthread_mutex_lock(&mutex);
+
+	rtn = pthread_cond_timedwait(&cond, &mutex, &timer.timer);
+
+	if(!locker || !pthread_equal(locker, self))
+		pthread_mutex_unlock(&mutex);
+
+	if(rtn == ETIMEDOUT)
+		return false;
+	return true;
+}		
+
+
+Conditional::~Conditional()
+{
+	pthread_cond_destroy(&cond);
+	pthread_mutex_destroy(&mutex);
 }
 
 Mutex::Mutex()

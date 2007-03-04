@@ -13,7 +13,7 @@ static string testing("second test");
 extern "C" int main()
 {
 	char buff[33];
-	strfill(buff, 32, ' ');
+	cpr_strfill(buff, 32, ' ');
 	string mystr = (string)"hello" + (string)" this is a test";
 	printf("STARTING %s\n", *mystr);
 	printf("SECOND %s\n", *testing);

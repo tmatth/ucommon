@@ -16,6 +16,9 @@ NAMESPACE_UCOMMON
 class __EXPORT Timer
 {
 private:
+	friend class __EXPORT Conditional;
+	friend class __EXPORT Semaphore;
+
 #if _POSIX_TIMERS > 0
 	timespec timer;
 #else

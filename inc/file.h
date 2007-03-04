@@ -56,6 +56,11 @@ public:
 
 extern "C" {
 #ifdef	_MSWINDOWS_
+#define	RTLD_LAZY 0
+#define	RTLD_NOW 0
+#define	RTLD_LOCAL 0
+#define RTLD_GLOBAL 0
+	
 	typedef	HINSTANCE loader_handle_t;
 
 	inline bool cpr_isloaded(loader_handle_t mem)

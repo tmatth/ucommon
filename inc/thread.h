@@ -4,7 +4,11 @@
 #if UCOMMON_THREADING > 0
 
 #ifndef _UCOMMON_ACCESS_H_
-#include ucommon/access.h
+#include <ucommon/access.h>
+#endif
+
+#ifndef	_UCOMMON_TIMERS_H_
+#include <ucommon/timers.h>
 #endif
 
 #include <pthread.h>
@@ -38,13 +42,72 @@ public:
 	void Unlock(void);	
 
 	inline void lock(void)
-		{return Exlock();};
+		{pthread_spin_lock(&spin);};
 
 	inline void unlock(void)
-		{return Unlock();};
+		{pthread_spin_unlock(&spin);};
 
 	inline void release(void)
-		{return Unlock();};
+		{pthread_spin_unlock(&spin);};
+};
+
+	
+class __EXPORT Conditional : public Exclusive
+{
+private:
+	friend class __EXPORT Semaphore;
+	class __EXPORT attribute
+	{
+	public:
+		pthread_condattr_t attr;
+		attribute();
+	};
+	static attribute attr;
+
+	volatile pthread_t locker;
+	pthread_cond_t cond;
+	pthread_mutex_t mutex;
+
+public:
+	Conditional();
+	~Conditional();
+
+	void Exlock(void);
+	void Unlock(void);
+
+	inline void lock(void)
+		{Conditional::Exlock();};
+
+	inline void unlock(void)
+		{Conditional::Unlock();};
+
+	inline void release(void)
+		{Conditional::Unlock();};
+
+	bool wait(timeout_t timeout = 0);
+	bool wait(Timer &timer);
+	void signal(bool broadcast);
+};
+
+class __EXPORT Semaphore : public Shared
+{
+private:
+	unsigned count, waits;
+	pthread_cond_t cond;
+	pthread_mutex_t mutex;
+
+public:
+	Semaphore(unsigned limit);
+	~Semaphore();
+
+	void Shlock(void);
+	void Unlock(void);
+
+	bool wait(timeout_t timeout = 0);
+	bool wait(Timer &timer);
+
+	inline void release(void)
+		{Semaphore::Unlock();};
 };
 
 class __EXPORT Mutex : public Exclusive
@@ -68,13 +131,13 @@ public:
 	void Unlock(void);
 
 	inline void lock(void)
-		{Exlock();};
+		{pthread_mutex_lock(&mutex);};
 
 	inline void unlock(void)
-		{Unlock();};
+		{pthread_mutex_unlock(&mutex);};
 
 	inline void release(void)
-		{Unlock();};
+		{pthread_mutex_unlock(&mutex);};
 };
 
 class __EXPORT Threadlock : public Exclusive, public Shared
@@ -91,13 +154,13 @@ public:
 	void Unlock(void);
 
 	inline void shared(void)
-		{return Shlock();};
+		{pthread_rwlock_rdlock(&lock);};
 
 	inline void exclusive(void)
-		{return Exlock();};
+		{pthread_rwlock_wrlock(&lock);};
 
 	inline void release(void)
-		{return Unlock();};
+		{pthread_rwlock_unlock(&lock);};
 };
 
 class __EXPORT auto_cancellation
