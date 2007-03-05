@@ -52,6 +52,30 @@ AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])
 
+AC_CHECK_LIB($clib, sigaction, [
+    AC_DEFINE(HAVE_SIGACTION, [1], [posix signal handling])
+])
+
+AC_TYPE_SIGNAL
+
+AC_CACHE_CHECK(whether sigwait has 2 arguments,
+	ac_cv_libc_sigwait2,
+    AC_TRY_COMPILE([
+        #define _POSIX_PTHREAD_SEMANTICS
+        #include <stdio.h>
+        #include <signal.h>],
+        [sigwait(NULL, NULL);],
+         ac_cv_libc_sigwait2=yes,
+        ac_cv_libc_sigwait2=no
+    )
+)
+if test "$ac_cv_libc_sigwait2" = "yes" ; then
+    AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
+fi
+
+AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h)
+
+
 PTHREAD_FLAGS=""
 
 AC_CHECK_HEADER(pthread.h, [

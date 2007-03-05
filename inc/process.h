@@ -12,4 +12,17 @@ __EXPORT void suspend(timeout_t timeout);
 
 END_NAMESPACE
 
+extern "C" {
+
+	__EXPORT void cpr_closeall(void);
+
+	__EXPORT int cpr_getexit(pid_t pid);
+
+	inline void cpr_sleep(timeout_t timeout)
+		{ucc::suspend(timeout);};
+
+	inline void cpr_yield(void)
+		{ucc::suspend();};
+};
+
 #endif
