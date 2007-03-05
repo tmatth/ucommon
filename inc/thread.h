@@ -167,6 +167,7 @@ class __EXPORT Thread
 {
 private:
 	pthread_t tid;
+	volatile bool running;
 	
 protected:
 	virtual ~Thread();
@@ -174,6 +175,10 @@ protected:
 	virtual void run(void);
 	
 	void release(void);
+
+public:
+	inline bool isRunning(void)
+		{return running;};
 };
 
 class __EXPORT auto_cancellation

@@ -3,6 +3,7 @@
 #include <inc/access.h>
 #include <inc/timers.h>
 #include <inc/thread.h>
+#include <inc/process.h>
 #include <errno.h>
 
 #if	UCOMMON_THREADING > 0
@@ -263,14 +264,17 @@ void Thread::release(void)
 	pthread_t self = pthread_self();
 
 	if(pthread_equal(tid, self)) {
-		tid = 0;
+		running = false;
+		suspend();
+		pthread_testcancel();
 		pthread_exit(NULL);
 	}
 
 	if(tid && !pthread_equal(tid, self)) {
-		pthread_cancel(tid);
+		suspend();
+		if(running)
+			pthread_cancel(tid);
 		pthread_join(tid, NULL);
-		tid = 0;
 	}
 }
 

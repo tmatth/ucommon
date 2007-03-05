@@ -69,6 +69,12 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_atfork,[
 			AC_DEFINE(HAVE_PTHREAD_ATFORK, [1], ["fork support"])			
 		])
+		AC_CHECK_LIB($tlib,pthread_yield,[
+			AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"])
+		])
+		AC_CHECK_LIB($tlib,pthread_delay,[
+			AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
+		])
 	fi		
 ],[
 	AC_MSG_WARN("no pthread support; threading disabled")
