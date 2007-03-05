@@ -2,7 +2,7 @@
 #define	_UCOMMON_FILE_H_
 
 #ifndef _UCOMMON_OBJECT_H_
-#include ucommon/object.h
+#include <ucommon/object.h>
 #endif
 
 #ifndef	_MSWINDOWS_
@@ -13,6 +13,11 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#ifdef	_MSWINDOWS_
+typedef	HANDLE fd_t;
+#else
+typedef int fd_t;
+#endif
 
 NAMESPACE_UCOMMON
 

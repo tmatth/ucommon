@@ -5,7 +5,41 @@
 #include <ucommon/timers.h>
 #endif
 
+#ifndef	_UCOMMON_LINKED_H_
+#include <ucommon/linked.h>
+#endif
+
+#ifndef	_UCOMMON_FILE_H_
+#include <ucommon/file.h>
+#endif
+
 NAMESPACE_UCOMMON
+
+class __EXPORT keypair
+{
+protected:
+	class __EXPORT keydata : public NamedObject
+	{
+	public:
+		keydata(keydata **root, const char *kid);
+
+		const char *data;
+		char key[1];
+	};
+
+	keydata *keypairs;
+
+	virtual keydata *alloc_key(const char *key);
+	virtual char *alloc_data(const char *data);
+
+public:
+	typedef struct {
+		const char *key;
+		const char *data;
+	} define;
+	void load(const char *path);
+	void load(define *defaults);
+};
 
 __EXPORT void suspend(void);
 __EXPORT void suspend(timeout_t timeout);
@@ -15,8 +49,10 @@ END_NAMESPACE
 extern "C" {
 
 	__EXPORT void cpr_closeall(void);
-
-	__EXPORT int cpr_getexit(pid_t pid);
+	__EXPORT void cpr_cancel(pid_t pid);
+	__EXPORT void cpr_hangup(pid_t pid);
+	__EXPORT pid_t cpr_wait(pid_t pid = 0, int *status = NULL);
+	__EXPORT pid_t cpr_create(const char *path, char **args, fd_t *iov);
 
 	inline void cpr_sleep(timeout_t timeout)
 		{ucc::suspend(timeout);};
@@ -26,3 +62,4 @@ extern "C" {
 };
 
 #endif
+

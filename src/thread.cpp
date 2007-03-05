@@ -1,8 +1,11 @@
 #include <private.h>
 #include <inc/config.h>
 #include <inc/access.h>
+#include <inc/object.h>
+#include <inc/linked.h>
 #include <inc/timers.h>
 #include <inc/thread.h>
+#include <inc/file.h>
 #include <inc/process.h>
 #include <errno.h>
 

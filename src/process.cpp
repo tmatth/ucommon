@@ -36,14 +36,33 @@
 #include <limits.h>
 #include <inc/config.h>
 #include <inc/object.h>
+#include <inc/linked.h>
 #include <inc/access.h>
 #include <inc/timers.h>
+#include <inc/string.h>
 #include <inc/thread.h>
+#include <inc/file.h>
 #include <inc/process.h>
-
 
 using namespace UCOMMON_NAMESPACE;
 
+keypair::keydata::keydata(keydata **root, const char *kid) :
+NamedObject((NamedObject **)(root), kid)
+{
+	strcpy(key, kid);
+	id = key;
+	data = NULL;
+}
+
+keypair::keydata *keypair::alloc_key(const char *id)
+{
+	keydata *key = new(cpr_strlen(id)) keydata(&keypairs, id);
+}
+
+char *keypair::alloc_data(const char *data)
+{
+	return cpr_strdup(data);
+}
 
 void ucc::suspend(timeout_t timeout)
 {
@@ -71,6 +90,36 @@ void ucc::suspend(void)
 #endif
 
 #ifndef	_MSWINDOWS_
+extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov)
+{
+	int stdin[2], stdout[2];
+	if(iov) {
+		crit(pipe(stdin) == 0);
+		crit(pipe(stdout) == 0);
+	}
+	pid_t pid = fork();
+	if(pid < 0 && iov) {
+		close(stdin[0]);
+		close(stdin[1]);
+		close(stdout[0]);
+		close(stdout[1]);
+		return pid;
+	}
+	if(pid && iov) {
+		iov[0] = stdout[0];
+		close(stdout[1]);
+		iov[1] = stdin[1];
+		close(stdin[0]);
+	}
+	if(pid)
+		return pid;
+	dup2(stdin[0], 0);
+	dup2(stdout[1], 1);
+	cpr_closeall();
+	execvp(fn, args);
+	exit(-1);
+}
+
 extern "C" void cpr_closeall(void)
 {
 	unsigned max = OPEN_MAX;
@@ -86,14 +135,33 @@ extern "C" void cpr_closeall(void)
 		::close(fd);
 }
 
-extern "C" int cpr_getexit(pid_t pid)
+extern "C" void cpr_cancel(pid_t pid)
 {
-	int status;
+#ifdef	HAVE_SIGNAL_H
+	kill(pid, SIGTERM);
+#endif
+}
 
-	if(waitpid(pid, &status, 0))
-		return -1;
+extern "C" void cpr_hangup(pid_t pid)
+{
+#ifdef  HAVE_SIGNAL_H
+    kill(pid, SIGHUP);
+#endif
+}
 
-	return WEXITSTATUS(status);
+extern "C" pid_t cpr_wait(pid_t pid, int *status)
+{
+	if(pid) {
+		if(waitpid(pid, status, 0))
+			return -1;
+		return pid;
+	}
+	else
+		pid = wait(status);
+
+	if(status)
+		*status = WEXITSTATUS(*status);
+	return pid;
 }
 
 #else
