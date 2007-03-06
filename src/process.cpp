@@ -131,7 +131,33 @@ void keypair::set(const char *id, const char *value)
 		create(id, value);
 }		
 
-static_mutex_object(keyconfig_mutex);
+keyconfig::pointer::pointer()
+{
+	static static_mutex_t init = STATIC_MUTEX_INITIALIZER;
+
+	memcpy(&mutex, &init, sizeof(mutex));
+	config = NULL;
+}
+
+keyconfig::instance::instance(pointer &p)
+{
+	object = keyconfig::getInstance(p);
+}
+
+keyconfig::instance::~instance()
+{
+	if(object)
+		object->release();
+	object = NULL;
+}
+
+keypair *keyconfig::instance::operator[](unsigned idx)
+{
+	if(!object)
+		return NULL;
+
+	return object->operator[](idx);
+}
 
 keyconfig::keyconfig(unsigned limit, size_t pagesize) :
 CountedObject(), mempager(pagesize)
@@ -148,20 +174,10 @@ keypair *keyconfig::operator[](unsigned idx)
 	return &keypairs[idx];
 }
 
-keyconfig *keyconfig::get(keyconfig *source)
-{
-	return static_cast<keyconfig*>(Object::get(source, &keyconfig_mutex));
-}
-
 void keyconfig::dealloc(void)
 {
 	mempager::release();
 	delete this;
-}
-
-void keyconfig::commit(keyconfig *target)
-{
-	Object::set(target, this, &keyconfig_mutex);
 }
 
 void ucc::suspend(timeout_t timeout)

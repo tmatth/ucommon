@@ -57,6 +57,28 @@ auto_delete::~auto_delete()
 	object = 0;
 }
 
+auto_instance::auto_instance(Object *o)
+{
+	object = o;
+}
+
+void auto_instance::release(void)
+{
+	if(object)
+		object->release();
+	object = NULL;
+}
+
+bool auto_instance::operator!() const
+{
+	return object == NULL;
+}
+
+auto_instance::~auto_instance()
+{
+	release();
+}
+
 auto_release::auto_release(Object *o)
 {
 	o->retain();

@@ -47,11 +47,13 @@ typedef	double rpcdouble_t;
 #include <pthread.h>
 typedef	pthread_mutex_t static_mutex_t;
 #define static_mutex_object(x) static pthread_mutex_t x = PTHREAD_MUTEX_INITIALIZER
+#define	STATIC_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 #define	static_mutex_lock(x) if(x) pthread_mutex_lock(x)
 #define static_mutex_unlock(x) if(x) pthread_mutex_unlock(x)
 #else
 typedef	bool static_mutex_t;
 #define	static_mutex_object(x) static char x = 0
+#define	STATIC_MUTEX_INITIALIZER 0
 #define	static_mutex_lock(x)
 #define	static_mutex_unlock(x)
 #endif

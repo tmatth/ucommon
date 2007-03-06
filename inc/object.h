@@ -99,6 +99,21 @@ public:
 	~auto_delete();
 };
 
+class __EXPORT auto_instance
+{
+protected:
+	Object *object;
+
+	auto_instance(Object *o);
+
+public:
+	~auto_instance();
+
+	void release(void);	
+
+	bool operator!() const;
+};
+
 class __EXPORT auto_release
 {
 protected:
@@ -171,6 +186,22 @@ public:
 		{return *(static_cast<T*>(object));};
 
 	inline T* operator->() const
+		{return static_cast<T*>(object);};
+};
+
+template <class T>
+class instance : public auto_instance
+{
+public:
+	inline instance() : auto_instance(T::getInstance()) {};
+
+	inline T& operator*() const
+		{return *(static_cast<T*>(object));};
+
+	inline T* operator->() const
+		{return static_cast<T*>(object);};
+
+	inline T* get(void) const
 		{return static_cast<T*>(object);};
 };
 

@@ -61,8 +61,35 @@ public:
 		{return get(id);};
 };
 
-class __EXPORT keyconfig : protected mempager, private CountedObject
+class __EXPORT keyconfig : protected mempager, public CountedObject
 {
+public:
+	class __EXPORT pointer 
+	{
+	public:
+		pointer();
+
+	private:
+		friend class keyconfig;
+		keyconfig *config;
+		static_mutex_t mutex;
+	};
+
+	class __EXPORT instance 
+	{
+	private:
+		keyconfig *object;
+
+	public:
+		instance(pointer &p);
+		~instance();
+
+		inline keyconfig *operator*()
+			{return object;};
+
+		keypair *operator[](unsigned idx);
+	};
+
 private:
 	keypair *keypairs;
 	size_t size;
@@ -72,9 +99,11 @@ private:
 public:
 	keyconfig(unsigned members, size_t pagesize);
 
-	static keyconfig *get(keyconfig *ptr);
+	inline static keyconfig *getInstance(pointer &i)
+		{return static_cast<keyconfig *>(Object::get(i.config, &i.mutex));};
 
-	void commit(keyconfig *ptr);
+	inline void commit(pointer &i)
+		{Object::set(i.config, this, &i.mutex);};
 
 	inline void release(void)
 		{CountedObject::release();};
