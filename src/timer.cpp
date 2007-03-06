@@ -35,6 +35,17 @@ static void adj(struct timeval *ts)
 const timeout_t Timer::inf = ((timeout_t)(-1));
 const time_t Timer::reset = ((time_t)0);
 
+Timer::Timer()
+{
+#ifdef  _POSIX_MONOTONIC_CLOCK
+    clock_gettime(CLOCK_MONOTONIC, &timer);
+#elif _POSIX_TIMERS > 0
+    clock_gettime(CLOCK_REALTIME, &timer);
+#else
+    gettimeofday(&timer, NULL);
+#endif
+};	
+
 timeout_t Timer::get(void)
 {
 	timeout_t diff;

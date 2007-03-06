@@ -192,7 +192,7 @@ private:
 protected:
 	virtual ~Thread();
 
-	virtual void run(void);
+	virtual void run(void) = 0;
 	
 	void release(void);
 

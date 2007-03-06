@@ -67,6 +67,7 @@ keypair::keypair(define *defaults, const char *path, mempager *mem)
 
 	if(path)
 		load(path);
+
 }
 
 keypair::keydata *keypair::create(const char *id, const char *data)
@@ -131,24 +132,9 @@ void keypair::set(const char *id, const char *value)
 		create(id, value);
 }		
 
-keyconfig::pointer::pointer()
+keyconfig::instance::instance(pointer &p) :
+Object::Instance(p)
 {
-	static static_mutex_t init = STATIC_MUTEX_INITIALIZER;
-
-	memcpy(&mutex, &init, sizeof(mutex));
-	config = NULL;
-}
-
-keyconfig::instance::instance(pointer &p)
-{
-	object = keyconfig::getInstance(p);
-}
-
-keyconfig::instance::~instance()
-{
-	if(object)
-		object->release();
-	object = NULL;
 }
 
 keypair *keyconfig::instance::operator[](unsigned idx)
@@ -157,6 +143,19 @@ keypair *keyconfig::instance::operator[](unsigned idx)
 		return NULL;
 
 	return object->operator[](idx);
+}
+
+const char *keyconfig::instance::operator()(unsigned idx, const char *key)
+{
+	keypair *pair;
+	if(!object)
+		return NULL;
+
+	pair = object->operator[](idx);
+	if(!pair)
+		return NULL;
+
+	return pair->get(key);
 }
 
 keyconfig::keyconfig(unsigned limit, size_t pagesize) :

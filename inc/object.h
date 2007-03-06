@@ -11,6 +11,30 @@ NAMESPACE_UCOMMON
 
 class __EXPORT Object
 {
+protected:
+	class __EXPORT Pointer
+	{
+	private:
+		friend class Object;
+		static_mutex_t mutex;
+		Object *object;
+	public:
+		Pointer();
+	};
+
+	class __EXPORT Instance
+	{
+	private:
+		friend class Object;
+		Object *object;
+
+	public:
+		Instance(Pointer &p);
+		~Instance();
+
+		Object *operator->();
+	};
+		
 public:
 	virtual void retain(void) = 0;
 	virtual void release(void) = 0;
@@ -18,6 +42,8 @@ public:
 
 	static Object *get(Object *o, static_mutex_t *s = NULL);
 	static void set(Object *o, Object *n, static_mutex_t *s = NULL);
+	static Object *getInstance(Pointer &i);
+	void commit(Pointer &i);
 };
 
 class __EXPORT CountedObject : public Object

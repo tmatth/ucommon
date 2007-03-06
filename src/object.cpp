@@ -12,6 +12,42 @@ using namespace UCOMMON_NAMESPACE;
 
 AutoObject::base_exit AutoObject::ex;
 
+Object::Pointer::Pointer()
+{
+	static static_mutex_t lock = STATIC_MUTEX_INITIALIZER;
+
+	memcpy(&mutex, &lock, sizeof(mutex));
+	object = NULL;
+}
+
+Object::Instance::Instance(Pointer &i)
+{
+	object = getInstance(i);
+}
+
+Object::Instance::~Instance()
+{
+	if(object) {
+		object->release();
+		object = NULL;
+	}
+}
+
+Object *Object::Instance::operator->()
+{
+	return object;
+}
+
+Object *Object::getInstance(Pointer &i)
+{
+	return get(i.object, &i.mutex);
+}
+
+void Object::commit(Pointer &i)
+{
+	Object::set(i.object, this, &i.mutex);
+}
+
 CountedObject::CountedObject()
 {
 	count = 0;

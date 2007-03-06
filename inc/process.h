@@ -24,17 +24,26 @@ class __EXPORT keypair
 private:
 	friend class __EXPORT keyconfig;
 
+public:
 	class __EXPORT keydata : public NamedObject
 	{
+	friend class keypair;
+
 	public:
 		keydata(keydata **root, const char *kid, const char *value = NULL);
 
+	private:
 #pragma pack(1)
 		const char *data;
 		char key[1];
 #pragma pack()
+
+	public:
+		inline const char *getValue(void)
+			{return data;};
 	};
 
+private:
 	keydata *keypairs;
 	mempager *pager;
 
@@ -57,6 +66,9 @@ public:
 	void load(const char *path);
 	void load(define *defaults);
 
+	inline keydata *begin(void)
+		{return keypairs;};
+
 	inline const char *operator()(const char *id)
 		{return get(id);};
 };
@@ -64,29 +76,23 @@ public:
 class __EXPORT keyconfig : protected mempager, public CountedObject
 {
 public:
-	class __EXPORT pointer 
-	{
-	public:
-		pointer();
+	typedef	Object::Pointer pointer;
 
-	private:
-		friend class keyconfig;
-		keyconfig *config;
-		static_mutex_t mutex;
-	};
-
-	class __EXPORT instance 
+	class __EXPORT instance : public Instance
 	{
 	private:
 		keyconfig *object;
 
 	public:
 		instance(pointer &p);
-		~instance();
 
-		inline keyconfig *operator*()
-			{return object;};
+		inline keyconfig &operator*()
+			{return *(static_cast<keyconfig *>(object));};
 
+		inline keyconfig *operator->()
+			{return static_cast<keyconfig *>(object);};
+
+		const char *operator()(unsigned idx, const char *key);
 		keypair *operator[](unsigned idx);
 	};
 
@@ -97,13 +103,10 @@ private:
 	void dealloc(void);
 
 public:
-	keyconfig(unsigned members, size_t pagesize);
+	keyconfig(unsigned members = 1, size_t pagesize = 0);
 
 	inline static keyconfig *getInstance(pointer &i)
-		{return static_cast<keyconfig *>(Object::get(i.config, &i.mutex));};
-
-	inline void commit(pointer &i)
-		{Object::set(i.config, this, &i.mutex);};
+		{return static_cast<keyconfig *>(Object::getInstance(i));};
 
 	inline void release(void)
 		{CountedObject::release();};
