@@ -365,3 +365,24 @@ Object *sparse_array::get(unsigned pos)
 	return vector[pos];
 }
 
+void Object::set(Object *old, Object *rep, static_mutex_t *sync)
+{
+	Object *temp;
+	rep->retain();
+	static_mutex_lock(sync);
+	temp = old;
+	old = rep;
+	static_mutex_unlock(sync);
+	temp->release();
+}
+
+Object *Object::get(Object *obj, static_mutex_t *sync)
+{
+	Object *temp;
+	static_mutex_lock(sync);
+	temp = obj;
+	temp->retain();
+	static_mutex_unlock(sync);
+	return temp;
+}
+

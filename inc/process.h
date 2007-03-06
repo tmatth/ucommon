@@ -9,6 +9,10 @@
 #include <ucommon/linked.h>
 #endif
 
+#ifndef	_UCOMMON_MEMORY_H_
+#include <ucommon/memory.h>
+#endif
+
 #ifndef	_UCOMMON_FILE_H_
 #include <ucommon/file.h>
 #endif
@@ -17,7 +21,9 @@ NAMESPACE_UCOMMON
 
 class __EXPORT keypair
 {
-protected:
+private:
+	friend class __EXPORT keyconfig;
+
 	class __EXPORT keydata : public NamedObject
 	{
 	public:
@@ -30,23 +36,51 @@ protected:
 	};
 
 	keydata *keypairs;
+	mempager *pager;
 
 	void update(keydata *key, const char *value);
 
-	virtual keydata *create(const char *key, const char *data = NULL);
-	virtual const char *alloc(const char *data);
-	virtual void dealloc(const char *data);
+	keydata *create(const char *key, const char *data = NULL);
+	const char *alloc(const char *data);
+	void dealloc(const char *data);
 
 public:
 	typedef struct {
 		const char *key;
 		const char *data;
 	} define;
+
+	keypair(define *defaults = NULL, const char *path = NULL, mempager *mem = NULL);
+
 	void set(const char *id, const char *value);
 	const char *get(const char *id);
 	void load(const char *path);
 	void load(define *defaults);
+
+	inline const char *operator()(const char *id)
+		{return get(id);};
 };
+
+class __EXPORT keyconfig : protected mempager, private CountedObject
+{
+private:
+	keypair *keypairs;
+	size_t size;
+
+	void dealloc(void);
+
+public:
+	keyconfig(unsigned members, size_t pagesize);
+
+	static keyconfig *get(keyconfig *ptr);
+
+	void commit(keyconfig *ptr);
+
+	inline void release(void)
+		{CountedObject::release();};
+
+	keypair *operator[](unsigned idx);
+};		
 
 __EXPORT void suspend(void);
 __EXPORT void suspend(timeout_t timeout);

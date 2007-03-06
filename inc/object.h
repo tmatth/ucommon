@@ -15,6 +15,9 @@ public:
 	virtual void retain(void) = 0;
 	virtual void release(void) = 0;
 	virtual ~Object();
+
+	static Object *get(Object *o, static_mutex_t *s = NULL);
+	static void set(Object *o, Object *n, static_mutex_t *s = NULL);
 };
 
 class __EXPORT CountedObject : public Object

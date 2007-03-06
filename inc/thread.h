@@ -11,8 +11,6 @@
 #include <ucommon/timers.h>
 #endif
 
-#include <pthread.h>
-
 NAMESPACE_UCOMMON
 
 class __EXPORT Barrier 

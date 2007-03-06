@@ -4,6 +4,7 @@
 #include <inc/object.h>
 #include <inc/linked.h>
 #include <inc/timers.h>
+#include <inc/memory.h>
 #include <inc/thread.h>
 #include <inc/file.h>
 #include <inc/process.h>

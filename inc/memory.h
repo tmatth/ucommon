@@ -103,6 +103,7 @@ END_NAMESPACE
 
 void *operator new(size_t size, ucc::mempager *pager);
 void *operator new[](size_t size, ucc::mempager *pager);
+void *operator new(size_t size, ucc::mempager *pager, size_t overdraft);
 void *operator new(size_t size, ucc::keyassoc *pager, const char *id);
 void *operator new[](size_t size, ucc::keyassoc *pager, const char *id);
 

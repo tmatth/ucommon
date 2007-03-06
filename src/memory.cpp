@@ -189,6 +189,14 @@ void *operator new(size_t size, mempager *pager)
 	return mem;
 }
 
+void *operator new(size_t size, mempager *pager, size_t overdraft)
+{
+    void *mem = pager->alloc(size + overdraft);
+
+    crit(mem != NULL);
+    return mem;
+}
+
 void *operator new(size_t size, keyassoc *pager, const char *id)
 {
 	void *mem = pager->get(id);

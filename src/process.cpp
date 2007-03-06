@@ -39,6 +39,7 @@
 #include <inc/linked.h>
 #include <inc/access.h>
 #include <inc/timers.h>
+#include <inc/memory.h>
 #include <inc/string.h>
 #include <inc/thread.h>
 #include <inc/file.h>
@@ -56,19 +57,38 @@ NamedObject((NamedObject **)root, kid)
 	}
 }
 
+keypair::keypair(define *defaults, const char *path, mempager *mem)
+{
+	keypairs = NULL;
+	pager = mem;
+
+	if(defaults)
+		load(defaults);
+
+	if(path)
+		load(path);
+}
+
 keypair::keydata *keypair::create(const char *id, const char *data)
 {
-	keydata *key = new(cpr_strlen(id)) keydata(&keypairs, id, data);
+	if(pager)
+		keydata *key = new(pager, cpr_strlen(id)) keydata(&keypairs, id, data);
+	else
+		keydata *key = new(cpr_strlen(id)) keydata(&keypairs, id, data);
 }
 
 const char *keypair::alloc(const char *data)
 {
+	if(pager)
+		return pager->dup(data);
+
 	return cpr_strdup(data);
 }
 
 void keypair::dealloc(const char *data)
 {
-	free((char *)data);
+	if(!pager)
+		free((char *)data);
 }
 
 void keypair::update(keydata *key, const char *value)
@@ -110,6 +130,39 @@ void keypair::set(const char *id, const char *value)
 	else
 		create(id, value);
 }		
+
+static_mutex_object(keyconfig_mutex);
+
+keyconfig::keyconfig(unsigned limit, size_t pagesize) :
+CountedObject(), mempager(pagesize)
+{
+	size = limit;
+	keypairs = new(static_cast<mempager *>(this)) keypair[limit];
+	for(unsigned pos = 0; pos < size; ++pos)
+		keypairs[pos].pager = static_cast<mempager *>(this);
+}
+
+keypair *keyconfig::operator[](unsigned idx)
+{
+	crit(idx < size);
+	return &keypairs[idx];
+}
+
+keyconfig *keyconfig::get(keyconfig *source)
+{
+	return static_cast<keyconfig*>(Object::get(source, &keyconfig_mutex));
+}
+
+void keyconfig::dealloc(void)
+{
+	mempager::release();
+	delete this;
+}
+
+void keyconfig::commit(keyconfig *target)
+{
+	Object::set(target, this, &keyconfig_mutex);
+}
 
 void ucc::suspend(timeout_t timeout)
 {

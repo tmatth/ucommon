@@ -43,6 +43,19 @@ typedef	double rpcdouble_t;
 
 #include <stdlib.h>
 
+#if UCOMMON_THREADING > 0
+#include <pthread.h>
+typedef	pthread_mutex_t static_mutex_t;
+#define static_mutex_object(x) static pthread_mutex_t x = PTHREAD_MUTEX_INITIALIZER
+#define	static_mutex_lock(x) if(x) pthread_mutex_lock(x)
+#define static_mutex_unlock(x) if(x) pthread_mutex_unlock(x)
+#else
+typedef	bool static_mutex_t;
+#define	static_mutex_object(x) static char x = 0
+#define	static_mutex_lock(x)
+#define	static_mutex_unlock(x)
+#endif
+
 __EXPORT void *operator new(size_t size);
 __EXPORT void *operator new[](size_t size);
 __EXPORT void *operator new(size_t size, size_t extra);
