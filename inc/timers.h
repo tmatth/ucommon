@@ -18,6 +18,7 @@ class __EXPORT Timer
 private:
 	friend class __EXPORT Conditional;
 	friend class __EXPORT Semaphore;
+	friend class __EXPORT Event;
 
 #if _POSIX_TIMERS > 0
 	timespec timer;

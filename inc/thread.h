@@ -50,12 +50,13 @@ public:
 	inline void release(void)
 		{pthread_spin_unlock(&spin);};
 };
-
 	
 class __EXPORT Conditional : public Exclusive
 {
 private:
 	friend class __EXPORT Semaphore;
+	friend class __EXPORT Event;
+
 	class __EXPORT attribute
 	{
 	public:
@@ -108,6 +109,26 @@ public:
 
 	inline void release(void)
 		{Semaphore::Unlock();};
+};
+
+class __EXPORT Event
+{
+private:
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	unsigned count;
+	bool signalled;
+
+public:
+	Event();
+	~Event();
+
+	void signal(void);
+	void reset(void);
+
+	bool wait(timeout_t timeout);
+	bool wait(Timer &t);
+	void wait(void);
 };
 
 class __EXPORT Mutex : public Exclusive

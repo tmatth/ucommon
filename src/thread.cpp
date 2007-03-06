@@ -22,6 +22,66 @@ Mutex::attribute::attribute()
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 }
 
+Event::Event()
+{
+	count = 0;
+	signalled = false;
+
+    crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
+    crit(pthread_mutex_init(&mutex, NULL) == 0);
+}
+
+Event::~Event()
+{
+    pthread_cond_destroy(&cond);
+    pthread_mutex_destroy(&mutex);
+}
+
+void Event::signal(void)
+{
+    pthread_mutex_lock(&mutex);
+    signalled = true;
+    ++count;
+    pthread_cond_broadcast(&cond);
+    pthread_mutex_unlock(&mutex);
+}
+
+void Event::reset(void)
+{
+    pthread_mutex_lock(&mutex);
+    signalled = true;
+	pthread_mutex_unlock(&mutex);
+}
+
+bool Event::wait(Timer &timer)
+{
+	pthread_mutex_lock(&mutex);
+	int rc = 0;
+	long last = count;
+	while(!signalled && count == last && rc != ETIMEDOUT)
+		rc = pthread_cond_timedwait(&cond, &mutex, &timer.timer);
+	pthread_mutex_unlock(&mutex);
+	if(rc == ETIMEDOUT)
+		return false;
+	return true;
+}
+
+bool Event::wait(timeout_t timeout)
+{
+	Timer timer;
+	timer += timeout;
+	return wait(timer);
+}
+
+void Event::wait(void)
+{
+	pthread_mutex_lock(&mutex);
+	long last = count;
+	while(!signalled && count == last)
+		pthread_cond_wait(&cond, &mutex);
+ 	pthread_mutex_unlock(&mutex);
+}
+
 Semaphore::Semaphore(unsigned limit)
 {
 	count = limit;
