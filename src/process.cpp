@@ -46,23 +46,70 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-keypair::keydata::keydata(keydata **root, const char *kid) :
-NamedObject((NamedObject **)(root), kid)
+keypair::keydata::keydata(keydata **root, const char *kid, const char *value) :
+NamedObject((NamedObject **)root, kid)
 {
-	strcpy(key, kid);
-	id = key;
-	data = NULL;
+	data = value;
+	if(data) {
+		strcpy(key, kid);
+		id = key;
+	}
 }
 
-keypair::keydata *keypair::alloc_key(const char *id)
+keypair::keydata *keypair::create(const char *id, const char *data)
 {
-	keydata *key = new(cpr_strlen(id)) keydata(&keypairs, id);
+	keydata *key = new(cpr_strlen(id)) keydata(&keypairs, id, data);
 }
 
-char *keypair::alloc_data(const char *data)
+const char *keypair::alloc(const char *data)
 {
 	return cpr_strdup(data);
 }
+
+void keypair::dealloc(const char *data)
+{
+	free((char *)data);
+}
+
+void keypair::update(keydata *key, const char *value)
+{
+	const char *old = NULL;
+
+	if(key->data && key->key[0])
+		old = key->data;
+	
+	if(value)
+		key->data = alloc(value);
+	else
+		key->data = NULL;
+
+	if(!key->key[0])
+		key->key[0] = 1;
+
+	if(old)
+		dealloc(old);
+}
+
+const char *keypair::get(const char *id)
+{
+    keydata *key = static_cast<keydata *>
+        (NamedObject::find(static_cast<NamedObject *>(keypairs), id));
+
+	if(!key)
+		return NULL;
+
+	return key->data;
+}
+
+void keypair::set(const char *id, const char *value)
+{
+	keydata *key = static_cast<keydata *>
+		(NamedObject::find(static_cast<NamedObject *>(keypairs), id));
+	if(key)
+		update(key, value);
+	else
+		create(id, value);
+}		
 
 void ucc::suspend(timeout_t timeout)
 {

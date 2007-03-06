@@ -21,22 +21,29 @@ protected:
 	class __EXPORT keydata : public NamedObject
 	{
 	public:
-		keydata(keydata **root, const char *kid);
+		keydata(keydata **root, const char *kid, const char *value = NULL);
 
+#pragma pack(1)
 		const char *data;
 		char key[1];
+#pragma pack()
 	};
 
 	keydata *keypairs;
 
-	virtual keydata *alloc_key(const char *key);
-	virtual char *alloc_data(const char *data);
+	void update(keydata *key, const char *value);
+
+	virtual keydata *create(const char *key, const char *data = NULL);
+	virtual const char *alloc(const char *data);
+	virtual void dealloc(const char *data);
 
 public:
 	typedef struct {
 		const char *key;
 		const char *data;
 	} define;
+	void set(const char *id, const char *value);
+	const char *get(const char *id);
 	void load(const char *path);
 	void load(define *defaults);
 };

@@ -268,12 +268,14 @@ void Thread::release(void)
 
 	if(pthread_equal(tid, self)) {
 		running = false;
-		suspend();
-		pthread_testcancel();
+		if(!detached) {
+			suspend();
+			pthread_testcancel();
+		}
 		pthread_exit(NULL);
 	}
 
-	if(tid && !pthread_equal(tid, self)) {
+	if(tid && !pthread_equal(tid, self) && !detached) {
 		suspend();
 		if(running)
 			pthread_cancel(tid);

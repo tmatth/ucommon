@@ -167,6 +167,7 @@ class __EXPORT Thread
 {
 private:
 	pthread_t tid;
+	bool detached;
 	volatile bool running;
 	
 protected:
