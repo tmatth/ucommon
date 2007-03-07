@@ -318,30 +318,70 @@ void Threadlock::Shlock(void)
 	pthread_rwlock_rdlock(&lock);
 }
 
+Thread::Thread(int p, size_t size)
+{
+	priority = p;
+	stack = size;
+}
+
 Thread::~Thread()
 {
 	release();
+}
+
+extern "C" {
+	static void *exec_thread(void *obj)
+	{
+		Thread *th = static_cast<Thread *>(obj);
+		th->run();
+		th->release();
+	}
+};
+
+void Thread::start(bool detach)
+{
+	pthread_attr_t attr;
+	if(running)
+		return;
+
+	detached = detach;
+	pthread_attr_init(&attr);
+	if(detach)
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	else
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+	if(stack)
+		pthread_attr_setstacksize(&attr, stack);
+	pthread_create(&tid, &attr, &exec_thread, this);
+	pthread_attr_destroy(&attr);
 }
 
 void Thread::release(void)
 {
 	pthread_t self = pthread_self();
 
-	if(pthread_equal(tid, self)) {
+	if(tid != 0 && pthread_equal(tid, self)) {
 		running = false;
-		if(!detached) {
+		if(detached) {
+			tid = 0;
+			delete this;
+		}
+		else {
 			suspend();
 			pthread_testcancel();
 		}
 		pthread_exit(NULL);
 	}
 
-	if(tid && !pthread_equal(tid, self) && !detached) {
+	if(tid != 0 && !detached) {
 		suspend();
 		if(running)
 			pthread_cancel(tid);
-		pthread_join(tid, NULL);
-	}
+		if(!pthread_join(tid, NULL)) {
+			running = false;
+			tid = 0;
+		}
+	}	
 }
 
 auto_cancellation::auto_cancellation(int ntype, int nmode)

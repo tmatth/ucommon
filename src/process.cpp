@@ -1,4 +1,14 @@
 #include <private.h>
+#include <inc/config.h>
+#include <inc/object.h>
+#include <inc/linked.h>
+#include <inc/access.h>
+#include <inc/timers.h>
+#include <inc/memory.h>
+#include <inc/string.h>
+#include <inc/thread.h>
+#include <inc/file.h>
+#include <inc/process.h>
 
 #ifdef	HAVE_SIGWAIT2
 #define	_POSIX_PTHREAD_SEMANTICS
@@ -34,16 +44,19 @@
 #include <unistd.h>
 #include <sched.h>
 #include <limits.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/access.h>
-#include <inc/timers.h>
-#include <inc/memory.h>
-#include <inc/string.h>
-#include <inc/thread.h>
-#include <inc/file.h>
-#include <inc/process.h>
+
+#ifdef  SIGTSTP
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#endif
+
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(status) ((unsigned)(status) >> 8)
+#endif
+
+#ifndef	_PATH_TTY
+#define	_PATH_TTY	"/dev/tty"
+#endif
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -55,6 +68,8 @@ NamedObject((NamedObject **)root, kid)
 		strcpy(key, kid);
 		id = key;
 	}
+	else
+		key[0] = 0;
 }
 
 keypair::keypair(define *defaults, const char *path, mempager *mem)
@@ -72,10 +87,14 @@ keypair::keypair(define *defaults, const char *path, mempager *mem)
 
 keypair::keydata *keypair::create(const char *id, const char *data)
 {
+	size_t overdraft = cpr_strlen(id);
+	if(!data)
+		overdraft = 0;
+
 	if(pager)
-		keydata *key = new(pager, cpr_strlen(id)) keydata(&keypairs, id, data);
+		keydata *key = new(pager, overdraft) keydata(&keypairs, id, data);
 	else
-		keydata *key = new(cpr_strlen(id)) keydata(&keypairs, id, data);
+		keydata *key = new(overdraft) keydata(&keypairs, id, data);
 }
 
 const char *keypair::alloc(const char *data)
@@ -84,6 +103,16 @@ const char *keypair::alloc(const char *data)
 		return pager->dup(data);
 
 	return cpr_strdup(data);
+}
+
+void keypair::load(define *list)
+{
+	keydata *key;
+	while(list->key) {
+		key = create(list->key);
+		key->data = list->data;
+		++list;
+	}
 }
 
 void keypair::dealloc(const char *data)
@@ -104,8 +133,10 @@ void keypair::update(keydata *key, const char *value)
 	else
 		key->data = NULL;
 
-	if(!key->key[0])
+	if(!key->key[0]) {
 		key->key[0] = 1;
+		old = NULL;
+	}
 
 	if(old)
 		dealloc(old);
@@ -205,6 +236,96 @@ void ucc::suspend(void)
 #endif
 
 #ifndef	_MSWINDOWS_
+extern "C" void cpr_detach(void)
+{
+	if(getppid() == 1)
+		return;
+	cpr_attach("/dev/null");
+}
+
+extern "C" void cpr_attach(const char *dev)
+{
+	pid_t pid;
+	int fd;
+
+	close(0);
+	close(1);
+	close(2);
+#ifdef	SIGTTOU
+	signal(SIGTTOU, SIG_IGN);
+#endif
+
+#ifdef	SIGTTIN
+	signal(SIGTTIN, SIG_IGN);
+#endif
+
+#ifdef	SIGTSTP
+	signal(SIGTSTP, SIG_IGN);
+#endif
+	pid = fork();
+	if(pid > 0)
+		exit(0);
+	crit(pid == 0);
+
+#if defined(SIGTSTP) && defined(TIOCNOTTY)
+	crit(setpgid(0, getpid()) == 0);
+	if((fd = open(_PATH_TTY, O_RDWR)) >= 0) {
+		ioctl(fd, TIOCNOTTY, NULL);
+		close(fd);
+	}
+#else
+
+#ifdef HAVE_SETPGRP
+	crit(setpgrp() == 0);
+#else
+	crit(setpgid(0, getpid()) == 0);
+#endif
+	signal(SIGHUP, SIG_IGN);
+	pid = fork();
+	if(pid > 0)
+		exit(0);
+	crit(pid == 0);
+#endif
+	if(dev && *dev) {
+		fd = open(dev, O_RDWR);
+		if(fd > 0)
+			dup2(fd, 0);
+		if(fd != 1)
+			dup2(fd, 1);
+		if(fd != 2)
+			dup2(fd, 2);
+		if(fd > 2)
+			close(fd);
+	}
+}
+
+extern "C" int cpr_spawn(const char *fn, char **args, int mode)
+{
+	pid_t pid = fork();
+	int status;
+	if(pid < 0)
+		return -1;
+
+	if(pid) {
+		switch(mode) {
+		case SPAWN_DETACH:
+			return 0;
+		case SPAWN_NOWAIT:
+			return pid;
+		case SPAWN_WAIT:
+			waitpid(pid, &status, 0);
+			return WEXITSTATUS(status);
+		}
+	}
+
+	cpr_closeall();
+	if(mode == SPAWN_DETACH)
+		cpr_detach();
+
+	execvp(fn, args);
+	exit(-1);
+}
+
 extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov)
 {
 	int stdin[2], stdout[2];
@@ -284,4 +405,17 @@ extern "C" void cpr_closeall(void)
 {
 }
 #endif
+
+extern "C" size_t cpr_pagesize(void)
+{
+#ifdef  HAVE_SYSCONF
+    return sysconf(_SC_PAGESIZE);
+#elif defined(PAGESIZE)
+    return PAGESIZE;
+#elif defined(PAGE_SIZE)
+    return PAGE_SIZE;
+#else
+    return 1024;
+#endif
+}
 

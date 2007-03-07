@@ -68,6 +68,9 @@ public:
 	cidr(LinkedObject **policy, const char *str);
 	cidr(const cidr &copy);
 
+	static bool allow(SOCKET so, const cidr *accept, const cidr *reject);
+	static bool find(const cidr *policy, const struct sockaddr *addr);
+
 	inline int getFamily(void) const
 		{return family;};
 
@@ -78,6 +81,8 @@ public:
 		{return netmask;};
 
 	inethostaddr_t getBroadcast(void) const;
+
+	unsigned getMask(void) const;
 		
 	void set(const char *c);
 
@@ -108,6 +113,7 @@ public:
 	bool isConnected(void) const;
 	bool isPending(timeout_t timeout = 0) const;
 	bool isSending(timeout_t timeout = 0) const;
+	unsigned getPending() const;
 
 	int setBroadcast(bool enable);
 	int setKeepAlive(bool enable);
@@ -160,6 +166,7 @@ public:
 END_NAMESPACE
 
 extern "C" {
+	__EXPORT void cpr_closesocket(SOCKET so);
 	__EXPORT int cpr_joinaddr(SOCKET so, const char *host);
 	__EXPORT int cpr_dropaddr(SOCKET so, const char *host);
 	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);

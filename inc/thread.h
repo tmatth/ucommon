@@ -185,20 +185,35 @@ public:
 class __EXPORT Thread
 {
 private:
-	pthread_t tid;
-	bool detached;
-	volatile bool running;
-	
-protected:
-	virtual ~Thread();
+	size_t stack;
+	int priority;
 
-	virtual void run(void) = 0;
-	
-	void release(void);
+	pthread_t tid;
+	volatile bool running, detached;
+
+	void start(bool detached);
+
+protected:
+	Thread(int pri = 0, size_t stack = 0);
 
 public:
+	virtual void run(void) = 0;
+	
+	virtual ~Thread();
+
 	inline bool isRunning(void)
 		{return running;};
+
+	inline bool isDetached(void)
+		{return detached;};
+
+	void release(void);
+	
+	inline void detach(void)
+		{return start(true);};
+
+	inline void start(void)
+		{return start(false);};
 };
 
 class __EXPORT auto_cancellation
@@ -221,6 +236,9 @@ public:
 	__cancel__(PTHREAD_CANCEL_DEFERRED, PTHREAD_CANCEL_DISABLE)
 
 END_NAMESPACE
+
+extern "C" {
+};
 
 #endif
 #endif

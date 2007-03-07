@@ -1,6 +1,7 @@
 #include <private.h>
 #include <net/if.h>
 #include <sys/un.h>
+#include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <inc/config.h>
@@ -117,6 +118,67 @@ LinkedObject()
 	family = copy.family;
 	memcpy(&network, &copy.network, sizeof(network));
 	memcpy(&netmask, &copy.netmask, sizeof(netmask));
+}
+
+unsigned cidr::getMask(void) const
+{
+	switch(family)
+	{
+	case AF_INET:
+		return bitcount((bit_t *)&netmask.ipv4, sizeof(struct in_addr));
+	case AF_INET6:
+		return bitcount((bit_t *)&netmask.ipv6, sizeof(struct in6_addr));
+	default:
+		return 0;
+	}
+}
+
+bool cidr::allow(int so, const cidr *accept, const cidr *reject)
+{
+	struct sockaddr_storage addr;
+	socklen_t slen = sizeof(addr);
+
+	if(so == INVALID_SOCKET)
+		return false;
+
+	if(getpeername(so, (struct sockaddr *)&addr, &slen))
+		return false;
+
+	while(accept) {
+		if(accept->isMember((struct sockaddr *)&addr))
+			break;
+		accept = static_cast<cidr *>(accept->next);
+	}
+
+    while(reject) {
+        if(reject->isMember((struct sockaddr *)&addr))
+            break;
+        reject = static_cast<cidr *>(reject->next);
+    }
+
+	if(accept && !reject)
+		return true;
+
+	if(reject && !accept)
+		return false;
+
+	if(!accept && !reject)
+		return true;
+
+	if(accept->getMask() > reject->getMask())
+		return true;
+
+	return false;
+}	
+
+bool cidr::find(const cidr *policy, const struct sockaddr *s)
+{
+	while(policy) {
+		if(policy->isMember(s))
+			return true;
+		policy = static_cast<cidr *>(policy->next);
+	}
+	return false;
 }
 
 bool cidr::isMember(const struct sockaddr *s) const
@@ -325,16 +387,13 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 
 Socket::~Socket()
 {
+	release();
 }
 
 void Socket::release(void)
 {
 	if(so != INVALID_SOCKET) {
-#ifdef	_MSWINDOWS_
-		closesocket(so);
-#else
-		::close(so);
-#endif
+		cpr_closesocket(so);
 		so = INVALID_SOCKET;
 	}
 }
@@ -537,6 +596,29 @@ bool Socket::isConnected(void) const
 
 	return true;
 }
+
+#ifdef _MSWINDOWS_
+unsigned Socket::getPending(void) const
+{
+	long opt;
+	if(so == INVALID_SOCKET)
+		return 0;
+
+	ioctlsocket(so, FIONREAD, &opt);
+	return (unsigned)opt;
+}
+#else
+unsigned Socket::getPending(void) const
+{
+	int opt;
+	if(so == INVALID_SOCKET)
+		return 0;
+
+	if(::ioctl(so, FIONREAD, &opt))
+		return 0;
+	return (unsigned)opt;
+}
+#endif
 
 bool Socket::isPending(timeout_t timeout) const
 {
@@ -948,6 +1030,17 @@ extern "C" int cpr_disconnect(SOCKET so)
 		len = sizeof(saddr);
 	return connect(so, addr, len);
 }
+
+extern "C" void cpr_closesocket(SOCKET so)
+{
+#ifdef	_MSWINDOWS_
+	if(so != SOCKET_INVALID)
+		closesocket(so);
+#else
+	if(so > -1)
+		close(so);
+#endif
+}	
 
 extern "C" int cpr_connect(SOCKET so, const char *host, const char *svc)
 {

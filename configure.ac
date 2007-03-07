@@ -35,6 +35,10 @@ AC_ARG_WITH(libc,
         UCOMMON_LIBC=-l${clib} ; fi
 ])
 
+AH_TOP([
+#include <inc/config.h>
+])
+
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
@@ -54,6 +58,10 @@ AC_CHECK_LIB($clib, posix_memalign, [
 
 AC_CHECK_LIB($clib, sigaction, [
     AC_DEFINE(HAVE_SIGACTION, [1], [posix signal handling])
+])
+
+AC_CHECK_LIB($clib, setpgrp, [
+    AC_DEFINE(HAVE_SETPGRP, [1], [process set group])
 ])
 
 AC_TYPE_SIGNAL

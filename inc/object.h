@@ -206,7 +206,7 @@ template <class T>
 class instance : public auto_instance
 {
 public:
-	inline instance() : auto_instance(T::pointer) {};
+	inline instance() : auto_instance(T::current) {};
 
 	inline T& operator*() const
 		{return *(static_cast<T*>(object));};
