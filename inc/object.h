@@ -11,31 +11,18 @@ NAMESPACE_UCOMMON
 
 class __EXPORT Object
 {
-protected:
+public:
 	class __EXPORT Pointer
 	{
 	private:
 		friend class Object;
+		friend class auto_instance;
 		static_mutex_t mutex;
 		Object *object;
 	public:
 		Pointer();
 	};
-
-	class __EXPORT Instance
-	{
-	private:
-		friend class Object;
-		Object *object;
-
-	public:
-		Instance(Pointer &p);
-		~Instance();
-
-		Object *operator->();
-	};
 		
-public:
 	virtual void retain(void) = 0;
 	virtual void release(void) = 0;
 	virtual ~Object();
@@ -130,7 +117,7 @@ class __EXPORT auto_instance
 protected:
 	Object *object;
 
-	auto_instance(Object *o);
+	auto_instance(Object::Pointer &p);
 
 public:
 	~auto_instance();
@@ -219,7 +206,7 @@ template <class T>
 class instance : public auto_instance
 {
 public:
-	inline instance() : auto_instance(T::getInstance()) {};
+	inline instance() : auto_instance(T::pointer) {};
 
 	inline T& operator*() const
 		{return *(static_cast<T*>(object));};

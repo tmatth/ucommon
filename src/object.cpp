@@ -20,29 +20,6 @@ Object::Pointer::Pointer()
 	object = NULL;
 }
 
-Object::Instance::Instance(Pointer &i)
-{
-	object = getInstance(i);
-}
-
-Object::Instance::~Instance()
-{
-	if(object) {
-		object->release();
-		object = NULL;
-	}
-}
-
-Object *Object::Instance::operator->()
-{
-	return object;
-}
-
-Object *Object::getInstance(Pointer &i)
-{
-	return get(i.object, &i.mutex);
-}
-
 void Object::commit(Pointer &i)
 {
 	Object::set(i.object, this, &i.mutex);
@@ -93,9 +70,9 @@ auto_delete::~auto_delete()
 	object = 0;
 }
 
-auto_instance::auto_instance(Object *o)
+auto_instance::auto_instance(Object::Pointer &p)
 {
-	object = o;
+	object = Object::get(p.object, &p.mutex);
 }
 
 void auto_instance::release(void)

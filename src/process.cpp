@@ -133,7 +133,7 @@ void keypair::set(const char *id, const char *value)
 }		
 
 keyconfig::instance::instance(pointer &p) :
-Object::Instance(p)
+auto_instance(p)
 {
 }
 

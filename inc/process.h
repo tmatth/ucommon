@@ -78,7 +78,7 @@ class __EXPORT keyconfig : protected mempager, public CountedObject
 public:
 	typedef	Object::Pointer pointer;
 
-	class __EXPORT instance : public Instance
+	class __EXPORT instance : public auto_instance
 	{
 	private:
 		keyconfig *object;
