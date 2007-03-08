@@ -293,6 +293,35 @@ void Barrier::wait(void)
 	pthread_barrier_wait(&barrier);
 }
 
+shared_pointer::shared_pointer()
+{
+	crit(pthread_rwlock_init(&lock, NULL) == 0);
+	pointer = NULL;
+}
+
+shared_pointer::~shared_pointer()
+{
+	pthread_rwlock_destroy(&lock);
+}
+
+void shared_pointer::set(void *ptr)
+{
+	pthread_rwlock_wrlock(&lock);
+	pointer = ptr;
+	pthread_rwlock_unlock(&lock);
+}
+
+void *shared_pointer::get(void)
+{
+	pthread_rwlock_rdlock(&lock);
+	return pointer;
+}
+
+void shared_pointer::release(void)
+{
+	pthread_rwlock_unlock(&lock);
+}
+
 Threadlock::Threadlock()
 {
 	crit(pthread_rwlock_init(&lock, NULL) == 0);
@@ -396,6 +425,39 @@ auto_cancellation::~auto_cancellation()
 
 	pthread_setcancelstate(mode, &ign);
 	pthread_setcanceltype(type, &ign);
+}
+
+auto_locked::auto_locked()
+{
+	ptr = NULL;
+	object = NULL;
+}
+
+auto_locked::auto_locked(shared_pointer *p)
+{
+	ptr = p;
+	object = p->get();
+}
+
+auto_locked::~auto_locked()
+{
+	release();
+}
+
+void auto_locked::release(void)
+{
+	if(ptr)
+		ptr->release();
+	ptr = NULL;
+	object = NULL;
+}
+
+auto_locked &auto_locked::operator=(shared_pointer *p)
+{
+	release();
+	ptr = p;
+	object = p->get();
+	return *this;
 }
 
 #endif

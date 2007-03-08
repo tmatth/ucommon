@@ -159,6 +159,21 @@ public:
 		{pthread_mutex_unlock(&mutex);};
 };
 
+class __EXPORT shared_pointer
+{
+private:
+	pthread_rwlock_t lock;
+	void *pointer;
+
+public:
+	shared_pointer();
+	~shared_pointer();
+
+	void set(void *ptr);
+	void *get(void);
+	void release(void);
+};
+
 class __EXPORT Threadlock : public Exclusive, public Shared
 {
 private:
@@ -214,6 +229,23 @@ public:
 
 	inline void start(void)
 		{return start(false);};
+};
+
+class __EXPORT auto_locked
+{
+protected:
+	void *object;
+	shared_pointer *ptr;
+
+	auto_locked();
+
+public:
+	auto_locked(shared_pointer *p);
+	~auto_locked();
+
+	void release(void);
+
+	auto_locked &operator=(shared_pointer *p);
 };
 
 class __EXPORT auto_cancellation

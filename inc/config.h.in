@@ -12,6 +12,10 @@
 #define _REENTRANT 1
 #endif
 
+#ifndef	_POSIX_PTHREAD_SEMANTICS
+#define	_POSIX_PTHREAD_SEMANTICS
+#endif
+
 #include <pthread.h>
 typedef	pthread_mutex_t static_mutex_t;
 #define static_mutex_object(x) static pthread_mutex_t x = PTHREAD_MUTEX_INITIALIZER

@@ -10,10 +10,6 @@
 #include <inc/file.h>
 #include <inc/process.h>
 
-#ifdef	HAVE_SIGWAIT2
-#define	_POSIX_PTHREAD_SEMANTICS
-#endif
-
 #if defined(HAVE_SIGACTION) && defined(HAVE_BSD_SIGNAL_H)
 #undef	HAVE_BSD_SIGNAL_H
 #endif
@@ -252,15 +248,15 @@ extern "C" void cpr_attach(const char *dev)
 	close(1);
 	close(2);
 #ifdef	SIGTTOU
-	signal(SIGTTOU, SIG_IGN);
+	cpr_signal(SIGTTOU, SIG_IGN);
 #endif
 
 #ifdef	SIGTTIN
-	signal(SIGTTIN, SIG_IGN);
+	cpr_signal(SIGTTIN, SIG_IGN);
 #endif
 
 #ifdef	SIGTSTP
-	signal(SIGTSTP, SIG_IGN);
+	cpr_signal(SIGTSTP, SIG_IGN);
 #endif
 	pid = fork();
 	if(pid > 0)
@@ -280,7 +276,7 @@ extern "C" void cpr_attach(const char *dev)
 #else
 	crit(setpgid(0, getpid()) == 0);
 #endif
-	signal(SIGHUP, SIG_IGN);
+	cpr_signal(SIGHUP, SIG_IGN);
 	pid = fork();
 	if(pid > 0)
 		exit(0);
@@ -382,6 +378,41 @@ extern "C" void cpr_hangup(pid_t pid)
 {
 #ifdef  HAVE_SIGNAL_H
     kill(pid, SIGHUP);
+#endif
+}
+
+extern "C" sighandler_t cpr_signal(int signo, sighandler_t func)
+{
+	struct sigaction sig_act, old_act;
+
+	memset(&sig_act, 0, sizeof(sig_act));
+	sig_act.sa_handler = func;
+	sigemptyset(&sig_act.sa_mask);
+	sig_act.sa_flags = 0;
+	if(signo == SIGALRM) {
+#ifdef	SA_INTERRUPT
+		sig_act.sa_flags != SA_INTERRUPT;
+#endif
+	}
+	else {
+		sigaddset(&sig_act.sa_mask, SIGALRM);
+#ifdef	SA_RESTART
+		sig_act.sa_flags |= SA_RESTART;
+#endif
+	}
+	if(sigaction(signo, &sig_act, &old_act))
+		return SIG_ERR;
+	return old_act.sa_handler;
+}
+
+extern "C" int cpr_sigwait(sigset_t *set)
+{
+#ifdef	HAVE_SIGWAIT2
+	int status;
+	crit(sigwait(set, &status) == 0);
+	return status;
+#else
+	return sigwait(set);
 #endif
 }
 
