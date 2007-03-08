@@ -294,14 +294,14 @@ void Barrier::wait(void)
 	pthread_barrier_wait(&barrier);
 }
 
-locked_pointer::locked_pointer()
+LockedPointer::LockedPointer()
 {
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	memcpy(&mutex, &lock, sizeof(mutex));
 	pointer = NULL;
 }
 
-void locked_pointer::set(Object *obj)
+void LockedPointer::set(Object *obj)
 {
 	pthread_mutex_lock(&mutex);
 	obj->retain();
@@ -311,7 +311,7 @@ void locked_pointer::set(Object *obj)
 	pthread_mutex_unlock(&mutex);
 }
 
-Object *locked_pointer::get(void)
+Object *LockedPointer::get(void)
 {
 	Object *temp;
 	pthread_mutex_lock(&mutex);
@@ -322,18 +322,18 @@ Object *locked_pointer::get(void)
 	return temp;
 }
 
-shared_pointer::shared_pointer()
+SharedPointer::SharedPointer()
 {
 	crit(pthread_rwlock_init(&lock, NULL) == 0);
 	pointer = NULL;
 }
 
-shared_pointer::~shared_pointer()
+SharedPointer::~SharedPointer()
 {
 	pthread_rwlock_destroy(&lock);
 }
 
-void shared_pointer::set(Object *ptr)
+void SharedPointer::set(Object *ptr)
 {
 	pthread_rwlock_wrlock(&lock);
 	ptr->retain();
@@ -343,7 +343,7 @@ void shared_pointer::set(Object *ptr)
 	pthread_rwlock_unlock(&lock);
 }
 
-Object *shared_pointer::get(void)
+Object *SharedPointer::get(void)
 {
 	pthread_rwlock_rdlock(&lock);
 	if(pointer)
@@ -351,7 +351,7 @@ Object *shared_pointer::get(void)
 	return pointer;
 }
 
-void shared_pointer::release(void)
+void SharedPointer::release(void)
 {
 	if(pointer)
 		pointer->release();
@@ -474,7 +474,7 @@ locked_release::locked_release()
 	object = NULL;
 }
 
-locked_release::locked_release(locked_pointer &p)
+locked_release::locked_release(LockedPointer &p)
 {
 	object = p.get();
 }
@@ -491,7 +491,7 @@ void locked_release::release(void)
 	object = NULL;
 }
 
-locked_release &locked_release::operator=(locked_pointer &p)
+locked_release &locked_release::operator=(LockedPointer &p)
 {
 	release();
 	object = p.get();
@@ -513,7 +513,7 @@ shared_release::shared_release()
 	object = NULL;
 }
 
-shared_release::shared_release(shared_pointer &p)
+shared_release::shared_release(SharedPointer &p)
 {
 	ptr = &p;
 	object = p.get();
@@ -532,7 +532,7 @@ void shared_release::release(void)
 	object = NULL;
 }
 
-shared_release &shared_release::operator=(shared_pointer &p)
+shared_release &shared_release::operator=(SharedPointer &p)
 {
 	release();
 	ptr = &p;

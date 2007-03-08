@@ -36,6 +36,7 @@
 #include <sys/wait.h>
 #endif
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sched.h>
@@ -68,17 +69,13 @@ NamedObject((NamedObject **)root, kid)
 		key[0] = 0;
 }
 
-keypair::keypair(define *defaults, const char *path, mempager *mem)
+keypair::keypair(define *defaults, mempager *mem)
 {
 	keypairs = NULL;
 	pager = mem;
 
 	if(defaults)
 		load(defaults);
-
-	if(path)
-		load(path);
-
 }
 
 keypair::keydata *keypair::create(const char *id, const char *data)
@@ -99,6 +96,56 @@ const char *keypair::alloc(const char *data)
 		return pager->dup(data);
 
 	return cpr_strdup(data);
+}
+
+void keypair::load(FILE *fp, const char *section)
+{
+	string input(256);
+	string value(256);
+	const char *pos, *eq;
+	unsigned len = cpr_strlen(section);
+
+	rewind(fp);
+	while(len) {
+		input << fp;
+		if(feof(fp))
+			return;
+		if(NULL == (pos = input.skip(" \t\r\n")))
+			continue;
+		if(*pos != '[')
+			continue;
+		if(cpr_strnicmp(section, ++pos, len))
+			continue;
+		if(pos[len] == ']')
+			break;
+	}
+
+	for(;;) {
+		input << fp;
+		if(feof(fp))
+			return;
+		pos = input.skip("\t\r\n ");
+		if(!pos)
+			continue;
+		if(*pos == '[')	
+			return;
+		if(!isalpha(*pos))
+			continue;
+		eq = input.chr('=');
+		if(!eq)
+			continue;
+		value = eq + 1;
+		input.split(eq);
+		input.strip(" \t");
+		input.lower();
+		value.strip(" \t\r\n");
+		eq = NULL;
+		if(value.at(0) == '\'' || value.at(0) == '\"') {
+			value.split(strchr(value[1], value.at(0)));
+			++value;
+		}
+		create(input, value);		
+	}
 }
 
 void keypair::load(define *list)

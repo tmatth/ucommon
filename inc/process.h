@@ -61,11 +61,11 @@ public:
 		const char *data;
 	} define;
 
-	keypair(define *defaults = NULL, const char *path = NULL, mempager *mem = NULL);
+	keypair(define *defaults = NULL, mempager *mem = NULL);
 
 	void set(const char *id, const char *value);
 	const char *get(const char *id);
-	void load(const char *path);
+	void load(FILE *fp, const char *key);
 	void load(define *defaults);
 
 	inline keydata *begin(void)
@@ -79,7 +79,7 @@ class __EXPORT keyconfig : protected mempager, public CountedObject
 {
 public:
 #if UCOMMON_THREADING > 0
-	typedef	locked_pointer pointer;
+	typedef	locked_pointer<keyconfig> pointer;
 
 	class __EXPORT instance : public locked_release
 	{

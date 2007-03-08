@@ -88,8 +88,12 @@ public:
 	const char *first(const char *clist) const;
 	const char *begin(void) const;
 	const char *end(void) const;
+	const char *skip(const char *clist, strsize_t offset = 0) const;
+	const char *rskip(const char *clist, strsize_t offset = npos) const;
 	const char *find(const char *clist, strsize_t offset = 0) const;
 	const char *rfind(const char *clist, strsize_t offset = npos) const;
+	void split(const char *mark);
+	void split(strsize_t offset);
 	const char *chr(char ch) const;
 	const char *rchr(char ch) const;
 
@@ -207,6 +211,8 @@ extern "C" {
 	__EXPORT char *cpr_strfill(char *str, size_t size, const char fill);
 	__EXPORT char *cpr_strfield(char *str, const char *s, const char fill, size_t offset = 0, size_t len = 0);
 	__EXPORT char *cpr_strclear(char *str, size_t offset, size_t len, const char fill);
+	__EXPORT char *cpr_strskip(char *str, const char *clist);
+	__EXPORT char *cpr_strrskip(char *str, const char *clist);
 	__EXPORT char *cpr_strfind(char *str, const char *clist);
 	__EXPORT char *cpr_strrfind(char *str, const char *clist);
 	__EXPORT char *cpr_strlast(char *str, const char *clist);

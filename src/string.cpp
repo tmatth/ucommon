@@ -339,6 +339,37 @@ const char *string::rchr(char ch) const
     return ::strrchr(str->text, ch);
 }
 
+const char *string::skip(const char *clist, strsize_t offset) const
+{
+	if(!str || !clist || !*clist || !str->len || offset > str->len)
+		return NULL;
+
+	while(offset < str->len) {
+		if(!strchr(clist, str->text[offset]))
+			return str->text + offset;
+		++offset;
+	}
+	return NULL;
+}
+
+const char *string::rskip(const char *clist, strsize_t offset) const
+{
+	if(!str || !clist || !*clist)
+		return NULL;
+
+	if(!str->len)
+		return NULL;
+
+	if(offset > str->len)
+		offset = str->len;
+
+	while(offset--) {
+		if(!strchr(clist, str->text[offset]))
+			return str->text + offset;
+	}
+	return NULL;
+}
+
 const char *string::rfind(const char *clist, strsize_t offset) const
 {
 	if(!str || !clist || !*clist)
@@ -418,6 +449,7 @@ void string::trim(const char *clist)
 	str->fix();
 }
 
+
 const char *string::find(const char *clist, strsize_t offset) const
 {
 	if(!str || !clist || !*clist || !str->len || offset > str->len)
@@ -489,6 +521,30 @@ void string::printf(const char *format, ...)
 		str->fix();
 	}
 	va_end(args);
+}
+
+void string::split(const char *s)
+{
+	unsigned pos;
+
+	if(!s || !*s || !str)
+		return;
+
+	if(s < str->text || s >= str->text + str->len)
+		return;
+
+	pos = s - str->text;
+	str->text[pos] = 0;
+	str->fix();
+}
+
+void string::split(strsize_t pos)
+{
+	if(!str || pos >= str->len)
+		return;
+
+	str->text[pos] = 0;
+	str->fix();
 }
 
 void string::set(strsize_t offset, const char *s, strsize_t size)
@@ -615,16 +671,16 @@ char string::at(int offset) const
 	if(!str)
 		return 0;
 
-	if(offset >= (int)str->max)
+	if(offset >= (int)str->len)
 		return 0;
 
 	if(offset > -1)
 		return str->text[offset];
 
-	if((strsize_t)(-offset) >= str->max)
+	if((strsize_t)(-offset) >= str->len)
 		return str->text[0];
 
-	return str->text[(int)(str->max) + offset];
+	return str->text[(int)(str->len) + offset];
 }
 
 const char *string::operator[](int offset) const
@@ -632,16 +688,16 @@ const char *string::operator[](int offset) const
 	if(!str)
 		return "";
 
-	if(offset >= (int)str->max)
+	if(offset >= (int)str->len)
 		return "";
 
 	if(offset > -1)
 		return str->text + offset;
 
-	if((strsize_t)(-offset) >= str->max)
+	if((strsize_t)(-offset) >= str->len)
 		return str->text;
 
-	return str->text + str->max + offset;
+	return str->text + str->len + offset;
 }
 
 string::operator strsize_t() const
@@ -1256,6 +1312,34 @@ extern "C" unsigned cpr_strccount(const char *str, const char *clist)
 			++count;
 	}
 	return count;
+}
+
+extern "C" char *cpr_strskip(char *str, const char *clist)
+{
+	if(!str || !clist)
+		return NULL;
+
+	while(*str && strchr(clist, *str))
+		++str;
+
+	if(*str)
+		return str;
+
+	return NULL;
+}
+
+extern "C" char *cpr_strrskip(char *str, const char *clist)
+{
+	unsigned len = cpr_strlen(str);
+
+	if(!len || !clist)
+		return NULL;
+
+	while(len > 0) {
+		if(!strchr(clist, str[--len]))
+			return str;
+	}
+	return NULL;
 }
 
 extern "C" char *cpr_strfind(char *str, const char *clist)

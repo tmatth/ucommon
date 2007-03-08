@@ -159,31 +159,37 @@ public:
 		{pthread_mutex_unlock(&mutex);};
 };
 
-class __EXPORT locked_pointer
+class __EXPORT LockedPointer
 {
 private:
+	friend class __EXPORT locked_release;
 	pthread_mutex_t mutex;
 	Object *pointer;
 
-public:
-	locked_pointer();
+protected:
+	LockedPointer();
 
 	void set(Object *ptr);
 	Object *get(void);
+
+	LockedPointer &operator=(Object *o);
 };
 
-class __EXPORT shared_pointer
+class __EXPORT SharedPointer
 {
 private:
+	friend class __EXPORT shared_release;
 	pthread_rwlock_t lock;
 	Object *pointer;
 
-public:
-	shared_pointer();
-	~shared_pointer();
+protected:
+	SharedPointer();
+	~SharedPointer();
 
 	void set(Object *ptr);
 	Object *get(void);
+
+public:
 	void release(void);
 };
 
@@ -253,30 +259,30 @@ protected:
 	locked_release(const locked_release &copy);
 
 public:
-	locked_release(locked_pointer &p);
+	locked_release(LockedPointer &p);
 	~locked_release();
 
 	void release(void);
 
-	locked_release &operator=(locked_pointer &p);
+	locked_release &operator=(LockedPointer &p);
 };
 
 class __EXPORT shared_release
 {
 protected:
 	Object *object;
-	shared_pointer *ptr;
+	SharedPointer *ptr;
 
 	shared_release();
 	shared_release(const shared_release &copy);
 
 public:
-	shared_release(shared_pointer &p);
+	shared_release(SharedPointer &p);
 	~shared_release();
 
 	void release(void);
 
-	shared_release &operator=(shared_pointer &p);
+	shared_release &operator=(SharedPointer &p);
 };
 
 class __EXPORT auto_cancellation
@@ -290,12 +296,44 @@ public:
 };
 
 template<class T>
+class shared_pointer : public SharedPointer
+{
+public:
+	inline shared_pointer() : SharedPointer() {};
+
+	inline T *get(void)
+		{return static_cast<T*>(SharedPointer::get());};
+
+	inline void set(T *p)
+		{SharedPointer::set(p);};
+};	
+
+template<class T>
+class locked_pointer : public LockedPointer
+{
+public:
+	inline locked_pointer() : LockedPointer() {};
+
+	inline T* get(void)
+		{return static_cast<T *>(LockedPointer::get());};
+
+	inline void set(T *p)
+		{LockedPointer::set(p);};
+
+	inline locked_pointer<T>& operator=(T *obj)
+		{LockedPointer::operator=(obj); return *this;};
+
+	inline T *operator*()
+		{return get();};
+};
+
+template<class T>
 class locked_instance : public locked_release
 {
 public:
     inline locked_instance() : locked_release() {};
 
-    inline locked_instance(locked_pointer &p) : locked_release(p) {};
+    inline locked_instance(locked_pointer<T> &p) : locked_release(p) {};
 
     inline T& operator*() const
         {return *(static_cast<T *>(object));};
@@ -313,7 +351,7 @@ class shared_instance : public shared_release
 public:
 	inline shared_instance() : shared_release() {};
 
-	inline shared_instance(shared_pointer &p) : shared_release(p) {};
+	inline shared_instance(shared_pointer<T> &p) : shared_release(p) {};
 
 	inline T& operator*() const
 		{return *(static_cast<T *>(object));};
