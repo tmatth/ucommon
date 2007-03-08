@@ -159,17 +159,19 @@ void keypair::set(const char *id, const char *value)
 		create(id, value);
 }		
 
+#if UCOMMON_THREADING > 0
 keyconfig::instance::instance(pointer &p) :
 locked_release(p)
 {
 }
+#endif
 
 keypair *keyconfig::instance::operator[](unsigned idx)
 {
 	if(!object)
 		return NULL;
 
-	return object->operator[](idx);
+	return (static_cast<keyconfig *>(object))->operator[](idx);
 }
 
 const char *keyconfig::instance::operator()(unsigned idx, const char *key)
@@ -178,7 +180,7 @@ const char *keyconfig::instance::operator()(unsigned idx, const char *key)
 	if(!object)
 		return NULL;
 
-	pair = object->operator[](idx);
+	pair = (static_cast<keyconfig *>(object))->operator[](idx);
 	if(!pair)
 		return NULL;
 

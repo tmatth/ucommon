@@ -295,7 +295,7 @@ class locked_instance : public locked_release
 public:
     inline locked_instance() : locked_release() {};
 
-    inline locked_instance(locked_pointer *p) : locked_release(p) {};
+    inline locked_instance(locked_pointer &p) : locked_release(p) {};
 
     inline T& operator*() const
         {return *(static_cast<T *>(object));};
@@ -313,7 +313,7 @@ class shared_instance : public shared_release
 public:
 	inline shared_instance() : shared_release() {};
 
-	inline shared_instance(shared_pointer *p) : shared_release(p) {};
+	inline shared_instance(shared_pointer &p) : shared_release(p) {};
 
 	inline T& operator*() const
 		{return *(static_cast<T *>(object));};

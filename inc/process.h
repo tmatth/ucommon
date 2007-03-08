@@ -78,13 +78,11 @@ public:
 class __EXPORT keyconfig : protected mempager, public CountedObject
 {
 public:
+#if UCOMMON_THREADING > 0
 	typedef	locked_pointer pointer;
 
 	class __EXPORT instance : public locked_release
 	{
-	private:
-		keyconfig *object;
-
 	public:
 		instance(pointer &p);
 
@@ -97,6 +95,24 @@ public:
 		const char *operator()(unsigned idx, const char *key);
 		keypair *operator[](unsigned idx);
 	};
+#else
+	typedef keyconfig *pointer;
+
+	class instance : public auto_release
+    {
+    public:
+        inline instance(keyconfig *p) : auto_release(p) {};
+
+        inline keyconfig &operator*()
+            {return *(static_cast<keyconfig *>(object));};
+
+        inline keyconfig *operator->()
+            {return static_cast<keyconfig *>(object);};
+
+        const char *operator()(unsigned idx, const char *key);
+        keypair *operator[](unsigned idx);
+    };
+#endif
 
 private:
 	keypair *keypairs;
