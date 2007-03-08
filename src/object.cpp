@@ -12,19 +12,6 @@ using namespace UCOMMON_NAMESPACE;
 
 AutoObject::base_exit AutoObject::ex;
 
-Object::Pointer::Pointer()
-{
-	static static_mutex_t lock = STATIC_MUTEX_INITIALIZER;
-
-	memcpy(&mutex, &lock, sizeof(mutex));
-	object = NULL;
-}
-
-void Object::commit(Pointer &i)
-{
-	Object::set(i.object, this, &i.mutex);
-}
-
 CountedObject::CountedObject()
 {
 	count = 0;
@@ -68,28 +55,6 @@ auto_delete::~auto_delete()
 		delete object;
 
 	object = 0;
-}
-
-auto_instance::auto_instance(Object::Pointer &p)
-{
-	object = Object::get(p.object, &p.mutex);
-}
-
-void auto_instance::release(void)
-{
-	if(object)
-		object->release();
-	object = NULL;
-}
-
-bool auto_instance::operator!() const
-{
-	return object == NULL;
-}
-
-auto_instance::~auto_instance()
-{
-	release();
 }
 
 auto_release::auto_release(Object *o)
@@ -400,24 +365,4 @@ Object *sparse_array::get(unsigned pos)
 	return vector[pos];
 }
 
-void Object::set(Object *old, Object *rep, static_mutex_t *sync)
-{
-	Object *temp;
-	rep->retain();
-	static_mutex_lock(sync);
-	temp = old;
-	old = rep;
-	static_mutex_unlock(sync);
-	temp->release();
-}
-
-Object *Object::get(Object *obj, static_mutex_t *sync)
-{
-	Object *temp;
-	static_mutex_lock(sync);
-	temp = obj;
-	temp->retain();
-	static_mutex_unlock(sync);
-	return temp;
-}
 

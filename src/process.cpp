@@ -160,7 +160,7 @@ void keypair::set(const char *id, const char *value)
 }		
 
 keyconfig::instance::instance(pointer &p) :
-auto_instance(p)
+locked_release(p)
 {
 }
 

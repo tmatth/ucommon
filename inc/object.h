@@ -12,25 +12,9 @@ NAMESPACE_UCOMMON
 class __EXPORT Object
 {
 public:
-	class __EXPORT Pointer
-	{
-	private:
-		friend class Object;
-		friend class auto_instance;
-		static_mutex_t mutex;
-		Object *object;
-	public:
-		Pointer();
-	};
-		
 	virtual void retain(void) = 0;
 	virtual void release(void) = 0;
 	virtual ~Object();
-
-	static Object *get(Object *o, static_mutex_t *s = NULL);
-	static void set(Object *o, Object *n, static_mutex_t *s = NULL);
-	static Object *getInstance(Pointer &i);
-	void commit(Pointer &i);
 };
 
 class __EXPORT CountedObject : public Object
@@ -112,21 +96,6 @@ public:
 	~auto_delete();
 };
 
-class __EXPORT auto_instance
-{
-protected:
-	Object *object;
-
-	auto_instance(Object::Pointer &p);
-
-public:
-	~auto_instance();
-
-	void release(void);	
-
-	bool operator!() const;
-};
-
 class __EXPORT auto_release
 {
 protected:
@@ -199,22 +168,6 @@ public:
 		{return *(static_cast<T*>(object));};
 
 	inline T* operator->() const
-		{return static_cast<T*>(object);};
-};
-
-template <class T>
-class instance : public auto_instance
-{
-public:
-	inline instance() : auto_instance(T::current) {};
-
-	inline T& operator*() const
-		{return *(static_cast<T*>(object));};
-
-	inline T* operator->() const
-		{return static_cast<T*>(object);};
-
-	inline T* get(void) const
 		{return static_cast<T*>(object);};
 };
 

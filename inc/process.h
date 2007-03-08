@@ -78,9 +78,9 @@ public:
 class __EXPORT keyconfig : protected mempager, public CountedObject
 {
 public:
-	typedef	Object::Pointer pointer;
+	typedef	locked_pointer pointer;
 
-	class __EXPORT instance : public auto_instance
+	class __EXPORT instance : public locked_release
 	{
 	private:
 		keyconfig *object;
@@ -106,9 +106,6 @@ private:
 
 public:
 	keyconfig(unsigned members = 1, size_t pagesize = 0);
-
-	inline static keyconfig *getInstance(pointer &i)
-		{return static_cast<keyconfig *>(Object::getInstance(i));};
 
 	inline void release(void)
 		{CountedObject::release();};

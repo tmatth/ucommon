@@ -159,18 +159,31 @@ public:
 		{pthread_mutex_unlock(&mutex);};
 };
 
+class __EXPORT locked_pointer
+{
+private:
+	pthread_mutex_t mutex;
+	Object *pointer;
+
+public:
+	locked_pointer();
+
+	void set(Object *ptr);
+	Object *get(void);
+};
+
 class __EXPORT shared_pointer
 {
 private:
 	pthread_rwlock_t lock;
-	void *pointer;
+	Object *pointer;
 
 public:
 	shared_pointer();
 	~shared_pointer();
 
-	void set(void *ptr);
-	void *get(void);
+	void set(Object *ptr);
+	Object *get(void);
 	void release(void);
 };
 
@@ -231,21 +244,39 @@ public:
 		{return start(false);};
 };
 
-class __EXPORT auto_locked
+class __EXPORT locked_release
 {
 protected:
-	void *object;
-	shared_pointer *ptr;
+	Object *object;
 
-	auto_locked();
+	locked_release();
+	locked_release(const locked_release &copy);
 
 public:
-	auto_locked(shared_pointer *p);
-	~auto_locked();
+	locked_release(locked_pointer &p);
+	~locked_release();
 
 	void release(void);
 
-	auto_locked &operator=(shared_pointer *p);
+	locked_release &operator=(locked_pointer &p);
+};
+
+class __EXPORT shared_release
+{
+protected:
+	Object *object;
+	shared_pointer *ptr;
+
+	shared_release();
+	shared_release(const shared_release &copy);
+
+public:
+	shared_release(shared_pointer &p);
+	~shared_release();
+
+	void release(void);
+
+	shared_release &operator=(shared_pointer &p);
 };
 
 class __EXPORT auto_cancellation
@@ -256,6 +287,42 @@ private:
 public:
 	auto_cancellation(int type, int mode);
 	~auto_cancellation();
+};
+
+template<class T>
+class locked_instance : public locked_release
+{
+public:
+    inline locked_instance() : locked_release() {};
+
+    inline locked_instance(locked_pointer *p) : locked_release(p) {};
+
+    inline T& operator*() const
+        {return *(static_cast<T *>(object));};
+
+    inline T* operator->() const
+        {return static_cast<T*>(object);};
+
+    inline T* get(void) const
+        {return static_cast<T*>(object);};
+};
+
+template<class T>
+class shared_instance : public shared_release
+{
+public:
+	inline shared_instance() : shared_release() {};
+
+	inline shared_instance(shared_pointer *p) : shared_release(p) {};
+
+	inline T& operator*() const
+		{return *(static_cast<T *>(object));};
+
+	inline T* operator->() const
+		{return static_cast<T*>(object);};
+
+	inline T* get(void) const
+		{return static_cast<T*>(object);};
 };
 
 #define	cancel_immediate()	auto_cancellation \

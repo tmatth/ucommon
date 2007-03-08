@@ -9,6 +9,7 @@
 #include <inc/file.h>
 #include <inc/process.h>
 #include <errno.h>
+#include <string.h>
 
 #if	UCOMMON_THREADING > 0
 
@@ -293,6 +294,34 @@ void Barrier::wait(void)
 	pthread_barrier_wait(&barrier);
 }
 
+locked_pointer::locked_pointer()
+{
+	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+	memcpy(&mutex, &lock, sizeof(mutex));
+	pointer = NULL;
+}
+
+void locked_pointer::set(Object *obj)
+{
+	pthread_mutex_lock(&mutex);
+	obj->retain();
+	if(pointer)
+		pointer->release();
+	pointer = obj;
+	pthread_mutex_unlock(&mutex);
+}
+
+Object *locked_pointer::get(void)
+{
+	Object *temp;
+	pthread_mutex_lock(&mutex);
+	temp = pointer;
+	if(temp)
+		temp->retain();
+	pthread_mutex_unlock(&mutex);
+	return temp;
+}
+
 shared_pointer::shared_pointer()
 {
 	crit(pthread_rwlock_init(&lock, NULL) == 0);
@@ -304,21 +333,28 @@ shared_pointer::~shared_pointer()
 	pthread_rwlock_destroy(&lock);
 }
 
-void shared_pointer::set(void *ptr)
+void shared_pointer::set(Object *ptr)
 {
 	pthread_rwlock_wrlock(&lock);
+	ptr->retain();
+	if(pointer)
+		pointer->release();
 	pointer = ptr;
 	pthread_rwlock_unlock(&lock);
 }
 
-void *shared_pointer::get(void)
+Object *shared_pointer::get(void)
 {
 	pthread_rwlock_rdlock(&lock);
+	if(pointer)
+		pointer->retain();
 	return pointer;
 }
 
 void shared_pointer::release(void)
 {
+	if(pointer)
+		pointer->release();
 	pthread_rwlock_unlock(&lock);
 }
 
@@ -427,24 +463,68 @@ auto_cancellation::~auto_cancellation()
 	pthread_setcanceltype(type, &ign);
 }
 
-auto_locked::auto_locked()
+locked_release::locked_release(const locked_release &copy)
+{
+	object = copy.object;
+	object->retain();
+}
+
+locked_release::locked_release()
+{
+	object = NULL;
+}
+
+locked_release::locked_release(locked_pointer &p)
+{
+	object = p.get();
+}
+
+locked_release::~locked_release()
+{
+	release();
+}
+
+void locked_release::release(void)
+{
+	if(object)
+		object->release();
+	object = NULL;
+}
+
+locked_release &locked_release::operator=(locked_pointer &p)
+{
+	release();
+	object = p.get();
+	return *this;
+}
+
+shared_release::shared_release(const shared_release &copy)
+{
+	ptr = copy.ptr;
+	if(ptr)
+		object = ptr->get();
+	else
+		object = NULL;
+}
+
+shared_release::shared_release()
 {
 	ptr = NULL;
 	object = NULL;
 }
 
-auto_locked::auto_locked(shared_pointer *p)
+shared_release::shared_release(shared_pointer &p)
 {
-	ptr = p;
-	object = p->get();
+	ptr = &p;
+	object = p.get();
 }
 
-auto_locked::~auto_locked()
+shared_release::~shared_release()
 {
 	release();
 }
 
-void auto_locked::release(void)
+void shared_release::release(void)
 {
 	if(ptr)
 		ptr->release();
@@ -452,11 +532,11 @@ void auto_locked::release(void)
 	object = NULL;
 }
 
-auto_locked &auto_locked::operator=(shared_pointer *p)
+shared_release &shared_release::operator=(shared_pointer &p)
 {
 	release();
-	ptr = p;
-	object = p->get();
+	ptr = &p;
+	object = p.get();
 	return *this;
 }
 
