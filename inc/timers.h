@@ -2,7 +2,7 @@
 #define	_UCOMMON_TIMERS_H_
 
 #ifndef _UCOMMON_CONFIG_H_
-#include ucommon/config.h
+#include <ucommon/config.h>
 #endif
 
 #include <unistd.h>

@@ -94,8 +94,13 @@ public:
 	const char *rfind(const char *clist, strsize_t offset = npos) const;
 	void split(const char *mark);
 	void split(strsize_t offset);
+	void rsplit(const char *mark);
+	void rsplit(strsize_t offset);
 	const char *chr(char ch) const;
 	const char *rchr(char ch) const;
+	strsize_t len(void);
+	strsize_t max(void);
+	char fill(void);
 
 	inline operator const char *() const
 		{return c_str();};
@@ -138,6 +143,7 @@ private:
 protected:
 	cstring *c_copy(void) const;
 	void cow(strsize_t adj = 0);
+	void release(void);
 
 public:
 	memstring(void *mem, strsize_t size, char fill = 0);
@@ -184,6 +190,19 @@ public:
 };
 
 __EXPORT void swap(string &s1, string &s2);
+
+template<strsize_t S>
+class stringbuf : public memstring
+{
+private:
+	char buffer[sizeof(cstring) + S];
+	
+public:
+	inline stringbuf() : memstring(buffer, S) {};
+
+	inline void operator=(string &s)
+		{set(s.c_str());};	
+};
 
 END_NAMESPACE
 

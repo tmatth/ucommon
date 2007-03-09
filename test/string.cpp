@@ -14,9 +14,9 @@ extern "C" int main()
 {
 	char buff[33];
 	cpr_strfill(buff, 32, ' ');
-	string mystr = (string)"hello" + (string)" this is a test";
+	stringbuf<128> mystr;
+	mystr = (string)"hello" + (string)" this is a test";
 	printf("STARTING %s\n", *mystr);
 	printf("SECOND %s\n", *testing);
 	printf("AN OFFSET %s\n", mystr[-10]);
-	crit(buff == NULL);
 };

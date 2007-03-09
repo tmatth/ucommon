@@ -15,6 +15,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+int Thread::policy = SCHED_RR;
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
 
@@ -383,7 +384,7 @@ void Threadlock::Shlock(void)
 	pthread_rwlock_rdlock(&lock);
 }
 
-Thread::Thread(int p, size_t size)
+Thread::Thread(unsigned p, size_t size)
 {
 	priority = p;
 	stack = size;
@@ -394,10 +395,50 @@ Thread::~Thread()
 	release();
 }
 
+unsigned Thread::maxPriority(void)
+{
+	int min = sched_get_priority_min(policy);
+	int max = sched_get_priority_max(policy);
+	return max - min;
+}
+
+void Thread::setPriority(unsigned pri)
+{
+	struct sched_param sparam;
+	bool reset = false;
+
+	if(!priority)
+		return;
+
+	if(!pri)
+		reset = true;
+		
+	pri += priority;
+
+	int min = sched_get_priority_min(policy);
+    int max = sched_get_priority_max(policy);
+
+	if(min == max)
+		return;
+	
+	pri += min;
+	if(pri > max)
+		pri = max;
+
+	if(tid != 0) {
+		sparam.sched_priority = pri;
+		if(reset)
+			pthread_setschedparam(tid, policy, &sparam);		
+		else
+			pthread_setschedprio(tid, pri);
+	}
+}
+		
 extern "C" {
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
+		th->setPriority(0);
 		th->run();
 		th->release();
 	}
@@ -415,6 +456,8 @@ void Thread::start(bool detach)
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	else
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+	if(stack && stack < PTHREAD_STACK_MIN)
+		stack = PTHREAD_STACK_MIN;
 	if(stack)
 		pthread_attr_setstacksize(&attr, stack);
 	pthread_create(&tid, &attr, &exec_thread, this);

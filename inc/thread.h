@@ -219,8 +219,9 @@ public:
 class __EXPORT Thread
 {
 private:
+	static int policy; 
 	size_t stack;
-	int priority;
+	unsigned priority;
 
 	pthread_t tid;
 	volatile bool running, detached;
@@ -228,7 +229,7 @@ private:
 	void start(bool detached);
 
 protected:
-	Thread(int pri = 0, size_t stack = 0);
+	Thread(unsigned pri = 0, size_t stack = 0);
 
 public:
 	virtual void run(void) = 0;
@@ -248,6 +249,19 @@ public:
 
 	inline void start(void)
 		{return start(false);};
+
+	inline static void setPolicy(int pol)
+		{policy = pol;};
+
+	inline static int getPolicy(void)
+		{return policy;};
+
+	void setPriority(unsigned pri);
+
+	inline unsigned getPriority(void)
+		{return priority;};
+
+	static unsigned maxPriority(void);
 };
 
 class __EXPORT locked_release

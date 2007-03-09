@@ -82,8 +82,8 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #endif
 #endif
 
-#ifdef	DEBUG
 #include <assert.h>
+#ifdef	DEBUG
 #define	crit(x)	assert(x)
 #else
 #define	crit(x) if(!(x)) abort()

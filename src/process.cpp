@@ -100,8 +100,8 @@ const char *keypair::alloc(const char *data)
 
 void keypair::load(FILE *fp, const char *section)
 {
-	string input(256);
-	string value(256);
+	stringbuf<256> input;
+	stringbuf<256> value;
 	const char *pos, *eq;
 	unsigned len = cpr_strlen(section);
 
@@ -134,7 +134,7 @@ void keypair::load(FILE *fp, const char *section)
 		eq = input.chr('=');
 		if(!eq)
 			continue;
-		value = eq + 1;
+		value.set(eq);
 		input.split(eq);
 		input.strip(" \t");
 		input.lower();

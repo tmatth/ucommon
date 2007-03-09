@@ -152,6 +152,30 @@ void string::cstring::set(strsize_t offset, const char *str, strsize_t size)
 	}
 }
 
+char string::fill(void)
+{
+	if(!str)
+		return 0;
+
+	return str->fill;
+}
+
+strsize_t string::max(void)
+{
+    if(!str)
+        return 0;
+
+    return str->max;
+}
+
+strsize_t string::len(void)
+{
+	if(!str)
+		return 0;
+
+	return str->len;
+}
+
 void string::cstring::set(const char *str)
 {
 	strsize_t size = strlen(str);
@@ -523,6 +547,22 @@ void string::printf(const char *format, ...)
 	va_end(args);
 }
 
+void string::rsplit(const char *s)
+{
+	if(!str || !s || s <= str->text || s > str->text + str->len)
+		return;
+
+	str->set(s);
+}
+
+void string::rsplit(strsize_t pos)
+{
+	if(!str || pos > str->len || !pos)
+		return;
+
+	str->set(str->text + pos);
+}
+
 void string::split(const char *s)
 {
 	unsigned pos;
@@ -876,6 +916,12 @@ memstring::memstring(void *mem, strsize_t size, char fill)
 
 memstring::~memstring()
 {
+	str = NULL;
+}
+
+void memstring::release(void)
+{
+	str = NULL;
 }
 
 bool memstring::resize(strsize_t size)
