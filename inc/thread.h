@@ -264,6 +264,36 @@ public:
 	static unsigned maxPriority(void);
 };
 
+class __EXPORT Buffer : public Conditional
+{
+private:
+	size_t size, used, objsize;
+	char *buf, *head, *tail;
+
+protected:
+	virtual size_t onPeek(void *buf);
+	virtual size_t onWait(void *buf);
+	virtual size_t onPost(void *buf);
+
+public:
+	static const size_t timeout;
+
+	Buffer(size_t capacity, size_t osize = 0);
+	~Buffer();
+
+	inline size_t getSize(void)
+		{return size;};
+
+	inline size_t getUsed(void)
+		{return used;};
+
+	size_t wait(void *buf, timeout_t timeout = 0);
+	size_t post(void *buf, timeout_t timeout = 0);
+	size_t peek(void *buf);
+
+	virtual bool operator!();
+};
+
 class __EXPORT locked_release
 {
 protected:
@@ -309,6 +339,19 @@ public:
 	~auto_cancellation();
 };
 
+template<class T>
+class buffer : public Buffer
+{
+public:
+	inline buffer(size_t size) : Buffer(size, sizeof(T)) {};
+
+	inline size_t wait(T *obj, timeout_t timeout = 0)
+		{return Buffer::wait(obj, timeout);};
+
+	inline size_t post(T *obj, timeout_t timeout = 0)
+		{return Buffer::post(obj, timeout);};
+};
+ 
 template<class T>
 class shared_pointer : public SharedPointer
 {

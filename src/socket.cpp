@@ -137,6 +137,7 @@ bool cidr::allow(int so, const cidr *accept, const cidr *reject)
 {
 	struct sockaddr_storage addr;
 	socklen_t slen = sizeof(addr);
+	unsigned allowed = 0, denied = 0, masked;
 
 	if(so == INVALID_SOCKET)
 		return false;
@@ -145,27 +146,27 @@ bool cidr::allow(int so, const cidr *accept, const cidr *reject)
 		return false;
 
 	while(accept) {
-		if(accept->isMember((struct sockaddr *)&addr))
-			break;
+		if(accept->isMember((struct sockaddr *)&addr)) {
+			masked = accept->getMask();
+			if(masked > allowed)
+				allowed = masked;
+		}
 		accept = static_cast<cidr *>(accept->next);
 	}
 
     while(reject) {
-        if(reject->isMember((struct sockaddr *)&addr))
-            break;
+        if(reject->isMember((struct sockaddr *)&addr)) {
+			masked = reject->getMask();
+			if(masked > denied)
+				denied = masked;
+        }
         reject = static_cast<cidr *>(reject->next);
     }
 
-	if(accept && !reject)
+	if(!allowed && !denied)
 		return true;
 
-	if(reject && !accept)
-		return false;
-
-	if(!accept && !reject)
-		return true;
-
-	if(accept->getMask() > reject->getMask())
+	if(allowed > denied)
 		return true;
 
 	return false;

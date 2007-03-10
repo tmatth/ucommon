@@ -210,6 +210,16 @@ string::string(const char *s, const char *end)
 	str->set(s);
 }		
 
+string::string(const char *s)
+{
+	strsize_t size = cpr_strlen(s);
+	if(!s)
+		s = "";
+	str = create(size);
+	str->retain();
+	str->set(s);
+}
+
 string::string(const char *s, strsize_t size)
 {
 	if(!s)
@@ -1065,61 +1075,6 @@ tokenstring &tokenstring::operator=(const string &s)
 	set(s.c_str());
 	token = NULL;
 	return *this;
-}
-
-istring::istring() :
-string()
-{
-}
-
-istring::istring(const char *s, strsize_t size) :
-string(s, size)
-{
-}
-
-istring::istring(const char *s, const char *end) :
-string(s, end)
-{
-}
-
-istring::istring(strsize_t size) :
-string(size)
-{
-};
-
-istring::istring(strsize_t size, char fill) :
-string(size, fill)
-{
-};
-
-istring::istring(strsize_t size, const char *format, ...) :
-string()
-{
-	va_list args;
-	va_start(args, format);
-
-	str = create(size);
-	str->retain();
-	vsnprintf(str->text, size + 1, format, args);
-	va_end(args);
-}
-
-istring::istring(const string &dup) :
-string(dup)
-{
-}
-
-int istring::compare(const char *s) const
-{
-	const char *mystr = "";
-
-	if(str)
-		mystr = str->text;
-
-	if(!s)
-		s = "";
-
-	return cpr_stricmp(mystr, s);
 }
 
 void ucc::swap(string &s1, string &s2)

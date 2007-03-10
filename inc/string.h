@@ -57,7 +57,8 @@ public:
 	string(strsize_t size);
 	string(strsize_t size, char fill);
 	string(strsize_t size, const char *fmt, ...);
-	string(const char *str, strsize_t size = 0);
+	string(const char *str);
+	string(const char *str, strsize_t size);
 	string(const char *str, const char *end);
 	string(const string &copy);
 	virtual ~string();
@@ -139,32 +140,21 @@ class __EXPORT memstring : public string
 private:
 	static const size_t header;
 	bool resize(strsize_t size);
-
-protected:
-	cstring *c_copy(void) const;
 	void cow(strsize_t adj = 0);
 	void release(void);
 
+protected:
+	cstring *c_copy(void) const;
+
 public:
+	inline void operator=(string &s)
+		{set(s.c_str());};
+
+	inline void operator=(const char *s)
+		{set(s);};
+
 	memstring(void *mem, strsize_t size, char fill = 0);
 	~memstring();
-};
-
-class __EXPORT istring : public string
-{
-protected:
-	virtual int compare(const char *s) const;
-
-public:
-	static const strsize_t npos;
-
-	istring();
-	istring(strsize_t size);
-	istring(strsize_t size, char fill);
-	istring(strsize_t size, const char *fmt, ...);
-	istring(const char *str, strsize_t size = 0);
-	istring(const char *str, const char *end);
-	istring(const string &copy);
 };
 
 class __EXPORT tokenstring : protected string
@@ -199,6 +189,9 @@ private:
 	
 public:
 	inline stringbuf() : memstring(buffer, S) {};
+
+	inline void operator=(const char *s)
+		{set(s);};
 
 	inline void operator=(string &s)
 		{set(s.c_str());};	

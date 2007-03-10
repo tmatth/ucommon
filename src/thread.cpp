@@ -15,6 +15,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+const size_t Buffer::timeout = ((size_t)(-1));
 int Thread::policy = SCHED_RR;
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
@@ -490,6 +491,111 @@ void Thread::release(void)
 			tid = 0;
 		}
 	}	
+}
+
+Buffer::Buffer(size_t capacity, size_t osize) : Conditional()
+{
+	size = capacity;
+	objsize = osize;
+	used = 0;
+
+	if(osize) {
+		buf = (char *)malloc(capacity * osize);
+		crit(buf != NULL);
+	}
+	else 
+		buf = NULL;
+
+	head = tail = buf;
+}
+
+Buffer::~Buffer()
+{
+	if(buf)
+		free(buf);
+	buf = NULL;
+}
+
+size_t Buffer::onWait(void *data)
+{
+	if(objsize) {
+		memcpy(data, head, objsize);
+		if((head += objsize) >= buf + (size * objsize))
+			head = buf;
+	}
+	return objsize;
+}
+
+size_t Buffer::onPost(void *data)
+{
+	if(objsize) {
+		memcpy(tail, data, objsize);
+		if((tail += objsize) > buf + (size *objsize))
+			tail = buf;
+	}
+	return objsize;
+}
+
+size_t Buffer::onPeek(void *data)
+{
+	if(objsize)
+		memcpy(data, head, objsize);
+	return objsize;
+}
+
+size_t Buffer::wait(void *buf, timeout_t timeout)
+{
+	size_t rc = 0;
+	
+	Exlock();
+	if(!Conditional::wait(timeout)) {
+		Unlock();
+		return Buffer::timeout;
+	}
+	rc = onWait(buf);
+	--used;
+	Conditional::signal(false);
+	Unlock();
+	return rc;
+}
+
+size_t Buffer::post(void *buf, timeout_t timeout)
+{
+	size_t rc = 0;
+	Lock();
+	while(used == size) {
+		if(!Conditional::wait(timeout)) {
+			Unlock();
+			return Buffer::timeout;
+		}
+	}
+	rc = onPost(buf);
+	++used;
+	Conditional::signal(false);
+	Unlock();
+	return rc;
+}
+
+size_t Buffer::peek(void *buf)
+{
+	size_t rc = 0;
+
+	Lock();
+	if(!used) {
+		Unlock();
+		return 0;
+	}
+	rc = onPeek(buf);
+	Unlock();
+	return rc;
+}
+
+bool Buffer::operator!()
+{
+	if(head && tail)
+		return false;
+
+	return true;
 }
 
 auto_cancellation::auto_cancellation(int ntype, int nmode)
