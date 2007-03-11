@@ -1,5 +1,5 @@
-#ifndef	_UCOMMON_STRING_H_
-#define	_UCOMMON_STRING_H_
+#ifndef	_UCOMMON_VECTOR_H_
+#define	_UCOMMON_VECTOR_H_
 
 #ifndef	_UCOMMON_OBJECT_H_
 #include <ucommon/object.h>
@@ -77,6 +77,9 @@ public:
 	inline void operator()(vectorsize_t pos, Object *obj)
 		{set(pos, obj);};
 
+	inline Object *operator()(vectorsize_t pos)
+		{return get(pos);};
+
 	inline void operator()(Object *obj)
 		{return add(obj);};
 
@@ -128,6 +131,9 @@ public:
 	inline T *get(int pos)
 		{return static_cast<T *>(Vector::get(pos));};
 
+    inline T *operator()(vectorsize_t pos)
+        {return static_cast<T *>(Vector::get(pos));};
+
 	inline T *begin(void)
 		{return static_cast<T *>(Vector::begin());};
 
@@ -152,6 +158,9 @@ public:
 
 	inline T *get(int pos)
 		{return static_cast<T *>(Vector::get(pos));};
+
+    inline T *operator()(vectorsize_t pos)
+        {return static_cast<T *>(Vector::get(pos));};
 
 	inline T *begin(void)
 		{return static_cast<T *>(Vector::begin());};
