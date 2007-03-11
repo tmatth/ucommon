@@ -12,8 +12,8 @@ NAMESPACE_UCOMMON
 class __EXPORT Object
 {
 public:
-	virtual void retain(void) = 0;
-	virtual void release(void) = 0;
+	virtual void retain(void);
+	virtual void release(void);
 	virtual ~Object();
 };
 

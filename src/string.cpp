@@ -289,6 +289,12 @@ string::cstring *string::create(strsize_t size, char fill) const
 		return new((size_t)size) cstring(size);
 }
 
+void string::retain(void)
+{
+	if(str)
+		str->retain();
+}
+
 void string::release(void)
 {
 	if(str)

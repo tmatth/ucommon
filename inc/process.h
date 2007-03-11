@@ -147,6 +147,7 @@ extern "C" {
 	__EXPORT void cpr_closeall(void);
 	__EXPORT void cpr_cancel(pid_t pid);
 #ifndef	_MSWINDOWS_
+	__EXPORT sighandler_t cpr_intsignal(int sig, sighandler_t handler);
 	__EXPORT sighandler_t cpr_signal(int sig, sighandler_t handler);
 	__EXPORT void cpr_hangup(pid_t pid);
 	__EXPORT int cpr_sigwait(sigset_t *set);

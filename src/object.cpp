@@ -26,6 +26,15 @@ Object::~Object()
 {
 }
 
+void Object::release(void)
+{
+	delete this;
+}
+
+void Object::retain(void)
+{
+}
+
 Temporary::~Temporary()
 {
 }

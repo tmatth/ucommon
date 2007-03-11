@@ -17,7 +17,7 @@ typedef	unsigned short strsize_t;
 
 NAMESPACE_UCOMMON
 
-class __EXPORT string
+class __EXPORT string : public Object
 {
 protected:
 	class __EXPORT cstring : public CountedObject
@@ -46,6 +46,7 @@ protected:
 	cstring *create(strsize_t size, char fill = 0) const;
 
 	virtual int compare(const char *s) const;
+	virtual void retain(void);
 	virtual void release(void);
 	virtual cstring *c_copy(void) const;
 	virtual void cow(strsize_t adj = 0);

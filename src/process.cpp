@@ -430,6 +430,26 @@ extern "C" void cpr_hangup(pid_t pid)
 #endif
 }
 
+extern "C" sighandler_t cpr_intsignal(int signo, sighandler_t func)
+{
+	struct	sigaction	sig_act, old_act;
+
+	memset(&sig_act, 0, sizeof(sig_act));
+	sig_act.sa_handler = func;
+	sigemptyset(&sig_act.sa_mask);
+	if(signo != SIGALRM)
+		sigaddset(&sig_act.sa_mask, SIGALRM);
+
+	sig_act.sa_flags = 0;
+#ifdef	SA_INTERRUPT
+	sig_act.sa_flags |= SA_INTERRUPT;
+#endif
+	if(sigaction(signo, &sig_act, &old_act) < 0)
+		return SIG_ERR;
+
+	return old_act.sa_handler;
+}
+
 extern "C" sighandler_t cpr_signal(int signo, sighandler_t func)
 {
 	struct sigaction sig_act, old_act;
