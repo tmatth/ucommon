@@ -21,7 +21,9 @@
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_
+#ifndef	__EXPORT
 #define	__EXPORT	__declspec(dllimport)
+#endif
 #define	__LOCAL
 #elif UCOMMON_VISIBILITY > 0
 #define	__EXPORT	__attribute__ ((visibility("default")))
@@ -54,7 +56,6 @@ typedef	char *rpcstring_t;
 typedef	double rpcdouble_t;
 
 #include <stdlib.h>
-
 
 __EXPORT void *operator new(size_t size);
 __EXPORT void *operator new[](size_t size);

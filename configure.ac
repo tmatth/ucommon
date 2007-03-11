@@ -61,6 +61,7 @@ AC_ARG_WITH(libc,
 ])
 
 AH_TOP([
+#include <inc/export.h>
 #include <inc/config.h>
 ])
 

@@ -1,6 +1,7 @@
 #include <ucommon/config.h>
 #include <ucommon/object.h>
 #include <ucommon/counter.h>
+#include <ucommon/vector.h>
 #include <ucommon/linked.h>
 #include <ucommon/timers.h>
 #include <ucommon/access.h>
@@ -12,3 +13,4 @@
 #include <ucommon/thread.h>
 #include <ucommon/buffer.h>
 #include <ucommon/process.h>
+#include <ucommon/misc.h>

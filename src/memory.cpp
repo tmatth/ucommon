@@ -1,11 +1,11 @@
 #include <private.h>
-#include <unistd.h>
-#include <limits.h>
-#include <string.h>
 #include <inc/config.h>
 #include <inc/object.h>
 #include <inc/linked.h>
 #include <inc/memory.h>
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
 
 using namespace UCOMMON_NAMESPACE;
 
