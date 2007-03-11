@@ -61,6 +61,7 @@ void auto_close::release(void)
 		break;
 	case T_FD:
 		::close(obj.fd);
+	case T_CLOSED:
 		break;
 	}
 	type = T_CLOSED;

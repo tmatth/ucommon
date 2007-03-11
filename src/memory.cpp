@@ -66,15 +66,17 @@ void mempager::release()
 
 mempager::page_t *mempager::pager(void)
 {
-	page_t *npage;
+	page_t *npage = NULL;
+	void *addr;
 
 	crit(!limit || count < limit);
 
 #ifdef	HAVE_POSIX_MEMALIGN
 	if(align) {
-		crit(posix_memalign(reinterpret_cast<void **>(&npage), align, pagesize) == 0);
+		crit(posix_memalign(&addr, align, pagesize) == 0);
+		npage = (page_t *)addr;
+		goto use;
 	}
-	goto use;
 #endif
 	npage = (page_t *)malloc(pagesize);
 

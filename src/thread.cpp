@@ -16,7 +16,11 @@
 using namespace UCOMMON_NAMESPACE;
 
 const size_t Buffer::timeout = ((size_t)(-1));
+#if	_POSIX_PRIORITY_SCHEDULING
 int Thread::policy = SCHED_RR;
+#else
+int Thread::policy = 0;
+#endif
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
 
@@ -61,7 +65,7 @@ bool Event::wait(Timer &timer)
 {
 	pthread_mutex_lock(&mutex);
 	int rc = 0;
-	long last = count;
+	unsigned last = count;
 	while(!signalled && count == last && rc != ETIMEDOUT)
 		rc = pthread_cond_timedwait(&cond, &mutex, &timer.timer);
 	pthread_mutex_unlock(&mutex);
@@ -80,7 +84,7 @@ bool Event::wait(timeout_t timeout)
 void Event::wait(void)
 {
 	pthread_mutex_lock(&mutex);
-	long last = count;
+	unsigned last = count;
 	while(!signalled && count == last)
 		pthread_cond_wait(&cond, &mutex);
  	pthread_mutex_unlock(&mutex);
@@ -396,6 +400,7 @@ Thread::~Thread()
 	release();
 }
 
+#ifdef	_POSIX_PRIORITY_SCHEDULING
 unsigned Thread::maxPriority(void)
 {
 	int min = sched_get_priority_min(policy);
@@ -407,6 +412,7 @@ void Thread::setPriority(unsigned pri)
 {
 	struct sched_param sparam;
 	bool reset = false;
+	int pval = (int)pri, rc;
 
 	if(!priority)
 		return;
@@ -414,7 +420,7 @@ void Thread::setPriority(unsigned pri)
 	if(!pri)
 		reset = true;
 		
-	pri += priority;
+	pval += priority;
 
 	int min = sched_get_priority_min(policy);
     int max = sched_get_priority_max(policy);
@@ -422,18 +428,29 @@ void Thread::setPriority(unsigned pri)
 	if(min == max)
 		return;
 	
-	pri += min;
-	if(pri > max)
-		pri = max;
+	pval += min;
+	if(pval > max)
+		pval = max;
 
 	if(tid != 0) {
-		sparam.sched_priority = pri;
+		sparam.sched_priority = pval;
 		if(reset)
-			pthread_setschedparam(tid, policy, &sparam);		
+			rc = pthread_setschedparam(tid, policy, &sparam);		
 		else
-			pthread_setschedprio(tid, pri);
+			rc = pthread_setschedprio(tid, pval);
+		assert(rc == 0);
 	}
 }
+#else
+unsigned Thread::maxPriority(void)
+{
+	return 0;
+}
+
+void Thread::setPriority(unsigned pri)
+{
+}	
+#endif
 		
 extern "C" {
 	static void *exec_thread(void *obj)
@@ -442,6 +459,7 @@ extern "C" {
 		th->setPriority(0);
 		th->run();
 		th->release();
+		return NULL;
 	}
 };
 

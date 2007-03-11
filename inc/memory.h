@@ -29,7 +29,7 @@ protected:
 	
 public:
 	mempager(size_t ps = 0);
-	~mempager();
+	virtual ~mempager();
 
 	inline unsigned overhead(void)
 		{return sizeof(page_t);};

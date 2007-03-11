@@ -301,7 +301,6 @@ void cidr::set(const char *cp)
 	char cbuf[128];
 	char *ep;
 	unsigned dots = 0;
-	uint32_t addr;
 
 	if(strchr(cp, ':'))
 		family = AF_INET6;
@@ -403,6 +402,7 @@ bool Socket::operator!() const
 {
 	if(so == INVALID_SOCKET)
 		return true;
+	return false;
 }
 
 Socket &Socket::operator=(SOCKET s)
@@ -440,7 +440,7 @@ ssize_t Socket::puts(const char *str)
 	if(!str)
 		return 0;
 
-	put(str, strlen(str));
+	return put(str, strlen(str));
 }
 
 ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
@@ -743,7 +743,7 @@ retry:
 		
 	if(::cpr_bindaddr(so, iface, svc)) {
 		release();
-		if(family = AF_INET && !strchr(iface, '.')) {
+		if(family == AF_INET && !strchr(iface, '.')) {
 			family = AF_INET6;
 			goto retry;
 		}
@@ -809,8 +809,6 @@ extern "C" struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *hint)
 extern "C" char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max)
 {
 	socklen_t sl;
-	char *sep = ";";
-	int flag = 0;
 
 #ifdef	AF_UNIX
     struct sockaddr_un *un = (struct sockaddr_un *)sa;

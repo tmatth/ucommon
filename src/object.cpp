@@ -254,6 +254,10 @@ extern "C" {
 
 } // c
 
+ExitObject::~ExitObject()
+{
+}
+
 void ExitObject::forkPrepare(void)
 {
 #ifndef	HAVE_PTHREAD_ATFORK

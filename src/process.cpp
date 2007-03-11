@@ -85,9 +85,9 @@ keypair::keydata *keypair::create(const char *id, const char *data)
 		overdraft = 0;
 
 	if(pager)
-		keydata *key = new(pager, overdraft) keydata(&keypairs, id, data);
+		return new(pager, overdraft) keydata(&keypairs, id, data);
 	else
-		keydata *key = new(overdraft) keydata(&keypairs, id, data);
+		return new(overdraft) keydata(&keypairs, id, data);
 }
 
 const char *keypair::alloc(const char *data)
@@ -440,7 +440,7 @@ extern "C" sighandler_t cpr_signal(int signo, sighandler_t func)
 	sig_act.sa_flags = 0;
 	if(signo == SIGALRM) {
 #ifdef	SA_INTERRUPT
-		sig_act.sa_flags != SA_INTERRUPT;
+		sig_act.sa_flags |= SA_INTERRUPT;
 #endif
 	}
 	else {

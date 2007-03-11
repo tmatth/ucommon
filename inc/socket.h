@@ -107,7 +107,7 @@ public:
 	Socket(SOCKET so);
 	Socket(int family, int type, int protocol = 0);
 	Socket(const char *iface, const char *port, int family, int type, int protocol = 0);
-	~Socket();
+	virtual ~Socket();
 
 	void release(void);
 	bool isConnected(void) const;

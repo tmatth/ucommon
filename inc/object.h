@@ -46,6 +46,7 @@ class __EXPORT ExitObject
 {
 protected:
 	ExitObject();
+	virtual ~ExitObject();
 
 	void delist(void);
 
@@ -135,7 +136,7 @@ protected:
 	sparse_array(unsigned limit);
 
 public:
-	~sparse_array();
+	virtual ~sparse_array();
 
 	unsigned count(void);
 };

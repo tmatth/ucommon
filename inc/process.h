@@ -75,7 +75,7 @@ public:
 		{return get(id);};
 };
 
-class __EXPORT keyconfig : protected mempager, public CountedObject
+class __EXPORT keyconfig : public CountedObject, protected mempager
 {
 public:
 #if UCOMMON_THREADING > 0

@@ -703,8 +703,6 @@ void string::cow(strsize_t size)
 
 void string::add(const char *s)
 {
-	strsize_t len;
-
 	if(!s || !*s)
 		return;
 
@@ -1233,7 +1231,6 @@ extern "C" char *cpr_stradd(char *str, size_t size, const char *s)
 	if(!s)
 		return str;
 
-	size_t l = strlen(s);
 	size_t o = strlen(str);
 
 	if(o >= (size - 1))
