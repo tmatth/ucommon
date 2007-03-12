@@ -5,4 +5,8 @@
 #include <ucommon/config.h>
 #endif
 
+extern "C" {
+	void __EXPORT cpr_md5hash(char *out, const char *source, size_t size = 0);
+};
+
 #endif

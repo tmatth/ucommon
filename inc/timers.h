@@ -1,8 +1,8 @@
 #ifndef _UCOMMON_TIMERS_H_
 #define	_UCOMMON_TIMERS_H_
 
-#ifndef _UCOMMON_CONFIG_H_
-#include <ucommon/config.h>
+#ifndef	_UCOMMON_LINKED_H_
+#include <ucommon/linked.h>
 #endif
 
 #include <unistd.h>
@@ -13,7 +13,7 @@ typedef unsigned long timeout_t;
 
 NAMESPACE_UCOMMON
 
-class __EXPORT Timer
+class __EXPORT Timer : public LinkedObject
 {
 private:
 	friend class __EXPORT Conditional;
@@ -25,15 +25,26 @@ private:
 #else
 	timeval timer;
 #endif
+	Timer **list;
+
+protected:
+	virtual void expired(void);
+	virtual void release(void);
 
 public:
 	static const timeout_t inf;
 	static const time_t reset;
 
+	Timer(Timer **root);
 	Timer();
 	Timer(timeout_t offset);
 	Timer(time_t offset);
-	
+	virtual ~Timer();
+
+	bool isExpired(void);
+
+	void set(void);
+	void clear(void);	
 	timeout_t get(void);
 
 	inline timeout_t operator*()
@@ -48,6 +59,7 @@ public:
 	void operator-=(timeout_t adj);
 
 	static void sync(Timer &timer);
+	static timeout_t expire(Timer *list);
 };
 
 END_NAMESPACE

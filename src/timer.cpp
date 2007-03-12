@@ -1,5 +1,7 @@
 #include <private.h>
 #include <inc/config.h>
+#include <inc/object.h>
+#include <inc/linked.h>
 #include <inc/timers.h>
 
 using namespace UCOMMON_NAMESPACE;
@@ -35,7 +37,49 @@ static void adj(struct timeval *ts)
 const timeout_t Timer::inf = ((timeout_t)(-1));
 const time_t Timer::reset = ((time_t)0);
 
-Timer::Timer()
+Timer::Timer(Timer **root) :
+LinkedObject((LinkedObject **)(root))
+{
+	clear();
+	list = root;
+}
+
+Timer::Timer() :
+LinkedObject()
+{
+	list = NULL;
+	set();
+}
+
+Timer::Timer(timeout_t in) :
+LinkedObject()
+{
+	list = NULL;
+	set();
+	operator+=(in);
+}
+
+Timer::Timer(time_t in) :
+LinkedObject()
+{
+	list = NULL;
+	set();
+	timer.tv_sec += difftime(in);
+}
+
+Timer::~Timer()
+{
+	release();
+}
+
+void Timer::release(void)
+{
+	if(list)
+		delist((LinkedObject **)list);
+	list = NULL;
+}
+
+void Timer::set(void)
 {
 #ifdef  _POSIX_MONOTONIC_CLOCK
     clock_gettime(CLOCK_MONOTONIC, &timer);
@@ -45,6 +89,32 @@ Timer::Timer()
     gettimeofday(&timer, NULL);
 #endif
 };	
+
+void Timer::expired(void)
+{
+}
+
+void Timer::clear(void)
+{
+	timer.tv_sec = 0;
+#if _POSIX_TIMERS > 0
+	timer.tv_nsec = 0;
+#else
+	timer.tv_usec = 0;
+#endif
+};	
+
+bool Timer::isExpired(void)
+{
+#if _POSIX_TIMERS > 0
+	if(!timer.tv_sec && !timer.tv_nsec)
+		return true;
+#else
+	if(!timer.tv_sec && !timer.tv_usec)
+		return true;
+#endif
+	return false;
+}
 
 timeout_t Timer::get(void)
 {
@@ -100,6 +170,9 @@ void Timer::operator=(timeout_t to)
 
 void Timer::operator+=(timeout_t to)
 {
+	if(isExpired())
+		set();
+
 	timer.tv_sec += (to / 1000);
 #if _POSIX_TIMERS > 0
 	timer.tv_nsec += (to % 1000l) * 1000000l;
@@ -111,6 +184,8 @@ void Timer::operator+=(timeout_t to)
 
 void Timer::operator-=(timeout_t to)
 {
+	if(isExpired())
+		set();
     timer.tv_sec -= (to / 1000);
 #if _POSIX_TIMERS > 0
     timer.tv_nsec -= (to % 1000l) * 1000000l;
@@ -123,11 +198,15 @@ void Timer::operator-=(timeout_t to)
 
 void Timer::operator+=(time_t abs)
 {
+	if(isExpired())
+		set();
 	timer.tv_sec += difftime(abs);
 }
 
 void Timer::operator-=(time_t abs)
 {
+	if(isExpired())
+		set();
 	timer.tv_sec -= difftime(abs);
 }
 
@@ -157,3 +236,22 @@ void Timer::sync(Timer &t)
 #endif
 }
 
+timeout_t Timer::expire(Timer *timer)
+{
+	timeout_t first = inf, next;
+
+	while(timer) {
+		if(!(timer->isExpired())) {
+			next = timer->get();
+			if(!next) {
+				timer->clear();
+				timer->expired();
+				next = timer->get();
+			}
+			if(next && next < first)
+				first = next;
+		}
+		timer = static_cast<Timer *>(timer->getNext());
+	}
+	return first;	
+}

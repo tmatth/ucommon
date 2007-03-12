@@ -1,6 +1,7 @@
 #include <private.h>
 #include <inc/config.h>
 #include <inc/object.h>
+#include <inc/linked.h>
 #include <inc/timers.h>
 #include <inc/string.h>
 #include <stdarg.h>

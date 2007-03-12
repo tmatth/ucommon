@@ -134,7 +134,7 @@ void keypair::load(FILE *fp, const char *section)
 		eq = input.chr('=');
 		if(!eq)
 			continue;
-		value.set(eq);
+		value.set(eq + 1);
 		input.split(eq);
 		input.strip(" \t");
 		input.lower();
