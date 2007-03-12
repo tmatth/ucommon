@@ -43,6 +43,7 @@ public:
 
 	bool isExpired(void);
 
+	virtual void arm(timeout_t timeout);
 	void set(void);
 	void clear(void);	
 	timeout_t get(void);

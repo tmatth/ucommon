@@ -116,6 +116,16 @@ bool Timer::isExpired(void)
 	return false;
 }
 
+void Timer::arm(timeout_t timeout)
+{
+	if(!timeout) {
+		clear();
+		return;
+	}
+	set();
+	operator+=(timeout);
+}
+
 timeout_t Timer::get(void)
 {
 	timeout_t diff;
