@@ -264,7 +264,7 @@ string::string(const string &dup)
 
 string::~string()
 {
-	release();
+	string::release();
 }
 
 string::cstring *string::c_copy(void) const

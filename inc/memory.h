@@ -7,6 +7,8 @@
 
 NAMESPACE_UCOMMON
 
+class __EXPORT PagerPool;
+
 class __EXPORT mempager
 {
 private:
@@ -24,6 +26,9 @@ private:
 
 protected:
 	unsigned limit;
+
+	inline size_t getOverhead(void)
+		{return sizeof(page_t);};
 
 	page_t *pager(void);
 	
@@ -49,6 +54,35 @@ public:
 	char *dup(const char *cp);
 	void *dup(void *mem, size_t size);
 
+};
+
+class __EXPORT PagerObject : public LinkedObject, public CountedObject
+{
+protected:
+	friend class __EXPORT PagerPool;
+
+	PagerPool *pager;
+
+	PagerObject();
+
+	void dealloc(void);
+};	
+
+class __EXPORT PagerPool : private mempager
+{
+private:
+	size_t objsize;
+	LinkedObject *freelist;
+#if UCOMMON_THREADING > 0
+	pthread_mutex_t mutex;
+#endif
+
+protected:
+	PagerPool(size_t count, size_t objsize);
+	PagerObject *get(void);
+
+public:
+	void put(PagerObject *obj);
 };
 
 class __EXPORT keyassoc : public mempager
@@ -77,6 +111,16 @@ public:
 	void *get(const char *id);
 	void set(const char *id, void *data);
 	void clear(const char *id);
+};
+
+template <class T, size_t S>
+class pager : private PagerPool
+{
+public:
+	inline pager() : PagerPool(S, sizeof(T)) {};
+
+	inline T *create(void)
+		{return new(get()) T;};
 };
 
 template <class T>

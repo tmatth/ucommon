@@ -72,6 +72,19 @@ Timer::~Timer()
 	release();
 }
 
+void Timer::attach(Timer **timers)
+{
+	if(timers == list)
+		return;
+
+	release();
+	if(!timers)
+		return;
+
+	enlist((LinkedObject **)timers);
+	list = timers;
+}
+
 void Timer::release(void)
 {
 	if(list)
@@ -249,8 +262,10 @@ void Timer::sync(Timer &t)
 timeout_t Timer::expire(Timer *timer)
 {
 	timeout_t first = inf, next;
+	Timer *nt;
 
 	while(timer) {
+		nt = static_cast<Timer *>(timer->getNext());
 		if(!(timer->isExpired())) {
 			next = timer->get();
 			if(!next) {
@@ -261,7 +276,7 @@ timeout_t Timer::expire(Timer *timer)
 			if(next && next < first)
 				first = next;
 		}
-		timer = static_cast<Timer *>(timer->getNext());
+		timer = nt;
 	}
 	return first;	
 }

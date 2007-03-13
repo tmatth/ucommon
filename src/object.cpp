@@ -51,8 +51,6 @@ void CountedObject::retain(void)
 
 void CountedObject::release(void)
 {
-	assert(count > 0);
-
 	if(count > 1) {
 		--count;
 		return;

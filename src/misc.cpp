@@ -6,6 +6,9 @@
 #include <inc/string.h>
 #include <inc/misc.h>
 #include <endian.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <stdarg.h>
 
 struct MD5Context {
 	uint32_t buf[4];
@@ -223,8 +226,7 @@ extern "C" void cpr_md5hash(char *out, const char *source, size_t len)
 	unsigned char digest[16];
 	unsigned p = 0;
 
-	if(!source)
-		source = "";
+	assert(out != NULL && source != NULL);
 
 	if(!len)
 		len = cpr_strlen(source);
@@ -237,6 +239,184 @@ extern "C" void cpr_md5hash(char *out, const char *source, size_t len)
 		snprintf(&out[p * 2], 3, "%2.2x", digest[p]);
 		++p;
 	}
+}
+
+extern "C" int cpr_uuid(char *uuid)
+{
+	int fd = open("/dev/urandom", O_RDONLY);
+	char buf[16];
+	if(fd < 0)
+		return -1;
+
+	if(read(fd, buf, 16) < 16)
+		return -1;
+
+	assert(uuid != NULL);
+
+	snprintf(uuid, uuid_size, "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+		buf[0], buf[1], buf[2], buf[3],
+        buf[4], buf[5], buf[6], buf[7],
+        buf[8], buf[9], buf[10], buf[11],
+        buf[12], buf[13], buf[14], buf[15]);
+
+	close(fd);
+	return 0;
+}
+
+extern "C" size_t cpr_urlencodesize(char *src)
+{
+	size_t size = 0;
+	while(src && *src) {
+		if(isalnum(*src) ||  strchr("/.-:;, ", *src))
+			++size;
+		else
+			size += 3;
+	}
+	return size;
+}
+
+extern "C" size_t cpr_urlencode(char *dest, size_t limit, const char *src)
+{
+	static const char *hex = "0123456789abcdef";
+	char *ret = dest;
+	unsigned char ch;
+
+	assert(dest != NULL && src != NULL && limit > 3);
+	
+	while(limit-- > 3 && *src) {
+		if(*src == ' ') {
+			*(dest++) = '+';
+			++src;
+		}
+		else if(isalnum(*src) ||  strchr("/.-:;,", *src))
+			*(dest++) = *(src++);
+		else {		
+			limit -= 2;
+			ch = (unsigned char)(*(src++));
+			*(dest++) = '%';
+			*(dest++) = hex[(ch >> 4)&0xF];
+			*(dest++) = hex[ch % 16];
+		}
+	}		
+	*dest = 0;
+	return dest - ret;
+}
+
+extern "C" size_t cpr_urldecode(char *dest, size_t limit, const char *src)
+{
+	char *ret = dest;
+	char hex[3];
+
+	assert(dest != NULL && src != NULL && limit > 1);
+
+	while(limit-- > 1 && *src && !strchr("?&", *src)) {
+		if(*src == '%') {
+			memset(hex, 0, 3);
+			hex[0] = *(++src);
+			if(*src)
+				hex[1] = *(++src);
+			if(*src)
+				++src;			
+			*(dest++) = (char)strtol(hex, NULL, 16);	
+		}
+		else if(*src == '+') {
+			*(dest++) = ' ';
+			++src;
+		}
+		else
+			*(dest++) = *(src++);
+	}
+	*dest = 0;
+	return dest - ret;
+}
+
+extern "C" size_t xml_encode(char *out, size_t limit, char *src)
+{
+	char *ret = out;
+	assert(src != NULL && limit > 0);
+	while(src && *src && limit > 6) {
+		switch(*src) {
+		case '<':
+			strcpy(out, "&lt;");
+			limit -= 4;
+			out += 4;
+			break;
+		case '>':
+			strcpy(out, "&gt;");
+			limit -= 4;
+			out += 4;
+			break;
+		case '&':
+			strcpy(out, "&amp;");
+			limit -= 5;
+			out += 5;
+			break;
+		case '\"':
+			strcpy(out, "&quot;");
+			limit -= 6;
+			out += 6;
+			break;
+		case '\'':
+			strcpy(out, "&apos;");
+			limit -= 6;
+			out += 6;
+			break;
+		default:
+			--limit;
+			*(out++) = *src;
+		}
+		++src;
+	}
+	*out = 0;
+	return out - ret;
+}
+
+extern "C" size_t xml_decode(char *out, size_t limit, char *src)
+{
+	char *ret = out;
+	assert(src != NULL && limit > 0);
+	if(*src == '\'' || *src == '\"')
+		++src;
+	while(src && limit-- > 1 && !strchr("<\'\">", *src)) {
+		if(!cpr_strnicmp(src, "&amp;", 5)) {
+			*(out++) = '&';
+			src += 5;
+		}
+		else if(!cpr_strnicmp(src, "&lt;", 4)) {
+			src += 4;
+			*(out++) = '<';
+		}
+		else if(!cpr_strnicmp(src, "&gt;", 4)) {
+			src += 4;
+			*(out++) = '>';
+		}
+		else if(!cpr_strnicmp(src, "&quot;", 6)) {
+			src += 6;
+			*(out++) = '\"';
+		}
+		else if(!cpr_strnicmp(src, "&apos;", 6)) {
+			src += 6;
+			*(out++) = '\'';
+		}
+		else
+			*(out++) = *(src++);
+	}
+	*out = 0;
+	return out - ret;
+}
+
+extern "C" size_t cpr_snprintf(char *out, size_t size, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	assert(fmt != NULL && size > 0 && out != NULL);
+
+	if(out)
+		vsnprintf(out, size, fmt, args);
+
+	va_end(args);
+	return cpr_strlen(out);
 }
 
 // vim: set ts=4 sw=4:

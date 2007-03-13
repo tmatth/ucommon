@@ -30,6 +30,7 @@ private:
 protected:
 	virtual void expired(void);
 	virtual void release(void);
+	virtual void attach(Timer **list);
 
 public:
 	static const timeout_t inf;
@@ -47,6 +48,9 @@ public:
 	void set(void);
 	void clear(void);	
 	timeout_t get(void);
+
+	inline void disarm(void)
+		{arm(0);};
 
 	inline timeout_t operator*()
 		{return get();};

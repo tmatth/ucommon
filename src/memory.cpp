@@ -51,7 +51,7 @@ mempager::mempager(size_t ps)
 
 mempager::~mempager()
 {
-	release();
+	mempager::release();
 }
 
 void mempager::release()
@@ -131,6 +131,58 @@ void *mempager::dup(void *obj, size_t size)
 	return mem;
 }
 
+PagerObject::PagerObject() :
+LinkedObject(NULL), CountedObject()
+{
+}
+
+void PagerObject::dealloc(void)
+{
+	pager->put(this);
+}
+
+PagerPool::PagerPool(size_t items, size_t osize) :
+mempager(items * osize + getOverhead())
+{
+	objsize = osize;
+	freelist = NULL;
+#if UCOMMON_THREADING > 0
+	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+	memcpy(&mutex, &lock, sizeof(mutex));
+#endif	
+}
+
+void PagerPool::put(PagerObject *ptr)
+{
+#if UCOMMON_THREADING > 0
+    pthread_mutex_lock(&mutex);
+#endif
+	ptr->enlist(&freelist);
+#if UCOMMON_THREADING > 0
+    pthread_mutex_unlock(&mutex);
+#endif
+}
+
+PagerObject *PagerPool::get(void)
+{
+	PagerObject *ptr;
+#if UCOMMON_THREADING > 0
+	pthread_mutex_lock(&mutex);
+#endif
+	ptr = static_cast<PagerObject *>(freelist);
+	if(ptr) 
+		freelist = ptr->next;
+	else
+		ptr = (PagerObject *)alloc(objsize);
+	memset(ptr, 0, objsize);
+	ptr->pager = this;
+	
+#if UCOMMON_THREADING > 0
+    pthread_mutex_unlock(&mutex);
+#endif
+	return ptr;
+}
+
 keyassoc::keydata::keydata(NamedObject **root, const char *id, unsigned max) :
 NamedObject(root, id, max)
 {
@@ -146,7 +198,7 @@ mempager(minsize(max, paging))
 
 keyassoc::~keyassoc()
 {
-	release();
+	keyassoc::release();
 }
 
 void *keyassoc::get(const char *id)

@@ -397,7 +397,7 @@ Thread::Thread(unsigned p, size_t size)
 
 Thread::~Thread()
 {
-	release();
+	Thread::release();
 }
 
 #ifdef	_POSIX_PRIORITY_SCHEDULING
@@ -544,6 +544,17 @@ size_t Buffer::onWait(void *data)
 	return objsize;
 }
 
+size_t Buffer::onPull(void *data)
+{
+    if(objsize) {
+		if(tail == buf)
+			tail = buf + (size * objsize);
+		tail -= objsize;
+        memcpy(data, tail, objsize);
+    }
+    return objsize;
+}
+
 size_t Buffer::onPost(void *data)
 {
 	if(objsize) {
@@ -575,6 +586,22 @@ size_t Buffer::wait(void *buf, timeout_t timeout)
 	Conditional::signal(false);
 	Unlock();
 	return rc;
+}
+
+size_t Buffer::pull(void *buf, timeout_t timeout)
+{
+    size_t rc = 0;
+
+    Exlock();
+    if(!Conditional::wait(timeout)) {
+        Unlock();
+        return Buffer::timeout;
+    }
+    rc = onPull(buf);
+    --used;
+    Conditional::signal(false);
+    Unlock();
+    return rc;
 }
 
 size_t Buffer::post(void *buf, timeout_t timeout)

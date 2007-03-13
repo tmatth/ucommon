@@ -25,6 +25,7 @@ protected:
 
 	virtual void release(void);
 
+	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
 
 public:

@@ -6,7 +6,17 @@
 #endif
 
 extern "C" {
-	void __EXPORT cpr_md5hash(char *out, const char *source, size_t size = 0);
+	const size_t uuid_size = 38;
+
+	__EXPORT void cpr_md5hash(char *out, const char *source, size_t size = 0);
+	__EXPORT int cpr_uuid(char *out);
+	__EXPORT size_t cpr_urldecode(char *out, size_t limit, const char *src);
+	__EXPORT size_t cpr_urlencode(char *out, size_t limit, const char *src);
+	__EXPORT size_t cpr_urlencodesize(char *str);
+	__EXPORT size_t cpr_xmldecode(char *out, size_t limit, const char *src);
+	__EXPORT size_t cpr_xmlencode(char *out, size_t limit, const char *src);
+	__EXPORT size_t cpr_xmlencodesize(char *str);
+	__EXPORT size_t cpr_snprintf(char *buf, size_t size, const char *fmt, ...);
 };
 
 #endif

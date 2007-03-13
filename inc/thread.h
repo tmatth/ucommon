@@ -271,6 +271,7 @@ private:
 	char *buf, *head, *tail;
 
 protected:
+	virtual size_t onPull(void *buf);
 	virtual size_t onPeek(void *buf);
 	virtual size_t onWait(void *buf);
 	virtual size_t onPost(void *buf);
@@ -287,6 +288,7 @@ public:
 	inline size_t getUsed(void)
 		{return used;};
 
+	size_t pull(void *buf, timeout_t timeout = 0);
 	size_t wait(void *buf, timeout_t timeout = 0);
 	size_t post(void *buf, timeout_t timeout = 0);
 	size_t peek(void *buf);
@@ -348,8 +350,12 @@ public:
 	inline size_t wait(T *obj, timeout_t timeout = 0)
 		{return Buffer::wait(obj, timeout);};
 
+	inline size_t pull(T *obj, timeout_t timeout = 0)
+		{return Buffer::pull(obj, timeout);};
+
 	inline size_t post(T *obj, timeout_t timeout = 0)
 		{return Buffer::post(obj, timeout);};
+
 };
  
 template<class T>

@@ -8,8 +8,8 @@ using namespace UCOMMON_NAMESPACE;
 
 LinkedObject::LinkedObject(LinkedObject **root)
 {
-	next = *root;
-	*root = this;
+	if(root)
+		enlist(root);
 }
 
 LinkedObject::~LinkedObject()
@@ -25,6 +25,12 @@ void LinkedObject::purge(LinkedObject *root)
 		root->release();
 		root = next;
 	}
+}
+
+void LinkedObject::enlist(LinkedObject **root)
+{
+	next = *root;
+	*root = this;
 }
 
 void LinkedObject::delist(LinkedObject **root)
