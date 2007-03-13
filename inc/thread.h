@@ -268,9 +268,10 @@ public:
 	static unsigned maxPriority(void);
 };
 
-class __EXPORT Queue : protected OrderedIndex, protected Conditional, protected mempager
+class __EXPORT Queue : protected OrderedIndex, protected Conditional
 {
 private:
+	mempager *pager;
 	LinkedObject *freelist;
 	size_t used;
 
@@ -285,7 +286,7 @@ protected:
 	size_t limit;
 
 public:
-	Queue(unsigned count);
+	Queue(mempager *mem);
 	~Queue();
 
 	bool remove(Object *obj);
@@ -299,6 +300,7 @@ class __EXPORT Stack : protected Conditional, protected mempager
 {
 private:
 	LinkedObject *freelist, *usedlist;
+	mempager *pager;
 	size_t used;
 
 	class __EXPORT member : public LinkedObject
@@ -314,7 +316,7 @@ protected:
 	size_t limit;
 
 public:
-	Stack(unsigned count);
+	Stack(mempager *pager);
 	~Stack();
 
 	bool remove(Object *obj);
@@ -400,11 +402,11 @@ public:
 	~auto_cancellation();
 };
 
-template<class T, size_t S = 32, size_t L = 0>
+template<class T, mempager *P = NULL, size_t L = 0>
 class queue : public Queue
 {
 public:
-	inline queue() : Queue(S) {limit = L;};
+	inline queue() : Queue(P) {limit = L;};
 
 	inline bool remove(T *obj)
 		{return Queue::remove(obj);};	
@@ -419,11 +421,11 @@ public:
         {return static_cast<T *>(Queue::lifo(timeout));};
 };
 
-template<class T, size_t S = 32, size_t L = 0>
+template<class T, mempager *P = NULL, size_t L = 0>
 class stack : public Stack
 {
 public:
-	inline stack() : Stack(S) {limit = L;};
+	inline stack() : Stack(P) {limit = L;};
 
 	inline bool remove(T *obj)
 		{return Stack::remove(obj);};	

@@ -527,16 +527,16 @@ OrderedObject(q)
 	object = o;
 }
 
-Queue::Queue(unsigned count) :
-OrderedIndex(), Conditional(), mempager(count * sizeof(member) + getOverhead())
+Queue::Queue(mempager *p) :
+OrderedIndex(), Conditional()
 {
+	pager = p;
 	freelist = NULL;
 	limit = used = 0;
 }
 
 Queue::~Queue()
 {
-	mempager::purge();
 	Conditional::destroy();
 }
 
@@ -609,6 +609,7 @@ Object *Queue::fifo(timeout_t timeout)
 bool Queue::post(Object *object, timeout_t timeout)
 {
 	member *node;
+	LinkedObject *mem;
 	Exlock();
 	while(limit && used == limit) {
 		if(!Conditional::wait(timeout)) {
@@ -618,12 +619,12 @@ bool Queue::post(Object *object, timeout_t timeout)
 	}
 	++used;
 	if(freelist) {
-		node = static_cast<member *>(freelist);
-		freelist = node->getNext();
+		mem = freelist;
+		freelist = freelist->getNext();
+		node = new((caddr_t)mem) member(this, object);
 	}
 	else
-		node = (member *)mempager::alloc(sizeof(member));		
-	new((caddr_t)node) member(this, object);
+		node = new(pager) member(this, object);
 	Conditional::signal(false);
 	Unlock();
 	return true;
@@ -646,16 +647,16 @@ LinkedObject((&S->usedlist))
 	object = o;
 }
 
-Stack::Stack(unsigned count) :
-Conditional(), mempager(count * sizeof(member) + getOverhead())
+Stack::Stack(mempager *p) :
+Conditional()
 {
+	pager = p;
 	freelist = usedlist = NULL;
 	limit = used = 0;
 }
 
 Stack::~Stack()
 {
-	mempager::purge();
 	Conditional::destroy();
 }
 
@@ -704,6 +705,7 @@ Object *Stack::pull(timeout_t timeout)
 bool Stack::push(Object *object, timeout_t timeout)
 {
 	member *node;
+	LinkedObject *mem;
 	Exlock();
 	while(limit && used == limit) {
 		if(!Conditional::wait(timeout)) {
@@ -713,12 +715,12 @@ bool Stack::push(Object *object, timeout_t timeout)
 	}
 	++used;
 	if(freelist) {
-		node = static_cast<Stack::member *>(freelist);
-		freelist = node->getNext();
+		mem = freelist;
+		freelist = freelist->getNext();
+		node = new((caddr_t)mem) member(this, object);
 	}
 	else
-		node = (member *)mempager::alloc(sizeof(member));		
-	new((caddr_t)node) member(this, object);
+		node = new(pager) member(this, object);
 	Conditional::signal(false);
 	Unlock();
 	return true;

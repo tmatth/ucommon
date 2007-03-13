@@ -69,18 +69,18 @@ protected:
 	void dealloc(void);
 };	
 
-class __EXPORT PagerPool : private mempager
+class __EXPORT PagerPool 
 {
 private:
-	size_t objsize;
+	mempager *pager;
 	LinkedObject *freelist;
 #if UCOMMON_THREADING > 0
 	pthread_mutex_t mutex;
 #endif
 
 protected:
-	PagerPool(size_t count, size_t objsize);
-	PagerObject *get(void);
+	PagerPool(mempager *pager);
+	PagerObject *get(size_t size);
 
 public:
 	void put(PagerObject *obj);
@@ -114,17 +114,17 @@ public:
 	void clear(const char *id);
 };
 
-template <class T, size_t S>
+template <class T, mempager *P = NULL>
 class pager : private PagerPool
 {
 public:
-	inline pager() : PagerPool(S, sizeof(T)) {};
+	inline pager() : PagerPool(P) {};
 
 	inline ~pager()
 		{mempager::purge();};
 
 	inline T *create(void)
-		{return new(get()) T;};
+		{return new(get(sizeof(T))) T;};
 };
 
 template <class T>

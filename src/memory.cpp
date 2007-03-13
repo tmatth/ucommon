@@ -141,10 +141,9 @@ void PagerObject::dealloc(void)
 	pager->put(this);
 }
 
-PagerPool::PagerPool(size_t items, size_t osize) :
-mempager(items * osize + getOverhead())
+PagerPool::PagerPool(mempager *p) 
 {
-	objsize = osize;
+	pager = p;
 	freelist = NULL;
 #if UCOMMON_THREADING > 0
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -163,7 +162,7 @@ void PagerPool::put(PagerObject *ptr)
 #endif
 }
 
-PagerObject *PagerPool::get(void)
+PagerObject *PagerPool::get(size_t size)
 {
 	PagerObject *ptr;
 #if UCOMMON_THREADING > 0
@@ -173,8 +172,8 @@ PagerObject *PagerPool::get(void)
 	if(ptr) 
 		freelist = ptr->next;
 	else
-		ptr = (PagerObject *)alloc(objsize);
-	memset(ptr, 0, objsize);
+		ptr = new(pager, size - sizeof(PagerObject)) PagerObject;
+	memset(ptr, 0, size);
 	ptr->pager = this;
 	
 #if UCOMMON_THREADING > 0
@@ -238,7 +237,12 @@ size_t keyassoc::minsize(unsigned max, size_t size)
 
 void *operator new(size_t size, mempager *pager)
 {
-	void *mem = pager->alloc(size);
+	void *mem;
+
+	if(pager != NULL)
+		mem = pager->alloc(size);
+	else
+		mem = malloc(size);
 
 	crit(mem != NULL);
 	return mem;
@@ -246,7 +250,12 @@ void *operator new(size_t size, mempager *pager)
 
 void *operator new(size_t size, mempager *pager, size_t overdraft)
 {
-    void *mem = pager->alloc(size + overdraft);
+    void *mem;
+
+	if(pager)
+		mem = pager->alloc(size + overdraft);
+	else
+		mem = malloc(size + overdraft);
 
     crit(mem != NULL);
     return mem;
@@ -254,6 +263,8 @@ void *operator new(size_t size, mempager *pager, size_t overdraft)
 
 void *operator new(size_t size, keyassoc *pager, const char *id)
 {
+	crit(pager != NULL);
+
 	void *mem = pager->get(id);
 	if(mem)
 		return mem;
@@ -280,7 +291,12 @@ void *operator new[](size_t size, keyassoc *pager, const char *id)
 
 void *operator new[](size_t size, mempager *pager)
 {
-    void *mem = pager->alloc(size);
+    void *mem;
+
+	if(pager)
+		mem = pager->alloc(size);
+	else
+		mem = malloc(size);
 
 	crit(mem != NULL);
     return mem;
