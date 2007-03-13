@@ -25,10 +25,10 @@ protected:
 
 	virtual void release(void);
 
+public:
 	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
 
-public:
 	static void purge(LinkedObject *root);
 
 	inline LinkedObject *getNext(void) const
@@ -71,6 +71,10 @@ protected:
 
 	OrderedObject(OrderedIndex *root);
 	OrderedObject();
+
+public:
+	void enlist(OrderedIndex *root);
+	void delist(OrderedIndex *root);
 };
 
 class __EXPORT NamedObject : public OrderedObject
@@ -121,6 +125,7 @@ protected:
 	NamedList(NamedObject **root, const char *id, unsigned max);
 	virtual ~NamedList();
 
+public:
 	void delist(void);
 };		
 
@@ -138,9 +143,10 @@ protected:
 	LinkedList();
 
 	virtual ~LinkedList();
-	void delist(void);
 
 public:
+	void delist(void);
+
 	inline bool isHead(void) const
 		{return root->head == (OrderedObject *)this;};
 

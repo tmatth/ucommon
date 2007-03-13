@@ -15,12 +15,13 @@ private:
 	size_t	pagesize, align;
 	unsigned count;
 
-#pragma pack(1)
 	typedef struct mempage {
 		struct mempage *next;
-		unsigned short used;		
+		union {
+			void *memalign;
+			unsigned used;		
+		};
 	}	page_t;
-#pragma pack()
 
 	page_t *page;
 
@@ -48,7 +49,7 @@ public:
 	inline unsigned getAlloc(void)
 		{return pagesize;};
 
-	void release(void);
+	void purge(void);
 	virtual void dealloc(void *mem);
 	virtual void *alloc(size_t size);
 	char *dup(const char *cp);
@@ -106,7 +107,7 @@ public:
 	~keyassoc();
 
 	inline void purge(void)
-		{release();};
+		{mempager::purge();};
 
 	void *get(const char *id);
 	void set(const char *id, void *data);
@@ -118,6 +119,9 @@ class pager : private PagerPool
 {
 public:
 	inline pager() : PagerPool(S, sizeof(T)) {};
+
+	inline ~pager()
+		{mempager::purge();};
 
 	inline T *create(void)
 		{return new(get()) T;};

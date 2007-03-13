@@ -51,10 +51,10 @@ mempager::mempager(size_t ps)
 
 mempager::~mempager()
 {
-	mempager::release();
+	mempager::purge();
 }
 
-void mempager::release()
+void mempager::purge(void)
 {
 	page_t *next;	
 	while(page) {
@@ -198,7 +198,7 @@ mempager(minsize(max, paging))
 
 keyassoc::~keyassoc()
 {
-	keyassoc::release();
+	mempager::purge();
 }
 
 void *keyassoc::get(const char *id)

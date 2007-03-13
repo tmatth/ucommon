@@ -172,6 +172,7 @@ Conditional::Conditional()
 	crit(pthread_cond_init(&cond, &attr.attr) == 0);
 	crit(pthread_mutex_init(&mutex, NULL) == 0);
 	locker = 0;
+	live = true;
 }
 
 void Conditional::Exlock(void)
@@ -233,8 +234,16 @@ bool Conditional::wait(Timer &timer)
 
 Conditional::~Conditional()
 {
-	pthread_cond_destroy(&cond);
-	pthread_mutex_destroy(&mutex);
+	destroy();
+}
+
+void Conditional::destroy(void)
+{
+	if(live) {
+		pthread_cond_destroy(&cond);
+		pthread_mutex_destroy(&mutex);
+	}
+	live = false;
 }
 
 Mutex::Mutex()
@@ -511,6 +520,219 @@ void Thread::release(void)
 	}	
 }
 
+Queue::member::member(Queue *q, Object *o) :
+OrderedObject(q)
+{
+	o->retain();
+	object = o;
+}
+
+Queue::Queue(unsigned count) :
+OrderedIndex(), Conditional(), mempager(count * sizeof(member) + getOverhead())
+{
+	freelist = NULL;
+	limit = used = 0;
+}
+
+Queue::~Queue()
+{
+	mempager::purge();
+	Conditional::destroy();
+}
+
+bool Queue::remove(Object *o)
+{
+	bool rtn = false;
+	member *node;
+	Exlock();
+	node = static_cast<member*>(head);
+	while(node) {
+		if(node->object == o)
+			break;
+		node = static_cast<member*>(node->getNext());
+	}
+	if(node) {
+		--used;
+		rtn = true;
+		node->object->release();
+		node->delist(this);
+		node->LinkedObject::enlist(&freelist);			
+	}
+	Unlock();
+	return rtn;
+}
+
+Object *Queue::lifo(timeout_t timeout)
+{
+    member *member;
+    Object *obj = NULL;
+    Exlock();
+    if(!Conditional::wait(timeout)) {
+        Unlock();
+        return NULL;
+    }
+    if(tail) {
+        --used;
+        member = static_cast<Queue::member *>(head);
+        obj = member->object;
+		member->delist(this);
+        member->LinkedObject::enlist(&freelist);
+    }
+    Conditional::signal(false);
+    Unlock();
+    return obj;
+}
+
+Object *Queue::fifo(timeout_t timeout)
+{
+	member *member;
+	Object *obj = NULL;
+	Exlock();
+	if(!Conditional::wait(timeout)) {
+		Unlock();
+		return NULL;
+	}
+	if(head) {
+		--used;
+		member = static_cast<Queue::member *>(head);
+		obj = member->object;
+		head = static_cast<Queue::member*>(head->getNext());
+		if(!head)
+			tail = NULL;
+		member->LinkedObject::enlist(&freelist);
+	}
+	Conditional::signal(false);
+	Unlock();
+	return obj;
+}
+
+bool Queue::post(Object *object, timeout_t timeout)
+{
+	member *node;
+	Exlock();
+	while(limit && used == limit) {
+		if(!Conditional::wait(timeout)) {
+			Unlock();
+			return false;	
+		}
+	}
+	++used;
+	if(freelist) {
+		node = static_cast<member *>(freelist);
+		freelist = node->getNext();
+	}
+	else
+		node = (member *)mempager::alloc(sizeof(member));		
+	new((caddr_t)node) member(this, object);
+	Conditional::signal(false);
+	Unlock();
+	return true;
+}
+
+size_t Queue::getCount(void)
+{
+	size_t count;
+	Exlock();
+	count = used;
+	Unlock();
+	return count;
+}
+
+
+Stack::member::member(Stack *S, Object *o) :
+LinkedObject((&S->usedlist))
+{
+	o->retain();
+	object = o;
+}
+
+Stack::Stack(unsigned count) :
+Conditional(), mempager(count * sizeof(member) + getOverhead())
+{
+	freelist = usedlist = NULL;
+	limit = used = 0;
+}
+
+Stack::~Stack()
+{
+	mempager::purge();
+	Conditional::destroy();
+}
+
+bool Stack::remove(Object *o)
+{
+	bool rtn = false;
+	member *node;
+	Exlock();
+	node = static_cast<member*>(usedlist);
+	while(node) {
+		if(node->object == o)
+			break;
+		node = static_cast<member*>(node->getNext());
+	}
+	if(node) {
+		--used;
+		rtn = true;
+		node->object->release();
+		node->delist(&usedlist);
+		node->enlist(&freelist);			
+	}
+	Unlock();
+	return rtn;
+}
+
+Object *Stack::pull(timeout_t timeout)
+{
+    member *member;
+    Object *obj = NULL;
+    Exlock();
+    if(!Conditional::wait(timeout)) {
+        Unlock();
+        return NULL;
+    }
+    if(usedlist) {
+        member = static_cast<Stack::member *>(usedlist);
+        obj = member->object;
+		usedlist = member->getNext();
+        member->enlist(&freelist);
+    }
+    Conditional::signal(false);
+    Unlock();
+    return obj;
+}
+
+bool Stack::push(Object *object, timeout_t timeout)
+{
+	member *node;
+	Exlock();
+	while(limit && used == limit) {
+		if(!Conditional::wait(timeout)) {
+			Unlock();
+			return false;	
+		}
+	}
+	++used;
+	if(freelist) {
+		node = static_cast<Stack::member *>(freelist);
+		freelist = node->getNext();
+	}
+	else
+		node = (member *)mempager::alloc(sizeof(member));		
+	new((caddr_t)node) member(this, object);
+	Conditional::signal(false);
+	Unlock();
+	return true;
+}
+
+size_t Stack::getCount(void)
+{
+	size_t count;
+	Exlock();
+	count = used;
+	Unlock();
+	return count;
+}
+
 Buffer::Buffer(size_t capacity, size_t osize) : Conditional()
 {
 	size = capacity;
@@ -532,6 +754,7 @@ Buffer::~Buffer()
 	if(buf)
 		free(buf);
 	buf = NULL;
+	Conditional::destroy();
 }
 
 size_t Buffer::onWait(void *data)
@@ -607,7 +830,7 @@ size_t Buffer::pull(void *buf, timeout_t timeout)
 size_t Buffer::post(void *buf, timeout_t timeout)
 {
 	size_t rc = 0;
-	Lock();
+	Exlock();
 	while(used == size) {
 		if(!Conditional::wait(timeout)) {
 			Unlock();

@@ -271,7 +271,34 @@ OrderedObject::OrderedObject() : LinkedObject()
 OrderedObject::OrderedObject(OrderedIndex *root) :
 LinkedObject()
 {
-	if(!root->head)
+	if(root)
+		enlist(root);
+}
+
+void OrderedObject::delist(OrderedIndex *root)
+{
+    OrderedObject *prev = NULL, *node = root->head;
+
+    while(node && node != this) {
+        prev = node;
+        node = static_cast<OrderedObject *>(node->next);
+    }
+
+    if(!node)
+        return;
+
+    if(!prev)
+        root->head = static_cast<OrderedObject *>(next);
+    else
+        prev->next = next;
+
+	if(this == root->tail)
+		root->tail = prev;
+}	
+
+void OrderedObject::enlist(OrderedIndex *root)
+{
+	if(root->head == NULL)
 		root->head = this;
 	
 	if(root->tail)

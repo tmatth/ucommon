@@ -251,7 +251,7 @@ keypair *keyconfig::operator[](unsigned idx)
 
 void keyconfig::dealloc(void)
 {
-	mempager::release();
+	mempager::purge();
 	delete this;
 }
 

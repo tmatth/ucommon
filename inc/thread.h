@@ -66,6 +66,10 @@ private:
 	volatile pthread_t locker;
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
+	bool live;
+
+protected:
+	void destroy(void);
 
 public:
 	Conditional();
@@ -264,6 +268,61 @@ public:
 	static unsigned maxPriority(void);
 };
 
+class __EXPORT Queue : protected OrderedIndex, protected Conditional, protected mempager
+{
+private:
+	LinkedObject *freelist;
+	size_t used;
+
+	class __EXPORT member : public OrderedObject
+	{
+	public:
+		member(Queue *q, Object *obj);
+		Object *object;
+	};
+
+protected:
+	size_t limit;
+
+public:
+	Queue(unsigned count);
+	~Queue();
+
+	bool remove(Object *obj);
+	bool post(Object *obj, timeout_t timeout = 0);
+	Object *fifo(timeout_t timeout = 0);
+	Object *lifo(timeout_t timeout = 0);
+	size_t getCount(void);
+};
+
+class __EXPORT Stack : protected Conditional, protected mempager
+{
+private:
+	LinkedObject *freelist, *usedlist;
+	size_t used;
+
+	class __EXPORT member : public LinkedObject
+	{
+	public:
+		member(Stack *s, Object *obj);
+		Object *object;
+	};
+
+	friend class member;
+
+protected:
+	size_t limit;
+
+public:
+	Stack(unsigned count);
+	~Stack();
+
+	bool remove(Object *obj);
+	bool push(Object *obj, timeout_t timeout = 0);
+	Object *pull(timeout_t timeout = 0);
+	size_t getCount(void);
+};
+
 class __EXPORT Buffer : public Conditional
 {
 private:
@@ -339,6 +398,41 @@ private:
 public:
 	auto_cancellation(int type, int mode);
 	~auto_cancellation();
+};
+
+template<class T, size_t S = 32, size_t L = 0>
+class queue : public Queue
+{
+public:
+	inline queue() : Queue(S) {limit = L;};
+
+	inline bool remove(T *obj)
+		{return Queue::remove(obj);};	
+
+	inline bool post(T *obj, timeout_t timeout = 0)
+		{return Queue::post(obj);};
+
+	inline T *fifo(timeout_t timeout = 0)
+		{return static_cast<T *>(Queue::fifo(timeout));};
+
+    inline T *lifo(timeout_t timeout = 0)
+        {return static_cast<T *>(Queue::lifo(timeout));};
+};
+
+template<class T, size_t S = 32, size_t L = 0>
+class stack : public Stack
+{
+public:
+	inline stack() : Stack(S) {limit = L;};
+
+	inline bool remove(T *obj)
+		{return Stack::remove(obj);};	
+
+	inline bool push(T *obj, timeout_t timeout = 0)
+		{return Stack::push(obj);};
+
+	inline T *pull(timeout_t timeout = 0)
+		{return static_cast<T *>(Stack::pull(timeout));};
 };
 
 template<class T>
