@@ -226,7 +226,7 @@ extern "C" void cpr_md5hash(char *out, const char *source, size_t len)
 	unsigned char digest[16];
 	unsigned p = 0;
 
-	assert(out != NULL && source != NULL);
+	assert(out != NULL && source != NULL && len != 0);
 
 	if(!len)
 		len = cpr_strlen(source);
@@ -266,6 +266,7 @@ extern "C" int cpr_uuid(char *uuid)
 extern "C" size_t cpr_urlencodesize(char *src)
 {
 	size_t size = 0;
+
 	while(src && *src) {
 		if(isalnum(*src) ||  strchr("/.-:;, ", *src))
 			++size;
@@ -333,7 +334,9 @@ extern "C" size_t cpr_urldecode(char *dest, size_t limit, const char *src)
 extern "C" size_t xml_encode(char *out, size_t limit, char *src)
 {
 	char *ret = out;
-	assert(src != NULL && limit > 0);
+
+	assert(src != NULL && out != NULL && limit > 0);
+
 	while(src && *src && limit > 6) {
 		switch(*src) {
 		case '<':
@@ -374,7 +377,9 @@ extern "C" size_t xml_encode(char *out, size_t limit, char *src)
 extern "C" size_t xml_decode(char *out, size_t limit, char *src)
 {
 	char *ret = out;
-	assert(src != NULL && limit > 0);
+
+	assert(src != NULL && out != NULL && limit > 0);
+
 	if(*src == '\'' || *src == '\"')
 		++src;
 	while(src && limit-- > 1 && !strchr("<\'\">", *src)) {
@@ -417,6 +422,67 @@ extern "C" size_t cpr_snprintf(char *out, size_t size, const char *fmt, ...)
 
 	va_end(args);
 	return cpr_strlen(out);
+}
+
+static const unsigned char alphabet[65] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+extern "C" size_t b64_decode(caddr_t out, const char *src, size_t count)
+{
+}
+
+extern "C" size_t b64_encode(char *out, caddr_t src, size_t count)
+{
+	unsigned bits;
+	char *dest = out;
+
+	assert(out != NULL && src != NULL && count > 0);
+
+	while(count >= 3) {
+		bits = (((unsigned)src[0])<<16) | (((unsigned)src[1])<<8)
+			| ((unsigned)src[2]);
+		src += 3;
+		count -= 3;
+		*(out++) = alphabet[bits >> 18];
+	    *(out++) = alphabet[(bits >> 12) & 0x3f];
+	    *(out++) = alphabet[(bits >> 6) & 0x3f];
+	    *(out++) = alphabet[bits & 0x3f];
+	}
+	if (count) {
+		bits = ((unsigned)src[0])<<16;
+		*(out++) = alphabet[bits >> 18];
+		if (count == 1) {
+			*(out++) = alphabet[(bits >> 12) & 0x3f];
+	    		*(out++) = '=';
+		}
+		else {
+			bits |= ((unsigned)src[1])<<8;
+			*(out++) = alphabet[(bits >> 12) & 0x3f];
+	    		*(out++) = alphabet[(bits >> 6) & 0x3f];
+		}
+	    	*(out++) = '=';
+	}
+	*out = 0;
+	return out - dest;
+}
+
+extern "C" size_t cpr_b64len(const char *str)
+{
+	unsigned count = cpr_strlen(str);
+	const char *ep = str + count - 1;
+
+	if(!count)
+		return 0;
+
+	count /= 4;
+	count *= 3;
+	if(*ep == '=') {
+		--ep;
+		--count;
+		if(*ep == '=')
+			--count;
+	}
+	return count;
 }
 
 // vim: set ts=4 sw=4:

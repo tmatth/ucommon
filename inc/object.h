@@ -196,6 +196,12 @@ public:
         {P::operator--(); return get();};
 };
 
+inline void retain(Object *obj)
+	{obj->retain();};
+
+inline void release(Object *obj)
+	{obj->release();};
+
 END_NAMESPACE
 
 #endif

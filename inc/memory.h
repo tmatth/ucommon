@@ -66,6 +66,8 @@ protected:
 
 	PagerObject();
 
+	void release(void);
+
 	void dealloc(void);
 };	
 
@@ -123,7 +125,10 @@ public:
 	inline ~pager()
 		{mempager::purge();};
 
-	inline T *create(void)
+	inline T *operator()(void)
+		{return new(get(sizeof(T))) T;};
+
+	inline T *operator*()
 		{return new(get(sizeof(T))) T;};
 };
 

@@ -522,6 +522,15 @@ public:
 		{return static_cast<T*>(object);};
 };
 
+inline void start(Thread *th)
+	{th->start();};
+
+inline void detach(Thread *th)
+	{th->detach();};
+
+inline void cancel(Thread *th)
+	{th->release();};
+
 #define	cancel_immediate()	auto_cancellation \
 	__cancel__(PTHREAD_CANCEL_ASYNCHRONOUS, PTHREAD_CANCEL_ENABLE)
 

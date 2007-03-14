@@ -57,6 +57,18 @@ public:
     void release(void);
 };
 
+inline void lock(Exclusive *ex)
+	{ex->Exlock();};
+
+inline void unlock(Exclusive *ex)
+	{ex->Unlock();};
+
+inline void share(Shared *sh)
+	{sh->Shlock();};
+
+inline void release(Shared *sh)
+	{sh->Unlock();};
+
 #define	__access__name(x)	x##__LINE__
 	
 #define	access_exclusive(x)	auto_exclusive __access__name(_ex_) \

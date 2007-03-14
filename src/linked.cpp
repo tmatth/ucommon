@@ -316,9 +316,17 @@ LinkedList::LinkedList()
 
 LinkedList::LinkedList(OrderedIndex *r)
 {
-	root = r;
+	root = NULL;
 	next = prev = 0;
+	if(r)
+		enlist(r);
+}
 
+void LinkedList::enlist(OrderedIndex *r)
+{
+	if(root)
+		delist();
+	root = r;
 	if(!root->head) {
 		root->head = root->tail = static_cast<OrderedObject *>(this);
 		return;

@@ -15,7 +15,9 @@ extern "C" {
 	__EXPORT size_t cpr_urlencodesize(char *str);
 	__EXPORT size_t cpr_xmldecode(char *out, size_t limit, const char *src);
 	__EXPORT size_t cpr_xmlencode(char *out, size_t limit, const char *src);
-	__EXPORT size_t cpr_xmlencodesize(char *str);
+	__EXPORT size_t cpr_b64decode(caddr_t out, const char *src, size_t count);
+	__EXPORT size_t cpr_b64encode(char *out, caddr_t src, size_t count);
+	__EXPORT size_t cpr_b64len(const char *str);
 	__EXPORT size_t cpr_snprintf(char *buf, size_t size, const char *fmt, ...);
 };
 

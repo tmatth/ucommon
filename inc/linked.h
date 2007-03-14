@@ -146,6 +146,7 @@ protected:
 
 public:
 	void delist(void);
+	void enlist(OrderedIndex *root);
 
 	inline bool isHead(void) const
 		{return root->head == (OrderedObject *)this;};

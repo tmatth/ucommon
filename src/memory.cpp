@@ -141,6 +141,11 @@ void PagerObject::dealloc(void)
 	pager->put(this);
 }
 
+void PagerObject::release(void)
+{
+	CountedObject::release();
+}
+
 PagerPool::PagerPool(mempager *p) 
 {
 	pager = p;
