@@ -527,5 +527,32 @@ extern "C" size_t cpr_b64len(const char *str)
 	return count;
 }
 
+extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
+{
+	char buffer[256];
+	char *ep;
+	int fd;
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
+	ep = buffer + strlen(buffer);
+	if(ep > buffer) {
+		--ep;
+		if(*ep != '\n') {
+			*(++ep) = '\n';
+			*ep = 0;
+		}
+	}
+	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0770);
+	write(fd, buffer, strlen(buffer));
+#ifdef	_POSIX_SYNCHRONIZED_IO	
+	fdatasync(fd);
+#else
+	fsync(fd);
+#endif
+	close(fd);
+	va_end(args);
+}
+
 // vim: set ts=4 sw=4:
 

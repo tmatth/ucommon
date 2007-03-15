@@ -59,12 +59,14 @@ mempager::~mempager()
 
 void mempager::purge(void)
 {
-	page_t *next;	
+	page_t *next;
+	pthread_mutex_lock(&mutex);	
 	while(page) {
 		next = page->next;
 		free(page);
 		page = next;
 	}
+	pthread_mutex_unlock(&mutex);
 	count = 0;
 }
 

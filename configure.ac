@@ -36,7 +36,7 @@ AC_PROG_CXXCPP
 AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
-AM_INIT_AUTOMAKE(ucommon, [$VERSION])
+AM_INIT_AUTOMAKE(libucommon, [$VERSION])
 AM_CONFIG_HEADER(private.h)
 
 LT_MAJOR="`echo $LT_VERSION | sed s/:.*$//`"
@@ -271,7 +271,9 @@ AC_SUBST(UCOMMON_LOADER)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)
+AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile inc/config.h)
+AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile inc/config.h
+libucommon.pc)
 

@@ -1,0 +1,11 @@
+loader=@UCOMMON_LOADER@
+shared=@UCOMMON_SHARED@
+module=@UCOMMON_MODULE@
+libc=@UCOMMON_LIBC@
+
+Name: ucommon
+Description: 
+Version: @VERSION@
+Libs:  -lucommon @UCOMMON_LIBS@ 
+Cflags: @UCOMMON_FLAGS@ 
+ 
