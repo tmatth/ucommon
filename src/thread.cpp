@@ -11,8 +11,6 @@
 #include <errno.h>
 #include <string.h>
 
-#if	UCOMMON_THREADING > 0
-
 using namespace UCOMMON_NAMESPACE;
 
 const size_t Buffer::timeout = ((size_t)(-1));
@@ -621,10 +619,14 @@ bool Queue::post(Object *object, timeout_t timeout)
 	if(freelist) {
 		mem = freelist;
 		freelist = freelist->getNext();
+		Unlock();
 		node = new((caddr_t)mem) member(this, object);
 	}
-	else
+	else {
+		Unlock();
 		node = new(pager) member(this, object);
+	}
+	Lock();
 	Conditional::signal(false);
 	Unlock();
 	return true;
@@ -717,10 +719,14 @@ bool Stack::push(Object *object, timeout_t timeout)
 	if(freelist) {
 		mem = freelist;
 		freelist = freelist->getNext();
+		Unlock();
 		node = new((caddr_t)mem) member(this, object);
 	}
-	else
+	else {
+		Unlock();
 		node = new(pager) member(this, object);
+	}
+	Lock();
 	Conditional::signal(false);
 	Unlock();
 	return true;
@@ -958,5 +964,3 @@ shared_release &shared_release::operator=(SharedPointer &p)
 	object = p.get();
 	return *this;
 }
-
-#endif

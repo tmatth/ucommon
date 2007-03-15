@@ -327,6 +327,8 @@ void LinkedList::enlist(OrderedIndex *r)
 	if(root)
 		delist();
 	root = r;
+	prev = 0;
+	next = 0;
 	if(!root->head) {
 		root->head = root->tail = static_cast<OrderedObject *>(this);
 		return;

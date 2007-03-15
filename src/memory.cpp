@@ -22,6 +22,8 @@ mempager::mempager(size_t ps)
 	size_t paging = 1024;
 #endif
 
+	pthread_mutex_init(&mutex, NULL);
+
 	if(!ps)
 		ps = paging;
 	else if(ps > paging)
@@ -52,6 +54,7 @@ mempager::mempager(size_t ps)
 mempager::~mempager()
 {
 	mempager::purge();
+	pthread_mutex_destroy(&mutex);
 }
 
 void mempager::purge(void)
@@ -88,6 +91,9 @@ use:
 	npage->used = sizeof(page_t);
 	npage->next = page;
 	page = npage;
+	if((size_t)(npage) % sizeof(void *))
+		npage->used += sizeof(void *) - ((size_t)(npage) % sizeof(void 
+*));
 	return npage;
 }
 
@@ -102,6 +108,10 @@ void *mempager::alloc(size_t size)
 
 	crit(size <= (pagesize - sizeof(page_t)));
 
+	while(size % sizeof(void *))
+		++size;
+
+	pthread_mutex_lock(&mutex);
 	while(p) {
 		if(size <= pagesize - p->used)	
 			break;
@@ -112,6 +122,7 @@ void *mempager::alloc(size_t size)
 
 	mem = ((caddr_t)(p)) + p->used;	
 	p->used += size;
+	pthread_mutex_unlock(&mutex);
 	return mem;
 }
 
@@ -150,40 +161,35 @@ PagerPool::PagerPool(mempager *p)
 {
 	pager = p;
 	freelist = NULL;
-#if UCOMMON_THREADING > 0
-	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-	memcpy(&mutex, &lock, sizeof(mutex));
-#endif	
+	pthread_mutex_init(&mutex, NULL);
+}
+
+PagerPool::~PagerPool()
+{
+	pthread_mutex_destroy(&mutex);
 }
 
 void PagerPool::put(PagerObject *ptr)
 {
-#if UCOMMON_THREADING > 0
     pthread_mutex_lock(&mutex);
-#endif
 	ptr->enlist(&freelist);
-#if UCOMMON_THREADING > 0
     pthread_mutex_unlock(&mutex);
-#endif
 }
 
 PagerObject *PagerPool::get(size_t size)
 {
 	PagerObject *ptr;
-#if UCOMMON_THREADING > 0
 	pthread_mutex_lock(&mutex);
-#endif
 	ptr = static_cast<PagerObject *>(freelist);
 	if(ptr) 
 		freelist = ptr->next;
-	else
+
+    pthread_mutex_unlock(&mutex);
+
+	if(!ptr)
 		ptr = new(pager, size - sizeof(PagerObject)) PagerObject;
 	memset(ptr, 0, size);
 	ptr->pager = this;
-	
-#if UCOMMON_THREADING > 0
-    pthread_mutex_unlock(&mutex);
-#endif
 	return ptr;
 }
 

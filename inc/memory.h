@@ -12,7 +12,8 @@ class __EXPORT PagerPool;
 class __EXPORT mempager
 {
 private:
-	size_t	pagesize, align;
+	size_t pagesize, align;
+	pthread_mutex_t mutex;
 	unsigned count;
 
 	typedef struct mempage {
@@ -76,12 +77,12 @@ class __EXPORT PagerPool
 private:
 	mempager *pager;
 	LinkedObject *freelist;
-#if UCOMMON_THREADING > 0
 	pthread_mutex_t mutex;
-#endif
 
 protected:
 	PagerPool(mempager *pager);
+	~PagerPool();
+
 	PagerObject *get(size_t size);
 
 public:

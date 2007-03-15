@@ -98,14 +98,40 @@ const char *keypair::alloc(const char *data)
 	return cpr_strdup(data);
 }
 
+void keypair::section(FILE *fp, char *buf, size_t size)
+{
+	stringbuf<256> input;
+	const char *pos;
+	char *ep;
+
+	for(;;) {
+		*buf = 0;
+		input << fp;
+		if(feof(fp))
+			break;
+		pos = input.skip(" \t\r\n");
+		if(*pos != '[')
+			continue;
+		cpr_strset(buf, size, ++pos);
+		ep = strchr(buf, ']');
+		if(ep) {
+			*ep = 0;
+			break;
+		}
+	}
+}
+
 void keypair::load(FILE *fp, const char *section)
 {
 	stringbuf<256> input;
 	stringbuf<256> value;
 	const char *pos, *eq;
 	unsigned len = cpr_strlen(section);
+	fpos_t fpos;
 
-	rewind(fp);
+	if(len)
+		rewind(fp);
+
 	while(len) {
 		input << fp;
 		if(feof(fp))
@@ -121,14 +147,20 @@ void keypair::load(FILE *fp, const char *section)
 	}
 
 	for(;;) {
+		if(!len)
+			fgetpos(fp, &fpos);
+
 		input << fp;
 		if(feof(fp))
 			return;
 		pos = input.skip("\t\r\n ");
 		if(!pos)
 			continue;
-		if(*pos == '[')	
+		if(*pos == '[')	{
+			if(!len)
+				fsetpos(fp, &fpos);
 			return;
+		}
 		if(!isalpha(*pos))
 			continue;
 		eq = input.chr('=');
@@ -206,12 +238,10 @@ void keypair::set(const char *id, const char *value)
 		create(id, value);
 }		
 
-#if UCOMMON_THREADING > 0
 keyconfig::instance::instance(pointer &p) :
 locked_release(p)
 {
 }
-#endif
 
 keypair *keyconfig::instance::operator[](unsigned idx)
 {

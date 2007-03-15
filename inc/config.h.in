@@ -2,12 +2,10 @@
 #define	_UCOMMON_CONFIG_H_
 
 #define	UCOMMON_VISIBILITY	@UCOMMON_VISIBILITY@
-#define	UCOMMON_THREADING	@UCOMMON_THREADING@
 #define	UCOMMON_NAMESPACE	ucc
 #define	NAMESPACE_UCOMMON	namespace ucc {
 #define	END_NAMESPACE		};
 
-#if UCOMMON_THREADING > 0
 #ifndef	_REENTRANT
 #define _REENTRANT 1
 #endif
@@ -17,7 +15,6 @@
 #endif
 
 #include <pthread.h>
-#endif
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_

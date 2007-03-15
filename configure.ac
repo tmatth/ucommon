@@ -48,7 +48,6 @@ AC_SUBST(LT_MAJOR)
 AC_SUBST(LT_MINOR)
 
 UCOMMON_VISIBILITY="0"
-UCOMMON_THREADING="0"
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 
@@ -114,7 +113,6 @@ PTHREAD_FLAGS=""
 
 AC_CHECK_HEADER(pthread.h, [
 	PTHREAD_FLAGS="-mt -pthread -pthreads"
-	UCOMMON_THREADING="1"
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -D_REENTRANT"
 	AC_CHECK_LIB(pthread,pthread_create,[
 		tlib="pthread"
@@ -135,7 +133,7 @@ AC_CHECK_HEADER(pthread.h, [
 		])
 	fi		
 ],[
-	AC_MSG_WARN("no pthread support; threading disabled")
+	AC_MSG_ERROR("pthread support required")
 ])
 
 socket_lib=""
@@ -256,7 +254,6 @@ rm -f conftest*
 AC_LANG_RESTORE
 
 AC_SUBST(UCOMMON_VISIBILITY)
-AC_SUBST(UCOMMON_THREADING)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)

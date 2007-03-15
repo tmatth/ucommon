@@ -65,8 +65,9 @@ public:
 
 	void set(const char *id, const char *value);
 	const char *get(const char *id);
-	void load(FILE *fp, const char *key);
+	void load(FILE *fp, const char *key = NULL);
 	void load(define *defaults);
+	void section(FILE *fp, char *buf, size_t size);
 
 	inline keydata *begin(void)
 		{return keypairs;};
@@ -78,7 +79,6 @@ public:
 class __EXPORT keyconfig : public CountedObject, protected mempager
 {
 public:
-#if UCOMMON_THREADING > 0
 	typedef	locked_pointer<keyconfig> pointer;
 
 	class __EXPORT instance : public locked_release
@@ -95,24 +95,6 @@ public:
 		const char *operator()(unsigned idx, const char *key);
 		keypair *operator[](unsigned idx);
 	};
-#else
-	typedef keyconfig *pointer;
-
-	class instance : public auto_release
-    {
-    public:
-        inline instance(keyconfig *p) : auto_release(p) {};
-
-        inline keyconfig &operator*()
-            {return *(static_cast<keyconfig *>(object));};
-
-        inline keyconfig *operator->()
-            {return static_cast<keyconfig *>(object);};
-
-        const char *operator()(unsigned idx, const char *key);
-        keypair *operator[](unsigned idx);
-    };
-#endif
 
 private:
 	keypair *keypairs;

@@ -1,8 +1,6 @@
 #ifndef _UCOMMON_THREAD_H_
 #define	_UCOMMON_THREAD_H_
 
-#if UCOMMON_THREADING > 0
-
 #ifndef _UCOMMON_ACCESS_H_
 #include <ucommon/access.h>
 #endif
@@ -545,5 +543,4 @@ END_NAMESPACE
 extern "C" {
 };
 
-#endif
 #endif

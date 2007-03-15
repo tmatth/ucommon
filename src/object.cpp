@@ -4,10 +4,6 @@
 #include <inc/config.h>
 #include <inc/object.h>
 
-#if UCOMMON_THREADING > 0
-#include <pthread.h>
-#endif
-
 using namespace UCOMMON_NAMESPACE;
 
 AutoObject::base_exit AutoObject::ex;
@@ -124,8 +120,6 @@ auto_release &auto_release::operator=(Object *o)
 	return *this;
 }
 
-#if UCOMMON_THREADING > 0
-
 static pthread_key_t exit_key;
 
 extern "C" {
@@ -163,26 +157,6 @@ void AutoObject::base_exit::set(AutoObject *ex)
 {
 	pthread_setspecific(exit_key, ex);
 }
-
-#else
-AutoObject::base_exit::base_exit()
-{
-}
-
-AutoObject::base_exit::~base_exit()
-{
-}
-
-AutoObject *AutoObject::base_exit::get(void)
-{
-	return NULL;
-}
-
-void AutoObject::base_exit::set(AutoObject *ex)
-{
-}
-
-#endif
 
 AutoObject::AutoObject()
 {
@@ -230,7 +204,6 @@ extern "C" {
 		}
 	}
 
-#if UCOMMON_THREADING > 0
 	static void fork_release(void)
 	{
     	while(exit_list) {
@@ -256,8 +229,6 @@ extern "C" {
             obj = obj->next;
         }
     }
-
-#endif
 
 } // c
 
@@ -315,9 +286,7 @@ ExitObject::ExitObject()
 	static bool installed = false;
 
 	if(!installed) {
-#if	UCOMMON_THREADING > 0 && defined(HAVE_PTHREAD_ATFORK)
 		pthread_atfork(&fork_prepare, &fork_retain, &fork_release);
-#endif
 		atexit(&exit_release);
 		installed = true;
 	}
