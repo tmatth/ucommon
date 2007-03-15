@@ -331,7 +331,7 @@ extern "C" size_t cpr_urldecode(char *dest, size_t limit, const char *src)
 	return dest - ret;
 }
 
-extern "C" size_t xml_encode(char *out, size_t limit, char *src)
+extern "C" size_t cpr_xmlencode(char *out, size_t limit, const char *src)
 {
 	char *ret = out;
 
@@ -374,7 +374,7 @@ extern "C" size_t xml_encode(char *out, size_t limit, char *src)
 	return out - ret;
 }
 
-extern "C" size_t xml_decode(char *out, size_t limit, char *src)
+extern "C" size_t cpr_xmldecode(char *out, size_t limit, const char *src)
 {
 	char *ret = out;
 
@@ -427,11 +427,53 @@ extern "C" size_t cpr_snprintf(char *out, size_t size, const char *fmt, ...)
 static const unsigned char alphabet[65] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-extern "C" size_t b64_decode(caddr_t out, const char *src, size_t count)
+extern "C" size_t cpr_b64decode(caddr_t out, const char *src, size_t count)
 {
+	static char *decoder = NULL;
+	int i, bits, c;
+
+	unsigned char *dest = (unsigned char *)out;
+
+	if(!decoder) {
+		decoder = (char *)malloc(256);
+		for (i = 0; i < 256; ++i)
+			decoder[i] = 64;
+		for (i = 0; i < 64 ; ++i)
+			decoder[alphabet[i]] = i;
+	}
+
+	bits = 1;
+
+	while(*src) {
+		c = (unsigned char)(*(src++));
+		if (c == '=') {
+			if (bits & 0x40000) {
+				if (count < 2) break;
+				*(dest++) = (bits >> 10);
+				*(dest++) = (bits >> 2) & 0xff;
+				break;
+			}
+			if (bits & 0x1000 && count)
+				*(dest++) = (bits >> 4);
+			break;
+		}
+		// skip invalid chars
+		if (decoder[c] == 64)
+			continue;
+		bits = (bits << 6) + decoder[c];
+		if (bits & 0x1000000) {
+			if (count < 3) break;
+			*(dest++) = (bits >> 16);
+			*(dest++) = (bits >> 8) & 0xff;
+			*(dest++) = (bits & 0xff);
+		    	bits = 1;
+			count -= 3;
+		}
+	}
+	return (size_t)((caddr_t)dest - out);
 }
 
-extern "C" size_t b64_encode(char *out, caddr_t src, size_t count)
+extern "C" size_t cpr_b64encode(char *out, caddr_t src, size_t count)
 {
 	unsigned bits;
 	char *dest = out;

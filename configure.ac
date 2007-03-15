@@ -50,6 +50,7 @@ AC_SUBST(LT_MINOR)
 UCOMMON_VISIBILITY="0"
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
+UCOMMON_LOADER=""
 
 
 AC_ARG_WITH(libc,
@@ -68,6 +69,18 @@ clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
 AC_CHECK_HEADERS(poll.h sys/poll.h)
+
+AC_CHECK_LIB($clib, dlopen, [
+	UCOMMON_LOADER=""
+],[
+	for lib in dl compat ; do
+		if test -z "$UCOMMON_LOADER" ; then
+			AC_CHECK_LIB($lib, dlopen, [
+				UCOMMON_LOADER="-l"$lib
+			])
+		fi
+	done
+])
 
 AC_CHECK_LIB($clib, stricmp, [
 	AC_DEFINE(HAVE_STRICMP, [1], [string icmp])
@@ -254,6 +267,7 @@ rm -f conftest*
 AC_LANG_RESTORE
 
 AC_SUBST(UCOMMON_VISIBILITY)
+AC_SUBST(UCOMMON_LOADER)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)
