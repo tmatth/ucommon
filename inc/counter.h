@@ -19,7 +19,7 @@ public:
 
 	unsigned get(void);
 
-	inline unsigned max(void)
+	inline unsigned range(void)
 		{return cycle;};
 
 	inline unsigned operator*()

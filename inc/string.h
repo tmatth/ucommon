@@ -101,7 +101,6 @@ public:
 	const char *chr(char ch) const;
 	const char *rchr(char ch) const;
 	strsize_t len(void);
-	strsize_t max(void);
 	char fill(void);
 
 	inline operator const char *() const

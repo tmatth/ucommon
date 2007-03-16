@@ -60,7 +60,7 @@ AC_ARG_WITH(libc,
         UCOMMON_LIBC=-l${clib} ; fi
 ])
 
-AH_TOP([
+AH_BOTTOM([
 #include <inc/export.h>
 #include <inc/config.h>
 ])
@@ -68,7 +68,7 @@ AH_TOP([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(poll.h sys/poll.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h)
 
 AC_CHECK_LIB($clib, dlopen, [
 	UCOMMON_LOADER=""

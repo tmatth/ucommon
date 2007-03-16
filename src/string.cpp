@@ -161,7 +161,7 @@ char string::fill(void)
 	return str->fill;
 }
 
-strsize_t string::max(void)
+strsize_t string::size(void) const
 {
     if(!str)
         return 0;
@@ -543,13 +543,6 @@ strsize_t string::ccount(const char *clist) const
 		return 0;
 
 	return ::cpr_strccount(str->text, clist);
-}
-
-strsize_t string::size(void) const
-{
-	if(!str)
-		return 0;
-	return str->max;
 }
 
 void string::printf(const char *format, ...)

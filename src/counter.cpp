@@ -47,7 +47,7 @@ void *SeqCounter::get(void)
 
 void *SeqCounter::get(unsigned pos)
 {
-	if(pos >= max())
+	if(pos >= range())
 		return NULL;
 
 	return (caddr_t)item + (pos * offset);

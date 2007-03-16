@@ -78,7 +78,7 @@ extern "C" {
 		{FreeLibrary(mem);};
 
 	inline void *cpr_getloadaddr(loader_handle_t mem, const char *sym)
-		{return GetProcAddress(mem, sym);};
+		{return (void *)GetProcAddress(mem, sym);};
 
 #else
 	typedef	void *loader_handle_t;

@@ -14,6 +14,10 @@
 #define	_POSIX_PTHREAD_SEMANTICS
 #endif
 
+#ifdef	HAVE_CONFIG_H
+#undef	HAVE_CONFIG_H
+#endif
+
 #include <pthread.h>
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
@@ -30,21 +34,26 @@
 #define	__LOCAL
 #endif
 
-#ifdef	_MSWINDOWS_
+#ifndef	HAVE_STDINT_H
 typedef	signed __int8 int8_t;
 typedef	unsigned __int8 uint8_t;
 typedef	signed __int16 int16_t;
 typedef unsigned __int16 uint16_t;
 typedef signed __int32 int32_t;
 typedef unsigned __int32 uint32_t;
-typedef singed __int64 int64_t;
+typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
+typedef char *caddr_t;
 
 #else
 
 #include <sys/types.h>
 #include <stdint.h>
 
+#endif
+
+#ifdef	_MSWINDOWS_
+typedef	char *caddr_t;
 #endif
 
 typedef	int32_t rpcint_t;

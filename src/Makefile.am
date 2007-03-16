@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = $(LT_VERSION) -release $(LT_RELEASE)
-AM_CXXFLAGS = $(UCOMMON_FLAGS)
+AM_CXXFLAGS = $(UCOMMON_FLAGS) -I$(top_srcdir)
 CXXLINK = $(LIBTOOL) --tag=CC --mode=link $(CXX) $(AM_CFLAGS) $(CFLAGS) \
     $(AM_LDFLAGS) $(LDFLAGS) -o $@
 

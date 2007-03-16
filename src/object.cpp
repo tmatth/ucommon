@@ -286,7 +286,9 @@ ExitObject::ExitObject()
 	static bool installed = false;
 
 	if(!installed) {
+#ifdef	HAVE_PTHREAD_ATFORK
 		pthread_atfork(&fork_prepare, &fork_retain, &fork_release);
+#endif
 		atexit(&exit_release);
 		installed = true;
 	}
