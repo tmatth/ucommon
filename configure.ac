@@ -68,7 +68,7 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h)
 
 AC_CHECK_LIB($clib, dlopen, [
 	UCOMMON_LOADER=""

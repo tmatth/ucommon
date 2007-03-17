@@ -9,12 +9,14 @@
 #include <ucommon/linked.h>
 #endif
 
+#ifdef	_MSWINDOWS_
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#else
 #include <unistd.h>
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netdb.h>
-
-#ifndef	_MSWINDOWS_
 typedef	int SOCKET;
 #define	INVALID_SOCKET -1
 #endif

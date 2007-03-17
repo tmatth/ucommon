@@ -107,7 +107,7 @@ void Vector::array::add(Object *obj)
 	list[len] = 0;
 }
 
-vectorsize_t Vector::max(void) const
+vectorsize_t Vector::size(void) const
 {
     if(!data)
         return 0;

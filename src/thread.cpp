@@ -61,11 +61,19 @@ void Event::reset(void)
 
 bool Event::wait(Timer &timer)
 {
+	struct timespec ts;
+#if _POSIX_TIMERS > 0
+	memcpy(&ts, &timer.timer, sizeof(timer));
+#else
+	ts.tv_sec = timer.timer.tv_sec;
+	ts.tv_nsec = timer.timer.tv_usec * 1000l;
+#endif
+
 	pthread_mutex_lock(&mutex);
 	int rc = 0;
 	unsigned last = count;
 	while(!signalled && count == last && rc != ETIMEDOUT)
-		rc = pthread_cond_timedwait(&cond, &mutex, &timer.timer);
+		rc = pthread_cond_timedwait(&cond, &mutex, &ts);
 	pthread_mutex_unlock(&mutex);
 	if(rc == ETIMEDOUT)
 		return false;
@@ -105,13 +113,21 @@ Semaphore::~Semaphore()
 
 bool Semaphore::wait(Timer &timer)
 {
+	struct timespec ts;
 	int rtn = 0;
 	bool result = true;
 	pthread_mutex_lock(&mutex);
+
+#if _POSIX_TIMERS > 0
+	memcpy(&ts, &timer.timer, sizeof(ts));
+#else
+	ts.tv_sec = timer.timer.tv_sec;
+	ts.tv_nsec = timer.timer.tv_usec * 1000l;
+#endif
 	if(!count) {
 		++waits;
 		while(!count && rtn != ETIMEDOUT)
-			pthread_cond_timedwait(&cond, &mutex, &timer.timer);
+			pthread_cond_timedwait(&cond, &mutex, &ts);
 		--waits;
 	}
 	if(rtn == ETIMEDOUT)
@@ -158,10 +174,12 @@ void Semaphore::Unlock(void)
 Conditional::attribute::attribute()
 {
 	pthread_condattr_init(&attr);
+#if _POSIX_TIMERS > 0
 #ifdef	_POSIX_MONOTONIC_CLOCK
 	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
 #else
 	pthread_condattr_setclock(&attr, CLOCK_REALTIME);
+#endif
 #endif
 }
 
@@ -169,19 +187,22 @@ Conditional::Conditional()
 {
 	crit(pthread_cond_init(&cond, &attr.attr) == 0);
 	crit(pthread_mutex_init(&mutex, NULL) == 0);
-	locker = 0;
+	memset(&locker, 0, sizeof(locker));
 	live = true;
+	locked = false;
 }
 
 void Conditional::Exlock(void)
 {
 	pthread_mutex_lock(&mutex);
 	locker = pthread_self();
+	locked = true;
 }
 
 void Conditional::Unlock(void)
 {
-	locker = 0;
+	locked = false;
+	memset(&locker, 0, sizeof(locker));
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -202,26 +223,34 @@ bool Conditional::wait(timeout_t timeout)
 	}
 
 	pthread_t self = pthread_self();
-	if(!locker || !pthread_equal(locker, self))
+	if(!locked || !pthread_equal(locker, self))
 		pthread_mutex_lock(&mutex);
 
 	pthread_cond_wait(&cond, &mutex);
 
-	if(!locker || !pthread_equal(locker, self))
+	if(!locked || !pthread_equal(locker, self))
 		pthread_mutex_unlock(&mutex);
 	return true;
 }		
 
 bool Conditional::wait(Timer &timer)
 {
+	struct timespec ts;
 	int rtn;
+
+#if _POSIX_TIMERS > 0
+	memcpy(&ts, &timer.timer, sizeof(ts));
+#else
+	ts.tv_sec = timer.timer.tv_sec;
+	ts.tv_nsec = timer.timer.tv_usec * 1000l;
+#endif
 	pthread_t self = pthread_self();
-	if(!locker || !pthread_equal(locker, self))
+	if(!locked || !pthread_equal(locker, self))
 		pthread_mutex_lock(&mutex);
 
-	rtn = pthread_cond_timedwait(&cond, &mutex, &timer.timer);
+	rtn = pthread_cond_timedwait(&cond, &mutex, &ts);
 
-	if(!locker || !pthread_equal(locker, self))
+	if(!locked || !pthread_equal(locker, self))
 		pthread_mutex_unlock(&mutex);
 
 	if(rtn == ETIMEDOUT)
@@ -494,10 +523,10 @@ void Thread::release(void)
 {
 	pthread_t self = pthread_self();
 
-	if(tid != 0 && pthread_equal(tid, self)) {
+	if(running && pthread_equal(tid, self)) {
 		running = false;
 		if(detached) {
-			tid = 0;
+			memset(&tid, 0, sizeof(tid));
 			delete this;
 		}
 		else {
@@ -507,13 +536,13 @@ void Thread::release(void)
 		pthread_exit(NULL);
 	}
 
-	if(tid != 0 && !detached) {
+	if(!detached) {
 		suspend();
 		if(running)
 			pthread_cancel(tid);
 		if(!pthread_join(tid, NULL)) {
 			running = false;
-			tid = 0;
+			memset(&tid, 0, sizeof(tid));
 		}
 	}	
 }

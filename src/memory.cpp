@@ -3,7 +3,6 @@
 #include <inc/object.h>
 #include <inc/linked.h>
 #include <inc/memory.h>
-#include <sys/mman.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
@@ -315,47 +314,3 @@ void *operator new[](size_t size, mempager *pager)
     return mem;
 }
 
-extern "C" void *cpr_mapalloc(size_t size)
-{
-	caddr_t mem;
-	size_t *base;
-
-	if(!size)
-		++size;
-
-	mem = (caddr_t)mmap((void *)0, size + sizeof(size_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-	crit(mem != NULL);
-	base = (size_t *)mem;
-	*base = size;
-	return (mem + sizeof(size_t));
-}
-
-extern "C" void cpr_mapfree(void *ptr)
-{
-	size_t *base = (size_t *)ptr;
-
-	assert(ptr != NULL);
-	--base;
-	munmap(base, *base);
-}
-
-extern "C" void *cpr_maprealloc(void *ptr, size_t size)
-{
-	void *mem;
-	size_t osize;
-	size_t *base = (size_t *)ptr;
-	assert(ptr != NULL);
-	osize = *(--base);
-
-	if(osize > size)
-		osize = size;
-
-	if(size > 0) {
-		mem = cpr_mapalloc(size);
-		crit(mem != NULL);
-		memcpy(mem, ptr, osize);
-		return mem;
-	}
-	cpr_mapfree(ptr);
-	return NULL;
-}

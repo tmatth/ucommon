@@ -22,6 +22,7 @@
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_
+#include <windows.h>
 #ifndef	__EXPORT
 #define	__EXPORT	__declspec(dllimport)
 #endif

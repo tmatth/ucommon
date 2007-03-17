@@ -287,6 +287,9 @@ void keyconfig::dealloc(void)
 
 void ucc::suspend(timeout_t timeout)
 {
+#ifdef	_MSWINDOWS_
+	SleepEx(timeout, FALSE);
+#else
 	timespec ts;
 	ts.tv_sec = timeout / 1000l;
 	ts.tv_nsec = (timeout % 1000l) * 1000000l;
@@ -294,6 +297,7 @@ void ucc::suspend(timeout_t timeout)
 	pthread_delay(&ts);
 #else
 	nanosleep(&ts, NULL);
+#endif
 #endif
 }
 

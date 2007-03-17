@@ -5,10 +5,23 @@
 #include <inc/timers.h>
 #include <inc/string.h>
 #include <inc/misc.h>
-#include <endian.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdarg.h>
+
+#if HAVE_ENDIAN_H
+#include <endian.h>
+#else
+#ifndef __LITTLE_ENDIAN
+#define __LITTLE_ENDIAN 1234
+#define __BIG_ENDIAN 4321
+#endif
+
+#ifndef __BYTE_ORDER
+#define __BYTE_ORDER 1234
+#endif
+
+#endif
 
 struct MD5Context {
 	uint32_t buf[4];
@@ -545,10 +558,12 @@ extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
 	}
 	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0770);
 	write(fd, buffer, strlen(buffer));
+#ifndef _MSWINDOWS_
 #ifdef	_POSIX_SYNCHRONIZED_IO	
 	fdatasync(fd);
 #else
 	fsync(fd);
+#endif
 #endif
 	close(fd);
 	va_end(args);

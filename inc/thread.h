@@ -61,7 +61,8 @@ private:
 	};
 	static attribute attr;
 
-	volatile pthread_t locker;
+	bool locked;
+	pthread_t locker;
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
 	bool live;

@@ -48,7 +48,7 @@ public:
 	virtual ~Vector();
 
 	vectorsize_t len(void) const;
-	vectorsize_t max(void) const;
+	vectorsize_t size(void) const;
 
 	Object *get(int index) const;
 	vectorsize_t get(void **mem, vectorsize_t max) const;

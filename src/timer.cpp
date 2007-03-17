@@ -34,6 +34,44 @@ static void adj(struct timeval *ts)
 }
 #endif
 
+#ifdef	WIN32
+#ifdef	_WIN32_WCE
+static int gettimeofday(struct timeval *tv_,  void *tz_)
+{
+	// We could use _ftime(), but it is not available on WinCE.
+	// (WinCE also lacks time.h)
+	// Note also that the average error of _ftime is around 20 ms :)
+	DWORD ms = GetTickCount();
+	tv_->tv_sec = ms / 1000;
+	tv_->tv_usec = ms * 1000;
+	return 0;
+}
+#else
+#ifdef	HAVE_SYS_TIMEB_H
+#include <sys/timeb.h>
+#endif
+
+static int gettimeofday(struct timeval *tv_, void *tz_)
+{
+#if defined(_MSC_VER) && _MSC_VER >= 1300 
+	struct __timeb64 tb;
+	_ftime64(&tb);
+#else
+# ifndef __BORLANDC__
+	struct _timeb tb;
+	_ftime(&tb);
+# else
+	struct timeb tb;
+	ftime(&tb);
+# endif
+#endif
+	tv_->tv_sec = (long)tb.time;
+	tv_->tv_usec = tb.millitm * 1000;
+	return 0;
+}
+#endif
+#endif
+
 const timeout_t Timer::inf = ((timeout_t)(-1));
 const time_t Timer::reset = ((time_t)0);
 
@@ -254,6 +292,8 @@ void Timer::sync(Timer &t)
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t.timer, NULL);
 #elif _POSIX_TIMERS > 0
 	clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &t.timer, NULL);
+#elif defined(_MSWINDOWS_)
+	SleepEx(t.get(), FALSE);
 #else
 	usleep(t.get());
 #endif

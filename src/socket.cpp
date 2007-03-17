@@ -1,8 +1,12 @@
+#define	_WIN32_WINNT 0x0501
+
 #include <private.h>
+#ifndef	_MSWINDOWS_
 #include <net/if.h>
 #include <sys/un.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
+#endif
 #include <fcntl.h>
 #include <inc/config.h>
 #include <inc/object.h>
@@ -20,6 +24,10 @@
 
 #if defined(HAVE_POLL) && defined(POLLRDNORM)
 #define	USE_POLL
+#endif
+
+#ifndef MSG_DONTWAIT
+#define MSG_DONTWAIT 0
 #endif
 
 #ifndef	MSG_NOSIGNAL
@@ -134,7 +142,7 @@ unsigned cidr::getMask(void) const
 	}
 }
 
-bool cidr::allow(int so, const cidr *accept, const cidr *reject)
+bool cidr::allow(SOCKET so, const cidr *accept, const cidr *reject)
 {
 	struct sockaddr_storage addr;
 	socklen_t slen = sizeof(addr);
@@ -302,6 +310,12 @@ void cidr::set(const char *cp)
 	char cbuf[128];
 	char *ep;
 	unsigned dots = 0;
+#ifdef	_MSWINDOWS_
+	struct sockaddr saddr;
+	int slen;
+	struct sockaddr_in6 *paddr;
+	int ok;
+#endif
 
 	if(strchr(cp, ':'))
 		family = AF_INET6;
@@ -327,7 +341,7 @@ void cidr::set(const char *cp)
 			cpr_stradd(cbuf, sizeof(cbuf), ".0");
 
 #ifdef	_MSWINDOWS_
-		addr = inet_addr(cbuf);
+		DWORD addr = (DWORD)inet_addr(cbuf);
 		memcpy(&network.ipv4, &addr, sizeof(network.ipv4));
 #else
 		inet_aton(cbuf, &network.ipv4);
@@ -341,7 +355,15 @@ void cidr::set(const char *cp)
 		ep = strchr(cp, '/');
 		if(ep)
 			*ep = 0;
+#ifdef	_MSWINDOWS_
+		struct sockaddr saddr;
+    	slen = sizeof(saddr);
+    	paddr = (struct sockaddr_in6 *)&saddr;
+    	ok = WSAStringToAddress((LPSTR)cbuf, AF_INET6, NULL, &saddr, &slen);
+    	network.ipv6 = paddr->sin6_addr;
+#else
 		inet_pton(AF_INET6, cbuf, &network.ipv6);
+#endif
 		bitmask((bit_t *)&network.ipv6, (bit_t *)&netmask.ipv6, sizeof(network.ipv6));
 	default:
 		break;
@@ -354,7 +376,7 @@ Socket::Socket(const Socket &s)
 	HANDLE pidH = GetCurrentProcess();
 	HANDLE dupH;
 
-	if(DuplicateHandle(pidH, reinterpret_cast<HANDLE>(s.so), pidH, dupH, 0, FALSE, DUPLICATE_SAME_ACCESS))
+	if(DuplicateHandle(pidH, reinterpret_cast<HANDLE>(s.so), pidH, &dupH, 0, FALSE, DUPLICATE_SAME_ACCESS))
 		so = reinterpret_cast<SOCKET>(dupH);
 	else
 		so = INVALID_SOCKET;
@@ -415,7 +437,7 @@ Socket &Socket::operator=(SOCKET s)
 
 size_t Socket::peek(void *data, size_t len) const
 {
-	ssize_t rtn = ::recv(so, data, 1, MSG_DONTWAIT | MSG_PEEK);
+	ssize_t rtn = ::recv(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK);
 	if(rtn < 1)
 		return 0;
 	return (size_t)rtn;
@@ -424,7 +446,7 @@ size_t Socket::peek(void *data, size_t len) const
 ssize_t Socket::get(void *data, size_t len, sockaddr *from)
 {
 	socklen_t slen = 0;
-	return ::recvfrom(so, data, len, 0, from, &slen);
+	return ::recvfrom(so, (caddr_t)data, len, 0, from, &slen);
 }
 
 ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
@@ -433,7 +455,7 @@ ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
 	if(dest)
 		slen = ::cpr_getaddrlen(dest);
 	
-	return ::sendto(so, data, len, MSG_NOSIGNAL, dest, slen);
+	return ::sendto(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
 }
 
 ssize_t Socket::puts(const char *str)
@@ -473,7 +495,7 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 				break;
 			}
 		}
-		nstat = ::recv(so, data, c, 0);
+		nstat = ::recv(so, (caddr_t)data, c, 0);
 		if(nstat < 0)
 			break;
 			
@@ -602,7 +624,7 @@ bool Socket::isConnected(void) const
 #ifdef _MSWINDOWS_
 unsigned Socket::getPending(void) const
 {
-	long opt;
+	u_long opt;
 	if(so == INVALID_SOCKET)
 		return 0;
 
@@ -765,6 +787,10 @@ SOCKET ListenSocket::accept(struct sockaddr *addr)
 		return ::accept(so, NULL, NULL);
 }
 
+#ifdef	_MSWINDOWS_
+#undef	AF_UNIX
+#endif
+
 #ifdef	AF_UNIX
 
 static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
@@ -803,7 +829,7 @@ extern "C" struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *hint)
 		return NULL;
 	hint->ai_family = sa->sa_family;
 	slen = sizeof(hint->ai_socktype);
-	getsockopt(so, SOL_SOCKET, SO_TYPE, &hint->ai_socktype, &slen);
+	getsockopt(so, SOL_SOCKET, SO_TYPE, (caddr_t)&hint->ai_socktype, &slen);
 	return hint;
 }
 
@@ -874,7 +900,7 @@ extern "C" int cpr_bindaddr(SOCKET so, const char *host, const char *svc)
 
 	struct addrinfo hint, *res = NULL;
 
-    setsockopt(so, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (caddr_t)&reuse, sizeof(reuse));
 
 #ifdef AF_UNIX
 	if(strchr(host, '/')) {
@@ -1034,7 +1060,7 @@ extern "C" int cpr_disconnect(SOCKET so)
 extern "C" void cpr_closesocket(SOCKET so)
 {
 #ifdef	_MSWINDOWS_
-	if(so != SOCKET_INVALID)
+	if(so != INVALID_SOCKET)
 		closesocket(so);
 #else
 	if(so > -1)

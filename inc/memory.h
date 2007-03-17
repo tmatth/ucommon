@@ -161,10 +161,4 @@ void *operator new(size_t size, ucc::mempager *pager, size_t overdraft);
 void *operator new(size_t size, ucc::keyassoc *pager, const char *id);
 void *operator new[](size_t size, ucc::keyassoc *pager, const char *id);
 
-extern "C" {
-	void *cpr_mapalloc(size_t size);
-	void cpr_mapfree(void *ptr);
-	void *cpr_maprealloc(void *ptr, size_t size);
-};
-
 #endif
