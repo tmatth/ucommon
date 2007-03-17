@@ -523,7 +523,7 @@ void Thread::release(void)
 {
 	pthread_t self = pthread_self();
 
-	if(running && pthread_equal(tid, self)) {
+	if(pthread_equal(tid, self)) {
 		running = false;
 		if(detached) {
 			memset(&tid, 0, sizeof(tid));
