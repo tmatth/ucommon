@@ -1,5 +1,3 @@
-#define	_WIN32_WINNT 0x0501
-
 #include <private.h>
 #ifndef	_MSWINDOWS_
 #include <net/if.h>
