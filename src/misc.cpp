@@ -540,6 +540,32 @@ extern "C" size_t cpr_b64len(const char *str)
 	return count;
 }
 
+#ifdef	_MSWINDOWS_
+extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
+{
+	char buffer[256];
+	char *ep;
+	FILE *fp;
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
+	ep = buffer + strlen(buffer);
+    if(ep > buffer) {
+        --ep;
+        if(*ep != '\n') {
+            *(++ep) = '\n';
+            *ep = 0;
+        }
+    }
+	fp = fopen(path, "a+");
+	assert(fp != NULL);
+	if(!fp)
+		return; 
+	fprintf(fp, "%s\n", buffer);
+	fclose(fp);
+}
+
+#else
 extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
 {
 	char buffer[256];
@@ -557,17 +583,20 @@ extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
 		}
 	}
 	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0770);
+	assert(fd > -1);
+	if(fd < 0)
+		return;
+
 	write(fd, buffer, strlen(buffer));
-#ifndef _MSWINDOWS_
 #ifdef	_POSIX_SYNCHRONIZED_IO	
 	fdatasync(fd);
 #else
 	fsync(fd);
 #endif
-#endif
 	close(fd);
 	va_end(args);
 }
+#endif
 
 // vim: set ts=4 sw=4:
 

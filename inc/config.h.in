@@ -44,7 +44,7 @@
 
 #include <pthread.h>
 
-#ifndef	HAVE_STDINT_H
+#ifdef _MSC_VER
 typedef	signed __int8 int8_t;
 typedef	unsigned __int8 uint8_t;
 typedef	signed __int16 int16_t;
@@ -60,10 +60,10 @@ typedef char *caddr_t;
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifdef	_MSWINDOWS_
+typedef char *caddr_t;
 #endif
 
-#ifdef	_MSWINDOWS_
-typedef	char *caddr_t;
 #endif
 
 typedef	int32_t rpcint_t;

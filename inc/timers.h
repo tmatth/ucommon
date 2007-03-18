@@ -5,8 +5,11 @@
 #include <ucommon/linked.h>
 #endif
 
+#ifndef _MSWINDOWS_
 #include <unistd.h>
 #include <sys/time.h>
+#endif
+
 #include <time.h>
 
 typedef unsigned long timeout_t;

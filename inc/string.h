@@ -112,7 +112,7 @@ public:
 	const char *operator[](int offset) const;
 	operator strsize_t() const;
 	bool operator!() const;
-	string &operator<<(::DIR *dp);
+	string &operator<<(::DIR *dir);
 	string &operator<<(::FILE *fp);
 	string &operator>>(::FILE *fp);
 	string &operator^=(const string &s);
