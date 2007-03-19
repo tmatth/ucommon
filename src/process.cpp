@@ -407,29 +407,29 @@ extern "C" int cpr_spawn(const char *fn, char **args, int mode)
 
 extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov)
 {
-	int stdin[2], stdout[2];
+	int in[2], out[2];
 	if(iov) {
-		crit(pipe(stdin) == 0);
-		crit(pipe(stdout) == 0);
+		crit(pipe(in) == 0);
+		crit(pipe(out) == 0);
 	}
 	pid_t pid = fork();
 	if(pid < 0 && iov) {
-		close(stdin[0]);
-		close(stdin[1]);
-		close(stdout[0]);
-		close(stdout[1]);
+		close(in[0]);
+		close(in[1]);
+		close(out[0]);
+		close(out[1]);
 		return pid;
 	}
 	if(pid && iov) {
-		iov[0] = stdout[0];
-		close(stdout[1]);
-		iov[1] = stdin[1];
-		close(stdin[0]);
+		iov[0] = out[0];
+		close(out[1]);
+		iov[1] = in[1];
+		close(in[0]);
 	}
 	if(pid)
 		return pid;
-	dup2(stdin[0], 0);
-	dup2(stdout[1], 1);
+	dup2(in[0], 0);
+	dup2(out[1], 1);
 	cpr_closeall();
 	execvp(fn, args);
 	exit(-1);
