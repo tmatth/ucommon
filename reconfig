@@ -27,6 +27,12 @@ for lt in glibtoolize libtoolize15 libtoolize14 libtoolize13 ; do
 done
 $libtoolize --copy --force
 
+AUTOMAKE_FLAGS=""
+case $libtoolize in
+*glibtoolize)
+	AUTOMAKE_FLAGS="-i"
+	;;
+esac
 
 ACLOCALDIRS=""
 if test -d m4 ; then
@@ -74,7 +80,7 @@ else
         autoheader${AUTOCONF_SUFFIX}
 fi
 
-automake${AUTOMAKE_SUFFIX} --add-missing --copy
+automake${AUTOMAKE_SUFFIX} --add-missing --copy ${AUTOMAKE_FLAGS}
 
 if test -f /usr/bin/autoconf-$ver ; then
 	/usr/bin/autoconf-$ver

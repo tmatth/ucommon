@@ -199,10 +199,8 @@ for flag in $CXXFLAGS $CFLAGS; do
 		VISIBLE_FLAGS=""
 		UCOMMON_FLAGS="$UCOMMON_FLAGS $flags"
 		;;
-	-*)
-		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
-		;;
 	*)
+		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
 		;;
 	esac
 done
