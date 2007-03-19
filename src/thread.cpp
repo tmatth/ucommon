@@ -1,13 +1,6 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/access.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/timers.h>
-#include <inc/memory.h>
-#include <inc/thread.h>
-#include <inc/file.h>
-#include <inc/process.h>
+#include <ucommon/thread.h>
+#include <ucommon/process.h>
 #include <errno.h>
 #include <string.h>
 
@@ -293,6 +286,8 @@ void Mutex::Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
+#ifdef PTHREAD_BARRIER_SERIAL_THREAD
+
 Spinlock::Spinlock()
 {
 	crit(pthread_spin_init(&spin, 0) == 0);
@@ -335,6 +330,8 @@ void Barrier::wait(void)
 {
 	pthread_barrier_wait(&barrier);
 }
+
+#endif
 
 LockedPointer::LockedPointer()
 {

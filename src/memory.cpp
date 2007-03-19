@@ -1,8 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/memory.h>
+#include <ucommon/memory.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>

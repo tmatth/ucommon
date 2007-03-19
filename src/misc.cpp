@@ -1,10 +1,6 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/timers.h>
-#include <inc/string.h>
-#include <inc/misc.h>
+#include <ucommon/misc.h>
+#include <ucommon/string.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdarg.h>

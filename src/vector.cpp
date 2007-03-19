@@ -1,7 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/vector.h>
+#include <ucommon/vector.h>
 #include <string.h>
 #include <stdarg.h>
 

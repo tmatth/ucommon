@@ -1,6 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/access.h>
+#include <ucommon/access.h>
 
 using namespace UCOMMON_NAMESPACE;
 

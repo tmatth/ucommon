@@ -1,14 +1,6 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/access.h>
-#include <inc/timers.h>
-#include <inc/memory.h>
-#include <inc/string.h>
-#include <inc/thread.h>
-#include <inc/file.h>
-#include <inc/process.h>
+#include <ucommon/process.h>
+#include <ucommon/string.h>
 
 #if defined(HAVE_SIGACTION) && defined(HAVE_BSD_SIGNAL_H)
 #undef	HAVE_BSD_SIGNAL_H

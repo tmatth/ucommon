@@ -1,7 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/file.h>
+#include <ucommon/file.h>
 #include <stdlib.h>
 #include <unistd.h>
 

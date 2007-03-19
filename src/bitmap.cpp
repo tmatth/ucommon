@@ -1,6 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/bitmap.h>
+#include <ucommon/bitmap.h>
 #include <stdlib.h>
 #include <unistd.h>
 

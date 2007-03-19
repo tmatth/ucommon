@@ -1,4 +1,6 @@
 #include <private.h>
+#include <ucommon/socket.h>
+#include <ucommon/string.h>
 #ifndef	_MSWINDOWS_
 #include <net/if.h>
 #include <sys/un.h>
@@ -6,13 +8,6 @@
 #include <arpa/inet.h>
 #endif
 #include <fcntl.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/timers.h>
-#include <inc/linked.h>
-#include <inc/string.h>
-#include <inc/socket.h>
 
 #if defined(HAVE_POLL_H)
 #include <poll.h>

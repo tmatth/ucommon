@@ -1,7 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
+#include <ucommon/linked.h>
 #include <string.h>
 
 using namespace UCOMMON_NAMESPACE;

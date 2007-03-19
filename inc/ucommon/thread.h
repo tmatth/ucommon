@@ -9,6 +9,10 @@
 #include <ucommon/timers.h>
 #endif
 
+#ifndef _UCOMMON_MEMORY_H_
+#include <ucommon/memory.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 #ifdef	PTHREAD_BARRIER_SERIAL_THREAD

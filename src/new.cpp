@@ -1,5 +1,5 @@
 #include <private.h>
-#include <inc/config.h>
+#include <ucommon/config.h>
 #include <stdlib.h>
 
 void *operator new(size_t size, caddr_t addr, size_t max)

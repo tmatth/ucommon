@@ -62,8 +62,7 @@ AC_ARG_WITH(libc,
 ])
 
 AH_BOTTOM([
-#include <inc/export.h>
-#include <inc/config.h>
+#include <ucommon/export.h>
 ])
 
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
@@ -120,7 +119,7 @@ if test "$ac_cv_libc_sigwait2" = "yes" ; then
     AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
 fi
 
-AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h)
+AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h mach/clock.h)
 
 
 PTHREAD_FLAGS=""
@@ -274,5 +273,6 @@ AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile libucommon.pc)
+AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile 
+inc/ucommon/Makefile libucommon.pc)
 

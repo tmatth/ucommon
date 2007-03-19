@@ -1,10 +1,11 @@
 #include <private.h>
-#include <inc/config.h>
-#include <inc/object.h>
-#include <inc/linked.h>
-#include <inc/timers.h>
+#include <ucommon/timers.h>
 
 using namespace UCOMMON_NAMESPACE;
+
+#if _POSIX_TIMERS > 0 && defined(HAVE_MACH_CLOCK_H) && !defined(HAVE_CLOCK_GETTIME)
+
+#endif
 
 static time_t difftime(time_t ref)
 {
@@ -132,7 +133,7 @@ void Timer::release(void)
 
 void Timer::set(void)
 {
-#ifdef  _POSIX_MONOTONIC_CLOCK
+#if _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
     clock_gettime(CLOCK_MONOTONIC, &timer);
 #elif _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, &timer);
@@ -219,7 +220,7 @@ bool Timer::operator!()
 
 void Timer::operator=(timeout_t to)
 {
-#ifdef	_POSIX_MONOTONIC_CLOCK
+#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
 	clock_gettime(CLOCK_MONOTONIC, &timer);
 #elif _POSIX_TIMERS > 0
 	clock_gettime(CLOCK_REALTIME, &timer);
@@ -273,7 +274,7 @@ void Timer::operator-=(time_t abs)
 
 void Timer::operator=(time_t abs)
 {
-#ifdef	_POSIX_MONOTONIC_CLOCK
+#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
 	clock_gettime(CLOCK_MONOTONIC, &timer);
 #elif _POSIX_TIMERS > 0
 	clock_gettime(CLOCK_REALTIME, &timer);
@@ -288,7 +289,7 @@ void Timer::operator=(time_t abs)
 
 void Timer::sync(Timer &t)
 {
-#ifdef _POSIX_MONOTONIC_CLOCK
+#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t.timer, NULL);
 #elif _POSIX_TIMERS > 0
 	clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &t.timer, NULL);

@@ -17,6 +17,10 @@
 #include <ucommon/file.h>
 #endif
 
+#ifndef _UCOMMON_THREAD_H_
+#include <ucommon/thread.h>
+#endif
+
 typedef	RETSIGTYPE (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON

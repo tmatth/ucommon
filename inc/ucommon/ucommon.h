@@ -11,6 +11,5 @@
 #include <ucommon/file.h>
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
-#include <ucommon/buffer.h>
 #include <ucommon/process.h>
 #include <ucommon/misc.h>
