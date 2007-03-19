@@ -16,15 +16,15 @@ if test -z "$*" ; then
 fi
 
 if test ! -z "$cfg_options" ; then
-        echo "using ~/.configure defaults...$cfg_options"
-        case "$SHELL" in
-        */bash*)
-                exec $SHELL $0 $cfg_options
-                exit -1        
-                ;;
-        esac
-        exec $0 $cfg_options
-        exit -1
+    echo "using ~/.configure defaults...$cfg_options"
+    case "$SHELL" in
+    */bash*)
+        exec $SHELL $0 $cfg_options
+        exit -1        
+		;;
+    esac
+    exec $0 $cfg_options
+	exit -1
 fi
 
 
@@ -43,6 +43,7 @@ LT_MAJOR="`echo $LT_VERSION | sed s/:.*$//`"
 LT_MINOR="`echo $LT_VERSION | sed s/.*://`"
 LT_SUBVER="$LT_MAJOR.$LT_MINOR"
 AC_SUBST(LT_RELEASE)
+AC_SUBST(LT_VERSION)
 AC_SUBST(LT_SUBVER)
 AC_SUBST(LT_MAJOR)
 AC_SUBST(LT_MINOR)
@@ -256,10 +257,11 @@ done
 AC_MSG_CHECKING([whether ${CXX} supports visibility])
 echo 'void f(){}' >conftest.cpp
 if test -z "`${CXX} -fvisibility=hidden -c conftest.cpp 2>&1`"; then
-	UCOMMON_FLAGS="$UCOMMON_FLAGS -fvisibility=hidden"
+	UCOMMON_FLAGS="$UCOMMON_FLAGS -fvisibility=hidden -DUCOMMON_VISIBILITY=1"
     AC_MSG_RESULT(yes)
 	UCOMMON_VISIBILITY="1"
 else
+	UCOMMON_FLAGS="$UCOMMON_FLAGS -DUCOMMON_VISIBILITY=0"
     AC_MSG_RESULT(no)
 fi
 rm -f conftest*
@@ -274,6 +276,5 @@ AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile inc/config.h
-libucommon.pc)
+AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile libucommon.pc)
 

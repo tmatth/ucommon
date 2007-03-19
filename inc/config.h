@@ -1,7 +1,6 @@
 #ifndef	_UCOMMON_CONFIG_H_
 #define	_UCOMMON_CONFIG_H_
 
-#define	UCOMMON_VISIBILITY	@UCOMMON_VISIBILITY@
 #define	UCOMMON_NAMESPACE	ucc
 #define	NAMESPACE_UCOMMON	namespace ucc {
 #define	END_NAMESPACE		};

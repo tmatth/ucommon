@@ -200,7 +200,7 @@ NamedObject(root, id, max)
 	data = NULL;
 }
 
-keyassoc::keyassoc(unsigned max, size_t paging) :
+keyassoc::keyassoc(size_t paging, unsigned max) :
 mempager(minsize(max, paging))
 {
 	root = static_cast<NamedObject **>(alloc(sizeof(NamedObject *) * max));

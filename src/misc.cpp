@@ -588,11 +588,7 @@ extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
 		return;
 
 	write(fd, buffer, strlen(buffer));
-#ifdef	_POSIX_SYNCHRONIZED_IO	
-	fdatasync(fd);
-#else
 	fsync(fd);
-#endif
 	close(fd);
 	va_end(args);
 }
