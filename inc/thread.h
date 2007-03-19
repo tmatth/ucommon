@@ -11,6 +11,8 @@
 
 NAMESPACE_UCOMMON
 
+#ifdef	PTHREAD_BARRIER_SERIAL_THREAD
+
 class __EXPORT Barrier 
 {
 private:
@@ -46,6 +48,8 @@ public:
 	inline void release(void)
 		{pthread_spin_unlock(&spin);};
 };
+
+#endif
 	
 class __EXPORT Conditional : public Exclusive
 {
