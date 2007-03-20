@@ -93,6 +93,7 @@ Semaphore::Semaphore(unsigned limit)
 {
 	count = limit;
 	waits = 0;
+	used = 0;
 
 	crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
 	crit(pthread_mutex_init(&mutex, NULL) == 0);
@@ -102,6 +103,24 @@ Semaphore::~Semaphore()
 {
 	pthread_cond_destroy(&cond);
 	pthread_mutex_destroy(&mutex);
+}
+
+unsigned Semaphore::getUsed(void)
+{
+	unsigned rtn;
+	pthread_mutex_lock(&mutex);
+	rtn = used;
+	pthread_mutex_unlock(&mutex);
+	return rtn;
+}
+
+unsigned Semaphore::getCount(void)
+{
+    unsigned rtn;
+    pthread_mutex_lock(&mutex);
+    rtn = count;
+    pthread_mutex_unlock(&mutex);
+    return rtn;
 }
 
 bool Semaphore::wait(Timer &timer)
@@ -117,16 +136,16 @@ bool Semaphore::wait(Timer &timer)
 	ts.tv_sec = timer.timer.tv_sec;
 	ts.tv_nsec = timer.timer.tv_usec * 1000l;
 #endif
-	if(!count) {
+	if(used >= count) {
 		++waits;
-		while(!count && rtn != ETIMEDOUT)
+		while(used >= count && rtn != ETIMEDOUT)
 			pthread_cond_timedwait(&cond, &mutex, &ts);
 		--waits;
 	}
 	if(rtn == ETIMEDOUT)
 		result = false;
 	else
-		--count;
+		++used;
 	pthread_mutex_unlock(&mutex);
 	return result;
 }
@@ -145,23 +164,44 @@ bool Semaphore::wait(timeout_t timeout)
 void Semaphore::Shlock(void)
 {
 	pthread_mutex_lock(&mutex);
-	if(!count) {
+	if(used >= count) {
 		++waits;
-		while(!count)
+		while(used >= count)
 			pthread_cond_wait(&cond, &mutex);
 		--waits;
 	}
-	--count;
+	++used;
 	pthread_mutex_unlock(&mutex);
 }
 
 void Semaphore::Unlock(void)
 {
 	pthread_mutex_lock(&mutex);
-	++count;
+	if(used)
+		--used;
 	if(waits)
 		pthread_cond_signal(&cond);
 	pthread_mutex_unlock(&mutex);
+}
+
+void Semaphore::set(unsigned value)
+{
+	unsigned diff;
+	pthread_mutex_lock(&mutex);
+	count = value;
+	if(used >= count || !waits) {
+		pthread_mutex_unlock(&mutex);
+		return;
+	}
+	diff = count - used;
+	if(diff > waits)
+		diff = waits;
+	pthread_mutex_unlock(&mutex);
+	while(diff--) {
+		pthread_mutex_lock(&mutex);
+		pthread_cond_signal(&cond);
+		pthread_mutex_unlock(&mutex);
+	}
 }
 
 Conditional::attribute::attribute()

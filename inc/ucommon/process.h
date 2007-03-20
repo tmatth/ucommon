@@ -1,5 +1,5 @@
-#ifndef _UCOMMON_COUNTER_H_
-#define	_UCOMMON_COUNTER_H_
+#ifndef _UCOMMON_PROCESS_H_
+#define	_UCOMMON_PROCESS_H_
 
 #ifndef	_UCOMMON_TIMERS_H_
 #include <ucommon/timers.h>
@@ -21,7 +21,7 @@
 #include <ucommon/thread.h>
 #endif
 
-typedef	RETSIGTYPE (*sighandler_t)(int);
+typedef	int (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON
 

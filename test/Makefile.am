@@ -4,8 +4,9 @@ CXXLINK = $(LIBTOOL) --tag=CC --mode=link $(CXX) $(AM_CXXFLAGS) $(CFLAGS) \
     $(AM_LDFLAGS) $(LDFLAGS) -o $@
 LDADD = ../src/libucommon.la @UCOMMON_LIBS@
 
-noinst_PROGRAMS = string
+noinst_PROGRAMS = string thread
 
 string_SOURCES = string.cpp
+thread_SOURCES = thread.cpp
 
 

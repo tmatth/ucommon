@@ -1,3 +1,5 @@
+#ifndef	_UCOMMON_UCOMMON_H_
+#define	_UCOMMON_UCOMMON_H_
 #include <ucommon/config.h>
 #include <ucommon/object.h>
 #include <ucommon/counter.h>
@@ -13,3 +15,4 @@
 #include <ucommon/thread.h>
 #include <ucommon/process.h>
 #include <ucommon/misc.h>
+#endif

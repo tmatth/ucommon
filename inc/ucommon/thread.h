@@ -58,8 +58,8 @@ public:
 class __EXPORT Conditional : public Exclusive
 {
 private:
-	friend class __EXPORT Semaphore;
 	friend class __EXPORT Event;
+	friend class __EXPORT Semaphore;
 
 	class __EXPORT attribute
 	{
@@ -102,12 +102,12 @@ public:
 class __EXPORT Semaphore : public Shared
 {
 private:
-	unsigned count, waits;
+	unsigned count, waits, used;
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
 
 public:
-	Semaphore(unsigned limit);
+	Semaphore(unsigned limit = 0);
 	~Semaphore();
 
 	void Shlock(void);
@@ -115,6 +115,10 @@ public:
 
 	bool wait(timeout_t timeout = 0);
 	bool wait(Timer &timer);
+
+	unsigned getCount(void);
+	unsigned getUsed(void);
+	void set(unsigned limit);
 
 	inline void release(void)
 		{Semaphore::Unlock();};
