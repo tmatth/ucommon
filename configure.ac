@@ -144,6 +144,9 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_delay,[
 			AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
 		])
+		AC_CHECK_LIB($tlib,pthread_setschedprio,[
+			AC_DEFINE(HAVE_PTHREAD_SETSCHEDPRIO, [1], ["pthread priority"])
+		])
 	fi		
 ],[
 	AC_MSG_ERROR("pthread support required")

@@ -507,10 +507,14 @@ void Thread::setPriority(unsigned pri)
 
 	if(tid != 0) {
 		sparam.sched_priority = pval;
+#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
 		if(reset)
 			rc = pthread_setschedparam(tid, policy, &sparam);		
 		else
 			rc = pthread_setschedprio(tid, pval);
+#else
+		rc = pthread_setschedparam(tid, policy, &sparam);
+#endif
 		assert(rc == 0);
 	}
 }
@@ -548,8 +552,14 @@ void Thread::start(bool detach)
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	else
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+// we typically use "stack 1" for min stack...
+#ifdef	PTHREAD_STACK_MIN
 	if(stack && stack < PTHREAD_STACK_MIN)
 		stack = PTHREAD_STACK_MIN;
+#else
+	if(stack && stack < 2)
+		stack = 0;
+#endif
 	if(stack)
 		pthread_attr_setstacksize(&attr, stack);
 	pthread_create(&tid, &attr, &exec_thread, this);

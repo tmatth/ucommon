@@ -7,15 +7,27 @@
 
 NAMESPACE_UCOMMON
 
+#ifdef	_MSC_VER
+class __EXPORT objlink;		
+class __EXPORT objlist;
+class __EXPORT objring;
+class __EXPORT objmap;
+class __EXPORT OrderedIndex;
+class __EXPORT LinkedRing;
+class __EXPORT NamedObject;
+class __EXPORT OrderedObject;
+class __EXPORT LinkedList;
+#endif
+
 class __EXPORT LinkedObject
 {
 protected:
-	friend class __EXPORT objlink;		
-	friend class __EXPORT objlist;
-	friend class __EXPORT objring;
-	friend class __EXPORT OrderedIndex;
-	friend class __EXPORT LinkedRing;
-	friend class __EXPORT NamedObject;
+	friend class objlink;		
+	friend class objlist;
+	friend class objring;
+	friend class OrderedIndex;
+	friend class LinkedRing;
+	friend class NamedObject;
 
 	LinkedObject *next;
 
@@ -35,18 +47,24 @@ public:
 		{return next;};
 };
 
+#ifdef	_MSC_VER
 class __EXPORT OrderedObject;
 class __EXPORT LinkedList;
+class __EXPORT LinkedRing;
+class __EXPORT NamedObject;
+class __EXPORT objring;
+class __EXPORT objlist;
+#endif
 
 class __EXPORT OrderedIndex
 {
 protected:
-	friend class __EXPORT OrderedObject;
-	friend class __EXPORT LinkedList;
-	friend class __EXPORT LinkedRing;
-	friend class __EXPORT NamedObject;
-	friend class __EXPORT objring;
-	friend class __EXPORT objlist;
+	friend class OrderedObject;
+	friend class LinkedList;
+	friend class LinkedRing;
+	friend class NamedObject;
+	friend class objring;
+	friend class objlist;
 
 	OrderedObject *head, *tail;
 
@@ -64,10 +82,10 @@ public:
 class __EXPORT OrderedObject : public LinkedObject
 {
 protected:
-	friend class __EXPORT LinkedList;
+	friend class LinkedList;
 	friend class OrderedIndex;
-	friend class __EXPORT objring;
-	friend class __EXPORT objlist;
+	friend class objring;
+	friend class objlist;
 
 	OrderedObject(OrderedIndex *root);
 	OrderedObject();
@@ -117,7 +135,7 @@ public:
 class __EXPORT NamedList : public NamedObject
 {
 protected:
-	friend class __EXPORT objmap;
+	friend class objmap;
 
 	NamedObject **keyroot;
 	unsigned keysize;
@@ -132,9 +150,9 @@ public:
 class __EXPORT LinkedList : public OrderedObject
 {
 protected:
-	friend class __EXPORT LinkedRing;
-	friend class __EXPORT objlist;
-	friend class __EXPORT objring;
+	friend class LinkedRing;
+	friend class objlist;
+	friend class objring;
 
 	LinkedList *prev;
 	OrderedIndex *root;
@@ -161,7 +179,7 @@ public:
 class __EXPORT LinkedRing : public LinkedList
 {
 protected:
-	friend class __EXPORT objring;
+	friend class objring;
 
 	LinkedRing();
 	LinkedRing(OrderedIndex *root);

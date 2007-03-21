@@ -15,6 +15,13 @@
 
 NAMESPACE_UCOMMON
 
+#ifdef _MSC_VER
+class __EXPORT Event;
+class __EXPORT Semaphore;
+class __EXPORT locked_release;
+class __EXPORT shared_release;
+#endif
+
 #ifdef	PTHREAD_BARRIER_SERIAL_THREAD
 
 class __EXPORT Barrier 
@@ -58,8 +65,8 @@ public:
 class __EXPORT Conditional : public Exclusive
 {
 private:
-	friend class __EXPORT Event;
-	friend class __EXPORT Semaphore;
+	friend class Event;
+	friend class Semaphore;
 
 	class __EXPORT attribute
 	{
@@ -177,7 +184,7 @@ public:
 class __EXPORT LockedPointer
 {
 private:
-	friend class __EXPORT locked_release;
+	friend class locked_release;
 	pthread_mutex_t mutex;
 	Object *pointer;
 
@@ -193,7 +200,7 @@ protected:
 class __EXPORT SharedPointer
 {
 private:
-	friend class __EXPORT shared_release;
+	friend class shared_release;
 	pthread_rwlock_t lock;
 	Object *pointer;
 

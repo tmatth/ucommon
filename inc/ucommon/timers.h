@@ -16,12 +16,18 @@ typedef unsigned long timeout_t;
 
 NAMESPACE_UCOMMON
 
+#ifdef _MSC_VER
+class __EXPORT Conditional;
+class __EXPORT Semaphore;
+class __EXPORT Event;
+#endif
+
 class __EXPORT Timer : public LinkedObject
 {
 private:
-	friend class __EXPORT Conditional;
-	friend class __EXPORT Semaphore;
-	friend class __EXPORT Event;
+	friend class Conditional;
+	friend class Semaphore;
+	friend class Event;
 
 #if _POSIX_TIMERS > 0
 	timespec timer;

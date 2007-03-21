@@ -970,10 +970,12 @@ extern "C" int cpr_joinaddr(SOCKET so, const char *host)
 		target = (inetsockaddr_t *)node->ai_addr;
 		node = node->ai_next;
 		switch(addr.addr.sa_family) {
+#if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP)
 		case AF_INET6:
 			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
 			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
 		case AF_INET:
 			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
@@ -1012,10 +1014,12 @@ extern "C" int cpr_dropaddr(SOCKET so, const char *host)
 		target = (inetsockaddr_t *)node->ai_addr;
 		node = node->ai_next;
 		switch(addr.addr.sa_family) {
+#if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP)
 		case AF_INET6:
 			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
 			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
 		case AF_INET:
 			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));

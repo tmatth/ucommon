@@ -25,10 +25,14 @@ typedef	void (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON
 
+#ifdef _MSC_VER
+class __EXPORT keyconfig;
+#endif
+
 class __EXPORT keypair
 {
 private:
-	friend class __EXPORT keyconfig;
+	friend class keyconfig;
 
 public:
 	class __EXPORT keydata : public NamedObject

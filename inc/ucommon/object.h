@@ -9,6 +9,10 @@
 
 NAMESPACE_UCOMMON
 
+#ifdef	_MSC_VER
+class __EXPORT auto_delete;
+#endif
+
 class __EXPORT Object
 {
 public:
@@ -38,7 +42,7 @@ public:
 class __EXPORT Temporary
 {
 protected:
-	friend class __EXPORT auto_delete;
+	friend class auto_delete;
 	virtual ~Temporary();
 };
 

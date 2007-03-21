@@ -7,7 +7,9 @@
 
 NAMESPACE_UCOMMON
 
+#ifdef _MSC_VER
 class __EXPORT PagerPool;
+#endif
 
 class __EXPORT mempager
 {
@@ -61,7 +63,7 @@ public:
 class __EXPORT PagerObject : public LinkedObject, public CountedObject
 {
 protected:
-	friend class __EXPORT PagerPool;
+	friend class PagerPool;
 
 	PagerPool *pager;
 
