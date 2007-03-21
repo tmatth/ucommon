@@ -307,14 +307,14 @@ void ucc::suspend(void)
 #endif
 
 #ifndef	_MSWINDOWS_
-extern "C" void cpr_detach(void)
+extern "C" void cpr_pdetach(void)
 {
 	if(getppid() == 1)
 		return;
-	cpr_attach("/dev/null");
+	cpr_pattach("/dev/null");
 }
 
-extern "C" void cpr_attach(const char *dev)
+extern "C" void cpr_pattach(const char *dev)
 {
 	pid_t pid;
 	int fd;
@@ -391,7 +391,7 @@ extern "C" int cpr_spawn(const char *fn, char **args, int mode)
 
 	cpr_closeall();
 	if(mode == SPAWN_DETACH)
-		cpr_detach();
+		cpr_pdetach();
 
 	execvp(fn, args);
 	exit(-1);

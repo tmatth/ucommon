@@ -129,8 +129,8 @@ END_NAMESPACE
 extern "C" {
 
 	__EXPORT size_t cpr_pagesize(void);
-	__EXPORT void cpr_attach(const char *path);
-	__EXPORT void cpr_detach(void);
+	__EXPORT void cpr_pattach(const char *path);
+	__EXPORT void cpr_pdetach(void);
 	__EXPORT int cpr_spawn(const char *fn, char **args, int mode);
 	__EXPORT void cpr_closeall(void);
 	__EXPORT void cpr_cancel(pid_t pid);
