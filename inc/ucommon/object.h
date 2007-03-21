@@ -9,9 +9,7 @@
 
 NAMESPACE_UCOMMON
 
-#ifdef	_MSC_VER
 class __EXPORT auto_delete;
-#endif
 
 class __EXPORT Object
 {

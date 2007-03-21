@@ -15,12 +15,10 @@
 
 NAMESPACE_UCOMMON
 
-#ifdef _MSC_VER
 class __EXPORT Event;
 class __EXPORT Semaphore;
 class __EXPORT locked_release;
 class __EXPORT shared_release;
-#endif
 
 #ifdef	PTHREAD_BARRIER_SERIAL_THREAD
 

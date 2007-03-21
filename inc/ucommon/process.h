@@ -25,9 +25,7 @@ typedef	void (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON
 
-#ifdef _MSC_VER
 class __EXPORT keyconfig;
-#endif
 
 class __EXPORT keypair
 {

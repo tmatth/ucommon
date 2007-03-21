@@ -7,9 +7,7 @@
 
 NAMESPACE_UCOMMON
 
-#ifdef _MSC_VER
 class __EXPORT PagerPool;
-#endif
 
 class __EXPORT mempager
 {

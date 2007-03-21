@@ -7,7 +7,6 @@
 
 NAMESPACE_UCOMMON
 
-#ifdef	_MSC_VER
 class __EXPORT objlink;		
 class __EXPORT objlist;
 class __EXPORT objring;
@@ -17,7 +16,6 @@ class __EXPORT LinkedRing;
 class __EXPORT NamedObject;
 class __EXPORT OrderedObject;
 class __EXPORT LinkedList;
-#endif
 
 class __EXPORT LinkedObject
 {
@@ -46,15 +44,6 @@ public:
 	inline LinkedObject *getNext(void) const
 		{return next;};
 };
-
-#ifdef	_MSC_VER
-class __EXPORT OrderedObject;
-class __EXPORT LinkedList;
-class __EXPORT LinkedRing;
-class __EXPORT NamedObject;
-class __EXPORT objring;
-class __EXPORT objlist;
-#endif
 
 class __EXPORT OrderedIndex
 {
