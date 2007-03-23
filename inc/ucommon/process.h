@@ -49,6 +49,8 @@ public:
 private:
 	keydata *keypairs;
 	mempager *pager;
+	unsigned count;
+	keydata **index;
 
 	void update(keydata *key, const char *value);
 
@@ -74,12 +76,21 @@ public:
 	void load(FILE *fp, const char *key = NULL);
 	void load(define *defaults);
 	void section(FILE *fp, char *buf, size_t size);
+	void validate(unsigned count, const char *lastkey);
 
 	inline keydata *begin(void)
 		{return keypairs;};
 
 	inline const char *operator()(const char *id)
 		{return get(id);};
+
+	inline unsigned getCount(void)
+		{return count;};
+
+	const char *operator[](unsigned idx);
+
+	inline const char *operator()(unsigned idx)
+		{return operator[](idx);};
 };
 
 __EXPORT void suspend(void);

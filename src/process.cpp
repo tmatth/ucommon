@@ -63,11 +63,30 @@ NamedObject((NamedObject **)root, kid)
 
 keypair::keypair(define *defaults, mempager *mem)
 {
+	unsigned idx;
+	keydata *node;
+
 	keypairs = NULL;
 	pager = mem;
+	count = 0;
+	index = NULL;
 
-	if(defaults)
+	if(defaults) {		
 		load(defaults);
+		while(defaults->key) {
+			++defaults;
+			++count;
+		}
+		if(!count)
+			return;
+		index = new(mem) keydata*[count];
+		idx = count;
+		node = keypairs;
+		while(idx) {
+			index[--idx] = node;
+			node = static_cast<keydata *>(node->getNext());
+		}
+	}
 }
 
 keypair::~keypair()
@@ -82,7 +101,22 @@ keypair::~keypair()
 			free(node);
 		node = next;
 	}
+	if(index && !pager)
+		delete[] index;
 }		
+
+const char *keypair::operator[](unsigned idx)
+{
+	if(!count || idx >= count || !index)
+		return NULL;
+
+	return index[idx]->data;
+}
+
+void keypair::validate(unsigned total, const char *key)
+{
+	crit(count == total && !cpr_stricmp(index[count - 1]->id, key));
+}
 
 keypair::keydata *keypair::create(const char *id, const char *data)
 {
