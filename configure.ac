@@ -53,15 +53,6 @@ UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 UCOMMON_LOADER=""
 
-malloc=""
-
-AC_ARG_WITH(malloc,
-    [  --with-malloc        specify malloc alternative],[
-	if test x$with_malloc != x ; then
-		malloc=`echo ${with_malloc} | sed s/[-]l//`
-	fi
-])
-
 AC_ARG_WITH(libc,
 	[  --with-libc          specify alternate libc],[
 	if test x$with_libc != x ; then
@@ -77,22 +68,6 @@ clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
 AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h)
-
-if test -z "$malloc" ; then
-	AC_CHECK_LIB(mtmalloc, malloc, [
-		malloc="mtmalloc"
-	])
-fi
-
-if test -z "$malloc" ; then
-	AC_CHECK_LIB(hoard, malloc, [
-		malloc="hoard"
-	])
-fi
-
-if test "$malloc" = "none" -o "$malloc" = "no" ; then
-	malloc=""
-fi
 
 AC_CHECK_LIB($clib, dlopen, [
 	UCOMMON_LOADER=""
@@ -212,9 +187,6 @@ for func in sched_setscheduler nanosleep clock_gettime ; do
 done
 
 UCOMMON_LIBS="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS $UCOMMON_LIBC"
-if test ! -z "$malloc" ; then
-	UCOMMON_LIBS="-l$malloc $UCOMMON_LIBS"
-fi
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS

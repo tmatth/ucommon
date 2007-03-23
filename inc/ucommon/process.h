@@ -25,13 +25,8 @@ typedef	void (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON
 
-class __EXPORT keyconfig;
-
-class __EXPORT keypair
+class __EXPORT keypair : public SharedObject
 {
-private:
-	friend class keyconfig;
-
 public:
 	class __EXPORT keydata : public NamedObject
 	{
@@ -60,6 +55,7 @@ private:
 	keydata *create(const char *key, const char *data = NULL);
 	const char *alloc(const char *data);
 	void dealloc(const char *data);
+	void dealloc(void);
 
 public:
 	typedef struct {
@@ -67,7 +63,11 @@ public:
 		const char *data;
 	} define;
 
+	typedef shared_pointer<keypair> pointer;
+	typedef shared_instance<keypair> instance;
+
 	keypair(define *defaults = NULL, mempager *mem = NULL);
+	~keypair();
 
 	void set(const char *id, const char *value);
 	const char *get(const char *id);
@@ -81,41 +81,6 @@ public:
 	inline const char *operator()(const char *id)
 		{return get(id);};
 };
-
-class __EXPORT keyconfig : public CountedObject, protected mempager
-{
-public:
-	typedef	locked_pointer<keyconfig> pointer;
-
-	class __EXPORT instance : public locked_release
-	{
-	public:
-		instance(pointer &p);
-
-		inline keyconfig &operator*()
-			{return *(static_cast<keyconfig *>(object));};
-
-		inline keyconfig *operator->()
-			{return static_cast<keyconfig *>(object);};
-
-		const char *operator()(unsigned idx, const char *key);
-		keypair *operator[](unsigned idx);
-	};
-
-private:
-	keypair *keypairs;
-	size_t size;
-
-	void dealloc(void);
-
-public:
-	keyconfig(unsigned members = 1, size_t pagesize = 0);
-
-	inline void release(void)
-		{CountedObject::release();};
-
-	keypair *operator[](unsigned idx);
-};		
 
 __EXPORT void suspend(void);
 __EXPORT void suspend(timeout_t timeout);

@@ -55,7 +55,6 @@ public:
 	virtual void *alloc(size_t size);
 	char *dup(const char *cp);
 	void *dup(void *mem, size_t size);
-
 };
 
 class __EXPORT PagerObject : public LinkedObject, public CountedObject

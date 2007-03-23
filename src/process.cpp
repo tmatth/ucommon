@@ -70,6 +70,20 @@ keypair::keypair(define *defaults, mempager *mem)
 		load(defaults);
 }
 
+keypair::~keypair()
+{
+	keydata *node = keypairs, *next;
+
+	while(node) {
+		next = static_cast<keydata *>(node->getNext());
+		if(node->key[0] && node->data)
+			dealloc(node->data);
+		if(!pager)
+			free(node);
+		node = next;
+	}
+}		
+
 keypair::keydata *keypair::create(const char *id, const char *data)
 {
 	size_t overdraft = cpr_strlen(id);
@@ -229,53 +243,6 @@ void keypair::set(const char *id, const char *value)
 	else
 		create(id, value);
 }		
-
-keyconfig::instance::instance(pointer &p) :
-locked_release(p)
-{
-}
-
-keypair *keyconfig::instance::operator[](unsigned idx)
-{
-	if(!object)
-		return NULL;
-
-	return (static_cast<keyconfig *>(object))->operator[](idx);
-}
-
-const char *keyconfig::instance::operator()(unsigned idx, const char *key)
-{
-	keypair *pair;
-	if(!object)
-		return NULL;
-
-	pair = (static_cast<keyconfig *>(object))->operator[](idx);
-	if(!pair)
-		return NULL;
-
-	return pair->get(key);
-}
-
-keyconfig::keyconfig(unsigned limit, size_t pagesize) :
-CountedObject(), mempager(pagesize)
-{
-	size = limit;
-	keypairs = new(static_cast<mempager *>(this)) keypair[limit];
-	for(unsigned pos = 0; pos < size; ++pos)
-		keypairs[pos].pager = static_cast<mempager *>(this);
-}
-
-keypair *keyconfig::operator[](unsigned idx)
-{
-	crit(idx < size);
-	return &keypairs[idx];
-}
-
-void keyconfig::dealloc(void)
-{
-	mempager::purge();
-	delete this;
-}
 
 void ucc::suspend(timeout_t timeout)
 {

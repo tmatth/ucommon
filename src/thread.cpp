@@ -401,6 +401,10 @@ Object *LockedPointer::get(void)
 	return temp;
 }
 
+SharedObject::~SharedObject()
+{
+}
+
 SharedPointer::SharedPointer()
 {
 	crit(pthread_rwlock_init(&lock, NULL) == 0);
@@ -412,28 +416,23 @@ SharedPointer::~SharedPointer()
 	pthread_rwlock_destroy(&lock);
 }
 
-void SharedPointer::set(Object *ptr)
+void SharedPointer::set(SharedObject *ptr)
 {
 	pthread_rwlock_wrlock(&lock);
-	ptr->retain();
 	if(pointer)
-		pointer->release();
+		delete pointer;
 	pointer = ptr;
 	pthread_rwlock_unlock(&lock);
 }
 
-Object *SharedPointer::get(void)
+SharedObject *SharedPointer::get(void)
 {
 	pthread_rwlock_rdlock(&lock);
-	if(pointer)
-		pointer->retain();
 	return pointer;
 }
 
 void SharedPointer::release(void)
 {
-	if(pointer)
-		pointer->release();
 	pthread_rwlock_unlock(&lock);
 }
 
@@ -1000,22 +999,24 @@ locked_release &locked_release::operator=(LockedPointer &p)
 shared_release::shared_release(const shared_release &copy)
 {
 	ptr = copy.ptr;
-	if(ptr)
-		object = ptr->get();
-	else
-		object = NULL;
 }
 
 shared_release::shared_release()
 {
 	ptr = NULL;
-	object = NULL;
+}
+
+SharedObject *shared_release::get(void)
+{
+	if(ptr)
+		return ptr->pointer;
+	return NULL;
 }
 
 shared_release::shared_release(SharedPointer &p)
 {
 	ptr = &p;
-	object = p.get();
+	p.get(); // create rdlock
 }
 
 shared_release::~shared_release()
@@ -1028,13 +1029,12 @@ void shared_release::release(void)
 	if(ptr)
 		ptr->release();
 	ptr = NULL;
-	object = NULL;
 }
 
 shared_release &shared_release::operator=(SharedPointer &p)
 {
 	release();
 	ptr = &p;
-	object = p.get();
+	p.get();
 	return *this;
 }

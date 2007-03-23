@@ -195,19 +195,25 @@ protected:
 	LockedPointer &operator=(Object *o);
 };
 
+class __EXPORT SharedObject
+{
+public:
+	virtual ~SharedObject();
+};
+
 class __EXPORT SharedPointer
 {
 private:
 	friend class shared_release;
 	pthread_rwlock_t lock;
-	Object *pointer;
+	SharedObject *pointer;
 
 protected:
 	SharedPointer();
 	~SharedPointer();
 
-	void set(Object *ptr);
-	Object *get(void);
+	void set(SharedObject *ptr);
+	SharedObject *get(void);
 
 public:
 	void release(void);
@@ -393,7 +399,6 @@ public:
 class __EXPORT shared_release
 {
 protected:
-	Object *object;
 	SharedPointer *ptr;
 
 	shared_release();
@@ -404,6 +409,8 @@ public:
 	~shared_release();
 
 	void release(void);
+
+	SharedObject *get(void);
 
 	shared_release &operator=(SharedPointer &p);
 };
@@ -529,13 +536,13 @@ public:
 	inline shared_instance(shared_pointer<T> &p) : shared_release(p) {};
 
 	inline T& operator*() const
-		{return *(static_cast<T *>(object));};
+		{return *(static_cast<T *>(ptr->pointer));};
 
 	inline T* operator->() const
-		{return static_cast<T*>(object);};
+		{return static_cast<T*>(ptr->pointer);};
 
 	inline T* get(void) const
-		{return static_cast<T*>(object);};
+		{return static_cast<T*>(ptr->pointer);};
 };
 
 inline void start(Thread *th)

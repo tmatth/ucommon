@@ -72,4 +72,8 @@ extern "C" void __cxa_pure_virtual(void)
 #endif
 
 // vim: set ts=4 sw=4:
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
 
