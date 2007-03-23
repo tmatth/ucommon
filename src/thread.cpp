@@ -422,6 +422,8 @@ void SharedPointer::set(SharedObject *ptr)
 	if(pointer)
 		delete pointer;
 	pointer = ptr;
+	if(ptr)
+		ptr->commit(this);
 	pthread_rwlock_unlock(&lock);
 }
 
@@ -1011,6 +1013,10 @@ SharedObject *shared_release::get(void)
 	if(ptr)
 		return ptr->pointer;
 	return NULL;
+}
+
+void SharedObject::commit(SharedPointer *pointer)
+{
 }
 
 shared_release::shared_release(SharedPointer &p)

@@ -28,6 +28,18 @@ NAMESPACE_UCOMMON
 class __EXPORT keypair : public SharedObject
 {
 public:
+	class __EXPORT callback : public LinkedObject
+	{
+	friend class keypair;
+	protected:
+		callback();
+		virtual ~callback();
+		
+		void release(void);
+
+		virtual void notify(SharedPointer *ptr, keypair *keys) = 0;
+	};
+
 	class __EXPORT keydata : public NamedObject
 	{
 	friend class keypair;
@@ -47,6 +59,10 @@ public:
 	};
 
 private:
+	friend class callback;
+
+	static LinkedObject *callbacks;
+
 	keydata *keypairs;
 	mempager *pager;
 	unsigned count;
@@ -58,6 +74,7 @@ private:
 	const char *alloc(const char *data);
 	void dealloc(const char *data);
 	void dealloc(void);
+	void commit(SharedPointer *ptr);
 
 public:
 	typedef struct {

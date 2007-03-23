@@ -49,6 +49,23 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+LinkedObject *keypair::callbacks = NULL;
+
+keypair::callback::callback() :
+LinkedObject(&keypair::callbacks)
+{
+}
+
+keypair::callback::~callback()
+{
+	release();
+}
+
+void keypair::callback::release(void)
+{
+	delist(&keypair::callbacks);
+}
+
 keypair::keydata::keydata(keydata **root, const char *kid, const char *value) :
 NamedObject((NamedObject **)root, kid)
 {
@@ -111,6 +128,16 @@ const char *keypair::operator[](unsigned idx)
 		return NULL;
 
 	return index[idx]->data;
+}
+
+void keypair::commit(SharedPointer *pointer)
+{
+	callback *cb = static_cast<callback *>(callbacks);
+
+	while(cb) {
+		cb->notify(pointer, this);
+		cb = static_cast<callback *>(cb->getNext());
+	}
 }
 
 void keypair::validate(unsigned total, const char *key)
