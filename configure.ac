@@ -188,6 +188,10 @@ done
 
 UCOMMON_LIBS="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS $UCOMMON_LIBC"
 
+AC_CHECK_LIB(Systemstubs, printf, [
+	UCOMMON_LIBS="$UCOMMON_LIBS -lSystemstubs"
+])
+
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 COMPILER=""
