@@ -7,6 +7,8 @@
 
 NAMESPACE_UCOMMON
 
+class PagerPool;
+
 class __EXPORT mempager
 {
 private:

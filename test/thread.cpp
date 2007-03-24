@@ -27,7 +27,7 @@ extern "C" int main()
 	printf("before\n");
 	thr->start();
 	suspend(1000);
-//	thr->release();
+	thr->release();
 	printf("joining\n");
 	delete thr;
 	printf("ending\n");

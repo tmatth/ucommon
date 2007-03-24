@@ -15,6 +15,8 @@
 
 NAMESPACE_UCOMMON
 
+class SharedPointer;
+
 #ifdef	PTHREAD_BARRIER_SERIAL_THREAD
 
 class __EXPORT Barrier 
