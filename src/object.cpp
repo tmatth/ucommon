@@ -30,6 +30,12 @@ void Object::retain(void)
 {
 }
 
+Object *Object::copy(void)
+{
+	retain();
+	return this;
+}
+
 Temporary::~Temporary()
 {
 }

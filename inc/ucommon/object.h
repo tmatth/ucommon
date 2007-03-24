@@ -15,6 +15,8 @@ public:
 	virtual void retain(void);
 	virtual void release(void);
 	virtual ~Object();
+
+	Object *copy(void);
 };
 
 class __EXPORT CountedObject : public Object
@@ -201,6 +203,9 @@ inline void retain(Object *obj)
 
 inline void release(Object *obj)
 	{obj->release();};
+
+inline Object *copy(Object *obj)
+	{return obj->copy();};
 
 END_NAMESPACE
 
