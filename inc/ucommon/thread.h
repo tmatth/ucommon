@@ -15,13 +15,6 @@
 
 NAMESPACE_UCOMMON
 
-class __EXPORT Event;
-class __EXPORT Semaphore;
-class __EXPORT locked_release;
-class __EXPORT shared_release;
-class __EXPORT SharedPointer;
-class __EXPORT ExclusivePointer;
-
 #ifdef	PTHREAD_BARRIER_SERIAL_THREAD
 
 class __EXPORT Barrier 

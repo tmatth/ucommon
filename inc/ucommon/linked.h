@@ -7,15 +7,7 @@
 
 NAMESPACE_UCOMMON
 
-class __EXPORT objlink;		
-class __EXPORT objlist;
-class __EXPORT objring;
-class __EXPORT objmap;
-class __EXPORT OrderedIndex;
-class __EXPORT LinkedRing;
-class __EXPORT NamedObject;
-class __EXPORT OrderedObject;
-class __EXPORT LinkedList;
+class OrderedObject;
 
 class __EXPORT LinkedObject
 {

@@ -9,8 +9,6 @@
 
 NAMESPACE_UCOMMON
 
-class __EXPORT auto_delete;
-
 class __EXPORT Object
 {
 public:
