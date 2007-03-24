@@ -427,7 +427,7 @@ void SharedPointer::replace(SharedObject *ptr)
 	pthread_rwlock_unlock(&lock);
 }
 
-SharedObject *SharedPointer::dup(void)
+SharedObject *SharedPointer::share(void)
 {
 	pthread_rwlock_rdlock(&lock);
 	return pointer;
@@ -1022,7 +1022,7 @@ void SharedObject::commit(SharedPointer *pointer)
 shared_release::shared_release(SharedPointer &p)
 {
 	ptr = &p;
-	p.dup(); // create rdlock
+	p.share(); // create rdlock
 }
 
 shared_release::~shared_release()
@@ -1041,6 +1041,6 @@ shared_release &shared_release::operator=(SharedPointer &p)
 {
 	release();
 	ptr = &p;
-	p.dup();
+	p.share();
 	return *this;
 }

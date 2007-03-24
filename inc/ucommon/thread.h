@@ -215,7 +215,7 @@ protected:
 	~SharedPointer();
 
 	void replace(SharedObject *ptr);
-	SharedObject *dup(void);
+	SharedObject *share(void);
 
 public:
 	void release(void);
@@ -486,7 +486,7 @@ public:
 	inline shared_pointer() : SharedPointer() {};
 
 	inline T *dup(void)
-		{return static_cast<T*>(SharedPointer::dup());};
+		{return static_cast<T*>(SharedPointer::share());};
 
 	inline void replace(T *p)
 		{SharedPointer::replace(p);};
