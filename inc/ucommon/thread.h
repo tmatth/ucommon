@@ -186,8 +186,8 @@ private:
 protected:
 	LockedPointer();
 
-	void set(Object *ptr);
-	Object *get(void);
+	void replace(Object *ptr);
+	Object *dup(void);
 
 	LockedPointer &operator=(Object *o);
 };
@@ -214,8 +214,8 @@ protected:
 	SharedPointer();
 	~SharedPointer();
 
-	void set(SharedObject *ptr);
-	SharedObject *get(void);
+	void replace(SharedObject *ptr);
+	SharedObject *dup(void);
 
 public:
 	void release(void);
@@ -485,11 +485,11 @@ class shared_pointer : public SharedPointer
 public:
 	inline shared_pointer() : SharedPointer() {};
 
-	inline T *get(void)
-		{return static_cast<T*>(SharedPointer::get());};
+	inline T *dup(void)
+		{return static_cast<T*>(SharedPointer::dup());};
 
-	inline void set(T *p)
-		{SharedPointer::set(p);};
+	inline void replace(T *p)
+		{SharedPointer::replace(p);};
 };	
 
 template<class T>
@@ -498,17 +498,17 @@ class locked_pointer : public LockedPointer
 public:
 	inline locked_pointer() : LockedPointer() {};
 
-	inline T* get(void)
-		{return static_cast<T *>(LockedPointer::get());};
+	inline T* dup(void)
+		{return static_cast<T *>(LockedPointer::dup());};
 
-	inline void set(T *p)
-		{LockedPointer::set(p);};
+	inline void replace(T *p)
+		{LockedPointer::replace(p);};
 
 	inline locked_pointer<T>& operator=(T *obj)
 		{LockedPointer::operator=(obj); return *this;};
 
 	inline T *operator*()
-		{return get();};
+		{return dup();};
 };
 
 template<class T>

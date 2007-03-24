@@ -2,6 +2,6 @@ AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = reconfig README libucommon.pc.in
 
 DIST_SUBDIRS = src inc test
-SUBDIRS = src inc
+SUBDIRS = src 
 
 

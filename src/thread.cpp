@@ -380,7 +380,7 @@ LockedPointer::LockedPointer()
 	pointer = NULL;
 }
 
-void LockedPointer::set(Object *obj)
+void LockedPointer::replace(Object *obj)
 {
 	pthread_mutex_lock(&mutex);
 	obj->retain();
@@ -390,7 +390,7 @@ void LockedPointer::set(Object *obj)
 	pthread_mutex_unlock(&mutex);
 }
 
-Object *LockedPointer::get(void)
+Object *LockedPointer::dup(void)
 {
 	Object *temp;
 	pthread_mutex_lock(&mutex);
@@ -416,7 +416,7 @@ SharedPointer::~SharedPointer()
 	pthread_rwlock_destroy(&lock);
 }
 
-void SharedPointer::set(SharedObject *ptr)
+void SharedPointer::replace(SharedObject *ptr)
 {
 	pthread_rwlock_wrlock(&lock);
 	if(pointer)
@@ -427,7 +427,7 @@ void SharedPointer::set(SharedObject *ptr)
 	pthread_rwlock_unlock(&lock);
 }
 
-SharedObject *SharedPointer::get(void)
+SharedObject *SharedPointer::dup(void)
 {
 	pthread_rwlock_rdlock(&lock);
 	return pointer;
@@ -976,7 +976,7 @@ locked_release::locked_release()
 
 locked_release::locked_release(LockedPointer &p)
 {
-	object = p.get();
+	object = p.dup();
 }
 
 locked_release::~locked_release()
@@ -994,7 +994,7 @@ void locked_release::release(void)
 locked_release &locked_release::operator=(LockedPointer &p)
 {
 	release();
-	object = p.get();
+	object = p.dup();
 	return *this;
 }
 
@@ -1022,7 +1022,7 @@ void SharedObject::commit(SharedPointer *pointer)
 shared_release::shared_release(SharedPointer &p)
 {
 	ptr = &p;
-	p.get(); // create rdlock
+	p.dup(); // create rdlock
 }
 
 shared_release::~shared_release()
@@ -1041,6 +1041,6 @@ shared_release &shared_release::operator=(SharedPointer &p)
 {
 	release();
 	ptr = &p;
-	p.get();
+	p.dup();
 	return *this;
 }
