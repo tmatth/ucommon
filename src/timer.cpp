@@ -303,21 +303,20 @@ void Timer::sync(Timer &t)
 timeout_t Timer::expire(Timer *timer)
 {
 	timeout_t first = inf, next;
-	Timer *nt;
+	linked_pointer<Timer> tp = timer;
 
-	while(timer) {
-		nt = static_cast<Timer *>(timer->getNext());
-		if(!(timer->isExpired())) {
-			next = timer->get();
+	while(tp) {
+		if(!(tp->isExpired())) {
+			next = tp->get();
 			if(!next) {
-				timer->clear();
-				timer->expired();
-				next = timer->get();
+				tp->clear();
+				tp->expired();
+				next = tp->get();
 			}
 			if(next && next < first)
 				first = next;
 		}
-		timer = nt;
+		tp.next();
 	}
 	return first;	
 }

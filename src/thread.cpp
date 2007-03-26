@@ -616,13 +616,13 @@ Queue::~Queue()
 bool Queue::remove(Object *o)
 {
 	bool rtn = false;
-	member *node;
+	linked_pointer<member> node;
 	Exlock();
-	node = static_cast<member*>(head);
+	node = begin();
 	while(node) {
 		if(node->object == o)
 			break;
-		node = static_cast<member*>(node->getNext());
+		node.next();
 	}
 	if(node) {
 		--used;
@@ -658,7 +658,7 @@ Object *Queue::lifo(timeout_t timeout)
 
 Object *Queue::fifo(timeout_t timeout)
 {
-	member *member;
+	linked_pointer<member> node;
 	Object *obj = NULL;
 	Exlock();
 	if(!Conditional::wait(timeout)) {
@@ -667,12 +667,12 @@ Object *Queue::fifo(timeout_t timeout)
 	}
 	if(head) {
 		--used;
-		member = static_cast<Queue::member *>(head);
-		obj = member->object;
-		head = static_cast<Queue::member*>(head->getNext());
+		node = begin();
+		obj = node->object;
+		head = head->getNext();
 		if(!head)
 			tail = NULL;
-		member->LinkedObject::enlist(&freelist);
+		node->LinkedObject::enlist(&freelist);
 	}
 	Conditional::signal(false);
 	Unlock();
@@ -699,7 +699,10 @@ bool Queue::post(Object *object, timeout_t timeout)
 	}
 	else {
 		Unlock();
-		node = new(pager) member(this, object);
+		if(pager)
+			node = new((caddr_t)(pager->alloc(sizeof(member)))) member(this, object);
+		else
+			node = new member(this, object);
 	}
 	Lock();
 	Conditional::signal(false);
@@ -740,13 +743,13 @@ Stack::~Stack()
 bool Stack::remove(Object *o)
 {
 	bool rtn = false;
-	member *node;
+	linked_pointer<member> node;
 	Exlock();
 	node = static_cast<member*>(usedlist);
 	while(node) {
 		if(node->object == o)
 			break;
-		node = static_cast<member*>(node->getNext());
+		node.next();
 	}
 	if(node) {
 		--used;
@@ -799,7 +802,12 @@ bool Stack::push(Object *object, timeout_t timeout)
 	}
 	else {
 		Unlock();
-		node = new(pager) member(this, object);
+		if(pager) {
+			caddr_t ptr = (caddr_t)pager->alloc(sizeof(member));
+			node = new(ptr) member(this, object);
+		}
+		else
+			node = new member(this, object);
 	}
 	Lock();
 	Conditional::signal(false);

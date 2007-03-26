@@ -81,7 +81,7 @@ NamedObject((NamedObject **)root, kid)
 keypair::keypair(define *defaults, mempager *mem)
 {
 	unsigned idx;
-	keydata *node;
+	linked_pointer<keydata> node;
 
 	keypairs = NULL;
 	pager = mem;
@@ -96,27 +96,30 @@ keypair::keypair(define *defaults, mempager *mem)
 		}
 		if(!count)
 			return;
-		index = new(mem) keydata*[count];
+		if(mem)
+			index = (keydata **)mem->alloc(sizeof(keydata *) * count);
+		else
+			index = new keydata*[count];
 		idx = count;
 		node = keypairs;
 		while(idx) {
 			index[--idx] = node;
-			node = static_cast<keydata *>(node->getNext());
+			node.next();
 		}
 	}
 }
 
 keypair::~keypair()
 {
-	keydata *node = keypairs, *next;
+	linked_pointer<keydata> node = keypairs, next;
 
 	while(node) {
-		next = static_cast<keydata *>(node->getNext());
+		next = node.getNext();
 		if(node->key[0] && node->data)
 			dealloc(node->data);
 		if(!pager)
-			free(node);
-		node = next;
+			free(*node);
+		node = *next;
 	}
 	if(index && !pager)
 		delete[] index;
@@ -132,11 +135,11 @@ const char *keypair::operator[](unsigned idx)
 
 void keypair::commit(SharedPointer *pointer)
 {
-	callback *cb = static_cast<callback *>(callbacks);
+	linked_pointer<callback> cb = callbacks;
 
 	while(cb) {
 		cb->notify(pointer, this);
-		cb = static_cast<callback *>(cb->getNext());
+		cb.next();
 	}
 }
 
@@ -151,10 +154,11 @@ keypair::keydata *keypair::create(const char *id, const char *data)
 	if(!data)
 		overdraft = 0;
 
-	if(pager)
-		return new(pager, overdraft) keydata(&keypairs, id, data);
-	else
-		return new(overdraft) keydata(&keypairs, id, data);
+	if(pager) {
+		caddr_t ptr = (caddr_t)pager->alloc(sizeof(keydata) + overdraft);
+		return new(ptr) keydata(&keypairs, id, data);
+	}
+	return new(overdraft) keydata(&keypairs, id, data);
 }
 
 const char *keypair::alloc(const char *data)

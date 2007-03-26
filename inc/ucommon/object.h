@@ -115,6 +115,8 @@ public:
 
 	bool operator!() const;
 
+	operator bool() const;
+
 	bool operator==(Object *o) const;
 
 	bool operator!=(Object *o) const;
@@ -172,6 +174,28 @@ public:
 
 	inline T* operator->() const
 		{return static_cast<T*>(object);};
+};
+
+template <class T, class O = CountedObject>
+class value : public O
+{
+protected:
+	T _value;
+
+public:
+	inline value() : O() {};
+
+	inline T& operator*()
+		{return _value;};
+
+	inline T &operator=(const T &v)
+		{_value = v; return _value;};
+
+	inline operator T() 
+		{return _value;};
+
+	inline T* get(void) const
+		{return &_value;};
 };
 
 template <class T, class P = auto_release>

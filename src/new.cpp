@@ -1,5 +1,5 @@
 #include <private.h>
-#include <ucommon/config.h>
+#include <ucommon/ucommon.h>
 #include <stdlib.h>
 
 void *operator new(size_t size, caddr_t addr, size_t max)
@@ -42,12 +42,16 @@ void *operator new[](size_t size)
 
 void *operator new(size_t size, caddr_t place)
 {
+	if(!place)
+		place = (caddr_t)malloc(size);
 	crit(place != NULL);
 	return place;
 }
 
 void *operator new[](size_t size, caddr_t place)
 {
+	if(!place)
+		place = (caddr_t)malloc(size);
 	crit(place != NULL);
     return place; 
 }

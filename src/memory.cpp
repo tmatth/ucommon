@@ -184,8 +184,10 @@ PagerObject *PagerPool::get(size_t size)
 
     pthread_mutex_unlock(&mutex);
 
-	if(!ptr)
-		ptr = new(pager, size - sizeof(PagerObject)) PagerObject;
+	if(!ptr && pager)
+		ptr = new((caddr_t)(pager->alloc(size))) PagerObject;
+	else if(!ptr && !pager)
+		ptr = new(size - sizeof(PagerObject)) PagerObject;
 	memset(ptr, 0, size);
 	ptr->pager = this;
 	return ptr;
@@ -197,16 +199,28 @@ NamedObject(root, id, max)
 	data = NULL;
 }
 
-keyassoc::keyassoc(size_t paging, unsigned max) :
-mempager(minsize(max, paging))
+keyassoc::keyassoc(unsigned max, mempager *mem) 
 {
-	root = static_cast<NamedObject **>(alloc(sizeof(NamedObject *) * max));
+	pager = mem;
+	if(mem)
+		root = (NamedObject **)mem->alloc(sizeof(NamedObject *) * max);
+	else
+		root = new NamedObject *[max];
 	memset(root, 0, sizeof(NamedObject *) * max);
 };
 
 keyassoc::~keyassoc()
 {
-	mempager::purge();
+	purge();
+}
+
+void keyassoc::purge(void)
+{
+	if(!root || pager)
+		return;
+
+	delete[] root;
+	root = NULL;
 }
 
 void *keyassoc::get(const char *id)
@@ -222,8 +236,15 @@ void keyassoc::set(const char *id, void *d)
 {
     keydata *kd = static_cast<keydata *>(NamedObject::map(root, id, max));
 	if(!kd) {
-		id = dup(id);
-		kd = new(this) keydata(root, id, max);
+		if(pager) {
+			id = pager->dup(id);
+			caddr_t ptr = (caddr_t)pager->alloc(sizeof(keydata));
+			kd = new(ptr) keydata(root, id, max);
+		}	
+		else {
+			id = strdup(id);
+			kd = new keydata(root, id, max);
+		}
 	}
 	kd->data = d;
 }
@@ -238,76 +259,14 @@ void keyassoc::clear(const char *id)
 
 size_t keyassoc::minsize(unsigned max, size_t size)
 {
-	size_t min = (sizeof(NamedObject *) * max) + overhead();
+	size_t min;
+
+	if(pager)
+		min = (sizeof(NamedObject *) * max) + pager->overhead();
+	else
+		min = size;
+	
 	if(size < min)
 		size = min;
 	return size;
 }
-
-void *operator new(size_t size, mempager *pager)
-{
-	void *mem;
-
-	if(pager != NULL)
-		mem = pager->alloc(size);
-	else
-		mem = malloc(size);
-
-	crit(mem != NULL);
-	return mem;
-}
-
-void *operator new(size_t size, mempager *pager, size_t overdraft)
-{
-    void *mem;
-
-	if(pager)
-		mem = pager->alloc(size + overdraft);
-	else
-		mem = malloc(size + overdraft);
-
-    crit(mem != NULL);
-    return mem;
-}
-
-void *operator new(size_t size, keyassoc *pager, const char *id)
-{
-	crit(pager != NULL);
-
-	void *mem = pager->get(id);
-	if(mem)
-		return mem;
-
-	mem = pager->alloc(size);
-	crit(mem != NULL);
-
-	pager->set(id, mem);
-	return mem;
-}
-
-void *operator new[](size_t size, keyassoc *pager, const char *id)
-{
-    void *mem = pager->get(id);
-    if(mem)
-        return mem;
-
-    mem = pager->alloc(size);
-	crit(mem != NULL);
-
-    pager->set(id, mem);
-    return mem;
-}
-
-void *operator new[](size_t size, mempager *pager)
-{
-    void *mem;
-
-	if(pager)
-		mem = pager->alloc(size);
-	else
-		mem = malloc(size);
-
-	crit(mem != NULL);
-    return mem;
-}
-

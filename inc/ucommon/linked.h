@@ -12,9 +12,6 @@ class OrderedObject;
 class __EXPORT LinkedObject
 {
 protected:
-	friend class objlink;		
-	friend class objlist;
-	friend class objring;
 	friend class OrderedIndex;
 	friend class LinkedRing;
 	friend class NamedObject;
@@ -42,10 +39,7 @@ class __EXPORT OrderedIndex
 protected:
 	friend class OrderedObject;
 	friend class LinkedList;
-	friend class LinkedRing;
 	friend class NamedObject;
-	friend class objring;
-	friend class objlist;
 
 	OrderedObject *head, *tail;
 
@@ -57,7 +51,18 @@ public:
 
 	unsigned count(void);
 
+	void detach(void);
+
 	LinkedObject **index(void);
+
+	inline LinkedObject *begin(void)
+		{return (LinkedObject*)(head);};
+
+	inline LinkedObject *end(void)
+		{return (LinkedObject*)(tail);};
+
+	inline LinkedObject *operator*()
+		{return (LinkedObject*)(head);};
 };
 
 class __EXPORT OrderedObject : public LinkedObject
@@ -65,8 +70,6 @@ class __EXPORT OrderedObject : public LinkedObject
 protected:
 	friend class LinkedList;
 	friend class OrderedIndex;
-	friend class objring;
-	friend class objlist;
 
 	OrderedObject(OrderedIndex *root);
 	OrderedObject();
@@ -74,6 +77,9 @@ protected:
 public:
 	void enlist(OrderedIndex *root);
 	void delist(OrderedIndex *root);
+
+	inline OrderedObject *getNext(void)
+		{return static_cast<OrderedObject *>(LinkedObject::getNext());};
 };
 
 class __EXPORT NamedObject : public OrderedObject
@@ -131,10 +137,6 @@ public:
 class __EXPORT LinkedList : public OrderedObject
 {
 protected:
-	friend class LinkedRing;
-	friend class objlist;
-	friend class objring;
-
 	LinkedList *prev;
 	OrderedIndex *root;
 
@@ -156,31 +158,7 @@ public:
 	inline LinkedList *getPrev(void) const
 		{return prev;};
 };
-
-class __EXPORT LinkedRing : public LinkedList
-{
-protected:
-	friend class objring;
-
-	LinkedRing();
-	LinkedRing(OrderedIndex *root);
-};
 	
-class __EXPORT objlink
-{
-protected:
-	LinkedObject *object;
-
-public:
-	objlink(LinkedObject *obj);
-
-	void operator++();
-
-	objlink &operator=(LinkedObject *root);
-
-	unsigned count(void);
-};
-
 class __EXPORT objmap
 {
 protected:
@@ -197,34 +175,48 @@ public:
 	void begin(void);
 };
 
-
-class __EXPORT objlist
+template <class T>
+class linked_pointer
 {
-protected:
-	LinkedList *object;
+private:
+	T *ptr;
 
 public:
-	objlist(LinkedList *obj = 0);
-	~objlist();
+	inline linked_pointer(T *p)
+		{ptr = p;};
 
-	void operator++();
-	void operator--();
+	inline linked_pointer(LinkedObject *p)
+		{ptr = static_cast<T*>(p);};
 
-	void clear(void);
-	void begin(void);
-	void end(void);
-	unsigned count(void);
+	inline linked_pointer() 
+		{ptr = NULL;};
 
-	objlist &operator=(LinkedList *l);
-};
+	inline void operator=(T *v)
+		{ptr = v;};
 
-class __EXPORT objring : public objlist
-{
-public:
-	objring(LinkedObject *obj = 0);
-	
-	void fifo(void);
-	void lifo(void);
+	inline void operator=(LinkedObject *p)
+		{ptr = static_cast<T*>(p);};
+
+	inline T* operator->()
+		{return ptr;};
+
+	inline T* operator*()
+		{return ptr;};
+
+	inline operator T*()
+		{return ptr;};
+
+	inline void next(void)
+		{ptr = static_cast<T*>(ptr->getNext());};
+
+	inline T *getNext(void)
+		{return static_cast<T*>(ptr->getNext());};
+
+	inline operator bool()
+		{return (ptr != NULL);};
+
+	inline bool operator!()
+		{return (ptr == NULL);};
 };
 
 template <class T, unsigned M = 177>
@@ -266,8 +258,6 @@ template <class T>
 class keylist : public OrderedIndex
 {
 public:
-    typedef pointer<T, objlink> pointer;
-
 	inline NamedObject **root(void)
 		{return static_cast<NamedObject*>(&head);};
 
@@ -291,94 +281,6 @@ public:
 
 	inline T **sort(void)
 		{return NamedObject::sort(index());};
-};
-
-template <class T>
-class list : public OrderedIndex
-{
-public:
-	typedef pointer<T, objlist> pointer;
-
-	inline LinkedObject **root(void)
-		{return &head;};
-
-	inline T *begin(void)
-		{return static_cast<T*>(head);};
-
-    inline T *end(void)
-        {return static_cast<T*>(tail);};
-
-	inline T *create(void)
-		{return new T(this);};
-
-	inline T *next(LinkedObject *current)
-		{return static_cast<T*>(current->getNext());};
-
-	inline T *prev(LinkedList *current)
-		{return static_cast<T*>(current->getPrev());};
-
-	inline T *operator[](unsigned index)
-		{return static_cast<T*>(OrderedIndex::find(index));};
-};
-
-template <class T>
-class linked : protected LinkedList, public T
-{
-public:
-	typedef linked<T> member;
-	typedef	pointer<member, objlist> pointer;
-	typedef	list<member> container;
-
-	inline linked(container *index) : 
-		LinkedList(index), T() {};
-
-	inline linked(const T &o, container *index) :
-		LinkedList(index), T(o) {};
-};
-
-template <class T>
-class slinked : protected LinkedObject, public T
-{
-public:
-	typedef slinked<T> member;
-    typedef pointer<member, objlist> pointer;
-    typedef list<member> container;
-
-    inline slinked(container *index) : 
-		LinkedObject(index->root), T() {};
-
-	inline slinked(const T& o, container *index) :
-		LinkedObject(index->root), T(o) {};
-};
-
-template <class T>
-class named : protected NamedObject, public T
-{
-public:
-	typedef named<T> member;
-    typedef pointer<member, objlist> pointer;
-    typedef keylist<member> container;
-
-    inline named(container *index, const char *id) : 
-		NamedObject(index, id), T() {};
-
-	inline named(const T &o, container *index, const char *id) :
-		NamedObject(index, id), T(o) {};
-};
-
-template <class T, unsigned M=177>
-class mapped : protected NamedList, public T
-{
-public:
-	typedef mapped<T, M> member;
-	typedef pointer<member, objmap> pointer;
-	typedef keymap<member, M> container;
-
-	inline mapped(const T &o, container *c, const char *id) :
-		NamedList(c->root(), id, M), T(o) {};
-
-	inline mapped(container *c, const char *id) :
-		NamedList(c->root(), id, M), T() {};
 };
 
 END_NAMESPACE

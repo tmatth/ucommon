@@ -99,7 +99,12 @@ auto_release::auto_release(const auto_release &from)
 
 bool auto_release::operator!() const
 {
-	return object == 0;
+	return (object == 0);
+}
+
+auto_release::operator bool() const
+{
+    return (object != 0);
 }
 
 bool auto_release::operator==(Object *o) const

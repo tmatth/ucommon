@@ -88,7 +88,7 @@ public:
 	void put(PagerObject *obj);
 };
 
-class __EXPORT keyassoc : public mempager
+class __EXPORT keyassoc 
 {
 private:
 	class __EXPORT keydata : public NamedObject
@@ -101,16 +101,15 @@ private:
 
 	unsigned max;
 	NamedObject **root;
+	mempager *pager;
 
 	size_t minsize(unsigned max, size_t ps);
 
 public:
-	keyassoc(size_t pagesize = 0, unsigned keysize = 177);
+	keyassoc(unsigned keysize = 177, mempager *pager = NULL);
 	~keyassoc();
 
-	inline void purge(void)
-		{mempager::purge();};
-
+	void purge(void);
 	void *get(const char *id);
 	void set(const char *id, void *data);
 	void clear(const char *id);
@@ -153,11 +152,5 @@ public:
 };
 
 END_NAMESPACE
-
-void *operator new(size_t size, ucc::mempager *pager);
-void *operator new[](size_t size, ucc::mempager *pager);
-void *operator new(size_t size, ucc::mempager *pager, size_t overdraft);
-void *operator new(size_t size, ucc::keyassoc *pager, const char *id);
-void *operator new[](size_t size, ucc::keyassoc *pager, const char *id);
 
 #endif

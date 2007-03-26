@@ -361,28 +361,6 @@ LinkedList::~LinkedList()
 	delist();
 }
 
-LinkedRing::LinkedRing() :
-LinkedList()
-{}
-
-LinkedRing::LinkedRing(OrderedIndex *r) :
-LinkedList()
-{
-	r = root;
-	if(!r->tail) {
-		r->tail = r->head = static_cast<OrderedObject *>(this);
-		next = prev = this;
-		return;
-	}
-
-	prev = static_cast<LinkedList *>(r->tail);
-	next = (r->tail)
-		->next;
-	(static_cast<LinkedList *>(r->tail->next))->prev = this;
-	r->tail->next = this;
-	r->tail = this;
-}
-
 OrderedIndex::OrderedIndex()
 {
 	head = tail = 0;
@@ -392,6 +370,11 @@ OrderedIndex::~OrderedIndex()
 {
 	if(head)
 		LinkedObject::purge(head);
+	head = tail = 0;
+}
+
+void OrderedIndex::detach(void)
+{
 	head = tail = 0;
 }
 
@@ -442,101 +425,5 @@ void objmap::operator++()
 	if(object)
 		object = static_cast<NamedList *>(NamedObject::skip(object->keyroot, 
 			static_cast<NamedObject*>(object), object->keysize));
-}
-
-objlink::objlink(LinkedObject *o)
-{
-	object = o;
-}
-
-void objlink::operator++()
-{
-	if(object)
-		object = object->next;
-}
-
-objlink &objlink::operator=(LinkedObject *o)
-{
-	object = o;
-	return *this;
-}
-
-objlist::objlist(LinkedList *o)
-{
-	object = o;
-}
-
-objlist::~objlist()
-{
-	if(object)
-		delete object;
-	object = 0;
-}
-
-void objlist::operator--()
-{
-	if(object)
-		object = object->prev;
-}
-
-void objlist::operator++()
-{
-    if(object)
-        object = static_cast<LinkedList *>(object->next);
-}
-
-void objlist::clear(void)
-{
-	object = 0;
-}
-
-void objlist::begin(void)
-{
-	if(object && object->root)
-		object = static_cast<LinkedList *>(object->root->head);
-}
-
-void objlist::end(void)
-{
-	if(object && object->root)
-		object = static_cast<LinkedList *>(object->root->tail);
-}
-
-unsigned objlink::count(void)
-{
-	unsigned count = 0;
-	LinkedObject *node = object;
-
-	while(node) {
-		++count;
-		node = node->next;
-	}
-
-	return count;
-}
-
-unsigned objlist::count(void)
-{
-	if(!object)
-		return 0;
-	if(!object->root)
-		return 1;
-	return object->root->count();
-}
-
-void objring::fifo(void)
-{
-	if(object && object->root) {
-		begin();
-		object->delist();
-	}
-}
-
-void objring::lifo(void)
-{
-    if(object && object->root) {
-        end();
-        object->delist();
-    }
 }
 
