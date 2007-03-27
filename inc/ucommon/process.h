@@ -61,7 +61,7 @@ public:
 private:
 	friend class callback;
 
-	static LinkedObject *callbacks;
+	static linked_pointer<callback> callbacks;
 
 	keydata *keypairs;
 	mempager *pager;

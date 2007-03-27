@@ -52,19 +52,19 @@ void LinkedObject::delist(LinkedObject **root)
 NamedObject::NamedObject(OrderedIndex *root, const char *nid) :
 OrderedObject()
 {
-	NamedObject *node = static_cast<NamedObject *>(root->head), *prev = NULL;
+	NamedObject *node = static_cast<NamedObject*>(root->head), *prev = NULL;
 
 	while(node) {
 		if(node->compare(nid)) {
 			if(prev) 
-				prev->next = node->next;
+				prev->next = node->getNext();
 			else
-				root->head = static_cast<OrderedObject*>(node->next);
+				root->head = node->getNext();
 			node->release();
 			break;
 		}
 		prev = node;
-		node = static_cast<NamedObject*>(node->next);
+		node = node->getNext();
 	}	
 	next = NULL;							
 	id = nid;
@@ -94,12 +94,12 @@ OrderedObject()
 				next = node->next;
 			}
 			else
-				root[max] = static_cast<NamedObject*>(node->next);
+				root[max] = node->getNext();
 			node->release();
 			break;
 		}
 		prev = node;
-		node = static_cast<NamedObject*>(node->next);
+		node = node->getNext();
 	}		
 
 	if(!prev) {
@@ -204,7 +204,7 @@ NamedObject *NamedObject::skip(NamedObject **idx, NamedObject *rec, unsigned max
 		return idx[key];
 	}
 
-	return static_cast<NamedObject *>(rec->next);
+	return rec->getNext();
 }
 
 void NamedObject::purge(NamedObject **idx, unsigned max)
@@ -252,7 +252,7 @@ NamedObject *NamedObject::find(NamedObject *root, const char *id)
 	{
 		if(root->compare(id))
 			break;
-		root = static_cast<NamedObject *>(root->next);
+		root = root->getNext();
 	}
 	return root;
 }
@@ -279,14 +279,14 @@ void OrderedObject::delist(OrderedIndex *root)
 
     while(node && node != this) {
         prev = node;
-        node = static_cast<OrderedObject *>(node->next);
+		node = node->getNext();
     }
 
     if(!node)
         return;
 
     if(!prev)
-        root->head = static_cast<OrderedObject *>(next);
+		root->head = getNext();
     else
         prev->next = next;
 
@@ -367,13 +367,6 @@ OrderedIndex::OrderedIndex()
 }
 
 OrderedIndex::~OrderedIndex()
-{
-	if(head)
-		LinkedObject::purge(head);
-	head = tail = 0;
-}
-
-void OrderedIndex::detach(void)
 {
 	head = tail = 0;
 }

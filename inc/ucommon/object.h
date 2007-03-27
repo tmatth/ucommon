@@ -180,22 +180,31 @@ template <class T, class O = CountedObject>
 class value : public O
 {
 protected:
-	T _value;
+	inline void set(T &v)
+		{data = v;};
 
 public:
+	T data;
+
 	inline value() : O() {};
 
-	inline T& operator*()
-		{return _value;};
+	inline value(T v) : O() 
+		{data = v;};
 
-	inline T &operator=(const T &v)
-		{_value = v; return _value;};
+	inline T& operator*()
+		{return data;};
+
+	inline void operator=(T v)
+		{data = v;};
 
 	inline operator T() 
-		{return _value;};
+		{return data;};
 
-	inline T* get(void) const
-		{return &_value;};
+	inline T &operator()()
+		{return data;};
+
+	inline void operator()(T v)
+		{data = v;};
 };
 
 template <class T, class P = auto_release>

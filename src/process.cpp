@@ -49,10 +49,10 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-LinkedObject *keypair::callbacks = NULL;
+linked_pointer<keypair::callback> keypair::callbacks = nil;
 
 keypair::callback::callback() :
-LinkedObject(&keypair::callbacks)
+LinkedObject(keypair::callbacks.root())
 {
 }
 
@@ -63,7 +63,7 @@ keypair::callback::~callback()
 
 void keypair::callback::release(void)
 {
-	delist(&keypair::callbacks);
+	delist(keypair::callbacks.root());
 }
 
 keypair::keydata::keydata(keydata **root, const char *kid, const char *value) :

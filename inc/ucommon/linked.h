@@ -34,6 +34,8 @@ public:
 		{return next;};
 };
 
+#define nil ((LinkedObject*)(NULL))
+
 class __EXPORT OrderedIndex
 {
 protected:
@@ -51,7 +53,8 @@ public:
 
 	unsigned count(void);
 
-	void detach(void);
+	inline void purge(void)
+		{LinkedObject::purge((LinkedObject*)(head));};
 
 	LinkedObject **index(void);
 
@@ -107,6 +110,9 @@ public:
 
 	static NamedObject **sort(NamedObject **list, size_t count = 0);
 
+	inline NamedObject *getNext(void) const
+		{return static_cast<NamedObject*>(LinkedObject::getNext());};
+
 	inline const char *getId(void) const
 		{return id;};
 
@@ -157,6 +163,9 @@ public:
 
 	inline LinkedList *getPrev(void) const
 		{return prev;};
+
+	inline LinkedList *getNext(void) const
+		{return static_cast<LinkedList*>(LinkedObject::getNext());};
 };
 	
 class __EXPORT objmap
@@ -175,6 +184,28 @@ public:
 	void begin(void);
 };
 
+template <class T, class O=OrderedObject>
+class linked_value : public value<T, O>
+{
+public:
+	inline linked_value() {};
+
+	inline linked_value(LinkedObject **root)
+		{LinkedObject::enlist(root);};
+
+	inline linked_value(OrderedIndex *index) 
+		{O::enlist(index);};
+
+	inline linked_value(LinkedObject **root, T v) 
+		{LinkedObject::enlist(root); set(v);};
+
+	inline linked_value(OrderedIndex *index, T v)
+ 		{O::enlist(index); set(v);};
+
+	inline void operator=(T v)
+		{set(v);};
+};	
+
 template <class T>
 class linked_pointer
 {
@@ -185,14 +216,26 @@ public:
 	inline linked_pointer(T *p)
 		{ptr = p;};
 
+	inline linked_pointer(const linked_pointer &p)
+		{ptr = p.ptr;};
+
 	inline linked_pointer(LinkedObject *p)
 		{ptr = static_cast<T*>(p);};
+
+	inline linked_pointer(OrderedIndex *a)
+		{ptr = static_cast<T*>(a->begin());};
 
 	inline linked_pointer() 
 		{ptr = NULL;};
 
 	inline void operator=(T *v)
 		{ptr = v;};
+
+	inline void operator=(linked_pointer &p)
+		{ptr = p.ptr;};
+
+	inline void operator=(OrderedIndex *a)
+		{ptr = static_cast<T*>(a->begin());};
 
 	inline void operator=(LinkedObject *p)
 		{ptr = static_cast<T*>(p);};
@@ -206,17 +249,38 @@ public:
 	inline operator T*()
 		{return ptr;};
 
+	inline void prev(void)
+		{ptr = static_cast<T*>(ptr->getPrev());};
+
 	inline void next(void)
 		{ptr = static_cast<T*>(ptr->getNext());};
 
 	inline T *getNext(void)
 		{return static_cast<T*>(ptr->getNext());};
 
+    inline T *getPrev(void)
+        {return static_cast<T*>(ptr->getPrev());};
+
+	inline void operator++()
+		{ptr = static_cast<T*>(ptr->getNext());};
+
+    inline void operator--()
+        {ptr = static_cast<T*>(ptr->getPrev());};
+
+	inline bool isNext(void)
+		{return (ptr->getNext() != NULL);};
+
+	inline bool isPrev(void)
+		{return (ptr->getPrev() != NULL);};
+
 	inline operator bool()
 		{return (ptr != NULL);};
 
 	inline bool operator!()
 		{return (ptr == NULL);};
+
+    inline LinkedObject **root(void)
+		{T **r = &ptr; return (LinkedObject**)r;};
 };
 
 template <class T, unsigned M = 177>

@@ -135,11 +135,13 @@ unsigned cidr::getMask(void) const
 	}
 }
 
-bool cidr::allow(SOCKET so, const cidr *accept, const cidr *reject)
+bool cidr::allow(SOCKET so, cidr *paccept, cidr *preject)
 {
 	struct sockaddr_storage addr;
 	socklen_t slen = sizeof(addr);
 	unsigned allowed = 0, denied = 0, masked;
+	linked_pointer<cidr> accept = paccept;
+	linked_pointer<cidr> reject = preject;
 
 	if(so == INVALID_SOCKET)
 		return false;
@@ -153,7 +155,7 @@ bool cidr::allow(SOCKET so, const cidr *accept, const cidr *reject)
 			if(masked > allowed)
 				allowed = masked;
 		}
-		accept = static_cast<cidr *>(accept->next);
+		accept.next();
 	}
 
     while(reject) {
@@ -162,7 +164,7 @@ bool cidr::allow(SOCKET so, const cidr *accept, const cidr *reject)
 			if(masked > denied)
 				denied = masked;
         }
-        reject = static_cast<cidr *>(reject->next);
+		reject.next();
     }
 
 	if(!allowed && !denied)
@@ -174,12 +176,13 @@ bool cidr::allow(SOCKET so, const cidr *accept, const cidr *reject)
 	return false;
 }	
 
-bool cidr::find(const cidr *policy, const struct sockaddr *s)
+bool cidr::find(cidr *policy, const struct sockaddr *s)
 {
-	while(policy) {
+	linked_pointer<cidr> p = policy;
+	while(p) {
 		if(policy->isMember(s))
 			return true;
-		policy = static_cast<cidr *>(policy->next);
+		p.next();
 	}
 	return false;
 }

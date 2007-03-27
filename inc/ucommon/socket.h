@@ -70,8 +70,8 @@ public:
 	cidr(LinkedObject **policy, const char *str);
 	cidr(const cidr &copy);
 
-	static bool allow(SOCKET so, const cidr *accept, const cidr *reject);
-	static bool find(const cidr *policy, const struct sockaddr *addr);
+	static bool allow(SOCKET so, cidr *accept, cidr *reject);
+	static bool find(cidr *policy, const struct sockaddr *addr);
 
 	inline int getFamily(void) const
 		{return family;};
