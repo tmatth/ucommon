@@ -28,6 +28,8 @@ public:
 	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
 
+	bool isMember(LinkedObject *list);
+
 	static void purge(LinkedObject *root);
 
 	inline LinkedObject *getNext(void) const
@@ -53,8 +55,7 @@ public:
 
 	unsigned count(void);
 
-	inline void purge(void)
-		{LinkedObject::purge((LinkedObject*)(head));};
+	void purge(void);
 
 	LinkedObject **index(void);
 

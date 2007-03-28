@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #endif
 #include <fcntl.h>
+#include <errno.h>
 
 #if defined(HAVE_POLL_H)
 #include <poll.h>
@@ -409,12 +410,26 @@ Socket::~Socket()
 	release();
 }
 
+bool Socket::create(int family, int type, int protocol)
+{
+	release();
+	so = ::socket(family, type, protocol);
+	return so != INVALID_SOCKET;
+}
+
 void Socket::release(void)
 {
 	if(so != INVALID_SOCKET) {
 		cpr_closesocket(so);
 		so = INVALID_SOCKET;
 	}
+}
+
+Socket::operator bool()
+{
+	if(so == INVALID_SOCKET)
+		return false;
+	return true;
 }
 
 bool Socket::operator!() const
@@ -583,7 +598,11 @@ int Socket::setNonBlocking(bool enable)
 
 int Socket::connect(const char *host, const char *svc)
 {
-	return ::cpr_connect(so, host, svc);
+	int rtn = ::cpr_connect(so, host, svc);
+	if(!rtn || errno == EINPROGRESS)
+		return 0;
+
+	return rtn;
 }
 
 int Socket::join(const char *member)
@@ -599,6 +618,17 @@ int Socket::drop(const char *member)
 int Socket::disconnect(void)
 {
 	return ::cpr_disconnect(so);
+}
+
+int Socket::getError(void)
+{
+	int opt;
+	socklen_t slen = sizeof(opt);
+
+	if(getsockopt(so, SOL_SOCKET, SO_ERROR, (caddr_t)&opt, &slen))
+		return -1;
+	
+	return opt;
 }
 
 bool Socket::isConnected(void) const
@@ -643,6 +673,7 @@ unsigned Socket::getPending(void) const
 bool Socket::isPending(timeout_t timeout) const
 {
 	int status;
+
 #ifdef	USE_POLL
 	struct pollfd pfd;
 

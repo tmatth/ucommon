@@ -121,8 +121,11 @@ public:
 	int setKeepAlive(bool enable);
 	int setNonBlocking(bool enable);
 	int setMulticast(bool enable);
+	int getError(void);
 
 	int connect(const char *host, const char *svc);
+	bool create(int family, int type, int protocol = 0);
+
 	int disconnect(void);
 	int join(const char *member);
 	int drop(const char *member);
@@ -136,6 +139,8 @@ public:
 	virtual ssize_t gets(char *data, size_t max, timeout_t to = Timer::inf);
 
 	ssize_t puts(const char *str);
+
+	operator bool();
 
 	bool operator!() const;
 

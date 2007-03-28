@@ -25,6 +25,16 @@ void LinkedObject::purge(LinkedObject *root)
 	}
 }
 
+bool LinkedObject::isMember(LinkedObject *list)
+{
+	while(list) {
+		if(list == this)
+			return true;
+		list = list->next;
+	}
+	return false;
+}
+
 void LinkedObject::enlist(LinkedObject **root)
 {
 	next = *root;
@@ -369,6 +379,14 @@ OrderedIndex::OrderedIndex()
 OrderedIndex::~OrderedIndex()
 {
 	head = tail = 0;
+}
+
+void OrderedIndex::purge(void)
+{
+	if(head) {
+		LinkedObject::purge((LinkedObject *)head);
+		head = tail = 0;
+	}
 }
 
 LinkedObject **OrderedIndex::index(void)
