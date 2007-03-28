@@ -9,6 +9,8 @@
 #include <dlfcn.h>
 #endif
 
+#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -19,7 +21,38 @@ typedef	HANDLE fd_t;
 typedef int fd_t;
 #endif
 
+#ifdef _POSIX_ASYNC_IO
+#include <aio.h>
+#endif
+
 NAMESPACE_UCOMMON
+
+class __EXPORT aio
+{
+private:
+	off_t offset;
+	size_t count;
+	bool pending;
+	int err;
+	int fd;
+#ifdef _POSIX_ASYNC_IO
+	struct aiocb cb;
+#endif
+
+public:
+	aio(int fd);
+	~aio();
+
+	void pos(off_t offset);
+	void set(int fd);
+	void read(caddr_t buf, size_t len);
+	void write(caddr_t buf, size_t len);
+	void cancel(void);
+	ssize_t result(void);	
+
+	inline int error(void)
+		{return err;};
+};
 
 class __EXPORT auto_close : private AutoObject
 {

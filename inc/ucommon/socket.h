@@ -104,6 +104,8 @@ protected:
 
 	SOCKET so;
 
+	unsigned getPending(void) const;
+
 public:
 	Socket(const Socket &s);
 	Socket(SOCKET so);
@@ -112,10 +114,10 @@ public:
 	virtual ~Socket();
 
 	void release(void);
+	bool isPending(unsigned qio) const;
 	bool isConnected(void) const;
-	bool isPending(timeout_t timeout = 0) const;
-	bool isSending(timeout_t timeout = 0) const;
-	unsigned getPending() const;
+	bool waitPending(timeout_t timeout = 0) const;
+	bool waitSending(timeout_t timeout = 0) const;
 
 	int setBroadcast(bool enable);
 	int setKeepAlive(bool enable);
@@ -160,8 +162,8 @@ public:
 
 	SOCKET accept(struct sockaddr *addr = NULL);
 
-	inline bool isPending(timeout_t timeout = Timer::inf) const
-		{return Socket::isPending(timeout);};
+	inline bool waitConnection(timeout_t timeout = Timer::inf) const
+		{return Socket::waitPending(timeout);};
 
     inline operator SOCKET() const
         {return so;};

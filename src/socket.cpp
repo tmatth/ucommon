@@ -490,7 +490,7 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 	data[0] = 0;
 	while(nleft && !nl) {
 		if(timeout) {
-			if(!isPending(timeout))
+			if(!waitPending(timeout))
 				return -1;
 		}
 		nstat = ::recv(so, data, nleft, MSG_PEEK);
@@ -638,13 +638,21 @@ bool Socket::isConnected(void) const
 	if(so == INVALID_SOCKET)
 		return false;
 
-	if(!isPending())
+	if(!waitPending())
 		return true;
 
 	if(::recv(so, &buf, 1, MSG_DONTWAIT | MSG_PEEK) < 1)
 		return false;
 
 	return true;
+}
+
+bool Socket::isPending(unsigned qio) const
+{
+	if(getPending() >= qio)
+		return true;
+
+	return false;
 }
 
 #ifdef _MSWINDOWS_
@@ -670,7 +678,7 @@ unsigned Socket::getPending(void) const
 }
 #endif
 
-bool Socket::isPending(timeout_t timeout) const
+bool Socket::waitPending(timeout_t timeout) const
 {
 	int status;
 
@@ -724,7 +732,7 @@ bool Socket::isPending(timeout_t timeout) const
 #endif
 }
 
-bool Socket::isSending(timeout_t timeout) const
+bool Socket::waitSending(timeout_t timeout) const
 {
 	int status;
 #ifdef	USE_POLL

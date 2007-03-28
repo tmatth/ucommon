@@ -463,9 +463,14 @@ void Threadlock::Shlock(void)
 	pthread_rwlock_rdlock(&lock);
 }
 
-Thread::Thread(unsigned p, size_t size)
+Thread::Thread(int p, size_t size)
 {
-	priority = p;
+	if(p < 0) {
+		p += maxPriority();
+		if(p < 1)
+			p = 1;
+	}
+	priority = (unsigned)p;
 	stack = size;
 }
 
@@ -482,7 +487,7 @@ unsigned Thread::maxPriority(void)
 	return max - min;
 }
 
-void Thread::setPriority(unsigned pri)
+void Thread::raisePriority(unsigned pri)
 {
 	struct sched_param sparam;
 	bool reset = false;
@@ -534,7 +539,7 @@ extern "C" {
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
-		th->setPriority(0);
+		th->resetPriority();
 		th->run();
 		th->release();
 		return NULL;

@@ -257,7 +257,7 @@ private:
 	void start(bool detached);
 
 protected:
-	Thread(unsigned pri = 0, size_t stack = 0);
+	Thread(int pri = 0, size_t stack = 0);
 
 public:
 	virtual void run(void) = 0;
@@ -284,7 +284,10 @@ public:
 	inline static int getPolicy(void)
 		{return policy;};
 
-	void setPriority(unsigned pri);
+	void raisePriority(unsigned pri = 1);
+
+	inline void resetPriority(void)
+		{raisePriority(0);};
 
 	inline unsigned getPriority(void)
 		{return priority;};
