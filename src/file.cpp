@@ -5,26 +5,9 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-aio::aio(int f)
-{
-	fd = f;
-	offset = (off_t)0;
-	pending = false;	
-	err = 0;
-}
-
 aio::~aio()
 {
 	cancel();
-}
-
-void aio::set(int f)
-{
-	cancel();
-	fd = f;
-	offset = (off_t)0;
-	pending = false;
-	err = 0;
 }
 
 #ifdef	_POSIX_ASYNC_IO
@@ -33,7 +16,7 @@ void aio::cancel(void)
 	if(!pending)
 		return;
 
-	aio_cancel(fd, &cb);
+	aio_cancel(cb.aio_fildes, &cb);
 	err = aio_error(&cb);
 	pending = false;
 }
@@ -49,43 +32,61 @@ void aio::cancel(void)
 #endif
 
 #ifdef	_POSIX_ASYNC_IO
+
+bool aio::isPending(void)
+{
+	if(!pending)
+		return false;
+	if(err == EINPROGRESS)
+		err = aio_error(&cb);
+	if(err != EINPROGRESS)
+		return false;
+	return false;
+}
+
 ssize_t aio::result(void)
 {
-	ssize_t rc;
-	err = aio_error(&cb);
+	if(err == EINPROGRESS)
+		err = aio_error(&cb);
 	if(err == EINPROGRESS)
 		return 0;
 
-	rc = aio_return(&cb);
-	if(rc > 0)
-		offset += rc;
-
-	return rc;
+	pending = false;
+	return aio_return(&cb);
 }	
 
-void aio::write(caddr_t buf, size_t len)
+void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
 {
     cancel();
+	err = EINPROGRESS;
     memset(&cb, 0, sizeof(cb));
     cb.aio_fildes = fd;
     cb.aio_buf = buf;
     cb.aio_nbytes = len;
     cb.aio_offset = offset;
-    aio_write(&cb);
+    if(!aio_write(&cb))
+		pending = true;
 }
 
-void aio::read(caddr_t buf, size_t len)
+void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
 {
 	cancel();
+	err = EINPROGRESS;
 	memset(&cb, 0, sizeof(cb));
 	cb.aio_fildes = fd;
 	cb.aio_buf = buf;
 	cb.aio_nbytes = len;
 	cb.aio_offset = offset;
-	aio_read(&cb);
+	if(!aio_read(&cb))
+		pending = true;
 }
 		
 #else
+bool aio::isPending(void)
+{
+	return false;
+}
+
 ssize_t aio::result(void)
 {
 	if(!err)
@@ -94,7 +95,7 @@ ssize_t aio::result(void)
 		return -1;
 }
 
-void aio::write(caddr_t buf, size_t len)
+void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
 {
     ssize_t res = pwrite(fd, buf, len, offset);
     count = 0;
@@ -103,10 +104,9 @@ void aio::write(caddr_t buf, size_t len)
         err = errno;
     else
         count = res;
-    offset += count;
 }
 
-void aio::read(caddr_t buf, size_t len)
+void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
 {
 	ssize_t res = pread(fd, buf, len, offset);
 	count = 0;
@@ -115,7 +115,6 @@ void aio::read(caddr_t buf, size_t len)
 		err = errno;
 	else
 		count = res;
-	offset += count;
 }
 #endif
 
