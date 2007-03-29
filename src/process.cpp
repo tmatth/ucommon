@@ -309,7 +309,7 @@ void keypair::set(const char *id, const char *value)
 		create(id, value);
 }		
 
-void ucc::suspend(timeout_t timeout)
+extern "C" void cpr_sleep(timeout_t timeout)
 {
 #ifdef	_MSWINDOWS_
 	SleepEx(timeout, FALSE);
@@ -325,7 +325,7 @@ void ucc::suspend(timeout_t timeout)
 #endif
 }
 
-void ucc::suspend(void)
+extern "C" void cpr_yield(void)
 {
 #ifdef	HAVE_PTHREAD_YIELD
 	pthread_yield();
@@ -577,4 +577,65 @@ extern "C" size_t cpr_pagesize(void)
 #endif
 }
 
+extern "C" int cpr_scheduler(int policy, unsigned priority)
+{
+#if defined(_POSIX_PRIORITY_SCHEDULING)
+	struct sched_param sparam;
+    int min = sched_get_priority_min(policy);
+    int max = sched_get_priority_max(policy);
+	int pri = (int)priority;
 
+	if(min == max)
+		pri = min;
+	else 
+		pri += min;
+	if(pri > max)
+		pri = max;
+
+	memset(&sparam, 0, sizeof(sparam));
+	sparam.sched_priority = pri;
+	return sched_setscheduler(0, policy, &sparam);	
+#elif defined(_MSWINDOWS_)
+	return cpr_priority(priority);
+#endif
+}
+
+extern "C" int cpr_priority(unsigned priority)
+{
+#if defined(_POSIX_PRIORITY_SCHEDULING)
+	struct sched_param sparam;
+	pthread_t tid = pthread_self();
+    int min, max, policy;
+	int pri = (int)priority;
+
+	if(pthread_getschedparam(tid, &policy, &sparam))
+		return -1;
+
+	min = sched_get_priority_min(policy);
+    max = sched_get_priority_max(policy);
+
+	if(min == max)
+		return 0;
+
+	pri += min;
+	if(pri > max)
+		pri = max;
+	sparam.sched_priority = pri;
+	return pthread_setschedparam(tid, policy, &sparam);
+#elif defined(_MSWINDOWS_)
+	int pri = THREAD_PRIORITY_ABOVE_NORMAL;
+	switch(priority) {
+	case CPR_PRIORITY_LOWEST:
+		pri = THREAD_PRIORITY_LOWEST;
+		break;
+	case CPR_PRIORITY_LOW:
+		pri = THREAD_PRIORITY_LOW_PRIORITY;
+		break;
+	case CPR_PRIORITY_NORMAL:
+		pri = THREAD_PRIORITY_NORMAL;
+		break;
+	}
+	SetThreadPriority(GetCurrentThread(), priority);
+	return 0;
+#endif
+}

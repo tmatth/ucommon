@@ -7,11 +7,6 @@
 using namespace UCOMMON_NAMESPACE;
 
 const size_t Buffer::timeout = ((size_t)(-1));
-#if	_POSIX_PRIORITY_SCHEDULING
-int Thread::policy = SCHED_RR;
-#else
-int Thread::policy = 0;
-#endif
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
 
@@ -326,53 +321,56 @@ void Mutex::Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
-#ifdef PTHREAD_BARRIER_SERIAL_THREAD
-
-Spinlock::Spinlock()
+Barrier::Barrier(unsigned limit)
 {
-	crit(pthread_spin_init(&spin, 0) == 0);
-}
+	count = limit;
+	waits = 0;
 
-Spinlock::~Spinlock()
-{
-	pthread_spin_destroy(&spin);
-}
-
-void Spinlock::Exlock(void)
-{
-	pthread_spin_lock(&spin);
-}
-
-void Spinlock::Unlock(void)
-{
-	pthread_spin_unlock(&spin);
-}
-
-bool Spinlock::operator!()
-{
-	if(pthread_spin_trylock(&spin))
-		return true;
-
-	return false;
-}
-
-Barrier::Barrier(unsigned count)
-{
-	crit(pthread_barrier_init(&barrier, NULL, count) == 0);
+    crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
+    crit(pthread_mutex_init(&lock, NULL) == 0);
 }
 
 Barrier::~Barrier()
 {
-	pthread_barrier_destroy(&barrier);
+	for(;;)
+	{
+		pthread_mutex_lock(&lock);
+		if(waits)
+			pthread_cond_broadcast(&cond);
+		pthread_mutex_unlock(&lock);
+	}
+	pthread_mutex_destroy(&lock);
+	pthread_cond_destroy(&cond);
+}
+
+void Barrier::set(unsigned limit)
+{
+	pthread_mutex_lock(&lock);
+	count = limit;
+	if(count <= waits) {
+		waits = 0;
+		pthread_cond_broadcast(&cond);
+	}
+	pthread_mutex_unlock(&lock);
 }
 
 void Barrier::wait(void)
 {
-	pthread_barrier_wait(&barrier);
+	pthread_mutex_lock(&lock);
+	if(!count) {
+		pthread_mutex_unlock(&lock);
+		return;
+	}
+	if(++waits >= count) {
+		waits = 0;
+		pthread_cond_broadcast(&cond);
+		pthread_mutex_unlock(&lock);
+		return;
+	}
+	pthread_cond_wait(&cond, &lock);
+	pthread_mutex_unlock(&lock);
 }
-
-#endif
-
+	
 LockedPointer::LockedPointer()
 {
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -463,14 +461,8 @@ void Threadlock::Shlock(void)
 	pthread_rwlock_rdlock(&lock);
 }
 
-Thread::Thread(int p, size_t size)
+Thread::Thread(size_t size)
 {
-	if(p < 0) {
-		p += maxPriority();
-		if(p < 1)
-			p = 1;
-	}
-	priority = (unsigned)p;
 	stack = size;
 }
 
@@ -478,73 +470,16 @@ Thread::~Thread()
 {
 	Thread::release();
 }
-
-#ifdef	_POSIX_PRIORITY_SCHEDULING
-unsigned Thread::maxPriority(void)
-{
-	int min = sched_get_priority_min(policy);
-	int max = sched_get_priority_max(policy);
-	return max - min;
-}
-
-void Thread::raisePriority(unsigned pri)
-{
-	struct sched_param sparam;
-	bool reset = false;
-	int pval = (int)pri, rc;
-
-	if(!priority)
-		return;
-
-	if(!pri)
-		reset = true;
-		
-	pval += priority;
-
-	int min = sched_get_priority_min(policy);
-    int max = sched_get_priority_max(policy);
-
-	if(min == max)
-		return;
-	
-	pval += min;
-	if(pval > max)
-		pval = max;
-
-	if(tid != 0) {
-		sparam.sched_priority = pval;
-#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
-		if(reset)
-			rc = pthread_setschedparam(tid, policy, &sparam);		
-		else
-			rc = pthread_setschedprio(tid, pval);
-#else
-		rc = pthread_setschedparam(tid, policy, &sparam);
-#endif
-		assert(rc == 0);
-	}
-}
-#else
-unsigned Thread::maxPriority(void)
-{
-	return 0;
-}
-
-void Thread::setPriority(unsigned pri)
-{
-}	
-#endif
 		
 extern "C" {
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
-		th->resetPriority();
 		th->run();
 		th->release();
 		return NULL;
-	}
-};
+	};
+}
 
 void Thread::start(bool detach)
 {
@@ -558,6 +493,7 @@ void Thread::start(bool detach)
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	else
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+	pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
 // we typically use "stack 1" for min stack...
 #ifdef	PTHREAD_STACK_MIN
 	if(stack && stack < PTHREAD_STACK_MIN)
@@ -572,6 +508,11 @@ void Thread::start(bool detach)
 	pthread_attr_destroy(&attr);
 }
 
+void Thread::dealloc(void)
+{
+	delete this;
+}
+
 void Thread::release(void)
 {
 	pthread_t self = pthread_self();
@@ -579,17 +520,17 @@ void Thread::release(void)
 	if(running && pthread_equal(tid, self)) {
 		running = false;
 		if(detached) {
-			delete this;
+			dealloc();
 		}
 		else {
-			suspend();
+			cpr_yield();
 			pthread_testcancel();
 		}
 		pthread_exit(NULL);
 	}
 
 	if(!detached) {
-		suspend();
+		cpr_yield();
 		if(running) {
 			pthread_cancel(tid);
 			if(!pthread_join(tid, NULL)) 
@@ -1057,3 +998,4 @@ shared_release &shared_release::operator=(SharedPointer &p)
 	p.share();
 	return *this;
 }
+

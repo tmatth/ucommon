@@ -23,6 +23,11 @@
 
 typedef	void (*sighandler_t)(int);
 
+#define	CPR_PRIORITY_LOWEST 0
+#define	CPR_PRIORITY_LOW 1
+#define	CPR_PRIORITY_NORMAL 2
+#define	CPR_PRIORITY_HIGH 3
+
 NAMESPACE_UCOMMON
 
 class __EXPORT keypair : public SharedObject
@@ -110,9 +115,6 @@ public:
 		{return operator[](idx);};
 };
 
-__EXPORT void suspend(void);
-__EXPORT void suspend(timeout_t timeout);
-
 END_NAMESPACE
 
 #define	SPAWN_WAIT		0
@@ -122,6 +124,7 @@ END_NAMESPACE
 extern "C" {
 
 	__EXPORT size_t cpr_pagesize(void);
+	__EXPORT int cpr_scheduler(int policy, unsigned priority = CPR_PRIORITY_NORMAL);
 	__EXPORT void cpr_pattach(const char *path);
 	__EXPORT void cpr_pdetach(void);
 	__EXPORT int cpr_spawn(const char *fn, char **args, int mode);
@@ -137,12 +140,9 @@ extern "C" {
 #endif
 	__EXPORT pid_t cpr_wait(pid_t pid = 0, int *status = NULL);
 	__EXPORT pid_t cpr_create(const char *path, char **args, fd_t *iov);
-
-	inline void cpr_sleep(timeout_t timeout)
-		{ucc::suspend(timeout);};
-
-	inline void cpr_yield(void)
-		{ucc::suspend();};
+	__EXPORT void cpr_sleep(timeout_t timeout);
+	__EXPORT void cpr_yield(void);
+	__EXPORT int cpr_priority(unsigned priority);
 };
 
 #endif

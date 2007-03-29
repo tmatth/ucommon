@@ -17,51 +17,28 @@ NAMESPACE_UCOMMON
 
 class SharedPointer;
 
-#ifdef	PTHREAD_BARRIER_SERIAL_THREAD
-
 class __EXPORT Barrier 
 {
 private:
-	pthread_barrier_t barrier;
+	pthread_mutex_t lock;
+	pthread_cond_t cond;
+	unsigned count;
+	unsigned waits;
 
 public:
 	Barrier(unsigned count);
 	~Barrier();
 
+	void set(unsigned count);
 	void wait(void);
 };
-
-class __EXPORT Spinlock : public Exclusive
-{
-private:
-	pthread_spinlock_t spin;
-
-public:
-	Spinlock();
-	~Spinlock();
-
-	bool operator!(void);
-
-	void Exlock(void);
-	void Unlock(void);	
-
-	inline void lock(void)
-		{pthread_spin_lock(&spin);};
-
-	inline void unlock(void)
-		{pthread_spin_unlock(&spin);};
-
-	inline void release(void)
-		{pthread_spin_unlock(&spin);};
-};
-
-#endif
 	
 class __EXPORT Conditional : public Exclusive
 {
 private:
 	friend class Event;
 	friend class Semaphore;
+	friend class Barrier;
 
 	class __EXPORT attribute
 	{
@@ -247,9 +224,7 @@ public:
 class __EXPORT Thread
 {
 private:
-	static int policy; 
 	size_t stack;
-	unsigned priority;
 
 	pthread_t tid;
 	volatile bool running, detached;
@@ -257,7 +232,8 @@ private:
 	void start(bool detached);
 
 protected:
-	Thread(int pri = 0, size_t stack = 0);
+	Thread(size_t stack = 0);
+	virtual void dealloc(void);
 
 public:
 	virtual void run(void) = 0;
@@ -277,22 +253,6 @@ public:
 
 	inline void start(void)
 		{return start(false);};
-
-	inline static void setPolicy(int pol)
-		{policy = pol;};
-
-	inline static int getPolicy(void)
-		{return policy;};
-
-	void raisePriority(unsigned pri = 1);
-
-	inline void resetPriority(void)
-		{raisePriority(0);};
-
-	inline unsigned getPriority(void)
-		{return priority;};
-
-	static unsigned maxPriority(void);
 };
 
 class __EXPORT Queue : protected OrderedIndex, protected Conditional
@@ -569,8 +529,5 @@ inline void cancel(Thread *th)
 	__cancel__(PTHREAD_CANCEL_DEFERRED, PTHREAD_CANCEL_DISABLE)
 
 END_NAMESPACE
-
-extern "C" {
-};
 
 #endif

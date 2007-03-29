@@ -17,6 +17,12 @@ public:
 	virtual ~Object();
 
 	Object *copy(void);
+
+	inline void operator++(void)
+		{retain();};
+
+	inline void operator--(void)
+		{release();};
 };
 
 class __EXPORT CountedObject : public Object
