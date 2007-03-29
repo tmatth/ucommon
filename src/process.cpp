@@ -592,6 +592,11 @@ extern "C" int cpr_scheduler(int policy, unsigned priority)
 	if(pri > max)
 		pri = max;
 
+	if(policy == SCHED_OTHER) 
+		setpriority(PRIO_PROCESS, 0, -(priority - CPR_PRIORITY_NORMAL));
+	else
+		setpriority(PRIO_PROCESS, 0, -(priority - CPR_PRIORITY_LOW));
+
 	memset(&sparam, 0, sizeof(sparam));
 	sparam.sched_priority = pri;
 	return sched_setscheduler(0, policy, &sparam);	
