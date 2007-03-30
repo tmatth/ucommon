@@ -17,11 +17,44 @@ NAMESPACE_UCOMMON
 
 class SharedPointer;
 
-class __EXPORT Barrier 
+	
+class __EXPORT Conditional 
 {
 private:
-	pthread_mutex_t lock;
+	class __EXPORT attribute
+	{
+	public:
+		pthread_condattr_t attr;
+		attribute();
+	};
+	static attribute attr;
+
 	pthread_cond_t cond;
+	pthread_mutex_t mutex;
+
+protected:
+	bool wait(timeout_t timeout);
+	bool wait(Timer &timer);
+
+	inline void lock(void)
+		{pthread_mutex_lock(&mutex);};
+
+	inline void unlock(void)
+		{pthread_mutex_unlock(&mutex);};
+
+	inline void signal(void)
+		{pthread_cond_signal(&cond);};
+
+	inline void broadcast(void)
+		{pthread_cond_broadcast(&cond);};
+
+	Conditional();
+	~Conditional();
+};
+
+class __EXPORT Barrier : public Conditional 
+{
+private:
 	unsigned count;
 	unsigned waits;
 
@@ -32,62 +65,14 @@ public:
 	void set(unsigned count);
 	void wait(void);
 };
-	
-class __EXPORT Conditional : public Exclusive
-{
-private:
-	friend class Event;
-	friend class Semaphore;
-	friend class Barrier;
 
-	class __EXPORT attribute
-	{
-	public:
-		pthread_condattr_t attr;
-		attribute();
-	};
-	static attribute attr;
-
-	bool locked;
-	pthread_t locker;
-	pthread_cond_t cond;
-	pthread_mutex_t mutex;
-	bool live;
-
-protected:
-	void destroy(void);
-
-public:
-	Conditional();
-	~Conditional();
-
-	void Exlock(void);
-	void Unlock(void);
-
-	inline void lock(void)
-		{Conditional::Exlock();};
-
-	inline void unlock(void)
-		{Conditional::Unlock();};
-
-	inline void release(void)
-		{Conditional::Unlock();};
-
-	bool wait(timeout_t timeout = 0);
-	bool wait(Timer &timer);
-	void signal(bool broadcast);
-};
-
-class __EXPORT Semaphore : public Shared
+class __EXPORT Semaphore : public Shared, public Conditional
 {
 private:
 	unsigned count, waits, used;
-	pthread_cond_t cond;
-	pthread_mutex_t mutex;
 
 public:
 	Semaphore(unsigned limit = 0);
-	~Semaphore();
 
 	void Shlock(void);
 	void Unlock(void);
@@ -103,17 +88,14 @@ public:
 		{Semaphore::Unlock();};
 };
 
-class __EXPORT Event
+class __EXPORT Event : public Conditional
 {
 private:
-	pthread_mutex_t mutex;
-	pthread_cond_t cond;
 	unsigned count;
 	bool signalled;
 
 public:
 	Event();
-	~Event();
 
 	void signal(void);
 	void reset(void);
@@ -274,7 +256,6 @@ protected:
 
 public:
 	Queue(mempager *mem);
-	~Queue();
 
 	bool remove(Object *obj);
 	bool post(Object *obj, timeout_t timeout = 0);
@@ -304,7 +285,6 @@ protected:
 
 public:
 	Stack(mempager *pager);
-	~Stack();
 
 	bool remove(Object *obj);
 	bool push(Object *obj, timeout_t timeout = 0);

@@ -16,56 +16,40 @@ Mutex::attribute::attribute()
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 }
 
-Event::Event()
+Event::Event() : 
+Conditional()
 {
 	count = 0;
 	signalled = false;
-
-    crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
-    crit(pthread_mutex_init(&mutex, NULL) == 0);
-}
-
-Event::~Event()
-{
-    pthread_cond_destroy(&cond);
-    pthread_mutex_destroy(&mutex);
 }
 
 void Event::signal(void)
 {
-    pthread_mutex_lock(&mutex);
+	lock();
     signalled = true;
     ++count;
-    pthread_cond_broadcast(&cond);
-    pthread_mutex_unlock(&mutex);
+	broadcast();
+	unlock();
 }
 
 void Event::reset(void)
 {
-    pthread_mutex_lock(&mutex);
+	lock();
     signalled = true;
-	pthread_mutex_unlock(&mutex);
+	unlock();
 }
 
 bool Event::wait(Timer &timer)
 {
-	struct timespec ts;
-#if _POSIX_TIMERS > 0
-	memcpy(&ts, &timer.timer, sizeof(timer));
-#else
-	ts.tv_sec = timer.timer.tv_sec;
-	ts.tv_nsec = timer.timer.tv_usec * 1000l;
-#endif
+	bool notimeout = true;
+	unsigned last;
 
-	pthread_mutex_lock(&mutex);
-	int rc = 0;
-	unsigned last = count;
-	while(!signalled && count == last && rc != ETIMEDOUT)
-		rc = pthread_cond_timedwait(&cond, &mutex, &ts);
-	pthread_mutex_unlock(&mutex);
-	if(rc == ETIMEDOUT)
-		return false;
-	return true;
+	lock();
+	last = count;
+	while(!signalled && count == last && notimeout)
+		notimeout = wait(timer);
+	unlock();
+	return notimeout;
 }
 
 bool Event::wait(timeout_t timeout)
@@ -77,53 +61,43 @@ bool Event::wait(timeout_t timeout)
 
 void Event::wait(void)
 {
-	pthread_mutex_lock(&mutex);
+	lock();
 	unsigned last = count;
 	while(!signalled && count == last)
-		pthread_cond_wait(&cond, &mutex);
- 	pthread_mutex_unlock(&mutex);
+		wait();
+	unlock();
 }
 
-Semaphore::Semaphore(unsigned limit)
+Semaphore::Semaphore(unsigned limit) : 
+Conditional()
 {
 	count = limit;
 	waits = 0;
 	used = 0;
-
-	crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
-	crit(pthread_mutex_init(&mutex, NULL) == 0);
-}
-
-Semaphore::~Semaphore()
-{
-	pthread_cond_destroy(&cond);
-	pthread_mutex_destroy(&mutex);
 }
 
 unsigned Semaphore::getUsed(void)
 {
 	unsigned rtn;
-	pthread_mutex_lock(&mutex);
+	lock();
 	rtn = used;
-	pthread_mutex_unlock(&mutex);
+	unlock();
 	return rtn;
 }
 
 unsigned Semaphore::getCount(void)
 {
     unsigned rtn;
-    pthread_mutex_lock(&mutex);
+	lock();
     rtn = count;
-    pthread_mutex_unlock(&mutex);
+	unlock();
     return rtn;
 }
 
 bool Semaphore::wait(Timer &timer)
 {
 	struct timespec ts;
-	int rtn = 0;
 	bool result = true;
-	pthread_mutex_lock(&mutex);
 
 #if _POSIX_TIMERS > 0
 	memcpy(&ts, &timer.timer, sizeof(ts));
@@ -131,17 +105,17 @@ bool Semaphore::wait(Timer &timer)
 	ts.tv_sec = timer.timer.tv_sec;
 	ts.tv_nsec = timer.timer.tv_usec * 1000l;
 #endif
+
+	lock();
 	if(used >= count) {
 		++waits;
-		while(used >= count && rtn != ETIMEDOUT)
-			pthread_cond_timedwait(&cond, &mutex, &ts);
+		while(used >= count && result)
+			result = wait(timer);
 		--waits;
 	}
-	if(rtn == ETIMEDOUT)
-		result = false;
-	else
+	if(result)
 		++used;
-	pthread_mutex_unlock(&mutex);
+	unlock();
 	return result;
 }
 
@@ -158,44 +132,45 @@ bool Semaphore::wait(timeout_t timeout)
 		
 void Semaphore::Shlock(void)
 {
-	pthread_mutex_lock(&mutex);
+	lock();
 	if(used >= count) {
 		++waits;
 		while(used >= count)
-			pthread_cond_wait(&cond, &mutex);
+			wait();
 		--waits;
 	}
 	++used;
-	pthread_mutex_unlock(&mutex);
+	unlock();
 }
 
 void Semaphore::Unlock(void)
 {
-	pthread_mutex_lock(&mutex);
+	lock();
 	if(used)
 		--used;
 	if(waits)
-		pthread_cond_signal(&cond);
-	pthread_mutex_unlock(&mutex);
+		signal();
+	unlock();
 }
 
 void Semaphore::set(unsigned value)
 {
 	unsigned diff;
-	pthread_mutex_lock(&mutex);
+
+	lock();
 	count = value;
 	if(used >= count || !waits) {
-		pthread_mutex_unlock(&mutex);
+		unlock();
 		return;
 	}
 	diff = count - used;
 	if(diff > waits)
 		diff = waits;
-	pthread_mutex_unlock(&mutex);
+	unlock();
 	while(diff--) {
-		pthread_mutex_lock(&mutex);
-		pthread_cond_signal(&cond);
-		pthread_mutex_unlock(&mutex);
+		lock();
+		signal();
+		unlock();
 	}
 }
 
@@ -215,90 +190,39 @@ Conditional::Conditional()
 {
 	crit(pthread_cond_init(&cond, &attr.attr) == 0);
 	crit(pthread_mutex_init(&mutex, NULL) == 0);
-	memset(&locker, 0, sizeof(locker));
-	live = true;
-	locked = false;
 }
 
-void Conditional::Exlock(void)
+Conditional::~Conditional()
 {
-	pthread_mutex_lock(&mutex);
-	locker = pthread_self();
-	locked = true;
-}
-
-void Conditional::Unlock(void)
-{
-	locked = false;
-	memset(&locker, 0, sizeof(locker));
-	pthread_mutex_unlock(&mutex);
-}
-
-void Conditional::signal(bool broadcast)
-{
-	if(broadcast)
-		pthread_cond_broadcast(&cond);
-	else
-		pthread_cond_signal(&cond);
+	pthread_cond_destroy(&cond);
+	pthread_mutex_destroy(&mutex);
 }
 
 bool Conditional::wait(timeout_t timeout)
 {
-	if(timeout) {
-		Timer timer;
-		timer += timeout;
-		return wait(timer);
+	if(!timeout) {
+		pthread_cond_wait(&cond, &mutex);
+		return true;
 	}
 
-	pthread_t self = pthread_self();
-	if(!locked || !pthread_equal(locker, self))
-		pthread_mutex_lock(&mutex);
-
-	pthread_cond_wait(&cond, &mutex);
-
-	if(!locked || !pthread_equal(locker, self))
-		pthread_mutex_unlock(&mutex);
-	return true;
-}		
+	Timer timer;
+	timer += timeout;
+	return wait(timer);
+}
 
 bool Conditional::wait(Timer &timer)
 {
 	struct timespec ts;
-	int rtn;
 
 #if _POSIX_TIMERS > 0
-	memcpy(&ts, &timer.timer, sizeof(ts));
+    memcpy(&ts, &timer.timer, sizeof(ts));
 #else
-	ts.tv_sec = timer.timer.tv_sec;
-	ts.tv_nsec = timer.timer.tv_usec * 1000l;
+    ts.tv_sec = timer.timer.tv_sec;
+    ts.tv_nsec = timer.timer.tv_usec * 1000l;
 #endif
-	pthread_t self = pthread_self();
-	if(!locked || !pthread_equal(locker, self))
-		pthread_mutex_lock(&mutex);
-
-	rtn = pthread_cond_timedwait(&cond, &mutex, &ts);
-
-	if(!locked || !pthread_equal(locker, self))
-		pthread_mutex_unlock(&mutex);
-
-	if(rtn == ETIMEDOUT)
+	if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
 		return false;
 	return true;
-}		
-
-
-Conditional::~Conditional()
-{
-	destroy();
-}
-
-void Conditional::destroy(void)
-{
-	if(live) {
-		pthread_cond_destroy(&cond);
-		pthread_mutex_destroy(&mutex);
-	}
-	live = false;
 }
 
 Mutex::Mutex()
@@ -321,54 +245,50 @@ void Mutex::Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
-Barrier::Barrier(unsigned limit)
+Barrier::Barrier(unsigned limit) :
+Conditional()
 {
 	count = limit;
 	waits = 0;
-
-    crit(pthread_cond_init(&cond, &Conditional::attr.attr) == 0);
-    crit(pthread_mutex_init(&lock, NULL) == 0);
 }
 
 Barrier::~Barrier()
 {
 	for(;;)
 	{
-		pthread_mutex_lock(&lock);
+		lock();
 		if(waits)
-			pthread_cond_broadcast(&cond);
-		pthread_mutex_unlock(&lock);
+			broadcast();
+		unlock();
 	}
-	pthread_mutex_destroy(&lock);
-	pthread_cond_destroy(&cond);
 }
 
 void Barrier::set(unsigned limit)
 {
-	pthread_mutex_lock(&lock);
+	lock();
 	count = limit;
 	if(count <= waits) {
 		waits = 0;
-		pthread_cond_broadcast(&cond);
+		broadcast();
 	}
-	pthread_mutex_unlock(&lock);
+	unlock();
 }
 
 void Barrier::wait(void)
 {
-	pthread_mutex_lock(&lock);
+	lock();
 	if(!count) {
-		pthread_mutex_unlock(&lock);
+		unlock();
 		return;
 	}
 	if(++waits >= count) {
 		waits = 0;
-		pthread_cond_broadcast(&cond);
-		pthread_mutex_unlock(&lock);
+		broadcast();
+		unlock();
 		return;
 	}
-	pthread_cond_wait(&cond, &lock);
-	pthread_mutex_unlock(&lock);
+	wait();
+	unlock();
 }
 	
 LockedPointer::LockedPointer()
@@ -554,16 +474,11 @@ OrderedIndex(), Conditional()
 	limit = used = 0;
 }
 
-Queue::~Queue()
-{
-	Conditional::destroy();
-}
-
 bool Queue::remove(Object *o)
 {
 	bool rtn = false;
 	linked_pointer<member> node;
-	Exlock();
+	lock();
 	node = begin();
 	while(node) {
 		if(node->object == o)
@@ -577,7 +492,7 @@ bool Queue::remove(Object *o)
 		node->delist(this);
 		node->LinkedObject::enlist(&freelist);			
 	}
-	Unlock();
+	unlock();
 	return rtn;
 }
 
@@ -585,9 +500,9 @@ Object *Queue::lifo(timeout_t timeout)
 {
     member *member;
     Object *obj = NULL;
-    Exlock();
+	lock();
     if(!Conditional::wait(timeout)) {
-        Unlock();
+		unlock();
         return NULL;
     }
     if(tail) {
@@ -597,8 +512,8 @@ Object *Queue::lifo(timeout_t timeout)
 		member->delist(this);
         member->LinkedObject::enlist(&freelist);
     }
-    Conditional::signal(false);
-    Unlock();
+	signal();
+	unlock();
     return obj;
 }
 
@@ -606,9 +521,9 @@ Object *Queue::fifo(timeout_t timeout)
 {
 	linked_pointer<member> node;
 	Object *obj = NULL;
-	Exlock();
+	lock();
 	if(!Conditional::wait(timeout)) {
-		Unlock();
+		unlock();
 		return NULL;
 	}
 	if(head) {
@@ -620,8 +535,8 @@ Object *Queue::fifo(timeout_t timeout)
 			tail = NULL;
 		node->LinkedObject::enlist(&freelist);
 	}
-	Conditional::signal(false);
-	Unlock();
+	signal();
+	unlock();
 	return obj;
 }
 
@@ -629,10 +544,10 @@ bool Queue::post(Object *object, timeout_t timeout)
 {
 	member *node;
 	LinkedObject *mem;
-	Exlock();
+	lock();
 	while(limit && used == limit) {
 		if(!Conditional::wait(timeout)) {
-			Unlock();
+			unlock();
 			return false;	
 		}
 	}
@@ -640,28 +555,28 @@ bool Queue::post(Object *object, timeout_t timeout)
 	if(freelist) {
 		mem = freelist;
 		freelist = freelist->getNext();
-		Unlock();
+		unlock();
 		node = new((caddr_t)mem) member(this, object);
 	}
 	else {
-		Unlock();
+		unlock();
 		if(pager)
 			node = new((caddr_t)(pager->alloc(sizeof(member)))) member(this, object);
 		else
 			node = new member(this, object);
 	}
-	Lock();
-	Conditional::signal(false);
-	Unlock();
+	lock();
+	signal();
+	unlock();
 	return true;
 }
 
 size_t Queue::getCount(void)
 {
 	size_t count;
-	Exlock();
+	lock();
 	count = used;
-	Unlock();
+	unlock();
 	return count;
 }
 
@@ -681,16 +596,11 @@ Conditional()
 	limit = used = 0;
 }
 
-Stack::~Stack()
-{
-	Conditional::destroy();
-}
-
 bool Stack::remove(Object *o)
 {
 	bool rtn = false;
 	linked_pointer<member> node;
-	Exlock();
+	lock();
 	node = static_cast<member*>(usedlist);
 	while(node) {
 		if(node->object == o)
@@ -704,7 +614,7 @@ bool Stack::remove(Object *o)
 		node->delist(&usedlist);
 		node->enlist(&freelist);			
 	}
-	Unlock();
+	unlock();
 	return rtn;
 }
 
@@ -712,9 +622,9 @@ Object *Stack::pull(timeout_t timeout)
 {
     member *member;
     Object *obj = NULL;
-    Exlock();
+	lock();
     if(!Conditional::wait(timeout)) {
-        Unlock();
+		unlock();
         return NULL;
     }
     if(usedlist) {
@@ -723,8 +633,8 @@ Object *Stack::pull(timeout_t timeout)
 		usedlist = member->getNext();
         member->enlist(&freelist);
     }
-    Conditional::signal(false);
-    Unlock();
+	signal();
+	unlock();
     return obj;
 }
 
@@ -732,10 +642,10 @@ bool Stack::push(Object *object, timeout_t timeout)
 {
 	member *node;
 	LinkedObject *mem;
-	Exlock();
+	lock();
 	while(limit && used == limit) {
 		if(!Conditional::wait(timeout)) {
-			Unlock();
+			unlock();
 			return false;	
 		}
 	}
@@ -743,11 +653,11 @@ bool Stack::push(Object *object, timeout_t timeout)
 	if(freelist) {
 		mem = freelist;
 		freelist = freelist->getNext();
-		Unlock();
+		unlock();
 		node = new((caddr_t)mem) member(this, object);
 	}
 	else {
-		Unlock();
+		unlock();
 		if(pager) {
 			caddr_t ptr = (caddr_t)pager->alloc(sizeof(member));
 			node = new(ptr) member(this, object);
@@ -755,22 +665,23 @@ bool Stack::push(Object *object, timeout_t timeout)
 		else
 			node = new member(this, object);
 	}
-	Lock();
-	Conditional::signal(false);
-	Unlock();
+	lock();
+	signal();
+	unlock();
 	return true;
 }
 
 size_t Stack::getCount(void)
 {
 	size_t count;
-	Exlock();
+	lock();
 	count = used;
-	Unlock();
+	unlock();
 	return count;
 }
 
-Buffer::Buffer(size_t capacity, size_t osize) : Conditional()
+Buffer::Buffer(size_t capacity, size_t osize) : 
+Conditional()
 {
 	size = capacity;
 	objsize = osize;
@@ -791,7 +702,6 @@ Buffer::~Buffer()
 	if(buf)
 		free(buf);
 	buf = NULL;
-	Conditional::destroy();
 }
 
 size_t Buffer::onWait(void *data)
@@ -835,16 +745,16 @@ size_t Buffer::onPeek(void *data)
 size_t Buffer::wait(void *buf, timeout_t timeout)
 {
 	size_t rc = 0;
-	
-	Exlock();
+
+	lock();	
 	if(!Conditional::wait(timeout)) {
-		Unlock();
+		unlock();
 		return Buffer::timeout;
 	}
 	rc = onWait(buf);
 	--used;
-	Conditional::signal(false);
-	Unlock();
+	signal();
+	unlock();
 	return rc;
 }
 
@@ -852,32 +762,32 @@ size_t Buffer::pull(void *buf, timeout_t timeout)
 {
     size_t rc = 0;
 
-    Exlock();
+	lock();
     if(!Conditional::wait(timeout)) {
-        Unlock();
+		unlock();
         return Buffer::timeout;
     }
     rc = onPull(buf);
     --used;
-    Conditional::signal(false);
-    Unlock();
+	signal();
+	unlock();
     return rc;
 }
 
 size_t Buffer::post(void *buf, timeout_t timeout)
 {
 	size_t rc = 0;
-	Exlock();
+	lock();
 	while(used == size) {
 		if(!Conditional::wait(timeout)) {
-			Unlock();
+			unlock();
 			return Buffer::timeout;
 		}
 	}
 	rc = onPost(buf);
 	++used;
-	Conditional::signal(false);
-	Unlock();
+	signal();
+	unlock();
 	return rc;
 }
 
@@ -885,13 +795,13 @@ size_t Buffer::peek(void *buf)
 {
 	size_t rc = 0;
 
-	Lock();
+	lock();
 	if(!used) {
-		Unlock();
+		unlock();
 		return 0;
 	}
 	rc = onPeek(buf);
-	Unlock();
+	unlock();
 	return rc;
 }
 
