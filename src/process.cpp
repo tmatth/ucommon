@@ -579,7 +579,7 @@ extern "C" size_t cpr_pagesize(void)
 
 extern "C" int cpr_scheduler(int policy, unsigned priority)
 {
-#if defined(_POSIX_PRIORITY_SCHEDULING)
+#if _POSIX_PRIORITY_SCHEDULING > 0
 	struct sched_param sparam;
     int min = sched_get_priority_min(policy);
     int max = sched_get_priority_max(policy);
