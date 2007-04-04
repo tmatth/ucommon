@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/socket.h>
 #include <ucommon/string.h>
 #ifndef	_MSWINDOWS_

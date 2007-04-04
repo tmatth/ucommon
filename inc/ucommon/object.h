@@ -2,7 +2,7 @@
 #define	_UCOMMON_OBJECT_H_
 
 #ifndef	_UCOMMON_CONFIG_H_
-#include <ucommon/config.h>
+#include <ucommon/platform.h>
 #endif
 
 #include <stdlib.h>

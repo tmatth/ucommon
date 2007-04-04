@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/file.h>
 #include <errno.h>
 #include <string.h>

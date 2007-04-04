@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/misc.h>
 #include <ucommon/string.h>
 #include <fcntl.h>

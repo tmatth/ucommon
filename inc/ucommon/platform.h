@@ -13,10 +13,6 @@
 #define	_POSIX_PTHREAD_SEMANTICS
 #endif
 
-#ifdef	HAVE_CONFIG_H
-#undef	HAVE_CONFIG_H
-#endif
-
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_
 #if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501

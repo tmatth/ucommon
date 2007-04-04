@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/timers.h>
 
 using namespace UCOMMON_NAMESPACE;

@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/string.h>
 #include <stdarg.h>
 #include <ctype.h>

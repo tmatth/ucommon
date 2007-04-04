@@ -2,7 +2,7 @@
 #define	_UCOMMON_BITMAP_H_
 
 #ifndef _UCOMMON_CONFIG_H_
-#include <ucommon/config.h>
+#include <ucommon/platform.h>
 #endif
 
 NAMESPACE_UCOMMON

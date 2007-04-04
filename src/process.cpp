@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/process.h>
 #include <ucommon/string.h>
 

@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/access.h>
 
 using namespace UCOMMON_NAMESPACE;

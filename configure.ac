@@ -37,7 +37,7 @@ AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 AM_INIT_AUTOMAKE(libucommon, [$VERSION])
-AM_CONFIG_HEADER(private.h)
+AM_CONFIG_HEADER(config.h)
 
 LT_MAJOR="`echo $LT_VERSION | sed s/:.*$//`"
 LT_MINOR="`echo $LT_VERSION | sed s/.*://`"

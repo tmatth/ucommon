@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/memory.h>
 #include <unistd.h>
 #include <limits.h>

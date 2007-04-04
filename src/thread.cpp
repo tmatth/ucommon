@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/thread.h>
 #include <ucommon/process.h>
 #include <errno.h>

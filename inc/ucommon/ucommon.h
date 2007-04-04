@@ -1,6 +1,6 @@
 #ifndef	_UCOMMON_UCOMMON_H_
 #define	_UCOMMON_UCOMMON_H_
-#include <ucommon/config.h>
+#include <ucommon/platform.h>
 #include <ucommon/object.h>
 #include <ucommon/counter.h>
 #include <ucommon/vector.h>

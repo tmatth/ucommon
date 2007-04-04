@@ -1,4 +1,4 @@
-#include <private.h>
+#include <config.h>
 #include <ucommon/counter.h>
 #include <stdlib.h>
 #include <unistd.h>
