@@ -1,6 +1,7 @@
 #include <config.h>
 #include <ucommon/process.h>
 #include <ucommon/string.h>
+#include <ucommon/misc.h>
 
 #if defined(HAVE_SIGACTION) && defined(HAVE_BSD_SIGNAL_H)
 #undef	HAVE_BSD_SIGNAL_H
@@ -64,121 +65,6 @@ keypair::callback::~callback()
 void keypair::callback::release(void)
 {
 	delist(keypair::callbacks.root());
-}
-
-xmlconfig::xmlnode::xmlnode() : 
-OrderedObject(), child()
-{
-	id = NULL;
-	text = NULL;
-}
-
-xmlconfig::xmlnode::xmlnode(xmlnode *p, const char *tag) :
-OrderedObject(&p->child), child()
-{
-	parent = p;
-	id = tag;
-	text = NULL;
-}
-
-const char *xmlconfig::xmlnode::getValue(const char *id)
-{
-	linked_pointer<xmlnode> node = child.begin();
-	if(!id)
-		return text;
-
-	while(node) {
-		if(!strcmp(node->id, id))
-			return node->text;
-		node.next();
-	}
-	return NULL;
-}
-
-bool xmlconfig::load(const char *fn)
-{
-	FILE *fp = fopen(fn, "r");
-	char *cp, *ep, *bp;
-	caddr_t mp;
-	xmlnode *node = &root;
-	size_t len = 0;
-	bool rtn = false;
-
-	if(!fp)
-		return false;
-
-	buffer = "";
-
-	while(node) {
-		cp = buffer.c_mem() + buffer.len();
-		if(buffer.len() < 4090) {
-			len = fread(cp, 1, 4096 - buffer.len() - 1, fp);
-		}
-		else
-			len = 0;
-
-		if(len < 0 || !buffer.chr('<'))
-			goto exit;
-		cp[len] = 0;
-		buffer = buffer.c_str();
-		cp = buffer.c_mem();
-
-		while(node && cp && *cp)
-		{
-			while(isspace(*cp))
-				++cp;
-
-			if(cp && *cp && !node)
-				goto exit;
-
-			bp = strchr(cp, '<');
-			ep = strchr(cp, '>');
-			if(!ep && bp == cp)
-				break;
-			if(!bp ) {
-				cp = cp + strlen(cp);
-				break;
-			}
-			if(bp > cp) {
-				if(node->text)
-					goto exit;
-				*bp = 0;
-				ep = bp - 1;
-				while(ep > cp && isspace(*ep)) {
-					*ep = 0;
-					--ep;
-				}		
-				ep = (char *)mempager::alloc(strlen(cp));
-				*bp = '<';
-				cp = bp;
-				continue;
-			}
-	
-			*ep = 0;
-			cp = ++ep;
-
-			if(!strncmp(bp, "</", 2)) {
-				if(strcmp(bp + 2, node->id))
-					goto exit;
-				node = node->parent;
-				continue;
-			}		
-			if(!node->id) {
-				node->id = mempager::dup(++bp);
-				continue;
-			}
-			if(node->text)
-				goto exit;
-			mp = (caddr_t)mempager::alloc(sizeof(xmlnode));
-			node = new(mp) xmlnode(node, mempager::dup(++bp));
-		}
-		buffer = cp;
-	}
-	if(!node && root.id)
-		rtn = true;
-exit:
-	fclose(fp);
-	return rtn;
 }
 	
 keypair::keydata::keydata(keydata **root, const char *kid, const char *value) :

@@ -1,9 +1,66 @@
 #ifndef _UCOMMON_MISC_H_
 #define	_UCOMMON_MISC_H_
 
-#ifndef _UCOMMON_CONFIG_H_
-#include <ucommon/platform.h>
+#ifndef _UCOMMON_LINKED_H_
+#include <ucommon/linked.h>
 #endif
+
+#ifndef	_UCOMMON_THREAD_H_
+#include <ucommon/thread.h>
+#endif
+
+NAMESPACE_UCOMMON
+
+class __EXPORT xmlnode : public OrderedObject
+{
+protected:
+	friend class XMLTree;
+
+	xmlnode();
+	xmlnode(xmlnode *parent, const char *id);
+	OrderedIndex child;
+	const char *id;
+	const char *text;
+	xmlnode *parent;
+
+public:
+	inline const char *getId(void)
+		{return id;};
+
+	inline const char *getText(void)
+		{return text;};
+
+	const char *getValue(const char *id);
+};
+
+class __EXPORT XMLTree : public SharedObject, public mempager
+{
+public:
+	XMLTree(size_t s);
+	virtual ~XMLTree();
+
+	bool load(const char *name);
+
+	inline operator bool()
+		{return (root.id != NULL);};
+
+	inline bool operator!()
+		{return (root.id == NULL);};
+
+protected:
+	xmlnode root;
+	bool updated;
+	unsigned loaded;
+	size_t size;
+
+    bool change(xmlnode *node, const char *text);
+    void remove(xmlnode *node);
+    xmlnode *add(xmlnode *parent, const char *id, const char *text = NULL);
+
+	virtual bool validate(xmlnode *node);
+};
+
+END_NAMESPACE
 
 extern "C" {
 	const size_t uuid_size = 38;

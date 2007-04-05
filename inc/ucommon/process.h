@@ -34,43 +34,6 @@ typedef	void (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON
 
-class __EXPORT xmlconfig : public SharedObject, public mempager
-{
-public:
-	class __EXPORT xmlnode : public OrderedObject
-	{
-	protected:
-		friend class xmlconfig;
-
-		xmlnode();
-		xmlnode(xmlnode *parent, const char *id);
-		OrderedIndex child;
-		const char *id;
-		const char *text;
-		xmlnode *parent;
-	public:
-		inline const char *getId(void)
-			{return id;};
-
-		inline const char *getText(void)
-			{return text;};
-
-		const char *getValue(const char *id);
-	};
-
-	bool load(const char *name);
-
-	inline operator bool()
-		{return (root.id != NULL);};
-
-	inline bool operator!()
-		{return (root.id == NULL);};
-
-protected:
-	stringbuf<4096> buffer; 
-	xmlnode root;
-};
-
 class __EXPORT keypair : public SharedObject
 {
 public:
