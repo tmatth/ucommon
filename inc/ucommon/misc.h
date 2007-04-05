@@ -11,51 +11,43 @@
 
 NAMESPACE_UCOMMON
 
-class __EXPORT xmlnode : public OrderedObject
-{
-protected:
-	friend class XMLTree;
-
-	xmlnode();
-	xmlnode(xmlnode *parent, const char *id);
-	OrderedIndex child;
-	const char *id;
-	const char *text;
-	xmlnode *parent;
-
-public:
-	inline const char *getId(void)
-		{return id;};
-
-	inline const char *getText(void)
-		{return text;};
-
-	const char *getValue(const char *id);
-};
-
 class __EXPORT XMLTree : public SharedObject, public mempager
 {
 public:
-	XMLTree(size_t s);
+	typedef treemap<char *> xmlnode;
+
+    class __EXPORT callback : public LinkedObject
+    {
+    friend class XMLTree;
+    protected:
+        callback();
+        virtual ~callback();
+
+        void release(void);
+
+        virtual void notify(SharedPointer *ptr, XMLTree *cfg) = 0;
+    };
+
+	XMLTree(size_t s, char *name);
 	virtual ~XMLTree();
 
-	bool load(const char *name);
-
-	inline operator bool()
-		{return (root.id != NULL);};
-
-	inline bool operator!()
-		{return (root.id == NULL);};
+	bool load(const char *name, xmlnode *top = NULL);
 
 protected:
 	xmlnode root;
-	bool updated;
 	unsigned loaded;
 	size_t size;
 
     bool change(xmlnode *node, const char *text);
     void remove(xmlnode *node);
     xmlnode *add(xmlnode *parent, const char *id, const char *text = NULL);
+	xmlnode *search(xmlnode *base, const char *leaf, const char *value);
+
+	inline xmlnode *find(const char *id)
+		{return root.find(id);};
+
+	inline xmlnode *path(const char *p)
+		{return root.path(p);};
 
 	virtual bool validate(xmlnode *node);
 };

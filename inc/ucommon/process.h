@@ -54,7 +54,7 @@ public:
 	friend class keypair;
 
 	public:
-		keydata(keydata **root, const char *kid, const char *value = NULL);
+		keydata(keydata **root, char *kid, const char *value = NULL);
 
 	private:
 #pragma pack(1)
@@ -79,7 +79,7 @@ private:
 
 	void update(keydata *key, const char *value);
 
-	keydata *create(const char *key, const char *data = NULL);
+	keydata *create(char *key, const char *data = NULL);
 	const char *alloc(const char *data);
 	void dealloc(const char *data);
 	void dealloc(void);
@@ -87,7 +87,7 @@ private:
 
 public:
 	typedef struct {
-		const char *key;
+		char *key;
 		const char *data;
 	} define;
 
@@ -97,7 +97,7 @@ public:
 	keypair(define *defaults = NULL, mempager *mem = NULL);
 	~keypair();
 
-	void set(const char *id, const char *value);
+	void set(char *id, const char *value);
 	const char *get(const char *id);
 	void load(FILE *fp, const char *key = NULL);
 	void load(define *defaults);

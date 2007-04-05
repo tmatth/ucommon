@@ -5,87 +5,74 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-xmlnode::xmlnode() : 
-OrderedObject(), child()
-{
-	id = NULL;
-	text = NULL;
-}
-
-xmlnode::xmlnode(xmlnode *p, const char *tag) :
-OrderedObject(&p->child), child()
-{
-	parent = p;
-	id = tag;
-	text = NULL;
-}
-
-const char *xmlnode::getValue(const char *id)
-{
-	linked_pointer<xmlnode> node = child.begin();
-	if(!id)
-		return text;
-
-	while(node) {
-		if(!strcmp(node->id, id))
-			return node->text;
-		node.next();
-	}
-	return NULL;
-}
-
-XMLTree::XMLTree(size_t s) :
+XMLTree::XMLTree(size_t s, char *name) :
 mempager(s), root()
 {
 	size = s;
-	updated = false;
+	root.setId(name);
 }
 
 XMLTree::~XMLTree()
 {
+	root.remove();
 	mempager::purge();
 }
 
+XMLTree::xmlnode *XMLTree::search(xmlnode *base, const char *find, const char *text)
+{
+	linked_pointer<xmlnode> node = node->getFirst();
+	xmlnode *leaf;
+	
+	while(node) {
+		leaf = node->getLeaf(find);
+		if(leaf && !cpr_stricmp(leaf->getData(), text))
+			return leaf;
+		node.next();
+	}
+	return NULL;
+} 
+
 bool XMLTree::change(xmlnode *node, const char *text)
 {
-	if(node->child.begin())
+	if(node->getFirst())
 		return false;
 
-	updated = true;
-	node->text = dup(text);
+	node->setPointer(dup(text));
 	return true;
 }
 
 void XMLTree::remove(xmlnode *node)
 {
-	node->delist(&node->parent->child);
-	updated = true;
+	node->remove();
 	loaded = 0;
 }
 
-xmlnode *XMLTree::add(xmlnode *node, const char *id, const char *text)
+XMLTree::xmlnode *XMLTree::add(xmlnode *node, const char *id, const char *text)
 {
 	caddr_t mp = (caddr_t)alloc(sizeof(xmlnode));
 	node = new(mp) xmlnode(node, dup(id));
-	updated = true;
 
 	if(text)
-		node->text = dup(text);
+		node->setPointer(dup(text));
 	if(validate(node))
 		return node;
 	remove(node);
 	return NULL;
 }
 
-bool XMLTree::load(const char *fn)
+bool XMLTree::load(const char *fn, xmlnode *node)
 {
 	FILE *fp = fopen(fn, "r");
 	char *cp, *ep, *bp;
 	caddr_t mp;
-	xmlnode *node = &root;
 	ssize_t len = 0;
 	bool rtn = false;
 	string buffer(size);
+	bool document = false;
+	xmlnode *match;
+
+	if(!node)
+		node = &root;
 
 	if(!fp)
 		return false;
@@ -126,7 +113,7 @@ bool XMLTree::load(const char *fn)
 				break;
 			}
 			if(bp > cp) {
-				if(node->text)
+				if(node->getData() != NULL)
 					goto exit;
 				*bp = 0;
 				ep = bp - 1;
@@ -137,7 +124,7 @@ bool XMLTree::load(const char *fn)
 				len = strlen(cp);
 				ep = (char *)alloc(len);
 				cpr_xmldecode(ep, len, cp);
-				node->text = ep;
+				node->setPointer(ep);
 				*bp = '<';
 				cp = bp;
 				continue;
@@ -147,29 +134,45 @@ bool XMLTree::load(const char *fn)
 			cp = ++ep;
 
 			if(!strncmp(bp, "</", 2)) {
-				if(strcmp(bp + 2, node->id))
+				if(strcmp(bp + 2, node->getId()))
 					goto exit;
 				if(!validate(node))
 					goto exit;
-				node = node->parent;
+				node = node->getParent();
 				continue;
 			}		
-			if(!node->id) {
-				node->id = dup(++bp);
+			++bp;
+
+			if(!document) {
+				if(strcmp(node->getId(), bp))
+					goto exit;
+				document = true;
 				continue;
 			}
-			if(node->text)
+
+			if(node->getData() != NULL)
 				goto exit;
+
+			++bp;
+
+			match = node->getChild(bp);
+			if(match) {
+				match->setPointer(NULL);
+				node = match;
+				continue;
+			}
 			mp = (caddr_t)alloc(sizeof(xmlnode));
-			node = new(mp) xmlnode(node, dup(++bp));
+			node = new(mp) xmlnode(node, dup(bp));
 		}
 		buffer = cp;
 	}
-	if(!node && root.id)
+	if(!node && root.getId())
 		rtn = true;
 exit:
 	if(rtn)
 		loaded = getPages();
+	else
+		root.remove();
 
 	fclose(fp);
 	return rtn;

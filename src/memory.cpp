@@ -193,7 +193,7 @@ PagerObject *PagerPool::get(size_t size)
 	return ptr;
 }
 
-keyassoc::keydata::keydata(NamedObject **root, const char *id, unsigned max) :
+keyassoc::keydata::keydata(NamedObject **root, char *id, unsigned max) :
 NamedObject(root, id, max)
 {
 	data = NULL;
@@ -232,7 +232,7 @@ void *keyassoc::get(const char *id)
 	return kd->data;
 }
 
-void keyassoc::set(const char *id, void *d)
+void keyassoc::set(char *id, void *d)
 {
     keydata *kd = static_cast<keydata *>(NamedObject::map(root, id, max));
 	if(!kd) {

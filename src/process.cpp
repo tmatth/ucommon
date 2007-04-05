@@ -67,7 +67,7 @@ void keypair::callback::release(void)
 	delist(keypair::callbacks.root());
 }
 	
-keypair::keydata::keydata(keydata **root, const char *kid, const char *value) :
+keypair::keydata::keydata(keydata **root, char *kid, const char *value) :
 NamedObject((NamedObject **)root, kid)
 {
 	data = value;
@@ -149,7 +149,7 @@ void keypair::validate(unsigned total, const char *key)
 	crit(count == total && !cpr_stricmp(index[count - 1]->id, key));
 }
 
-keypair::keydata *keypair::create(const char *id, const char *data)
+keypair::keydata *keypair::create(char *id, const char *data)
 {
 	size_t overdraft = cpr_strlen(id);
 	if(!data)
@@ -248,7 +248,7 @@ void keypair::load(FILE *fp, const char *section)
 			value.split(strchr(value[1], value.at(0)));
 			++value;
 		}
-		create(input, value);		
+		create(input.c_mem(), value);		
 	}
 }
 
@@ -300,7 +300,7 @@ const char *keypair::get(const char *id)
 	return key->data;
 }
 
-void keypair::set(const char *id, const char *value)
+void keypair::set(char *id, const char *value)
 {
 	keydata *key = static_cast<keydata *>
 		(NamedObject::find(static_cast<NamedObject *>(keypairs), id));

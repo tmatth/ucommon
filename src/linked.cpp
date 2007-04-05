@@ -1,6 +1,6 @@
 #include <config.h>
 #include <ucommon/linked.h>
-#include <string.h>
+#include <ucommon/string.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -59,7 +59,13 @@ void LinkedObject::delist(LinkedObject **root)
 		prev->next = next;
 }
 
-NamedObject::NamedObject(OrderedIndex *root, const char *nid) :
+NamedObject::NamedObject() :
+OrderedObject()
+{
+	id = NULL;
+}
+
+NamedObject::NamedObject(OrderedIndex *root, char *nid) :
 OrderedObject()
 {
 	NamedObject *node = static_cast<NamedObject*>(root->head), *prev = NULL;
@@ -86,7 +92,7 @@ OrderedObject()
 		root->tail->next = this;
 }
 
-NamedObject::NamedObject(NamedObject **root, const char *nid, unsigned max) :
+NamedObject::NamedObject(NamedObject **root, char *nid, unsigned max) :
 OrderedObject()
 {
 	NamedObject *node, *prev = NULL;
@@ -119,7 +125,15 @@ OrderedObject()
 	id = nid;
 }
 
-NamedList::NamedList(NamedObject **root, const char *id, unsigned max) :
+NamedObject::~NamedObject()
+{
+	if(id) {
+		free(id);
+		id = NULL;
+	}
+}
+
+NamedList::NamedList(NamedObject **root, char *id, unsigned max) :
 NamedObject(root, id, max)
 {
 	keyroot = root;
@@ -265,6 +279,154 @@ NamedObject *NamedObject::find(NamedObject *root, const char *id)
 		root = root->getNext();
 	}
 	return root;
+}
+
+NamedTree::NamedTree(char *nid) :
+NamedObject(), child()
+{
+	id = nid;
+	parent = NULL;
+}
+
+NamedTree::NamedTree(NamedTree *p, char *nid) :
+NamedObject(&(p->child), nid), child()
+{
+	parent = p;
+}
+
+NamedTree::~NamedTree()
+{
+	purge();
+}
+
+NamedTree *NamedTree::getChild(const char *id)
+{
+	linked_pointer<NamedTree> node = child.begin();
+	
+	while(node) {
+		if(!strcmp(node->id, id))
+			return *node;
+		node.next();
+	}
+	return NULL;
+}
+
+NamedTree *NamedTree::path(const char *id)
+{
+	const char *np;
+	char buf[65];
+	char *ep;
+	NamedTree *node = this;
+
+	if(!id || !*id)
+		return this;
+
+	while(*id == '.') {
+		if(!node->parent)
+			return NULL;
+		node = node->parent;
+
+		++id;
+	}
+		
+	while(id && *id && node) {
+		cpr_strset(buf, sizeof(buf), id);
+		ep = strchr(buf, '.');
+		if(ep)
+			*ep = 0;
+		np = strchr(id, '.');
+		if(np)
+			id = ++np;
+		else
+			id = NULL;
+		node = node->getChild(buf);
+	}
+	return node;
+}
+
+NamedTree *NamedTree::getLeaf(const char *id)
+{
+    linked_pointer<NamedTree> node = child.begin();
+
+    while(node) {
+        if(node->isLeaf() && !strcmp(node->id, id))
+            return *node;
+        node.next();
+    }
+    return NULL;
+}
+
+NamedTree *NamedTree::leaf(const char *id)
+{
+    linked_pointer<NamedTree> node = child.begin();
+    NamedTree *obj;
+
+	while(node) {
+		if(node->isLeaf() && !strcmp(node->id, id))
+			return *node;
+		obj = NULL;
+		if(!node->isLeaf())
+			obj = node->leaf(id);
+		if(obj)
+			return obj;
+		node.next();
+	}
+	return NULL;
+}
+
+NamedTree *NamedTree::find(const char *id)
+{
+	linked_pointer<NamedTree> node = child.begin();
+	NamedTree *obj;
+
+	while(node) {
+		if(!node->isLeaf()) {
+			if(!strcmp(node->id, id))
+				return *node;
+			obj = node->find(id);
+			if(obj)
+				return obj;
+		}
+		node.next();
+	}
+	return NULL;
+}
+
+void NamedTree::setId(char *nid)
+{
+	if(id)
+		free(id);
+
+	id = nid;
+}
+
+void NamedTree::remove(void)
+{
+	if(parent)
+		delist(&parent->child);
+
+	id = NULL;
+}
+
+void NamedTree::purge(void)
+{
+	linked_pointer<NamedTree> node = child.begin();
+	NamedTree *obj;
+
+	if(parent)
+		delist(&parent->child);
+
+	while(node) {
+		obj = *node;
+		obj->parent = NULL;	// save processing
+		node.next();
+		delete obj;
+	}
+
+	if(id) {
+		free(id);
+		id = NULL;
+	}
 }
 
 LinkedObject::LinkedObject()

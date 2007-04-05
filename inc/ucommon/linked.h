@@ -89,10 +89,12 @@ public:
 class __EXPORT NamedObject : public OrderedObject
 {
 protected:
-	const char *id;
+	char *id;
 
-    NamedObject(NamedObject **root, const char *id, unsigned max = 1);
-	NamedObject(OrderedIndex *idx, const char *id);
+	NamedObject();
+    NamedObject(NamedObject **root, char *id, unsigned max = 1);
+	NamedObject(OrderedIndex *idx, char *id);
+	~NamedObject();
 
 public:
 	static void purge(NamedObject **idx, unsigned max);
@@ -114,7 +116,7 @@ public:
 	inline NamedObject *getNext(void) const
 		{return static_cast<NamedObject*>(LinkedObject::getNext());};
 
-	inline const char *getId(void) const
+	inline char *getId(void) const
 		{return id;};
 
 	virtual bool compare(const char *cmp) const;
@@ -126,6 +128,52 @@ public:
 		{return !compare(cmp);};
 };
 
+class __EXPORT NamedTree : public NamedObject
+{
+protected:
+	NamedTree *parent;
+	OrderedIndex child;
+
+	NamedTree(char *id = NULL);
+	NamedTree(NamedTree *parent, char *id);
+	virtual ~NamedTree();
+
+	void purge(void);
+
+public:
+	NamedTree *find(const char *tag);
+
+	NamedTree *path(const char *path);
+
+	NamedTree *leaf(const char *tag);
+
+	NamedTree *getChild(const char *tag);
+
+	NamedTree *getLeaf(const char *tag);
+
+	inline NamedTree *getFirst(void)
+		{return static_cast<NamedTree *>(child.begin());};
+
+	inline NamedTree *getParent(void)
+		{return parent;};
+
+	inline OrderedIndex *getIndex(void)
+		{return &child;};
+
+	inline operator bool()
+		{return (id != NULL);};
+
+	inline bool operator!()
+		{return (id == NULL);};
+
+	void setId(char *id);
+
+	void remove(void);
+
+	inline bool isLeaf(void)
+		{return (child.begin() == NULL);};
+};
+
 class __EXPORT NamedList : public NamedObject
 {
 protected:
@@ -134,7 +182,7 @@ protected:
 	NamedObject **keyroot;
 	unsigned keysize;
 
-	NamedList(NamedObject **root, const char *id, unsigned max);
+	NamedList(NamedObject **root, char *id, unsigned max);
 	virtual ~NamedList();
 
 public:
@@ -282,6 +330,67 @@ public:
 
     inline LinkedObject **root(void)
 		{T **r = &ptr; return (LinkedObject**)r;};
+};
+
+template <class T>
+class treemap : public NamedTree
+{
+protected:
+	T value;
+
+public:
+	inline treemap(char *id = NULL) : NamedTree(id) {};
+	inline treemap(treemap *parent, char *id) : NamedTree(parent, id) {};
+	inline treemap(treemap *parent, char *id, T &v) :
+		NamedTree(parent, id) {value = v;};
+
+	inline T &get(void)
+		{return value;};
+
+	static inline T getPointer(treemap *node)
+		{(node == NULL) ? NULL : node->value;};
+
+	inline bool isAttribute(void)
+		{return (!child.begin() && value != NULL);};
+
+	inline T getPointer(void)
+		{return value;};
+
+	inline T getData(void)
+		{return value;};
+
+	inline void setPointer(const T p)
+		{value = p;};
+
+	inline void set(const T &v)
+		{value = v;};
+
+	inline void operator=(const T &v)
+		{value = v;};
+
+	inline treemap *getParent(void)
+		{return static_cast<treemap*>(parent);};
+
+	inline treemap *getChild(const char *id)
+		{return static_cast<treemap*>(NamedTree::getChild(id));};
+
+	inline treemap *getLeaf(const char *id)
+		{return static_cast<treemap*>(NamedTree::getLeaf(id));};
+
+	inline T getValue(const char *id)
+		{return getPointer(getLeaf(id));};
+
+	inline treemap *find(const char *id)
+		{return static_cast<treemap*>(NamedTree::find(id));};
+
+	inline treemap *path(const char *path)
+		{return static_cast<treemap*>(NamedTree::path(path));};
+
+	inline treemap *leaf(const char *id)
+		{return static_cast<treemap*>(NamedTree::leaf(id));};
+
+	inline treemap *getFirst(void)
+		{return static_cast<treemap*>(NamedTree::getFirst());};
 };
 
 template <class T, unsigned M = 177>

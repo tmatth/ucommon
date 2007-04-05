@@ -96,7 +96,7 @@ private:
 	public:
 		void *data;
 
-		keydata(NamedObject **root, const char *id, unsigned max);
+		keydata(NamedObject **root, char *id, unsigned max);
 	};
 
 	unsigned max;
@@ -111,7 +111,7 @@ public:
 
 	void purge(void);
 	void *get(const char *id);
-	void set(const char *id, void *data);
+	void set(char *id, void *data);
 	void clear(const char *id);
 };
 
