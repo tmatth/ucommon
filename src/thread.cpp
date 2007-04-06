@@ -270,8 +270,11 @@ void SharedLock::unlock(void)
 void SharedLock::release(void)
 {
 	Conditional::lock();
-	if(!--reads && waits)
-		Conditional::broadcast();
+	if(reads) {
+		--reads;
+		if(!reads && waits)
+			Conditional::broadcast();
+	}
 	Conditional::unlock();
 }
 
@@ -385,11 +388,6 @@ SharedObject *SharedPointer::share(void)
 {
 	SharedLock::access();
 	return pointer;
-}
-
-void SharedPointer::release(void)
-{
-	SharedLock::release();
 }
 
 Threadlock::Threadlock()

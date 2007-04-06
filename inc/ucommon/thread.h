@@ -69,6 +69,12 @@ public:
 	void unlock(void);
 	void access(void);
 	void release(void);
+
+	inline void operator++()
+		{access();};
+
+	inline void operator--()
+		{release();};
 };	
 
 class __EXPORT Barrier : public Conditional 
@@ -193,9 +199,6 @@ protected:
 
 	void replace(SharedObject *ptr);
 	SharedObject *share(void);
-
-public:
-	void release(void);
 };
 
 class __EXPORT Threadlock : public Exclusive, public Shared
