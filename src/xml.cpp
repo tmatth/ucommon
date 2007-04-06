@@ -18,7 +18,7 @@ XMLTree::~XMLTree()
 	mempager::purge();
 }
 
-XMLTree::xmlnode *XMLTree::search(xmlnode *base, const char *find, const char *text)
+xmlnode *XMLTree::search(xmlnode *base, const char *find, const char *text)
 {
 	linked_pointer<xmlnode> node = node->getFirst();
 	xmlnode *leaf;
@@ -47,7 +47,7 @@ void XMLTree::remove(xmlnode *node)
 	loaded = 0;
 }
 
-XMLTree::xmlnode *XMLTree::add(xmlnode *node, const char *id, const char *text)
+xmlnode *XMLTree::add(xmlnode *node, const char *id, const char *text)
 {
 	caddr_t mp = (caddr_t)alloc(sizeof(xmlnode));
 	node = new(mp) xmlnode(node, dup(id));

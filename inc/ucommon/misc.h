@@ -11,23 +11,12 @@
 
 NAMESPACE_UCOMMON
 
-class __EXPORT XMLTree : public SharedObject, public mempager
+typedef treemap<char *> xmlnode;
+
+class __EXPORT XMLTree : public mempager
 {
 public:
-	typedef treemap<char *> xmlnode;
-
-    class __EXPORT callback : public LinkedObject
-    {
-    friend class XMLTree;
-    protected:
-        callback();
-        virtual ~callback();
-
-        void release(void);
-
-        virtual void notify(SharedPointer *ptr, XMLTree *cfg) = 0;
-    };
-
+    
 	XMLTree(size_t s, char *name);
 	virtual ~XMLTree();
 
@@ -50,6 +39,43 @@ protected:
 		{return root.path(p);};
 
 	virtual bool validate(xmlnode *node);
+};
+
+class __EXPORT xmlconfig : public XMLTree
+{
+public:
+	typedef xmlnode node;
+
+	class __EXPORT callback : public OrderedObject
+    {
+	friend class xmlconfig;
+
+    protected:
+		static OrderedIndex list;
+
+        callback();
+        virtual ~callback();
+
+        void release(void);
+
+        virtual void commit(xmlconfig *cfg);
+		virtual void reload(xmlconfig *cfg);
+    };
+
+	void commit(void);
+	void update(void); // calls new uncommited callbacks...
+
+	static xmlconfig *get(void);
+	static void protect(void);
+	static void release(void);
+
+protected:
+	static xmlconfig *config;
+	void lock(void);
+
+private:
+	static SharedLock rwlock;
+	static linked_pointer<callback> cb; // for update...
 };
 
 END_NAMESPACE

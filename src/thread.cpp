@@ -245,6 +245,43 @@ void Mutex::Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
+SharedLock::SharedLock() :
+Conditional()
+{
+	waits = 0;
+	reads = 0;
+}
+
+void SharedLock::lock(void)
+{
+	Conditional::lock();
+	while(reads) {
+		++waits;
+		Conditional::wait();
+		--waits;
+	}
+}
+
+void SharedLock::unlock(void)
+{
+	Conditional::unlock();
+}
+
+void SharedLock::release(void)
+{
+	Conditional::lock();
+	if(!--reads && waits)
+		Conditional::broadcast();
+	Conditional::unlock();
+}
+
+void SharedLock::access(void)
+{
+	Conditional::lock();
+	++reads;
+	Conditional::unlock();
+}
+
 Barrier::Barrier(unsigned limit) :
 Conditional()
 {
@@ -323,42 +360,42 @@ SharedObject::~SharedObject()
 {
 }
 
-SharedPointer::SharedPointer()
+SharedPointer::SharedPointer() :
+SharedLock()
 {
-	crit(pthread_rwlock_init(&lock, NULL) == 0);
 	pointer = NULL;
 }
 
 SharedPointer::~SharedPointer()
 {
-	pthread_rwlock_destroy(&lock);
 }
 
 void SharedPointer::replace(SharedObject *ptr)
 {
-	pthread_rwlock_wrlock(&lock);
+	SharedLock::lock();
 	if(pointer)
 		delete pointer;
 	pointer = ptr;
 	if(ptr)
 		ptr->commit(this);
-	pthread_rwlock_unlock(&lock);
+	SharedLock::unlock();
 }
 
 SharedObject *SharedPointer::share(void)
 {
-	pthread_rwlock_rdlock(&lock);
+	SharedLock::access();
 	return pointer;
 }
 
 void SharedPointer::release(void)
 {
-	pthread_rwlock_unlock(&lock);
+	SharedLock::release();
 }
 
 Threadlock::Threadlock()
 {
 	crit(pthread_rwlock_init(&lock, NULL) == 0);
+	count = 0;
 }
 
 Threadlock::~Threadlock()
@@ -368,17 +405,104 @@ Threadlock::~Threadlock()
 
 void Threadlock::Unlock(void)
 {
-	pthread_rwlock_unlock(&lock);
+	release();
 }
 
 void Threadlock::Exlock(void)
 {
-	pthread_rwlock_wrlock(&lock);
+	while(!exclusive())
+		cpr_yield();
 }
 
 void Threadlock::Shlock(void)
 {
-	pthread_rwlock_rdlock(&lock);
+	while(!shared())
+		cpr_yield();
+}
+
+void Threadlock::release(void)
+{
+	if(count) {
+		--count;
+		return;
+	}
+	pthread_rwlock_unlock(&lock);
+}
+
+bool Threadlock::exclusive(void)
+{
+	if(!pthread_rwlock_wrlock(&lock))
+		return true;
+
+	if(errno == EDEADLK) {
+		++count;
+		return true;
+	}
+	return false;
+}
+
+bool Threadlock::shared(void)
+{
+    if(!pthread_rwlock_rdlock(&lock))
+        return true;
+
+    if(errno == EDEADLK) {
+        ++count;
+        return true;
+    }
+    return false;
+}
+
+bool Threadlock::shared(timeout_t timeout)
+{
+    struct timespec ts;
+
+#if _POSIX_TIMERS > 0
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_nsec += (timeout % 1000) * 1000000l;
+    ts.tv_sec += timeout / 1000l;
+    while(ts.tv_nsec > 1000000000l) {
+        ts.tv_nsec -= 1000000000l;
+        ++ts.tv_sec;
+	}
+#else
+    ts.tv_nsec = 0;
+    time(&ts.tv_sec);
+    ts.tv_sec += timeout / 1000l;
+#endif
+    if(!pthread_rwlock_timedrdlock(&lock, &ts))
+        return true;
+    if(errno == EDEADLK) {
+        ++count;
+        return true;
+    }
+    return false;
+}
+
+bool Threadlock::exclusive(timeout_t timeout)
+{
+    struct timespec ts;
+
+#if _POSIX_TIMERS > 0
+	clock_gettime(CLOCK_REALTIME, &ts);
+	ts.tv_nsec += (timeout % 1000) * 1000000l;
+	ts.tv_sec += timeout / 1000l;
+	while(ts.tv_nsec > 1000000000l) {
+		ts.tv_nsec -= 1000000000l;
+		++ts.tv_sec;
+	}	
+#else
+	ts.tv_nsec = 0;
+	time(&ts.tv_sec);
+	ts.tv_sec += timeout / 1000l;
+#endif
+	if(!pthread_rwlock_timedwrlock(&lock, &ts))
+		return true;
+	if(errno == EDEADLK) {
+		++count;
+		return true;
+	}
+	return false;
 }
 
 Thread::Thread(size_t size)

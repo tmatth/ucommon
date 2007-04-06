@@ -33,6 +33,9 @@ private:
 	pthread_mutex_t mutex;
 
 protected:
+	inline void wait(void)
+		{pthread_cond_wait(&cond, &mutex);};
+
 	bool wait(timeout_t timeout);
 	bool wait(Timer &timer);
 
@@ -51,6 +54,22 @@ protected:
 	Conditional();
 	~Conditional();
 };
+
+class __EXPORT SharedLock : public Conditional
+{
+private:
+	unsigned waits;
+	unsigned reads;
+
+public:
+	SharedLock();
+	~SharedLock();
+
+	void lock(void);
+	void unlock(void);
+	void access(void);
+	void release(void);
+};	
 
 class __EXPORT Barrier : public Conditional 
 {
@@ -162,11 +181,10 @@ public:
 	virtual ~SharedObject();
 };
 
-class __EXPORT SharedPointer
+class __EXPORT SharedPointer : public SharedLock
 {
 private:
 	friend class shared_release;
-	pthread_rwlock_t lock;
 	SharedObject *pointer;
 
 protected:
@@ -184,6 +202,7 @@ class __EXPORT Threadlock : public Exclusive, public Shared
 {
 private:
 	pthread_rwlock_t lock;
+	unsigned count;
 
 public:
 	Threadlock();
@@ -193,14 +212,19 @@ public:
 	void Shlock(void);
 	void Unlock(void);
 
-	inline void shared(void)
-		{pthread_rwlock_rdlock(&lock);};
+	bool shared(void);
+	bool shared(timeout_t timeout);
 
-	inline void exclusive(void)
-		{pthread_rwlock_wrlock(&lock);};
+	inline bool shared(Timer &timer)
+		{return shared(timer.get());};
 
-	inline void release(void)
-		{pthread_rwlock_unlock(&lock);};
+	bool exclusive(void);
+	bool exclusive(timeout_t timeout);
+
+	inline bool exclusive(Timer &timer)
+		{return exclusive(timer.get());};
+
+	void release(void);
 };
 
 class __EXPORT Thread
