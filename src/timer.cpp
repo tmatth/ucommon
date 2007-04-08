@@ -76,6 +76,26 @@ static int gettimeofday(struct timeval *tv_, void *tz_)
 const timeout_t Timer::inf = ((timeout_t)(-1));
 const time_t Timer::reset = ((time_t)0);
 
+extern "C" void cpr_gettimeout(timeout_t msec, struct timespec *ts)
+{
+#if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
+	clock_gettime(CLOCK_MONOTONIC, ts);
+#elif _POSIX_TIMERS > 0
+	clock_gettime(CLOCK_REALTIME, ts);
+#else
+	timeval tv;
+	gettimeofday(&tv, NULL);
+	ts->tv_sec = tv.tv_sec;
+	ts->tv_nsec = tv.tv_usec * 1000l;
+#endif
+	ts->tv_sec += msec / 1000;
+	ts->tv_nsec += (msec % 1000) * 1000000l;
+	while(ts->tv_nsec > 1000000000l) {
+		++ts->tv_sec;
+		ts->tv_nsec -= 1000000000l;
+	}
+}
+
 Timer::Timer(Timer **root) :
 LinkedObject((LinkedObject **)(root))
 {

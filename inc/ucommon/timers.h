@@ -72,4 +72,8 @@ public:
 
 END_NAMESPACE
 
+extern "C" {
+	void cpr_gettimeout(timeout_t timeout, timespec *ts);
+};
+
 #endif

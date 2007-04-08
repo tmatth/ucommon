@@ -134,6 +134,9 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($clib, pthread_create, [tlib="$clib"])
 	fi
 	if test ! -z "$tlib" ; then
+		AC_CHECK_LIB($tlib,pthread_condattr_setclock,[
+			AC_DEFINE(HAVE_PTHREAD_CONDATTR_SETCLOCK, [1], ["pthread clocking"])
+		])
 		AC_CHECK_LIB($tlib,pthread_atfork,[
 			AC_DEFINE(HAVE_PTHREAD_ATFORK, [1], ["fork support"])			
 		])

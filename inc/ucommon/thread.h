@@ -37,7 +37,6 @@ protected:
 		{pthread_cond_wait(&cond, &mutex);};
 
 	bool wait(timeout_t timeout);
-	bool wait(Timer &timer);
 
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};
@@ -63,12 +62,13 @@ private:
 
 public:
 	SharedLock();
-	~SharedLock();
 
 	void lock(void);
 	void unlock(void);
 	void access(void);
 	void release(void);
+	void release(int *state);
+	void protect(int *state);
 
 	inline void operator++()
 		{access();};
@@ -99,18 +99,18 @@ private:
 public:
 	Semaphore(unsigned limit = 0);
 
-	void Shlock(void);
-	void Unlock(void);
+	inline void Shlock(void)
+		{wait();};
 
-	bool wait(timeout_t timeout = 0);
-	bool wait(Timer &timer);
+	inline void Unlock(void)
+		{release();};
 
+	void wait(void);
+	bool wait(timeout_t timeout);
 	unsigned getCount(void);
 	unsigned getUsed(void);
 	void set(unsigned limit);
-
-	inline void release(void)
-		{Semaphore::Unlock();};
+	void release(void);
 };
 
 class __EXPORT Event : public Conditional
@@ -126,7 +126,6 @@ public:
 	void reset(void);
 
 	bool wait(timeout_t timeout);
-	bool wait(Timer &t);
 	void wait(void);
 };
 
@@ -218,14 +217,8 @@ public:
 	bool shared(void);
 	bool shared(timeout_t timeout);
 
-	inline bool shared(Timer &timer)
-		{return shared(timer.get());};
-
 	bool exclusive(void);
 	bool exclusive(timeout_t timeout);
-
-	inline bool exclusive(Timer &timer)
-		{return exclusive(timer.get());};
 
 	void release(void);
 };

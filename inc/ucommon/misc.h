@@ -62,6 +62,7 @@ public:
 		virtual void reload(xmlconfig *cfg);
     };
 
+	xmlconfig();
 	void commit(void);
 	void update(void); // calls new uncommited callbacks...
 

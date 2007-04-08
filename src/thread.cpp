@@ -39,7 +39,7 @@ void Event::reset(void)
 	unlock();
 }
 
-bool Event::wait(Timer &timer)
+bool Event::wait(timeout_t timeout)
 {
 	bool notimeout = true;
 	unsigned last;
@@ -47,16 +47,9 @@ bool Event::wait(Timer &timer)
 	lock();
 	last = count;
 	while(!signalled && count == last && notimeout)
-		notimeout = wait(timer);
+		notimeout = wait(timeout);
 	unlock();
 	return notimeout;
-}
-
-bool Event::wait(timeout_t timeout)
-{
-	Timer timer;
-	timer += timeout;
-	return wait(timer);
 }
 
 void Event::wait(void)
@@ -94,23 +87,14 @@ unsigned Semaphore::getCount(void)
     return rtn;
 }
 
-bool Semaphore::wait(Timer &timer)
+bool Semaphore::wait(timeout_t timeout)
 {
-	struct timespec ts;
 	bool result = true;
-
-#if _POSIX_TIMERS > 0
-	memcpy(&ts, &timer.timer, sizeof(ts));
-#else
-	ts.tv_sec = timer.timer.tv_sec;
-	ts.tv_nsec = timer.timer.tv_usec * 1000l;
-#endif
-
 	lock();
 	if(used >= count) {
 		++waits;
 		while(used >= count && result)
-			result = wait(timer);
+			result = Conditional::wait(timeout);
 		--waits;
 	}
 	if(result)
@@ -118,32 +102,21 @@ bool Semaphore::wait(Timer &timer)
 	unlock();
 	return result;
 }
-
-bool Semaphore::wait(timeout_t timeout)
-{
-	if(timeout) {
-		Timer timer;
-		timer += timeout;
-		return wait(timer);
-	}
-	Semaphore::Shlock();
-	return true;
-}
 		
-void Semaphore::Shlock(void)
+void Semaphore::wait(void)
 {
 	lock();
 	if(used >= count) {
 		++waits;
 		while(used >= count)
-			wait();
+			Conditional::wait();
 		--waits;
 	}
 	++used;
 	unlock();
 }
 
-void Semaphore::Unlock(void)
+void Semaphore::release(void)
 {
 	lock();
 	if(used)
@@ -177,8 +150,8 @@ void Semaphore::set(unsigned value)
 Conditional::attribute::attribute()
 {
 	pthread_condattr_init(&attr);
-#if _POSIX_TIMERS > 0
-#ifdef	_POSIX_MONOTONIC_CLOCK
+#if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK)
+#if defined(_POSIX_MONOTONIC_CLOCK)
 	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
 #else
 	pthread_condattr_setclock(&attr, CLOCK_REALTIME);
@@ -200,26 +173,11 @@ Conditional::~Conditional()
 
 bool Conditional::wait(timeout_t timeout)
 {
-	if(!timeout) {
-		pthread_cond_wait(&cond, &mutex);
-		return true;
-	}
-
-	Timer timer;
-	timer += timeout;
-	return wait(timer);
-}
-
-bool Conditional::wait(Timer &timer)
-{
 	struct timespec ts;
+	if(!timeout)
+		return false;
 
-#if _POSIX_TIMERS > 0
-    memcpy(&ts, &timer.timer, sizeof(ts));
-#else
-    ts.tv_sec = timer.timer.tv_sec;
-    ts.tv_nsec = timer.timer.tv_usec * 1000l;
-#endif
+	cpr_gettimeout(timeout, &ts);
 	if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
 		return false;
 	return true;
@@ -267,6 +225,18 @@ void SharedLock::unlock(void)
 	Conditional::unlock();
 }
 
+void SharedLock::release(int *state)
+{
+	Conditional::lock();
+	if(reads) {
+		--reads;
+		if(!reads && waits)
+			Conditional::broadcast();
+	}
+	pthread_setcancelstate(*state, NULL);
+	Conditional::unlock();
+}
+
 void SharedLock::release(void)
 {
 	Conditional::lock();
@@ -281,6 +251,14 @@ void SharedLock::release(void)
 void SharedLock::access(void)
 {
 	Conditional::lock();
+	++reads;
+	Conditional::unlock();
+}
+
+void SharedLock::protect(int *state)
+{
+	Conditional::lock();
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, state);
 	++reads;
 	Conditional::unlock();
 }
@@ -316,19 +294,19 @@ void Barrier::set(unsigned limit)
 
 void Barrier::wait(void)
 {
-	lock();
+	Conditional::lock();
 	if(!count) {
-		unlock();
+		Conditional::unlock();
 		return;
 	}
 	if(++waits >= count) {
 		waits = 0;
-		broadcast();
-		unlock();
+		Conditional::broadcast();
+		Conditional::unlock();
 		return;
 	}
-	wait();
-	unlock();
+	Conditional::wait();
+	Conditional::unlock();
 }
 	
 LockedPointer::LockedPointer()
