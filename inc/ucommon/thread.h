@@ -67,8 +67,6 @@ public:
 	void unlock(void);
 	void access(void);
 	void release(void);
-	void release(int *state);
-	void protect(int *state);
 
 	inline void operator++()
 		{access();};

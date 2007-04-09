@@ -225,18 +225,6 @@ void SharedLock::unlock(void)
 	Conditional::unlock();
 }
 
-void SharedLock::release(int *state)
-{
-	Conditional::lock();
-	if(reads) {
-		--reads;
-		if(!reads && waits)
-			Conditional::broadcast();
-	}
-	pthread_setcancelstate(*state, NULL);
-	Conditional::unlock();
-}
-
 void SharedLock::release(void)
 {
 	Conditional::lock();
@@ -251,14 +239,6 @@ void SharedLock::release(void)
 void SharedLock::access(void)
 {
 	Conditional::lock();
-	++reads;
-	Conditional::unlock();
-}
-
-void SharedLock::protect(int *state)
-{
-	Conditional::lock();
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, state);
 	++reads;
 	Conditional::unlock();
 }
