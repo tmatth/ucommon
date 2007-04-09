@@ -965,11 +965,13 @@ locked_release &locked_release::operator=(LockedPointer &p)
 shared_release::shared_release(const shared_release &copy)
 {
 	ptr = copy.ptr;
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 }
 
 shared_release::shared_release()
 {
 	ptr = NULL;
+	state = PTHREAD_CANCEL_ENABLE;
 }
 
 SharedObject *shared_release::get(void)
@@ -986,6 +988,8 @@ void SharedObject::commit(SharedPointer *pointer)
 shared_release::shared_release(SharedPointer &p)
 {
 	ptr = &p;
+	if(ptr)
+		state = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	p.share(); // create rdlock
 }
 
@@ -996,8 +1000,10 @@ shared_release::~shared_release()
 
 void shared_release::release(void)
 {
-	if(ptr)
+	if(ptr) {
 		ptr->release();
+		pthread_setcancelstate(state, NULL);
+	}
 	ptr = NULL;
 }
 
@@ -1005,6 +1011,8 @@ shared_release &shared_release::operator=(SharedPointer &p)
 {
 	release();
 	ptr = &p;
+	if(ptr)
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	p.share();
 	return *this;
 }

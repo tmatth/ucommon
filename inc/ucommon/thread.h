@@ -365,6 +365,7 @@ class __EXPORT shared_release
 {
 protected:
 	SharedPointer *ptr;
+	int state;
 
 	shared_release();
 	shared_release(const shared_release &copy);
