@@ -225,6 +225,19 @@ void SharedLock::unlock(void)
 	Conditional::unlock();
 }
 
+void SharedLock::release(int *state)
+{
+	Conditional::lock();
+	--reads;
+	if(!reads && waits)
+		Conditional::broadcast();
+	if(state)
+		pthread_setcancelstate(*state, NULL);
+	Conditional::unlock();
+	if(state && *state == PTHREAD_CANCEL_ENABLE)
+		pthread_testcancel();
+}
+
 void SharedLock::release(void)
 {
 	Conditional::lock();
@@ -233,6 +246,15 @@ void SharedLock::release(void)
 		if(!reads && waits)
 			Conditional::broadcast();
 	}
+	Conditional::unlock();
+}
+
+void SharedLock::protect(int *state)
+{
+	Conditional::lock();
+	if(state)
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, state);
+	++reads;
 	Conditional::unlock();
 }
 
@@ -893,14 +915,48 @@ bool Buffer::operator!()
 	return true;
 }
 
-cancelstate::cancelstate()
+auto_sync_exclusive::auto_sync_exclusive(pthread_mutex_t *m)
+{
+	mutex = m;
+	pthread_mutex_lock(mutex);
+}
+
+auto_sync_exclusive::~auto_sync_exclusive()
+{
+	pthread_mutex_unlock(mutex);
+}
+
+auto_sync_locked::auto_sync_locked(pthread_mutex_t *m)
+{
+    mutex = m;
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
+    pthread_mutex_lock(mutex);
+}
+
+auto_sync_locked::~auto_sync_locked()
+{
+    pthread_mutex_unlock(mutex);
+	pthread_setcancelstate(state, NULL);
+}
+
+auto_cancel_disabled::auto_cancel_disabled()
 {
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 }
 
-cancelstate::~cancelstate()
+auto_cancel_disabled::~auto_cancel_disabled()
 {
 	pthread_setcancelstate(state, NULL);
+}
+
+auto_cancel_async::auto_cancel_async()
+{
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &state);
+}
+
+auto_cancel_async::~auto_cancel_async()
+{
+    pthread_setcanceltype(state, NULL);
 }
 
 locked_release::locked_release(const locked_release &copy)

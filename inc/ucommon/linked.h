@@ -28,7 +28,7 @@ public:
 	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
 
-	bool isMember(LinkedObject *list);
+	bool isMember(LinkedObject *list) const;
 
 	static void purge(LinkedObject *root);
 
@@ -36,7 +36,7 @@ public:
 		{return next;};
 };
 
-#define nil ((LinkedObject*)(NULL))
+#define nil ((void*)(NULL))
 
 class __EXPORT OrderedIndex
 {
@@ -51,21 +51,21 @@ public:
 	OrderedIndex();
 	~OrderedIndex();
 
-	LinkedObject *find(unsigned index);
+	LinkedObject *find(unsigned index) const;
 
-	unsigned count(void);
+	unsigned count(void) const;
 
 	void purge(void);
 
-	LinkedObject **index(void);
+	LinkedObject **index(void) const;
 
-	inline LinkedObject *begin(void)
+	inline LinkedObject *begin(void) const
 		{return (LinkedObject*)(head);};
 
-	inline LinkedObject *end(void)
+	inline LinkedObject *end(void) const
 		{return (LinkedObject*)(tail);};
 
-	inline LinkedObject *operator*()
+	inline LinkedObject *operator*() const
 		{return (LinkedObject*)(head);};
 };
 
@@ -82,7 +82,7 @@ public:
 	void enlist(OrderedIndex *root);
 	void delist(OrderedIndex *root);
 
-	inline OrderedObject *getNext(void)
+	inline OrderedObject *getNext(void) const
 		{return static_cast<OrderedObject *>(LinkedObject::getNext());};
 };
 
@@ -121,10 +121,10 @@ public:
 
 	virtual bool compare(const char *cmp) const;
 
-	inline bool operator==(const char *cmp)
+	inline bool operator==(const char *cmp) const
 		{return compare(cmp);};
 
-	inline bool operator!=(const char *cmp)
+	inline bool operator!=(const char *cmp) const
 		{return !compare(cmp);};
 };
 
@@ -141,36 +141,36 @@ protected:
 	void purge(void);
 
 public:
-	NamedTree *find(const char *tag);
+	NamedTree *find(const char *tag) const;
 
-	NamedTree *path(const char *path);
+	NamedTree *path(const char *path) const;
 
-	NamedTree *leaf(const char *tag);
+	NamedTree *leaf(const char *tag) const;
 
-	NamedTree *getChild(const char *tag);
+	NamedTree *getChild(const char *tag) const;
 
-	NamedTree *getLeaf(const char *tag);
+	NamedTree *getLeaf(const char *tag) const;
 
-	inline NamedTree *getFirst(void)
+	inline NamedTree *getFirst(void) const
 		{return static_cast<NamedTree *>(child.begin());};
 
-	inline NamedTree *getParent(void)
+	inline NamedTree *getParent(void) const
 		{return parent;};
 
-	inline OrderedIndex *getIndex(void)
-		{return &child;};
+	inline OrderedIndex *getIndex(void) const
+		{return const_cast<OrderedIndex*>(&child);};
 
-	inline operator bool()
+	inline operator bool() const
 		{return (id != NULL);};
 
-	inline bool operator!()
+	inline bool operator!() const
 		{return (id == NULL);};
 
 	void setId(char *id);
 
 	void remove(void);
 
-	inline bool isLeaf(void)
+	inline bool isLeaf(void) const
 		{return (child.begin() == NULL);};
 };
 
@@ -229,8 +229,9 @@ public:
 
 	objmap &operator=(NamedList *root);
 
-	unsigned count(void);
-	void begin(void);
+	unsigned count(void) const;
+
+	void begin(void) const;
 };
 
 template <class T, class O=OrderedObject>
@@ -289,13 +290,13 @@ public:
 	inline void operator=(LinkedObject *p)
 		{ptr = static_cast<T*>(p);};
 
-	inline T* operator->()
+	inline T* operator->() const
 		{return ptr;};
 
-	inline T* operator*()
+	inline T* operator*() const
 		{return ptr;};
 
-	inline operator T*()
+	inline operator T*() const
 		{return ptr;};
 
 	inline void prev(void)
@@ -304,10 +305,10 @@ public:
 	inline void next(void)
 		{ptr = static_cast<T*>(ptr->getNext());};
 
-	inline T *getNext(void)
+	inline T *getNext(void) const
 		{return static_cast<T*>(ptr->getNext());};
 
-    inline T *getPrev(void)
+    inline T *getPrev(void) const
         {return static_cast<T*>(ptr->getPrev());};
 
 	inline void operator++()
@@ -316,19 +317,19 @@ public:
     inline void operator--()
         {ptr = static_cast<T*>(ptr->getPrev());};
 
-	inline bool isNext(void)
+	inline bool isNext(void) const
 		{return (ptr->getNext() != NULL);};
 
-	inline bool isPrev(void)
+	inline bool isPrev(void) const
 		{return (ptr->getPrev() != NULL);};
 
-	inline operator bool()
+	inline operator bool() const
 		{return (ptr != NULL);};
 
-	inline bool operator!()
+	inline bool operator!() const
 		{return (ptr == NULL);};
 
-    inline LinkedObject **root(void)
+    inline LinkedObject **root(void) const
 		{T **r = &ptr; return (LinkedObject**)r;};
 };
 
@@ -344,22 +345,22 @@ public:
 	inline treemap(treemap *parent, char *id, T &v) :
 		NamedTree(parent, id) {value = v;};
 
-	inline T &get(void)
+	inline T &get(void) const
 		{return value;};
 
-	inline T operator*()
+	inline T operator*() const
 		{return value;};
 
 	static inline T getPointer(treemap *node)
 		{(node == NULL) ? NULL : node->value;};
 
-	inline bool isAttribute(void)
+	inline bool isAttribute(void) const
 		{return (!child.begin() && value != NULL);};
 
-	inline T getPointer(void)
+	inline T getPointer(void) const
 		{return value;};
 
-	inline T getData(void)
+	inline T getData(void) const
 		{return value;};
 
 	inline void setPointer(const T p)
@@ -371,28 +372,28 @@ public:
 	inline void operator=(const T &v)
 		{value = v;};
 
-	inline treemap *getParent(void)
+	inline treemap *getParent(void) const
 		{return static_cast<treemap*>(parent);};
 
-	inline treemap *getChild(const char *id)
+	inline treemap *getChild(const char *id) const
 		{return static_cast<treemap*>(NamedTree::getChild(id));};
 
-	inline treemap *getLeaf(const char *id)
+	inline treemap *getLeaf(const char *id) const
 		{return static_cast<treemap*>(NamedTree::getLeaf(id));};
 
-	inline T getValue(const char *id)
+	inline T getValue(const char *id) const
 		{return getPointer(getLeaf(id));};
 
-	inline treemap *find(const char *id)
+	inline treemap *find(const char *id) const
 		{return static_cast<treemap*>(NamedTree::find(id));};
 
-	inline treemap *path(const char *path)
+	inline treemap *path(const char *path) const
 		{return static_cast<treemap*>(NamedTree::path(path));};
 
-	inline treemap *leaf(const char *id)
+	inline treemap *leaf(const char *id) const
 		{return static_cast<treemap*>(NamedTree::leaf(id));};
 
-	inline treemap *getFirst(void)
+	inline treemap *getFirst(void) const
 		{return static_cast<treemap*>(NamedTree::getFirst());};
 };
 
@@ -406,28 +407,28 @@ public:
 	inline ~keymap()
 		{NamedObject::purge(idx, M);};
 
-	inline NamedObject **root(void)
+	inline NamedObject **root(void) const
 		{return idx;};
 
-	inline unsigned limit(void)
+	inline unsigned limit(void) const
 		{return M;};
 
-	inline T *get(const char *id)
+	inline T *get(const char *id) const
 		{return static_cast<T*>(NamedObject::map(idx, id, M));};
 
-	inline T *begin(void)
+	inline T *begin(void) const
 		{return static_cast<T*>(NamedObject::skip(idx, NULL, M));};
 
-	inline T *next(T *current)
+	inline T *next(T *current) const
 		{return static_cast<T*>(NamedObject::skip(idx, current, M));};
 
-	inline unsigned count(void)
+	inline unsigned count(void) const
 		{return NamedObject::count(idx, M);};
 
-	inline T **index(void)
+	inline T **index(void) const
 		{return NamedObject::index(idx, M);};
 
-	inline T **sort(void)
+	inline T **sort(void) const
 		{return NamedObject::sort(NamedObject::index(idx, M));};
 }; 
 

@@ -25,7 +25,7 @@ void LinkedObject::purge(LinkedObject *root)
 	}
 }
 
-bool LinkedObject::isMember(LinkedObject *list)
+bool LinkedObject::isMember(LinkedObject *list) const
 {
 	while(list) {
 		if(list == this)
@@ -299,7 +299,7 @@ NamedTree::~NamedTree()
 	purge();
 }
 
-NamedTree *NamedTree::getChild(const char *id)
+NamedTree *NamedTree::getChild(const char *id) const
 {
 	linked_pointer<NamedTree> node = child.begin();
 	
@@ -311,15 +311,15 @@ NamedTree *NamedTree::getChild(const char *id)
 	return NULL;
 }
 
-NamedTree *NamedTree::path(const char *id)
+NamedTree *NamedTree::path(const char *id) const
 {
 	const char *np;
 	char buf[65];
 	char *ep;
-	NamedTree *node = this;
+	NamedTree *node = const_cast<NamedTree*>(this);
 
 	if(!id || !*id)
-		return this;
+		return const_cast<NamedTree*>(this);
 
 	while(*id == '.') {
 		if(!node->parent)
@@ -344,7 +344,7 @@ NamedTree *NamedTree::path(const char *id)
 	return node;
 }
 
-NamedTree *NamedTree::getLeaf(const char *id)
+NamedTree *NamedTree::getLeaf(const char *id) const
 {
     linked_pointer<NamedTree> node = child.begin();
 
@@ -356,7 +356,7 @@ NamedTree *NamedTree::getLeaf(const char *id)
     return NULL;
 }
 
-NamedTree *NamedTree::leaf(const char *id)
+NamedTree *NamedTree::leaf(const char *id) const
 {
     linked_pointer<NamedTree> node = child.begin();
     NamedTree *obj;
@@ -374,7 +374,7 @@ NamedTree *NamedTree::leaf(const char *id)
 	return NULL;
 }
 
-NamedTree *NamedTree::find(const char *id)
+NamedTree *NamedTree::find(const char *id) const
 {
 	linked_pointer<NamedTree> node = child.begin();
 	NamedTree *obj;
@@ -551,7 +551,7 @@ void OrderedIndex::purge(void)
 	}
 }
 
-LinkedObject **OrderedIndex::index(void)
+LinkedObject **OrderedIndex::index(void) const
 {
 	LinkedObject **op = new LinkedObject *[count() + 1];
 	LinkedObject *node = head;
@@ -565,7 +565,7 @@ LinkedObject **OrderedIndex::index(void)
 	return op;
 }
 
-LinkedObject *OrderedIndex::find(unsigned index)
+LinkedObject *OrderedIndex::find(unsigned index) const
 {
 	unsigned count = 0;
 	LinkedObject *node = head;
@@ -576,7 +576,7 @@ LinkedObject *OrderedIndex::find(unsigned index)
 	return node;
 }
 
-unsigned OrderedIndex::count(void)
+unsigned OrderedIndex::count(void) const
 {
 	unsigned count = 0;
 	LinkedObject *node = head;

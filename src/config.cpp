@@ -6,6 +6,9 @@
 using namespace UCOMMON_NAMESPACE;
 
 OrderedIndex keyconfig::callback::list;
+SharedLock keyconfig::lock;
+linked_pointer<keyconfig::callback> keyconfig::cb;
+keyconfig *keyconfig::cfg = NULL;
 
 keyconfig::callback::callback() :
 OrderedObject(&list)
@@ -28,6 +31,16 @@ void keyconfig::callback::reload(keyconfig *keys)
 
 void keyconfig::callback::commit(keyconfig *keys)
 {
+}
+
+keyconfig::instance::instance()
+{
+	keyconfig::protect(&state);
+}
+
+keyconfig::instance::~instance()
+{
+	keyconfig::release(&state);
 }
 
 keyconfig::keyconfig(char *name, size_t s) :
@@ -262,4 +275,16 @@ exit:
 	return rtn;
 }
 
-	
+void keyconfig::update(void)
+{
+	lock.lock();
+	if(cb)
+		cb.next();
+
+	while(cb) {
+		cb->reload(this);
+		cb->commit(this);
+		cb.next();
+	}
+	lock.unlock();
+}

@@ -25,11 +25,24 @@ public:
 		const char *value;
 	} define;
 
+	class __EXPORT instance
+	{
+	private:
+		int state;
+	
+	public:
+		instance();
+		~instance();
+		
+		inline const keyconfig *operator->()
+			{return keyconfig::cfg;};
+	};
+
 	class __EXPORT callback : public OrderedObject
     {
-	friend class xmlconfig;
+	protected:
+		friend class keyconfig;
 
-    protected:
 		static OrderedIndex list;
 
         callback();
@@ -63,7 +76,21 @@ public:
 	inline static bool isNode(keynode *node)
 		{return isLinked(node) && isValue(node);};
 
+	void update(void);
+
+	inline static void protect(int *state)
+		{lock.protect(state);};
+
+	inline static void release(int *state)
+		{lock.release(state);};
+
 protected:
+	friend class instance;
+
+	static keyconfig *cfg;
+	static SharedLock lock;
+	static linked_pointer<callback> cb; // for update...
+
 	keynode root;
 	stringbuf<1024> buffer;
 };

@@ -67,6 +67,8 @@ public:
 	void unlock(void);
 	void access(void);
 	void release(void);
+	void protect(int *state);
+	void release(int *state);
 
 	inline void operator++()
 		{access();};
@@ -379,14 +381,45 @@ public:
 	shared_release &operator=(SharedPointer &p);
 };
 
-class __EXPORT cancelstate
+class __EXPORT auto_sync_exclusive
+{
+private:
+	pthread_mutex_t *mutex;
+
+public:
+	auto_sync_exclusive(pthread_mutex_t *m);
+	~auto_sync_exclusive();
+};
+
+class __EXPORT auto_sync_locked
+{
+private:
+	pthread_mutex_t *mutex;
+	int state;
+
+public:
+	auto_sync_locked(pthread_mutex_t *m);
+	~auto_sync_locked();
+};
+
+class __EXPORT auto_cancel_disabled
 {
 private:
 	int state;
 
 public:
-	cancelstate();
-	~cancelstate();
+	auto_cancel_disabled();
+	~auto_cancel_disabled();
+};
+
+class __EXPORT auto_cancel_async
+{
+private:
+	int state;
+
+public:
+	auto_cancel_async();
+	~auto_cancel_async();
 };
 
 template<class T, mempager *P = NULL, size_t L = 0>
@@ -447,8 +480,10 @@ class shared_pointer : public SharedPointer
 public:
 	inline shared_pointer() : SharedPointer() {};
 
-	inline T *dup(void)
-		{return static_cast<T*>(SharedPointer::share());};
+	inline shared_pointer(void *p) : SharedPointer(p) {};
+
+	inline const T *dup(void)
+		{return static_cast<const T*>(SharedPointer::share());};
 
 	inline void replace(T *p)
 		{SharedPointer::replace(p);};
@@ -499,14 +534,14 @@ public:
 
 	inline shared_instance(shared_pointer<T> &p) : shared_release(p) {};
 
-	inline T& operator*() const
-		{return *(static_cast<T *>(ptr->pointer));};
+	inline const T& operator*() const
+		{return *(static_cast<const T *>(ptr->pointer));};
 
-	inline T* operator->() const
-		{return static_cast<T*>(ptr->pointer);};
+	inline const T* operator->() const
+		{return static_cast<const T*>(ptr->pointer);};
 
-	inline T* get(void) const
-		{return static_cast<T*>(ptr->pointer);};
+	inline const T* get(void) const
+		{return static_cast<const T*>(ptr->pointer);};
 };
 
 inline void start(Thread *th)
@@ -517,6 +552,18 @@ inline void detach(Thread *th)
 
 inline void cancel(Thread *th)
 	{th->release();};
+
+#define	disable_cancel auto_cancel_disabled _cancel_;
+
+#define	async_cancel auto_cancel_async _cancel_;
+
+#define exclusive_cancel \
+	static pthread_mutex_t _mutex_ = PTHREAD_MUTEX_INITIALIZER; \
+	auto_sync_exclusive(&_mutex_);
+
+#define exclusive_disable_cancel pthread_mutex_t \
+	static pthread_mutex_t _mutex_ = PTHREAD_MUTEX_INITIALIZER; \
+	auto_sync_locked(&_mutex_);
 
 END_NAMESPACE
 

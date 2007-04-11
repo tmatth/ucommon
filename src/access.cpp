@@ -11,41 +11,58 @@ Exclusive::~Exclusive()
 {
 }
 
-auto_shared::auto_shared(Shared *obj)
+shared_lock::shared_lock(Shared *obj)
 {
 	lock = obj;
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	lock->Shlock();
+
 };
 
-auto_exclusive::auto_exclusive(Exclusive *obj)
+exclusive_lock::exclusive_lock(Exclusive *obj)
 {
 	lock = obj;
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	lock->Exlock();
 }
 
-auto_shared::~auto_shared()
-{
-	release();
-}
-
-auto_exclusive::~auto_exclusive()
-{
-	release();
-}
-
-void auto_shared::release()
+shared_lock::~shared_lock()
 {
 	if(lock) {
 		lock->Unlock();
+		pthread_setcancelstate(state, NULL);
 		lock = NULL;
 	}
 }
 
-void auto_exclusive::release()
+exclusive_lock::~exclusive_lock()
+{
+	if(lock) {
+		lock->Unlock();
+		pthread_setcancelstate(state, NULL);
+		lock = NULL;
+	}
+}
+
+void shared_lock::release()
+{
+	if(lock) {
+		lock->Unlock();
+		pthread_setcancelstate(state, NULL);
+		lock = NULL;
+		if(state == PTHREAD_CANCEL_ENABLE)
+			pthread_testcancel();
+	}
+}
+
+void exclusive_lock::release()
 {
     if(lock) {
         lock->Unlock();
+		pthread_setcancelstate(state, NULL);
         lock = NULL;
+		if(state == PTHREAD_CANCEL_ENABLE)
+			pthread_testcancel();
     }
 }
 

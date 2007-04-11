@@ -33,26 +33,28 @@ public:
 		{return Shlock();};
 };
 
-class __EXPORT auto_exclusive
+class __EXPORT exclusive_lock
 {
 private:
 	Exclusive *lock;
+	int state;
 
 public:
-	auto_exclusive(Exclusive *l);
-	~auto_exclusive();
+	exclusive_lock(Exclusive *l);
+	~exclusive_lock();
 	
 	void release(void);
 };
 
-class __EXPORT auto_shared
+class __EXPORT shared_lock
 {
 private:
     Shared *lock;
+	int state;
 
 public:
-    auto_shared(Shared *l);
-    ~auto_shared();
+    shared_lock(Shared *l);
+    ~shared_lock();
 
     void release(void);
 };
@@ -68,14 +70,6 @@ inline void share(Shared *sh)
 
 inline void release(Shared *sh)
 	{sh->Unlock();};
-
-#define	__access__name(x)	x##__LINE__
-	
-#define	access_exclusive(x)	auto_exclusive __access__name(_ex_) \
-	(static_cast<Exclusive*>(&x))
-
-#define	access_shared(x)	auto_shared __access__name(_ex_) \
-	(static_cast<Shared*>(&x))
 
 END_NAMESPACE
 
