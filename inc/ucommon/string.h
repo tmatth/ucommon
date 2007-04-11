@@ -215,7 +215,7 @@ extern "C" {
 	__EXPORT char *cpr_stradd(char *str, size_t size, const char *src);
 	__EXPORT char *cpr_strnadd(char *str, size_t size, const char *src, size_t len);
 	__EXPORT char *cpr_strtrim(char *str, const char *clist); 
-	__EXPORT char *cpr_strrtrim(char *str, const char *clist); 
+	__EXPORT char *cpr_strchop(char *str, const char *clist); 
 	__EXPORT char *cpr_strstrip(char *str, const char *clist);
 	__EXPORT char *cpr_strupper(char *str);
 	__EXPORT char *cpr_strlower(char *str);

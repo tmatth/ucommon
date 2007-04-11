@@ -893,18 +893,14 @@ bool Buffer::operator!()
 	return true;
 }
 
-auto_cancellation::auto_cancellation(int ntype, int nmode)
+cancelstate::cancelstate()
 {
-	pthread_setcanceltype(ntype, &type);
-	pthread_setcancelstate(nmode, &mode);
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 }
 
-auto_cancellation::~auto_cancellation()
+cancelstate::~cancelstate()
 {
-	int ign;
-
-	pthread_setcancelstate(mode, &ign);
-	pthread_setcanceltype(type, &ign);
+	pthread_setcancelstate(state, NULL);
 }
 
 locked_release::locked_release(const locked_release &copy)

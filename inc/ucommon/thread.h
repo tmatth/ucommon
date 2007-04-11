@@ -379,14 +379,14 @@ public:
 	shared_release &operator=(SharedPointer &p);
 };
 
-class __EXPORT auto_cancellation
+class __EXPORT cancelstate
 {
 private:
-	int type, mode;
+	int state;
 
 public:
-	auto_cancellation(int type, int mode);
-	~auto_cancellation();
+	cancelstate();
+	~cancelstate();
 };
 
 template<class T, mempager *P = NULL, size_t L = 0>
@@ -517,15 +517,6 @@ inline void detach(Thread *th)
 
 inline void cancel(Thread *th)
 	{th->release();};
-
-#define	cancel_immediate()	auto_cancellation \
-	__cancel__(PTHREAD_CANCEL_ASYNCHRONOUS, PTHREAD_CANCEL_ENABLE)
-
-#define	cancel_deferred() auto_cancellation \
-	__cancel__(PTHREAD_CANCEL_DEFERRED, PTHREAD_CANCEL_ENABLE)
-
-#define	cancel_disabled() auto_cancellation \
-	__cancel__(PTHREAD_CANCEL_DEFERRED, PTHREAD_CANCEL_DISABLE)
 
 END_NAMESPACE
 

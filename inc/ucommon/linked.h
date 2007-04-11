@@ -347,6 +347,9 @@ public:
 	inline T &get(void)
 		{return value;};
 
+	inline T operator*()
+		{return value;};
+
 	static inline T getPointer(treemap *node)
 		{(node == NULL) ? NULL : node->value;};
 

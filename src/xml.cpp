@@ -5,71 +5,136 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-XMLTree::XMLTree(size_t s, char *name) :
+OrderedIndex keyconfig::callback::list;
+
+keyconfig::callback::callback() :
+OrderedObject(&list)
+{
+}
+
+keyconfig::callback::~callback()
+{
+	release();
+}
+
+void keyconfig::callback::release(void)
+{
+	delist(&list);
+}
+
+void keyconfig::callback::reload(keyconfig *keys)
+{
+}
+
+void keyconfig::callback::commit(keyconfig *keys)
+{
+}
+
+keyconfig::keyconfig(char *name, size_t s) :
 mempager(s), root()
 {
-	size = s;
 	root.setId(name);
 }
 
-XMLTree::~XMLTree()
+keyconfig::~keyconfig()
 {
-	root.remove();
 	mempager::purge();
 }
 
-xmlnode *XMLTree::search(xmlnode *base, const char *find, const char *text)
+keyconfig::keynode *keyconfig::getPath(const char *id)
 {
-	linked_pointer<xmlnode> node = node->getFirst();
-	xmlnode *leaf;
+	const char *np;
+	char buf[65];
+	char *ep;
+	keynode *node = &root, *child;
+	caddr_t mp;
+
+	while(id && *id && node) {
+		cpr_strset(buf, sizeof(buf), id);
+		ep = strchr(buf, '.');
+		if(ep)
+			*ep = 0;
+		np = strchr(id, '.');
+		if(np)
+			id = ++np;
+		else
+			id = NULL;
+		child = node->getChild(buf);
+		if(!child) {
+			mp = (caddr_t)alloc(sizeof(keynode));
+			child = new(mp) keynode(node, dup(buf));
+		}
+		node = child;			
+	}
+	return node;
+}
+
+keyconfig::keynode *keyconfig::addNode(keynode *base, const char *id, const char *value)
+{
+	caddr_t mp;
+	keynode *node;
+
+	mp = (caddr_t)alloc(sizeof(keynode));
+	node = new(mp) keynode(base, dup(id));
+	if(value)
+		node->setPointer(dup(value));
+	return node;
+}
+
+const char *keyconfig::getValue(keynode *node, const char *id, keynode *alt)
+{
+	node = node->getChild(id);
+	if(!node && alt)
+		node = alt->getChild(id);
+
+	if(!node)
+		return NULL;
+
+	return node->getPointer();
+}
+
+keyconfig::keynode *keyconfig::addNode(keynode *base, define *defs)
+{
+	keynode *node = getNode(base, defs->key, defs->value);
+	if(!node)
+		node = addNode(base, defs->key, defs->value);
+
+	for(;;) {
+		++defs;
+		if(!defs->key)
+			return base;
+		if(node->getChild(defs->key))
+			continue;
+		addNode(node, defs->key, defs->value);
+	}
+	return node;
+}
+
+
+keyconfig::keynode *keyconfig::getNode(keynode *base, const char *id, const char *text)
+{
+	linked_pointer<keynode> node = base->getFirst();
+	char *cp;
 	
 	while(node) {
-		leaf = node->getLeaf(find);
-		if(leaf && !cpr_stricmp(leaf->getData(), text))
-			return leaf;
+		if(!strcmp(id, node->getId())) {
+			cp = node->getData();
+			if(cp && !cpr_stricmp(cp, text))
+				return *node;
+		}
 		node.next();
 	}
 	return NULL;
 } 
 
-bool XMLTree::change(xmlnode *node, const char *text)
-{
-	if(node->getFirst())
-		return false;
-
-	node->setPointer(dup(text));
-	return true;
-}
-
-void XMLTree::remove(xmlnode *node)
-{
-	node->remove();
-	loaded = 0;
-}
-
-xmlnode *XMLTree::add(xmlnode *node, const char *id, const char *text)
-{
-	caddr_t mp = (caddr_t)alloc(sizeof(xmlnode));
-	node = new(mp) xmlnode(node, dup(id));
-
-	if(text)
-		node->setPointer(dup(text));
-	if(validate(node))
-		return node;
-	remove(node);
-	return NULL;
-}
-
-bool XMLTree::load(const char *fn, xmlnode *node)
+bool keyconfig::loadxml(const char *fn, keynode *node)
 {
 	FILE *fp = fopen(fn, "r");
-	char *cp, *ep, *bp;
-	caddr_t mp;
+	char *cp, *ep, *bp, *id;
 	ssize_t len = 0;
 	bool rtn = false;
-	string buffer(size);
-	bool document = false;
-	xmlnode *match;
+	bool document = false, empty;
+	keynode *match;
 
 	if(!node)
 		node = &root;
@@ -81,12 +146,11 @@ bool XMLTree::load(const char *fn, xmlnode *node)
 
 	while(node) {
 		cp = buffer.c_mem() + buffer.len();
-		if(buffer.len() < size - 5) {
-			len = fread(cp, 1, size - buffer.len() - 1, fp);
+		if(buffer.len() < 1024 - 5) {
+			len = fread(cp, 1, 1024 - buffer.len() - 1, fp);
 		}
 		else
 			len = 0;
-
 
 		if(len < 0)
 			goto exit;
@@ -98,8 +162,7 @@ bool XMLTree::load(const char *fn, xmlnode *node)
 
 		while(node && cp && *cp)
 		{
-			while(isspace(*cp))
-				++cp;
+			cp = cpr_strtrim(cp, " \t\r\n");
 
 			if(cp && *cp && !node)
 				goto exit;
@@ -116,32 +179,57 @@ bool XMLTree::load(const char *fn, xmlnode *node)
 				if(node->getData() != NULL)
 					goto exit;
 				*bp = 0;
-				ep = bp - 1;
-				while(ep > cp && isspace(*ep)) {
-					*ep = 0;
-					--ep;
-				}		
+				cp = cpr_strchop(cp, " \r\n\t");
 				len = strlen(cp);
-				ep = (char *)alloc(len);
+				ep = (char *)alloc(len + 1);
 				cpr_xmldecode(ep, len, cp);
 				node->setPointer(ep);
 				*bp = '<';
 				cp = bp;
 				continue;
 			}
-	
+
+			empty = false;	
 			*ep = 0;
+			if(*(ep - 1) == '/') {
+				*(ep - 1) = 0;
+				empty = true;
+			}
 			cp = ++ep;
 
 			if(!strncmp(bp, "</", 2)) {
 				if(strcmp(bp + 2, node->getId()))
 					goto exit;
-				if(!validate(node))
-					goto exit;
+
 				node = node->getParent();
 				continue;
 			}		
+
 			++bp;
+
+			// if comment/control field...
+			if(!isalnum(*bp))
+				continue;
+
+			ep = bp;
+			while(isalnum(*ep))
+				++ep;
+
+			id = NULL;
+			if(isspace(*ep)) {
+				*(ep++) = 0;
+				id = strchr(ep, '\"');
+			}
+			else if(*ep)
+				goto exit;
+
+			if(id) {
+				ep = strchr(id + 1, *id);
+				if(!ep)
+					goto exit;
+				*ep = 0;
+				++id;
+			}
 
 			if(!document) {
 				if(strcmp(node->getId(), bp))
@@ -150,36 +238,28 @@ bool XMLTree::load(const char *fn, xmlnode *node)
 				continue;
 			}
 
-			if(node->getData() != NULL)
-				goto exit;
-
-			++bp;
-
-			match = node->getChild(bp);
+			if(id)
+				match = getNode(node, bp, id);
+			else
+				match = node->getChild(bp);
 			if(match) {
-				match->setPointer(NULL);
+				if(!id)
+					match->setPointer(NULL);
 				node = match;
-				continue;
 			}
-			mp = (caddr_t)alloc(sizeof(xmlnode));
-			node = new(mp) xmlnode(node, dup(bp));
+			else 
+				node = addNode(node, bp, id);
+
+			if(empty)
+				node = node->getParent();
 		}
 		buffer = cp;
 	}
 	if(!node && root.getId())
 		rtn = true;
 exit:
-	if(rtn)
-		loaded = getPages();
-	else
-		root.remove();
-
 	fclose(fp);
 	return rtn;
 }
 
-bool XMLTree::validate(xmlnode *node)
-{
-	return true;
-}
 	

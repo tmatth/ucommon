@@ -9,42 +9,21 @@
 #include <ucommon/thread.h>
 #endif
 
+#ifndef	_UCOMMON_STRING_H_
+#include <ucommon/string.h>
+#endif
+
 NAMESPACE_UCOMMON
 
-typedef treemap<char *> xmlnode;
-
-class __EXPORT XMLTree : public mempager
+class __EXPORT keyconfig : public mempager
 {
 public:
-    
-	XMLTree(size_t s, char *name);
-	virtual ~XMLTree();
+	typedef treemap<char *>keynode;
 
-	bool load(const char *name, xmlnode *top = NULL);
-
-protected:
-	xmlnode root;
-	unsigned loaded;
-	size_t size;
-
-    bool change(xmlnode *node, const char *text);
-    void remove(xmlnode *node);
-    xmlnode *add(xmlnode *parent, const char *id, const char *text = NULL);
-	xmlnode *search(xmlnode *base, const char *leaf, const char *value);
-
-	inline xmlnode *find(const char *id)
-		{return root.find(id);};
-
-	inline xmlnode *path(const char *p)
-		{return root.path(p);};
-
-	virtual bool validate(xmlnode *node);
-};
-
-class __EXPORT xmlconfig : public XMLTree
-{
-public:
-	typedef xmlnode node;
+	typedef struct {
+		const char *key;
+		const char *value;
+	} define;
 
 	class __EXPORT callback : public OrderedObject
     {
@@ -58,26 +37,62 @@ public:
 
         void release(void);
 
-        virtual void commit(xmlconfig *cfg);
-		virtual void reload(xmlconfig *cfg);
+        virtual void commit(keyconfig *cfg);
+		virtual void reload(keyconfig *cfg);
     };
+    
+	keyconfig(char *name, size_t s = 0);
+	virtual ~keyconfig();
+
+	bool loadxml(const char *name, keynode *top = NULL);
+	keynode *getPath(const char *path);
+	keynode *getNode(keynode *base, const char *id, const char *value);	
+	keynode *addNode(keynode *base, define *defs);
+	keynode *addNode(keynode *base, const char *id, const char *value);
+	const char *getValue(keynode *base, const char *id, keynode *copy = NULL);
+
+	inline static bool isLinked(keynode *node)
+		{return node->isLeaf();};
+
+	inline static bool isValue(keynode *node)
+		{return (node->getPointer() != NULL);};
+
+	inline static bool isUndefined(keynode *node)
+		{return !isLinked(node) && !isValue(node);};
+
+	inline static bool isNode(keynode *node)
+		{return isLinked(node) && isValue(node);};
+
+protected:
+	keynode root;
+	stringbuf<1024> buffer;
+};
+
+/* class __EXPORT xmlconfig : public XMLTree
+{
+public:
+	typedef xmlnode node;
+
 
 	xmlconfig();
 	void commit(void);
 	void update(void); // calls new uncommited callbacks...
 
-	static xmlconfig *get(void);
+	static keyconfig *get(void);
 	static void protect(void);
 	static void release(void);
 
 protected:
 	static xmlconfig *config;
+
+	bool loadAttribute(xmlnode *node, char *a);
 	void lock(void);
 
 private:
 	static SharedLock rwlock;
 	static linked_pointer<callback> cb; // for update...
 };
+*/
 
 END_NAMESPACE
 
