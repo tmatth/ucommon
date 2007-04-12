@@ -50,44 +50,6 @@ public:
 		{return err;};
 };
 
-class __EXPORT auto_close : private AutoObject
-{
-private:
-	union {
-#ifdef	_MSWINDOWS_
-		HANDLE h;
-#endif
-		FILE *fp;
-		DIR *dp;
-		int fd;
-	}	obj;
-
-	enum {
-#ifdef	_MSWINDOWS_
-		T_HANDLE,
-#endif
-		T_FILE,
-		T_DIR,
-		T_FD,
-		T_CLOSED
-	} type;
-
-	void release(void);
-
-public:
-
-#ifdef	_MSWINDOWS_
-	auto_close(HANDLE hv);
-#endif
-
-	auto_close(FILE *fp);
-	auto_close(DIR *dp);
-	auto_close(int fd);
-	~auto_close();
-};
-
-#define	autoclose(x)	auto_close __access_name(__ac__)(x)
-
 extern "C" {
 #ifdef	_MSWINDOWS_
 #define	RTLD_LAZY 0

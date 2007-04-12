@@ -18,7 +18,7 @@ extern "C" int main()
 
 	ptr = &list;
 	while(ptr) {
-		printf("VALUE %d\n", ptr->data);
+		printf("VALUE %d\n", ptr->value);
 		++ptr;
 	}
 	printf("DONE!\n");

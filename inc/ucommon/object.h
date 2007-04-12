@@ -183,34 +183,34 @@ public:
 };
 
 template <class T, class O = CountedObject>
-class value : public O
+class object_value : public O
 {
 protected:
 	inline void set(T &v)
-		{data = v;};
+		{value = v;};
 
 public:
-	T data;
+	T value;
 
-	inline value() : O() {};
+	inline object_value() : O() {};
 
-	inline value(T v) : O() 
-		{data = v;};
+	inline object_value(T v) : O() 
+		{value = v;};
 
 	inline T& operator*()
-		{return data;};
+		{return value;};
 
 	inline void operator=(T v)
-		{data = v;};
+		{value = v;};
 
 	inline operator T() 
-		{return data;};
+		{return value;};
 
 	inline T &operator()()
-		{return data;};
+		{return value;};
 
 	inline void operator()(T v)
-		{data = v;};
+		{value = v;};
 };
 
 template <class T, class P = auto_release>

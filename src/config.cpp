@@ -7,7 +7,6 @@ using namespace UCOMMON_NAMESPACE;
 
 OrderedIndex keyconfig::callback::list;
 SharedLock keyconfig::lock;
-linked_pointer<keyconfig::callback> keyconfig::cb;
 keyconfig *keyconfig::cfg = NULL;
 
 keyconfig::callback::callback() :
@@ -275,8 +274,29 @@ exit:
 	return rtn;
 }
 
-void keyconfig::update(void)
+void keyconfig::commit(void)
 {
+	cb = callback::list.begin();
+	while(cb) {
+		cb->reload(this);
+		cb.next();
+	}
+	lock.lock();
+
+	disable_cancel
+
+	cb = callback::list.begin();
+	while(cb) {
+		cb->commit(this);
+		cb.next();
+	}
+	cfg = this;
+	lock.unlock();
+}
+
+void keyconfig::update(void)
+{disable_cancel
+
 	lock.lock();
 	if(cb)
 		cb.next();

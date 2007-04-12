@@ -36,13 +36,42 @@ typedef	void (*sighandler_t)(int);
 #define	SPAWN_NOWAIT	1
 #define	SPAWN_DETACH	2
 
+NAMESPACE_UCOMMON
+
+class __EXPORT envpager : public mempager
+{
+protected:
+	LinkedObject *root;
+
+public:
+	typedef named_value<const char *> member;
+
+	envpager(size_t paging);
+	~envpager();
+
+	void dup(const char *id, const char *val);
+	void set(char *id, const char *val);
+	const char *get(const char *id);
+
+	inline member *find(const char *id)
+		{return static_cast<member*>(NamedObject::find(static_cast<NamedObject*>(root), id));};
+
+	inline member *begin(void)
+		{return static_cast<member*>(root);};
+
+	char **getEnviron(void);
+
+};
+
+END_NAMESPACE
+
 extern "C" {
 
 	__EXPORT size_t cpr_pagesize(void);
 	__EXPORT int cpr_scheduler(int policy, unsigned priority = CPR_PRIORITY_NORMAL);
 	__EXPORT void cpr_pattach(const char *path);
 	__EXPORT void cpr_pdetach(void);
-	__EXPORT int cpr_spawn(const char *fn, char **args, int mode);
+	__EXPORT int cpr_spawn(const char *fn, char **args, int mode, ucc::envpager *env = NULL);
 	__EXPORT void cpr_closeall(void);
 	__EXPORT void cpr_cancel(pid_t pid);
 #ifndef	_MSWINDOWS_
@@ -54,7 +83,7 @@ extern "C" {
 	#define cpr_signal(sig, handler) signal(sig, handler)
 #endif
 	__EXPORT pid_t cpr_wait(pid_t pid = 0, int *status = NULL);
-	__EXPORT pid_t cpr_create(const char *path, char **args, fd_t *iov);
+	__EXPORT pid_t cpr_create(const char *path, char **args, fd_t *iov, ucc::envpager *env = NULL);
 	__EXPORT void cpr_sleep(timeout_t timeout);
 	__EXPORT void cpr_yield(void);
 	__EXPORT int cpr_priority(unsigned priority);

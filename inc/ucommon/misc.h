@@ -77,6 +77,7 @@ public:
 		{return isLinked(node) && isValue(node);};
 
 	void update(void);
+	void commit(void);
 
 	inline static void protect(int *state)
 		{lock.protect(state);};
@@ -84,42 +85,19 @@ public:
 	inline static void release(int *state)
 		{lock.release(state);};
 
+	inline static keyconfig *forked(void)
+		{return cfg;};
+
 protected:
 	friend class instance;
 
 	static keyconfig *cfg;
 	static SharedLock lock;
-	static linked_pointer<callback> cb; // for update...
 
+	linked_pointer<callback> cb; // for update...
 	keynode root;
 	stringbuf<1024> buffer;
 };
-
-/* class __EXPORT xmlconfig : public XMLTree
-{
-public:
-	typedef xmlnode node;
-
-
-	xmlconfig();
-	void commit(void);
-	void update(void); // calls new uncommited callbacks...
-
-	static keyconfig *get(void);
-	static void protect(void);
-	static void release(void);
-
-protected:
-	static xmlconfig *config;
-
-	bool loadAttribute(xmlnode *node, char *a);
-	void lock(void);
-
-private:
-	static SharedLock rwlock;
-	static linked_pointer<callback> cb; // for update...
-};
-*/
 
 END_NAMESPACE
 

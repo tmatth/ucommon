@@ -50,6 +50,67 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+envpager::envpager(size_t ps) :
+mempager(ps)
+{
+	root = NULL;
+}
+
+envpager::~envpager()
+{
+	purge();
+}
+
+const char *envpager::get(const char *id)
+{
+	member *key = find(id);
+	if(!key)
+		return NULL;
+
+	return key->value;
+}
+
+char **envpager::getEnviron(void)
+{
+	char buf[1024 - 64];
+	linked_pointer<member> env;
+	unsigned idx = 0;
+	unsigned count = LinkedObject::count(root) + 1;
+	caddr_t mp = (caddr_t)alloc(count * sizeof(char *));
+	char **envp = new(mp) char *[count];
+
+	env = root;
+	while(env) {
+		snprintf(buf, sizeof(buf), "%s=%s", env->getId(), env->value);
+		envp[idx++] = mempager::dup(buf);
+	}
+	envp[idx] = NULL;
+	return envp;
+}
+
+void envpager::dup(const char *id, const char *value)
+{
+	member *env = find(id);
+
+	if(!env) {
+		caddr_t mp = (caddr_t)alloc(sizeof(member));
+		env = new(mp) member(&root, mempager::dup(id));
+	}
+	env->value = mempager::dup(value);
+};
+
+void envpager::set(char *id, const char *value)
+{
+    member *env = find(id);
+	
+	if(!env) {
+	    caddr_t mp = (caddr_t)alloc(sizeof(member));
+	    env = new(mp) member(&root, id);
+	}
+
+    env->value = value;
+};
+
 extern "C" void cpr_sleep(timeout_t timeout)
 {
 #ifdef	_MSWINDOWS_
@@ -143,7 +204,21 @@ extern "C" void cpr_pattach(const char *dev)
 	}
 }
 
-extern "C" int cpr_spawn(const char *fn, char **args, int mode)
+static void setenv(envpager *ep)
+{
+	linked_pointer<envpager::member> env;
+
+	if(!ep)
+		return;
+
+	env = ep->begin();
+	while(env) {
+		setenv(env->getId(), env->value, 1);
+		env.next();
+	}
+}
+
+extern "C" int cpr_spawn(const char *fn, char **args, int mode, envpager *env)
 {
 	pid_t pid = fork();
 	int status;
@@ -166,11 +241,12 @@ extern "C" int cpr_spawn(const char *fn, char **args, int mode)
 	if(mode == SPAWN_DETACH)
 		cpr_pdetach();
 
+	setenv(env);		
 	execvp(fn, args);
 	exit(-1);
 }
 
-extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov)
+extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov, envpager *env)
 {
 	int in[2], out[2];
 	if(iov) {
@@ -196,6 +272,7 @@ extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov)
 	dup2(in[0], 0);
 	dup2(out[1], 1);
 	cpr_closeall();
+	setenv(env);
 	execvp(fn, args);
 	exit(-1);
 }

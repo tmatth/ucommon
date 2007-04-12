@@ -32,6 +32,8 @@ public:
 
 	static void purge(LinkedObject *root);
 
+	static unsigned count(LinkedObject *root);
+
 	inline LinkedObject *getNext(void) const
 		{return next;};
 };
@@ -234,8 +236,22 @@ public:
 	void begin(void) const;
 };
 
+template <class T, class O=NamedObject>
+class named_value : public object_value<T, O>
+{
+public:
+	inline named_value(LinkedObject **root, char *i) 
+		{LinkedObject::enlist(root); O::id = i;};
+
+	inline void operator=(T v)
+		{set(v);};
+
+	inline static named_value find(named_value *base, const char *id)
+		{return static_cast<named_value *>(NamedObject::find(base, id));};
+};
+
 template <class T, class O=OrderedObject>
-class linked_value : public value<T, O>
+class linked_value : public object_value<T, O>
 {
 public:
 	inline linked_value() {};

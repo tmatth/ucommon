@@ -162,6 +162,16 @@ void LinkedObject::release(void)
 	}
 }
 
+unsigned LinkedObject::count(LinkedObject *root)
+{
+	unsigned c = 0;
+	while(root) {
+		++c;
+		root = root->next;
+	}
+	return c;
+}
+
 unsigned NamedObject::keyindex(const char *id, unsigned max)
 {
 	unsigned val = 0;
