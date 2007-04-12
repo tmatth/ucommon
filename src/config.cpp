@@ -276,6 +276,8 @@ exit:
 
 void keyconfig::commit(void)
 {
+	cancel_state cancel;
+
 	cb = callback::list.begin();
 	while(cb) {
 		cb->reload(this);
@@ -283,7 +285,7 @@ void keyconfig::commit(void)
 	}
 	lock.lock();
 
-	disable_cancel
+	cancel_disable(cancel);
 
 	cb = callback::list.begin();
 	while(cb) {
@@ -292,11 +294,14 @@ void keyconfig::commit(void)
 	}
 	cfg = this;
 	lock.unlock();
+	cancel_release(cancel);
 }
 
 void keyconfig::update(void)
-{disable_cancel
+{
+	cancel_state cancel;
 
+	cancel_disable(cancel);
 	lock.lock();
 	if(cb)
 		cb.next();

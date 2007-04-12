@@ -381,46 +381,28 @@ public:
 	shared_release &operator=(SharedPointer &p);
 };
 
-class __EXPORT auto_sync_exclusive
+class __EXPORT cancel_state
 {
 private:
-	pthread_mutex_t *mutex;
+	int state, type;
 
 public:
-	auto_sync_exclusive(pthread_mutex_t *m);
-	~auto_sync_exclusive();
+	cancel_state();
+	~cancel_state();
+
+	void async(void);
+	void disable(void);
+	void release(void);
 };
 
-class __EXPORT auto_sync_locked
-{
-private:
-	pthread_mutex_t *mutex;
-	int state;
+inline void cancel_async(cancel_state &cancel)
+	{cancel.async();};
 
-public:
-	auto_sync_locked(pthread_mutex_t *m);
-	~auto_sync_locked();
-};
+inline void cancel_disable(cancel_state &cancel)
+	{cancel.disable();};
 
-class __EXPORT auto_cancel_disabled
-{
-private:
-	int state;
-
-public:
-	auto_cancel_disabled();
-	~auto_cancel_disabled();
-};
-
-class __EXPORT auto_cancel_async
-{
-private:
-	int state;
-
-public:
-	auto_cancel_async();
-	~auto_cancel_async();
-};
+inline void cancel_release(cancel_state &cancel)
+	{cancel.release();};
 
 template<class T, mempager *P = NULL, size_t L = 0>
 class queue : public Queue
@@ -552,10 +534,6 @@ inline void detach(Thread *th)
 
 inline void cancel(Thread *th)
 	{th->release();};
-
-#define	disable_cancel auto_cancel_disabled _cancel_;
-
-#define	async_cancel auto_cancel_async _cancel_;
 
 #define exclusive_cancel \
 	static pthread_mutex_t _mutex_ = PTHREAD_MUTEX_INITIALIZER; \

@@ -915,48 +915,39 @@ bool Buffer::operator!()
 	return true;
 }
 
-auto_sync_exclusive::auto_sync_exclusive(pthread_mutex_t *m)
+cancel_state::cancel_state()
 {
-	mutex = m;
-	pthread_mutex_lock(mutex);
-}
-
-auto_sync_exclusive::~auto_sync_exclusive()
-{
-	pthread_mutex_unlock(mutex);
-}
-
-auto_sync_locked::auto_sync_locked(pthread_mutex_t *m)
-{
-    mutex = m;
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
-    pthread_mutex_lock(mutex);
-}
-
-auto_sync_locked::~auto_sync_locked()
-{
-    pthread_mutex_unlock(mutex);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &type);
+	pthread_setcanceltype(type, NULL);
 	pthread_setcancelstate(state, NULL);
 }
 
-auto_cancel_disabled::auto_cancel_disabled()
+cancel_state::~cancel_state()
+{
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	pthread_setcanceltype(type, NULL);
+	pthread_setcancelstate(state, NULL);
+}
+
+void cancel_state::release(void)
+{
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	pthread_setcanceltype(type, NULL);
+	pthread_setcancelstate(state, NULL);
+	if(state == PTHREAD_CANCEL_ENABLE)
+		pthread_testcancel();
+}
+
+void cancel_state::disable(void)
 {
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 }
 
-auto_cancel_disabled::~auto_cancel_disabled()
+void cancel_state::async(void)
 {
-	pthread_setcancelstate(state, NULL);
-}
-
-auto_cancel_async::auto_cancel_async()
-{
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &state);
-}
-
-auto_cancel_async::~auto_cancel_async()
-{
-    pthread_setcanceltype(state, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &type);
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &state);
 }
 
 locked_release::locked_release(const locked_release &copy)
