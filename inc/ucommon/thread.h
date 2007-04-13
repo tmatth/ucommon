@@ -227,7 +227,6 @@ class __EXPORT Thread
 {
 protected:
 	size_t stack;
-	pthread_t tid;
 
 	Thread(size_t stack = 0);
 
@@ -244,6 +243,8 @@ public:
 class __EXPORT CancelableThread : protected Thread
 {
 protected:
+	pthread_t tid;
+
 	volatile bool running;
 
 	CancelableThread(size_t size = 0);

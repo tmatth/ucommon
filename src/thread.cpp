@@ -560,6 +560,8 @@ void PooledThread::start(void)
 
 void DetachedThread::start(void)
 {
+	pthread_t tid;
+
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -612,12 +614,8 @@ void CancelableThread::release(void)
 
 void DetachedThread::release(void)
 {
-	pthread_t self = pthread_self();
-
-	if(pthread_equal(tid, self)) {
-		dealloc();
-		pthread_exit(NULL);
-	}
+	dealloc();
+	pthread_exit(NULL);
 }
 
 Queue::member::member(Queue *q, Object *o) :
