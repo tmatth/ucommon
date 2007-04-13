@@ -259,6 +259,7 @@ public:
 
 	void release(void);
 	void start(void);
+
 };
 
 class __EXPORT DetachedThread : protected Thread
@@ -283,13 +284,15 @@ public:
 class __EXPORT PooledThread : public DetachedThread
 {
 protected:
-	unsigned poolsize;
+	unsigned poolsize, poolused;
 
-	PooledThread(unsigned pool, size_t stack = 0);
+	PooledThread(size_t stack = 0);
 	void dealloc(void);
+	void pause(void);
 
 public:
 	void start(void);
+	void start(unsigned count);
 };
 	
 class __EXPORT Queue : protected OrderedIndex, protected Conditional
