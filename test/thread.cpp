@@ -5,19 +5,19 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-class mythread : public CancelableThread
+class mythread : public JoinableThread
 {
 public:
-	inline mythread() : CancelableThread() {};
+	inline mythread() : JoinableThread() {};
 
 	void run(void);
 };
 
 void mythread::run(void)
 {
-	printf("starting...\n");
-	cpr_sleep(10000);
-	printf("finishing\n");
+	printf("starting thread...\n");
+	pause(10000);
+	printf("finishing thread\n");
 };
 
 extern "C" int main()
@@ -26,7 +26,9 @@ extern "C" int main()
 
 	printf("before\n");
 	thr->start();
+	printf("sleeping main...\n");
 	cpr_sleep(1000);
+	printf("wakeup main...\n");
 	thr->release();
 	printf("joining\n");
 	delete thr;

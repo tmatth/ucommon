@@ -224,6 +224,7 @@ public:
 class __EXPORT Thread
 {
 protected:
+	pthread_t tid;
 	size_t stack;
 
 	Thread(size_t stack = 0);
@@ -235,26 +236,22 @@ public:
 	
 	virtual ~Thread();
 
+	virtual void dealloc(void);
+
 	virtual void release(void) = 0;
 };
 
-class __EXPORT CancelableThread : protected Thread
+class __EXPORT JoinableThread : protected Thread
 {
 private:
-	pthread_t tid;
-	int cancel_state, cancel_type;
 	volatile bool running;
 
 protected:
-	CancelableThread(size_t size = 0);
-	virtual ~CancelableThread();
+	JoinableThread(size_t size = 0);
+	virtual ~JoinableThread();
 	void pause(void);
 	void pause(timeout_t timeout);
 	
-	void async_cancel(void);
-	void disable_cancel(void);
-	void release_cancel(void);
-
 	inline void test_cancel(void)
 		{pause();};
 
@@ -277,10 +274,13 @@ protected:
 
 	virtual void release(void);
 	virtual void dealloc(void);
+
 	void pause(void);
 	void pause(timeout_t timeout);
 
 public:
+	virtual void cancel(void);
+
 	void start(void);
 
 	void stop(void);
@@ -302,7 +302,10 @@ protected:
 	void pause(timeout_t timeout);
 	void wait(void);
 	bool wait(timeout_t timeout);
+	
 	void release(void);
+	void dealloc(void);
+	void cancel(void);
 
 public:
 	bool signal(void);
@@ -559,9 +562,35 @@ public:
 inline void start(Thread *th)
 	{th->start();};
 
-inline void cancel(CancelableThread *th)
+inline void cancel(JoinableThread *th)
 	{th->release();};
 
+inline void cancel(DetachedThread *th)
+	{th->cancel();};
+
 END_NAMESPACE
+
+extern "C" {
+	typedef struct {int state; int type;} cancellation;
+	__EXPORT void cpr_cancel_suspend(cancellation *cancel);
+	__EXPORT void cpr_cancel_resume(cancellation *cancel);
+	__EXPORT void cpr_cancel_async(cancellation *cancel);
+};
+
+#define	begin_exclusive()	\
+	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
+		pthread_mutex_lock(&__sync__);
+
+#define end_exclusive() \
+	pthread_mutex_unlock(&__sync__);} while(0);
+
+#define	suspend_cancellation() \
+	do { static cancellation __cancel__; cpr_cancel_suspend(&__cancel__);
+
+#define async_cancellation() \
+	do { static cancellation __cancel__; cpr_cancel_async(&__cancel__);
+
+#define	resume_cancellation() \
+	cpr_cancel_resume(&__cancel__);} while(0);
 
 #endif

@@ -466,32 +466,10 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
-CancelableThread::CancelableThread(size_t size)
+JoinableThread::JoinableThread(size_t size)
 {
 	running = false;
 	stack = size;
-	cancel_state = PTHREAD_CANCEL_ENABLE;
-	cancel_type = PTHREAD_CANCEL_DEFERRED;
-}
-
-void CancelableThread::release_cancel(void)
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-	pthread_setcanceltype(cancel_type, NULL);
-	pthread_setcancelstate(cancel_state, NULL);
-	if(cancel_state == PTHREAD_CANCEL_ENABLE)
-		pthread_testcancel();
-}
-
-void CancelableThread::async_cancel(void)
-{
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel_type);
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancel_state);
-}
-
-void CancelableThread::disable_cancel(void)
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_state);
 }
 
 DetachedThread::DetachedThread(size_t size)
@@ -499,22 +477,42 @@ DetachedThread::DetachedThread(size_t size)
 	stack = size;
 }
 
+void Thread::dealloc(void)
+{
+}
+
+void PooledThread::dealloc(void)
+{
+	if(!poolused)
+		delete this;
+}
+
+void DetachedThread::dealloc(void)
+{
+	delete this;
+}
+
+void DetachedThread::cancel(void)
+{
+	pthread_cancel(tid);
+}
+
+void PooledThread::cancel(void)
+{
+	crit(0);
+}
+
 void PooledThread::release(void)
 {
-	bool done = false;
 	lock();
 	--poolused;
-	if(!poolused)
-		done = true;
 	unlock();
-	if(done)
-		dealloc();
 	pthread_exit(NULL);
 }
 
 bool PooledThread::wait(timeout_t timeout)
 {
-    bool over = false;
+	bool over = false;
 	bool result;
     lock();
     ++waits;
@@ -525,10 +523,8 @@ bool PooledThread::wait(timeout_t timeout)
         over = true;
     }
     unlock();
-    if(over) {
-        dealloc();
+    if(over)
         pthread_exit(NULL);
-	}
 	return result;
 }
 
@@ -544,10 +540,8 @@ void PooledThread::wait(void)
 		over = true;
 	}
 	unlock();
-	if(over) {
-		dealloc();
+	if(over)
 		pthread_exit(NULL);
-	}
 }
 
 bool PooledThread::signal(void)
@@ -588,7 +582,7 @@ Thread::~Thread()
 {
 }
 
-CancelableThread::~CancelableThread()
+JoinableThread::~JoinableThread()
 {
 	release();
 }
@@ -598,26 +592,35 @@ DetachedThread::~DetachedThread()
 }
 		
 extern "C" {
+	static void exit_thread(void *obj)
+	{
+		Thread *th = static_cast<Thread *>(obj);
+		th->dealloc();
+	};
+
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
+		pthread_cleanup_push(exit_thread, th);
 		th->run();
 		th->release();
+		pthread_cleanup_pop(1);
 		return NULL;
 	};
 }
 
-void CancelableThread::pause(void)
+void JoinableThread::pause(void)
 {
 	pthread_testcancel();
 	cpr_yield();
 }
 
-void CancelableThread::pause(timeout_t timeout)
+void JoinableThread::pause(timeout_t timeout)
 {
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel_type);
+	int ctype;
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &ctype);
 	cpr_sleep(timeout);
-	pthread_setcanceltype(cancel_type, NULL);
+	pthread_setcanceltype(ctype, NULL);
 }
 
 void DetachedThread::pause(void)
@@ -630,7 +633,7 @@ void DetachedThread::pause(timeout_t timeout)
 	cpr_sleep(timeout);
 }
 
-void CancelableThread::start(void)
+void JoinableThread::start(void)
 {
 	pthread_attr_t attr;
 	if(running)
@@ -676,8 +679,6 @@ void PooledThread::start(unsigned count)
 
 void DetachedThread::start(void)
 {
-	pthread_t tid;
-
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -706,10 +707,8 @@ void PooledThread::pause(timeout_t timeout)
 		--poolused;
 	}
 	unlock();
-    if(over) {
-		dealloc();
+    if(over)
 		pthread_exit(NULL);
-	}		
 }
 
 void PooledThread::pause(void)
@@ -722,20 +721,13 @@ void PooledThread::pause(void)
 		--poolused;
 	}
 	unlock();
-	if(over) {
-		dealloc();
+	if(over)
 		pthread_exit(NULL);
-	}	
 	else
 		cpr_yield();
 }
 
-void DetachedThread::dealloc(void)
-{
-	delete this;
-}
-
-void CancelableThread::release(void)
+void JoinableThread::release(void)
 {
 	pthread_t self = pthread_self();
 
@@ -1194,5 +1186,25 @@ shared_release &shared_release::operator=(SharedPointer &p)
 	ptr = &p;
 	p.share();
 	return *this;
+}
+
+extern "C" void cpr_cancel_async(cancellation *cancel)
+{
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel->type);
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancel->state);
+}
+
+extern "C" void cpr_cancel_suspend(cancellation *cancel)
+{
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel->state);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &cancel->type);
+}
+
+extern "C" void cpr_cancel_resume(cancellation *cancel)
+{
+	pthread_setcanceltype(cancel->type, NULL);
+	pthread_setcancelstate(cancel->state, NULL);
+	if(cancel->state == PTHREAD_CANCEL_ENABLE)
+		pthread_testcancel();
 }
 
