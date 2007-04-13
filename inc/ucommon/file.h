@@ -46,6 +46,9 @@ public:
 	void cancel(void);
 	ssize_t result(void);	
 
+	inline size_t transfer(void)
+		{return count;};
+
 	inline int error(void)
 		{return err;};
 };

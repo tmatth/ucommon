@@ -16,6 +16,7 @@ void aio::cancel(void)
 	if(!pending)
 		return;
 
+	count = 0;
 	aio_cancel(cb.aio_fildes, &cb);
 	err = aio_error(&cb);
 	pending = false;
@@ -23,6 +24,7 @@ void aio::cancel(void)
 #else
 void aio::cancel(void)
 {
+	count = 0;
 #ifdef	ECANCELED
 	err = ECANCELED;
 #else
@@ -41,18 +43,22 @@ bool aio::isPending(void)
 		err = aio_error(&cb);
 	if(err != EINPROGRESS)
 		return false;
-	return false;
+	return true;
 }
 
 ssize_t aio::result(void)
 {
+	ssize_t res;
 	if(err == EINPROGRESS)
 		err = aio_error(&cb);
 	if(err == EINPROGRESS)
 		return 0;
 
 	pending = false;
-	return aio_return(&cb);
+	res = aio_return(&cb);
+	if(res > -1)
+		count = res;
+	return res;
 }	
 
 void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
@@ -64,8 +70,10 @@ void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
     cb.aio_buf = buf;
     cb.aio_nbytes = len;
     cb.aio_offset = offset;
-    if(!aio_write(&cb))
+    if(!aio_write(&cb)) {
+		count = 0;
 		pending = true;
+	}
 }
 
 void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
@@ -77,8 +85,10 @@ void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
 	cb.aio_buf = buf;
 	cb.aio_nbytes = len;
 	cb.aio_offset = offset;
-	if(!aio_read(&cb))
+	if(!aio_read(&cb)) {
+		count = 0;
 		pending = true;
+	}
 }
 		
 #else

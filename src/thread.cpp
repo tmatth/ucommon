@@ -6,8 +6,6 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-static pthread_mutex_t pool = PTHREAD_MUTEX_INITIALIZER;
-
 const size_t Buffer::timeout = ((size_t)(-1));
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
@@ -501,11 +499,89 @@ DetachedThread::DetachedThread(size_t size)
 	stack = size;
 }
 
-PooledThread::PooledThread(size_t size)
+void PooledThread::release(void)
 {
+	bool done = false;
+	lock();
+	--poolused;
+	if(!poolused)
+		done = true;
+	unlock();
+	if(done)
+		dealloc();
+	pthread_exit(NULL);
+}
+
+bool PooledThread::wait(timeout_t timeout)
+{
+    bool over = false;
+	bool result;
+    lock();
+    ++waits;
+    result = Conditional::wait(timeout);
+    --waits;
+    if(poolused > poolsize) {
+        --poolused;
+        over = true;
+    }
+    unlock();
+    if(over) {
+        dealloc();
+        pthread_exit(NULL);
+	}
+	return result;
+}
+
+void PooledThread::wait(void)
+{
+	bool over = false;
+	lock();
+	++waits;
+	Conditional::wait();
+	--waits;
+	if(poolused > poolsize) {
+		--poolused;
+		over = true;
+	}
+	unlock();
+	if(over) {
+		dealloc();
+		pthread_exit(NULL);
+	}
+}
+
+bool PooledThread::signal(void)
+{
+	bool waiting = true;
+
+	lock();
+	if(waits)
+		Conditional::signal();
+	else
+		waiting = false;
+	unlock();
+	return waiting;
+}
+
+bool PooledThread::wakeup(unsigned limit)
+{
+	bool waiting = true;
+
+	lock();
+	if(waits >= limit)
+		Conditional::broadcast();
+	else
+		waiting = false;
+	unlock();
+	return waiting;
+}
+
+PooledThread::PooledThread(size_t size) :
+DetachedThread(size), Conditional()
+{
+	waits = 0;
 	poolsize = 0;
 	poolused = 0;
-	stack = size;
 }
 
 Thread::~Thread()
@@ -529,6 +605,30 @@ extern "C" {
 		th->release();
 		return NULL;
 	};
+}
+
+void CancelableThread::pause(void)
+{
+	pthread_testcancel();
+	cpr_yield();
+}
+
+void CancelableThread::pause(timeout_t timeout)
+{
+	int ctype;
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &ctype);
+	cpr_sleep(timeout);
+	pthread_setcanceltype(ctype, NULL);
+}
+
+void DetachedThread::pause(void)
+{
+	cpr_yield();
+}
+
+void DetachedThread::pause(timeout_t timeout)
+{
+	cpr_sleep(timeout);
 }
 
 void CancelableThread::start(void)
@@ -557,22 +657,22 @@ void CancelableThread::start(void)
 
 void PooledThread::start(void)
 {
-	pthread_mutex_lock(&pool);
+	lock();
 	++poolsize;
 	++poolused;
 	DetachedThread::start();
-	pthread_mutex_unlock(&pool);
+	unlock();
 }
 
 void PooledThread::start(unsigned count)
 {
-	pthread_mutex_lock(&pool);
+	lock();
 	poolsize = count;
 	while(poolused < poolsize) {
 		DetachedThread::start();
 		++poolused;
 	}
-	pthread_mutex_unlock(&pool);
+	unlock();
 }
 
 void DetachedThread::start(void)
@@ -597,27 +697,39 @@ void DetachedThread::start(void)
 	pthread_attr_destroy(&attr);
 }
 
+void PooledThread::pause(timeout_t timeout)
+{
+	bool over = false;
+	cpr_sleep(timeout);
+	lock();
+    if(poolused > poolsize) {
+        over = true;
+		--poolused;
+	}
+	unlock();
+    if(over) {
+		dealloc();
+		pthread_exit(NULL);
+	}		
+}
+
 void PooledThread::pause(void)
 {
 	bool over = false;
-	pthread_mutex_lock(&pool);
-	if(poolused > poolsize)
+
+	lock();
+	if(poolused > poolsize) {
 		over = true;
-	pthread_mutex_unlock(&pool);
-	if(over)
-		release();
+		--poolused;
+	}
+	unlock();
+	if(over) {
+		dealloc();
+		pthread_exit(NULL);
+	}	
 	else
 		cpr_yield();
 }
-
-void PooledThread::dealloc(void)
-{
-	pthread_mutex_lock(&pool);
-	--poolsize;
-	if(!poolsize)
-		delete this;
-	pthread_mutex_unlock(&pool);
-}	
 
 void DetachedThread::dealloc(void)
 {

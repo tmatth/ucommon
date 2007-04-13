@@ -249,6 +249,8 @@ protected:
 
 	CancelableThread(size_t size = 0);
 	virtual ~CancelableThread();
+	void pause(void);
+	void pause(timeout_t timeout);
 
 public:
 	inline bool isRunning(void)
@@ -259,20 +261,23 @@ public:
 
 	void release(void);
 	void start(void);
-
 };
 
 class __EXPORT DetachedThread : protected Thread
 {
 protected:
 	DetachedThread(size_t size = 0);
-	virtual ~DetachedThread();
+	~DetachedThread();
 
 	virtual void release(void);
 	virtual void dealloc(void);
+	void pause(void);
+	void pause(timeout_t timeout);
 
 public:
 	void start(void);
+
+	void stop(void);
 
 	inline bool isDetached(void)
 		{return true;};
@@ -281,16 +286,21 @@ public:
 		{return true;};
 };
 
-class __EXPORT PooledThread : public DetachedThread
+class __EXPORT PooledThread : public DetachedThread, protected Conditional
 {
 protected:
-	unsigned poolsize, poolused;
+	unsigned poolsize, poolused, waits;
 
 	PooledThread(size_t stack = 0);
-	void dealloc(void);
 	void pause(void);
+	void pause(timeout_t timeout);
+	void wait(void);
+	bool wait(timeout_t timeout);
+	void release(void);
 
 public:
+	bool signal(void);
+	bool wakeup(unsigned limit = 1);
 	void start(void);
 	void start(unsigned count);
 };
