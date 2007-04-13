@@ -577,20 +577,20 @@ extern "C" {
 	__EXPORT void cpr_cancel_async(cancellation *cancel);
 };
 
-#define	begin_exclusive()	\
+#define	cpr_begin_exclusive()	\
 	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
 		pthread_mutex_lock(&__sync__);
 
-#define end_exclusive() \
+#define cpr_end_exclusive() \
 	pthread_mutex_unlock(&__sync__);} while(0);
 
-#define	suspend_cancellation() \
-	do { static cancellation __cancel__; cpr_cancel_suspend(&__cancel__);
+#define	cpr_suspend_cancellation() \
+	do { cancellation __cancel__; cpr_cancel_suspend(&__cancel__);
 
-#define async_cancellation() \
-	do { static cancellation __cancel__; cpr_cancel_async(&__cancel__);
+#define cpr_async_cancellation() \
+	do { cancellation __cancel__; cpr_cancel_async(&__cancel__);
 
-#define	resume_cancellation() \
+#define	cpr_resume_cancellation() \
 	cpr_cancel_resume(&__cancel__);} while(0);
 
 #endif

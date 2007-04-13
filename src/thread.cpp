@@ -595,6 +595,8 @@ extern "C" {
 	static void exit_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
+
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 		th->dealloc();
 	};
 
