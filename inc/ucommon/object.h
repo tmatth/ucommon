@@ -39,6 +39,9 @@ public:
 	inline bool isCopied(void)
 		{return count > 1;};
 
+	inline unsigned copied(void)
+		{return count;};
+
 	void retain(void);
 	void release(void);
 };
@@ -49,27 +52,6 @@ protected:
 	friend class auto_delete;
 	virtual ~Temporary();
 };
-
-class __EXPORT ExitObject
-{
-protected:
-	ExitObject();
-	virtual ~ExitObject();
-
-	void delist(void);
-
-public:
-	ExitObject *next;
-	
-	static void forkPrepare(void);
-	static void forkRelease(void);
-	static void forkRetain(void);
-
-	virtual void release(void) = 0;
-	virtual void prepare(void);
-	virtual void parent(void);
-	virtual void child(void);
-};	
 
 class __EXPORT AutoObject
 {

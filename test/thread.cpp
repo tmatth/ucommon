@@ -5,10 +5,10 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-class mythread : public CThread
+class mythread : public CancelableThread
 {
 public:
-	inline mythread() : CThread() {};
+	inline mythread() : CancelableThread() {};
 
 	void run(void);
 };

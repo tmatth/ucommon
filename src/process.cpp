@@ -70,6 +70,7 @@ const char *envpager::get(const char *id)
 	return key->value;
 }
 
+#ifdef	_MSWINDOWS_
 char **envpager::getEnviron(void)
 {
 	char buf[1024 - 64];
@@ -87,6 +88,7 @@ char **envpager::getEnviron(void)
 	envp[idx] = NULL;
 	return envp;
 }
+#endif
 
 void envpager::dup(const char *id, const char *value)
 {

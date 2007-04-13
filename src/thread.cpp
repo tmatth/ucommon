@@ -488,14 +488,20 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
-CThread::CThread(size_t size)
+CancelableThread::CancelableThread(size_t size)
 {
 	running = false;
 	stack = size;
 }
 
-DThread::DThread(size_t size)
+DetachedThread::DetachedThread(size_t size)
 {
+	stack = size;
+}
+
+PooledThread::PooledThread(unsigned p, size_t size)
+{
+	poolsize = p;
 	stack = size;
 }
 
@@ -503,12 +509,12 @@ Thread::~Thread()
 {
 }
 
-CThread::~CThread()
+CancelableThread::~CancelableThread()
 {
 	release();
 }
 
-DThread::~DThread()
+DetachedThread::~DetachedThread()
 {
 }
 		
@@ -522,7 +528,7 @@ extern "C" {
 	};
 }
 
-void CThread::start(void)
+void CancelableThread::start(void)
 {
 	pthread_attr_t attr;
 	if(running)
@@ -546,7 +552,13 @@ void CThread::start(void)
 	running = true;
 }
 
-void DThread::start(void)
+void PooledThread::start(void)
+{
+	for(unsigned i = 0; i < poolsize; ++i)
+		DetachedThread::start();
+}
+
+void DetachedThread::start(void)
 {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -566,12 +578,20 @@ void DThread::start(void)
 	pthread_attr_destroy(&attr);
 }
 
-void DThread::dealloc(void)
+void PooledThread::dealloc(void)
+{
+	if(--poolsize)
+		return;
+
+	delete this;
+}	
+
+void DetachedThread::dealloc(void)
 {
 	delete this;
 }
 
-void CThread::release(void)
+void CancelableThread::release(void)
 {
 	pthread_t self = pthread_self();
 
@@ -590,7 +610,7 @@ void CThread::release(void)
 	}	
 }
 
-void DThread::release(void)
+void DetachedThread::release(void)
 {
 	pthread_t self = pthread_self();
 

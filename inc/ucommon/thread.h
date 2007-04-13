@@ -232,6 +232,8 @@ protected:
 	Thread(size_t stack = 0);
 
 public:
+	virtual void start(void) = 0;
+
 	virtual void run(void) = 0;
 	
 	virtual ~Thread();
@@ -239,27 +241,30 @@ public:
 	virtual void release(void) = 0;
 };
 
-class __EXPORT CThread : protected Thread
+class __EXPORT CancelableThread : protected Thread
 {
 protected:
 	volatile bool running;
 
-	CThread(size_t size = 0);
-	virtual ~CThread();
+	CancelableThread(size_t size = 0);
+	virtual ~CancelableThread();
 
 public:
 	inline bool isRunning(void)
 		{return running;};
 
+	inline bool isDetached(void)
+		{return false;};
+
 	void release(void);
 	void start(void);
 };
 
-class __EXPORT DThread : protected Thread
+class __EXPORT DetachedThread : protected Thread
 {
 protected:
-	DThread(size_t size = 0);
-	virtual ~DThread();
+	DetachedThread(size_t size = 0);
+	virtual ~DetachedThread();
 
 	virtual void release(void);
 	virtual void dealloc(void);
@@ -274,6 +279,18 @@ public:
 		{return true;};
 };
 
+class __EXPORT PooledThread : public DetachedThread
+{
+protected:
+	unsigned poolsize;
+
+	PooledThread(unsigned pool, size_t stack = 0);
+	void dealloc(void);
+
+public:
+	void start(void);
+};
+	
 class __EXPORT Queue : protected OrderedIndex, protected Conditional
 {
 private:
@@ -345,7 +362,7 @@ public:
 	static const size_t timeout;
 
 	Buffer(size_t capacity, size_t osize = 0);
-	~Buffer();
+	virtual ~Buffer();
 
 	inline size_t getSize(void)
 		{return size;};
@@ -543,13 +560,10 @@ public:
 		{return static_cast<const T*>(ptr->pointer);};
 };
 
-inline void start(CThread *th)
+inline void start(Thread *th)
 	{th->start();};
 
-inline void start(DThread *th)
-	{th->start();};
-
-inline void cancel(CThread *th)
+inline void cancel(CancelableThread *th)
 	{th->release();};
 
 END_NAMESPACE

@@ -59,7 +59,9 @@ public:
 	inline member *begin(void)
 		{return static_cast<member*>(root);};
 
+#ifdef	_MSWINDOWS_
 	char **getEnviron(void);
+#endif
 
 };
 
