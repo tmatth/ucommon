@@ -225,19 +225,6 @@ void SharedLock::unlock(void)
 	Conditional::unlock();
 }
 
-void SharedLock::release(int *state)
-{
-	Conditional::lock();
-	--reads;
-	if(!reads && waits)
-		Conditional::broadcast();
-	if(state)
-		pthread_setcancelstate(*state, NULL);
-	Conditional::unlock();
-	if(state && *state == PTHREAD_CANCEL_ENABLE)
-		pthread_testcancel();
-}
-
 void SharedLock::release(void)
 {
 	Conditional::lock();
@@ -246,15 +233,6 @@ void SharedLock::release(void)
 		if(!reads && waits)
 			Conditional::broadcast();
 	}
-	Conditional::unlock();
-}
-
-void SharedLock::protect(int *state)
-{
-	Conditional::lock();
-	if(state)
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, state);
-	++reads;
 	Conditional::unlock();
 }
 
@@ -492,6 +470,28 @@ CancelableThread::CancelableThread(size_t size)
 {
 	running = false;
 	stack = size;
+	cancel_state = PTHREAD_CANCEL_ENABLE;
+	cancel_type = PTHREAD_CANCEL_DEFERRED;
+}
+
+void CancelableThread::release_cancel(void)
+{
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	pthread_setcanceltype(cancel_type, NULL);
+	pthread_setcancelstate(cancel_state, NULL);
+	if(cancel_state == PTHREAD_CANCEL_ENABLE)
+		pthread_testcancel();
+}
+
+void CancelableThread::async_cancel(void)
+{
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel_type);
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancel_state);
+}
+
+void CancelableThread::disable_cancel(void)
+{
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_state);
 }
 
 DetachedThread::DetachedThread(size_t size)
@@ -615,10 +615,9 @@ void CancelableThread::pause(void)
 
 void CancelableThread::pause(timeout_t timeout)
 {
-	int ctype;
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &ctype);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel_type);
 	cpr_sleep(timeout);
-	pthread_setcanceltype(ctype, NULL);
+	pthread_setcanceltype(cancel_type, NULL);
 }
 
 void DetachedThread::pause(void)
@@ -1115,41 +1114,6 @@ bool Buffer::operator!()
 	return true;
 }
 
-cancel_state::cancel_state()
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &type);
-	pthread_setcanceltype(type, NULL);
-	pthread_setcancelstate(state, NULL);
-}
-
-cancel_state::~cancel_state()
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-	pthread_setcanceltype(type, NULL);
-	pthread_setcancelstate(state, NULL);
-}
-
-void cancel_state::release(void)
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-	pthread_setcanceltype(type, NULL);
-	pthread_setcancelstate(state, NULL);
-	if(state == PTHREAD_CANCEL_ENABLE)
-		pthread_testcancel();
-}
-
-void cancel_state::disable(void)
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
-}
-
-void cancel_state::async(void)
-{
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &type);
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &state);
-}
-
 locked_release::locked_release(const locked_release &copy)
 {
 	object = copy.object;
@@ -1188,13 +1152,11 @@ locked_release &locked_release::operator=(LockedPointer &p)
 shared_release::shared_release(const shared_release &copy)
 {
 	ptr = copy.ptr;
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 }
 
 shared_release::shared_release()
 {
 	ptr = NULL;
-	state = PTHREAD_CANCEL_ENABLE;
 }
 
 SharedObject *shared_release::get(void)
@@ -1211,8 +1173,6 @@ void SharedObject::commit(SharedPointer *pointer)
 shared_release::shared_release(SharedPointer &p)
 {
 	ptr = &p;
-	if(ptr)
-		state = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	p.share(); // create rdlock
 }
 
@@ -1223,10 +1183,8 @@ shared_release::~shared_release()
 
 void shared_release::release(void)
 {
-	if(ptr) {
+	if(ptr)
 		ptr->release();
-		pthread_setcancelstate(state, NULL);
-	}
 	ptr = NULL;
 }
 
@@ -1234,8 +1192,6 @@ shared_release &shared_release::operator=(SharedPointer &p)
 {
 	release();
 	ptr = &p;
-	if(ptr)
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	p.share();
 	return *this;
 }

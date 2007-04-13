@@ -67,8 +67,6 @@ public:
 	void unlock(void);
 	void access(void);
 	void release(void);
-	void protect(int *state);
-	void release(int *state);
 
 	inline void operator++()
 		{access();};
@@ -242,15 +240,23 @@ public:
 
 class __EXPORT CancelableThread : protected Thread
 {
-protected:
+private:
 	pthread_t tid;
-
+	int cancel_state, cancel_type;
 	volatile bool running;
 
+protected:
 	CancelableThread(size_t size = 0);
 	virtual ~CancelableThread();
 	void pause(void);
 	void pause(timeout_t timeout);
+	
+	void async_cancel(void);
+	void disable_cancel(void);
+	void release_cancel(void);
+
+	inline void test_cancel(void)
+		{pause();};
 
 public:
 	inline bool isRunning(void)
@@ -413,7 +419,6 @@ class __EXPORT shared_release
 {
 protected:
 	SharedPointer *ptr;
-	int state;
 
 	shared_release();
 	shared_release(const shared_release &copy);
@@ -428,29 +433,6 @@ public:
 
 	shared_release &operator=(SharedPointer &p);
 };
-
-class __EXPORT cancel_state
-{
-private:
-	int state, type;
-
-public:
-	cancel_state();
-	~cancel_state();
-
-	void async(void);
-	void disable(void);
-	void release(void);
-};
-
-inline void cancel_async(cancel_state &cancel)
-	{cancel.async();};
-
-inline void cancel_disable(cancel_state &cancel)
-	{cancel.disable();};
-
-inline void cancel_release(cancel_state &cancel)
-	{cancel.release();};
 
 template<class T, mempager *P = NULL, size_t L = 0>
 class queue : public Queue

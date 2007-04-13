@@ -79,14 +79,11 @@ public:
 	void update(void);
 	void commit(void);
 
-	inline static void protect(int *state)
-		{lock.protect(state);};
+	inline static void protect(void)
+		{lock.access();};
 
-	inline static void release(int *state)
-		{lock.release(state);};
-
-	inline static keyconfig *forked(void)
-		{return cfg;};
+	inline static void release(void)
+		{lock.release();};
 
 protected:
 	friend class instance;

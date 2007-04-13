@@ -34,12 +34,12 @@ void keyconfig::callback::commit(keyconfig *keys)
 
 keyconfig::instance::instance()
 {
-	keyconfig::protect(&state);
+	keyconfig::protect();
 }
 
 keyconfig::instance::~instance()
 {
-	keyconfig::release(&state);
+	keyconfig::release();
 }
 
 keyconfig::keyconfig(char *name, size_t s) :
@@ -276,16 +276,12 @@ exit:
 
 void keyconfig::commit(void)
 {
-	cancel_state cancel;
-
 	cb = callback::list.begin();
 	while(cb) {
 		cb->reload(this);
 		cb.next();
 	}
 	lock.lock();
-
-	cancel_disable(cancel);
 
 	cb = callback::list.begin();
 	while(cb) {
@@ -294,14 +290,10 @@ void keyconfig::commit(void)
 	}
 	cfg = this;
 	lock.unlock();
-	cancel_release(cancel);
 }
 
 void keyconfig::update(void)
 {
-	cancel_state cancel;
-
-	cancel_disable(cancel);
 	lock.lock();
 	if(cb)
 		cb.next();
