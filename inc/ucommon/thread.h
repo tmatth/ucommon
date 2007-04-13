@@ -225,36 +225,53 @@ public:
 
 class __EXPORT Thread
 {
-private:
-	size_t stack;
-
-	pthread_t tid;
-	volatile bool running, detached;
-
-	void start(bool detached);
-
 protected:
+	size_t stack;
+	pthread_t tid;
+
 	Thread(size_t stack = 0);
-	virtual void dealloc(void);
 
 public:
 	virtual void run(void) = 0;
 	
 	virtual ~Thread();
 
+	virtual void release(void) = 0;
+};
+
+class __EXPORT CThread : protected Thread
+{
+protected:
+	volatile bool running;
+
+	CThread(size_t size = 0);
+	virtual ~CThread();
+
+public:
 	inline bool isRunning(void)
 		{return running;};
 
-	inline bool isDetached(void)
-		{return detached;};
-
 	void release(void);
-	
-	inline void detach(void)
-		{return start(true);};
+	void start(void);
+};
 
-	inline void start(void)
-		{return start(false);};
+class __EXPORT DThread : protected Thread
+{
+protected:
+	DThread(size_t size = 0);
+	virtual ~DThread();
+
+	virtual void release(void);
+	virtual void dealloc(void);
+
+public:
+	void start(void);
+
+	inline bool isDetached(void)
+		{return true;};
+
+	inline bool isRunning(void)
+		{return true;};
 };
 
 class __EXPORT Queue : protected OrderedIndex, protected Conditional
@@ -526,22 +543,14 @@ public:
 		{return static_cast<const T*>(ptr->pointer);};
 };
 
-inline void start(Thread *th)
+inline void start(CThread *th)
 	{th->start();};
 
-inline void detach(Thread *th)
-	{th->detach();};
+inline void start(DThread *th)
+	{th->start();};
 
-inline void cancel(Thread *th)
+inline void cancel(CThread *th)
 	{th->release();};
-
-#define exclusive_cancel \
-	static pthread_mutex_t _mutex_ = PTHREAD_MUTEX_INITIALIZER; \
-	auto_sync_exclusive(&_mutex_);
-
-#define exclusive_disable_cancel pthread_mutex_t \
-	static pthread_mutex_t _mutex_ = PTHREAD_MUTEX_INITIALIZER; \
-	auto_sync_locked(&_mutex_);
 
 END_NAMESPACE
 

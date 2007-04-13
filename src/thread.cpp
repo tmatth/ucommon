@@ -488,9 +488,28 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
+CThread::CThread(size_t size)
+{
+	running = false;
+	stack = size;
+}
+
+DThread::DThread(size_t size)
+{
+	stack = size;
+}
+
 Thread::~Thread()
 {
-	Thread::release();
+}
+
+CThread::~CThread()
+{
+	release();
+}
+
+DThread::~DThread()
+{
 }
 		
 extern "C" {
@@ -503,18 +522,35 @@ extern "C" {
 	};
 }
 
-void Thread::start(bool detach)
+void CThread::start(void)
 {
 	pthread_attr_t attr;
 	if(running)
 		return;
 
-	detached = detach;
 	pthread_attr_init(&attr);
-	if(detach)
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	else
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+	pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+// we typically use "stack 1" for min stack...
+#ifdef	PTHREAD_STACK_MIN
+	if(stack && stack < PTHREAD_STACK_MIN)
+		stack = PTHREAD_STACK_MIN;
+#else
+	if(stack && stack < 2)
+		stack = 0;
+#endif
+	if(stack)
+		pthread_attr_setstacksize(&attr, stack);
+	pthread_create(&tid, &attr, &exec_thread, this);
+	pthread_attr_destroy(&attr);
+	running = true;
+}
+
+void DThread::start(void)
+{
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
 // we typically use "stack 1" for min stack...
 #ifdef	PTHREAD_STACK_MIN
@@ -530,35 +566,38 @@ void Thread::start(bool detach)
 	pthread_attr_destroy(&attr);
 }
 
-void Thread::dealloc(void)
+void DThread::dealloc(void)
 {
 	delete this;
 }
 
-void Thread::release(void)
+void CThread::release(void)
 {
 	pthread_t self = pthread_self();
 
 	if(running && pthread_equal(tid, self)) {
 		running = false;
-		if(detached) {
-			dealloc();
-		}
-		else {
-			cpr_yield();
-			pthread_testcancel();
-		}
+		cpr_yield();
+		pthread_testcancel();
 		pthread_exit(NULL);
 	}
 
-	if(!detached) {
-		cpr_yield();
-		if(running) {
-			pthread_cancel(tid);
-			if(!pthread_join(tid, NULL)) 
-				running = false;
-		}
+	cpr_yield();
+	if(running) {
+		pthread_cancel(tid);
+		if(!pthread_join(tid, NULL)) 
+			running = false;
 	}	
+}
+
+void DThread::release(void)
+{
+	pthread_t self = pthread_self();
+
+	if(pthread_equal(tid, self)) {
+		dealloc();
+		pthread_exit(NULL);
+	}
 }
 
 Queue::member::member(Queue *q, Object *o) :
