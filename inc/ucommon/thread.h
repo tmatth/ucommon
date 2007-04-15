@@ -198,29 +198,6 @@ protected:
 	SharedObject *share(void);
 };
 
-class __EXPORT Threadlock : public Exclusive, public Shared
-{
-private:
-	pthread_rwlock_t lock;
-	unsigned count;
-
-public:
-	Threadlock();
-	~Threadlock();
-
-	void Exlock(void);
-	void Shlock(void);
-	void Unlock(void);
-
-	bool shared(void);
-	bool shared(timeout_t timeout);
-
-	bool exclusive(void);
-	bool exclusive(timeout_t timeout);
-
-	void release(void);
-};
-
 class __EXPORT Thread
 {
 protected:
