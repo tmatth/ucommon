@@ -36,6 +36,15 @@ void string::cstring::fix(void)
 	text[len] = 0;
 }
 
+void string::cstring::unfix(void)
+{
+	while(len && fill) {
+		if(text[len - 1] == fill)
+			--len;
+	}
+	text[len] = 0;
+}
+
 void string::cstring::clear(strsize_t offset, strsize_t size)
 {
 	if(!fill || offset >= max)
@@ -500,6 +509,24 @@ const char *string::find(const char *clist, strsize_t offset) const
 	return NULL;
 }
 
+bool string::unquote(const char *clist)
+{
+	char *s;
+
+	if(!str)
+		return false;
+
+	str->unfix();
+	s = cpr_strunquote(str->text, clist);
+	if(!s) {
+		str->fix();
+		return false;
+	}
+
+	set(s);
+	return true;
+}
+
 void string::upper(void)
 {
 	if(str)
@@ -727,13 +754,25 @@ char string::at(int offset) const
 	return str->text[(int)(str->len) + offset];
 }
 
-const char *string::operator[](int offset) const
+string string::operator()(int offset, strsize_t len) const
+{
+	const char *cp = operator()(offset);
+	if(!cp)
+		cp = "";
+
+	if(!len)
+		len = strlen(cp);
+
+	return string(cp, len);
+}
+
+const char *string::operator()(int offset) const
 {
 	if(!str)
-		return "";
+		return NULL;
 
 	if(offset >= (int)str->len)
-		return "";
+		return NULL;
 
 	if(offset > -1)
 		return str->text + offset;
@@ -742,6 +781,25 @@ const char *string::operator[](int offset) const
 		return str->text;
 
 	return str->text + str->len + offset;
+}
+
+
+
+const char string::operator[](int offset) const
+{
+	if(!str)
+		return 0;
+
+	if(offset >= (int)str->len)
+		return 0;
+
+	if(offset > -1)
+		return str->text[offset];
+
+	if((strsize_t)(-offset) >= str->len)
+		return *str->text;
+
+	return str->text[str->len + offset];
 }
 
 string::operator strsize_t() const
@@ -858,12 +916,44 @@ string &string::operator=(const string &s)
 	return *this;
 }
 
+bool string::full(void) const
+{
+	if(!str)
+		return false;
+
+	if(str->len == str->max && 
+	   str->text[str->len - 1] != str->fill)
+		return true;
+	
+	return false;
+}
+
 bool string::operator!() const
 {
-	if(str && str->len)
+	bool rtn = false;
+	if(!str)
 		return true;
 
-	return false;
+	str->unfix();
+	if(!str->len)
+		rtn = true;
+
+	str->fix();
+	return rtn;
+}
+
+string::operator bool() const
+{
+	bool rtn = false;
+
+	if(!str)
+		return false;
+
+	str->unfix();
+	if(str->len)
+		rtn = true;
+	str->fix();
+	return rtn;
 }
 
 bool string::operator==(const char *s) const
@@ -1097,55 +1187,6 @@ extern "C" size_t cpr_strlen(const char *cp)
 		return 0;
 
 	return strlen(cp);
-}
-
-extern "C" char *cpr_strfill(char *str, size_t size, const char fill)
-{
-	if(!str)
-		return NULL;
-
-	memset(str, size - 1, fill);
-	str[size - 1] = 0;
-	return str;
-}
-
-extern "C" char *cpr_strfield(char *str, const char *s, const char fill, size_t offset, size_t len)
-{
-	if(!str)
-		return NULL;
-
-	if(!s)
-		s = "";
-
-	size_t size = strlen(str);
-
-	if(!len)
-		len = strlen(s);
-	
-	if(offset >= size)
-		return str;
-
-	if(offset + len > size)
-		len = size - offset;
-
-	memmove(str + offset, s, len);
-	return str;
-}
-
-extern "C" char *cpr_strclear(char *str, size_t offset, size_t len, const char fill)
-{
-	if(!str)
-		return NULL;
-
-	size_t size = strlen(str);
-	if(offset >= size)
-		return str;
-
-	if(!len || len + offset > size)
-		len = size - offset;
-
-	memset(str + offset, fill, size);
-	return str;
 }
 	
 extern "C" char *cpr_strnset(char *str, size_t size, const char *s, size_t len)
@@ -1576,6 +1617,32 @@ extern "C" int32_t cpr_strtoint(const char *cp, char **ep)
 	long value = strtol(cp, ep, 10);
 	return (int32_t)value;
 }	
+
+extern "C" char *cpr_strunquote(char *str, const char *clist)
+{
+	size_t len = cpr_strlen(str);
+	if(!len || !str)
+		return NULL;
+
+	while(clist[0]) {
+		if(*str == clist[0] && str[len - 1] == clist[1]) {
+			str[len - 1] = 0;
+			return ++str;
+		}
+		clist += 2;
+	}
+	return NULL;
+}
+
+extern "C" char *cpr_strfill(char *str, size_t size, const char fill)
+{
+	if(!str)
+		return NULL;
+
+	memset(str, fill, size - 1);
+	str[size - 1] = 0;
+	return str;
+}
 
 extern "C" bool cpr_strtobool(const char *cp, char **ep)
 {

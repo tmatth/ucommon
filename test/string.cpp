@@ -15,5 +15,5 @@ extern "C" int main()
 	mystr = (string)"hello" + (string)" this is a test";
 	printf("STARTING %s\n", *mystr);
 	printf("SECOND %s\n", *testing);
-	printf("AN OFFSET %s\n", mystr[-10]);
+	printf("AN OFFSET %s\n", mystr(-10));
 };

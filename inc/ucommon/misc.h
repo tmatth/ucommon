@@ -58,6 +58,7 @@ public:
 	virtual ~keyconfig();
 
 	bool loadxml(const char *name, keynode *top = NULL);
+	bool loadconf(const char *name, keynode *top = NULL, char *gid = NULL, keynode *entry = NULL);
 	keynode *getPath(const char *path);
 	keynode *getNode(keynode *base, const char *id, const char *value);	
 	keynode *addNode(keynode *base, define *defs);

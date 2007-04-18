@@ -53,6 +53,33 @@ public:
 		{return err;};
 };
 
+class __EXPORT aiopager
+{
+private:
+	int fd;
+	size_t pagesize;
+	off_t offset;
+	unsigned index, count, ahead, error, written, fetched;
+	caddr_t buffer;
+	aio *control;	
+
+public:
+	aiopager(int fdes, unsigned pages, unsigned scanahead, off_t start = 0, size_t ps = 1024);
+	~aiopager();
+
+	operator bool();
+	bool operator!();
+
+	void sync(void);
+	void cancel(void);
+	caddr_t buf(void);
+	unsigned len(void);
+	void next(size_t len = 0);
+
+	inline void operator++(void)
+		{next();};
+};
+
 extern "C" {
 #ifdef	_MSWINDOWS_
 #define	RTLD_LAZY 0

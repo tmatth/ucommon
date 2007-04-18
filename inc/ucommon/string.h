@@ -37,6 +37,7 @@ protected:
 		void add(const char *str);
 		void add(char ch);
 		void fix(void);
+		void unfix(void);
 		void inc(strsize_t adj);
 		void dec(strsize_t adj);
 	};
@@ -76,6 +77,7 @@ public:
 	void trim(const char *clist);
 	void chop(const char *clist);
 	void strip(const char *clist);
+	bool unquote(const char *clist);
 	void cut(strsize_t offset, strsize_t size = 0);
 	void clear(strsize_t offset, strsize_t size = 0);
 	void clear(void);
@@ -109,9 +111,13 @@ public:
 	inline const char *operator*() const
 		{return c_str();};
 
-	const char *operator[](int offset) const;
+	bool full(void) const;
+	string operator()(int offset, strsize_t len) const;
+	const char *operator()(int offset) const;
+	const char operator[](int offset) const;
 	operator strsize_t() const;
 	bool operator!() const;
+	operator bool() const;
 	string &operator<<(::DIR *dir);
 	string &operator<<(::FILE *fp);
 	string &operator>>(::FILE *fp);
@@ -219,10 +225,9 @@ extern "C" {
 	__EXPORT char *cpr_strstrip(char *str, const char *clist);
 	__EXPORT char *cpr_strupper(char *str);
 	__EXPORT char *cpr_strlower(char *str);
+	__EXPORT char *cpr_strfill(char *str, size_t size, char chr);
 	__EXPORT unsigned cpr_strccount(const char *str, const char *clist);
-	__EXPORT char *cpr_strfill(char *str, size_t size, const char fill);
-	__EXPORT char *cpr_strfield(char *str, const char *s, const char fill, size_t offset = 0, size_t len = 0);
-	__EXPORT char *cpr_strclear(char *str, size_t offset, size_t len, const char fill);
+	__EXPORT char *cpr_strunquote(char *str, const char *clist);
 	__EXPORT char *cpr_strskip(char *str, const char *clist);
 	__EXPORT char *cpr_strrskip(char *str, const char *clist);
 	__EXPORT char *cpr_strfind(char *str, const char *clist);

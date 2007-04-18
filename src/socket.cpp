@@ -522,6 +522,41 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 	return ssize_t(max - nleft - 1);
 }
 
+int Socket::setTimeToLive(unsigned char ttl)
+{
+	struct sockaddr_storage saddr;
+	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	int family;
+	socklen_t len = sizeof(addr);
+
+	if(so == INVALID_SOCKET)
+		return -1;
+
+	getsockname(so, (struct sockaddr *)&addr, &len);
+	family = addr->sa_family;
+	switch(family) {
+	case AF_INET:
+		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
+#ifdef	AF_INET6
+	case AF_INET6:
+		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&ttl, sizeof(ttl));
+#endif
+	}
+	return -1;
+}
+
+int Socket::setTypeOfService(unsigned tos)
+{
+	if(so == INVALID_SOCKET)
+		return -1;
+
+#ifdef	IP_TOS
+	return setsockopt(so, SOL_IP, IP_TOS,(char *)&tos, (socklen_t)sizeof(tos));
+#else
+	return -1;
+#endif
+}
+
 int Socket::setBroadcast(bool enable)
 {
 	if(so == INVALID_SOCKET)

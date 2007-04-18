@@ -21,6 +21,13 @@ typedef	int SOCKET;
 #define	INVALID_SOCKET -1
 #endif
 
+#ifndef IPTOS_LOWDELAY
+#define IPTOS_LOWDELAY      0x10
+#define IPTOS_THROUGHPUT    0x08
+#define IPTOS_RELIABILITY   0x04
+#define IPTOS_MINCOST       0x02
+#endif
+
 typedef	struct
 {
 	union
@@ -124,6 +131,8 @@ public:
 	int setNonBlocking(bool enable);
 	int setMulticast(bool enable);
 	int getError(void);
+	int setTimeToLive(unsigned char ttl);
+	int setTypeOfService(unsigned tos);
 
 	int connect(const char *host, const char *svc);
 	bool create(int family, int type, int protocol = 0);

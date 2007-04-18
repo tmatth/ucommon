@@ -139,6 +139,67 @@ keyconfig::keynode *keyconfig::getNode(keynode *base, const char *id, const char
 	return NULL;
 } 
 
+bool keyconfig::loadconf(const char *fn, keynode *node, char *gid, keynode *entry)
+{
+	FILE *fp = fopen(fn, "r");
+	bool rtn = false;
+	keynode *data;
+	caddr_t mp;
+	const char *cp;
+	char *value;
+
+	if(!node)
+		node = &root;
+
+	if(!fp)
+		return false;
+
+	while(!feof(fp)) {
+		buffer << fp;
+		buffer.strip(" \t\r\n");
+		if(buffer[0] == '[') {
+			if(!buffer.unquote("[]"))
+				goto exit;
+			value = mempager::dup(*buffer);
+			if(gid)
+				entry = getNode(node, gid, value);
+			else
+				entry = node->getChild(value);
+			if(!entry) {
+				mp = (caddr_t)alloc(sizeof(keynode));
+				if(gid) {
+					entry = new(mp) keynode(node, gid);
+					entry->setPointer(value);
+				}
+				else					
+					entry = new(mp) keynode(node, value);
+			}
+		}
+		if(!buffer[0] || !isalnum(buffer[0]))
+			continue;	
+		if(!entry)
+			continue;
+		cp = buffer.chr('=');
+		if(!cp)
+			continue;
+		buffer.split(cp++);
+		buffer.chop(" \t=");
+		while(isspace(*cp))
+			++cp;
+		data = entry->getChild(buffer.c_mem());
+		if(!data) {
+			mp = (caddr_t)alloc(sizeof(keynode));
+			data = new(mp) keynode(entry, mempager::dup(*buffer));
+		}
+		data->setPointer(mempager::dup(cp));
+	}
+
+	rtn = true;
+exit:
+	fclose(fp);
+	return rtn;
+}
+
 bool keyconfig::loadxml(const char *fn, keynode *node)
 {
 	FILE *fp = fopen(fn, "r");

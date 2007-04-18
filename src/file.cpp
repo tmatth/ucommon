@@ -1,5 +1,6 @@
 #include <config.h>
 #include <ucommon/file.h>
+#include <ucommon/process.h>
 #include <errno.h>
 #include <string.h>
 
@@ -127,6 +128,118 @@ void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
 		count = res;
 }
 #endif
+
+aiopager::aiopager(int fdes, unsigned pages, unsigned scan, off_t start, size_t ps)
+{
+	offset = start;
+	count = pages;
+	ahead = scan;
+	pagesize = ps;
+	written = count;
+	fetched = 0;
+	error = 0;
+	fd = fdes;
+	control = new aio[count];
+	buffer = new char[count * pagesize];
+
+	if(ahead > count)
+		ahead = count;
+}
+
+aiopager::~aiopager()
+{
+	cancel();
+	if(fd > -1)
+		::close(fd);
+	fd = -1;
+	if(buffer)
+		delete[] buffer;
+	if(control)
+		delete[] control;
+	buffer = NULL;
+	control = NULL;
+}
+
+void aiopager::sync(void)
+{
+	if(fd < 0)
+		return;
+
+	for(unsigned pos = 0; pos < count; ++pos) {
+		while(control[pos].isPending())
+			cpr_sleep(10);
+		control[pos].result();
+	}
+	written = count;
+	error = 0;
+}
+
+void aiopager::cancel(void)
+{
+	if(fd < 0)
+		return;
+
+	for(unsigned pos = 0; pos < count; ++pos) {
+		if(control[pos].isPending())
+			control[pos].cancel();
+	}
+	written = count;
+	fetched = 0;
+	error = 0;
+}
+
+caddr_t aiopager::buf(void)
+{
+	unsigned apos = index + fetched;
+	off_t aoffset = offset + (pagesize * fetched);
+
+	while(!error && ahead && fetched < ahead) {
+		++fetched;
+		if(apos >= count)
+			apos -= count;
+		control[apos].read(fd, &buffer[apos * pagesize], pagesize, aoffset);
+		++apos;
+		aoffset += pagesize;
+	}
+	if(!error || index != written) {
+		if(control[index].isPending())
+			return NULL;
+
+		if(ahead || index == written)
+			error = control[index].result();
+
+		if(!ahead && ++written >= count)
+			written = 0;
+	}	
+	return &buffer[index * pagesize];
+}
+
+void aiopager::next(size_t len)
+{
+	if(!len)
+		len = pagesize;
+
+	if(!ahead) {
+		if(written == count)
+			written = index;
+		control[index].write(fd, &buffer[index * pagesize], len, offset);
+	}
+	if(++index >= count)
+		index = 0;
+	
+	offset += len;
+
+	if(fetched)
+		--fetched;
+}
+
+size_t aiopager::len(void)
+{
+	if(error || control[index].isPending())
+		return 0;
+	
+	return control[index].transfer();
+}
 
 extern "C" bool cpr_isdir(const char *fn)
 {
