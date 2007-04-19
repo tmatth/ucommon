@@ -65,12 +65,10 @@ public:
 class __EXPORT TimerQueue : public OrderedIndex
 {
 public:
-	class __EXPORT event : protected Timer, public LinkedList
+	class __EXPORT event : private Timer, public LinkedList
 	{
 	protected:
 		friend class TimerQueue;
-
-		pthread_mutex_t mutex;
 
 		event(timeout_t arm);
 		event(TimerQueue *tq, timeout_t arm);
@@ -78,22 +76,25 @@ public:
 		void attach(TimerQueue *tq);
 		void detach(void);
 
-		virtual timeout_t expired(void) = 0;
-
-		inline void lock(void)
-			{pthread_mutex_lock(&mutex);};
-
-		inline void unlock(void)
-			{pthread_mutex_unlock(&mutex);};
+		virtual void expired(void) = 0;
+		virtual timeout_t timeout(void);
 
 	public:
 		virtual ~event();
 
-        void arm(timeout_t timeout);
-		void disarm(void);
+        inline void arm(timeout_t timeout)
+			{set(timeout);};
+
+		inline void disarm(void)
+			{clear();};
+
+		inline bool isExpired(void)
+			{return Timer::isExpired();};
+
+		inline timeout_t get(void)
+			{return Timer::get();};
+
 		void update(void);
-		bool isExpired(void);
-		timeout_t get(void);
 
 		inline TimerQueue *getQueue(void)
 			{return static_cast<TimerQueue*>(root);};

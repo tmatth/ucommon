@@ -100,14 +100,12 @@ extern "C" void cpr_gettimeout(timeout_t msec, struct timespec *ts)
 TimerQueue::event::event(timeout_t timeout) :
 Timer(), LinkedList()
 {
-	pthread_mutex_init(&mutex, Mutex::initializer());
-	arm(timeout);
+	set(timeout);
 }
 
 TimerQueue::event::event(TimerQueue *tq, timeout_t timeout) :
 Timer(), LinkedList()
 {
-	pthread_mutex_init(&mutex, NULL);
 	set(timeout);
 	isUpdated();
 	attach(tq);
@@ -116,7 +114,6 @@ Timer(), LinkedList()
 TimerQueue::event::~event()
 {
 	detach();
-	pthread_mutex_destroy(&mutex);
 }
 
 Timer::Timer()
@@ -166,14 +163,10 @@ void TimerQueue::event::attach(TimerQueue *tq)
 void TimerQueue::event::update(void)
 {
 	TimerQueue *tq = getQueue();
-	lock();
 	if(isUpdated() && tq) {
-		unlock();
 		tq->modify();
 		tq->update();
 	} 
-	else
-		unlock();	
 }
 
 void TimerQueue::event::detach(void)
@@ -354,55 +347,30 @@ void Timer::sync(Timer &t)
 #endif
 }
 
-void TimerQueue::event::arm(timeout_t timeout)
+timeout_t TimerEvent::timeout(void)
 {
-	lock();
-	Timer::set(timeout);
-	unlock();
-}
-
-void TimerQueue::event::disarm(void)
-{
-	lock();
-	Timer::clear();
-	unlock();
-}
-
-bool TimerQueue::event::isExpired(void)
-{
-	bool rtn;
-	lock();
-	rtn = Timer::isExpired();
-	unlock();
-	return rtn;
-}
-
-timeout_t TimerQueue::event::get(void)
-{
-	timeout_t timeout;
-	lock();
-	timeout = Timer::get();
-	unlock();
+	timeout_t timeout = get();
+	if(!isExpired() && !timeout) {
+		disarm();
+		expired();
+		timeout = get();
+		isUpdated();
+	}
 	return timeout;
 }
 
-timeout_t TimerQueue::expire()
+timeout_t TimerQueue::expire(void)
 {
 	timeout_t first = Timer::inf, next;
-	linked_pointer<TimerQueue::event> tp = begin();
+	linked_pointer<TimerQueue::event> timer = begin();
+	TimerQueue::event *tp;
 
-	while(tp) {
-		tp->lock();
-		next = tp->Timer::get();
-		if(!tp->Timer::isExpired() && !next) {
-			tp->Timer::clear();
-			next = tp->expired();
-			tp->isUpdated();
-		}
-		tp->unlock();
+	while(timer) {
+		tp = *timer;
+		timer.next();
+		next = tp->timeout();
 		if(next && next < first)
-				first = next;
-		tp.next();
+			first = next;
 	}
 	return first;	
 }
