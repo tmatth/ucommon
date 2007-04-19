@@ -178,6 +178,11 @@ bool Conditional::wait(timeout_t timeout)
 	if(!timeout)
 		return false;
 
+	if(timeout == Timer::inf) {
+		wait();
+		return true;
+	}
+
 	cpr_gettimeout(timeout, &ts);
 	if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
 		return false;

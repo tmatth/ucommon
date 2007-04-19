@@ -52,6 +52,9 @@ protected:
 
 	Conditional();
 	~Conditional();
+
+	static inline pthread_condattr_t *initializer(void)
+		{return &attr.attr;};
 };
 
 class __EXPORT SharedLock : public Conditional
@@ -155,6 +158,9 @@ public:
 
 	inline void release(void)
 		{pthread_mutex_unlock(&mutex);};
+
+	static inline pthread_mutexattr_t *initializer(void)
+		{return &attr.attr;};
 };
 
 class __EXPORT LockedPointer

@@ -16,11 +16,8 @@ typedef unsigned long timeout_t;
 
 NAMESPACE_UCOMMON
 
-class __EXPORT Timer : public LinkedList
+class __EXPORT Timer
 {
-public:
-	typedef	OrderedIndex list;
-	 
 private:
 	friend class Conditional;
 	friend class Semaphore;
@@ -31,34 +28,24 @@ private:
 #else
 	timeval timer;
 #endif
-
-protected:
-	virtual void expired(void);
-	virtual void release(void);
-	virtual void attach(list *tq);
+	bool updated;
 
 public:
 	static const timeout_t inf;
 	static const time_t reset;
 
-	Timer(list *tq);
 	Timer();
 	Timer(timeout_t offset);
 	Timer(time_t offset);
-	virtual ~Timer();
 
 	bool isExpired(void);
+	bool isUpdated(void);
 
-	void arm(timeout_t timeout);
+	void set(timeout_t offset);
+	void set(time_t offset);
 	void set(void);
 	void clear(void);	
 	timeout_t get(void);
-
-	inline list *getList(void)
-		{return root;};
-
-	inline void disarm(void)
-		{arm(0);};
 
 	inline timeout_t operator*()
 		{return get();};
@@ -72,8 +59,63 @@ public:
 	void operator-=(timeout_t adj);
 
 	static void sync(Timer &timer);
-	static timeout_t expire(list *tq);
 };
+
+	
+class __EXPORT TimerQueue : public OrderedIndex
+{
+public:
+	class __EXPORT event : protected Timer, public LinkedList
+	{
+	protected:
+		friend class TimerQueue;
+
+		pthread_mutex_t mutex;
+
+		event(timeout_t arm);
+		event(TimerQueue *tq, timeout_t arm);
+
+		void attach(TimerQueue *tq);
+		void detach(void);
+
+		virtual timeout_t expired(void) = 0;
+
+		inline void lock(void)
+			{pthread_mutex_lock(&mutex);};
+
+		inline void unlock(void)
+			{pthread_mutex_unlock(&mutex);};
+
+	public:
+		virtual ~event();
+
+        void arm(timeout_t timeout);
+		void disarm(void);
+		void update(void);
+		bool isExpired(void);
+		timeout_t get(void);
+
+		inline TimerQueue *getQueue(void)
+			{return static_cast<TimerQueue*>(root);};
+	};	
+
+protected:
+	friend class event;
+
+	virtual void update(void) = 0;
+	virtual void modify(void) = 0;
+
+public:
+	TimerQueue();
+	virtual ~TimerQueue();
+
+	void operator+=(event &te);
+	void operator-=(event &te);
+
+	timeout_t expire();
+};	
+
+typedef TimerQueue::event TimerEvent;
 
 END_NAMESPACE
 

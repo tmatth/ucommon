@@ -1,5 +1,6 @@
 #include <config.h>
 #include <ucommon/timers.h>
+#include <ucommon/thread.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -96,52 +97,94 @@ extern "C" void cpr_gettimeout(timeout_t msec, struct timespec *ts)
 	}
 }
 
-Timer::Timer(list *tq) :
-LinkedList(tq)
+TimerQueue::event::event(timeout_t timeout) :
+Timer(), LinkedList()
+{
+	pthread_mutex_init(&mutex, Mutex::initializer());
+	arm(timeout);
+}
+
+TimerQueue::event::event(TimerQueue *tq, timeout_t timeout) :
+Timer(), LinkedList()
+{
+	pthread_mutex_init(&mutex, NULL);
+	set(timeout);
+	isUpdated();
+	attach(tq);
+}
+
+TimerQueue::event::~event()
+{
+	detach();
+	pthread_mutex_destroy(&mutex);
+}
+
+Timer::Timer()
 {
 	clear();
 }
 
-Timer::Timer() :
-LinkedList()
-{
-	set();
-}
-
-Timer::Timer(timeout_t in) :
-LinkedList()
+Timer::Timer(timeout_t in)
 {
 	set();
 	operator+=(in);
 }
 
-Timer::Timer(time_t in) :
-LinkedList()
+Timer::Timer(time_t in)
 {
 	set();
 	timer.tv_sec += difftime(in);
 }
 
-Timer::~Timer()
+void Timer::set(timeout_t timeout)
 {
-	release();
+	set();
+	operator+=(timeout);
 }
 
-void Timer::attach(list *tq)
+void Timer::set(time_t time)
 {
-	if(tq == root)
+	set();
+	timer.tv_sec += difftime(time);
+}
+
+void TimerQueue::event::attach(TimerQueue *tq)
+{
+	if(tq == getQueue())
 		return;
 
-	release();
+	detach();
 	if(!tq)
 		return;
 
+	tq->modify();
 	enlist(tq);
+	isUpdated();
+	tq->update();
 }
 
-void Timer::release(void)
+void TimerQueue::event::update(void)
 {
-	delist();
+	TimerQueue *tq = getQueue();
+	lock();
+	if(isUpdated() && tq) {
+		unlock();
+		tq->modify();
+		tq->update();
+	} 
+	else
+		unlock();	
+}
+
+void TimerQueue::event::detach(void)
+{
+	TimerQueue *tq = getQueue();
+	if(tq) {
+		tq->modify();
+		delist();
+		isUpdated();
+		tq->update();
+	}
 }
 
 void Timer::set(void)
@@ -153,11 +196,8 @@ void Timer::set(void)
 #else
     gettimeofday(&timer, NULL);
 #endif
+	updated = true;
 };	
-
-void Timer::expired(void)
-{
-}
 
 void Timer::clear(void)
 {
@@ -167,7 +207,15 @@ void Timer::clear(void)
 #else
 	timer.tv_usec = 0;
 #endif
+	updated = false;
 };	
+
+bool Timer::isUpdated(void)
+{
+	bool rtn = updated;
+	updated = false;
+	return rtn;
+}
 
 bool Timer::isExpired(void)
 {
@@ -179,16 +227,6 @@ bool Timer::isExpired(void)
 		return true;
 #endif
 	return false;
-}
-
-void Timer::arm(timeout_t timeout)
-{
-	if(!timeout) {
-		clear();
-		return;
-	}
-	set();
-	operator+=(timeout);
 }
 
 timeout_t Timer::get(void)
@@ -255,6 +293,7 @@ void Timer::operator+=(timeout_t to)
 	timer.tv_usec += (to % 1000l) * 1000l;
 #endif
 	adj(&timer);
+	updated = true;
 }
 
 void Timer::operator-=(timeout_t to)
@@ -276,6 +315,7 @@ void Timer::operator+=(time_t abs)
 	if(isExpired())
 		set();
 	timer.tv_sec += difftime(abs);
+	updated = true;
 }
 
 void Timer::operator-=(time_t abs)
@@ -298,6 +338,7 @@ void Timer::operator=(time_t abs)
 		return;
 
 	timer.tv_sec += difftime(abs);
+	updated = true;
 }
 
 void Timer::sync(Timer &t)
@@ -313,23 +354,66 @@ void Timer::sync(Timer &t)
 #endif
 }
 
-timeout_t Timer::expire(list *tq)
+void TimerQueue::event::arm(timeout_t timeout)
 {
-	timeout_t first = inf, next;
-	linked_pointer<Timer> tp = tq->begin();
+	lock();
+	Timer::set(timeout);
+	unlock();
+}
+
+void TimerQueue::event::disarm(void)
+{
+	lock();
+	Timer::clear();
+	unlock();
+}
+
+bool TimerQueue::event::isExpired(void)
+{
+	bool rtn;
+	lock();
+	rtn = Timer::isExpired();
+	unlock();
+	return rtn;
+}
+
+timeout_t TimerQueue::event::get(void)
+{
+	timeout_t timeout;
+	lock();
+	timeout = Timer::get();
+	unlock();
+	return timeout;
+}
+
+timeout_t TimerQueue::expire()
+{
+	timeout_t first = Timer::inf, next;
+	linked_pointer<TimerQueue::event> tp = begin();
 
 	while(tp) {
-		if(!(tp->isExpired())) {
-			next = tp->get();
-			if(!next) {
-				tp->clear();
-				tp->expired();
-				next = tp->get();
-			}
-			if(next && next < first)
-				first = next;
+		tp->lock();
+		next = tp->Timer::get();
+		if(!tp->Timer::isExpired() && !next) {
+			tp->Timer::clear();
+			next = tp->expired();
+			tp->isUpdated();
 		}
+		tp->unlock();
+		if(next && next < first)
+				first = next;
 		tp.next();
 	}
 	return first;	
+}
+
+void TimerQueue::operator+=(event &te)
+{
+	te.attach(this);
+}
+
+void TimerQueue::operator-=(event &te)
+{
+	if(te.getQueue() == this)
+		te.detach();
 }
