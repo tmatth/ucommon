@@ -451,10 +451,8 @@ extern "C" int cpr_priority(unsigned priority)
 	int pri = THREAD_PRIORITY_ABOVE_NORMAL;
 	switch(priority) {
 	case CPR_PRIORITY_LOWEST:
-		pri = THREAD_PRIORITY_LOWEST;
-		break;
 	case CPR_PRIORITY_LOW:
-		pri = THREAD_PRIORITY_LOW_PRIORITY;
+		pri = THREAD_PRIORITY_LOWEST;
 		break;
 	case CPR_PRIORITY_NORMAL:
 		pri = THREAD_PRIORITY_NORMAL;

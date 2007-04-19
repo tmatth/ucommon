@@ -631,6 +631,57 @@ void string::set(strsize_t offset, const char *s, strsize_t size)
 	str->set(offset, s, size);
 }
 
+void string::set(const char *s, char overflow, strsize_t offset, strsize_t size)
+{
+	size_t len = cpr_strlen(s);
+
+	if(!s || !*s || !str)
+		return;
+	
+	if(offset >= str->max)
+		return;
+
+	if(!size || size > str->max - offset)
+		size = str->max - offset;
+
+	if(len <= size) {
+		set(offset, s, size);
+		return;
+	}
+
+	set(offset, s, size);
+
+	if(len > size && overflow)
+		str->text[offset + size - 1] = overflow;
+}
+
+void string::rset(const char *s, char overflow, strsize_t offset, strsize_t size)
+{
+	size_t len = cpr_strlen(s);
+	strsize_t dif;
+
+	if(!s || !*s || !str)
+		return;
+	
+	if(offset >= str->max)
+		return;
+
+	if(!size || size > str->max - offset)
+		size = str->max - offset;
+
+	dif = len;
+	while(dif < size && str->fill) {
+		str->text[offset++] = str->fill;
+		++dif;
+	}
+
+	if(len > size)
+		s += len - size;
+	set(offset, s, size);
+	if(overflow && len > size)
+		str->text[offset] = overflow;
+}
+
 void string::set(const char *s)
 {
 	strsize_t len;
@@ -1215,6 +1266,14 @@ extern "C" char *cpr_strnset(char *str, size_t size, const char *s, size_t len)
 	memmove(str, s, l);
 	str[l] = 0;
 	return str;
+}
+
+extern "C" char *cpr_strrset(char *str, size_t size, const char *s)
+{
+	size_t len = cpr_strlen(s);
+	if(len > size) 
+		s += len - size;
+	return cpr_strset(str, size, s);
 }
 
 extern "C" char *cpr_strset(char *str, size_t size, const char *s)

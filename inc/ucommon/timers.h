@@ -16,8 +16,11 @@ typedef unsigned long timeout_t;
 
 NAMESPACE_UCOMMON
 
-class __EXPORT Timer : public LinkedObject
+class __EXPORT Timer : public LinkedList
 {
+public:
+	typedef	OrderedIndex list;
+	 
 private:
 	friend class Conditional;
 	friend class Semaphore;
@@ -28,18 +31,17 @@ private:
 #else
 	timeval timer;
 #endif
-	Timer **list;
 
 protected:
 	virtual void expired(void);
 	virtual void release(void);
-	virtual void attach(Timer **list);
+	virtual void attach(list *tq);
 
 public:
 	static const timeout_t inf;
 	static const time_t reset;
 
-	Timer(Timer **root);
+	Timer(list *tq);
 	Timer();
 	Timer(timeout_t offset);
 	Timer(time_t offset);
@@ -47,10 +49,13 @@ public:
 
 	bool isExpired(void);
 
-	virtual void arm(timeout_t timeout);
+	void arm(timeout_t timeout);
 	void set(void);
 	void clear(void);	
 	timeout_t get(void);
+
+	inline list *getList(void)
+		{return root;};
 
 	inline void disarm(void)
 		{arm(0);};
@@ -67,7 +72,7 @@ public:
 	void operator-=(timeout_t adj);
 
 	static void sync(Timer &timer);
-	static timeout_t expire(Timer *list);
+	static timeout_t expire(list *tq);
 };
 
 END_NAMESPACE

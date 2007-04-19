@@ -550,7 +550,7 @@ int Socket::setTypeOfService(unsigned tos)
 	if(so == INVALID_SOCKET)
 		return -1;
 
-#ifdef	IP_TOS
+#ifdef	SOL_IP
 	return setsockopt(so, SOL_IP, IP_TOS,(char *)&tos, (socklen_t)sizeof(tos));
 #else
 	return -1;
@@ -634,9 +634,10 @@ int Socket::setNonBlocking(bool enable)
 int Socket::connect(const char *host, const char *svc)
 {
 	int rtn = ::cpr_connect(so, host, svc);
+#ifndef _MSWINDOWS_
 	if(!rtn || errno == EINPROGRESS)
 		return 0;
-
+#endif
 	return rtn;
 }
 

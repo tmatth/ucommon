@@ -96,32 +96,28 @@ extern "C" void cpr_gettimeout(timeout_t msec, struct timespec *ts)
 	}
 }
 
-Timer::Timer(Timer **root) :
-LinkedObject((LinkedObject **)(root))
+Timer::Timer(list *tq) :
+LinkedList(tq)
 {
 	clear();
-	list = root;
 }
 
 Timer::Timer() :
-LinkedObject()
+LinkedList()
 {
-	list = NULL;
 	set();
 }
 
 Timer::Timer(timeout_t in) :
-LinkedObject()
+LinkedList()
 {
-	list = NULL;
 	set();
 	operator+=(in);
 }
 
 Timer::Timer(time_t in) :
-LinkedObject()
+LinkedList()
 {
-	list = NULL;
 	set();
 	timer.tv_sec += difftime(in);
 }
@@ -131,24 +127,21 @@ Timer::~Timer()
 	release();
 }
 
-void Timer::attach(Timer **timers)
+void Timer::attach(list *tq)
 {
-	if(timers == list)
+	if(tq == root)
 		return;
 
 	release();
-	if(!timers)
+	if(!tq)
 		return;
 
-	enlist((LinkedObject **)timers);
-	list = timers;
+	enlist(tq);
 }
 
 void Timer::release(void)
 {
-	if(list)
-		delist((LinkedObject **)list);
-	list = NULL;
+	delist();
 }
 
 void Timer::set(void)
@@ -320,10 +313,10 @@ void Timer::sync(Timer &t)
 #endif
 }
 
-timeout_t Timer::expire(Timer *timer)
+timeout_t Timer::expire(list *tq)
 {
 	timeout_t first = inf, next;
-	linked_pointer<Timer> tp = timer;
+	linked_pointer<Timer> tp = tq->begin();
 
 	while(tp) {
 		if(!(tp->isExpired())) {

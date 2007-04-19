@@ -72,6 +72,8 @@ public:
 	virtual bool resize(strsize_t size);
 	void set(const char *s);
 	void set(strsize_t offset, const char *str, strsize_t size = 0);
+	void set(const char *s, char overflow, strsize_t offset, strsize_t size = 0);
+	void rset(const char *s, char overflow, strsize_t offset, strsize_t size = 0);
 	void add(const char *s);
 	void add(char ch);
 	void trim(const char *clist);
@@ -217,6 +219,7 @@ extern "C" {
 	__EXPORT size_t cpr_strlen(const char *cp);
 	__EXPORT char *cpr_strdup(const char *cp);
 	__EXPORT char *cpr_strset(char *str, size_t size, const char *src);
+	__EXPORT char *cpr_strrset(char *str, size_t size, const char *src);
 	__EXPORT char *cpr_strnset(char *str, size_t size, const char *src, size_t len);
 	__EXPORT char *cpr_stradd(char *str, size_t size, const char *src);
 	__EXPORT char *cpr_strnadd(char *str, size_t size, const char *src, size_t len);

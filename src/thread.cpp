@@ -3,6 +3,7 @@
 #include <ucommon/process.h>
 #include <errno.h>
 #include <string.h>
+#include <stdarg.h>
 
 using namespace UCOMMON_NAMESPACE;
 
