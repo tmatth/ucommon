@@ -5,6 +5,10 @@
 #include <ucommon/object.h>
 #endif
 
+#ifndef _UCOMMON_MEMORY_H_
+#include <ucommon/memory.h>
+#endif
+
 #ifndef	_MSWINDOWS_
 #include <dlfcn.h>
 #endif
@@ -27,6 +31,40 @@ typedef int fd_t;
 
 NAMESPACE_UCOMMON
 
+class __EXPORT MappedFile
+{
+private:
+	caddr_t map;
+	int fd;
+
+protected:
+	size_t size, used;
+
+	virtual void fault(void);
+
+public:
+	MappedFile(const char *fname, size_t len = 0);
+	virtual ~MappedFile();
+
+	inline operator bool() const
+		{return (size != 0);};
+
+	inline bool operator!() const
+		{return (size == 0);};
+
+	void *brk(size_t size);
+	void *get(size_t offset);
+	void sync(void);
+};
+
+class MappedAssoc : protected MappedFile, protected keyassoc
+{
+public:
+	MappedAssoc(mempager *pager, const char *fname, size_t len, size_t isize = 177);
+
+	void *find(const char *id, size_t osize, size_t tsize = 32);
+};
+
 class __EXPORT aio
 {
 private:
@@ -38,6 +76,7 @@ private:
 #endif
 
 public:
+	aio();
 	~aio();
 
 	bool isPending(void);
@@ -78,6 +117,72 @@ public:
 
 	inline void operator++(void)
 		{next();};
+};
+
+template <class T, unsigned I = 32, unsigned H = 177>
+class mapped_assoc : protected MappedAssoc
+{
+public:
+	inline mapped_assoc(mempager *pager, const char *fn, unsigned members) :
+		MappedAssoc(pager, fn, members * (sizeof(T) + I), H) {};
+
+	inline T *operator()(const char *id)
+		{return static_cast<T*>(find(id, sizeof(T), I));};
+
+	inline unsigned getUsed(void)
+		{return (unsigned)(used / (sizeof(T) + I));};
+
+	inline unsigned getSize(void)
+		{return (unsigned)(size / (sizeof(T) + I));};
+
+	inline unsigned getFree(void)
+		{return (unsigned)((size - used) / (sizeof(T) + I));};
+
+	inline void sync(void)
+		{MappedFile::sync();};
+};
+
+template <class T>
+class mapped_array : protected MappedFile
+{
+public:
+	inline mapped_array(const char *fn, unsigned members) : 
+		MappedFile(fn, members * sizeof(T)) {};
+	
+	inline T *operator()(unsigned idx)
+		{return static_cast<T*>(get(idx * sizeof(T)));}
+
+	inline T *operator()(void)
+		{return static_cast<T*>(brk(sizeof(T)));};
+	
+	inline T &operator[](unsigned idx)
+		{return *(operator()(idx));};
+
+	inline unsigned getSize(void)
+		{return (unsigned)(size / sizeof(T));};
+
+	inline void sync(void)
+		{MappedFile::sync();};
+};
+	
+template <class T, unsigned I = 0>
+class mapped_view : protected MappedFile
+{
+public:
+	inline mapped_view(const char *fn, unsigned members) : 
+		MappedFile(fn) {};
+	
+	inline const char *id(unsigned idx)
+		{return static_cast<const char *>(get(idx * (sizeof(T) + I)));};
+
+	inline const T *operator()(unsigned idx)
+		{return static_cast<const T*>(get(idx * (sizeof(T) + I)) + I);}
+	
+	inline const T &operator[](unsigned idx)
+		{return *(operator()(idx));};
+
+	inline unsigned getSize(void)
+		{return (unsigned)(size / (sizeof(T) + I));};
 };
 
 extern "C" {

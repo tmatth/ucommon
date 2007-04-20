@@ -1,10 +1,105 @@
 #include <config.h>
 #include <ucommon/file.h>
 #include <ucommon/process.h>
+#include <sys/mman.h>
 #include <errno.h>
 #include <string.h>
 
 using namespace UCOMMON_NAMESPACE;
+
+MappedFile::MappedFile(const char *fn, size_t len)
+{
+	int prot = PROT_READ;
+	struct stat ino;
+
+	size = used = 0;
+	if(len) {
+		prot |= PROT_WRITE;
+		remove(fn);
+		fd = creat(fn, 0660);
+		if(fd > -1)
+			lseek(fd, len, SEEK_SET);
+	}
+	else {
+		fd = open(fn, O_RDONLY);
+		if(fd > -1) {
+			fstat(fd, &ino);
+			len = ino.st_size;
+		}
+	}
+
+	if(fd < 0)
+		return;
+	
+	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
+	if(map == (caddr_t)MAP_FAILED)
+		close(fd);
+	else
+		size = len;
+}
+
+MappedFile::~MappedFile()
+{
+	if(size) {
+		munmap(map, size);
+		close(fd);
+		size = 0;
+		map = (caddr_t)MAP_FAILED;
+	}
+}
+
+void MappedFile::fault(void) 
+{
+	abort();
+}
+
+void MappedFile::sync(void)
+{
+	if(!size)
+		return;
+
+	msync(map, size, MS_ASYNC);
+}
+
+void *MappedFile::brk(size_t len)
+{
+	void *mp = (void *)(map + used);
+	if(used + len > size)
+		fault();
+	used += len;
+	return mp;
+}
+	
+void *MappedFile::get(size_t offset)
+{
+	if(offset >= size)
+		fault();
+	return (void *)(map + offset);
+}
+
+MappedAssoc::MappedAssoc(mempager *pager, const char *fname, size_t size, unsigned isize) :
+MappedFile(fname, size), keyassoc(isize, pager)
+{
+}
+
+void *MappedAssoc::find(const char *id, size_t osize, size_t tsize)
+{
+	void *mem = keyassoc::get(id);
+	if(mem)
+		return mem;
+	
+	mem = MappedFile::brk(osize + tsize);
+	cpr_strset((char *)mem, tsize, id);
+	keyassoc::set((char *)mem, (caddr_t)(mem) + tsize);
+	return mem;
+}
+
+aio::aio()
+{
+	pending = false;
+	count = 0;
+	err = 0;
+}
 
 aio::~aio()
 {
