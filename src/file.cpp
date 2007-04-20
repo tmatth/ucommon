@@ -11,17 +11,18 @@ MappedFile::MappedFile(const char *fn, size_t len)
 {
 	int prot = PROT_READ;
 	struct stat ino;
+	int fd;
 
 	size = used = 0;
 	if(len) {
 		prot |= PROT_WRITE;
-		remove(fn);
-		fd = creat(fn, 0660);
+		shm_unlink(fn);
+		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
 		if(fd > -1)
-			lseek(fd, len, SEEK_SET);
+			ftruncate(fd, len);
 	}
 	else {
-		fd = open(fn, O_RDONLY);
+		fd = shm_open(fn, O_RDONLY, 0660);
 		if(fd > -1) {
 			fstat(fd, &ino);
 			len = ino.st_size;
@@ -32,17 +33,15 @@ MappedFile::MappedFile(const char *fn, size_t len)
 		return;
 	
 	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
-	if(map == (caddr_t)MAP_FAILED)
-		close(fd);
-	else
+	if(map != (caddr_t)MAP_FAILED)
 		size = len;
+	close(fd);
 }
 
 MappedFile::~MappedFile()
 {
 	if(size) {
 		munmap(map, size);
-		close(fd);
 		size = 0;
 		map = (caddr_t)MAP_FAILED;
 	}
@@ -157,7 +156,7 @@ ssize_t aio::result(void)
 	return res;
 }	
 
-void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
+void aio::write(fd_t fd, caddr_t buf, size_t len, off_t offset)
 {
     cancel();
 	err = EINPROGRESS;
@@ -172,7 +171,7 @@ void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
 	}
 }
 
-void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
+void aio::read(fd_t fd, caddr_t buf, size_t len, off_t offset)
 {
 	cancel();
 	err = EINPROGRESS;
@@ -201,7 +200,7 @@ ssize_t aio::result(void)
 		return -1;
 }
 
-void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
+void aio::write(fd_t fd, caddr_t buf, size_t len, off_t offset)
 {
     ssize_t res = pwrite(fd, buf, len, offset);
     count = 0;
@@ -212,7 +211,7 @@ void aio::write(int fd, caddr_t buf, size_t len, off_t offset)
         count = res;
 }
 
-void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
+void aio::read(fd_t fd, caddr_t buf, size_t len, off_t offset)
 {
 	ssize_t res = pread(fd, buf, len, offset);
 	count = 0;
@@ -224,7 +223,7 @@ void aio::read(int fd, caddr_t buf, size_t len, off_t offset)
 }
 #endif
 
-aiopager::aiopager(int fdes, unsigned pages, unsigned scan, off_t start, size_t ps)
+aiopager::aiopager(fd_t fdes, unsigned pages, unsigned scan, off_t start, size_t ps)
 {
 	offset = start;
 	count = pages;

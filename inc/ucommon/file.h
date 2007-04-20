@@ -35,7 +35,6 @@ class __EXPORT MappedFile
 {
 private:
 	caddr_t map;
-	int fd;
 
 protected:
 	size_t size, used;
@@ -80,8 +79,8 @@ public:
 	~aio();
 
 	bool isPending(void);
-	void read(int fd, caddr_t buf, size_t len, off_t offset);
-	void write(int fd, caddr_t buf, size_t len, off_t offset);
+	void read(fd_t fd, caddr_t buf, size_t len, off_t offset);
+	void write(fd_t fd, caddr_t buf, size_t len, off_t offset);
 	void cancel(void);
 	ssize_t result(void);	
 
@@ -95,7 +94,7 @@ public:
 class __EXPORT aiopager
 {
 private:
-	int fd;
+	fd_t fd;
 	size_t pagesize;
 	off_t offset;
 	unsigned index, count, ahead, error, written, fetched;
@@ -103,7 +102,7 @@ private:
 	aio *control;	
 
 public:
-	aiopager(int fdes, unsigned pages, unsigned scanahead, off_t start = 0, size_t ps = 1024);
+	aiopager(fd_t fdes, unsigned pages, unsigned scanahead, off_t start = 0, size_t ps = 1024);
 	~aiopager();
 
 	operator bool();
