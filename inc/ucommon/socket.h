@@ -134,6 +134,9 @@ public:
 	int setTimeToLive(unsigned char ttl);
 	int setTypeOfService(unsigned tos);
 
+	inline void shutdown(void)
+		{::shutdown(so, SHUT_RDWR);};
+
 	int connect(const char *host, const char *svc);
 	bool create(int family, int type, int protocol = 0);
 

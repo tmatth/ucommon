@@ -35,14 +35,17 @@ class __EXPORT MappedFile
 {
 private:
 	caddr_t map;
+#ifdef	_MSWINDOWS_
+	HANDLE hmap;
+#endif
 
 protected:
-	size_t size, used;
+	size_t size, used, page;
 
 	virtual void fault(void);
 
 public:
-	MappedFile(const char *fname, size_t len = 0);
+	MappedFile(const char *fname, size_t len = 0, size_t paging = 0);
 	virtual ~MappedFile();
 
 	inline operator bool() const
@@ -51,9 +54,8 @@ public:
 	inline bool operator!() const
 		{return (size == 0);};
 
-	void *brk(size_t size);
+	void *sbrk(size_t size);
 	void *get(size_t offset);
-	void sync(void);
 };
 
 class MappedAssoc : protected MappedFile, protected keyassoc
@@ -136,9 +138,6 @@ public:
 
 	inline unsigned getFree(void)
 		{return (unsigned)((size - used) / (sizeof(T) + I));};
-
-	inline void sync(void)
-		{MappedFile::sync();};
 };
 
 template <class T>
@@ -152,16 +151,13 @@ public:
 		{return static_cast<T*>(get(idx * sizeof(T)));}
 
 	inline T *operator()(void)
-		{return static_cast<T*>(brk(sizeof(T)));};
+		{return static_cast<T*>(sbrk(sizeof(T)));};
 	
 	inline T &operator[](unsigned idx)
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
 		{return (unsigned)(size / sizeof(T));};
-
-	inline void sync(void)
-		{MappedFile::sync();};
 };
 	
 template <class T, unsigned I = 0>
@@ -223,7 +219,8 @@ extern "C" {
 	inline void cpr_unload(loader_handle_t mem)
 		{dlclose(mem);};
 #endif
- 
+
+	__EXPORT caddr_t cpr_mapfile(const char *fn); 
 	__EXPORT bool cpr_isfile(const char *fn);	
 	__EXPORT bool cpr_isdir(const char *fn);
 }

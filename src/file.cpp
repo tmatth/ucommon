@@ -1,18 +1,83 @@
 #include <config.h>
 #include <ucommon/file.h>
 #include <ucommon/process.h>
+
+#if _POSIX_MAPPED_FILES > 0
 #include <sys/mman.h>
+#endif
+
 #include <errno.h>
 #include <string.h>
 
 using namespace UCOMMON_NAMESPACE;
 
-MappedFile::MappedFile(const char *fn, size_t len)
+#if defined(_MSWINDOWS_) && !defined(_POSIX_MAPPED_FILES)
+
+MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
+{
+	int share = FILE_SHARE_READ;
+	int prot = FILE_MAP_READ;
+	int page = PAGE_READONLY;
+	int mode = GENERIC_READ;
+	struct stat ino;
+	HANDLE fd;
+
+	page = paging;
+	size = used = 0;
+	map = NULL;
+
+	if(len) {
+		prot = FILE_MAP_WRITE;
+		page = PAGE_READWRITE;
+		mode |= GENERIC_WRITE;
+		share |= FILE_SHARE_WRITE;
+		remove(fn);
+	}
+	fd = CreateFile(fn, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+	if(fd == INVALID_HANDLE_VALUE) 
+		return;
+
+	if(len) {
+		SetFilePointer(fd, (LONG)len, 0l, FILE_BEGIN);
+		SetEndOfFile(fd);
+	}
+	else {
+		SetFilePointer(fd, 0l, 0l, FILE_END);
+		len = GetFilePointer(fd);
+	}
+	hmap = CreateFileMapping(fd, NULL, page, 0, 0, fn + 1);
+	if(hmap == INVALID_HANDLE_VALUE) {
+		CloseHandle(fd);
+		return;
+	}
+	map = (caddr_t)MapViewOfFile(map, prot, 0, 0, len);
+	if(map) {
+		size = len;
+		VirtualLock(map, size);
+	}
+	CloseHandle(fd);
+}
+
+MappedFile::~MappedFile()
+{
+	if(map) {
+		VirtualUnlock(map, size);
+		UnmapViewOfFile(hmap);
+		CloseHandle(hmap);
+		map = NULL;
+		hmap = INVALID_HANDLE_VALUE;
+	}
+}
+
+#else
+
+MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 {
 	int prot = PROT_READ;
 	struct stat ino;
 	int fd;
 
+	page = paging;
 	size = used = 0;
 	if(len) {
 		prot |= PROT_WRITE;
@@ -33,38 +98,47 @@ MappedFile::MappedFile(const char *fn, size_t len)
 		return;
 	
 	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
-	if(map != (caddr_t)MAP_FAILED)
+	if(map != (caddr_t)MAP_FAILED) {
 		size = len;
+		mlock(map, size);
+	}
 	close(fd);
 }
 
 MappedFile::~MappedFile()
 {
 	if(size) {
+		munlock(map, size);
 		munmap(map, size);
 		size = 0;
 		map = (caddr_t)MAP_FAILED;
 	}
 }
 
+#endif
+
 void MappedFile::fault(void) 
 {
 	abort();
 }
 
-void MappedFile::sync(void)
-{
-	if(!size)
-		return;
-
-	msync(map, size, MS_ASYNC);
-}
-
-void *MappedFile::brk(size_t len)
+void *MappedFile::sbrk(size_t len)
 {
 	void *mp = (void *)(map + used);
-	if(used + len > size)
+	size_t old = size;
+	if(used + len > size && !page)
 		fault();
+	if(used + len > size) {
+#if defined(_MSWINDOWS_) && !defined(_POSIX_MAPPED_FILES)
+		fault();
+#else
+		munlock(map, size);
+		size += page;
+		if(mremap(map, old, size, 0) != map)
+			fault();
+		mlock(map, size);
+#endif
+	}
 	used += len;
 	return mp;
 }
@@ -87,7 +161,7 @@ void *MappedAssoc::find(const char *id, size_t osize, size_t tsize)
 	if(mem)
 		return mem;
 	
-	mem = MappedFile::brk(osize + tsize);
+	mem = MappedFile::sbrk(osize + tsize);
 	cpr_strset((char *)mem, tsize, id);
 	keyassoc::set((char *)mem, (caddr_t)(mem) + tsize);
 	return mem;
@@ -361,4 +435,53 @@ extern "C" bool cpr_isfile(const char *fn)
 	return false;
 }
 
+#if _POSIX_MAPPED_FILES > 0
 
+extern "C" caddr_t cpr_mapfile(const char *fn)
+{
+	struct stat ino;
+	int fd = open(fn, O_RDONLY);
+	void *map;
+
+	if(fd < 0)
+		return NULL;
+
+	if(fstat(fd, &ino) || !ino.st_size) {
+		close(fd);
+		return NULL;
+	}
+
+	map = mmap(NULL, ino.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	msync(map, ino.st_size, MS_SYNC);
+	close(fd);
+	if(map == MAP_FAILED)
+		return NULL;
+	
+	return (caddr_t)map;
+}
+#else
+
+caddr_t cpr_mapfile(const char *fn)
+{
+	void *mem;
+	struct stat ino;
+
+	int fd = open(fn, O_RDONLY);
+	if(fd < 0)
+		return NULL;
+
+	if(fstat(fd, &ino) || !ino.st_size) {
+		close(fd);
+		return NULL;
+	}
+
+	mem = malloc(ino.st_size);
+	if(!mem)
+		abort();
+	
+	read(fd, mem, ino.st_size);
+	close(fd);
+	return (caddr_t)mem;
+}
+
+#endif
