@@ -83,8 +83,6 @@ public:
 		{return (void *)(map + offset);};
 };
 
-
-
 class MappedAssoc : protected MappedFile, protected keyassoc
 {
 public:
@@ -208,19 +206,19 @@ public:
 };
 
 template <class T, unsigned I = 0>
-class mapped_share : protected MappedFile
+class mapped_shared : protected MappedFile
 {
 public:
-	inline mapped_share(const char *fn, unsigned members) : 
+	inline mapped_shared(const char *fn, unsigned members) : 
 		MappedFile(fn) {};
 	
 	inline const char *id(unsigned idx)
 		{return static_cast<const char *>(get(idx * (sizeof(T) + I)));};
 
-	inline const T *operator()(unsigned idx)
+	inline T *operator()(unsigned idx)
 		{return static_cast<const T*>(get(idx * (sizeof(T) + I)) + I);}
 	
-	inline const T &operator[](unsigned idx)
+	inline T &operator[](unsigned idx)
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
