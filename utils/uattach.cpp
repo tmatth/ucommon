@@ -1,6 +1,6 @@
-#include <inc/process.h>
-#include <inc/signal.h>
+#include <ucommon/process.h>
 #include <sys/stat.h>
+#include <config.h>
 #include <syslog.h>
 #include <stdio.h>
 #include <unistd.h>

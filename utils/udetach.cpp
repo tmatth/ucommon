@@ -1,4 +1,5 @@
-#include <inc/process.h>
+#include <ucommon/process.h>
+#include <config.h>
 #include <stdio.h>
 #include <syslog.h>
 

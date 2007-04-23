@@ -53,6 +53,9 @@ UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 UCOMMON_LOADER=""
 
+POSIX=false
+MSSYS=false
+
 AC_ARG_WITH(libc,
 	[  --with-libc          specify alternate libc],[
 	if test x$with_libc != x ; then
@@ -101,6 +104,11 @@ AC_CHECK_LIB($clib, setpgrp, [
     AC_DEFINE(HAVE_SETPGRP, [1], [process set group])
 ])
 
+AC_CHECK_LIB($clib, fork, [
+	POSIX="true"
+	AC_DEFINE(WITH_POSIX, [1], [has posix])
+])
+
 AC_TYPE_SIGNAL
 
 AC_CACHE_CHECK(whether sigwait has 2 arguments,
@@ -146,6 +154,10 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_delay,[
 			AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
 		])
+		AC_CHECK_LIB($tlib,pthread_rwlockattr_setpshared,[
+			AC_DEFINE(HAVE_PTHREAD_RWLOCKATTR_SETPSHARED, [1], ["shared rwlock"])
+		])
+	
 	fi		
 ],[
 	AC_MSG_ERROR("pthread support required")
@@ -257,6 +269,8 @@ do
     rm -f conftest*
 done
 
+AM_CONDITIONAL(POSIX, test "$POSIX" = "true")
+
 AC_MSG_CHECKING([whether ${CXX} supports visibility])
 echo 'void f(){}' >conftest.cpp
 if test -z "`${CXX} -fvisibility=hidden -c conftest.cpp 2>&1`"; then
@@ -271,6 +285,8 @@ rm -f conftest*
 
 AC_LANG_RESTORE
 
+
+
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LOADER)
 AC_SUBST(UCOMMON_SHARED)
@@ -280,5 +296,5 @@ AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
 AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile 
-inc/ucommon/Makefile libucommon.pc)
+inc/ucommon/Makefile utils/Makefile libucommon.pc)
 

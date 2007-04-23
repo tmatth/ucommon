@@ -71,23 +71,58 @@ MappedFile::~MappedFile()
 
 #else
 
-MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
+MappedView::MappedView(const char *fn)
 {
 	int prot = PROT_READ;
+	struct stat ino;
+	int fd;
+	size_t len = 0;
+
+	size = 0;
+	fd = shm_open(fn, O_RDONLY, 0660);
+	if(fd > -1) {
+		fstat(fd, &ino);
+		len = ino.st_size;
+	}
+
+	if(fd < 0)
+		return;
+	
+	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
+	if(map != (caddr_t)MAP_FAILED) {
+		size = len;
+		mlock(map, size);
+	}
+	close(fd);
+}
+
+MappedView::~MappedView()
+{
+	if(size) {
+		munlock(map, size);
+		munmap(map, size);
+		size = 0;
+		map = (caddr_t)MAP_FAILED;
+	}
+}
+	
+MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
+{
+	int prot = PROT_READ | PROT_WRITE;
 	struct stat ino;
 	int fd;
 
 	page = paging;
 	size = used = 0;
 	if(len) {
-		prot |= PROT_WRITE;
+//		prot |= PROT_WRITE;
 		shm_unlink(fn);
 		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
 		if(fd > -1)
 			ftruncate(fd, len);
 	}
 	else {
-		fd = shm_open(fn, O_RDONLY, 0660);
+		fd = shm_open(fn, O_RDWR, 0660);
 		if(fd > -1) {
 			fstat(fd, &ino);
 			len = ino.st_size;
@@ -485,3 +520,4 @@ caddr_t cpr_mapfile(const char *fn)
 }
 
 #endif
+

@@ -58,6 +58,33 @@ public:
 	void *get(size_t offset);
 };
 
+class __EXPORT MappedView
+{
+private:
+	caddr_t map;
+#ifdef	_MSWINDOWS_
+	HANDLE hmap;
+#endif
+
+protected:
+	size_t size;
+
+public:
+	MappedView(const char *fname);
+	virtual ~MappedView();
+
+	inline operator bool() const
+		{return (size != 0);};
+
+	inline bool operator!() const
+		{return (size == 0);};
+
+	inline void *get(size_t offset)
+		{return (void *)(map + offset);};
+};
+
+
+
 class MappedAssoc : protected MappedFile, protected keyassoc
 {
 public:
@@ -161,10 +188,30 @@ public:
 };
 	
 template <class T, unsigned I = 0>
-class mapped_view : protected MappedFile
+class mapped_view : protected MappedView
 {
 public:
 	inline mapped_view(const char *fn, unsigned members) : 
+		MappedView(fn) {};
+	
+	inline const char *id(unsigned idx)
+		{return static_cast<const char *>(get(idx * (sizeof(T) + I)));};
+
+	inline const T *operator()(unsigned idx)
+		{return static_cast<const T*>(get(idx * (sizeof(T) + I)) + I);}
+	
+	inline const T &operator[](unsigned idx)
+		{return *(operator()(idx));};
+
+	inline unsigned getSize(void)
+		{return (unsigned)(size / (sizeof(T) + I));};
+};
+
+template <class T, unsigned I = 0>
+class mapped_share : protected MappedFile
+{
+public:
+	inline mapped_share(const char *fn, unsigned members) : 
 		MappedFile(fn) {};
 	
 	inline const char *id(unsigned idx)

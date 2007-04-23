@@ -57,6 +57,26 @@ protected:
 		{return &attr.attr;};
 };
 
+class __EXPORT MappedLock : public Exclusive, public Shared
+{
+private:
+	union {
+		pthread_mutex_t mutex;
+		pthread_rwlock_t lock;
+	} control;
+
+public:
+	MappedLock();
+
+	void Exlock(void);
+	void Shlock(void);
+	void Unlock(void);
+
+	void exclusive(void);
+	void share(void);
+	void release(void);
+};
+
 class __EXPORT SharedLock : public Conditional
 {
 private:

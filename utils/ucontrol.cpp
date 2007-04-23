@@ -1,17 +1,17 @@
-#include <inc/process.h>
-#include <inc/signal.h>
+#include <ucommon/process.h>
 #include <sys/stat.h>
-#include <syslog.h>
+#include <config.h>
 #include <stdio.h>
-#include <unistd.h>
 
-static REGSIGTYPE signotify(int signo)
+static RETSIGTYPE signotify(int signo)
 {
 	switch(signo) {
 	case SIGUSR1:
 		exit(0);
 	case SIGUSR2:
 		exit(1);
+	case SIGALRM:
+		exit(2);
 	default:
 		exit(signo);
 	}
@@ -23,15 +23,23 @@ int main(int argc, char **argv)
 	char ctrlcmd[512];
 	struct stat ino;
 	int fd;
+	int timeout = 0;
+
+	if(argc > 1 && argv[1][0] == '-') {
+		timeout = atoi(argv[1] + 1);
+		++argv;
+		--argc;
+	}
 
 	if(argc != 3) {
-		fprintf(stderr, "use: control service \"command\" ...\n");
+		fprintf(stderr, "use: control [-timeout] service \"command\" ...\n");
 		exit(-1);
 	}
 	cpr_signal(SIGUSR1, signotify);
 	cpr_signal(SIGUSR2, signotify);
+	cpr_signal(SIGALRM, signotify);
 
-	snprintf(ctrlpath, "/var/run/%s/%s.ctrl", argv[1], argv[1]);
+	snprintf(ctrlpath, sizeof(ctrlpath), "/var/run/%s/%s.ctrl", argv[1], argv[1]);
 	if(stat(ctrlpath, &ino)) {
 		fprintf(stderr, "*** control: %s; cannot access\n", ctrlpath);
 		exit(-1);
@@ -39,10 +47,13 @@ int main(int argc, char **argv)
 
 	snprintf(ctrlcmd, sizeof(ctrlcmd), "%d %s\n", getpid(), argv[2]);
 
-	if(!S_IFIFO(ino.st_mode)) {
+	if(!S_ISFIFO(ino.st_mode)) {
 		fprintf(stderr, "*** control: %s; not fifo\n", ctrlpath);
 		exit(-1);
 	}
+
+	if(timeout)
+		alarm(timeout);
 
 	fd = open(ctrlpath, O_WRONLY);
 
@@ -53,5 +64,5 @@ int main(int argc, char **argv)
 	
 	write(fd, ctrlcmd, strlen(ctrlcmd));
 	close(fd);
-	sleep(-1);
+	pause();
 }

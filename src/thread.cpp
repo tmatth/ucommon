@@ -209,6 +209,77 @@ void Mutex::Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
+#ifdef HAVE_PTHREAD_RWLOCKATTR_SETPSHARED
+
+MappedLock::MappedLock()
+{
+	pthread_rwlockattr_t attr;
+
+	pthread_rwlockattr_init(&attr);
+	pthread_rwlockattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+	pthread_rwlock_init(&control.lock, &attr);
+	pthread_rwlockattr_destroy(&attr);
+}
+
+void MappedLock::exclusive(void)
+{
+	pthread_rwlock_wrlock(&control.lock);
+}
+
+void MappedLock::share(void)
+{
+	pthread_rwlock_rdlock(&control.lock);
+}
+
+void MappedLock::release(void)
+{
+	pthread_rwlock_unlock(&control.lock);
+}
+
+#else
+
+MappedLock::MappedLock()
+{
+	pthread_mutexattr_t attr;
+
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+	pthread_mutex_init(&control.mutex, &attr);
+	pthread_mutexattr_destroy(&attr);
+}
+
+void MappedLock::exclusive(void)
+{
+	pthread_mutex_lock(&control.mutex);
+}
+
+void MappedLock::share(void)
+{
+	pthread_mutex_lock(&control.mutex);
+}
+
+void MappedLock::release(void)
+{
+	pthread_mutex_unlock(&control.mutex);
+}
+
+#endif
+
+void MappedLock::Exlock(void)
+{
+	exclusive();
+}
+
+void MappedLock::Shlock(void)
+{
+	share();
+}
+
+void MappedLock::Unlock(void)
+{
+	release();
+}
+
 SharedLock::SharedLock() :
 Conditional()
 {
@@ -1102,4 +1173,5 @@ extern "C" void cpr_cancel_resume(cancellation *cancel)
 	if(cancel->state == PTHREAD_CANCEL_ENABLE)
 		pthread_testcancel();
 }
+
 
