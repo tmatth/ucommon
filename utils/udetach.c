@@ -1,5 +1,4 @@
 #include <inc/process.h>
-#include <inc/signal.h>
 #include <stdio.h>
 #include <syslog.h>
 
