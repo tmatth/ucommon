@@ -63,26 +63,6 @@ protected:
 		static void mapped(Conditional *cond);
 };
 
-class __EXPORT MappedLock : public Exclusive, public Shared
-{
-private:
-	union {
-		pthread_mutex_t mutex;
-		pthread_rwlock_t lock;
-	} control;
-
-public:
-	MappedLock();
-
-	void Exlock(void);
-	void Shlock(void);
-	void Unlock(void);
-
-	void exclusive(void);
-	void share(void);
-	void release(void);
-};
-
 class __EXPORT SharedLock : public Conditional
 {
 private:
@@ -586,20 +566,20 @@ extern "C" {
 	__EXPORT void cpr_cancel_async(cancellation *cancel);
 };
 
-#define	cpr_begin_exclusive()	\
+#define	ENTER_EXCLUSIVE	\
 	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
 		pthread_mutex_lock(&__sync__);
 
-#define cpr_end_exclusive() \
+#define EXIT_EXCLUSIVE \
 	pthread_mutex_unlock(&__sync__);} while(0);
 
-#define	cpr_suspend_cancellation() \
+#define	SUSPEND_CANCELLATION \
 	do { cancellation __cancel__; cpr_cancel_suspend(&__cancel__);
 
-#define cpr_async_cancellation() \
+#define ASYNC_CANCELLATION \
 	do { cancellation __cancel__; cpr_cancel_async(&__cancel__);
 
-#define	cpr_resume_cancellation() \
+#define	RESUME_CANCELLATION \
 	cpr_cancel_resume(&__cancel__);} while(0);
 
 #endif

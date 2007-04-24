@@ -11,6 +11,92 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+#ifndef _MSWINDOWS_
+
+#ifdef HAVE_PTHREAD_RWLOCKATTR_SETPSHARED
+
+mapped_lock::mapped_lock()
+{
+	pthread_rwlockattr_t attr;
+
+	pthread_rwlockattr_init(&attr);
+	pthread_rwlockattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+	pthread_rwlock_init(&control.lock, &attr);
+	pthread_rwlockattr_destroy(&attr);
+}
+
+void mapped_lock::exclusive(void)
+{
+	pthread_rwlock_wrlock(&control.lock);
+}
+
+void mapped_lock::share(void)
+{
+	pthread_rwlock_rdlock(&control.lock);
+}
+
+void mapped_lock::release(void)
+{
+	pthread_rwlock_unlock(&control.lock);
+}
+
+#else
+
+mapped_lock::mapped_lock()
+{
+	pthread_mutexattr_t attr;
+
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+	pthread_mutex_init(&control.mutex, &attr);
+	pthread_mutexattr_destroy(&attr);
+}
+
+void mapped_lock::mapped_lock(void)
+{
+	pthread_mutex_lock(&control.mutex);
+}
+
+void mapped_lock::share(void)
+{
+	pthread_mutex_lock(&control.mutex);
+}
+
+void mapped_lock::release(void)
+{
+	pthread_mutex_unlock(&control.mutex);
+}
+
+#endif
+#else
+void mapped_lock::share(void)
+{
+}
+
+void mapped_lock::release(void)
+{
+}
+
+void mapped_lock::exclusive(void)
+{
+}
+#endif
+
+void mapped_lock::Exlock(void)
+{
+	exclusive();
+}
+
+void mapped_lock::Shlock(void)
+{
+	share();
+}
+
+void mapped_lock::Unlock(void)
+{
+	release();
+}
+
 #if defined(_MSWINDOWS_) && !defined(_POSIX_MAPPED_FILES)
 
 MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
@@ -20,20 +106,21 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 	int page = PAGE_READONLY;
 	int mode = GENERIC_READ;
 	struct stat ino;
-	HANDLE fd;
+	char fpath[256];
 
 	page = paging;
 	size = used = 0;
 	map = NULL;
 
+	snprintf(fpath, sizeof(fpath), "c:/temp/mapped-%s", fn + 1);
 	if(len) {
 		prot = FILE_MAP_WRITE;
 		page = PAGE_READWRITE;
 		mode |= GENERIC_WRITE;
 		share |= FILE_SHARE_WRITE;
-		remove(fn);
+		remove(fpath);
 	}
-	fd = CreateFile(fn, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+	fd = CreateFile(fpath, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
 	if(fd == INVALID_HANDLE_VALUE) 
 		return;
 
@@ -42,8 +129,7 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 		SetEndOfFile(fd);
 	}
 	else {
-		SetFilePointer(fd, 0l, 0l, FILE_END);
-		len = GetFilePointer(fd);
+		len = SetFilePointer(fd, 0l, 0l, FILE_END);
 	}
 	hmap = CreateFileMapping(fd, NULL, page, 0, 0, fn + 1);
 	if(hmap == INVALID_HANDLE_VALUE) {
@@ -55,7 +141,6 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 		size = len;
 		VirtualLock(map, size);
 	}
-	CloseHandle(fd);
 }
 
 MappedFile::~MappedFile()
@@ -66,6 +151,7 @@ MappedFile::~MappedFile()
 		CloseHandle(hmap);
 		map = NULL;
 		hmap = INVALID_HANDLE_VALUE;
+		CloseHandle(fd);
 	}
 }
 
@@ -82,7 +168,7 @@ MappedView::MappedView(const char *fn)
 	fd = shm_open(fn, O_RDONLY, 0660);
 	if(fd > -1) {
 		fstat(fd, &ino);
-		len = ino.st_size - sizeof(MappedLock);
+		len = ino.st_size - sizeof(mapped_lock);
 	}
 
 	if(fd < 0)
@@ -154,7 +240,7 @@ MappedBuffer::~MappedBuffer()
 	}
 }
 
-unsigned MappedBuffer::getCount(size_t objsize)
+unsigned MappedBuffer::count(void)
 {
 	unsigned c;
 
@@ -164,21 +250,12 @@ unsigned MappedBuffer::getCount(size_t objsize)
 	return c;
 }
 
-void *MappedBuffer::get(void)
+void MappedBuffer::get(void *data, size_t objsize)
 {
-	void *dbuf;
-
 	buffer->lock();
 	while(!buffer->count)
 		wait();
-	dbuf = map + buffer->head;
-	buffer->unlock();
-	return dbuf;
-}
-
-void MappedBuffer::release(size_t objsize)
-{
-	buffer->lock();
+	memcpy(data, map + buffer->head, objsize);
 	buffer->head += objsize;
 	if(buffer->head >= size)
 		buffer->head = sizeof(control);
@@ -209,13 +286,13 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 
 	page = paging;
 	size = 0;
-	used = sizeof(MappedLock);
+	used = sizeof(mapped_lock);
 	lock = NULL;
 	bool addlock = false;
 	
 	if(len) {
 		addlock = true;
-		len += sizeof(MappedLock);
+		len += sizeof(mapped_lock);
 //		prot |= PROT_WRITE;
 		shm_unlink(fn);
 		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
@@ -239,8 +316,8 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 		mlock(map, size);
 	}
 	if(addlock)
-		new(map) MappedLock();
-	lock = (MappedLock *)map;
+		new(map) mapped_lock();
+	lock = (mapped_lock *)map;
 	close(fd);
 }
 
@@ -284,7 +361,7 @@ void *MappedFile::sbrk(size_t len)
 	
 void *MappedFile::get(size_t offset)
 {
-	offset += sizeof(MappedLock);
+	offset += sizeof(mapped_lock);
 
 	if(offset >= size)
 		fault();
@@ -417,7 +494,7 @@ ssize_t aio::result(void)
 
 void aio::write(fd_t fd, caddr_t buf, size_t len, off_t offset)
 {
-    ssize_t res = pwrite(fd, buf, len, offset);
+    ssize_t res = cpr_pwritefile(fd, buf, len, offset);
     count = 0;
     err = 0;
     if(res < 1)
@@ -428,7 +505,7 @@ void aio::write(fd_t fd, caddr_t buf, size_t len, off_t offset)
 
 void aio::read(fd_t fd, caddr_t buf, size_t len, off_t offset)
 {
-	ssize_t res = pread(fd, buf, len, offset);
+	ssize_t res = cpr_preadfile(fd, buf, len, offset);
 	count = 0;
 	err = 0;
 	if(res < 1)
@@ -458,9 +535,8 @@ aiopager::aiopager(fd_t fdes, unsigned pages, unsigned scan, off_t start, size_t
 aiopager::~aiopager()
 {
 	cancel();
-	if(fd > -1)
-		::close(fd);
-	fd = -1;
+	fd = cpr_closefile(fd);
+
 	if(buffer)
 		delete[] buffer;
 	if(control)
@@ -576,6 +652,160 @@ extern "C" bool cpr_isfile(const char *fn)
 	return false;
 }
 
+#ifdef HAVE_PREAD
+
+extern "C" ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset)
+{
+	return pread(fd, data, len, offset);
+}
+
+extern "C" ssize_t cpr_pwritefile(fd_t fd, caddr_t data, size_t len, off_t offset)
+{
+	return pwrite(fd, data, len, offset);
+}
+
+#elif defined(_MSWINDOWS_)
+
+extern "C" ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset)
+{
+	DWORD count = (DWORD)-1;
+	ENTER_EXCLUSIVE
+	SetFilePointer(fd, (DWORD)len, NULL, FILE_BEGIN);
+	ReadFile(fd, data, (DWORD)len, &count, NULL);
+	EXIT_EXCLUSIVE
+	return count;
+}
+
+extern "C" ssize_t cpr_pwritefile(fd_t fd, caddr_t data, size_t len, off_t offset)
+{
+	DWORD count = (DWORD)-1;
+	ENTER_EXCLUSIVE
+	SetFilePointer(fd, (DWORD)len, NULL, FILE_BEGIN);
+	WriteFile(fd, data, (DWORD)len, &count, NULL);
+	EXIT_EXCLUSIVE
+	return count;
+}
+
+#else
+
+extern "C" ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset)
+{
+	ssize_t rtn;
+	ENTER_EXCLUSIVE
+	lseek(fd, offset, SEEK_SET);
+	rtn = read(fd, data, len);
+	EXIT_EXCLUSIVE
+	return rtn;
+}
+
+extern "C" ssize_t cpr_pwritefile(fd_t fd, caddr_t data, size_t len, off_t offset)
+{
+	ssize_t rtn;
+	ENTER_EXCLUSIVE
+	lseek(fd, offset, SEEK_SET);
+	rtn = write(fd, data, len);
+	EXIT_EXCLUSIVE
+	return rtn;
+}
+
+#endif
+
+#ifdef _MSWINDOWS_
+
+extern "C" bool cpr_isopen(fd_t fd)
+{
+	if(fd == INVALID_HANDLE_VALUE)
+		return false;
+	return true;
+}
+
+extern "C" void cpr_seekfile(fd_t fd, off_t offset)
+{
+	SetFilePointer(fd, offset, NULL, FILE_BEGIN);
+}
+
+extern "C" size_t cpr_filesize(fd_t fd)
+{
+	DWORD pos, end;
+	pos = SetFilePointer(fd, 0l, NULL, FILE_CURRENT);
+	end = SetFilePointer(fd, 0l, NULL, FILE_END);
+	SetFilePointer(fd, pos, NULL, FILE_BEGIN);
+	return (size_t)end;
+}
+
+extern "C" ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len)
+{
+	DWORD count = (DWORD)-1;
+	ReadFile(fd, data, (DWORD)len, &count, NULL);
+	return count;
+}
+
+extern "C" ssize_t cpr_writefile(fd_t fd, caddr_t data, size_t len)
+{
+	DWORD count = (DWORD)-1;
+	WriteFile(fd, data, (DWORD)len, &count, NULL);
+	return count;
+}
+
+extern "C" fd_t cpr_closefile(fd_t fd)
+{
+	if(fd != INVALID_HANDLE_VALUE)
+		CloseHandle(fd);
+	return INVALID_HANDLE_VALUE;
+}
+
+#else
+
+extern "C" bool cpr_isopen(fd_t fd)
+{
+	if(fd > -1)
+		return true;
+
+	return false;
+}
+
+extern "C" void cpr_seekfile(fd_t fd, off_t offset)
+{
+	lseek(fd, offset, SEEK_SET);
+}
+
+extern "C" size_t cpr_filesize(fd_t fd)
+{
+	struct stat ino;
+
+	if(fd < 0 || fstat(fd, &ino))
+		return 0;
+
+	return ino.st_size;
+}
+
+extern "C" ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len)
+{
+	return read(fd, data, len);
+}
+
+extern "C" ssize_t cpr_writefile(fd_t fd, caddr_t data, size_t len)
+{
+	return write(fd, data, len);
+}
+
+extern "C" fd_t cpr_closefile(fd_t fd)
+{
+	if(fd > -1)
+		close(fd);
+	return -1;
+}
+
+extern "C" fd_t cpr_openfile(const char *fn, bool rewrite)
+{
+	if(rewrite)
+		return open(fn, O_RDWR);
+	else
+		return open(fn, O_RDONLY);
+}
+
+#endif
+
 #if _POSIX_MAPPED_FILES > 0
 
 extern "C" caddr_t cpr_mapfile(const char *fn)
@@ -594,7 +824,7 @@ extern "C" caddr_t cpr_mapfile(const char *fn)
 
 	map = mmap(NULL, ino.st_size, PROT_READ, MAP_SHARED, fd, 0);
 	msync(map, ino.st_size, MS_SYNC);
-	close(fd);
+	cpr_closefile(fd);
 	if(map == MAP_FAILED)
 		return NULL;
 	
@@ -604,24 +834,25 @@ extern "C" caddr_t cpr_mapfile(const char *fn)
 
 caddr_t cpr_mapfile(const char *fn)
 {
-	void *mem;
-	struct stat ino;
+	caddr_t mem;
+	fd_t fd;
+	size_t size;
 
-	int fd = open(fn, O_RDONLY);
-	if(fd < 0)
+	fd = cpr_openfile(fn, false);
+	if(!cpr_isopen(fd))
 		return NULL;
 
-	if(fstat(fd, &ino) || !ino.st_size) {
-		close(fd);
+	size = cpr_filesize(fd);
+	if(size < 1) {
+		cpr_closefile(fd);
 		return NULL;
 	}
-
-	mem = malloc(ino.st_size);
+	mem = (caddr_t)malloc(size);
 	if(!mem)
 		abort();
 	
-	read(fd, mem, ino.st_size);
-	close(fd);
+	cpr_readfile(fd, mem, size);
+	cpr_closefile(fd);
 	return (caddr_t)mem;
 }
 

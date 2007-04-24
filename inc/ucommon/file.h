@@ -35,6 +35,28 @@ typedef int fd_t;
 
 NAMESPACE_UCOMMON
 
+class __EXPORT mapped_lock : public Exclusive, public Shared
+{
+private:
+#ifndef	_MSWINDOWS_
+	union {
+		pthread_mutex_t mutex;
+		pthread_rwlock_t lock;
+	} control;
+#endif
+
+public:
+	mapped_lock();
+
+	void Exlock(void);
+	void Shlock(void);
+	void Unlock(void);
+
+	void exclusive(void);
+	void share(void);
+	void release(void);
+};
+
 class __EXPORT MappedBuffer
 {
 private:
@@ -56,10 +78,15 @@ protected:
 	MappedBuffer(const char *fn, size_t bufsize = 0);
 	~MappedBuffer();
 
-	unsigned getCount(size_t objsize);
+	unsigned count(void);
 
-	void *get(void);
-	void release(size_t objsize);
+	inline operator bool()
+		{return count() != 0;};
+
+	inline bool operator!()
+		{return count() == 0;};
+
+	void get(void *data, size_t objsize);
 	void put(void *data, size_t objsize);
 };
 
@@ -69,11 +96,12 @@ private:
 	caddr_t map;
 #ifdef	_MSWINDOWS_
 	HANDLE hmap;
+	fd_t fd;
 #endif
 
 protected:
 	size_t size, used, page;
-	MappedLock *lock;
+	mapped_lock *lock;
 
 	virtual void fault(void);
 
@@ -90,6 +118,9 @@ public:
 	void *sbrk(size_t size);
 	void *get(size_t offset);
 
+#ifdef	_MSWINDOWS_
+
+#else
 	inline void exclusive(void)
 		{lock->exclusive();};
 
@@ -98,18 +129,18 @@ public:
 
 	inline void release(void)
 		{lock->release();};
+#endif
 
 	inline size_t len(void)
-		{return size - sizeof(MappedLock);};
+		{return size - sizeof(mapped_lock);};
 };
+
+#ifndef _MSWINDOWS_
 
 class __EXPORT MappedView
 {
 private:
 	caddr_t map;
-#ifdef	_MSWINDOWS_
-	HANDLE hmap;
-#endif
 
 protected:
 	size_t size;
@@ -130,6 +161,10 @@ public:
 	inline size_t len(void)
 		{return size;};
 };
+
+#else
+typedef	MappedFile MappedView;
+#endif
 
 class MappedAssoc : protected MappedFile, protected keyassoc
 {
@@ -193,8 +228,6 @@ public:
 		{next();};
 };
 
-typedef MappedLock mapped_lock;
-
 template <class T>
 class mapped_buffer : public MappedBuffer
 {
@@ -205,11 +238,8 @@ public:
 	inline mapped_buffer(const char *fn, unsigned count) :
 		MappedBuffer(fn, count * sizeof(T)) {};
 
-	inline T* get(void)
-		{return static_cast<T*>(MappedBuffer::get());};
-
-	inline void release(void)
-		{MappedBuffer::release(sizeof(T));};
+	inline void get(T *buf)
+		{MappedBuffer::get(buf, sizeof(T));};
 
 	inline void put(T *buf)
 		{MappedBuffer::put(buf, sizeof(T));};
@@ -226,10 +256,10 @@ public:
 		{return static_cast<T*>(find(id, sizeof(T), I));};
 
 	inline unsigned getUsed(void)
-		{return (unsigned)((used - sizeof(MappedLock)) / (sizeof(T) + I));};
+		{return (unsigned)((used - sizeof(mapped_lock)) / (sizeof(T) + I));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)((size - sizeof(MappedLock)) / (sizeof(T) + I));};
+		{return (unsigned)((size - sizeof(mapped_lock)) / (sizeof(T) + I));};
 
 	inline unsigned getFree(void)
 		{return (unsigned)((size - used) / (sizeof(T) + I));};
@@ -255,7 +285,7 @@ public:
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)((size - sizeof(MappedLock)) / sizeof(T));};
+		{return (unsigned)((size - sizeof(mapped_lock)) / sizeof(T));};
 };
 	
 template <class T, unsigned I = 0>
@@ -295,7 +325,7 @@ public:
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)((size  - sizeof(MappedLock))/ (sizeof(T) + I));};
+		{return (unsigned)((size  - sizeof(mapped_lock))/ (sizeof(T) + I));};
 };
 
 extern "C" {
@@ -338,6 +368,15 @@ extern "C" {
 		{dlclose(mem);};
 #endif
 
+	__EXPORT bool cpr_isopen(fd_t fd);
+	__EXPORT fd_t cpr_openfile(const char *fn, bool rewrite);
+	__EXPORT fd_t cpr_closefile(fd_t fd);
+	__EXPORT ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset);
+	__EXPORT ssize_t cpr_pwritefile(fd_t fd, caddr_t data, size_t len, off_t offset);
+	__EXPORT ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len);
+	__EXPORT ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len);
+	__EXPORT void cpr_seekfile(fd_t fd, off_t offset);
+	__EXPORT long cpr_filesize(fd_t fd);
 	__EXPORT caddr_t cpr_mapfile(const char *fn); 
 	__EXPORT bool cpr_isfile(const char *fn);	
 	__EXPORT bool cpr_isdir(const char *fn);
