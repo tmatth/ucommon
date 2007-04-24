@@ -7,7 +7,7 @@ LDADD = ../src/libucommon.la @UCOMMON_LIBS@
 bin_PROGRAMS = ushmdump
 
 if POSIX
-bin_PROGRAMS += udetach uattach ucontrol 
+bin_PROGRAMS += udetach uattach ucontrol
 endif
 
 udetach_SOURCES = udetach.cpp

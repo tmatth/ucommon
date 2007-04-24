@@ -54,6 +54,7 @@ typedef char *caddr_t;
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #ifdef	_MSWINDOWS_
 typedef char *caddr_t;
@@ -99,6 +100,22 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #define	crit(x)	assert(x)
 #else
 #define	crit(x) if(!(x)) abort()
+#endif
+
+#if _POSIX_MAPPED_FILES > 0 && _POSIX_SHARED_MEMORY_OBJECTS > 0
+#define	UCOMMON_MAPPED_MEMORY 1
+#endif
+
+#if _POSIX_MAPPED_FILES > 0 || defined(_MSWINDOWS_)
+#define	UCOMMON_MAPPED_FILES 1
+#endif
+
+#if _POSIX_SHARED_MEMORY_OBJECTS > 0 && _POSIX_THREAD_PROCESS_SHARED > 0
+#define	UCOMMON_MAPPED_THREADS 1
+#endif
+
+#if _POSIX_ASYCHRONOUS_IO > 0
+#define UCOMMON_ASYNC_IO 1
 #endif
 
 #endif

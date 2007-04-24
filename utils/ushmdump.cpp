@@ -7,7 +7,7 @@ using namespace UCOMMON_NAMESPACE;
 
 int main(int argc, char **argv)
 {
-	MappedView *view;
+	MappedMemory *view;
 
 	if(argc != 2) {
 		fprintf(stderr, "use: ushmdump shmname\n");
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "*** %s: invalid shm name\n", argv[1]);
 		exit(-1);
 	}
-	view = new MappedView(argv[1]);
+	view = new MappedMemory(argv[1]);
 	if(!(*view)) {
 		fprintf(stderr, "*** %s: cannot access\n", argv[1]);
 		exit(-1);

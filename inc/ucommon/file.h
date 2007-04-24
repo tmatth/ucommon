@@ -29,85 +29,29 @@ typedef	HANDLE fd_t;
 typedef int fd_t;
 #endif
 
-#ifdef _POSIX_ASYNC_IO
+#ifdef _POSIX_ASYNCHRONOUS_IO
 #include <aio.h>
 #endif
 
 NAMESPACE_UCOMMON
 
-class __EXPORT mapped_lock : public Exclusive, public Shared
-{
-private:
-#ifndef	_MSWINDOWS_
-	union {
-		pthread_mutex_t mutex;
-		pthread_rwlock_t lock;
-	} control;
-#endif
-
-public:
-	mapped_lock();
-
-	void Exlock(void);
-	void Shlock(void);
-	void Unlock(void);
-
-	void exclusive(void);
-	void share(void);
-	void release(void);
-};
-
-class __EXPORT MappedBuffer
+class __EXPORT MappedMemory
 {
 private:
 	caddr_t map;
-#ifdef	_MSWINDOWS_
+#if defined(_MSWINDOWS_) 
 	HANDLE hmap;
 #endif
-	class __EXPORT control : public Conditional
-	{
-	private:
-		friend class MappedBuffer;
-
-		size_t head, tail, count;
-	};
-	control *buffer;
-	size_t size;
-
-protected:
-	MappedBuffer(const char *fn, size_t bufsize = 0);
-	~MappedBuffer();
-
-	unsigned count(void);
-
-	inline operator bool()
-		{return count() != 0;};
-
-	inline bool operator!()
-		{return count() == 0;};
-
-	void get(void *data, size_t objsize);
-	void put(void *data, size_t objsize);
-};
-
-class __EXPORT MappedFile
-{
-private:
-	caddr_t map;
-#ifdef	_MSWINDOWS_
-	HANDLE hmap;
 	fd_t fd;
-#endif
 
 protected:
-	size_t size, used, page;
-	mapped_lock *lock;
+	size_t size, used;
 
 	virtual void fault(void);
 
 public:
-	MappedFile(const char *fname, size_t len = 0, size_t paging = 0);
-	virtual ~MappedFile();
+	MappedMemory(const char *fname, size_t len = 0);
+	virtual ~MappedMemory();
 
 	inline operator bool() const
 		{return (size != 0);};
@@ -118,61 +62,22 @@ public:
 	void *sbrk(size_t size);
 	void *get(size_t offset);
 
-#ifdef	_MSWINDOWS_
-
-#else
-	inline void exclusive(void)
-		{lock->exclusive();};
-
-	inline void share(void)
-		{lock->share();};
-
-	inline void release(void)
-		{lock->release();};
-#endif
-
-	inline size_t len(void)
-		{return size - sizeof(mapped_lock);};
-};
-
-#ifndef _MSWINDOWS_
-
-class __EXPORT MappedView
-{
-private:
-	caddr_t map;
-
-protected:
-	size_t size;
-
-public:
-	MappedView(const char *fname);
-	virtual ~MappedView();
-
-	inline operator bool() const
-		{return (size != 0);};
-
-	inline bool operator!() const
-		{return (size == 0);};
-
-	inline void *get(size_t offset)
-		{return (void *)(map + offset);};
-
 	inline size_t len(void)
 		{return size;};
 };
 
-#else
-typedef	MappedFile MappedView;
-#endif
-
-class MappedAssoc : protected MappedFile, protected keyassoc
+class MappedAssoc : protected MappedMemory, protected keyassoc
 {
+private:
+	pthread_mutex_t mutex;
+
 public:
 	MappedAssoc(mempager *pager, const char *fname, size_t len, size_t isize = 177);
 
 	void *find(const char *id, size_t osize, size_t tsize = 32);
 };
+
+#if _POSIX_ASYNCHRONOUS_IO > 0
 
 class __EXPORT aio
 {
@@ -180,7 +85,7 @@ private:
 	size_t count;
 	bool pending;
 	int err;
-#ifdef _POSIX_ASYNC_IO
+#ifdef _POSIX_ASYNCHRONOUS_IO
 	struct aiocb cb;
 #endif
 
@@ -228,22 +133,7 @@ public:
 		{next();};
 };
 
-template <class T>
-class mapped_buffer : public MappedBuffer
-{
-public:
-	inline mapped_buffer(const char *fn) :
-		MappedBuffer(fn) {};
-
-	inline mapped_buffer(const char *fn, unsigned count) :
-		MappedBuffer(fn, count * sizeof(T)) {};
-
-	inline void get(T *buf)
-		{MappedBuffer::get(buf, sizeof(T));};
-
-	inline void put(T *buf)
-		{MappedBuffer::put(buf, sizeof(T));};
-};
+#endif
 
 template <class T, unsigned I = 32, unsigned H = 177>
 class mapped_assoc : public MappedAssoc
@@ -256,21 +146,21 @@ public:
 		{return static_cast<T*>(find(id, sizeof(T), I));};
 
 	inline unsigned getUsed(void)
-		{return (unsigned)((used - sizeof(mapped_lock)) / (sizeof(T) + I));};
+		{return (unsigned)(used / (sizeof(T) + I));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)((size - sizeof(mapped_lock)) / (sizeof(T) + I));};
+		{return (unsigned)(size / (sizeof(T) + I));};
 
 	inline unsigned getFree(void)
 		{return (unsigned)((size - used) / (sizeof(T) + I));};
 };
 
 template <class T>
-class mapped_array : public MappedFile
+class mapped_array : public MappedMemory
 {
 public:
 	inline mapped_array(const char *fn, unsigned members) : 
-		MappedFile(fn, members * sizeof(T)) {};
+		MappedMemory(fn, members * sizeof(T)) {};
 
 	inline void addLock(void)
 		{sbrk(sizeof(T));};
@@ -285,35 +175,15 @@ public:
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)((size - sizeof(mapped_lock)) / sizeof(T));};
+		{return (unsigned)(size / sizeof(T));};
 };
 	
 template <class T, unsigned I = 0>
-class mapped_view : protected MappedView
+class mapped_share : protected MappedMemory
 {
 public:
-	inline mapped_view(const char *fn, unsigned members) : 
-		MappedView(fn) {};
-	
-	inline const char *id(unsigned idx)
-		{return static_cast<const char *>(get(idx * (sizeof(T) + I)));};
-
-	inline const T *operator()(unsigned idx)
-		{return static_cast<const T*>(get(idx * (sizeof(T) + I)) + I);}
-	
-	inline const T &operator[](unsigned idx)
-		{return *(operator()(idx));};
-
-	inline unsigned getSize(void)
-		{return (unsigned)(size / (sizeof(T) + I));};
-};
-
-template <class T, unsigned I = 0>
-class mapped_shared : protected MappedFile
-{
-public:
-	inline mapped_shared(const char *fn, unsigned members) : 
-		MappedFile(fn) {};
+	inline mapped_share(const char *fn) : 
+		MappedMemory(fn) {};
 	
 	inline const char *id(unsigned idx)
 		{return static_cast<const char *>(get(idx * (sizeof(T) + I)));};
@@ -325,7 +195,7 @@ public:
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)((size  - sizeof(mapped_lock))/ (sizeof(T) + I));};
+		{return (unsigned)(size / (sizeof(T) + I));};
 };
 
 extern "C" {
@@ -368,6 +238,7 @@ extern "C" {
 		{dlclose(mem);};
 #endif
 
+	__EXPORT bool cpr_isasync(fd_t fd);
 	__EXPORT bool cpr_isopen(fd_t fd);
 	__EXPORT fd_t cpr_openfile(const char *fn, bool rewrite);
 	__EXPORT fd_t cpr_closefile(fd_t fd);

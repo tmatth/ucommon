@@ -170,7 +170,7 @@ rt_lib=""
 AC_CHECK_LIB(socket,socket,[
 	socket_lib="-lsocket"])
 
-for func in sched_setscheduler nanosleep clock_gettime pread ; do
+for func in sched_setscheduler nanosleep clock_gettime pread shm_open ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -188,6 +188,9 @@ for func in sched_setscheduler nanosleep clock_gettime pread ; do
 	case $found in
 	pread)
 		AC_DEFINE(HAVE_PREAD, [1], [has posix reading])
+		;;
+	shm_open)
+		AC_DEFINE(HAVE_SHM_OPEN, [1], [shared mem objects])
 		;;
 	sched_setscheduler)
 		AC_DEFINE(HAVE_SCHEDULING, [1], [has posix scheduling])

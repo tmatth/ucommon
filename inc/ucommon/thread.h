@@ -24,7 +24,7 @@ private:
 	class __EXPORT attribute
 	{
 	public:
-		pthread_condattr_t attr, pattr;
+		pthread_condattr_t attr;
 		attribute();
 	};
 	static attribute attr;
@@ -56,11 +56,6 @@ protected:
 	static inline pthread_condattr_t *initializer(void)
 		{return &attr.attr;};
 
-	static inline pthread_condattr_t *pinitializer(void)
-		{return &attr.pattr;};
-
-	public:
-		static void mapped(Conditional *cond);
 };
 
 class __EXPORT SharedLock : public Conditional
@@ -143,7 +138,6 @@ private:
 	{
 	public:
 		pthread_mutexattr_t attr;
-		pthread_mutexattr_t pattr;
 		attribute();
 	};
 
@@ -168,9 +162,6 @@ public:
 
 	static inline pthread_mutexattr_t *initializer(void)
 		{return &attr.attr;};
-
-	static inline pthread_mutexattr_t *pinitializer(void)
-		{return &attr.pattr;};
 };
 
 class __EXPORT LockedPointer

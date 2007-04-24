@@ -89,6 +89,8 @@ extern "C" {
 	__EXPORT void cpr_sleep(timeout_t timeout);
 	__EXPORT void cpr_yield(void);
 	__EXPORT int cpr_priority(unsigned priority);
+	__EXPORT void cpr_memlock(void *addr, size_t len);
+	__EXPORT void cpr_memunlock(void *addr, size_t len);
 };
 
 #endif

@@ -14,8 +14,6 @@ Mutex::attribute::attribute()
 {
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutexattr_init(&pattr);
-	pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
 }
 
 Event::Event() : 
@@ -152,17 +150,13 @@ void Semaphore::set(unsigned value)
 Conditional::attribute::attribute()
 {
 	pthread_condattr_init(&attr);
-	pthread_condattr_init(&pattr);
 #if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK)
 #if defined(_POSIX_MONOTONIC_CLOCK)
 	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
-	pthread_condattr_setclock(&pattr, CLOCK_MONOTONIC);
 #else
 	pthread_condattr_setclock(&attr, CLOCK_REALTIME);
-	pthread_condattr_setclock(&pattr, CLOCK_REALTIME);
 #endif
 #endif
-	pthread_condattr_setpshared(&pattr, PTHREAD_PROCESS_SHARED);
 }
 
 Conditional::Conditional()
@@ -175,12 +169,6 @@ Conditional::~Conditional()
 {
 	pthread_cond_destroy(&cond);
 	pthread_mutex_destroy(&mutex);
-}
-
-void Conditional::mapped(Conditional *c)
-{
-	pthread_mutex_init(&c->mutex, Mutex::pinitializer());
-	pthread_cond_init(&c->cond, pinitializer());
 }
 
 bool Conditional::wait(timeout_t timeout)

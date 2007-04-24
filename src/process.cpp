@@ -3,6 +3,10 @@
 #include <ucommon/string.h>
 #include <ucommon/misc.h>
 
+#if _POSIX_MEMLOCK_RANGE > 0
+#include <sys/mman.h>
+#endif
+
 #if defined(HAVE_SIGACTION) && defined(HAVE_BSD_SIGNAL_H)
 #undef	HAVE_BSD_SIGNAL_H
 #endif
@@ -462,3 +466,33 @@ extern "C" int cpr_priority(unsigned priority)
 	return 0;
 #endif
 }
+
+#ifdef	_MSWINDOWS_
+
+void cpr_memlock(void *addr, size_t len)
+{
+	VirtualLock(addr, len);
+}
+
+void cpr_memunlock(void *addr, size_t len)
+{
+	VirtualUnlock(addr, len);
+}
+
+#else
+
+void cpr_memlock(void *addr, size_t len)
+{
+#if _POSIX_MEMLOCK_RANGE > 0
+	mlock(addr, len);
+#endif
+}
+
+void cpr_memunlock(void *addr, size_t len)
+{
+#if _POSIX_MEMLOCK_RANGE > 0
+	munlock(addr, len);
+#endif
+}
+
+#endif
