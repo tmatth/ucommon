@@ -9,6 +9,10 @@
 #include <ucommon/memory.h>
 #endif
 
+#ifndef _UCOMMON_THREAD_H_
+#include <ucommon/thread.h>
+#endif
+
 #ifndef	_MSWINDOWS_
 #include <dlfcn.h>
 #endif
@@ -31,6 +35,34 @@ typedef int fd_t;
 
 NAMESPACE_UCOMMON
 
+class __EXPORT MappedBuffer
+{
+private:
+	caddr_t map;
+#ifdef	_MSWINDOWS_
+	HANDLE hmap;
+#endif
+	class __EXPORT control : public Conditional
+	{
+	private:
+		friend class MappedBuffer;
+
+		size_t head, tail, count;
+	};
+	control *buffer;
+	size_t size;
+
+protected:
+	MappedBuffer(const char *fn, size_t bufsize = 0);
+	~MappedBuffer();
+
+	unsigned getCount(size_t objsize);
+
+	void *get(void);
+	void release(size_t objsize);
+	void put(void *data, size_t objsize);
+};
+
 class __EXPORT MappedFile
 {
 private:
@@ -41,6 +73,7 @@ private:
 
 protected:
 	size_t size, used, page;
+	MappedLock *lock;
 
 	virtual void fault(void);
 
@@ -56,6 +89,18 @@ public:
 
 	void *sbrk(size_t size);
 	void *get(size_t offset);
+
+	inline void exclusive(void)
+		{lock->exclusive();};
+
+	inline void share(void)
+		{lock->share();};
+
+	inline void release(void)
+		{lock->release();};
+
+	inline size_t len(void)
+		{return size - sizeof(MappedLock);};
 };
 
 class __EXPORT MappedView
@@ -81,6 +126,9 @@ public:
 
 	inline void *get(size_t offset)
 		{return (void *)(map + offset);};
+
+	inline size_t len(void)
+		{return size;};
 };
 
 class MappedAssoc : protected MappedFile, protected keyassoc
@@ -145,8 +193,30 @@ public:
 		{next();};
 };
 
+typedef MappedLock mapped_lock;
+
+template <class T>
+class mapped_buffer : public MappedBuffer
+{
+public:
+	inline mapped_buffer(const char *fn) :
+		MappedBuffer(fn) {};
+
+	inline mapped_buffer(const char *fn, unsigned count) :
+		MappedBuffer(fn, count * sizeof(T)) {};
+
+	inline T* get(void)
+		{return static_cast<T*>(MappedBuffer::get());};
+
+	inline void release(void)
+		{MappedBuffer::release(sizeof(T));};
+
+	inline void put(T *buf)
+		{MappedBuffer::put(buf, sizeof(T));};
+};
+
 template <class T, unsigned I = 32, unsigned H = 177>
-class mapped_assoc : protected MappedAssoc
+class mapped_assoc : public MappedAssoc
 {
 public:
 	inline mapped_assoc(mempager *pager, const char *fn, unsigned members) :
@@ -156,21 +226,24 @@ public:
 		{return static_cast<T*>(find(id, sizeof(T), I));};
 
 	inline unsigned getUsed(void)
-		{return (unsigned)(used / (sizeof(T) + I));};
+		{return (unsigned)((used - sizeof(MappedLock)) / (sizeof(T) + I));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)(size / (sizeof(T) + I));};
+		{return (unsigned)((size - sizeof(MappedLock)) / (sizeof(T) + I));};
 
 	inline unsigned getFree(void)
 		{return (unsigned)((size - used) / (sizeof(T) + I));};
 };
 
 template <class T>
-class mapped_array : protected MappedFile
+class mapped_array : public MappedFile
 {
 public:
 	inline mapped_array(const char *fn, unsigned members) : 
 		MappedFile(fn, members * sizeof(T)) {};
+
+	inline void addLock(void)
+		{sbrk(sizeof(T));};
 	
 	inline T *operator()(unsigned idx)
 		{return static_cast<T*>(get(idx * sizeof(T)));}
@@ -182,7 +255,7 @@ public:
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)(size / sizeof(T));};
+		{return (unsigned)((size - sizeof(MappedLock)) / sizeof(T));};
 };
 	
 template <class T, unsigned I = 0>
@@ -222,7 +295,7 @@ public:
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)(size / (sizeof(T) + I));};
+		{return (unsigned)((size  - sizeof(MappedLock))/ (sizeof(T) + I));};
 };
 
 extern "C" {

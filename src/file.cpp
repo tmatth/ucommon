@@ -82,13 +82,13 @@ MappedView::MappedView(const char *fn)
 	fd = shm_open(fn, O_RDONLY, 0660);
 	if(fd > -1) {
 		fstat(fd, &ino);
-		len = ino.st_size;
+		len = ino.st_size - sizeof(MappedLock);
 	}
 
 	if(fd < 0)
 		return;
 	
-	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
+	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, sizeof(MappedFile));
 	if(map != (caddr_t)MAP_FAILED) {
 		size = len;
 		mlock(map, size);
@@ -106,6 +106,101 @@ MappedView::~MappedView()
 	}
 }
 	
+MappedBuffer::MappedBuffer(const char *fn, size_t bufsize)
+{
+	int prot = PROT_READ | PROT_WRITE;
+	struct stat ino;
+	int fd;
+
+	size = 0;
+	if(bufsize) {
+		size = bufsize + sizeof(control);
+		shm_unlink(fn);
+		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
+		if(fd > -1)
+			ftruncate(fd, size);
+	}
+	else {
+		fd = shm_open(fn, O_RDWR, 0660);
+		if(fd > -1) {
+			fstat(fd, &ino);
+			size = ino.st_size;
+		}
+	}
+	if(fd < 0)
+		return;
+
+	map = (caddr_t)mmap(NULL, size, prot, MAP_SHARED, fd, 0);
+	close(fd);
+	if(map == (caddr_t)MAP_FAILED) {
+		size = 0;
+		return;
+	}
+	mlock(map, size);
+	buffer = (control *)map;
+	if(bufsize) {
+		Conditional::mapped(buffer);
+		buffer->head = buffer->tail = sizeof(control);
+		buffer->count = 0;
+	}
+}
+
+MappedBuffer::~MappedBuffer()
+{
+	if(size) {
+		munlock(map, size);
+		munmap(map, size);
+		size = 0;
+	}
+}
+
+unsigned MappedBuffer::getCount(size_t objsize)
+{
+	unsigned c;
+
+	buffer->lock();
+	c = buffer->count;
+	buffer->unlock();
+	return c;
+}
+
+void *MappedBuffer::get(void)
+{
+	void *dbuf;
+
+	buffer->lock();
+	while(!buffer->count)
+		wait();
+	dbuf = map + buffer->head;
+	buffer->unlock();
+	return dbuf;
+}
+
+void MappedBuffer::release(size_t objsize)
+{
+	buffer->lock();
+	buffer->head += objsize;
+	if(buffer->head >= size)
+		buffer->head = sizeof(control);
+	--buffer->count;
+	buffer->signal();
+	buffer->unlock();
+}
+
+void MappedBuffer::put(void *dbuf, size_t objsize)
+{
+	buffer->lock();
+	while(buffer->head == buffer->tail && buffer->count)
+		wait();
+	memcpy(map + buffer->tail, dbuf, objsize);
+	buffer->tail += objsize;
+	if(buffer->tail >= size)
+		buffer->tail = sizeof(control);
+	++buffer->count;
+	buffer->signal();
+	buffer->unlock();
+}
+
 MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 {
 	int prot = PROT_READ | PROT_WRITE;
@@ -113,8 +208,14 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 	int fd;
 
 	page = paging;
-	size = used = 0;
+	size = 0;
+	used = sizeof(MappedLock);
+	lock = NULL;
+	bool addlock = false;
+	
 	if(len) {
+		addlock = true;
+		len += sizeof(MappedLock);
 //		prot |= PROT_WRITE;
 		shm_unlink(fn);
 		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
@@ -137,6 +238,9 @@ MappedFile::MappedFile(const char *fn, size_t len, size_t paging)
 		size = len;
 		mlock(map, size);
 	}
+	if(addlock)
+		new(map) MappedLock();
+	lock = (MappedLock *)map;
 	close(fd);
 }
 
@@ -180,6 +284,8 @@ void *MappedFile::sbrk(size_t len)
 	
 void *MappedFile::get(size_t offset)
 {
+	offset += sizeof(MappedLock);
+
 	if(offset >= size)
 		fault();
 	return (void *)(map + offset);

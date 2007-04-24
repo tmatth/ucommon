@@ -24,7 +24,7 @@ private:
 	class __EXPORT attribute
 	{
 	public:
-		pthread_condattr_t attr;
+		pthread_condattr_t attr, pattr;
 		attribute();
 	};
 	static attribute attr;
@@ -55,6 +55,12 @@ protected:
 
 	static inline pthread_condattr_t *initializer(void)
 		{return &attr.attr;};
+
+	static inline pthread_condattr_t *pinitializer(void)
+		{return &attr.pattr;};
+
+	public:
+		static void mapped(Conditional *cond);
 };
 
 class __EXPORT MappedLock : public Exclusive, public Shared
@@ -157,6 +163,7 @@ private:
 	{
 	public:
 		pthread_mutexattr_t attr;
+		pthread_mutexattr_t pattr;
 		attribute();
 	};
 
@@ -181,6 +188,9 @@ public:
 
 	static inline pthread_mutexattr_t *initializer(void)
 		{return &attr.attr;};
+
+	static inline pthread_mutexattr_t *pinitializer(void)
+		{return &attr.pattr;};
 };
 
 class __EXPORT LockedPointer
@@ -375,31 +385,24 @@ public:
 class __EXPORT Buffer : public Conditional
 {
 private:
-	size_t size, used, objsize;
-	char *buf, *head, *tail;
-
-protected:
-	virtual size_t onPull(void *buf);
-	virtual size_t onPeek(void *buf);
-	virtual size_t onWait(void *buf);
-	virtual size_t onPost(void *buf);
+	size_t size, objsize;
+	caddr_t buf, head, tail;
+	unsigned count, limit;
 
 public:
-	static const size_t timeout;
-
-	Buffer(size_t capacity, size_t osize = 0);
+	Buffer(size_t objsize, size_t count);
 	virtual ~Buffer();
 
-	inline size_t getSize(void)
-		{return size;};
+	unsigned getSize(void);
+	unsigned getCount(void);
 
-	inline size_t getUsed(void)
-		{return used;};
+	void *get(timeout_t timeout);
+	void *get(void);
+	void put(void *data);
+	bool put(void *data, timeout_t timeout);
+	void release(void);	// release lock from get
 
-	size_t pull(void *buf, timeout_t timeout = 0);
-	size_t wait(void *buf, timeout_t timeout = 0);
-	size_t post(void *buf, timeout_t timeout = 0);
-	size_t peek(void *buf);
+	operator bool();
 
 	virtual bool operator!();
 };
@@ -479,17 +482,20 @@ template<class T>
 class buffer : public Buffer
 {
 public:
-	inline buffer(size_t size) : Buffer(size, sizeof(T)) {};
+	inline buffer(unsigned count) :
+		Buffer(sizeof(T), count) {};
 
-	inline size_t wait(T *obj, timeout_t timeout = 0)
-		{return Buffer::wait(obj, timeout);};
+	inline T *get(void)
+		{return static_cast<T*>(get());};
 
-	inline size_t pull(T *obj, timeout_t timeout = 0)
-		{return Buffer::pull(obj, timeout);};
+	inline T *get(timeout_t timeout)
+		{return static_cast<T*>(get(timeout));};
 
-	inline size_t post(T *obj, timeout_t timeout = 0)
-		{return Buffer::post(obj, timeout);};
+	inline void put(T *obj)
+		{put(obj);};
 
+	inline bool put(T *obj, timeout_t timeout)
+		{return put(obj, timeout);};
 };
  
 template<class T>

@@ -7,7 +7,6 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-const size_t Buffer::timeout = ((size_t)(-1));
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
 
@@ -15,6 +14,8 @@ Mutex::attribute::attribute()
 {
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutexattr_init(&pattr);
+	pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
 }
 
 Event::Event() : 
@@ -151,13 +152,17 @@ void Semaphore::set(unsigned value)
 Conditional::attribute::attribute()
 {
 	pthread_condattr_init(&attr);
+	pthread_condattr_init(&pattr);
 #if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK)
 #if defined(_POSIX_MONOTONIC_CLOCK)
 	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+	pthread_condattr_setclock(&pattr, CLOCK_MONOTONIC);
 #else
 	pthread_condattr_setclock(&attr, CLOCK_REALTIME);
+	pthread_condattr_setclock(&pattr, CLOCK_REALTIME);
 #endif
 #endif
+	pthread_condattr_setpshared(&pattr, PTHREAD_PROCESS_SHARED);
 }
 
 Conditional::Conditional()
@@ -170,6 +175,12 @@ Conditional::~Conditional()
 {
 	pthread_cond_destroy(&cond);
 	pthread_mutex_destroy(&mutex);
+}
+
+void Conditional::mapped(Conditional *c)
+{
+	pthread_mutex_init(&c->mutex, Mutex::pinitializer());
+	pthread_cond_init(&c->cond, pinitializer());
 }
 
 bool Conditional::wait(timeout_t timeout)
@@ -939,15 +950,16 @@ size_t Stack::getCount(void)
 	return count;
 }
 
-Buffer::Buffer(size_t capacity, size_t osize) : 
+Buffer::Buffer(size_t osize, unsigned c) : 
 Conditional()
 {
-	size = capacity;
+	size = osize * count;
 	objsize = osize;
-	used = 0;
+	count = 0;
+	limit = c;
 
 	if(osize) {
-		buf = (char *)malloc(capacity * osize);
+		buf = (char *)malloc(size);
 		crit(buf != NULL);
 	}
 	else 
@@ -963,113 +975,118 @@ Buffer::~Buffer()
 	buf = NULL;
 }
 
-size_t Buffer::onWait(void *data)
+unsigned Buffer::getCount(void)
 {
-	if(objsize) {
-		memcpy(data, head, objsize);
-		if((head += objsize) >= buf + (size * objsize))
-			head = buf;
-	}
-	return objsize;
-}
-
-size_t Buffer::onPull(void *data)
-{
-    if(objsize) {
-		if(tail == buf)
-			tail = buf + (size * objsize);
-		tail -= objsize;
-        memcpy(data, tail, objsize);
-    }
-    return objsize;
-}
-
-size_t Buffer::onPost(void *data)
-{
-	if(objsize) {
-		memcpy(tail, data, objsize);
-		if((tail += objsize) > buf + (size *objsize))
-			tail = buf;
-	}
-	return objsize;
-}
-
-size_t Buffer::onPeek(void *data)
-{
-	if(objsize)
-		memcpy(data, head, objsize);
-	return objsize;
-}
-
-size_t Buffer::wait(void *buf, timeout_t timeout)
-{
-	size_t rc = 0;
-
-	lock();	
-	if(!Conditional::wait(timeout)) {
-		unlock();
-		return Buffer::timeout;
-	}
-	rc = onWait(buf);
-	--used;
-	signal();
-	unlock();
-	return rc;
-}
-
-size_t Buffer::pull(void *buf, timeout_t timeout)
-{
-    size_t rc = 0;
+	unsigned count = 0;
 
 	lock();
-    if(!Conditional::wait(timeout)) {
-		unlock();
-        return Buffer::timeout;
-    }
-    rc = onPull(buf);
-    --used;
-	signal();
+	if(tail > head) 
+		count = (unsigned)((size_t)(tail - head) / objsize);
+	else if(head > tail)
+		count = (unsigned)((((buf + size) - head) + (tail - buf)) / objsize);
 	unlock();
-    return rc;
+	return count;
 }
 
-size_t Buffer::post(void *buf, timeout_t timeout)
+unsigned Buffer::getSize(void)
 {
-	size_t rc = 0;
-	lock();
-	while(used == size) {
-		if(!Conditional::wait(timeout)) {
-			unlock();
-			return Buffer::timeout;
-		}
-	}
-	rc = onPost(buf);
-	++used;
-	signal();
-	unlock();
-	return rc;
+	return size / objsize;
 }
 
-size_t Buffer::peek(void *buf)
+void *Buffer::get(void)
 {
-	size_t rc = 0;
+	caddr_t dbuf;
 
 	lock();
-	if(!used) {
-		unlock();
-		return 0;
-	}
-	rc = onPeek(buf);
+	while(!count)
+		wait();
+	dbuf = head;
 	unlock();
-	return rc;
+	return dbuf;
+}
+
+void *Buffer::get(timeout_t timeout)
+{
+	caddr_t dbuf = NULL;
+
+	lock();
+	while(!count) {
+		if(!wait(timeout))
+			break;
+	}
+	if(count)
+		dbuf = head;
+	unlock();
+	return dbuf;
+}
+
+
+
+void Buffer::release(void)
+{
+	lock();
+	head += objsize;
+	if(head >= buf + size)
+		head = buf;
+	--count;
+	signal();
+	unlock();
+}
+
+void Buffer::put(void *dbuf)
+{
+	lock();
+	while(count == limit)
+		wait();
+	memcpy(tail, dbuf, objsize);
+	tail += objsize;
+	if(tail >= (buf + size))
+		tail = 0;
+	++count;
+	signal();
+	unlock();
+}
+
+bool Buffer::put(void *dbuf, timeout_t timeout)
+{
+	bool rtn = true;
+
+	lock();
+	while(count == limit)
+		rtn = wait(timeout);
+	if(rtn) {
+		memcpy(tail, dbuf, objsize);
+		tail += objsize;
+		if(tail >= (buf + size))
+			tail = 0;
+		++count;
+		signal();
+	}
+	unlock();
+	return rtn;
+}
+
+
+Buffer::operator bool()
+{
+	bool rtn = false;
+
+	lock();
+	if(buf && head != tail)
+		rtn = true;
+	unlock();
+	return rtn;
 }
 
 bool Buffer::operator!()
 {
-	if(head && tail)
-		return false;
+	bool rtn = false;
 
-	return true;
+	lock();
+	if(!buf || head == tail)
+		rtn = true;
+	unlock();
+	return rtn;
 }
 
 locked_release::locked_release(const locked_release &copy)
