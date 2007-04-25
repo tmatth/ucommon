@@ -33,7 +33,9 @@ typedef struct
 	union {
 		struct sockaddr addr;
 		struct sockaddr_in ipv4;
+#ifdef	AF_INET6
 		struct sockaddr_in6 ipv6;
+#endif
 	};
 }	inetsockaddr_t;
 
@@ -41,7 +43,9 @@ typedef struct
 {
 	union {
 		struct ip_mreq	ipv4;
+#ifdef	AF_INET6
 		struct ipv6_mreq ipv6;
+#endif
 	};
 }	inetmulticast_t;
 
@@ -129,18 +133,20 @@ unsigned cidr::getMask(void) const
 	{
 	case AF_INET:
 		return bitcount((bit_t *)&netmask.ipv4, sizeof(struct in_addr));
+#ifdef	AF_INET6
 	case AF_INET6:
 		return bitcount((bit_t *)&netmask.ipv6, sizeof(struct in6_addr));
+#endif
 	default:
 		return 0;
 	}
 }
 
-bool cidr::allow(SOCKET so, cidr *paccept, cidr *preject)
+int cidr::policy(SOCKET so, cidr *paccept, cidr *preject, int prior)
 {
 	struct sockaddr_storage addr;
 	socklen_t slen = sizeof(addr);
-	unsigned allowed = 0, denied = 0, masked;
+	int allowed = 0, denied = 0, masked;
 	linked_pointer<cidr> accept = paccept;
 	linked_pointer<cidr> reject = preject;
 
@@ -168,13 +174,26 @@ bool cidr::allow(SOCKET so, cidr *paccept, cidr *preject)
 		reject.next();
     }
 
-	if(!allowed && !denied)
-		return true;
-
-	if(allowed > denied)
-		return true;
-
-	return false;
+	if(allowed == denied)
+		return prior;
+	else if(allowed > denied) {
+		if(prior < 0 && allowed > -prior)
+			return allowed;
+		if(prior >= 0 && allowed > prior)
+			return allowed;
+		if(allowed == -prior)
+			return 0;
+		return prior;
+	}
+	else {
+		if(prior > 0 && denied > prior)
+			return -denied;
+		if(prior <= 0 && denied > -prior)
+			return -denied;
+		if(denied == prior)
+			return 0;
+		return prior;
+	}
 }	
 
 bool cidr::find(cidr *policy, const struct sockaddr *s)
@@ -203,12 +222,14 @@ bool cidr::isMember(const struct sockaddr *s) const
 		if(!memcmp(&host.ipv4, &network.ipv4, sizeof(host.ipv4)))
 			return true;
 		return false;
+#ifdef	AF_INET6
 	case AF_INET6:
 		memcpy(&host.ipv6, &addr->ipv6.sin6_addr, sizeof(host.ipv6));
 		bitmask((bit_t *)&host.ipv6, (bit_t *)&netmask, sizeof(host.ipv6));
 		if(!memcmp(&host.ipv6, &network.ipv6, sizeof(host.ipv6)))
 			return true;
 		return false;
+#endif
 	default:
 		return false;
 	}
@@ -223,10 +244,12 @@ inethostaddr_t cidr::getBroadcast(void) const
 		memcpy(&bcast.ipv4, &network.ipv4, sizeof(network.ipv4));
 		bitimask((bit_t *)&bcast.ipv4, (bit_t *)&netmask.ipv4, sizeof(bcast.ipv4));
 		return bcast;
+#ifdef	AF_INET6
 	case AF_INET6:
 		memcpy(&bcast.ipv6, &network.ipv6, sizeof(network.ipv6));
 		bitimask((bit_t *)&bcast.ipv6, (bit_t *)&netmask.ipv6, sizeof(bcast.ipv6));
 		return bcast;
+#endif
 	default:
 		memset(&bcast, 0, sizeof(bcast));
 		return  bcast;
@@ -243,6 +266,7 @@ unsigned cidr::getMask(const char *cp) const
 	uint32_t mask;
 
 	switch(family) {
+#ifdef	AF_INET6
 	case AF_INET6:
 		if(sp)
 			return atoi(++sp);
@@ -274,6 +298,7 @@ unsigned cidr::getMask(const char *cp) const
 			}
 		}
 		return rcount;
+#endif
 	case AF_INET:
 		if(sp) {
 			if(!strchr(++sp, '.'))
@@ -314,9 +339,11 @@ void cidr::set(const char *cp)
 	int ok;
 #endif
 
+#ifdef	AF_INET6
 	if(strchr(cp, ':'))
 		family = AF_INET6;
 	else
+#endif
 		family = AF_INET;
 
 	switch(family) {
@@ -345,6 +372,7 @@ void cidr::set(const char *cp)
 #endif
 		bitmask((bit_t *)&network.ipv4, (bit_t *)&netmask.ipv4, sizeof(network.ipv4));
 		break;
+#ifdef	AF_INET6
 	case AF_INET6:
 		memset(&netmask.ipv6, 0, sizeof(netmask));
 		bitset((bit_t *)&netmask.ipv6, getMask(cp));
@@ -362,9 +390,60 @@ void cidr::set(const char *cp)
 		inet_pton(AF_INET6, cbuf, &network.ipv6);
 #endif
 		bitmask((bit_t *)&network.ipv6, (bit_t *)&netmask.ipv6, sizeof(network.ipv6));
+#endif
 	default:
 		break;
 	}
+}
+
+Socket::address::address(const char *a, int family)
+{
+	struct addrinfo hint;
+	char *addr = strdup(a);
+	char *host = strchr(addr, '@');
+	char *ep;
+	char *svc = NULL;
+
+	memset(&hint, 0, sizeof(hint));
+
+	if(!host)
+		host = addr;
+	else
+		++host;
+
+	if(*host != '[') {
+		ep = strchr(host, ':');
+		if(ep) {
+			*(ep++) = 0;
+			svc = ep;
+		}
+		goto proc;
+	}
+#ifdef	AF_INET6
+	if(*host == '[') {
+		family = AF_INET6;
+		++host;
+		ep = strchr(host, ']');
+		if(ep) {
+			*(ep++) = 0;
+			if(*ep == ':')
+				svc = ++ep;
+		}
+	}
+#endif
+proc:
+	hint.ai_family = family;
+	getaddrinfo(host, svc, &hint, &list);
+}
+
+Socket::address::address(int family, const char *host, const char *svc)
+{
+	struct addrinfo hint;
+
+	memset(&hint, 0, sizeof(hint));
+	hint.ai_family = family;
+
+	getaddrinfo(host, svc, &hint, &list);
 }
 
 Socket::address::address(Socket &s, const char *host, const char *svc)
@@ -391,7 +470,7 @@ Socket::address::~address()
 	}
 }
 
-Socket::address::operator struct sockaddr *()
+struct sockaddr *Socket::address::getAddr(void)
 {
 	if(!list)
 		return NULL;
@@ -626,14 +705,19 @@ int Socket::setMulticast(bool enable)
 		case AF_INET:
 			memset(&addr.ipv4.sin_addr, 0, sizeof(addr.ipv4.sin_addr));
 			break;
+#ifdef	AF_INET6
 		case AF_INET6:
 			memset(&addr.ipv6.sin6_addr, 0, sizeof(addr.ipv6.sin6_addr));
+			break;
+#endif
 		default:
 			break;
 		}
 	switch(addr.addr.sa_family) {
+#ifdef	AF_INET6
 	case AF_INET6:
 		return ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+#endif
 	case AF_INET:
 #ifdef	IP_MULTICAST_IF
 		return ::setsockopt(so, IPPROTO_IP, IP_MULTICAST_IF, (char *)&addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
@@ -1067,10 +1151,12 @@ extern "C" int cpr_joinaddr(SOCKET so, struct addrinfo *node)
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
 			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
 #endif
+#if defined(IP_ADD_MEMBERSHIP)
 		case AF_INET:
 			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
 			rtn = ::setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
 		default:
 			rtn = -1;
 		}
@@ -1106,10 +1192,12 @@ extern "C" int cpr_dropaddr(SOCKET so, struct addrinfo *node)
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
 			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
 #endif
+#if defined(IP_DROP_MEMBERSHIP)
 		case AF_INET:
 			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
 			rtn = ::setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
 		default:
 			rtn = -1;
 		}

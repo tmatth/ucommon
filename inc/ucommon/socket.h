@@ -9,6 +9,8 @@
 #include <ucommon/linked.h>
 #endif
 
+struct addrinfo;
+
 #ifdef	_MSWINDOWS_
 #include <ws2tcpip.h>
 #include <winsock2.h>
@@ -36,7 +38,9 @@ typedef	struct
 	union
 	{
 		struct in_addr ipv4;
+#ifdef	AF_INET6
 		struct in6_addr ipv6;
+#endif
 	};
 }	inethostaddr_t;
 
@@ -94,7 +98,7 @@ public:
 	cidr(LinkedObject **policy, const char *str);
 	cidr(const cidr &copy);
 
-	static bool allow(SOCKET so, cidr *accept, cidr *reject);
+	static int policy(SOCKET so, cidr *accept, cidr *reject, int prior = 0);
 	static bool find(cidr *policy, const struct sockaddr *addr);
 
 	inline int getFamily(void) const
@@ -137,10 +141,17 @@ public:
 		struct addrinfo *list;
 
 	public:
+		address(const char *a, int family = 0);
 		address(Socket &s, const char *host, const char *svc = NULL);
-		address(const char *host, const char *svc, SOCKET so = INVALID_SOCKET);
+		address(const char *host, const char *svc = NULL, SOCKET so = INVALID_SOCKET);
+		address(int family, const char *host, const char *svc = NULL);
 		address();
 		~address();
+
+		struct sockaddr *getAddr(void);
+
+		inline struct addrinfo *getList(void)
+			{return list;};
 
 		inline operator struct addrinfo *()
 			{return list;};
@@ -151,7 +162,8 @@ public:
 		inline bool operator!()
 			{return list == NULL;};
 
-		operator struct sockaddr *();
+		inline operator struct sockaddr *()
+			{return getAddr();};
 	};
 
 	Socket(const Socket &s);
@@ -228,6 +240,12 @@ public:
     inline SOCKET operator*() const
         {return so;};
 };
+
+inline struct addrinfo *addrinfo(Socket::address &a)
+	{return a.getList();};
+
+inline struct sockaddr *addr(Socket::address &a)
+	{return a.getAddr();};
 
 END_NAMESPACE
 
