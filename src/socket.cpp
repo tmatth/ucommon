@@ -367,6 +367,38 @@ void cidr::set(const char *cp)
 	}
 }
 
+Socket::address::address(Socket &s, const char *host, const char *svc)
+{
+	address(host, svc, (int)s);
+}
+
+Socket::address::address(const char *host, const char *svc, SOCKET so)
+{
+	struct addrinfo hint;
+	struct addrinfo *ah = NULL;
+
+	if(so)
+		ah = cpr_getsockhint(so, &hint);
+
+	getaddrinfo(host, svc, ah, &list);	
+}
+
+Socket::address::~address()
+{
+	if(list) {
+		freeaddrinfo(list);
+		list = NULL;
+	}
+}
+
+Socket::address::operator struct sockaddr *()
+{
+	if(!list)
+		return NULL;
+	
+	return list->ai_addr;
+}
+
 Socket::Socket(const Socket &s)
 {
 #ifdef	_MSWINDOWS_
@@ -631,29 +663,14 @@ int Socket::setNonBlocking(bool enable)
 #endif
 }
 
-int Socket::connect(const char *host, const char *svc)
+int Socket::connect(struct addrinfo *list)
 {
-	int rtn = ::cpr_connect(so, host, svc);
+	int rtn = ::cpr_connect(so, list);
 #ifndef _MSWINDOWS_
 	if(!rtn || errno == EINPROGRESS)
 		return 0;
 #endif
 	return rtn;
-}
-
-int Socket::join(const char *member)
-{
-	return ::cpr_joinaddr(so, member);
-}
-
-int Socket::drop(const char *member)
-{
-	return ::cpr_dropaddr(so, member);
-}
-
-int Socket::disconnect(void)
-{
-	return ::cpr_disconnect(so);
 }
 
 int Socket::getError(void)
@@ -1024,29 +1041,25 @@ extern "C" socklen_t cpr_getaddrlen(struct sockaddr *sa)
 	}
 }
 
-extern "C" int cpr_joinaddr(SOCKET so, const char *host)
+extern "C" int cpr_joinaddr(SOCKET so, struct addrinfo *node)
 {
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
 	socklen_t len = sizeof(addr);
 	inetsockaddr_t *target;
-	struct addrinfo hint, *res, *node;
+	int family;
 	int rtn;
 
 	if(so == INVALID_SOCKET)
 		return -1;
 	
 	getsockname(so, (struct sockaddr *)&addr, &len);
-	if(cpr_getsockhint(so, &hint) == NULL)
-		return -1;
-	rtn = getaddrinfo(host, NULL, &hint, &res);
-	if(rtn)
-		goto exit;
-
-	node = res;
 	while(!rtn && node && node->ai_addr) {
 		target = (inetsockaddr_t *)node->ai_addr;
+		family = node->ai_family;
 		node = node->ai_next;
+		if(family != addr.addr.sa_family)
+			continue;
 		switch(addr.addr.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP)
 		case AF_INET6:
@@ -1062,35 +1075,30 @@ extern "C" int cpr_joinaddr(SOCKET so, const char *host)
 			rtn = -1;
 		}
 	}
-exit:
-	if(res)
-		freeaddrinfo(res);
 	return rtn;
 }
 
-extern "C" int cpr_dropaddr(SOCKET so, const char *host)
+extern "C" int cpr_dropaddr(SOCKET so, struct addrinfo *node)
 {
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
 	socklen_t len = sizeof(addr);
 	inetsockaddr_t *target;
-	struct addrinfo hint, *res, *node;
+	int family;
 	int rtn;
 
 	if(so == INVALID_SOCKET)
 		return -1;
 	
 	getsockname(so, (struct sockaddr *)&addr, &len);
-	if(cpr_getsockhint(so, &hint) == NULL)
-		return -1;
-	rtn = getaddrinfo(host, NULL, &hint, &res);
-	if(rtn)
-		goto exit;
-
-	node = res;
 	while(!rtn && node && node->ai_addr) {
 		target = (inetsockaddr_t *)node->ai_addr;
+		family = node->ai_family;
 		node = node->ai_next;
+
+		if(family != addr.addr.sa_family)
+			continue;
+
 		switch(addr.addr.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP)
 		case AF_INET6:
@@ -1106,9 +1114,6 @@ extern "C" int cpr_dropaddr(SOCKET so, const char *host)
 			rtn = -1;
 		}
 	}
-exit:
-	if(res)
-		freeaddrinfo(res);
 	return rtn;
 }
 
@@ -1143,43 +1148,38 @@ extern "C" void cpr_closesocket(SOCKET so)
 #endif
 }	
 
-extern "C" int cpr_connect(SOCKET so, const char *host, const char *svc)
+extern "C" int cpr_connect(SOCKET so, struct addrinfo *node)
 {
 	int rtn = -1;
-	struct addrinfo hint, *res = NULL, *node;
-
-#ifdef	AF_UNIX
-	if(strchr(host, '/')) {
-		struct sockaddr_un uaddr;
-		socklen_t len = unixaddr(&uaddr, host);
-		return connect(so, (struct sockaddr *)&uaddr, len);
-	}
-#endif
-
-	if(cpr_getsockhint(so, &hint))
+	int family;
+	
+	if(so == INVALID_SOCKET)
 		return -1;
 
-	rtn = getaddrinfo(host, svc, &hint, &res);
-	if(rtn)
-		goto exit;
+	family = cpr_getsockfamily(so);
 
-	rtn = -1;
-	if(!res)
-		goto exit;
-
-	node = res;
 	while(node) {
-		if(!connect(so, node->ai_addr, node->ai_addrlen)) {
-			rtn = 0;
-			goto exit;
+		if(node->ai_family == family) {
+			if(!connect(so, node->ai_addr, node->ai_addrlen)) {
+				rtn = 0;
+				goto exit;
+			}
 		}
 		node = node->ai_next;
 	}
 
 exit:
-	if(res)
-		freeaddrinfo(res);
 	return rtn;
 }	
 	
-	
+extern "C" int cpr_getsockfamily(SOCKET so)
+{
+	struct sockaddr_storage saddr;
+	socklen_t len = sizeof(saddr);
+	struct sockaddr *addr = (struct sockaddr *)&saddr;
+
+	if(getsockname(so, addr, &len))
+		return AF_UNSPEC;
+
+	return addr->sa_family;
+}

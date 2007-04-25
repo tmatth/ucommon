@@ -64,6 +64,20 @@ struct sockaddr_storage
 };
 #endif
 
+extern "C" {
+	__EXPORT int cpr_getsockfamily(SOCKET so);
+	__EXPORT void cpr_closesocket(SOCKET so);
+	__EXPORT int cpr_joinaddr(SOCKET so, struct addrinfo *list);
+	__EXPORT int cpr_dropaddr(SOCKET so, struct addrinfo *list);
+	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);
+	__EXPORT int cpr_disconnect(SOCKET so);
+	__EXPORT int cpr_connect(SOCKET so, struct addrinfo *list);
+	__EXPORT char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max);
+	__EXPORT struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *h);
+	__EXPORT socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
+	__EXPORT socklen_t cpr_getaddrlen(struct sockaddr *addr);
+};
+
 NAMESPACE_UCOMMON
 
 class __EXPORT cidr : public LinkedObject
@@ -117,6 +131,29 @@ protected:
 	unsigned getPending(void) const;
 
 public:
+	class __EXPORT address
+	{
+	protected:
+		struct addrinfo *list;
+
+	public:
+		address(Socket &s, const char *host, const char *svc = NULL);
+		address(const char *host, const char *svc, SOCKET so = INVALID_SOCKET);
+		address();
+		~address();
+
+		inline operator struct addrinfo *()
+			{return list;};
+
+		inline operator bool()
+			{return list != NULL;};
+
+		inline bool operator!()
+			{return list == NULL;};
+
+		operator struct sockaddr *();
+	};
+
 	Socket(const Socket &s);
 	Socket(SOCKET so);
 	Socket(int family, int type, int protocol = 0);
@@ -140,12 +177,17 @@ public:
 	inline void shutdown(void)
 		{::shutdown(so, SHUT_RDWR);};
 
-	int connect(const char *host, const char *svc);
+	int connect(struct addrinfo *list);
 	bool create(int family, int type, int protocol = 0);
 
-	int disconnect(void);
-	int join(const char *member);
-	int drop(const char *member);
+	inline int disconnect(void)
+		{return cpr_disconnect(so);};
+
+	inline int join(struct addrinfo *list)
+		{return cpr_joinaddr(so, list);};
+
+	inline int drop(struct addrinfo *list)
+		{return cpr_dropaddr(so, list);};
 
 	size_t peek(void *data, size_t len) const;
 
@@ -188,18 +230,5 @@ public:
 };
 
 END_NAMESPACE
-
-extern "C" {
-	__EXPORT void cpr_closesocket(SOCKET so);
-	__EXPORT int cpr_joinaddr(SOCKET so, const char *host);
-	__EXPORT int cpr_dropaddr(SOCKET so, const char *host);
-	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);
-	__EXPORT int cpr_disconnect(SOCKET so);
-	__EXPORT int cpr_connect(SOCKET so, const char *host, const char *svc);
-	__EXPORT char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max);
-	__EXPORT struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *h);
-	__EXPORT socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
-	__EXPORT socklen_t cpr_getaddrlen(struct sockaddr *addr);
-};
 
 #endif
