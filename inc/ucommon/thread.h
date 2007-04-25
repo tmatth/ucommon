@@ -221,8 +221,6 @@ public:
 	virtual ~Thread();
 
 	virtual void dealloc(void);
-
-	virtual void release(void) = 0;
 };
 
 class __EXPORT JoinableThread : protected Thread
@@ -256,7 +254,6 @@ protected:
 	DetachedThread(size_t size = 0);
 	~DetachedThread();
 
-	virtual void release(void);
 	virtual void dealloc(void);
 
 	void pause(void);
@@ -287,7 +284,6 @@ protected:
 	void wait(void);
 	bool wait(timeout_t timeout);
 	
-	void release(void);
 	void dealloc(void);
 	void cancel(void);
 

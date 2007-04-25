@@ -375,6 +375,7 @@ void Thread::dealloc(void)
 
 void PooledThread::dealloc(void)
 {
+	--poolused;
 	if(!poolused)
 		delete this;
 }
@@ -392,14 +393,6 @@ void DetachedThread::cancel(void)
 void PooledThread::cancel(void)
 {
 	crit(0);
-}
-
-void PooledThread::release(void)
-{
-	lock();
-	--poolused;
-	unlock();
-	pthread_exit(NULL);
 }
 
 bool PooledThread::wait(timeout_t timeout)
@@ -484,21 +477,11 @@ DetachedThread::~DetachedThread()
 }
 		
 extern "C" {
-	static void exit_thread(void *obj)
-	{
-		Thread *th = static_cast<Thread *>(obj);
-
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-		th->dealloc();
-	};
-
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
-		pthread_cleanup_push(exit_thread, th);
 		th->run();
-		th->release();
-		pthread_cleanup_pop(1);
+		th->dealloc();
 		return NULL;
 	};
 }
@@ -626,10 +609,12 @@ void JoinableThread::release(void)
 	pthread_t self = pthread_self();
 
 	if(running && pthread_equal(tid, self)) {
-		running = false;
-		cpr_yield();
-		pthread_testcancel();
-		pthread_exit(NULL);
+		pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		for(;;) {
+			pthread_testcancel();
+			pause(Timer::inf);
+		}
 	}
 
 	cpr_yield();
@@ -638,12 +623,6 @@ void JoinableThread::release(void)
 		if(!pthread_join(tid, NULL)) 
 			running = false;
 	}	
-}
-
-void DetachedThread::release(void)
-{
-	dealloc();
-	pthread_exit(NULL);
 }
 
 Queue::member::member(Queue *q, Object *o) :
