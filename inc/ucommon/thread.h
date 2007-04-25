@@ -214,13 +214,15 @@ protected:
 	Thread(size_t stack = 0);
 
 public:
-	virtual void start(void) = 0;
+	static void yield(void);
+
+	static void pause(timeout_t timeout);
 
 	virtual void run(void) = 0;
 	
 	virtual ~Thread();
 
-	virtual void dealloc(void);
+	virtual void exit(void) = 0;
 };
 
 class __EXPORT JoinableThread : protected Thread
@@ -231,11 +233,7 @@ private:
 protected:
 	JoinableThread(size_t size = 0);
 	virtual ~JoinableThread();
-	void pause(void);
-	void pause(timeout_t timeout);
-	
-	inline void test_cancel(void)
-		{pause();};
+	void exit(void);
 
 public:
 	inline bool isRunning(void)
@@ -244,7 +242,7 @@ public:
 	inline bool isDetached(void)
 		{return false;};
 
-	void release(void);
+	bool cancel(void);
 	void start(void);
 };
 
@@ -254,17 +252,12 @@ protected:
 	DetachedThread(size_t size = 0);
 	~DetachedThread();
 
-	virtual void dealloc(void);
-
-	void pause(void);
-	void pause(timeout_t timeout);
+	virtual void exit(void);
 
 public:
-	virtual void cancel(void);
-
 	void start(void);
 
-	void stop(void);
+	bool cancel(void);
 
 	inline bool isDetached(void)
 		{return true;};
@@ -279,17 +272,15 @@ protected:
 	unsigned poolsize, poolused, waits;
 
 	PooledThread(size_t stack = 0);
-	void pause(void);
-	void pause(timeout_t timeout);
-	void wait(void);
-	bool wait(timeout_t timeout);
+	void suspend(void);
+	bool suspend(timeout_t timeout);
+	void sync(void);
 	
-	void dealloc(void);
-	void cancel(void);
+	void exit(void);
+	bool cancel(void);
 
 public:
-	bool signal(void);
-	bool wakeup(unsigned limit = 1);
+	unsigned wakeup(unsigned limit = 1);
 	void start(void);
 	void start(unsigned count);
 };
@@ -535,14 +526,18 @@ public:
 		{return static_cast<const T*>(ptr->pointer);};
 };
 
-inline void start(Thread *th)
+inline void start(JoinableThread *th)
 	{th->start();};
 
-inline void cancel(JoinableThread *th)
-	{th->release();};
+inline bool cancel(JoinableThread *th)
+	{return th->cancel();};
 
-inline void cancel(DetachedThread *th)
-	{th->cancel();};
+inline void start(DetachedThread *th)
+    {th->start();};
+
+inline bool cancel(DetachedThread *th)
+	{return th->cancel();};
+
 
 END_NAMESPACE
 

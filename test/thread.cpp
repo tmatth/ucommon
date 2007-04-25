@@ -25,11 +25,11 @@ extern "C" int main()
 	mythread *thr = new mythread();
 
 	printf("before\n");
-	thr->start();
+	start(thr);
 	printf("sleeping main...\n");
-	cpr_sleep(1000);
+	Thread::pause(1000);
 	printf("wakeup main...\n");
-	thr->release();
+	cancel(thr);
 	printf("joining\n");
 	delete thr;
 	printf("ending\n");

@@ -369,88 +369,113 @@ DetachedThread::DetachedThread(size_t size)
 	stack = size;
 }
 
-void Thread::dealloc(void)
+void Thread::pause(timeout_t timeout)
 {
+	int state;
+	int mode;
+	
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
+	if(state == PTHREAD_CANCEL_ENABLE) {
+		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &mode);
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		cpr_sleep(timeout);
+		pthread_setcanceltype(mode, NULL);
+	}
+	else
+		cpr_sleep(timeout);
 }
 
-void PooledThread::dealloc(void)
+void Thread::yield(void)
+{
+#ifdef	HAVE_PTHREAD_YIELD
+	pthread_yield();
+#else
+	sched_yield();
+#endif
+	pthread_testcancel();
+}
+
+void PooledThread::exit(void)
 {
 	--poolused;
 	if(!poolused)
 		delete this;
 }
 
-void DetachedThread::dealloc(void)
+void DetachedThread::exit(void)
 {
 	delete this;
 }
 
-void DetachedThread::cancel(void)
+bool DetachedThread::cancel(void)
 {
-	pthread_cancel(tid);
+	pthread_t self = pthread_self();
+
+	if(pthread_equal(tid, self)) {
+		pthread_testcancel();
+	}
+	else if(!pthread_cancel(tid)) {
+		exit();
+		return true;
+	}
+	return false;
 }
 
-void PooledThread::cancel(void)
+bool PooledThread::cancel(void)
 {
-	crit(0);
+	return false;
 }
 
-bool PooledThread::wait(timeout_t timeout)
+void PooledThread::sync(void)
 {
-	bool over = false;
-	bool result;
+	lock();
+	if(poolused < 2) {
+		unlock();
+		return;
+	}
+	if(++waits == poolused) {
+		Conditional::broadcast();
+		waits = 0;
+	}
+	else
+		Conditional::wait();
+	unlock();
+}
+
+bool PooledThread::suspend(timeout_t timeout)
+{
+	bool result = true;
+
     lock();
     ++waits;
-    result = Conditional::wait(timeout);
+	while(result)
+	    result = Conditional::wait(timeout);
     --waits;
-    if(poolused > poolsize) {
-        --poolused;
-        over = true;
-    }
     unlock();
-    if(over)
-        pthread_exit(NULL);
 	return result;
 }
 
-void PooledThread::wait(void)
+void PooledThread::suspend(void)
 {
-	bool over = false;
 	lock();
 	++waits;
 	Conditional::wait();
 	--waits;
-	if(poolused > poolsize) {
-		--poolused;
-		over = true;
-	}
 	unlock();
-	if(over)
-		pthread_exit(NULL);
 }
 
-bool PooledThread::signal(void)
+unsigned PooledThread::wakeup(unsigned limit)
 {
-	bool waiting = true;
+	unsigned waiting = 0;
 
 	lock();
-	if(waits)
+	while(waits >= limit) {
+		++waiting;
 		Conditional::signal();
-	else
-		waiting = false;
-	unlock();
-	return waiting;
-}
-
-bool PooledThread::wakeup(unsigned limit)
-{
-	bool waiting = true;
-
-	lock();
-	if(waits >= limit)
-		Conditional::broadcast();
-	else
-		waiting = false;
+		unlock();
+		yield();
+		lock();
+	}
 	unlock();
 	return waiting;
 }
@@ -469,7 +494,7 @@ Thread::~Thread()
 
 JoinableThread::~JoinableThread()
 {
-	release();
+	cancel();
 }
 
 DetachedThread::~DetachedThread()
@@ -481,33 +506,9 @@ extern "C" {
 	{
 		Thread *th = static_cast<Thread *>(obj);
 		th->run();
-		th->dealloc();
+		th->exit();
 		return NULL;
 	};
-}
-
-void JoinableThread::pause(void)
-{
-	pthread_testcancel();
-	cpr_yield();
-}
-
-void JoinableThread::pause(timeout_t timeout)
-{
-	int ctype;
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &ctype);
-	cpr_sleep(timeout);
-	pthread_setcanceltype(ctype, NULL);
-}
-
-void DetachedThread::pause(void)
-{
-	cpr_yield();
-}
-
-void DetachedThread::pause(timeout_t timeout)
-{
-	cpr_sleep(timeout);
 }
 
 void JoinableThread::start(void)
@@ -574,55 +575,32 @@ void DetachedThread::start(void)
 	pthread_attr_destroy(&attr);
 }
 
-void PooledThread::pause(timeout_t timeout)
+void JoinableThread::exit(void)
 {
-	bool over = false;
-	cpr_sleep(timeout);
-	lock();
-    if(poolused > poolsize) {
-        over = true;
-		--poolused;
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	for(;;) {
+		pause(Timer::inf);
+		pthread_testcancel();
 	}
-	unlock();
-    if(over)
-		pthread_exit(NULL);
 }
 
-void PooledThread::pause(void)
-{
-	bool over = false;
-
-	lock();
-	if(poolused > poolsize) {
-		over = true;
-		--poolused;
-	}
-	unlock();
-	if(over)
-		pthread_exit(NULL);
-	else
-		cpr_yield();
-}
-
-void JoinableThread::release(void)
+bool JoinableThread::cancel(void)
 {
 	pthread_t self = pthread_self();
 
 	if(running && pthread_equal(tid, self)) {
-		pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		for(;;) {
-			pthread_testcancel();
-			pause(Timer::inf);
-		}
+		pthread_testcancel();
+		return false;
 	}
 
-	cpr_yield();
 	if(running) {
 		pthread_cancel(tid);
 		if(!pthread_join(tid, NULL)) 
 			running = false;
 	}	
+	if(running)
+		return false;
+	return true;
 }
 
 Queue::member::member(Queue *q, Object *o) :

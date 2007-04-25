@@ -135,11 +135,7 @@ extern "C" void cpr_sleep(timeout_t timeout)
 
 extern "C" void cpr_yield(void)
 {
-#ifdef	HAVE_PTHREAD_YIELD
-	pthread_yield();
-#else
 	sched_yield();
-#endif
 }
 
 #ifndef	OPEN_MAX
