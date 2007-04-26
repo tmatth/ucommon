@@ -109,7 +109,7 @@ MappedMemory::~MappedMemory()
 
 MappedMemory::MappedMemory(const char *fn, size_t len)
 {
-	int prot = PROT_READ | PROT_WRITE;
+	int prot = PROT_READ;
 	struct stat ino;
 	int fd;
 
@@ -117,13 +117,14 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 	used = 0;
 	
 	if(len) {
+		prot |= PROT_WRITE;
 		shm_unlink(fn);
 		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
 		if(fd > -1)
 			ftruncate(fd, len);
 	}
 	else {
-		fd = shm_open(fn, O_RDWR, 0660);
+		fd = shm_open(fn, O_RDONLY, 0660);
 		if(fd > -1) {
 			fstat(fd, &ino);
 			len = ino.st_size;
