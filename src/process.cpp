@@ -7,7 +7,7 @@
 #include <sys/mman.h>
 #endif
 
-#ifdef HAVE_MQUEUE>H
+#ifdef HAVE_MQUEUE_H
 #include <mqueue.h>
 #endif
 
@@ -226,7 +226,7 @@ static void setenv(envpager *ep)
 
 extern "C" int cpr_spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, envpager *env)
 {
-	unsigned max = OPEN_MAX, idx;
+	unsigned max = OPEN_MAX, idx = 0;
 	int status;
 
 	*pid = fork();
@@ -480,6 +480,67 @@ void cpr_memunlock(void *addr, size_t len)
 #if _POSIX_MEMLOCK_RANGE > 0
 	munlock(addr, len);
 #endif
+}
+
+#endif
+
+#ifdef	HAVE_MQUEUE_H
+struct cpr_mq
+{
+	mqd_t mqid;
+	mq_attr attr;
+};
+
+extern "C" void cpr_closemsg(cpr_mq *mq)
+{
+	mq_close(mq->mqid);
+	free(mq);
+}
+
+extern "C" cpr_mq *cpr_openmsg(const char *name, bool blocking)
+{
+	cpr_mq* mq = (cpr_mq *)malloc(sizeof(cpr_mq));
+	int mode = O_WRONLY;
+
+	if(!blocking)
+		mode |= O_NONBLOCK;
+	mq->mqid = mq_open(name, mode);
+	if(mq->mqid == (mqd_t)-1) {
+		free(mq);
+		return NULL;
+	}
+	mq_getattr(mq->mqid, &mq->attr);
+	return mq;
+}
+
+extern "C" unsigned cpr_msglimit(cpr_mq *mq)
+{
+	return mq->attr.mq_maxmsg;
+}
+
+extern "C" unsigned cpr_msgsize(cpr_mq *mq)
+{
+	return mq->attr.mq_msgsize;
+}
+
+extern "C" unsigned cpr_msgcount(cpr_mq *mq)
+{
+	mq_attr attr;
+	if(mq_getattr(mq->mqid, &attr))
+		return 0;
+
+	return attr.mq_curmsgs;
+}
+
+extern "C" ssize_t cpr_msgsend(cpr_mq *mq, const caddr_t buf, size_t len)
+{
+	return mq_send(mq->mqid, buf, len, 0);
+}
+
+extern "C" ssize_t cpr_msgrecv(cpr_mq *mq, caddr_t buf, size_t len)
+{
+		unsigned int pri;
+	    return mq_receive(mq->mqid, buf, len, &pri);
 }
 
 #endif

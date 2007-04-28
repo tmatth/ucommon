@@ -25,7 +25,7 @@
 #include <ucommon/thread.h>
 #endif
 
-typedef struct mqd_t;
+struct cpr_mq;
 
 typedef	void (*sighandler_t)(int);
 
@@ -92,9 +92,14 @@ extern "C" {
 	__EXPORT int cpr_priority(unsigned priority);
 	__EXPORT void cpr_memlock(void *addr, size_t len);
 	__EXPORT void cpr_memunlock(void *addr, size_t len);
-	__EXPORT mqd_t *cpr_createmsg(void *path, size_t quesize, size_t msgsize);
-	__EXPORT mqd_t *cpr_openmsg(void *path);
-	__EXPORT int cpr_closemsg(mqd_t *mq);
+	__EXPORT cpr_mq *cpr_createmsg(const char *path, size_t quesize, size_t msgsize);
+	__EXPORT cpr_mq *cpr_openmsg(const char *path, bool blocking = true);
+	__EXPORT void cpr_closemsg(cpr_mq *mq);
+	__EXPORT unsigned cpr_msglimit(cpr_mq *mq);
+	__EXPORT unsigned cpr_msgsize(cpr_mq *mq);
+	__EXPORT unsigned cpr_msgcount(cpr_mq *mq);
+	__EXPORT ssize_t cpr_msgsend(cpr_mq *mq, const caddr_t msg, size_t len);
+	__EXPORT ssize_t cpr_msgrecv(cpr_mq *mq, caddr_t msg, size_t len);
 };
 
 #endif
