@@ -43,6 +43,16 @@
 #include <sched.h>
 #include <limits.h>
 
+#if HAVE_FTOK
+#include <sys/ipc.h>
+
+extern "C" {
+	extern key_t cpr_createipc(const char *name);
+	extern key_t cpr_accessipc(const char *name);
+	extern void cpr_unlinkipc(const char *name);
+};
+#endif
+
 #ifdef  SIGTSTP
 #include <sys/file.h>
 #include <sys/ioctl.h>

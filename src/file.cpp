@@ -6,6 +6,16 @@
 #include <sys/mman.h>
 #endif
 
+#if HAVE_FTOK
+#include <sys/ipc.h>
+
+extern "C" {
+	extern key_t cpr_createipc(const char *name);
+	extern key_t cpr_accessipc(const char *name);
+	extern void cpr_unlinkipc(const char *name);
+};
+#endif
+
 #include <errno.h>
 #include <string.h>
 
@@ -17,6 +27,7 @@ using namespace UCOMMON_NAMESPACE;
 #define	SHM_PATH "c:/temp/%s.shm"
 #else
 #define	SHM_PATH "/var/run/shm/%s"
+#defin	SHM_TEMP "/tmp/.%s.shm"
 #endif
 
 static int shm_open(const char *fn, unsigned mode)
@@ -29,8 +40,10 @@ static int shm_open(const char *fn, unsigned mode)
 #ifdef	_MSWINDOWS_
 	snprintf(buffer, sizeof(buffer), SHM_PATH, ++fn);
 #else
-	mkdir("/var/run/shm", 04777);	
-	snprintf(buffer, sizeof(buffer), SHM_PATH, ++fn);
+	if(cpr_isdir("/var/run/shm"))
+		snprintf(buffer, sizeof(buffer), SHM_PATH, ++fn);
+	else
+		snprintf(buffer, sizeof(buffer), SHM_TEMP, ++fn);
 #endif
 	return open(buffer, mode);
 }
@@ -645,6 +658,49 @@ caddr_t cpr_mapfile(const char *fn)
 	cpr_readfile(fd, mem, size);
 	cpr_closefile(fd);
 	return (caddr_t)mem;
+}
+
+#endif
+
+#ifdef	HAVE_FTOK
+
+static void ftok_name(const char *name, char *buf, size_t max)
+{
+	if(*name == '/')
+		++name;
+
+	if(cpr_isdir("/var/run/ipc"))
+		snprintf(buf, sizeof(buf), "/var/run/ipc/%s", name);
+	else
+		snprintf(buf, sizeof(buf), "/tmp/.%s.ipc", name);
+}
+
+extern "C" void cpr_unlinkipc(const char *name)
+{
+	char buf[65];
+
+	ftok_name(name, buf, sizeof(buf));
+	remove(buf);
+}
+
+extern "C" key_t cpr_createipc(const char *name)
+{
+	char buf[65];
+	int fd;
+
+	ftok_name(name, buf, sizeof(buf));
+	remove(buf);
+	fd = creat(buf, 0660);
+	close(fd);
+	return ftok(buf, 'u');
+}
+
+extern "C" key_t cpr_accessipc(const char *name)
+{
+	char buf[65];
+
+	ftok_name(name, buf, sizeof(buf));
+	return ftok(buf, 'u');
 }
 
 #endif
