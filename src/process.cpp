@@ -135,40 +135,67 @@ unsigned MessageQueue::getPending(void) const
 	return attr.mq_curmsgs;
 }
 
-ssize_t MessageQueue::puts(char *buf)
+bool MessageQueue::puts(char *buf)
 {
 	size_t len = cpr_strlen(buf);
 	if(!mq)
-		return 0;
+		return false;
 
 	if(len >= getSize())
-		return 0;
+		return false;
 	
-	return put(buf, len + 1);
+	return put(buf, len);
 }
 
-ssize_t MessageQueue::put(void *buf, size_t len)
+bool MessageQueue::put(void *buf, size_t len)
 {
 	if(!mq)
-		return 0;
+		return false;
 
 	if(!len)
 		len = getSize();
 
-	return mq_send(mq->mqid, (const char *)buf, len, 0);
+	if(!len)
+		return false;
+
+	if(mq_send(mq->mqid, (const char *)buf, len, 0) < 0)
+		return false;
+
+	return true;
 }
 
-ssize_t MessageQueue::get(void *buf, size_t len)
+bool MessageQueue::gets(char *buf)
+{
+	unsigned int pri;
+	ssize_t len = getSize();
+	if(!len)
+		return false;
+
+	len = mq_receive(mq->mqid, buf, (size_t)len, &pri);
+	if(len < 1)
+		return false;
+	
+	buf[len] = 0;
+	return true;
+}	
+
+bool MessageQueue::get(void *buf, size_t len)
 {
 	unsigned int pri;
 
 	if(!mq)
-		return 0;
+		return false;
 	
 	if(!len)
 		len = getSize();
 
-	return mq_receive(mq->mqid, (char *)buf, len, &pri);
+	if(!len)
+		return false;
+
+	if(mq_receive(mq->mqid, (char *)buf, len, &pri) < 0)
+		return false;
+	
+	return true;
 }
 
 #endif

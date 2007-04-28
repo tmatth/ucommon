@@ -52,12 +52,10 @@ public:
 	MessageQueue(const char *name, bool blocking = true);
 	~MessageQueue();
 
-	ssize_t get(void *data, size_t len);
-	ssize_t put(void *data, size_t len);
-	ssize_t puts(char *data);
-
-	inline ssize_t gets(char *data)
-		{return get(data, 0);};
+	bool get(void *data, size_t len);
+	bool put(void *data, size_t len);
+	bool puts(char *data);
+	bool gets(char *data);
 
 	void release(void);
 
@@ -125,10 +123,10 @@ public:
 		{return mq == NULL;};
 
 	inline bool get(T *buf)
-		{return MessageQueue::get(buf, sizeof(T)) == sizeof(T);};
+		{return MessageQueue::get(buf);};
 	
 	inline bool put(T *buf)
-		{return MessageQueue::put(buf, sizeof(T)) == sizeof(T);};
+		{return MessageQueue::put(buf);};
 };
 
 END_NAMESPACE
