@@ -40,6 +40,41 @@ typedef	void (*sighandler_t)(int);
 
 NAMESPACE_UCOMMON
 
+class __EXPORT MessageQueue
+{
+private:
+	struct ipc;
+
+	ipc *mq;
+
+public:
+	MessageQueue(const char *name, size_t objsize, unsigned count);
+	MessageQueue(const char *name, bool blocking = true);
+	~MessageQueue();
+
+	ssize_t get(void *data, size_t len);
+	ssize_t put(void *data, size_t len);
+	ssize_t puts(char *data);
+
+	inline ssize_t gets(char *data)
+		{return get(data, 0);};
+
+	void release(void);
+
+	inline operator bool() const
+		{return mq != NULL;};
+		
+	inline bool operator!() const
+		{return mq == NULL;};
+
+	inline bool isPending(void) const
+		{return getPending() > 0;};
+
+	unsigned getPending(void) const;
+	unsigned getLimit(void) const;
+	size_t getSize(void) const;
+};
+
 class __EXPORT envpager : public mempager
 {
 protected:
@@ -67,6 +102,35 @@ public:
 
 };
 
+template <class T>
+class mqueue : private MessageQueue
+{
+protected:
+	unsigned getPending(void)
+		{return MessageQueue::getPending();};
+
+public:
+	inline mqueue(const char *name) :
+		MessageQueue(name) {};
+	
+	inline mqueue(const char *name, unsigned count) :
+		MessageQueue(name, sizeof(T), count) {};
+
+	inline ~mqueue() {release();};
+
+	inline operator bool() const
+		{return mq != NULL;};
+
+	inline bool operator!() const
+		{return mq == NULL;};
+
+	inline bool get(T *buf)
+		{return MessageQueue::get(buf, sizeof(T)) == sizeof(T);};
+	
+	inline bool put(T *buf)
+		{return MessageQueue::put(buf, sizeof(T)) == sizeof(T);};
+};
+
 END_NAMESPACE
 
 extern "C" {
@@ -92,14 +156,6 @@ extern "C" {
 	__EXPORT int cpr_priority(unsigned priority);
 	__EXPORT void cpr_memlock(void *addr, size_t len);
 	__EXPORT void cpr_memunlock(void *addr, size_t len);
-	__EXPORT cpr_mq *cpr_createmsg(const char *path, size_t msgsize, unsigned count);
-	__EXPORT cpr_mq *cpr_openmsg(const char *path, bool blocking = true);
-	__EXPORT void cpr_closemsg(cpr_mq *mq);
-	__EXPORT unsigned cpr_msglimit(cpr_mq *mq);
-	__EXPORT unsigned cpr_msgsize(cpr_mq *mq);
-	__EXPORT unsigned cpr_msgcount(cpr_mq *mq);
-	__EXPORT ssize_t cpr_msgsend(cpr_mq *mq, const caddr_t msg, size_t len);
-	__EXPORT ssize_t cpr_msgrecv(cpr_mq *mq, caddr_t msg, size_t len);
 };
 
 #endif

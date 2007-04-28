@@ -58,6 +58,121 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+#ifdef	HAVE_MQUEUE_H
+struct MessageQueue::ipc
+{
+	mqd_t mqid;
+	mq_attr attr;
+};
+
+MessageQueue::MessageQueue(const char *name, size_t msgsize, unsigned count)
+{
+	mq = (ipc *)malloc(sizeof(ipc));
+	memset(&mq->attr, 0 , sizeof(mq_attr));
+	mq->attr.mq_maxmsg = count;
+	mq->attr.mq_msgsize = msgsize;
+	mq_unlink(name);
+	mq->mqid = mq_open(name, O_CREAT | O_RDWR | O_NONBLOCK, 0660, &mq->attr);
+	if(mq->mqid == (mqd_t)(-1)) {
+		free(mq);
+		mq = NULL;
+	}
+}
+	
+MessageQueue::MessageQueue(const char *name, bool blocking)
+{
+	mq = (ipc *)malloc(sizeof(ipc));
+	int mode = O_WRONLY;
+
+	if(!blocking)
+		mode |= O_NONBLOCK;
+	mq->mqid = mq_open(name, mode);
+	if(mq->mqid == (mqd_t)-1) {
+		free(mq);
+		return;
+	}
+	mq_getattr(mq->mqid, &mq->attr);
+}
+
+MessageQueue::~MessageQueue()
+{
+	release();
+}
+
+void MessageQueue::release(void)
+{
+	if(mq) {
+		mq_close(mq->mqid);
+		free(mq);
+		mq = NULL;
+	}
+}
+
+unsigned MessageQueue::getLimit(void) const
+{
+	if(!mq)
+		return 0;
+
+	return mq->attr.mq_maxmsg;
+}
+
+size_t MessageQueue::getSize(void) const
+{
+	if(!mq)
+		return 0;
+	return mq->attr.mq_msgsize;
+}
+
+unsigned MessageQueue::getPending(void) const
+{
+	mq_attr attr;
+	if(!mq)
+		return 0;
+
+	if(mq_getattr(mq->mqid, &attr))
+		return 0;
+
+	return attr.mq_curmsgs;
+}
+
+ssize_t MessageQueue::puts(char *buf)
+{
+	size_t len = cpr_strlen(buf);
+	if(!mq)
+		return 0;
+
+	if(len >= getSize())
+		return 0;
+	
+	return put(buf, len + 1);
+}
+
+ssize_t MessageQueue::put(void *buf, size_t len)
+{
+	if(!mq)
+		return 0;
+
+	if(!len)
+		len = getSize();
+
+	return mq_send(mq->mqid, (const char *)buf, len, 0);
+}
+
+ssize_t MessageQueue::get(void *buf, size_t len)
+{
+	unsigned int pri;
+
+	if(!mq)
+		return 0;
+	
+	if(!len)
+		len = getSize();
+
+	return mq_receive(mq->mqid, (char *)buf, len, &pri);
+}
+
+#endif
+
 envpager::envpager(size_t ps) :
 mempager(ps)
 {
@@ -484,78 +599,4 @@ void cpr_memunlock(void *addr, size_t len)
 
 #endif
 
-#ifdef	HAVE_MQUEUE_H
-struct cpr_mq
-{
-	mqd_t mqid;
-	mq_attr attr;
-};
 
-extern "C" void cpr_closemsg(cpr_mq *mq)
-{
-	mq_close(mq->mqid);
-	free(mq);
-}
-
-extern "C" cpr_mq *cpr_createmsg(const char *name, size_t msgsize, unsigned count)
-{
-	cpr_mq *mq = (cpr_mq *)malloc(sizeof(cpr_mq));
-	memset(&mq->attr, 0 , sizeof(mq_attr));
-	mq->attr.mq_maxmsg = count;
-	mq->attr.mq_msgsize = msgsize;
-	mq_unlink(name);
-	mq->mqid = mq_open(name, O_CREAT | O_RDWR | O_NONBLOCK, 0660, &mq->attr);
-	if(mq->mqid == (mqd_t)(-1)) {
-		free(mq);
-		return NULL;
-	}
-	return mq;
-}
-	
-extern "C" cpr_mq *cpr_openmsg(const char *name, bool blocking)
-{
-	cpr_mq* mq = (cpr_mq *)malloc(sizeof(cpr_mq));
-	int mode = O_WRONLY;
-
-	if(!blocking)
-		mode |= O_NONBLOCK;
-	mq->mqid = mq_open(name, mode);
-	if(mq->mqid == (mqd_t)-1) {
-		free(mq);
-		return NULL;
-	}
-	mq_getattr(mq->mqid, &mq->attr);
-	return mq;
-}
-
-extern "C" unsigned cpr_msglimit(cpr_mq *mq)
-{
-	return mq->attr.mq_maxmsg;
-}
-
-extern "C" unsigned cpr_msgsize(cpr_mq *mq)
-{
-	return mq->attr.mq_msgsize;
-}
-
-extern "C" unsigned cpr_msgcount(cpr_mq *mq)
-{
-	mq_attr attr;
-	if(mq_getattr(mq->mqid, &attr))
-		return 0;
-
-	return attr.mq_curmsgs;
-}
-
-extern "C" ssize_t cpr_msgsend(cpr_mq *mq, const caddr_t buf, size_t len)
-{
-	return mq_send(mq->mqid, buf, len, 0);
-}
-
-extern "C" ssize_t cpr_msgrecv(cpr_mq *mq, caddr_t buf, size_t len)
-{
-		unsigned int pri;
-	    return mq_receive(mq->mqid, buf, len, &pri);
-}
-
-#endif

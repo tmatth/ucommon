@@ -118,8 +118,6 @@ protected:
 
 	SOCKET so;
 
-	unsigned getPending(void) const;
-
 public:
 	class __EXPORT address
 	{
@@ -164,6 +162,7 @@ public:
 	bool isConnected(void) const;
 	bool waitPending(timeout_t timeout = 0) const;
 	bool waitSending(timeout_t timeout = 0) const;
+	unsigned getPending(void) const;
 
 	int setBroadcast(bool enable);
 	int setKeepAlive(bool enable);
