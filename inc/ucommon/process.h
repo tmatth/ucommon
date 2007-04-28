@@ -25,6 +25,8 @@
 #include <ucommon/thread.h>
 #endif
 
+typedef struct mqd_t;
+
 typedef	void (*sighandler_t)(int);
 
 #define	CPR_PRIORITY_LOWEST 0
@@ -32,9 +34,9 @@ typedef	void (*sighandler_t)(int);
 #define	CPR_PRIORITY_NORMAL 2
 #define	CPR_PRIORITY_HIGH 3
 
-#define	SPAWN_WAIT		0
-#define	SPAWN_NOWAIT	1
-#define	SPAWN_DETACH	2
+#define	CPR_SPAWN_WAIT		0
+#define	CPR_SPAWN_NOWAIT	1
+#define	CPR_SPAWN_DETACH	2
 
 NAMESPACE_UCOMMON
 
@@ -73,7 +75,7 @@ extern "C" {
 	__EXPORT int cpr_scheduler(int policy, unsigned priority = CPR_PRIORITY_NORMAL);
 	__EXPORT void cpr_pattach(const char *path);
 	__EXPORT void cpr_pdetach(void);
-	__EXPORT int cpr_spawn(const char *fn, char **args, int mode, ucc::envpager *env = NULL);
+	__EXPORT int cpr_spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, ucc::envpager *env = NULL);
 	__EXPORT void cpr_closeall(void);
 	__EXPORT void cpr_cancel(pid_t pid);
 #ifndef	_MSWINDOWS_
@@ -85,12 +87,14 @@ extern "C" {
 	#define cpr_signal(sig, handler) signal(sig, handler)
 #endif
 	__EXPORT pid_t cpr_wait(pid_t pid = 0, int *status = NULL);
-	__EXPORT pid_t cpr_create(const char *path, char **args, fd_t *iov, ucc::envpager *env = NULL);
 	__EXPORT void cpr_sleep(timeout_t timeout);
 	__EXPORT void cpr_yield(void);
 	__EXPORT int cpr_priority(unsigned priority);
 	__EXPORT void cpr_memlock(void *addr, size_t len);
 	__EXPORT void cpr_memunlock(void *addr, size_t len);
+	__EXPORT mqd_t *cpr_createmsg(void *path, size_t quesize, size_t msgsize);
+	__EXPORT mqd_t *cpr_openmsg(void *path);
+	__EXPORT int cpr_closemsg(mqd_t *mq);
 };
 
 #endif

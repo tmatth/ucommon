@@ -141,7 +141,7 @@ public:
 		struct addrinfo *list;
 
 	public:
-		address(const char *a, int family = 0);
+		address(const char *a, int family = 0, int type = SOCK_STREAM, int protocol = 0);
 		address(Socket &s, const char *host, const char *svc = NULL);
 		address(const char *host, const char *svc = NULL, SOCKET so = INVALID_SOCKET);
 		address(int family, const char *host, const char *svc = NULL);
@@ -168,6 +168,7 @@ public:
 
 	Socket(const Socket &s);
 	Socket(SOCKET so);
+	Socket(struct addrinfo *addr);
 	Socket(int family, int type, int protocol = 0);
 	Socket(const char *iface, const char *port, int family, int type, int protocol = 0);
 	virtual ~Socket();
