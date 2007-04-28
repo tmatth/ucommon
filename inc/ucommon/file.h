@@ -198,6 +198,8 @@ public:
 		{return (unsigned)(size / (sizeof(T) + I));};
 };
 
+END_NAMESPACE
+
 extern "C" {
 #ifdef	_MSWINDOWS_
 #define	RTLD_LAZY 0
@@ -247,12 +249,10 @@ extern "C" {
 	__EXPORT ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len);
 	__EXPORT ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len);
 	__EXPORT void cpr_seekfile(fd_t fd, off_t offset);
-	__EXPORT long cpr_filesize(fd_t fd);
+	__EXPORT size_t cpr_filesize(fd_t fd);
 	__EXPORT caddr_t cpr_mapfile(const char *fn); 
 	__EXPORT bool cpr_isfile(const char *fn);	
 	__EXPORT bool cpr_isdir(const char *fn);
 }
-
-END_NAMESPACE
 
 #endif

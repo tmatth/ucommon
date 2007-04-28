@@ -596,6 +596,84 @@ extern "C" int cpr_priority(unsigned priority)
 #endif
 }
 
+#if defined(HAVE_MKFIFO)
+
+static void fifo_name(const char *name, char *buf, size_t max)
+{
+	if(*name == '/')
+		++name;
+
+	snprintf(buf, max, "/var/run/%s", name);
+	if(cpr_isdir(buf)) {
+		snprintf(buf, max, "/var/run/%s/%s.ctrl");
+		return;
+	}
+
+	snprintf(buf, max, "/tmp/.%s.ctrl", name);
+}
+
+void cpr_unlinkctrl(const char *name)
+{
+	char buf[65];
+
+	fifo_name(name, buf, sizeof(buf));
+	remove(buf);
+}
+
+fd_t cpr_createctrl(const char *name)
+{
+	char buf;
+
+	fifo_name(name, buf, sizeof(buf));
+	remove(buf);
+	if(mkfifo(buf, 0660))
+		return -1;
+
+	return open(name, O_RDWR);
+}
+
+fd_t cpr_openctrl(const char *name)
+{
+	char buf[65];
+
+	fifo_name(name, buf, sizeof(buf));
+	return open(name, O_WRONLY);
+}
+
+#elif defined(_MSWINDOWS_)
+
+void cpr_unlinkctrl(const char *name)
+{
+}
+
+fd_t cpr_createctrl(const char *name)
+{
+	return INVALID_HANDLE_VALUE;
+}
+
+fd_t cpr_openctrl(const char *name)
+{
+	return INVALID_HANDLE_VALUE;
+}
+
+#else
+
+void cpr_unlinkctrl(const char *name)
+{
+}
+
+fd_t cpr_createctrl(const char *name)
+{
+	return -1;
+}
+
+fd_t cpr_openctrl(const char *name)
+{
+	return -1;
+}
+
+#endif
+
 #ifdef	_MSWINDOWS_
 
 void cpr_memlock(void *addr, size_t len)

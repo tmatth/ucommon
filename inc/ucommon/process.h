@@ -154,6 +154,9 @@ extern "C" {
 	__EXPORT int cpr_priority(unsigned priority);
 	__EXPORT void cpr_memlock(void *addr, size_t len);
 	__EXPORT void cpr_memunlock(void *addr, size_t len);
+	__EXPORT fd_t cpr_createctrl(const char *path);
+	__EXPORT void cpr_unlinkctrl(const char *path);
+	__EXPORT fd_t cpr_openctrl(const char *path);
 };
 
 #endif

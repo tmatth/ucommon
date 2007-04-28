@@ -1,4 +1,5 @@
 #include <ucommon/process.h>
+#include <ucommon/file.h>
 #include <sys/stat.h>
 #include <config.h>
 #include <stdio.h>
@@ -21,8 +22,7 @@ int main(int argc, char **argv)
 {
 	char ctrlpath[65];
 	char ctrlcmd[512];
-	struct stat ino;
-	int fd;
+	fd_t fd;
 	int timeout = 0;
 
 	if(argc > 1 && argv[1][0] == '-') {
@@ -39,30 +39,18 @@ int main(int argc, char **argv)
 	cpr_signal(SIGUSR2, signotify);
 	cpr_signal(SIGALRM, signotify);
 
-	snprintf(ctrlpath, sizeof(ctrlpath), "/var/run/%s/%s.ctrl", argv[1], argv[1]);
-	if(stat(ctrlpath, &ino)) {
+	fd = cpr_openctrl(argv[1]);
+	if(!cpr_isopen(fd)) {
 		fprintf(stderr, "*** control: %s; cannot access\n", ctrlpath);
 		exit(-1);
 	}
 
 	snprintf(ctrlcmd, sizeof(ctrlcmd), "%d %s\n", getpid(), argv[2]);
 
-	if(!S_ISFIFO(ino.st_mode)) {
-		fprintf(stderr, "*** control: %s; not fifo\n", ctrlpath);
-		exit(-1);
-	}
-
 	if(timeout)
 		alarm(timeout);
 
-	fd = open(ctrlpath, O_WRONLY);
-
-	if(fd < 0) {
-		fprintf(stderr, "*** control: %s; cannot send\n", ctrlpath);
-		exit(-1);
-	}
-	
 	write(fd, ctrlcmd, strlen(ctrlcmd));
-	close(fd);
+	cpr_closefile(fd);
 	pause();
 }

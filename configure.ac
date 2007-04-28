@@ -96,6 +96,10 @@ AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])
 
+AC_CHECK_LIB($clib, mkfifo, [
+    AC_DEFINE(HAVE_SIGACTION, [1], [fifo control port])
+])
+
 AC_CHECK_LIB($clib, sigaction, [
     AC_DEFINE(HAVE_SIGACTION, [1], [posix signal handling])
 ])
