@@ -497,6 +497,21 @@ extern "C" void cpr_closemsg(cpr_mq *mq)
 	free(mq);
 }
 
+extern "C" cpr_mq *cpr_createmsg(const char *name, size_t msgsize, unsigned count)
+{
+	cpr_mq *mq = (cpr_mq *)malloc(sizeof(cpr_mq));
+	memset(&mq->attr, 0 , sizeof(mq_attr));
+	mq->attr.mq_maxmsg = count;
+	mq->attr.mq_msgsize = msgsize;
+	mq_unlink(name);
+	mq->mqid = mq_open(name, O_CREAT | O_RDWR | O_NONBLOCK, 0660, &mq->attr);
+	if(mq->mqid == (mqd_t)(-1)) {
+		free(mq);
+		return NULL;
+	}
+	return mq;
+}
+	
 extern "C" cpr_mq *cpr_openmsg(const char *name, bool blocking)
 {
 	cpr_mq* mq = (cpr_mq *)malloc(sizeof(cpr_mq));
