@@ -3,8 +3,12 @@
 #include <ucommon/string.h>
 #include <ucommon/misc.h>
 
-#if _POSIX_MEMLOCK_RANGE > 0
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#endif
+
+#ifdef HAVE_MQUEUE>H
+#include <mqueue.h>
 #endif
 
 #if defined(HAVE_SIGACTION) && defined(HAVE_BSD_SIGNAL_H)
@@ -220,61 +224,48 @@ static void setenv(envpager *ep)
 	}
 }
 
-extern "C" int cpr_spawn(const char *fn, char **args, int mode, envpager *env)
+extern "C" int cpr_spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, envpager *env)
 {
-	pid_t pid = fork();
+	unsigned max = OPEN_MAX, idx;
 	int status;
-	if(pid < 0)
+
+	*pid = fork();
+	if(*pid < 0)
 		return -1;
 
-	if(pid) {
+	if(*pid) {
 		switch(mode) {
-		case SPAWN_DETACH:
+		case CPR_SPAWN_DETACH:
+		case CPR_SPAWN_NOWAIT:
 			return 0;
-		case SPAWN_NOWAIT:
-			return pid;
-		case SPAWN_WAIT:
-			waitpid(pid, &status, 0);
+		case CPR_SPAWN_WAIT:
+			waitpid(*pid, &status, 0);
 			return WEXITSTATUS(status);
 		}
 	}
 
-	cpr_closeall();
-	if(mode == SPAWN_DETACH)
+	while(iov && *iov > -1)
+		dup2(*(iov++), idx++);
+
+	while(idx < 3)
+		++idx;
+	
+#if defined(HAVE_SYSCONF)
+	max = sysconf(_SC_OPEN_MAX);
+#endif
+#if defined(HAVE_SYS_RESOURCE_H)
+	struct rlimit rl;
+	if(!getrlimit(RLIMIT_NOFILE, &rl))
+		max = rl.rlim_cur;
+#endif
+
+	while(idx < max)
+		close(idx++);
+
+	if(mode == CPR_SPAWN_DETACH)
 		cpr_pdetach();
 
 	setenv(env);		
-	execvp(fn, args);
-	exit(-1);
-}
-
-extern "C" pid_t cpr_create(const char *fn, char **args, fd_t *iov, envpager *env)
-{
-	int in[2], out[2];
-	if(iov) {
-		crit(pipe(in) == 0);
-		crit(pipe(out) == 0);
-	}
-	pid_t pid = fork();
-	if(pid < 0 && iov) {
-		close(in[0]);
-		close(in[1]);
-		close(out[0]);
-		close(out[1]);
-		return pid;
-	}
-	if(pid && iov) {
-		iov[0] = out[0];
-		close(out[1]);
-		iov[1] = in[1];
-		close(in[0]);
-	}
-	if(pid)
-		return pid;
-	dup2(in[0], 0);
-	dup2(out[1], 1);
-	cpr_closeall();
-	setenv(env);
 	execvp(fn, args);
 	exit(-1);
 }

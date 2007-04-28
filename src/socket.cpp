@@ -396,7 +396,7 @@ void cidr::set(const char *cp)
 	}
 }
 
-Socket::address::address(const char *a, int family)
+Socket::address::address(const char *a, int family, int type, int protocol)
 {
 	struct addrinfo hint;
 	char *addr = strdup(a);
@@ -433,6 +433,8 @@ Socket::address::address(const char *a, int family)
 #endif
 proc:
 	hint.ai_family = family;
+	hint.ai_socktype = type;
+	hint.ai_protocol = protocol;
 	getaddrinfo(host, svc, &hint, &list);
 }
 
@@ -501,6 +503,19 @@ Socket::Socket()
 Socket::Socket(SOCKET s)
 {
 	so = s;
+}
+
+Socket::Socket(struct addrinfo *addr)
+{
+	while(addr) {
+		so = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+		if(so != INVALID_SOCKET) {
+			if(!::connect(so, addr->ai_addr, addr->ai_addrlen))
+				return;
+		}
+		addr = addr->ai_next;
+	}
+	so = INVALID_SOCKET;
 }
 
 Socket::Socket(int family, int type, int protocol)
