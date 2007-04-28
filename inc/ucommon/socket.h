@@ -68,20 +68,6 @@ struct sockaddr_storage
 };
 #endif
 
-extern "C" {
-	__EXPORT int cpr_getsockfamily(SOCKET so);
-	__EXPORT void cpr_closesocket(SOCKET so);
-	__EXPORT int cpr_joinaddr(SOCKET so, struct addrinfo *list);
-	__EXPORT int cpr_dropaddr(SOCKET so, struct addrinfo *list);
-	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);
-	__EXPORT int cpr_disconnect(SOCKET so);
-	__EXPORT int cpr_connect(SOCKET so, struct addrinfo *list);
-	__EXPORT char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max);
-	__EXPORT struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *h);
-	__EXPORT socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
-	__EXPORT socklen_t cpr_getaddrlen(struct sockaddr *addr);
-};
-
 NAMESPACE_UCOMMON
 
 class __EXPORT cidr : public LinkedObject
@@ -192,15 +178,9 @@ public:
 
 	int connect(struct addrinfo *list);
 	bool create(int family, int type, int protocol = 0);
-
-	inline int disconnect(void)
-		{return cpr_disconnect(so);};
-
-	inline int join(struct addrinfo *list)
-		{return cpr_joinaddr(so, list);};
-
-	inline int drop(struct addrinfo *list)
-		{return cpr_dropaddr(so, list);};
+	int disconnect(void);
+	int join(struct addrinfo *list);
+	int drop(struct addrinfo *list);
 
 	size_t peek(void *data, size_t len) const;
 
@@ -249,5 +229,14 @@ inline struct sockaddr *addr(Socket::address &a)
 	{return a.getAddr();};
 
 END_NAMESPACE
+
+extern "C" {
+	__EXPORT int cpr_getsockfamily(SOCKET so);
+	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);
+	__EXPORT char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max);
+	__EXPORT struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *h);
+	__EXPORT socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
+	__EXPORT socklen_t cpr_getaddrlen(struct sockaddr *addr);
+};
 
 #endif

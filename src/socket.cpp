@@ -546,7 +546,12 @@ bool Socket::create(int family, int type, int protocol)
 void Socket::release(void)
 {
 	if(so != INVALID_SOCKET) {
-		cpr_closesocket(so);
+#ifdef	_MSWINDOWS_
+		::closesocket(so);
+#else
+		::shutdown(so, SHUT_RDWR);
+		::close(so);
+#endif
 		so = INVALID_SOCKET;
 	}
 }
@@ -762,9 +767,127 @@ int Socket::setNonBlocking(bool enable)
 #endif
 }
 
-int Socket::connect(struct addrinfo *list)
+int Socket::disconnect(void)
 {
-	int rtn = ::cpr_connect(so, list);
+	struct sockaddr_storage saddr;
+	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	int family;
+	socklen_t len = sizeof(addr);
+
+	getsockname(so, (struct sockaddr *)&addr, &len);
+	family = addr->sa_family;
+	memset(addr, 0, sizeof(saddr));
+#if defined(_MSWINDOWS_)
+	addr->sa_family = family;
+#else
+	addr->sa_family = AF_UNSPEC;
+#endif
+	if(len > sizeof(saddr))
+		len = sizeof(saddr);
+	return ::connect(so, addr, len);
+}
+
+int Socket::join(struct addrinfo *node)
+{
+	inetmulticast_t mcast;
+	inetsockaddr_t addr;
+	socklen_t len = sizeof(addr);
+	inetsockaddr_t *target;
+	int family;
+	int rtn;
+
+	if(so == INVALID_SOCKET)
+		return -1;
+	
+	getsockname(so, (struct sockaddr *)&addr, &len);
+	while(!rtn && node && node->ai_addr) {
+		target = (inetsockaddr_t *)node->ai_addr;
+		family = node->ai_family;
+		node = node->ai_next;
+		if(family != addr.addr.sa_family)
+			continue;
+		switch(addr.addr.sa_family) {
+#if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP)
+		case AF_INET6:
+			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
+			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
+#if defined(IP_ADD_MEMBERSHIP)
+		case AF_INET:
+			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
+			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
+			rtn = ::setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
+		default:
+			rtn = -1;
+		}
+	}
+	return rtn;
+}
+
+int Socket::drop(struct addrinfo *node)
+{
+	inetmulticast_t mcast;
+	inetsockaddr_t addr;
+	socklen_t len = sizeof(addr);
+	inetsockaddr_t *target;
+	int family;
+	int rtn;
+
+	if(so == INVALID_SOCKET)
+		return -1;
+	
+	getsockname(so, (struct sockaddr *)&addr, &len);
+	while(!rtn && node && node->ai_addr) {
+		target = (inetsockaddr_t *)node->ai_addr;
+		family = node->ai_family;
+		node = node->ai_next;
+
+		if(family != addr.addr.sa_family)
+			continue;
+
+		switch(addr.addr.sa_family) {
+#if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP)
+		case AF_INET6:
+			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
+			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
+#if defined(IP_DROP_MEMBERSHIP)
+		case AF_INET:
+			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
+			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
+			rtn = ::setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+#endif
+		default:
+			rtn = -1;
+		}
+	}
+	return rtn;
+}
+	
+int Socket::connect(struct addrinfo *node)
+{
+	int rtn = -1;
+	int family;
+	
+	if(so == INVALID_SOCKET)
+		return -1;
+
+	family = cpr_getsockfamily(so);
+
+	while(node) {
+		if(node->ai_family == family) {
+			if(!::connect(so, node->ai_addr, node->ai_addrlen)) {
+				rtn = 0;
+				goto exit;
+			}
+		}
+		node = node->ai_next;
+	}
+
+exit:
 #ifndef _MSWINDOWS_
 	if(!rtn || errno == EINPROGRESS)
 		return 0;
@@ -1140,141 +1263,6 @@ extern "C" socklen_t cpr_getaddrlen(struct sockaddr *sa)
 	}
 }
 
-extern "C" int cpr_joinaddr(SOCKET so, struct addrinfo *node)
-{
-	inetmulticast_t mcast;
-	inetsockaddr_t addr;
-	socklen_t len = sizeof(addr);
-	inetsockaddr_t *target;
-	int family;
-	int rtn;
-
-	if(so == INVALID_SOCKET)
-		return -1;
-	
-	getsockname(so, (struct sockaddr *)&addr, &len);
-	while(!rtn && node && node->ai_addr) {
-		target = (inetsockaddr_t *)node->ai_addr;
-		family = node->ai_family;
-		node = node->ai_next;
-		if(family != addr.addr.sa_family)
-			continue;
-		switch(addr.addr.sa_family) {
-#if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP)
-		case AF_INET6:
-			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
-			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
-			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
-#endif
-#if defined(IP_ADD_MEMBERSHIP)
-		case AF_INET:
-			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
-			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
-			rtn = ::setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
-#endif
-		default:
-			rtn = -1;
-		}
-	}
-	return rtn;
-}
-
-extern "C" int cpr_dropaddr(SOCKET so, struct addrinfo *node)
-{
-	inetmulticast_t mcast;
-	inetsockaddr_t addr;
-	socklen_t len = sizeof(addr);
-	inetsockaddr_t *target;
-	int family;
-	int rtn;
-
-	if(so == INVALID_SOCKET)
-		return -1;
-	
-	getsockname(so, (struct sockaddr *)&addr, &len);
-	while(!rtn && node && node->ai_addr) {
-		target = (inetsockaddr_t *)node->ai_addr;
-		family = node->ai_family;
-		node = node->ai_next;
-
-		if(family != addr.addr.sa_family)
-			continue;
-
-		switch(addr.addr.sa_family) {
-#if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP)
-		case AF_INET6:
-			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
-			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
-			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
-#endif
-#if defined(IP_DROP_MEMBERSHIP)
-		case AF_INET:
-			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
-			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
-			rtn = ::setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
-#endif
-		default:
-			rtn = -1;
-		}
-	}
-	return rtn;
-}
-
-extern "C" int cpr_disconnect(SOCKET so)
-{
-	struct sockaddr_storage saddr;
-	struct sockaddr *addr = (struct sockaddr *)&saddr;
-	int family;
-	socklen_t len = sizeof(addr);
-
-	getsockname(so, (struct sockaddr *)&addr, &len);
-	family = addr->sa_family;
-	memset(addr, 0, sizeof(saddr));
-#if defined(_MSWINDOWS_)
-	addr->sa_family = family;
-#else
-	addr->sa_family = AF_UNSPEC;
-#endif
-	if(len > sizeof(saddr))
-		len = sizeof(saddr);
-	return connect(so, addr, len);
-}
-
-extern "C" void cpr_closesocket(SOCKET so)
-{
-#ifdef	_MSWINDOWS_
-	if(so != INVALID_SOCKET)
-		closesocket(so);
-#else
-	if(so > -1)
-		close(so);
-#endif
-}	
-
-extern "C" int cpr_connect(SOCKET so, struct addrinfo *node)
-{
-	int rtn = -1;
-	int family;
-	
-	if(so == INVALID_SOCKET)
-		return -1;
-
-	family = cpr_getsockfamily(so);
-
-	while(node) {
-		if(node->ai_family == family) {
-			if(!connect(so, node->ai_addr, node->ai_addrlen)) {
-				rtn = 0;
-				goto exit;
-			}
-		}
-		node = node->ai_next;
-	}
-
-exit:
-	return rtn;
-}	
-	
 extern "C" int cpr_getsockfamily(SOCKET so)
 {
 	struct sockaddr_storage saddr;

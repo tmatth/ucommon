@@ -92,7 +92,7 @@ extern "C" {
 	__EXPORT int cpr_priority(unsigned priority);
 	__EXPORT void cpr_memlock(void *addr, size_t len);
 	__EXPORT void cpr_memunlock(void *addr, size_t len);
-	__EXPORT cpr_mq *cpr_createmsg(const char *path, size_t quesize, size_t msgsize);
+	__EXPORT cpr_mq *cpr_createmsg(const char *path, size_t msgsize, unsigned count);
 	__EXPORT cpr_mq *cpr_openmsg(const char *path, bool blocking = true);
 	__EXPORT void cpr_closemsg(cpr_mq *mq);
 	__EXPORT unsigned cpr_msglimit(cpr_mq *mq);
