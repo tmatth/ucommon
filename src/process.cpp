@@ -192,7 +192,7 @@ bool MessageQueue::get(void *buf, size_t len)
 	return true;
 }
 
-#else
+#elif defined(HAVE_FTOK)
 #include <sys/msg.h>
 
 /* struct msgbuf {
