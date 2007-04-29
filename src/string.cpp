@@ -1659,7 +1659,7 @@ extern "C" const char *cpr_stristr(const char *body, const char *find)
     if(!body || !find)
         return NULL;
 
-#ifdef	HAVE_STRICMP
+#ifdef	HAVE_STRISTR
 	return stristr(body, find);
 #else
     return strstr(body, find);

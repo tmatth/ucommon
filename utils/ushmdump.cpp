@@ -24,5 +24,5 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	write(1, view->get(0), view->len());
+	fwrite(view->get(0), view->len(), 1, stdout);
 }

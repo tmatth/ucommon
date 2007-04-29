@@ -640,9 +640,9 @@ extern "C" caddr_t cpr_mapfile(const char *fn)
 }
 #else
 
-caddr_t cpr_mapfile(const char *fn)
+extern "C" caddr_t cpr_mapfile(const char *fn)
 {
-	caddr_t mem;
+/*	caddr_t mem;
 	fd_t fd;
 	size_t size;
 
@@ -662,6 +662,7 @@ caddr_t cpr_mapfile(const char *fn)
 	cpr_readfile(fd, mem, size);
 	cpr_closefile(fd);
 	return (caddr_t)mem;
+*/
 }
 
 #endif

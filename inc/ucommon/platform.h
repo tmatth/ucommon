@@ -57,7 +57,27 @@ typedef char *caddr_t;
 #include <unistd.h>
 
 #ifdef	_MSWINDOWS_
+
+#include <sys/stat.h>
+#include <malloc.h>
+
 typedef char *caddr_t;
+
+#define	strcasecmp _stricmp
+#define	strncasecmp _strnicmp
+#define	snprintf	_snprintf
+#define	vsnprintf	_vsnprintf
+#define	strdup		_strdup
+
+inline int stricmp(const char *s1, const char *s2)
+	{return _stricmp(s1, s2);};
+
+inline int strnicmp(const char *s1, const char *s2, size_t l)
+	{return _strnicmp(s1, s2, l);};
+
+inline int stat(const char *path, struct stat *buf)
+	{return _stat(path, (struct _stat *)(buf));};
+
 #endif
 
 #endif

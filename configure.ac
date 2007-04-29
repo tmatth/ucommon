@@ -72,6 +72,11 @@ tlib=""
 
 AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h)
 
+AC_CHECK_LIB(msvcrt, fopen, [
+	clib="msvcrt"
+	UCOMMON_LIBC="-lmingwex -lmingw32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
+])
+
 AC_CHECK_LIB($clib, dlopen, [
 	UCOMMON_LOADER=""
 ],[
@@ -86,6 +91,10 @@ AC_CHECK_LIB($clib, dlopen, [
 
 AC_CHECK_LIB($clib, stricmp, [
 	AC_DEFINE(HAVE_STRICMP, [1], [string icmp])
+])
+
+AC_CHECK_LIB($clib, stristr, [
+    AC_DEFINE(HAVE_STRISTR, [1], [string istr])
 ])
 
 AC_CHECK_LIB($clib, sysconf, [
@@ -146,6 +155,10 @@ AC_CHECK_HEADER(pthread.h, [
 		tlib="pthread"
 		UCOMMON_LIBS="$UCOMMON_LIBS -lpthread"
 	])
+	AC_CHECK_LIB(pthreadGC2,pthread_create,[
+		tlib="pthreadGC2"
+		UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
+	])
 	if test -z "$tlib" ; then
 		AC_CHECK_LIB($clib, pthread_create, [tlib="$clib"])
 	fi
@@ -162,10 +175,6 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_delay,[
 			AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
 		])
-		AC_CHECK_LIB($tlib,pthread_rwlockattr_setpshared,[
-			AC_DEFINE(HAVE_PTHREAD_RWLOCKATTR_SETPSHARED, [1], ["shared rwlock"])
-		])
-	
 	fi		
 ],[
 	AC_MSG_ERROR("pthread support required")
