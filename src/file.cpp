@@ -694,9 +694,9 @@ extern "C" key_t cpr_createipc(const char *name)
 	int fd;
 
 	ftok_name(name, buf, sizeof(buf));
-	remove(buf);
-	fd = creat(buf, 0660);
-	close(fd);
+	fd = open(buf, O_CREAT | O_EXCL | O_WRONLY, 0660);
+	if(fd > -1)
+		close(fd);
 	return ftok(buf, 'u');
 }
 
