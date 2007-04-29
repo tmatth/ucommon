@@ -49,7 +49,7 @@ private:
 
 public:
 	MessageQueue(const char *name, size_t objsize, unsigned count);
-	MessageQueue(const char *name, bool blocking = true);
+	MessageQueue(const char *name);
 	~MessageQueue();
 
 	bool get(void *data, size_t len);
@@ -69,8 +69,6 @@ public:
 		{return getPending() > 0;};
 
 	unsigned getPending(void) const;
-	unsigned getLimit(void) const;
-	size_t getSize(void) const;
 };
 
 class __EXPORT envpager : public mempager
@@ -123,10 +121,10 @@ public:
 		{return mq == NULL;};
 
 	inline bool get(T *buf)
-		{return MessageQueue::get(buf);};
+		{return MessageQueue::get(buf, sizeof(T));};
 	
 	inline bool put(T *buf)
-		{return MessageQueue::put(buf);};
+		{return MessageQueue::put(buf, sizeof(T));};
 };
 
 END_NAMESPACE

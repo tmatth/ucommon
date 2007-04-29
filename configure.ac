@@ -97,7 +97,11 @@ AC_CHECK_LIB($clib, posix_memalign, [
 ])
 
 AC_CHECK_LIB($clib, mkfifo, [
-    AC_DEFINE(HAVE_SIGACTION, [1], [fifo control port])
+    AC_DEFINE(HAVE_MKFIFO, [1], [fifo control port])
+])
+
+AC_CHECK_LIB($clib, ftok, [
+    AC_DEFINE(HAVE_FTOK, [1], [ftok ipc support])
 ])
 
 AC_CHECK_LIB($clib, sigaction, [

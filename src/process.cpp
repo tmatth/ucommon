@@ -43,7 +43,7 @@
 #include <sched.h>
 #include <limits.h>
 
-#if HAVE_FTOK
+#ifdef HAVE_FTOK
 #include <sys/ipc.h>
 
 extern "C" {
@@ -69,6 +69,7 @@ extern "C" {
 using namespace UCOMMON_NAMESPACE;
 
 #ifdef	HAVE_MQUEUE_H
+
 struct MessageQueue::ipc
 {
 	mqd_t mqid;
@@ -89,13 +90,11 @@ MessageQueue::MessageQueue(const char *name, size_t msgsize, unsigned count)
 	}
 }
 	
-MessageQueue::MessageQueue(const char *name, bool blocking)
+MessageQueue::MessageQueue(const char *name)
 {
 	mq = (ipc *)malloc(sizeof(ipc));
-	int mode = O_WRONLY;
+	int mode = O_WRONLY | O_NONBLOCK;
 
-	if(!blocking)
-		mode |= O_NONBLOCK;
 	mq->mqid = mq_open(name, mode);
 	if(mq->mqid == (mqd_t)-1) {
 		free(mq);
@@ -118,21 +117,6 @@ void MessageQueue::release(void)
 	}
 }
 
-unsigned MessageQueue::getLimit(void) const
-{
-	if(!mq)
-		return 0;
-
-	return mq->attr.mq_maxmsg;
-}
-
-size_t MessageQueue::getSize(void) const
-{
-	if(!mq)
-		return 0;
-	return mq->attr.mq_msgsize;
-}
-
 unsigned MessageQueue::getPending(void) const
 {
 	mq_attr attr;
@@ -151,7 +135,7 @@ bool MessageQueue::puts(char *buf)
 	if(!mq)
 		return false;
 
-	if(len >= getSize())
+	if(len >= (size_t)(mq->attr.mq_msgsize))
 		return false;
 	
 	return put(buf, len);
@@ -163,7 +147,7 @@ bool MessageQueue::put(void *buf, size_t len)
 		return false;
 
 	if(!len)
-		len = getSize();
+		len = mq->attr.mq_msgsize;
 
 	if(!len)
 		return false;
@@ -177,7 +161,7 @@ bool MessageQueue::put(void *buf, size_t len)
 bool MessageQueue::gets(char *buf)
 {
 	unsigned int pri;
-	ssize_t len = getSize();
+	ssize_t len = mq->attr.mq_msgsize;
 	if(!len)
 		return false;
 
@@ -197,7 +181,7 @@ bool MessageQueue::get(void *buf, size_t len)
 		return false;
 	
 	if(!len)
-		len = getSize();
+		len = mq->attr.mq_msgsize;
 
 	if(!len)
 		return false;
@@ -207,6 +191,161 @@ bool MessageQueue::get(void *buf, size_t len)
 	
 	return true;
 }
+
+#else
+#include <sys/msg.h>
+
+/* struct msgbuf {
+	long mtype;
+	char mtext[1];
+}; */
+
+struct MessageQueue::ipc
+{
+	key_t key;
+	bool creator;
+	int fd;
+	struct msqid_ds attr;
+	struct msginfo info;
+	struct msgbuf *mbuf;
+};
+
+MessageQueue::MessageQueue(const char *name)
+{
+	mq = (ipc *)malloc(sizeof(ipc));
+	mq->key = cpr_accessipc(name);
+	mq->fd = msgget(mq->key, 0660);
+	mq->creator = false;
+
+	if(mq->fd == -1) {
+fail:
+		free(mq);
+		mq = NULL;
+		return;
+	}
+
+	if(msgctl(mq->fd, IPC_STAT, &mq->attr))
+		goto fail;
+	void *mi = (void *)&mq->info;
+	if(msgctl(mq->fd, IPC_INFO, (struct msqid_ds *)(mi)))
+		goto fail;
+	mq->mbuf = (struct msgbuf *)malloc(sizeof(msgbuf) + mq->info.msgmax);
+}
+
+MessageQueue::MessageQueue(const char *name, size_t size, unsigned count)
+{
+	mq = (ipc *)malloc(sizeof(ipc));
+	mq->key = cpr_createipc(name);
+	mq->fd = msgget(mq->key, IPC_CREAT | 0660);
+	mq->creator = true;
+	
+    if(mq->fd == -1) {
+fail:
+        free(mq);
+        mq = NULL;
+		cpr_unlinkipc(name);
+        return;
+    }
+
+	void *mi = (void *)&mq->info;
+	if(msgctl(mq->fd, IPC_INFO, (struct msqid_ds *)mi)) {
+		msgctl(mq->fd, IPC_RMID, NULL);
+		goto fail;
+	}
+
+	if(msgctl(mq->fd, IPC_STAT, &mq->attr)) {
+		msgctl(mq->fd, IPC_RMID, NULL);
+		goto fail;
+	}
+
+	mq->attr.msg_qbytes = size * count;
+	if(msgctl(mq->fd, IPC_SET, &mq->attr)) {
+		msgctl(mq->fd, IPC_RMID, NULL);
+		goto fail;
+	}
+	mq->mbuf = (struct msgbuf *)malloc(sizeof(struct msgbuf) + mq->info.msgmax);
+}
+
+MessageQueue::~MessageQueue()
+{
+	release();
+}
+
+void MessageQueue::release(void)
+{
+	if(mq) {
+		free(mq->mbuf);
+		if(mq->creator)
+			msgctl(mq->fd, IPC_RMID, NULL);
+		free(mq);
+		mq = NULL;
+	}
+}
+
+unsigned MessageQueue::getPending(void) const
+{
+	struct msqid_ds stat;
+
+	if(!mq)
+		return 0;
+
+	if(msgctl(mq->fd, IPC_STAT, &stat))
+		return 0;
+
+	return stat.msg_qnum;
+}
+
+bool MessageQueue::puts(char *data)
+{
+	size_t len = cpr_strlen(data);
+
+	if(len >= (size_t)(mq->info.msgmax))
+		len = mq->info.msgmax - 1;
+
+	return put(data, len);
+}
+
+bool MessageQueue::put(void *data, size_t len)
+{
+	if(!mq)
+		return false;
+
+	mq->mbuf->mtype = 1;
+
+	if(len > (size_t)(mq->info.msgmax) || !len)
+		len = mq->info.msgmax;
+
+	memcpy(mq->mbuf->mtext, data, len);
+	if(msgsnd(mq->fd, &mq->mbuf, len, IPC_NOWAIT) < 0)
+		return false;
+	return true;
+}
+
+bool MessageQueue::get(void *data, size_t len)
+{
+	if(!mq)
+		return false;
+
+	if(msgrcv(mq->fd, &mq->mbuf, len, 1, 0) < 0)
+		return false;
+
+	memcpy(data, mq->mbuf->mtext, len);
+	return true;
+}
+
+bool MessageQueue::gets(char *data)
+{
+    if(!mq)
+        return false;
+
+    if(msgrcv(mq->fd, &mq->mbuf, mq->info.msgmax, 1, 0) < 0)
+        return false;
+
+	mq->mbuf->mtext[mq->info.msgmax - 1] = 0;
+	strcpy(data, mq->mbuf->mtext);
+    return true;
+}
+
 
 #endif
 
@@ -615,7 +754,7 @@ static void fifo_name(const char *name, char *buf, size_t max)
 
 	snprintf(buf, max, "/var/run/%s", name);
 	if(cpr_isdir(buf)) {
-		snprintf(buf, max, "/var/run/%s/%s.ctrl");
+		snprintf(buf, max, "/var/run/%s/%s.ctrl", name, name);
 		return;
 	}
 
@@ -632,7 +771,7 @@ void cpr_unlinkctrl(const char *name)
 
 fd_t cpr_createctrl(const char *name)
 {
-	char buf;
+	char buf[65];
 
 	fifo_name(name, buf, sizeof(buf));
 	remove(buf);
