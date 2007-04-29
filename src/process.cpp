@@ -48,9 +48,8 @@
 #include <sys/ipc.h>
 
 extern "C" {
-	extern key_t cpr_createipc(const char *name);
-	extern key_t cpr_accessipc(const char *name);
-	extern void cpr_unlinkipc(const char *name);
+	extern key_t cpr_createipc(const char *name, char mode);
+	extern key_t cpr_accessipc(const char *name, char mode);
 };
 #endif
 
@@ -214,7 +213,7 @@ struct MessageQueue::ipc
 MessageQueue::MessageQueue(const char *name)
 {
 	mq = (ipc *)malloc(sizeof(ipc));
-	mq->key = cpr_accessipc(name);
+	mq->key = cpr_accessipc(name, 'M');
 	mq->fd = msgget(mq->key, 0660);
 	mq->creator = false;
 
@@ -238,7 +237,7 @@ MessageQueue::MessageQueue(const char *name, size_t size, unsigned count)
 	int tmp;
 
 	mq = (ipc *)malloc(sizeof(ipc));
-	mq->key = cpr_createipc(name);
+	mq->key = cpr_createipc(name, 'M');
 	mq->creator = true;
 
 remake:

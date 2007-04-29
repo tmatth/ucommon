@@ -11,9 +11,8 @@
 #include <sys/shm.h>
 
 extern "C" {
-	extern key_t cpr_createipc(const char *name);
-	extern key_t cpr_accessipc(const char *name);
-	extern void cpr_unlinkipc(const char *name);
+	extern key_t cpr_createipc(const char *name, char mode);
+	extern key_t cpr_accessipc(const char *name, char mode);
 };
 #endif
 
@@ -135,7 +134,7 @@ MappedMemory::MappedMemory(const char *name, size_t len)
 	key_t key;
 
 	if(len) {
-		key = cpr_createipc(name);
+		key = cpr_createipc(name, 'S');
 remake:
 		fd = shmget(key, len, IPC_CREAT | IPC_EXCL | 0660);
 		if(fd == -1 && errno == EEXIST) {
@@ -147,7 +146,7 @@ remake:
 		}
 	}
 	else {
-		key = cpr_accessipc(name);
+		key = cpr_accessipc(name, 'S');
 		fd = shmget(key, 0, 0);
 	}
 	
@@ -688,7 +687,7 @@ extern "C" void cpr_unlinkipc(const char *name)
 	remove(buf);
 }
 
-extern "C" key_t cpr_createipc(const char *name)
+extern "C" key_t cpr_createipc(const char *name, char mode)
 {
 	char buf[65];
 	int fd;
@@ -697,15 +696,15 @@ extern "C" key_t cpr_createipc(const char *name)
 	fd = open(buf, O_CREAT | O_EXCL | O_WRONLY, 0660);
 	if(fd > -1)
 		close(fd);
-	return ftok(buf, 'u');
+	return ftok(buf, mode);
 }
 
-extern "C" key_t cpr_accessipc(const char *name)
+extern "C" key_t cpr_accessipc(const char *name, char mode)
 {
 	char buf[65];
 
 	ftok_name(name, buf, sizeof(buf));
-	return ftok(buf, 'u');
+	return ftok(buf, mode);
 }
 
 #endif
