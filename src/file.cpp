@@ -8,6 +8,7 @@
 
 #if HAVE_FTOK
 #include <sys/ipc.h>
+#include <sys/shm.h>
 
 extern "C" {
 	extern key_t cpr_createipc(const char *name);
@@ -21,48 +22,9 @@ extern "C" {
 
 using namespace UCOMMON_NAMESPACE;
 
-#if !defined(HAVE_SHM_OPEN)
-
-#ifdef	_MSWINDOWS_
-#define	SHM_PATH "c:/temp/%s.shm"
-#else
-#define	SHM_PATH "/var/run/shm/%s"
-#defin	SHM_TEMP "/tmp/.%s.shm"
-#endif
-
-static int shm_open(const char *fn, unsigned mode)
-{
-	char buffer[128];
-
-	if(strrchr(fn, '/') != fn)
-		return -1;
-
-#ifdef	_MSWINDOWS_
-	snprintf(buffer, sizeof(buffer), SHM_PATH, ++fn);
-#else
-	if(cpr_isdir("/var/run/shm"))
-		snprintf(buffer, sizeof(buffer), SHM_PATH, ++fn);
-	else
-		snprintf(buffer, sizeof(buffer), SHM_TEMP, ++fn);
-#endif
-	return open(buffer, mode);
-}
-
-static void shm_unlink(const char *fn)
-{
-	char buffer[128];
-
-	if(strrchr(fn, '/') == fn) {
-		snprintf(buffer, sizeof(buffer), SHM_PATH, ++fn);
-		remove(buffer);
-	}
-}
-
-#endif
-
 #if defined(_MSWINDOWS_)
 
-MappedMemory::MappedMemory(const char *fn, size_t len, size_t paging)
+MappedMemory::MappedMemory(const char *fn, size_t len)
 {
 	int share = FILE_SHARE_READ;
 	int prot = FILE_MAP_READ;
@@ -71,8 +33,8 @@ MappedMemory::MappedMemory(const char *fn, size_t len, size_t paging)
 	struct stat ino;
 	char fpath[256];
 
-	page = paging;
-	size = used = 0;
+	size = 0;
+	used = 0;
 	map = NULL;
 
 	snprintf(fpath, sizeof(fpath), "c:/temp/%s.shm", fn + 1);
@@ -118,13 +80,12 @@ MappedMemory::~MappedMemory()
 	}
 }
 
-#else
+#elif defined(HAVE_SHM_OPEN)
 
 MappedMemory::MappedMemory(const char *fn, size_t len)
 {
 	int prot = PROT_READ;
 	struct stat ino;
-	int fd;
 
 	size = 0;
 	used = 0;
@@ -147,28 +108,72 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 	if(fd < 0)
 		return;
 
-#if UCOMMON_MAPPED_FILES > 0	
 	map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
+	close(fd);
 	if(map != (caddr_t)MAP_FAILED) {
 		size = len;
 		mlock(map, size);
 	}
-#else
-	map = (caddr_t)malloc(len);
-	size = len;
-	cpr_memlock(map, size);
-#endif
 }
 
 MappedMemory::~MappedMemory()
 {
 	if(size) {
-#if UCOMMON_MAPPED_FILES > 0
 		munlock(map, size);
 		munmap(map, size);
+		size = 0;
+	}
+}
+
 #else
-		cpr_memunlock(map, size);
+
+MappedMemory::MappedMemory(const char *name, size_t len)
+{
+	struct shmid_ds stat;
+	size = 0;
+	used = 0;
+	key_t key;
+
+	if(len) {
+		key = cpr_createipc(name);
+remake:
+		fd = shmget(key, len, IPC_CREAT | IPC_EXCL | 0660);
+		if(fd == -1 && errno == EEXIST) {
+			fd = shmget(key, 0, 0);
+			if(fd > -1) {
+				shmctl(fd, IPC_RMID, NULL);
+				goto remake;
+			}
+		}
+	}
+	else {
+		key = cpr_accessipc(name);
+		fd = shmget(key, 0, 0);
+	}
+	
+	if(fd > -1) {
+		if(len)
+			size = len;
+		else if(shmctl(fd, IPC_STAT, &stat) == 0)
+			size = stat.shm_segsz;
+		else
+			fd = -1;
+	}
+	map = (caddr_t)shmat(fd, NULL, 0);
+#ifdef	SHM_LOCK
+	if(fd > -1)
+		shmctl(fd, SHM_LOCK, NULL);
 #endif
+}
+
+MappedMemory::~MappedMemory()
+{
+	if(size > 0) {
+#ifdef	SHM_UNLOCK
+		shmctl(fd, SHM_UNLOCK, NULL);
+#endif
+		shmdt(map);
+		fd = -1;
 		size = 0;
 	}
 }

@@ -2,6 +2,7 @@
 #include <ucommon/process.h>
 #include <ucommon/string.h>
 #include <ucommon/misc.h>
+#include <errno.h>
 
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -234,10 +235,22 @@ fail:
 
 MessageQueue::MessageQueue(const char *name, size_t size, unsigned count)
 {
+	int tmp;
+
 	mq = (ipc *)malloc(sizeof(ipc));
 	mq->key = cpr_createipc(name);
-	mq->fd = msgget(mq->key, IPC_CREAT | 0660);
 	mq->creator = true;
+
+remake:
+	mq->fd = msgget(mq->key, IPC_CREAT | IPC_EXCL | 0660);
+
+	if(mq->fd < 0 && errno == EEXIST) {
+		tmp = msgget(mq->key, 0660);
+		if(tmp > -1) {
+			msgctl(tmp, IPC_RMID, NULL);
+			goto remake;
+		}
+	}
 	
     if(mq->fd == -1) {
 fail:
@@ -277,6 +290,7 @@ void MessageQueue::release(void)
 		free(mq->mbuf);
 		if(mq->creator)
 			msgctl(mq->fd, IPC_RMID, NULL);
+		close(mq->fd);
 		free(mq);
 		mq = NULL;
 	}
