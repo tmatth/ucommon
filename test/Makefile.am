@@ -13,4 +13,4 @@ linked_SOURCES = linked.cpp
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp
-	g++ @UCOMMON_STD@ -o stdcpp -I../inc -L../src/.libs -lucommon stdcpp.cpp @UCOMMON_LIBS@
+	$(CXX) @UCOMMON_STD@ -o stdcpp -I../inc -L../src/.libs -lucommon stdcpp.cpp @UCOMMON_LIBS@
