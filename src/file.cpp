@@ -44,9 +44,9 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 	else
 		fd = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, fn + 1);
 	
-	if(fd == INVALID_HANDLE_VALUE) {
+	if(fd == INVALID_HANDLE_VALUE || fd == NULL) 
 		return;
-	}
+
 	map = (caddr_t)MapViewOfFile(fd, FILE_MAP_ALL_ACCESS, 0, 0, len);
 	if(map) {
 		size = len;
