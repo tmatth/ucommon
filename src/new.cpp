@@ -2,7 +2,7 @@
 #include <ucommon/ucommon.h>
 #include <stdlib.h>
 
-extern "C" void *memalloc(size_t size)
+extern "C" void *cpr_memalloc(size_t size)
 {
 	void *mem;
 
@@ -14,7 +14,7 @@ extern "C" void *memalloc(size_t size)
 	return mem;
 }
 
-extern "C" void *memassign(size_t size, caddr_t addr, size_t max)
+extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 {
 	if(!addr)
 		addr = (caddr_t)malloc(size);

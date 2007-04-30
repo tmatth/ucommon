@@ -89,29 +89,29 @@ typedef	double rpcdouble_t;
 
 #include <stdlib.h>
 
-extern "C" __EXPORT void *memalloc(size_t size);
-extern "C" __EXPORT void *memassign(size_t size, caddr_t place, size_t max);
+extern "C" __EXPORT void *cpr_memalloc(size_t size);
+extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t place, size_t max);
 
 inline void *operator new(size_t size)
-	{return memalloc(size);};
+	{return cpr_memalloc(size);};
 
 inline void *operator new[](size_t size)
-	{return memalloc(size);};
+	{return cpr_memalloc(size);};
 
 inline void *operator new[](size_t size, caddr_t place)
-	{return memassign(size, place, size);};
+	{return cpr_memassign(size, place, size);};
 
 inline void *operator new[](size_t size, caddr_t place, size_t max)
-	{return memassign(size, place, max);};
+	{return cpr_memassign(size, place, max);};
 
 inline void *operator new(size_t size, size_t extra)
-	{return memalloc(size + extra);};
+	{return cpr_memalloc(size + extra);};
 
 inline void *operator new(size_t size, caddr_t place)
-	{return memassign(size, place, size);};
+	{return cpr_memassign(size, place, size);};
 
 inline void *operator new(size_t size, caddr_t place, size_t max)
-	{return memassign(size, place, max);};
+	{return cpr_memassign(size, place, max);};
 
 inline void operator delete(void *mem)
 	{free(mem);};

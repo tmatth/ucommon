@@ -8,4 +8,5 @@ Description:
 Version: @VERSION@
 Libs:  -lucommon @UCOMMON_LIBS@ 
 Cflags: @UCOMMON_FLAGS@ 
+Stdflags: @UCOMMON_STD@
  

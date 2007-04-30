@@ -237,7 +237,7 @@ for flag in $CXXFLAGS $CFLAGS; do
 		;;
 	-fvisibility=*)
 		VISIBLE_FLAGS=""
-		UCOMMON_FLAGS="$UCOMMON_FLAGS $flags"
+		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
 		;;
 	*)
 		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
@@ -246,11 +246,14 @@ for flag in $CXXFLAGS $CFLAGS; do
 done
 export CXXFLAGS="$UCOMMON_FLAGS"
 UCOMMON_FLAGS="-DNOSTDCPP"
+UCOMMON_STD=""
 
 if test "$GCC" = yes ; then
-	ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs -nodefaultlibs -nostdinc++"
+	ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs"
+	lcflags="-nodefaultlibs -nostdinc++"
 else
-	ucflags="-features=no%except -features=namespace -features=no%rtti -xnolib"
+	ucflags="-features=no%except -features=namespace -features=no%rtti"
+	lcflags="-xnolib"
 fi
 
 for flag in $ucflags ; do
@@ -258,9 +261,22 @@ for flag in $ucflags ; do
 	echo 'void f(){}' >conftest.cpp
 	if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
 		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+		UCOMMON_STD="$UCOMMON_STD $flag"
 		AC_MSG_RESULT(yes)
     else
 		AC_MSG_RESULT(no)
+    fi
+    rm -f conftest*
+done
+
+for flag in $lcflags ; do
+    AC_MSG_CHECKING([whether ${CXX} supports $flag])
+    echo 'void f(){}' >conftest.cpp
+    if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
+        UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+        AC_MSG_RESULT(yes)
+    else
+        AC_MSG_RESULT(no)
     fi
     rm -f conftest*
 done
@@ -272,6 +288,7 @@ if test ! -z "$PTHREAD_FLAGS" ; then
     	if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
 			AC_MSG_RESULT(yes)
 			UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+			UCOMMON_STD="$UCOMMON_STD $flag"
 			break
 		else
 			AC_MSG_RESULT(no)
@@ -285,6 +302,7 @@ do
     echo 'void f(){}' >conftest.cpp
     if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
         UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+		UCOMMON_STD="$UCOMMON_STD $flag"
         AC_MSG_RESULT(yes)
     else
         AC_MSG_RESULT(no)
@@ -298,10 +316,12 @@ AC_MSG_CHECKING([whether ${CXX} supports visibility])
 echo 'void f(){}' >conftest.cpp
 if test -z "`${CXX} -fvisibility=hidden -c conftest.cpp 2>&1`"; then
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -fvisibility=hidden -DUCOMMON_VISIBILITY=1"
+	UCOMMON_STD="$UCOMMON_STD -fvisibility=hidden -DUCOMMON_VISIBILITY=1"
     AC_MSG_RESULT(yes)
 	UCOMMON_VISIBILITY="1"
 else
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -DUCOMMON_VISIBILITY=0"
+	UCOMMON_STD="$UCOMMON_STD -DUCOMMON_VISIBILITY=0"
     AC_MSG_RESULT(no)
 fi
 rm -f conftest*
@@ -315,6 +335,7 @@ AC_SUBST(UCOMMON_LOADER)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)
+AC_SUBST(UCOMMON_STD)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
