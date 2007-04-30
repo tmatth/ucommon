@@ -89,15 +89,35 @@ typedef	double rpcdouble_t;
 
 #include <stdlib.h>
 
-__EXPORT void *operator new(size_t size);
-__EXPORT void *operator new[](size_t size);
-__EXPORT void *operator new(size_t size, size_t extra);
-__EXPORT void *operator new(size_t size, caddr_t place, size_t max);
-__EXPORT void *operator new[](size_t size, caddr_t place, size_t max);
-__EXPORT void *operator new(size_t size, caddr_t place);
-__EXPORT void *operator new[](size_t size, caddr_t place);
-__EXPORT void operator delete(void *mem);
-__EXPORT void operator delete[](void *mem);
+extern "C" __EXPORT void *memalloc(size_t size);
+extern "C" __EXPORT void *memassign(size_t size, caddr_t place, size_t max);
+
+inline void *operator new(size_t size)
+	{return memalloc(size);};
+
+inline void *operator new[](size_t size)
+	{return memalloc(size);};
+
+inline void *operator new[](size_t size, caddr_t place)
+	{return memassign(size, place, size);};
+
+inline void *operator new[](size_t size, caddr_t place, size_t max)
+	{return memassign(size, place, max);};
+
+inline void *operator new(size_t size, size_t extra)
+	{return memalloc(size + extra);};
+
+inline void *operator new(size_t size, caddr_t place)
+	{return memassign(size, place, size);};
+
+inline void *operator new(size_t size, caddr_t place, size_t max)
+	{return memassign(size, place, max);};
+
+inline void operator delete(void *mem)
+	{free(mem);};
+
+inline void operator delete[](void *mem)
+	{free(mem);};
 
 #ifdef	__GNUC__
 extern "C" __EXPORT void __cxa_pure_virtual(void);

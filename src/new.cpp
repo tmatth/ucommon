@@ -2,68 +2,24 @@
 #include <ucommon/ucommon.h>
 #include <stdlib.h>
 
-void *operator new(size_t size, caddr_t addr, size_t max)
+extern "C" void *memalloc(size_t size)
 {
+	void *mem;
+
+	if(!size)
+		++size;
+
+	mem = malloc(size);
+	crit(mem != NULL);
+	return mem;
+}
+
+extern "C" void *memassign(size_t size, caddr_t addr, size_t max)
+{
+	if(!addr)
+		addr = (caddr_t)malloc(size);
 	crit((size <= max));
 	return addr;
-}
-
-void *operator new[](size_t size, caddr_t addr, size_t max)
-{
-	crit((size <= max));
-    return addr;
-}
-
-void *operator new(size_t size, size_t extra)
-{
-	size += extra;
-	return operator new(size);
-}
-
-void *operator new(size_t size)
-{
-	if(!size)
-		++size;
-
-	void *mem = malloc(size);
-	crit(mem != NULL);
-	return mem;
-}
-
-void *operator new[](size_t size)
-{
-	if(!size)
-		++size;
-
-	void *mem = malloc(size);
-	crit(mem != NULL);
-	return mem;
-}
-
-void *operator new(size_t size, caddr_t place)
-{
-	if(!place)
-		place = (caddr_t)malloc(size);
-	crit(place != NULL);
-	return place;
-}
-
-void *operator new[](size_t size, caddr_t place)
-{
-	if(!place)
-		place = (caddr_t)malloc(size);
-	crit(place != NULL);
-    return place; 
-}
-
-void operator delete(void *mem)
-{
-	::free(mem);
-}
-
-void operator delete[](void *mem)
-{
-	::free(mem);
 }
 
 #ifdef	__GNUC__
