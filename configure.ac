@@ -27,7 +27,6 @@ if test ! -z "$cfg_options" ; then
 	exit -1
 fi
 
-
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
 AC_PROG_CPP
@@ -246,7 +245,7 @@ for flag in $CXXFLAGS $CFLAGS; do
 done
 export CXXFLAGS="$UCOMMON_FLAGS"
 UCOMMON_FLAGS="-DNOSTDCPP"
-UCOMMON_STD=""
+UCOMMON_CLINK=""
 
 if test "$GCC" = yes ; then
 	ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs"
@@ -261,7 +260,6 @@ for flag in $ucflags ; do
 	echo 'void f(){}' >conftest.cpp
 	if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
 		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
-		UCOMMON_STD="$UCOMMON_STD $flag"
 		AC_MSG_RESULT(yes)
     else
 		AC_MSG_RESULT(no)
@@ -273,7 +271,7 @@ for flag in $lcflags ; do
     AC_MSG_CHECKING([whether ${CXX} supports $flag])
     echo 'void f(){}' >conftest.cpp
     if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
-        UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+        UCOMMON_CLINK="$UCOMMON_CLINK $flag"
         AC_MSG_RESULT(yes)
     else
         AC_MSG_RESULT(no)
@@ -288,7 +286,6 @@ if test ! -z "$PTHREAD_FLAGS" ; then
     	if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
 			AC_MSG_RESULT(yes)
 			UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
-			UCOMMON_STD="$UCOMMON_STD $flag"
 			break
 		else
 			AC_MSG_RESULT(no)
@@ -302,7 +299,6 @@ do
     echo 'void f(){}' >conftest.cpp
     if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
         UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
-		UCOMMON_STD="$UCOMMON_STD $flag"
         AC_MSG_RESULT(yes)
     else
         AC_MSG_RESULT(no)
@@ -316,26 +312,42 @@ AC_MSG_CHECKING([whether ${CXX} supports visibility])
 echo 'void f(){}' >conftest.cpp
 if test -z "`${CXX} -fvisibility=hidden -c conftest.cpp 2>&1`"; then
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -fvisibility=hidden -DUCOMMON_VISIBILITY=1"
-	UCOMMON_STD="$UCOMMON_STD -fvisibility=hidden -DUCOMMON_VISIBILITY=1"
     AC_MSG_RESULT(yes)
 	UCOMMON_VISIBILITY="1"
 else
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -DUCOMMON_VISIBILITY=0"
-	UCOMMON_STD="$UCOMMON_STD -DUCOMMON_VISIBILITY=0"
     AC_MSG_RESULT(no)
 fi
 rm -f conftest*
 
 AC_LANG_RESTORE
 
+UCOMMON_SHARED=""
+UCOMMON_MODULE="-module -shared"
 
+case "$target_os" in
+osf*)
+    UCOMMON_FLAGS="$UCOMMON_FLAGS -D_POSIX_C_SOURCE=1 -D_OSF_SOURCE=1 -D__USE_STD_IOSTREAM"
+    ;;
+cygwin*|mingw*)
+    UCOMMON_SHARED="-no-undefined"
+    UCOMMON_MODULE="-module -shared -no-undefined"
+    ;;
+darwin6*)
+    UCOMMON_MODULE="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
+    STAGE2="macosx"
+    ;;
+darwin*)
+    UCOMMON_MODULE="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
+    ;;
+esac
 
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LOADER)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)
-AC_SUBST(UCOMMON_STD)
+AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
