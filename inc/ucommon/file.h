@@ -39,9 +39,6 @@ class __EXPORT MappedMemory
 {
 private:
 	caddr_t map;
-#if defined(_MSWINDOWS_) 
-	HANDLE hmap;
-#endif
 	fd_t fd;
 
 protected:

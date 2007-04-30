@@ -27,40 +27,27 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 {
 	int share = FILE_SHARE_READ;
 	int prot = FILE_MAP_READ;
-	int page = PAGE_READONLY;
 	int mode = GENERIC_READ;
 	struct stat ino;
-	char fpath[256];
 
 	size = 0;
 	used = 0;
 	map = NULL;
 
-	snprintf(fpath, sizeof(fpath), "c:/temp/%s.shm", fn + 1);
 	if(len) {
 		prot = FILE_MAP_WRITE;
-		page = PAGE_READWRITE;
 		mode |= GENERIC_WRITE;
 		share |= FILE_SHARE_WRITE;
-		remove(fpath);
-	}
-	fd = CreateFile(fpath, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
-	if(fd == INVALID_HANDLE_VALUE) 
-		return;
+		fd = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, len, fn + 1);
 
-	if(len) {
-		SetFilePointer(fd, (LONG)len, 0l, FILE_BEGIN);
-		SetEndOfFile(fd);
 	}
-	else {
-		len = SetFilePointer(fd, 0l, 0l, FILE_END);
-	}
-	hmap = CreateFileMapping(fd, NULL, page, 0, 0, fn + 1);
-	if(hmap == INVALID_HANDLE_VALUE) {
-		CloseHandle(fd);
+	else
+		fd = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, fn + 1);
+	
+	if(fd == INVALID_HANDLE_VALUE) {
 		return;
 	}
-	map = (caddr_t)MapViewOfFile(map, prot, 0, 0, len);
+	map = (caddr_t)MapViewOfFile(fd, FILE_MAP_ALL_ACCESS, 0, 0, len);
 	if(map) {
 		size = len;
 		VirtualLock(map, size);
@@ -71,11 +58,10 @@ MappedMemory::~MappedMemory()
 {
 	if(map) {
 		VirtualUnlock(map, size);
-		UnmapViewOfFile(hmap);
-		CloseHandle(hmap);
-		map = NULL;
-		hmap = INVALID_HANDLE_VALUE;
+		UnmapViewOfFile(fd);
 		CloseHandle(fd);
+		map = NULL;
+		fd = INVALID_HANDLE_VALUE;
 	}
 }
 
