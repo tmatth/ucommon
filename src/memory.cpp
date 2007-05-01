@@ -99,7 +99,7 @@ void mempager::dealloc(void *mem)
 {
 }
 
-void *mempager::alloc(size_t size)
+void *mempager::alloc_locked(size_t size)
 {
 	caddr_t mem;
 	page_t *p = page;
@@ -109,7 +109,6 @@ void *mempager::alloc(size_t size)
 	while(size % sizeof(void *))
 		++size;
 
-	pthread_mutex_lock(&mutex);
 	while(p) {
 		if(size <= pagesize - p->used)	
 			break;
@@ -120,6 +119,20 @@ void *mempager::alloc(size_t size)
 
 	mem = ((caddr_t)(p)) + p->used;	
 	p->used += size;
+	return mem;
+}
+
+void *mempager::alloc(size_t size)
+{
+	void *mem;
+
+	crit(size <= (pagesize - sizeof(page_t)));
+
+	while(size % sizeof(void *))
+		++size;
+
+	pthread_mutex_lock(&mutex);
+	mem = alloc_locked(size);
 	pthread_mutex_unlock(&mutex);
 	return mem;
 }
@@ -131,6 +144,15 @@ char *mempager::dup(const char *str)
 	char *mem = static_cast<char *>(alloc(strlen(str) + 1));
 	strcpy(mem, str);
 	return mem;
+}
+
+char *mempager::dup_locked(const char *str)
+{
+    if(!str)
+        return NULL;
+    char *mem = static_cast<char *>(alloc_locked(strlen(str) + 1));
+    strcpy(mem, str);
+    return mem;
 }
 
 void *mempager::dup(void *obj, size_t size)
@@ -225,7 +247,14 @@ void keyassoc::purge(void)
 
 void *keyassoc::get(const char *id)
 {
-	keydata *kd = static_cast<keydata *>(NamedObject::map(root, id, max));
+	keydata *kd;
+
+	if(pager)
+		pager->lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, max));
+
+	if(pager)
+		pager->unlock();
 	if(!kd)
 		return NULL;
 
@@ -234,11 +263,15 @@ void *keyassoc::get(const char *id)
 
 void keyassoc::set(char *id, void *d)
 {
-    keydata *kd = static_cast<keydata *>(NamedObject::map(root, id, max));
+    keydata *kd;
+
+	if(pager)
+		pager->lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, max));
 	if(!kd) {
 		if(pager) {
-			id = pager->dup(id);
-			caddr_t ptr = (caddr_t)pager->alloc(sizeof(keydata));
+			id = pager->dup_locked(id);
+			caddr_t ptr = (caddr_t)pager->alloc_locked(sizeof(keydata));
 			kd = new(ptr) keydata(root, id, max);
 		}	
 		else {
@@ -247,14 +280,21 @@ void keyassoc::set(char *id, void *d)
 		}
 	}
 	kd->data = d;
+	if(pager)
+		pager->unlock();
 }
 
 void keyassoc::clear(const char *id)
 {
-    keydata *kd = static_cast<keydata *>(NamedObject::map(root, id, max));
-	if(!kd)
-		return;
-	kd->data = NULL;
+    keydata *kd;
+
+	if(pager)
+		pager->lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, max));
+	if(kd)
+		kd->data = NULL;
+	if(pager)
+		pager->unlock();
 }
 
 size_t keyassoc::minsize(unsigned max, size_t size)

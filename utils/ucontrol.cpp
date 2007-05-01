@@ -4,6 +4,8 @@
 #include <config.h>
 #include <stdio.h>
 
+using namespace UCOMMON_NAMESPACE;
+
 static RETSIGTYPE signotify(int signo)
 {
 	switch(signo) {
@@ -20,7 +22,8 @@ static RETSIGTYPE signotify(int signo)
 
 int main(int argc, char **argv)
 {
-	char ctrlpath[65];
+	MessageQueue *mq;
+	char cpath[65];
 	char ctrlcmd[512];
 	fd_t fd;
 	int timeout = 0;
@@ -39,9 +42,14 @@ int main(int argc, char **argv)
 	cpr_signal(SIGUSR2, signotify);
 	cpr_signal(SIGALRM, signotify);
 
-	fd = cpr_openctrl(argv[1]);
+	snprintf(cpath, sizeof(cpath), "/%s", argv[1]);
+
+	fd = cpr_openctrl(cpath);
 	if(!cpr_isopen(fd)) {
-		fprintf(stderr, "*** control: %s; cannot access\n", ctrlpath);
+		mq = new MessageQueue(cpath);
+		if(*mq)
+			goto queue;
+		fprintf(stderr, "*** control: %s; cannot access\n", argv[1]);
 		exit(-1);
 	}
 
@@ -50,7 +58,12 @@ int main(int argc, char **argv)
 	if(timeout)
 		alarm(timeout);
 
-	write(fd, ctrlcmd, strlen(ctrlcmd));
+	cpr_writefile(fd, ctrlcmd, strlen(ctrlcmd));
 	cpr_closefile(fd);
 	pause();
+	exit(-1);
+queue:
+	mq->puts(argv[2]);
+	delete mq;
+	exit(0);
 }

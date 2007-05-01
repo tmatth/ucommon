@@ -83,7 +83,9 @@ MessageQueue::MessageQueue(const char *name, size_t msgsize, unsigned count)
 	mq->attr.mq_maxmsg = count;
 	mq->attr.mq_msgsize = msgsize;
 	mq_unlink(name);
-	mq->mqid = mq_open(name, O_CREAT | O_RDWR | O_NONBLOCK, 0660, &mq->attr);
+	mq->mqid = (mqd_t)(-1);
+	if(strrchr(name, '/') == name)
+		mq->mqid = mq_open(name, O_CREAT | O_RDWR | O_NONBLOCK, 0660, &mq->attr);
 	if(mq->mqid == (mqd_t)(-1)) {
 		free(mq);
 		mq = NULL;
@@ -93,11 +95,13 @@ MessageQueue::MessageQueue(const char *name, size_t msgsize, unsigned count)
 MessageQueue::MessageQueue(const char *name)
 {
 	mq = (ipc *)malloc(sizeof(ipc));
-	int mode = O_WRONLY | O_NONBLOCK;
 
-	mq->mqid = mq_open(name, mode);
+	mq->mqid = (mqd_t)(-1);
+	if(strrchr(name, '/') == name)
+		mq->mqid = mq_open(name, O_WRONLY | O_NONBLOCK);
 	if(mq->mqid == (mqd_t)-1) {
 		free(mq);
+		mq = NULL;
 		return;
 	}
 	mq_getattr(mq->mqid, &mq->attr);
@@ -214,8 +218,11 @@ MessageQueue::MessageQueue(const char *name)
 {
 	mq = (ipc *)malloc(sizeof(ipc));
 	mq->key = cpr_accessipc(name, 'M');
-	mq->fd = msgget(mq->key, 0660);
 	mq->creator = false;
+
+	mq->fd = -1;
+	if(strrchr(name, '/') == name) 
+		mq->fd = msgget(mq->key, 0660);
 
 	if(mq->fd == -1) {
 fail:
@@ -239,6 +246,9 @@ MessageQueue::MessageQueue(const char *name, size_t size, unsigned count)
 	mq = (ipc *)malloc(sizeof(ipc));
 	mq->key = cpr_createipc(name, 'M');
 	mq->creator = true;
+	
+	if(strrchr(name, '/') != name)
+		goto fail;
 
 remake:
 	mq->fd = msgget(mq->key, IPC_CREAT | IPC_EXCL | 0660);
@@ -786,6 +796,9 @@ fd_t cpr_createctrl(const char *name)
 {
 	char buf[65];
 
+	if(strrchr(name, '/') != name)
+		return -1;
+
 	fifo_name(name, buf, sizeof(buf));
 	remove(buf);
 	if(mkfifo(buf, 0660))
@@ -797,6 +810,9 @@ fd_t cpr_createctrl(const char *name)
 fd_t cpr_openctrl(const char *name)
 {
 	char buf[65];
+
+	if(strrchr(name, '/') != name)
+		return -1;
 
 	fifo_name(name, buf, sizeof(buf));
 	return open(name, O_WRONLY);

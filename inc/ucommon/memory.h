@@ -33,8 +33,18 @@ protected:
 		{return sizeof(page_t);};
 
 	page_t *pager(void);
-	
+
 public:
+	virtual void *alloc_locked(size_t size);
+	
+	char *dup_locked(const char *cp);
+
+	inline void lock(void)
+		{pthread_mutex_lock(&mutex);};
+
+	inline void unlock(void)
+		{pthread_mutex_unlock(&mutex);};
+	
 	mempager(size_t ps = 0);
 	virtual ~mempager();
 
@@ -52,7 +62,7 @@ public:
 
 	void purge(void);
 	virtual void dealloc(void *mem);
-	virtual void *alloc(size_t size);
+	void *alloc(size_t size);
 	char *dup(const char *cp);
 	void *dup(void *mem, size_t size);
 };

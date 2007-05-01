@@ -186,30 +186,6 @@ void *MappedMemory::get(size_t offset)
 	return (void *)(map + offset);
 }
 
-MappedAssoc::MappedAssoc(mempager *pager, const char *fname, size_t size, unsigned isize) :
-MappedMemory(fname, size), keyassoc(isize, pager)
-{
-	pthread_mutex_init(&mutex, NULL);
-}
-
-void *MappedAssoc::find(const char *id, size_t osize, size_t tsize)
-{
-	void *mem;
-	
-	pthread_mutex_lock(&mutex);
-	mem = keyassoc::get(id); 
-	if(mem) {
-		pthread_mutex_unlock(&mutex);
-		return mem;
-	}
-	
-	mem = MappedMemory::sbrk(osize + tsize);
-	cpr_strset((char *)mem, tsize, id);
-	keyassoc::set((char *)mem, (caddr_t)(mem) + tsize);
-	pthread_mutex_unlock(&mutex);
-	return mem;
-}
-
 #if UCOMMON_ASYNC_IO > 0
 
 aio::aio()

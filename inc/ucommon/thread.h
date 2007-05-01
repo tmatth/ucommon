@@ -312,7 +312,7 @@ public:
 	size_t getCount(void);
 };
 
-class __EXPORT Stack : protected Conditional, protected mempager
+class __EXPORT Stack : protected Conditional
 {
 private:
 	LinkedObject *freelist, *usedlist;

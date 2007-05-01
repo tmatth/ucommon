@@ -63,17 +63,6 @@ public:
 		{return size;};
 };
 
-class MappedAssoc : protected MappedMemory, protected keyassoc
-{
-private:
-	pthread_mutex_t mutex;
-
-public:
-	MappedAssoc(mempager *pager, const char *fname, size_t len, size_t isize = 177);
-
-	void *find(const char *id, size_t osize, size_t tsize = 32);
-};
-
 #if _POSIX_ASYNCHRONOUS_IO > 0
 
 class __EXPORT aio
@@ -132,26 +121,6 @@ public:
 
 #endif
 
-template <class T, unsigned I = 32, unsigned H = 177>
-class mapped_assoc : public MappedAssoc
-{
-public:
-	inline mapped_assoc(mempager *pager, const char *fn, unsigned members) :
-		MappedAssoc(pager, fn, members * (sizeof(T) + I), H) {};
-
-	inline T *operator()(const char *id)
-		{return static_cast<T*>(find(id, sizeof(T), I));};
-
-	inline unsigned getUsed(void)
-		{return (unsigned)(used / (sizeof(T) + I));};
-
-	inline unsigned getSize(void)
-		{return (unsigned)(size / (sizeof(T) + I));};
-
-	inline unsigned getFree(void)
-		{return (unsigned)((size - used) / (sizeof(T) + I));};
-};
-
 template <class T>
 class mapped_array : public MappedMemory
 {
@@ -175,24 +144,24 @@ public:
 		{return (unsigned)(size / sizeof(T));};
 };
 	
-template <class T, unsigned I = 0>
-class mapped_share : protected MappedMemory
+template <class T>
+class mapped_view : protected MappedMemory
 {
 public:
-	inline mapped_share(const char *fn) : 
+	inline mapped_view(const char *fn) : 
 		MappedMemory(fn) {};
 	
 	inline const char *id(unsigned idx)
-		{return static_cast<const char *>(get(idx * (sizeof(T) + I)));};
+		{return static_cast<const char *>(get(idx * sizeof(T)));};
 
 	inline T *operator()(unsigned idx)
-		{return static_cast<const T*>(get(idx * (sizeof(T) + I)) + I);}
+		{return static_cast<const T*>(get(idx * sizeof(T)));}
 	
 	inline T &operator[](unsigned idx)
 		{return *(operator()(idx));};
 
 	inline unsigned getSize(void)
-		{return (unsigned)(size / (sizeof(T) + I));};
+		{return (unsigned)(size / sizeof(T));};
 };
 
 END_NAMESPACE
@@ -244,7 +213,7 @@ extern "C" {
 	__EXPORT ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset);
 	__EXPORT ssize_t cpr_pwritefile(fd_t fd, caddr_t data, size_t len, off_t offset);
 	__EXPORT ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len);
-	__EXPORT ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len);
+	__EXPORT ssize_t cpr_writefile(fd_t fd, caddr_t data, size_t len);
 	__EXPORT void cpr_seekfile(fd_t fd, off_t offset);
 	__EXPORT size_t cpr_filesize(fd_t fd);
 	__EXPORT caddr_t cpr_mapfile(const char *fn); 
