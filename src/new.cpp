@@ -22,6 +22,7 @@ extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 	return addr;
 }
 
+
 #ifdef	__GNUC__
 
 extern "C" void __cxa_pure_virtual(void)
@@ -30,6 +31,7 @@ extern "C" void __cxa_pure_virtual(void)
 }
 
 #endif
+
 
 // vim: set ts=4 sw=4:
 // Local Variables:

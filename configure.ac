@@ -35,7 +35,7 @@ AC_PROG_CXXCPP
 AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
-AM_INIT_AUTOMAKE(libucommon, [$VERSION])
+AM_INIT_AUTOMAKE(ucommon, [$VERSION])
 AM_CONFIG_HEADER(config.h)
 
 LT_MAJOR="`echo $LT_VERSION | sed s/:.*$//`"
@@ -62,6 +62,13 @@ AC_ARG_WITH(libc,
         UCOMMON_LIBC=-l${clib} ; fi
 ])
 
+AC_ARG_ENABLE(debug, [  --enable-debug          compile for debugging])
+if test -z "$enable_debug" ; then
+	enable_debug="no"
+elif test $enable_debug = "yes" ; then
+	CXXFLAGS="${CXXFLAGS} -g -DDEBUG"
+fi
+
 AH_BOTTOM([
 #include <ucommon/export.h>
 ])
@@ -75,6 +82,10 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
 	UCOMMON_LIBC="-lmingwex -lmingw32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
 ])
+
+# AC_CHECK_LIB(supc++, __cxa_pure_virtual, [
+#	UCOMMON_LIBC="$UCOMMON_LIBC -lsupc++"
+# ])
 
 AC_CHECK_LIB($clib, dlopen, [
 	UCOMMON_LOADER=""
@@ -230,7 +241,7 @@ AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 COMPILER=""
 UCOMMON_FLAGS=""
-for flag in $CXXFLAGS $CFLAGS; do
+for flag in $CXXFLAGS ; do
 	case $flag in
 		-f*exceptions|-f*rtti|-f*check-new|-f*enforce-eh-specs|-finline|-f*except)
 		;;
@@ -279,6 +290,18 @@ for flag in $lcflags ; do
     rm -f conftest*
 done
 
+flags=""
+for flag in $CXXFLAGS ; do
+	case "$flags" in
+	*$flag*)
+		;;
+	*)
+		flags="$flags $flag"
+		;;
+	esac
+done
+CXXFLAGS="$flags"
+
 if test ! -z "$PTHREAD_FLAGS" ; then
 	for flag in $PTHREAD_FLAGS ; do
 	    AC_MSG_CHECKING([whether ${CXX} supports $flag])
@@ -292,6 +315,8 @@ if test ! -z "$PTHREAD_FLAGS" ; then
 		fi
 	done
 fi
+
+export CXXFLAGS
 
 for flag in -fno-check-new -finline -fvisibility-inlines-hidden
 do
@@ -342,6 +367,7 @@ darwin*)
     ;;
 esac
 
+AC_SUBST(CXXFLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LOADER)
 AC_SUBST(UCOMMON_SHARED)
@@ -352,5 +378,5 @@ AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
 AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile 
-inc/ucommon/Makefile utils/Makefile libucommon.pc)
+inc/ucommon/Makefile utils/Makefile ucommon.pc)
 
