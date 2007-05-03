@@ -38,7 +38,7 @@ static void adj(struct timeval *ts)
 
 #ifdef	WIN32
 #ifdef	_WIN32_WCE
-static int gettimeofday(struct timeval *tv_,  void *tz_)
+extern "C" int gettimeofday(struct timeval *tv_,  void *tz_)
 {
 	// We could use _ftime(), but it is not available on WinCE.
 	// (WinCE also lacks time.h)
@@ -53,7 +53,7 @@ static int gettimeofday(struct timeval *tv_,  void *tz_)
 #include <sys/timeb.h>
 #endif
 
-static int gettimeofday(struct timeval *tv_, void *tz_)
+extern "C" int gettimeofday(struct timeval *tv_, void *tz_)
 {
 #if defined(_MSC_VER) && _MSC_VER >= 1300 
 	struct __timeb64 tb;

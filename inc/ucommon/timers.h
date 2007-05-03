@@ -120,4 +120,10 @@ typedef TimerQueue::event TimerEvent;
 
 END_NAMESPACE
 
+extern "C" {
+#if defined(WIN32)
+	__EXPORT int gettimeofday(struct timeval *tv, void *tz);
+#endif
+};
+
 #endif
