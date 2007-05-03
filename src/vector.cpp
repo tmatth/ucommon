@@ -1,5 +1,6 @@
 #include <config.h>
 #include <ucommon/vector.h>
+#include <ucommon/thread.h>
 #include <string.h>
 #include <stdarg.h>
 
@@ -429,7 +430,89 @@ Vector::array *MemVector::copy(void) const
 	tmp->set(data->list);
 	return tmp;
 }
-	
+
+ArrayReuse::ArrayReuse(size_t size, unsigned c) :
+Conditional()
+{
+	freelist = NULL;
+	objsize = size;
+	count = waits = 0;
+	limit = c;
+	used = 0;
+	mem = (caddr_t)malloc(size * count);
+	crit(mem != NULL);
+}
+
+ArrayReuse::~ArrayReuse()
+{
+	if(mem) {
+		free(mem);
+		mem = NULL;
+	}
+}
+
+bool ArrayReuse::avail(void)
+{
+	bool rtn = false;
+	lock();
+	if(count < limit)
+		rtn = true;
+	unlock();
+	return rtn;
+}
+
+LinkedObject *ArrayReuse::get(void)
+{
+	LinkedObject *obj = NULL;
+
+	lock();
+	while(!freelist && used >= limit) {
+		++waits;
+		wait();
+	}
+
+	if(freelist) {
+		obj = freelist;
+		freelist = obj->getNext();
+	}
+	else if(used < limit) {
+		obj = (LinkedObject *)(mem + (used * objsize));
+		++used;
+	}
+	if(obj)
+		++count;
+	unlock();
+	return obj;
+}
+
+LinkedObject *ArrayReuse::request(void)
+{
+	LinkedObject *obj = NULL;
+
+	lock();
+	if(freelist) {
+		obj = freelist;
+		freelist = obj->getNext();
+	}
+	else if(used < limit) {
+		obj = (LinkedObject *)(mem + (used * objsize));
+		++used;
+	}
+	if(obj)
+		++count;
+	unlock();
+	return obj;
+}
+
+void ArrayReuse::release(LinkedObject *obj)
+{
+	lock();
+	obj->enlist(&freelist);
+	if(waits)
+		signal();
+	unlock();
+}
+
 extern "C" vectorsize_t cpr_vectorsize(void **list)
 {
 	vectorsize_t pos = 0;

@@ -42,12 +42,22 @@ void Event::reset(void)
 bool Event::wait(timeout_t timeout)
 {
 	bool notimeout = true;
+	Timer expires;
 	unsigned last;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
 
 	lock();
 	last = count;
-	while(!signalled && count == last && notimeout)
-		notimeout = wait(timeout);
+	while(!signalled && count == last && notimeout) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)		
+			notimeout = Conditional::wait(*expires);
+		else
+			notimeout = false;
+	}
 	unlock();
 	return notimeout;
 }
@@ -57,7 +67,7 @@ void Event::wait(void)
 	lock();
 	unsigned last = count;
 	while(!signalled && count == last)
-		wait();
+		Conditional::wait();
 	unlock();
 }
 
@@ -90,11 +100,22 @@ unsigned Semaphore::getCount(void)
 bool Semaphore::wait(timeout_t timeout)
 {
 	bool result = true;
+	Timer expires;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
 	if(used >= count) {
 		++waits;
-		while(used >= count && result)
-			result = Conditional::wait(timeout);
+		while(used >= count && result) {
+			if(timeout == Timer::inf)
+				Conditional::wait();
+			else if(timeout)
+				result = Conditional::wait(*expires);
+			else
+				result = false;
+		}
 		--waits;
 	}
 	if(result)
@@ -174,17 +195,14 @@ Conditional::~Conditional()
 bool Conditional::wait(timeout_t timeout)
 {
 	struct timespec ts;
+
 	if(!timeout)
 		return false;
 
-	if(timeout == Timer::inf) {
-		wait();
-		return true;
-	}
-
 	cpr_gettimeout(timeout, &ts);
-	if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
+	if(pthread_cond_timedwait(&cond, &mutex, &ts))
 		return false;
+
 	return true;
 }
 
@@ -444,12 +462,11 @@ void PooledThread::sync(void)
 
 bool PooledThread::suspend(timeout_t timeout)
 {
-	bool result = true;
+	bool result;
 
     lock();
     ++waits;
-	while(result)
-	    result = Conditional::wait(timeout);
+	result = Conditional::wait(timeout);
     --waits;
     unlock();
 	return result;
@@ -642,35 +659,57 @@ bool Queue::remove(Object *o)
 
 Object *Queue::lifo(timeout_t timeout)
 {
+	bool rtn = true;
+	Timer expires;
     member *member;
     Object *obj = NULL;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
-    if(!Conditional::wait(timeout)) {
-		unlock();
-        return NULL;
-    }
-    if(tail) {
+	while(!tail && rtn) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)
+			rtn = Conditional::wait(*expires);
+		else
+			rtn = false;
+	}
+    if(rtn && tail) {
         --used;
         member = static_cast<Queue::member *>(head);
         obj = member->object;
 		member->delist(this);
         member->LinkedObject::enlist(&freelist);
     }
-	signal();
+	if(rtn)
+		signal();
 	unlock();
     return obj;
 }
 
 Object *Queue::fifo(timeout_t timeout)
 {
+	bool rtn = true;
+	Timer expires;
 	linked_pointer<member> node;
 	Object *obj = NULL;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
-	if(!Conditional::wait(timeout)) {
-		unlock();
-		return NULL;
+	while(rtn && !head) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)
+			rtn = Conditional::wait(*expires);
+		else
+			rtn = false;
 	}
-	if(head) {
+
+	if(rtn && head) {
 		--used;
 		node = begin();
 		obj = node->object;
@@ -679,22 +718,37 @@ Object *Queue::fifo(timeout_t timeout)
 			tail = NULL;
 		node->LinkedObject::enlist(&freelist);
 	}
-	signal();
+	if(rtn)
+		signal();
 	unlock();
 	return obj;
 }
 
 bool Queue::post(Object *object, timeout_t timeout)
 {
+	bool rtn = true;
+	Timer expires;
 	member *node;
 	LinkedObject *mem;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
-	while(limit && used == limit) {
-		if(!Conditional::wait(timeout)) {
-			unlock();
-			return false;	
-		}
+	while(rtn && limit && used == limit) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)
+			rtn = Conditional::wait(*expires);
+		else
+			rtn = false;
 	}
+
+	if(!rtn) {
+		unlock();
+		return false;
+	}
+
 	++used;
 	if(freelist) {
 		mem = freelist;
@@ -764,35 +818,64 @@ bool Stack::remove(Object *o)
 
 Object *Stack::pull(timeout_t timeout)
 {
+	bool rtn = true;
+	Timer expires;	
     member *member;
     Object *obj = NULL;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
-    if(!Conditional::wait(timeout)) {
+	while(rtn && !usedlist) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)
+			rtn = Conditional::wait(*expires);
+		else
+			rtn = false;
+	} 
+	if(!rtn) {
 		unlock();
-        return NULL;
-    }
+		return NULL;
+	}
     if(usedlist) {
         member = static_cast<Stack::member *>(usedlist);
         obj = member->object;
 		usedlist = member->getNext();
         member->enlist(&freelist);
-    }
-	signal();
+	}
+	if(rtn)
+		signal();
 	unlock();
     return obj;
 }
 
 bool Stack::push(Object *object, timeout_t timeout)
 {
+	bool rtn = true;
+	Timer expires;
 	member *node;
 	LinkedObject *mem;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
-	while(limit && used == limit) {
-		if(!Conditional::wait(timeout)) {
-			unlock();
-			return false;	
-		}
+	while(rtn && limit && used == limit) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)
+			rtn = Conditional::wait(*expires);
+		else
+			rtn = false;
 	}
+
+	if(!rtn) {
+		unlock();
+		return false;
+	}
+
 	++used;
 	if(freelist) {
 		mem = freelist;
@@ -882,19 +965,26 @@ void *Buffer::get(void)
 void *Buffer::get(timeout_t timeout)
 {
 	caddr_t dbuf = NULL;
+	Timer expires;
+	bool rtn = true;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
 
 	lock();
-	while(!count) {
-		if(!wait(timeout))
-			break;
+	while(!count && rtn) {
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(*expires);
+		else
+			rtn = false;
 	}
-	if(count)
+	if(count && rtn)
 		dbuf = head;
 	unlock();
 	return dbuf;
 }
-
-
 
 void Buffer::release(void)
 {
@@ -924,11 +1014,21 @@ void Buffer::put(void *dbuf)
 bool Buffer::put(void *dbuf, timeout_t timeout)
 {
 	bool rtn = true;
+	Timer expires;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
 
 	lock();
-	while(count == limit)
-		rtn = wait(timeout);
-	if(rtn) {
+	while(count == limit && rtn) {
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(*expires);
+		else
+			rtn = false;
+	}
+	if(rtn && count < limit) {
 		memcpy(tail, dbuf, objsize);
 		tail += objsize;
 		if(tail >= (buf + size))

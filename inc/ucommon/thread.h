@@ -17,7 +17,6 @@ NAMESPACE_UCOMMON
 
 class SharedPointer;
 
-	
 class __EXPORT Conditional 
 {
 private:
@@ -36,7 +35,7 @@ protected:
 	inline void wait(void)
 		{pthread_cond_wait(&cond, &mutex);};
 
-	bool wait(timeout_t timeout);
+	bool wait(timeout_t expires);
 
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};

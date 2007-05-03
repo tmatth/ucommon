@@ -349,6 +349,7 @@ LinkedObject *PagerReuse::request(void)
 		}
 		else
 			obj = (LinkedObject *)pager->alloc_locked(osize);
+		++count;
 	}
 	pager->unlock();
 	return obj;
@@ -363,13 +364,13 @@ LinkedObject *PagerReuse::get(void)
 		pthread_cond_wait(&cond, &pager->mutex);
 		--waits;
 	}
-	++count;
 	if(freelist) {
 		obj = freelist;
 		freelist = obj->getNext();
 	}
 	else
 		obj = (LinkedObject *)pager->alloc_locked(osize);
+	++count;
 	pager->unlock();
 	return obj;	
 }

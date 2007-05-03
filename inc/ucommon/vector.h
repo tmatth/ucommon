@@ -1,13 +1,35 @@
 #ifndef	_UCOMMON_VECTOR_H_
 #define	_UCOMMON_VECTOR_H_
 
-#ifndef	_UCOMMON_OBJECT_H_
-#include <ucommon/object.h>
+#ifndef	_UCOMMON_THREAD_H_
+#include <ucommon/thread.h>
 #endif
 
 typedef	unsigned short vectorsize_t;
 
 NAMESPACE_UCOMMON
+
+class __EXPORT ArrayReuse : public Conditional
+{
+private:
+	size_t objsize;
+	unsigned count, limit, used, waits;
+	LinkedObject *freelist;
+	caddr_t mem;
+
+protected:
+	ArrayReuse(size_t objsize, unsigned c);
+
+public:
+	~ArrayReuse();
+
+protected:
+	bool avail(void);
+
+	LinkedObject *get(void);
+	LinkedObject *request(void);
+	void release(LinkedObject *obj);
+};
 
 class __EXPORT Vector
 {
@@ -142,6 +164,35 @@ public:
 
 	inline Vector &operator+(Vector &v)
 		{Vector::add(v); return static_cast<Vector &>(*this);};
+};
+
+template<class T>
+class array_reuse : protected ArrayReuse
+{
+public:
+	inline array_reuse(unsigned count) :
+		ArrayReuse(sizeof(T), count) {};
+
+	inline operator bool()
+		{return avail();};
+
+	inline bool operator!()
+		{return !avail();};
+
+	inline T* request(void)
+		{return static_cast<T*>(ArrayReuse::request());};
+
+	inline T* get(void)
+		{return static_cast<T*>(ArrayReuse::get());};
+
+	inline void release(T *o)
+		{ArrayReuse::release(o);};
+
+	inline operator T*()
+		{return array_reuse::get();};
+
+	inline T *operator*()
+		{return array_reuse::get();};
 };
 
 template<class T, vectorsize_t S>
