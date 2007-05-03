@@ -4,8 +4,8 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-const void *LinkedObject::nil = (void *)NULL;
-const void *LinkedObject::invalid = (void *)-1;
+LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
+LinkedObject *LinkedObject::inv = (LinkedObject *)-1;
 
 LinkedObject::LinkedObject(LinkedObject **root)
 {

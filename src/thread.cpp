@@ -48,6 +48,8 @@ Conditional()
 void ReusableAllocator::release(ReusableObject *obj)
 {
 	LinkedObject **ru = (LinkedObject **)freelist;
+
+	obj->setNil();
 	obj->release();
 
 	lock();

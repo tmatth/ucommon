@@ -7,9 +7,6 @@
 
 NAMESPACE_UCOMMON
 
-extern const void *nil;
-extern const void *inv;
-
 class OrderedObject;
 
 class __EXPORT LinkedObject
@@ -27,8 +24,8 @@ protected:
 	LinkedObject();
 
 public:
-	static const void *nil;
-	static const void *invalid;
+	static LinkedObject *nil;
+	static LinkedObject *inv;
 
 	virtual ~LinkedObject();
 
@@ -47,10 +44,16 @@ public:
 
 class __EXPORT ReusableObject : protected LinkedObject
 {
-protected:
 	friend class ReusableAllocator;
 
+	inline void setNil(void)
+		{next = nil;};
+
+protected:
 	virtual void release(void);
+
+	inline void setInvalid(void)
+		{next = inv;};
 
 	inline ReusableObject *getNext(void)
 		{return static_cast<ReusableObject*>(LinkedObject::getNext());};
