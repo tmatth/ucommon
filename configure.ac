@@ -80,7 +80,7 @@ AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
-	UCOMMON_LIBC="-lmingwex -lmingw32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
+	UCOMMON_LIBC="-lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
 ])
 
 # AC_CHECK_LIB(supc++, __cxa_pure_virtual, [
