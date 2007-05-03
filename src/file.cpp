@@ -186,6 +186,72 @@ void *MappedMemory::get(size_t offset)
 	return (void *)(map + offset);
 }
 
+MappedReuse::MappedReuse(const char *name, size_t osize, unsigned count) :
+Conditional(), MappedMemory(name,  osize * count)
+{
+	free = NULL;
+	waiting = 0;
+	objsize = osize;
+}
+
+bool MappedReuse::avail(void)
+{
+	bool rtn = false;
+	lock();
+	if(free || used < size)
+		rtn = true;
+	unlock();
+	return rtn;
+}
+
+LinkedObject *MappedReuse::request(void)
+{
+    LinkedObject *obj = NULL;
+
+	lock();
+	if(free) {
+		obj = free;
+		free = obj->getNext();
+	} 
+	else if(used + objsize <= size)
+		obj = (LinkedObject *)sbrk(objsize);
+	unlock();
+	return obj;	
+}
+
+LinkedObject *MappedReuse::get(void)
+{
+	LinkedObject *obj;
+
+	lock();
+	for(;;) {
+		if(free) {
+			obj = free;
+			free = obj->getNext();
+			break;
+		}
+		if(used + objsize <= size) {
+			obj = (LinkedObject *)sbrk(objsize);
+			break;
+		}
+		++waiting;
+		wait();
+		--waiting;
+	}
+	unlock();
+	return obj;
+}
+
+void MappedReuse::release(LinkedObject *obj)
+{
+	lock();
+	obj->enlist(&free);
+	if(waiting)
+		signal();
+	unlock();
+	return;
+}
+
 #if UCOMMON_ASYNC_IO > 0
 
 aio::aio()

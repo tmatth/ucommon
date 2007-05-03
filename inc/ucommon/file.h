@@ -63,6 +63,22 @@ public:
 		{return size;};
 };
 
+class __EXPORT MappedReuse : protected Conditional, protected MappedMemory
+{
+private:
+	LinkedObject *free;
+	unsigned waiting;
+	unsigned objsize;
+
+protected:
+	MappedReuse(const char *name, size_t osize, unsigned count);
+
+	bool avail(void);
+	LinkedObject *request(void);
+	LinkedObject *get(void);
+	void release(LinkedObject *obj);
+};
+
 #if _POSIX_ASYNCHRONOUS_IO > 0
 
 class __EXPORT aio
@@ -142,6 +158,35 @@ public:
 
 	inline unsigned getSize(void)
 		{return (unsigned)(size / sizeof(T));};
+};
+
+template <class T>
+class mapped_reuse : protected MappedReuse
+{
+public:
+	inline mapped_reuse(const char *fname, unsigned count) :
+		MappedReuse(fname, sizeof(T), count) {};
+
+	inline operator bool()
+		{return MappedReuse::avail();};
+
+	inline bool operator!()
+		{return !MappedReuse::avail();};
+
+	inline operator T*()
+		{return mapped_reuse::get();};
+
+	inline T* operator*()
+		{return mapped_reuse::get();};
+
+	inline T *get(void)
+		{return static_cast<T*>(MappedReuse::get());};
+
+	inline T *request(void)
+		{return static_cast<T*>(MappedReuse::request());};
+
+	inline void release(T *o)
+		{MappedReuse::release(o);};
 };
 	
 template <class T>

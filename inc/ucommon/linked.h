@@ -7,6 +7,9 @@
 
 NAMESPACE_UCOMMON
 
+extern const void *nil;
+extern const void *inv;
+
 class OrderedObject;
 
 class __EXPORT LinkedObject
@@ -25,6 +28,9 @@ protected:
 	virtual void release(void);
 
 public:
+	static const void *nil;
+	static const void *invalid;
+
 	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
 
@@ -37,8 +43,6 @@ public:
 	inline LinkedObject *getNext(void) const
 		{return next;};
 };
-
-#define nil ((void*)(NULL))
 
 class __EXPORT OrderedIndex
 {

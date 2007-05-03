@@ -53,6 +53,7 @@ protected:
 	Conditional();
 	~Conditional();
 
+public:
 	static inline pthread_condattr_t *initializer(void)
 		{return &attr.attr;};
 

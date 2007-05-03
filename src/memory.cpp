@@ -1,5 +1,6 @@
 #include <config.h>
 #include <ucommon/memory.h>
+#include <ucommon/thread.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
@@ -310,3 +311,76 @@ size_t keyassoc::minsize(unsigned max, size_t size)
 		size = min;
 	return size;
 }
+
+PagerReuse::PagerReuse(mempager *p, size_t objsize, unsigned c)
+{
+	pager = p;
+	limit = c;
+	waits = 0;
+	count = 0;
+	osize = objsize;
+	freelist = NULL;
+	pthread_cond_init(&cond, Conditional::initializer());
+};
+
+PagerReuse::~PagerReuse()
+{
+	pthread_cond_destroy(&cond);
+}
+
+bool PagerReuse::avail(void)
+{
+	bool rtn = false;
+	pager->lock();
+	if(count < limit)
+		rtn = true;
+	pager->unlock();
+	return rtn;
+}
+
+LinkedObject *PagerReuse::request(void)
+{
+	LinkedObject *obj = NULL;
+	pager->lock();
+	if(count < limit) {
+		if(freelist) {
+			obj = freelist;
+			freelist = obj->getNext();
+		}
+		else
+			obj = (LinkedObject *)pager->alloc_locked(osize);
+	}
+	pager->unlock();
+	return obj;
+}
+
+LinkedObject *PagerReuse::get(void)
+{
+	LinkedObject *obj;
+	pager->lock();
+	while(count >= limit) {
+		++waits;
+		pthread_cond_wait(&cond, &pager->mutex);
+		--waits;
+	}
+	++count;
+	if(freelist) {
+		obj = freelist;
+		freelist = obj->getNext();
+	}
+	else
+		obj = (LinkedObject *)pager->alloc_locked(osize);
+	pager->unlock();
+	return obj;	
+}
+
+void PagerReuse::release(LinkedObject *obj)
+{
+	pager->lock();
+	obj->enlist(&freelist);
+	--count;
+	if(waits)
+		pthread_cond_signal(&cond);
+	pager->unlock();
+}	
+ 		

@@ -1,8 +1,8 @@
-#ifndef		_UCOMMON_MEMORY_H_
-#define		_UCOMMON_MEMORY_H_
+#ifndef	_UCOMMON_MEMORY_H_
+#define	_UCOMMON_MEMORY_H_
 
-#ifndef		_UCOMMON_LINKED_H_
-#include 	<ucommon/linked.h>
+#ifndef	 _UCOMMON_LINKED_H_
+#include <ucommon/linked.h>
 #endif
 
 NAMESPACE_UCOMMON
@@ -12,6 +12,8 @@ class PagerPool;
 class __EXPORT mempager
 {
 private:
+	friend class PagerReuse;
+
 	size_t pagesize, align;
 	pthread_mutex_t mutex;
 	unsigned count;
@@ -98,6 +100,26 @@ public:
 	void put(PagerObject *obj);
 };
 
+class __EXPORT PagerReuse
+{
+private:
+	mempager *pager;
+	LinkedObject *freelist;
+	unsigned limit, count, waits;
+	size_t osize;
+	pthread_cond_t cond;
+
+protected:
+	PagerReuse(mempager *pager, size_t objsize, unsigned count);
+	~PagerReuse();
+
+	bool avail(void);
+	LinkedObject *get(void);
+	LinkedObject *request(void);
+	void release(LinkedObject *obj);
+};	
+
+
 class __EXPORT keyassoc 
 {
 private:
@@ -125,11 +147,11 @@ public:
 	void clear(const char *id);
 };
 
-template <class T, mempager *P = NULL>
+template <class T>
 class pager : private PagerPool
 {
 public:
-	inline pager() : PagerPool(P) {};
+	inline pager(mempager *P = NULL) : PagerPool(P) {};
 
 	inline ~pager()
 		{mempager::purge();};
@@ -139,6 +161,35 @@ public:
 
 	inline T *operator*()
 		{return new(get(sizeof(T))) T;};
+};
+
+template <class T>
+class paged_reuse : protected PagerReuse
+{
+public: 
+	inline paged_reuse(mempager *M, unsigned count) :
+		PagerReuse(M, sizeof(T), count) {};
+
+	inline operator bool()
+		{return PagerReuse::avail();};
+
+	inline bool operator!()
+		{return !PagerReuse::avail();};
+
+	inline T *get(void)
+		{return static_cast<T*>(PagerReuse::get());};
+
+	inline T *request(void)
+		{return static_cast<T*>(PagerReuse::request());};
+
+	inline T *operator*()
+		{return paged_reuse::get();};
+
+	inline operator T*()
+		{return paged_reuse::get();};
+
+	inline void release(T *o)
+		{PagerReuse::release(o);};
 };
 
 template <class T>
