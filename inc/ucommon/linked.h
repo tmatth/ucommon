@@ -21,15 +21,16 @@ protected:
 
 	LinkedObject *next;
 
-	LinkedObject();
-	LinkedObject(LinkedObject **root);
-	virtual ~LinkedObject();
-
 	virtual void release(void);
+
+	LinkedObject(LinkedObject **root);
+	LinkedObject();
 
 public:
 	static const void *nil;
 	static const void *invalid;
+
+	virtual ~LinkedObject();
 
 	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
@@ -42,6 +43,17 @@ public:
 
 	inline LinkedObject *getNext(void) const
 		{return next;};
+};
+
+class __EXPORT ReusableObject : protected LinkedObject
+{
+protected:
+	friend class ReusableAllocator;
+
+	virtual void release(void);
+
+	inline ReusableObject *getNext(void)
+		{return static_cast<ReusableObject*>(LinkedObject::getNext());};
 };
 
 class __EXPORT OrderedIndex

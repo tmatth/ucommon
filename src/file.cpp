@@ -187,10 +187,8 @@ void *MappedMemory::get(size_t offset)
 }
 
 MappedReuse::MappedReuse(const char *name, size_t osize, unsigned count) :
-Conditional(), MappedMemory(name,  osize * count)
+ReusableAllocator(), MappedMemory(name,  osize * count)
 {
-	free = NULL;
-	waiting = 0;
 	objsize = osize;
 }
 
@@ -198,58 +196,64 @@ bool MappedReuse::avail(void)
 {
 	bool rtn = false;
 	lock();
-	if(free || used < size)
+	if(freelist || used < size)
 		rtn = true;
 	unlock();
 	return rtn;
 }
 
-LinkedObject *MappedReuse::request(void)
+ReusableObject *MappedReuse::request(void)
 {
-    LinkedObject *obj = NULL;
+    ReusableObject *obj = NULL;
 
 	lock();
-	if(free) {
-		obj = free;
-		free = obj->getNext();
+	if(freelist) {
+		obj = freelist;
+		freelist = next(obj);
 	} 
 	else if(used + objsize <= size)
-		obj = (LinkedObject *)sbrk(objsize);
+		obj = (ReusableObject *)sbrk(objsize);
 	unlock();
 	return obj;	
 }
 
-LinkedObject *MappedReuse::get(void)
+ReusableObject *MappedReuse::get(void)
 {
-	LinkedObject *obj;
-
-	lock();
-	for(;;) {
-		if(free) {
-			obj = free;
-			free = obj->getNext();
-			break;
-		}
-		if(used + objsize <= size) {
-			obj = (LinkedObject *)sbrk(objsize);
-			break;
-		}
-		++waiting;
-		wait();
-		--waiting;
-	}
-	unlock();
-	return obj;
+	return get(Timer::inf);
 }
 
-void MappedReuse::release(LinkedObject *obj)
+ReusableObject *MappedReuse::get(timeout_t timeout)
 {
+	bool rtn = true;
+	Timer expires;
+	ReusableObject *obj = NULL;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
 	lock();
-	obj->enlist(&free);
-	if(waiting)
-		signal();
+	while(rtn && !freelist && used >= size) {
+		++waiting;
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(*expires);
+		else
+			rtn = false;
+		--waiting;
+	}
+	if(!rtn) {
+		unlock();
+		return NULL;
+	}
+	if(freelist) {
+		obj = freelist;
+		freelist = next(obj);
+	}
+	else if(used + objsize <= size)
+		obj = (ReusableObject *)sbrk(objsize);
 	unlock();
-	return;
+	return obj;
 }
 
 #if UCOMMON_ASYNC_IO > 0

@@ -58,6 +58,20 @@ public:
 
 };
 
+class __EXPORT ReusableAllocator : public Conditional
+{
+protected:
+	ReusableObject *freelist;
+	unsigned waiting;
+
+	ReusableAllocator();
+
+	inline ReusableObject *next(ReusableObject *obj)
+		{return obj->getNext();};
+	
+	void release(ReusableObject *obj);
+};
+
 class __EXPORT SharedLock : public Conditional
 {
 private:

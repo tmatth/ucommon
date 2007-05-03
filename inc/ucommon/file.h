@@ -63,20 +63,18 @@ public:
 		{return size;};
 };
 
-class __EXPORT MappedReuse : protected Conditional, protected MappedMemory
+class __EXPORT MappedReuse : protected ReusableAllocator, protected MappedMemory
 {
 private:
-	LinkedObject *free;
-	unsigned waiting;
 	unsigned objsize;
 
 protected:
 	MappedReuse(const char *name, size_t osize, unsigned count);
 
 	bool avail(void);
-	LinkedObject *request(void);
-	LinkedObject *get(void);
-	void release(LinkedObject *obj);
+	ReusableObject *request(void);
+	ReusableObject *get(void);
+	ReusableObject *get(timeout_t timeout);
 };
 
 #if _POSIX_ASYNCHRONOUS_IO > 0
@@ -181,6 +179,10 @@ public:
 
 	inline T *get(void)
 		{return static_cast<T*>(MappedReuse::get());};
+
+    inline T *get(timeout_t timeout)
+        {return static_cast<T*>(MappedReuse::get(timeout));};
+
 
 	inline T *request(void)
 		{return static_cast<T*>(MappedReuse::request());};

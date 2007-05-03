@@ -432,11 +432,10 @@ Vector::array *MemVector::copy(void) const
 }
 
 ArrayReuse::ArrayReuse(size_t size, unsigned c) :
-Conditional()
+ReusableAllocator()
 {
-	freelist = NULL;
 	objsize = size;
-	count = waits = 0;
+	count = 0;
 	limit = c;
 	used = 0;
 	mem = (caddr_t)malloc(size * count);
@@ -461,22 +460,37 @@ bool ArrayReuse::avail(void)
 	return rtn;
 }
 
-LinkedObject *ArrayReuse::get(void)
+ReusableObject *ArrayReuse::get(timeout_t timeout)
 {
-	LinkedObject *obj = NULL;
+	bool rtn = true;
+	Timer expires;
+	ReusableObject *obj = NULL;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
 
 	lock();
-	while(!freelist && used >= limit) {
-		++waits;
-		wait();
+	while(!freelist && used >= limit && rtn) {
+		++waiting;
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(*expires);
+		else
+			rtn = false;
+		--waiting;
+	}
+
+	if(!rtn) {
+		unlock();
+		return NULL;
 	}
 
 	if(freelist) {
 		obj = freelist;
-		freelist = obj->getNext();
-	}
-	else if(used < limit) {
-		obj = (LinkedObject *)(mem + (used * objsize));
+		freelist = next(obj);
+	} else if(used < limit) {
+		obj = (ReusableObject *)&mem[used * objsize];
 		++used;
 	}
 	if(obj)
@@ -485,32 +499,28 @@ LinkedObject *ArrayReuse::get(void)
 	return obj;
 }
 
-LinkedObject *ArrayReuse::request(void)
+ReusableObject *ArrayReuse::get(void)
 {
-	LinkedObject *obj = NULL;
+	return get(Timer::inf);
+}
+
+ReusableObject *ArrayReuse::request(void)
+{
+	ReusableObject *obj = NULL;
 
 	lock();
 	if(freelist) {
 		obj = freelist;
-		freelist = obj->getNext();
+		freelist = next(obj);
 	}
 	else if(used < limit) {
-		obj = (LinkedObject *)(mem + (used * objsize));
+		obj = (ReusableObject *)(mem + (used * objsize));
 		++used;
 	}
 	if(obj)
 		++count;
 	unlock();
 	return obj;
-}
-
-void ArrayReuse::release(LinkedObject *obj)
-{
-	lock();
-	obj->enlist(&freelist);
-	if(waits)
-		signal();
-	unlock();
 }
 
 extern "C" vectorsize_t cpr_vectorsize(void **list)
@@ -520,3 +530,109 @@ extern "C" vectorsize_t cpr_vectorsize(void **list)
 		++pos;
 	return pos;
 }
+
+PagerReuse::PagerReuse(mempager *p, size_t objsize, unsigned c) :
+ReusableAllocator()
+{
+	pager = p;
+	limit = c;
+	count = 0;
+	osize = objsize;
+};
+
+PagerReuse::~PagerReuse()
+{
+}
+
+bool PagerReuse::avail(void)
+{
+	bool rtn = false;
+	lock();
+	if(count < limit)
+		rtn = true;
+	unlock();
+	return rtn;
+}
+
+ReusableObject *PagerReuse::alloc(void)
+{
+	ReusableObject *obj = (ReusableObject *)malloc(osize);
+	crit(obj != NULL);
+	return obj;
+}
+
+ReusableObject *PagerReuse::request(void)
+{
+	ReusableObject *obj = NULL;
+	lock();
+	if(count < limit) {
+		if(freelist) {
+			++count;
+			obj = freelist;
+			freelist = next(obj);
+		}
+		else if(pager) {
+			++count;
+			unlock();
+			return (ReusableObject *)pager->alloc(osize);
+		}
+		else {
+			++count;
+			unlock();
+			return alloc();
+		}
+	}
+	unlock();
+	return obj;
+}
+
+ReusableObject *PagerReuse::get(void)
+{
+	return get(Timer::inf);
+}
+
+ReusableObject *PagerReuse::get(timeout_t timeout)
+{
+	bool rtn = true;
+	Timer expires;
+	ReusableObject *obj;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
+	lock();
+	while(rtn && count >= limit) {
+		++waiting;
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(*expires);
+		else
+			rtn = false;
+		--waiting;
+	}
+	if(!rtn) {
+		unlock();
+		return NULL;
+	}
+	if(freelist) {
+		obj = freelist;
+		freelist = next(obj);
+	}
+	else if(pager) {
+		++count;
+		unlock();
+		return (ReusableObject *)pager->alloc(osize);
+	}
+	else {
+		++count;
+		unlock();
+		return alloc();
+	}
+	if(obj)
+		++count;
+	unlock();
+	return obj;	
+}
+
+ 		

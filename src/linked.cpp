@@ -62,6 +62,11 @@ void LinkedObject::delist(LinkedObject **root)
 		prev->next = next;
 }
 
+void ReusableObject::release(void)
+{
+	next = (LinkedObject *)nil;
+}
+
 NamedObject::NamedObject() :
 OrderedObject()
 {

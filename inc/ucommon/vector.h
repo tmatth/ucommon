@@ -9,12 +9,11 @@ typedef	unsigned short vectorsize_t;
 
 NAMESPACE_UCOMMON
 
-class __EXPORT ArrayReuse : public Conditional
+class __EXPORT ArrayReuse : public ReusableAllocator
 {
 private:
 	size_t objsize;
-	unsigned count, limit, used, waits;
-	LinkedObject *freelist;
+	unsigned count, limit, used;
 	caddr_t mem;
 
 protected:
@@ -26,10 +25,29 @@ public:
 protected:
 	bool avail(void);
 
-	LinkedObject *get(void);
-	LinkedObject *request(void);
-	void release(LinkedObject *obj);
+	ReusableObject *get(timeout_t timeout);
+	ReusableObject *get(void);
+	ReusableObject *request(void);
 };
+
+class __EXPORT PagerReuse : protected ReusableAllocator
+{
+private:
+	mempager *pager;
+	unsigned limit, count;
+	size_t osize;
+
+	ReusableObject *alloc(void);
+
+protected:
+	PagerReuse(mempager *pager, size_t objsize, unsigned count);
+	~PagerReuse();
+
+	bool avail(void);
+	ReusableObject *get(void);
+	ReusableObject *get(timeout_t timeout);
+	ReusableObject *request(void);
+};	
 
 class __EXPORT Vector
 {
@@ -185,6 +203,9 @@ public:
 	inline T* get(void)
 		{return static_cast<T*>(ArrayReuse::get());};
 
+	inline T* get(timeout_t timeout)
+		{return static_cast<T*>(ArrayReuse::get(timeout));};
+
 	inline void release(T *o)
 		{ArrayReuse::release(o);};
 
@@ -193,6 +214,38 @@ public:
 
 	inline T *operator*()
 		{return array_reuse::get();};
+};
+
+template <class T>
+class paged_reuse : protected PagerReuse
+{
+public: 
+	inline paged_reuse(mempager *M, unsigned count) :
+		PagerReuse(M, sizeof(T), count) {};
+
+	inline operator bool()
+		{return PagerReuse::avail();};
+
+	inline bool operator!()
+		{return !PagerReuse::avail();};
+
+	inline T *get(void)
+		{return static_cast<T*>(PagerReuse::get());};
+
+	inline T *get(timeout_t timeout)
+		{return static_cast<T*>(PagerReuse::get(timeout));};
+
+	inline T *request(void)
+		{return static_cast<T*>(PagerReuse::request());};
+
+	inline T *operator*()
+		{return paged_reuse::get();};
+
+	inline operator T*()
+		{return paged_reuse::get();};
+
+	inline void release(T *o)
+		{PagerReuse::release(o);};
 };
 
 template<class T, vectorsize_t S>

@@ -1,11 +1,33 @@
 #include <config.h>
 #include <ucommon/thread.h>
 #include <ucommon/process.h>
+#include <ucommon/timers.h>
+#include <ucommon/linked.h>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
 
 using namespace UCOMMON_NAMESPACE;
+
+static void gettimeout(timeout_t msec, struct timespec *ts)
+{
+#if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
+	clock_gettime(CLOCK_MONOTONIC, ts);
+#elif _POSIX_TIMERS > 0
+	clock_gettime(CLOCK_REALTIME, ts);
+#else
+	timeval tv;
+	gettimeofday(&tv, NULL);
+	ts->tv_sec = tv.tv_sec;
+	ts->tv_nsec = tv.tv_usec * 1000l;
+#endif
+	ts->tv_sec += msec / 1000;
+	ts->tv_nsec += (msec % 1000) * 1000000l;
+	while(ts->tv_nsec > 1000000000l) {
+		++ts->tv_sec;
+		ts->tv_nsec -= 1000000000l;
+	}
+}
 
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
@@ -14,6 +36,25 @@ Mutex::attribute::attribute()
 {
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+}
+
+ReusableAllocator::ReusableAllocator() :
+Conditional()
+{
+	freelist = NULL;
+	waiting = 0;
+}
+
+void ReusableAllocator::release(ReusableObject *obj)
+{
+	LinkedObject **ru = (LinkedObject **)freelist;
+	obj->release();
+
+	lock();
+	obj->enlist(ru);
+	if(waiting)
+		signal();
+	unlock();
 }
 
 Event::Event() : 
@@ -199,7 +240,7 @@ bool Conditional::wait(timeout_t timeout)
 	if(!timeout)
 		return false;
 
-	cpr_gettimeout(timeout, &ts);
+	gettimeout(timeout, &ts);
 	if(pthread_cond_timedwait(&cond, &mutex, &ts))
 		return false;
 
