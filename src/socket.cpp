@@ -459,7 +459,7 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	struct addrinfo *ah = NULL;
 
 	if(so)
-		ah = cpr_getsockhint(so, &hint);
+		ah = gethint(so, &hint);
 
 	getaddrinfo(host, svc, ah, &list);	
 }
@@ -527,7 +527,7 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 {
 	so = ::socket(family, type, protocol);
 	if(so != INVALID_SOCKET)
-		if(::cpr_bindaddr(so, iface, port))
+		if(bindaddr(so, iface, port))
 			release();
 }
 
@@ -595,7 +595,7 @@ ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
 {
 	socklen_t slen = 0;
 	if(dest)
-		slen = ::cpr_getaddrlen(dest);
+		slen = getlen(dest);
 	
 	return ::sendto(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
 }
@@ -875,7 +875,7 @@ int Socket::connect(struct addrinfo *node)
 	if(so == INVALID_SOCKET)
 		return -1;
 
-	family = cpr_getsockfamily(so);
+	family = getfamily(so);
 
 	while(node) {
 		if(node->ai_family == family) {
@@ -1074,7 +1074,7 @@ retry:
 	if(so == INVALID_SOCKET)
 		return;
 		
-	if(::cpr_bindaddr(so, iface, svc)) {
+	if(bindaddr(so, iface, svc)) {
 		release();
 		if(family == AF_INET && !strchr(iface, '.')) {
 			family = AF_INET6;
@@ -1090,7 +1090,7 @@ SOCKET ListenSocket::accept(struct sockaddr *addr)
 {
 	socklen_t len = 0;
 	if(addr) {
-		len = ::cpr_getaddrlen(addr);		
+		len = getlen(addr);		
 		return ::accept(so, addr, &len);
 	}
 	else
@@ -1127,7 +1127,7 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 
 #endif
 
-extern "C" struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *hint)
+struct addrinfo *Socket::gethint(SOCKET so, struct addrinfo *hint)
 {
 	struct sockaddr_storage st;
 	struct sockaddr *sa = (struct sockaddr *)&st;
@@ -1143,7 +1143,7 @@ extern "C" struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *hint)
 	return hint;
 }
 
-extern "C" char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max)
+char *Socket::hosttostr(struct sockaddr *sa, char *buf, size_t max)
 {
 	socklen_t sl;
 
@@ -1178,7 +1178,7 @@ extern "C" char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max)
 	return buf;
 }
 
-extern "C" socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *sa, const char *host, const char *svc)
+socklen_t Socket::getaddr(SOCKET so, struct sockaddr_storage *sa, const char *host, const char *svc)
 {
 	socklen_t len = 0;
 	struct addrinfo hint, *res = NULL;
@@ -1188,7 +1188,7 @@ extern "C" socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *sa, con
 		return unixaddr((struct sockaddr_un *)sa, host);
 #endif
 
-	if(!cpr_getsockhint(so, &hint) || !svc)
+	if(!gethint(so, &hint) || !svc)
 		return 0;
 
 	if(getaddrinfo(host, svc, &hint, &res) || !res)
@@ -1203,7 +1203,7 @@ exit:
 	return len;
 }
 
-extern "C" int cpr_bindaddr(SOCKET so, const char *host, const char *svc)
+int Socket::bindaddr(SOCKET so, const char *host, const char *svc)
 {
 	int rtn = -1;
 	int reuse = 1;
@@ -1216,12 +1216,12 @@ extern "C" int cpr_bindaddr(SOCKET so, const char *host, const char *svc)
 	if(strchr(host, '/')) {
 		struct sockaddr_un uaddr;
 		socklen_t len = unixaddr(&uaddr, host);
-		rtn = bind(so, (struct sockaddr *)&uaddr, len);
+		rtn = ::bind(so, (struct sockaddr *)&uaddr, len);
 		goto exit;	
 	};
 #endif
 
-    if(!cpr_getsockhint(so, &hint) || !svc)
+    if(!gethint(so, &hint) || !svc)
         return -1;
 
 	if(host && !string::compare(host, "*"))
@@ -1243,14 +1243,14 @@ extern "C" int cpr_bindaddr(SOCKET so, const char *host, const char *svc)
 	if(rtn)
 		goto exit;
 
-	rtn = bind(so, res->ai_addr, res->ai_addrlen);
+	rtn = ::bind(so, res->ai_addr, res->ai_addrlen);
 exit:
 	if(res)
 		freeaddrinfo(res);
 	return rtn;
 }
 
-extern "C" socklen_t cpr_getaddrlen(struct sockaddr *sa)
+socklen_t Socket::getlen(struct sockaddr *sa)
 {
 	switch(sa->sa_family)
 	{
@@ -1263,7 +1263,7 @@ extern "C" socklen_t cpr_getaddrlen(struct sockaddr *sa)
 	}
 }
 
-extern "C" int cpr_getsockfamily(SOCKET so)
+int Socket::getfamily(SOCKET so)
 {
 	struct sockaddr_storage saddr;
 	socklen_t len = sizeof(saddr);

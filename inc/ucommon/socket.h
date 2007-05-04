@@ -202,6 +202,13 @@ public:
 
 	inline SOCKET operator*() const
 		{return so;};
+
+	static int getfamily(SOCKET so);
+	static int bindaddr(SOCKET so, const char *host, const char *svc);
+	static char *hosttostr(struct sockaddr *sa, char *buf, size_t max);
+	static struct addrinfo *gethint(SOCKET so, struct addrinfo *h);
+	static socklen_t getaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
+	static socklen_t getlen(struct sockaddr *addr);
 };
 
 class __EXPORT ListenSocket : protected Socket
@@ -228,14 +235,5 @@ inline struct sockaddr *addr(Socket::address &a)
 	{return a.getAddr();};
 
 END_NAMESPACE
-
-extern "C" {
-	__EXPORT int cpr_getsockfamily(SOCKET so);
-	__EXPORT int cpr_bindaddr(SOCKET so, const char *host, const char *svc);
-	__EXPORT char *cpr_hosttostr(struct sockaddr *sa, char *buf, size_t max);
-	__EXPORT struct addrinfo *cpr_getsockhint(SOCKET so, struct addrinfo *h);
-	__EXPORT socklen_t cpr_getsockaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
-	__EXPORT socklen_t cpr_getaddrlen(struct sockaddr *addr);
-};
 
 #endif
