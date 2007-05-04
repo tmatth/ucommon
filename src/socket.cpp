@@ -350,7 +350,7 @@ void cidr::set(const char *cp)
 	case AF_INET:
 		memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
 		bitset((bit_t *)&netmask.ipv4, getMask(cp));
-		cpr_strset(cbuf, sizeof(cbuf), cp);
+		string::set(cbuf, sizeof(cbuf), cp);
 		ep = strchr(cp, '/');
 		if(ep)
 			*ep = 0;
@@ -362,7 +362,7 @@ void cidr::set(const char *cp)
 		}
 
 		while(dots++ < 3)
-			cpr_stradd(cbuf, sizeof(cbuf), ".0");
+			string::add(cbuf, sizeof(cbuf), ".0");
 
 #ifdef	_MSWINDOWS_
 		DWORD addr = (DWORD)inet_addr(cbuf);
@@ -376,7 +376,7 @@ void cidr::set(const char *cp)
 	case AF_INET6:
 		memset(&netmask.ipv6, 0, sizeof(netmask));
 		bitset((bit_t *)&netmask.ipv6, getMask(cp));
-		cpr_strset(cbuf, sizeof(cbuf), cp);
+		string::set(cbuf, sizeof(cbuf), cp);
 		ep = strchr(cp, '/');
 		if(ep)
 			*ep = 0;
@@ -1224,7 +1224,7 @@ extern "C" int cpr_bindaddr(SOCKET so, const char *host, const char *svc)
     if(!cpr_getsockhint(so, &hint) || !svc)
         return -1;
 
-	if(host && !cpr_stricmp(host, "*"))
+	if(host && !string::compare(host, "*"))
 		host = NULL;
 
 #ifdef	SO_BINDTODEVICE

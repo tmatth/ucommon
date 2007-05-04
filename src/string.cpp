@@ -218,7 +218,7 @@ string::string(const char *s, const char *end)
 
 string::string(const char *s)
 {
-	strsize_t size = cpr_strlen(s);
+	strsize_t size = count(s);
 	if(!s)
 		s = "";
 	str = create(size);
@@ -342,7 +342,7 @@ const char *string::last(const char *clist) const
 	if(!str)
 		return NULL;
 
-	return ::cpr_strlast(str->text, clist);
+	return last(str->text, clist);
 }
 
 const char *string::first(const char *clist) const
@@ -350,7 +350,7 @@ const char *string::first(const char *clist) const
 	if(!str)
 		return NULL;
 
-	return ::cpr_strfirst(str->text, clist);
+	return first(str->text, clist);
 }
 
 const char *string::begin(void) const
@@ -517,7 +517,7 @@ bool string::unquote(const char *clist)
 		return false;
 
 	str->unfix();
-	s = cpr_strunquote(str->text, clist);
+	s = unquote(str->text, clist);
 	if(!s) {
 		str->fix();
 		return false;
@@ -530,13 +530,13 @@ bool string::unquote(const char *clist)
 void string::upper(void)
 {
 	if(str)
-		::cpr_strupper(str->text);
+		upper(str->text);
 }
 
 void string::lower(void)
 {
 	if(str)
-		::cpr_strlower(str->text);
+		lower(str->text);
 }
 
 strsize_t string::offset(const char *s) const
@@ -565,7 +565,7 @@ strsize_t string::ccount(const char *clist) const
 	if(!str)
 		return 0;
 
-	return ::cpr_strccount(str->text, clist);
+	return ccount(str->text, clist);
 }
 
 void string::printf(const char *format, ...)
@@ -633,7 +633,7 @@ void string::set(strsize_t offset, const char *s, strsize_t size)
 
 void string::set(const char *s, char overflow, strsize_t offset, strsize_t size)
 {
-	size_t len = cpr_strlen(s);
+	size_t len = count(s);
 
 	if(!s || !*s || !str)
 		return;
@@ -657,7 +657,7 @@ void string::set(const char *s, char overflow, strsize_t offset, strsize_t size)
 
 void string::rset(const char *s, char overflow, strsize_t offset, strsize_t size)
 {
-	size_t len = cpr_strlen(s);
+	size_t len = count(s);
 	strsize_t dif;
 
 	if(!s || !*s || !str)
@@ -1096,7 +1096,7 @@ tokenstring::tokenstring(caddr_t mem, const char *cl) :
 string()
 {
 	clist = cl;
-	token = ::cpr_strtrim(mem, cl);
+	token = trim(mem, cl);
 }
 
 const char *tokenstring::get(void)
@@ -1201,7 +1201,7 @@ tokenstring &tokenstring::operator=(caddr_t s)
 	if(str)
 		set(s);
 	else
-		token = ::cpr_strtrim(s, clist);
+		token = trim(s, clist);
 	return *this;
 }
 
@@ -1212,14 +1212,14 @@ tokenstring &tokenstring::operator=(const string &s)
 	return *this;
 }
 
-void ucc::swap(string &s1, string &s2)
+void string::swap(string &s1, string &s2)
 {
 	string::cstring *s = s1.str;
 	s1.str = s2.str;
 	s2.str = s;
 }
 
-extern "C" char *cpr_strdup(const char *cp)
+char *string::dup(const char *cp)
 {
 	char *mem;
 
@@ -1232,7 +1232,7 @@ extern "C" char *cpr_strdup(const char *cp)
 	return mem;
 }	
 
-extern "C" size_t cpr_strlen(const char *cp)
+size_t string::count(const char *cp)
 {
 	if(!cp)
 		return 0;
@@ -1240,7 +1240,7 @@ extern "C" size_t cpr_strlen(const char *cp)
 	return strlen(cp);
 }
 	
-extern "C" char *cpr_strnset(char *str, size_t size, const char *s, size_t len)
+char *string::set(char *str, size_t size, const char *s, size_t len)
 {
 	if(!str)
 		return NULL;
@@ -1268,15 +1268,15 @@ extern "C" char *cpr_strnset(char *str, size_t size, const char *s, size_t len)
 	return str;
 }
 
-extern "C" char *cpr_strrset(char *str, size_t size, const char *s)
+char *string::rset(char *str, size_t size, const char *s)
 {
-	size_t len = cpr_strlen(s);
+	size_t len = count(s);
 	if(len > size) 
 		s += len - size;
-	return cpr_strset(str, size, s);
+	return set(str, size, s);
 }
 
-extern "C" char *cpr_strset(char *str, size_t size, const char *s)
+char *string::set(char *str, size_t size, const char *s)
 {
 	if(!str)
 		return NULL;
@@ -1302,7 +1302,7 @@ extern "C" char *cpr_strset(char *str, size_t size, const char *s)
 	return str;
 }
 
-extern "C" char *cpr_strnadd(char *str, size_t size, const char *s, size_t len)
+char *string::add(char *str, size_t size, const char *s, size_t len)
 {
     if(!str)
         return NULL;
@@ -1315,11 +1315,11 @@ extern "C" char *cpr_strnadd(char *str, size_t size, const char *s, size_t len)
 
 	if(o >= (size - 1))
 		return str;
-	cpr_strnset(str + o, size - o, s, l);
+	set(str + o, size - o, s, l);
 	return str;
 }
 
-extern "C" char *cpr_stradd(char *str, size_t size, const char *s)
+char *string::add(char *str, size_t size, const char *s)
 {
 	if(!str)
 		return NULL;
@@ -1332,11 +1332,11 @@ extern "C" char *cpr_stradd(char *str, size_t size, const char *s)
 	if(o >= (size - 1))
 		return str;
 
-	cpr_strset(str + o, size - o, s);
+	set(str + o, size - o, s);
 	return str;
 }
 
-extern "C" char *cpr_strtrim(char *str, const char *clist)
+char *string::trim(char *str, const char *clist)
 {
 	if(!str)
 		return NULL;
@@ -1350,7 +1350,7 @@ extern "C" char *cpr_strtrim(char *str, const char *clist)
 	return str;
 }
 
-extern "C" char *cpr_strchop(char *str, const char *clist)
+char *string::chop(char *str, const char *clist)
 {
 	if(!str)
 		return NULL;
@@ -1366,39 +1366,29 @@ extern "C" char *cpr_strchop(char *str, const char *clist)
 	return str;
 }
 
-extern "C" char *cpr_strstrip(char *str, const char *clist)
+char *string::strip(char *str, const char *clist)
 {
-	str = cpr_strtrim(str, clist);
-	return cpr_strchop(str, clist);
+	str = trim(str, clist);
+	return chop(str, clist);
 }
 
-extern "C" char *cpr_strupper(char *str)
+void string::upper(char *str)
 {
-	char *s = str;
-	if(!str)
-		return NULL;
-
-	while(*str) {
+	while(str && *str) {
 		*str = toupper(*str);
 		++str;
 	}
-	return s;
 }
 
-extern "C" char *cpr_strlower(char *str)
+void string::lower(char *str)
 {
-    char *s = str;
-	if(!str)
-		return NULL;
-
-    while(*str) {
+    while(str && *str) {
         *str = tolower(*str);
         ++str;
     }
-    return s;
 }
 
-extern "C" unsigned cpr_strccount(const char *str, const char *clist)
+unsigned string::ccount(const char *str, const char *clist)
 {
 	unsigned count = 0;
 	while(str && *str) {
@@ -1408,7 +1398,7 @@ extern "C" unsigned cpr_strccount(const char *str, const char *clist)
 	return count;
 }
 
-extern "C" char *cpr_strskip(char *str, const char *clist)
+char *string::skip(char *str, const char *clist)
 {
 	if(!str || !clist)
 		return NULL;
@@ -1422,9 +1412,9 @@ extern "C" char *cpr_strskip(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" char *cpr_strrskip(char *str, const char *clist)
+char *string::rskip(char *str, const char *clist)
 {
-	unsigned len = cpr_strlen(str);
+	size_t len = count(str);
 
 	if(!len || !clist)
 		return NULL;
@@ -1436,7 +1426,7 @@ extern "C" char *cpr_strrskip(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" char *cpr_strfind(char *str, const char *clist)
+char *string::find(char *str, const char *clist)
 {
 	if(!str)
 		return NULL;
@@ -1451,7 +1441,7 @@ extern "C" char *cpr_strfind(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" char *cpr_strrfind(char *str, const char *clist)
+char *string::rfind(char *str, const char *clist)
 {
 	if(!str)
 		return NULL;
@@ -1468,7 +1458,7 @@ extern "C" char *cpr_strrfind(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" timeout_t cpr_strtotimeout(const char *cp, char **ep, bool sec)
+timeout_t string::totimeout(const char *cp, char **ep, bool sec)
 {
 	char *end, *nend;
 	timeout_t base = strtol(cp, &end, 10);
@@ -1539,7 +1529,7 @@ extern "C" timeout_t cpr_strtotimeout(const char *cp, char **ep, bool sec)
 	return base;
 }
 
-extern "C" char *cpr_strlast(char *str, const char *clist)
+char *string::last(char *str, const char *clist)
 {
 	char *cp, *lp = NULL;
 
@@ -1558,7 +1548,7 @@ extern "C" char *cpr_strlast(char *str, const char *clist)
 	return lp;
 }
 
-extern "C" char *cpr_strfirst(char *str, const char *clist)
+char *string::first(char *str, const char *clist)
 {
     char *cp, *fp;
 
@@ -1580,23 +1570,7 @@ extern "C" char *cpr_strfirst(char *str, const char *clist)
     return fp;
 }
 
-extern "C" char *cpr_strchr(const char *str, char c)
-{
-	if(!str)
-		return NULL;
-
-	return strchr(str, c);
-}
-
-extern "C" char *cpr_strrchr(const char *str, char c)
-{
-    if(!str)
-        return NULL;
-
-    return strrchr(str, c);
-}
-
-extern "C" int cpr_strcmp(const char *s1, const char *s2)
+int string::compare(const char *s1, const char *s2)
 {
 	if(!s1)
 		s1 = "";
@@ -1606,7 +1580,7 @@ extern "C" int cpr_strcmp(const char *s1, const char *s2)
 	return strcmp(s1, s2);
 }
 
-extern "C" int cpr_strncmp(const char *s1, const char *s2, size_t s)
+int string::compare(const char *s1, const char *s2, size_t s)
 {
     if(!s1)
         s1 = "";
@@ -1616,7 +1590,7 @@ extern "C" int cpr_strncmp(const char *s1, const char *s2, size_t s)
     return strncmp(s1, s2, s);
 }
 
-extern "C" int cpr_stricmp(const char *s1, const char *s2)
+int string::casecompare(const char *s1, const char *s2)
 {
 	if(!s1)
 		s1 = "";
@@ -1631,7 +1605,7 @@ extern "C" int cpr_stricmp(const char *s1, const char *s2)
 #endif
 }
 
-extern "C" int cpr_strnicmp(const char *s1, const char *s2, size_t s)
+int string::casecompare(const char *s1, const char *s2, size_t s)
 {
     if(!s1)
         s1 = "";
@@ -1646,27 +1620,7 @@ extern "C" int cpr_strnicmp(const char *s1, const char *s2, size_t s)
 #endif
 }
 
-extern "C" const char *cpr_strstr(const char *body, const char *find)
-{
-	if(!body || !find)
-		return NULL;
-
-	return strstr(body, find);
-}
-
-extern "C" const char *cpr_stristr(const char *body, const char *find)
-{
-    if(!body || !find)
-        return NULL;
-
-#ifdef	HAVE_STRISTR
-	return stristr(body, find);
-#else
-    return strstr(body, find);
-#endif
-}
-
-extern "C" int32_t cpr_strtoint(const char *cp, char **ep)
+int32_t string::toint(const char *cp, char **ep)
 {
 	if(!cp) {
 		if(ep)
@@ -1677,9 +1631,9 @@ extern "C" int32_t cpr_strtoint(const char *cp, char **ep)
 	return (int32_t)value;
 }	
 
-extern "C" char *cpr_strunquote(char *str, const char *clist)
+char *string::unquote(char *str, const char *clist)
 {
-	size_t len = cpr_strlen(str);
+	size_t len = count(str);
 	if(!len || !str)
 		return NULL;
 
@@ -1693,7 +1647,7 @@ extern "C" char *cpr_strunquote(char *str, const char *clist)
 	return NULL;
 }
 
-extern "C" char *cpr_strfill(char *str, size_t size, const char fill)
+char *string::fill(char *str, size_t size, const char fill)
 {
 	if(!str)
 		return NULL;
@@ -1703,7 +1657,7 @@ extern "C" char *cpr_strfill(char *str, size_t size, const char fill)
 	return str;
 }
 
-extern "C" bool cpr_strtobool(const char *cp, char **ep)
+bool string::tobool(const char *cp, char **ep)
 {
 	bool rtn = false;
 
@@ -1723,21 +1677,21 @@ extern "C" bool cpr_strtobool(const char *cp, char **ep)
 		goto exit;
 	}
 
-	if(!cpr_strnicmp(cp, "true", 4)) {
+	if(!casecompare(cp, "true", 4)) {
 		cp += 4;
 		rtn = true;
 		goto exit;
 	}
-	else if(!cpr_strnicmp(cp, "yes", 3)) {
+	else if(!casecompare(cp, "yes", 3)) {
 		cp += 3;
 		rtn = true;
 		goto exit;
 	}
-	else if(!cpr_strnicmp(cp, "false", 5)) {
+	else if(!casecompare(cp, "false", 5)) {
 		cp += 5;
 		goto exit;
 	}
-	else if(!cpr_strnicmp(cp, "no", 2)) {
+	else if(!casecompare(cp, "no", 2)) {
 		cp += 2;
 		goto exit;
 	}

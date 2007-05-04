@@ -10,7 +10,7 @@ static string testing("second test");
 extern "C" int main()
 {
 	char buff[33];
-	cpr_strfill(buff, 32, ' ');
+	string::fill(buff, 32, ' ');
 	stringbuf<128> mystr;
 	mystr = (string)"hello" + (string)" this is a test";
 	printf("STARTING %s\n", *mystr);

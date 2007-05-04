@@ -348,7 +348,7 @@ NamedTree *NamedTree::path(const char *id) const
 	}
 		
 	while(id && *id && node) {
-		cpr_strset(buf, sizeof(buf), id);
+		string::set(buf, sizeof(buf), id);
 		ep = strchr(buf, '.');
 		if(ep)
 			*ep = 0;

@@ -238,7 +238,7 @@ extern "C" void cpr_md5hash(char *out, const char *source, size_t len)
 	assert(out != NULL && source != NULL && len != 0);
 
 	if(!len)
-		len = cpr_strlen(source);
+		len = strlen(source);
 
 	MD5Init(&md5);
 	MD5Update(&md5, (unsigned char *)source, len);
@@ -392,23 +392,23 @@ extern "C" size_t cpr_xmldecode(char *out, size_t limit, const char *src)
 	if(*src == '\'' || *src == '\"')
 		++src;
 	while(src && limit-- > 1 && !strchr("<\'\">", *src)) {
-		if(!cpr_strnicmp(src, "&amp;", 5)) {
+		if(!strncmp(src, "&amp;", 5)) {
 			*(out++) = '&';
 			src += 5;
 		}
-		else if(!cpr_strnicmp(src, "&lt;", 4)) {
+		else if(!strncmp(src, "&lt;", 4)) {
 			src += 4;
 			*(out++) = '<';
 		}
-		else if(!cpr_strnicmp(src, "&gt;", 4)) {
+		else if(!strncmp(src, "&gt;", 4)) {
 			src += 4;
 			*(out++) = '>';
 		}
-		else if(!cpr_strnicmp(src, "&quot;", 6)) {
+		else if(!strncmp(src, "&quot;", 6)) {
 			src += 6;
 			*(out++) = '\"';
 		}
-		else if(!cpr_strnicmp(src, "&apos;", 6)) {
+		else if(!strncmp(src, "&apos;", 6)) {
 			src += 6;
 			*(out++) = '\'';
 		}
@@ -430,7 +430,7 @@ extern "C" size_t cpr_snprintf(char *out, size_t size, const char *fmt, ...)
 		vsnprintf(out, size, fmt, args);
 
 	va_end(args);
-	return cpr_strlen(out);
+	return strlen(out);
 }
 
 static const unsigned char alphabet[65] =
@@ -519,7 +519,7 @@ extern "C" size_t cpr_b64encode(char *out, caddr_t src, size_t count)
 
 extern "C" size_t cpr_b64len(const char *str)
 {
-	unsigned count = cpr_strlen(str);
+	unsigned count = strlen(str);
 	const char *ep = str + count - 1;
 
 	if(!count)

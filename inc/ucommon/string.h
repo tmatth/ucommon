@@ -140,7 +140,73 @@ public:
 	bool operator>(const char *str) const;
 	bool operator>=(const char *str) const;
 
-	friend __EXPORT void swap(string &s1, string &s2);
+	static void swap(string &s1, string &s2);
+	
+	static void lower(char *s);
+	static void upper(char *s);
+	static char *skip(char *s, const char *clist);
+	static char *rskip(char *s, const char *clist);
+	static char *unquote(char *s, const char *clist);
+	static char *rset(char *s, size_t s, const char *d);
+	static char *set(char *s, size_t s, const char *d);
+	static char *set(char *s, size_t s, const char *d, size_t l);
+	static char *add(char *s, size_t s, const char *d); 
+	static char *add(char *s, size_t s, const char *d, size_t l);
+	static size_t count(const char *s);
+	static int compare(const char *s1, const char *s2);
+	static int compare(const char *s1, const char *s2, size_t len);
+	static int casecompare(const char *s1, const char *s2);
+	static int casecompare(const char *s1, const char *s2, size_t len);
+	static timeout_t totimeout(const char *cp, char **ep = NULL, bool sec = false);
+	static bool tobool(const char *cp, char **ep = NULL);
+	static int32_t toint(const char *cp, char **ep = NULL);
+	static char *trim(char *str, const char *clist); 
+	static char *chop(char *str, const char *clist); 
+	static char *strip(char *str, const char *clist);
+	static char *fill(char *str, size_t size, char chr);
+	static unsigned ccount(const char *str, const char *clist);
+	static char *find(char *str, const char *clist);
+	static char *rfind(char *str, const char *clist);
+	static char *last(char *str, const char *clist);
+	static char *first(char *str, const char *clist);
+	static char *dup(const char *s);
+
+	inline static unsigned ccount(string &s1, const char *clist)
+		{return s1.ccount(clist);};
+
+	inline static size_t count(string &s1)
+		{return s1.count();};
+
+	inline static void upper(string &s1)
+		{s1.upper();};
+
+	inline static void lower(string &s1)
+		{s1.lower();};
+
+	inline static bool unquote(string &s1, const char *clist)
+		{return s1.unquote(clist);};
+
+	inline static void trim(string &s, const char *clist)
+		{return s.trim(clist);};
+
+	inline static void chop(string &s, const char *clist)
+		{return s.trim(clist);};
+
+	inline static void strip(string &s, const char *clist)
+		{return s.trim(clist);};
+
+	inline static const char *find(string &s, const char *c)
+		{return s.find(c);};
+
+	inline static const char *rfind(string &s, const char *c)
+		{return s.rfind(c);};
+
+	inline static const char *first(string &s, const char *c)
+		{return s.first(c);};
+
+	inline static const char *last(string &s, const char *c)
+		{return s.last(c);};
+
 };
 
 class __EXPORT memstring : public string
@@ -187,8 +253,6 @@ public:
 		{return get();};
 };
 
-__EXPORT void swap(string &s1, string &s2);
-
 template<strsize_t S>
 class stringbuf : public memstring
 {
@@ -206,40 +270,5 @@ public:
 };
 
 END_NAMESPACE
-
-extern "C" {
-	__EXPORT const char *cpr_strstr(const char *body, const char *item);
-	__EXPORT const char *cpr_stristr(const char *body, const char *item);
-	__EXPORT int cpr_strcmp(const char *s1, const char *s2);
-	__EXPORT int cpr_strncmp(const char *s1, const char *s2, size_t len);
-    __EXPORT int cpr_stricmp(const char *s1, const char *s2);
-    __EXPORT int cpr_strnicmp(const char *s1, const char *s2, size_t len);
-	__EXPORT char *cpr_strchr(const char *str, char c);
-	__EXPORT char *cpr_strrchr(const char *str, char c);
-	__EXPORT size_t cpr_strlen(const char *cp);
-	__EXPORT char *cpr_strdup(const char *cp);
-	__EXPORT char *cpr_strset(char *str, size_t size, const char *src);
-	__EXPORT char *cpr_strrset(char *str, size_t size, const char *src);
-	__EXPORT char *cpr_strnset(char *str, size_t size, const char *src, size_t len);
-	__EXPORT char *cpr_stradd(char *str, size_t size, const char *src);
-	__EXPORT char *cpr_strnadd(char *str, size_t size, const char *src, size_t len);
-	__EXPORT char *cpr_strtrim(char *str, const char *clist); 
-	__EXPORT char *cpr_strchop(char *str, const char *clist); 
-	__EXPORT char *cpr_strstrip(char *str, const char *clist);
-	__EXPORT char *cpr_strupper(char *str);
-	__EXPORT char *cpr_strlower(char *str);
-	__EXPORT char *cpr_strfill(char *str, size_t size, char chr);
-	__EXPORT unsigned cpr_strccount(const char *str, const char *clist);
-	__EXPORT char *cpr_strunquote(char *str, const char *clist);
-	__EXPORT char *cpr_strskip(char *str, const char *clist);
-	__EXPORT char *cpr_strrskip(char *str, const char *clist);
-	__EXPORT char *cpr_strfind(char *str, const char *clist);
-	__EXPORT char *cpr_strrfind(char *str, const char *clist);
-	__EXPORT char *cpr_strlast(char *str, const char *clist);
-	__EXPORT char *cpr_strfirst(char *str, const char *clist);
-	__EXPORT timeout_t cpr_strtotimeout(const char *cp, char **ep = NULL, bool sec = false);
-	__EXPORT bool cpr_strtobool(const char *cp, char **ep = NULL);
-	__EXPORT int32_t cpr_strtoint(const char *cp, char **ep = NULL);
-};
 
 #endif

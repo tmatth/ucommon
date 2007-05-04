@@ -62,7 +62,7 @@ keyconfig::keynode *keyconfig::getPath(const char *id)
 	caddr_t mp;
 
 	while(id && *id && node) {
-		cpr_strset(buf, sizeof(buf), id);
+		string::set(buf, sizeof(buf), id);
 		ep = strchr(buf, '.');
 		if(ep)
 			*ep = 0;
@@ -131,7 +131,7 @@ keyconfig::keynode *keyconfig::getNode(keynode *base, const char *id, const char
 	while(node) {
 		if(!strcmp(id, node->getId())) {
 			cp = node->getData();
-			if(cp && !cpr_stricmp(cp, text))
+			if(cp && !string::casecompare(cp, text))
 				return *node;
 		}
 		node.next();
@@ -235,7 +235,7 @@ bool keyconfig::loadxml(const char *fn, keynode *node)
 
 		while(node && cp && *cp)
 		{
-			cp = cpr_strtrim(cp, " \t\r\n");
+			cp = string::trim(cp, " \t\r\n");
 
 			if(cp && *cp && !node)
 				goto exit;
@@ -252,7 +252,7 @@ bool keyconfig::loadxml(const char *fn, keynode *node)
 				if(node->getData() != NULL)
 					goto exit;
 				*bp = 0;
-				cp = cpr_strchop(cp, " \r\n\t");
+				cp = string::chop(cp, " \r\n\t");
 				len = strlen(cp);
 				ep = (char *)alloc(len + 1);
 				cpr_xmldecode(ep, len, cp);

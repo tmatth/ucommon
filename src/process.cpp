@@ -135,7 +135,7 @@ unsigned MessageQueue::getPending(void) const
 
 bool MessageQueue::puts(char *buf)
 {
-	size_t len = cpr_strlen(buf);
+	size_t len = string::count(buf);
 	if(!mq)
 		return false;
 
