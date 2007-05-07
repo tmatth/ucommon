@@ -1,5 +1,5 @@
-#ifndef	_UCOMMON_CONFIG_H_
-#define	_UCOMMON_CONFIG_H_
+#ifndef	_UCOMMON_PLATFORM_H_
+#define	_UCOMMON_PLATFORM_H_
 
 #define	UCOMMON_NAMESPACE	ucc
 #define	NAMESPACE_UCOMMON	namespace ucc {

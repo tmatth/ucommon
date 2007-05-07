@@ -5,6 +5,10 @@
 #include <ucommon/cpr.h>
 #endif
 
+#ifndef _UCOMMON_THREAD_H_
+#include <ucommon/thread.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 class __EXPORT MappedMemory

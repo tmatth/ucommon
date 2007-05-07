@@ -1,25 +1,15 @@
 #ifndef _UCOMMON_CPR_H_
 #define	_UCOMMON_CPR_H_
 
-#ifndef	_UCOMMON_TIMERS_H_
+#ifndef _UCOMMON_TIMERS_H_
 #include <ucommon/timers.h>
 #endif
 
-#ifndef	_UCOMMON_LINKED_H_
-#include <ucommon/linked.h>
-#endif
-
-#ifndef	_UCOMMON_MEMORY_H_
-#include <ucommon/memory.h>
-#endif
-
-#ifndef _UCOMMON_STRING_H_
-#include <ucommon/string.h>
-#endif
-
-#ifndef _UCOMMON_THREAD_H_
-#include <ucommon/thread.h>
-#endif
+#include <stdlib.h>
+#include <malloc.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 #ifdef	_MSWINDOWS_
 typedef	HANDLE fd_t;
@@ -97,16 +87,21 @@ extern "C" {
 	__EXPORT void cpr_closeall(void);
 	__EXPORT void cpr_cancel(pid_t pid);
 #ifndef	_MSWINDOWS_
-	__EXPORT key_t cpr_createipc(const char *path, int mode);
-	__EXPORT key_t cpr_accessipc(const char *path, int mode);
 	__EXPORT sighandler_t cpr_intsignal(int sig, sighandler_t handler);
 	__EXPORT sighandler_t cpr_signal(int sig, sighandler_t handler);
 	__EXPORT void cpr_hangup(pid_t pid);
 	__EXPORT int cpr_sigwait(sigset_t *set);
+
+	inline void cpr_reload(pid_t pid)
+		{kill(pid, SIGHUP);};
+
+	inline void cpr_terminate(pid_t pid)
+		{kill(pid, SIGTERM);};
 #else
 	#define cpr_signal(sig, handler) signal(sig, handler)
 #endif
-	__EXPORT pid_t cpr_wait(pid_t pid = 0, int *status = NULL);
+	__EXPORT pid_t cpr_waitpid(pid_t pid = 0, int *status = NULL);
+	__EXPORT int cpr_exitpid(pid_t pid);
 	__EXPORT void cpr_sleep(timeout_t timeout);
 	__EXPORT void cpr_yield(void);
 	__EXPORT int cpr_priority(unsigned priority);

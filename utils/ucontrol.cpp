@@ -2,7 +2,6 @@
 #include <ucommon/cpr.h>
 #include <sys/stat.h>
 #include <config.h>
-#include <stdio.h>
 
 using namespace UCOMMON_NAMESPACE;
 

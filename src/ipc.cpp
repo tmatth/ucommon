@@ -1,5 +1,7 @@
 #include <config.h>
 #include <ucommon/cpr.h>
+#include <ucommon/thread.h>
+#include <ucommon/string.h>
 #include <ucommon/ipc.h>
 #include <errno.h>
 
@@ -717,7 +719,7 @@ int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env
 		case SPAWN_NOWAIT:
 			return 0;
 		case SPAWN_WAIT:
-			cpr_wait(*pid, &status);
+			cpr_waitpid(*pid, &status);
 			return status;
 		}
 	}

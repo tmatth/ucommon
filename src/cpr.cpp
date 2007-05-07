@@ -228,7 +228,7 @@ extern "C" int cpr_sigwait(sigset_t *set)
 #endif
 }
 
-extern "C" pid_t cpr_wait(pid_t pid, int *status)
+extern "C" pid_t cpr_waitpid(pid_t pid, int *status)
 {
 	if(pid) {
 		if(waitpid(pid, status, 0))
@@ -241,6 +241,15 @@ extern "C" pid_t cpr_wait(pid_t pid, int *status)
 	if(status)
 		*status = WEXITSTATUS(*status);
 	return pid;
+}
+
+extern "C" int cpr_exitpid(pid_t pid)
+{
+	int status;
+
+	kill(pid, SIGINT);
+	cpr_waitpid(pid, &status);
+	return status;
 }
 
 #else
