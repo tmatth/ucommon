@@ -1713,3 +1713,31 @@ exit:
 
 	return rtn;
 }
+
+bool string::isinteger(const char *cp)
+{
+	if(!cp)
+		return false;
+
+	while(*cp && isdigit(*cp))
+		++cp;
+
+	if(*cp)
+		return false;
+
+	return true;
+}
+
+bool string::isnumeric(const char *cp)
+{
+	if(!cp)
+		return false;
+
+	while(*cp && strchr("0123456789.+-e", *cp))
+		++cp;
+
+	if(*cp)
+		return false;
+
+	return true;
+}

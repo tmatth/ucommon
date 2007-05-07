@@ -629,10 +629,15 @@ bool MessageQueue::gets(char *data)
 
 #endif
 
-proc::proc(size_t ps) :
+proc::proc(size_t ps, define *def) :
 mempager(ps)
 {
 	root = NULL;
+
+	while(def && def->name) {
+		set(def->name, def->value);
+		++def;
+	}
 }
 
 proc::~proc()
@@ -640,16 +645,38 @@ proc::~proc()
 	purge();
 }
 
-void proc::setenv(proc *ep)
+void proc::setenv(proc *ep, const char *sid)
 {
-#ifndef	HAVE_SETENV
 	char buf[128];
-#endif
+	const char *id;
 
 	linked_pointer<proc::member> env;
 
 	if(!ep)
 		return;
+
+#ifndef	_MSWINDOWS_
+	if(!getuid() && sid) {
+		struct passwd *pwd;
+		const char *uid = ep->get("USER");
+
+		if(!uid)
+			uid = sid;
+		pwd = getpwnam(uid);
+		crit(pwd != NULL);
+
+		umask(002);
+		setgid(pwd->pw_gid);
+		setegid(pwd->pw_gid);
+	
+		snprintf(buf, sizeof(buf), "/var/run/%s", sid);
+		mkdir(buf, 0770);
+		mkdir(pwd->pw_dir, 02770);
+		chdir(pwd->pw_dir);
+		setuid(pwd->pw_uid);
+		endpwent();
+	}
+#endif
 
 	env = ep->begin();
 	while(env) {
@@ -661,8 +688,28 @@ void proc::setenv(proc *ep)
 #endif
 		env.next();
 	}
-}
 
+#ifndef	_MSWINDOWS_
+	if(getuid() == 0 && getppid() < 2)
+		umask(002);
+
+	id = ep->get("UID");
+	if(id && getuid() == 0) {
+		if(getppid() > 1)
+			umask(022);
+		setuid(atoi(id));
+	}
+
+	id = ep->get("HOME");
+	if(id)
+		chdir(id);
+#else
+#endif
+
+	id = ep->get("PWD");
+	if(id)
+		chdir(id);	
+}
 
 const char *proc::get(const char *id)
 {
@@ -716,85 +763,32 @@ void proc::set(char *id, const char *value)
     env->value = value;
 };
 
-#ifdef	_MSWINDOWS_
+#ifdef _MSWINDOW_
 
 #else
 
-bool proc::setuser(const char *uid)
+void proc::foreground(const char *id, int fac)
 {
-	bool rtn = false;
-	struct passwd *pwd;
-	struct group *grp;
-
-	if(!uid)
-		return true;
-
-	if(uid && *uid == '@') {
-		grp = getgrnam(++uid);
-		if(grp) {
-			rtn = true;
-			umask(002);
-			setgid(grp->gr_gid);
-		}
-		endgrent();
-	}
-	else if(uid) {
-		pwd = getpwnam(uid);
-		if(pwd) {
-			rtn = true;
-			umask(022);
-			::setenv("HOME", pwd->pw_dir, 1);
-			::setenv("USER", pwd->pw_name, 1);
-			::setenv("LOGNAME", pwd->pw_name, 1);
-			::setenv("SHELL", pwd->pw_shell, 1);
-			setgid(pwd->pw_gid);
-			setuid(pwd->pw_uid);
-		}
-		endpwent();
-	}
-	return rtn;
-}
-
-bool proc::foreground(const char *id, const char *uid, int fac)
-{
-	bool rtn;
-
 	if(!fac)
-		fac = LOG_DAEMON;
+		fac = LOG_USER;
 
-	rtn = setuser(uid);
-	setenv(this);
-	
-	if(id)
-		openlog(id, LOG_PERROR, fac);
-
+	setenv(this, id);
+	openlog(id, LOG_PERROR, fac);
 	purge();
-	return rtn;
 }
 
-bool proc::background(const char *id, const char *uid, int fac)
+void proc::background(const char *id, int fac)
 {
-	bool rtn;
-
 	if(!fac)
 		fac = LOG_DAEMON;
 
 	cpr_pdetach();
-
-	if(getppid() != 1)
-		return false;
-
-	rtn = setuser(uid);
-	setenv(this);
-
-	if(id)
-		openlog(id, LOG_CONS, fac);
-
+	setenv(this, id);
+	openlog(id, LOG_CONS, fac);
 	purge();
-	return rtn;
 }
 
-int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, proc *env, const char *uid)
+int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, proc *env)
 {
 	unsigned max = OPEN_MAX, idx = 0;
 	int status;
@@ -830,7 +824,6 @@ int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, pr
 #endif
 
 	closelog();
-	setuser(uid);
 
 	while(idx < max)
 		close(idx++);

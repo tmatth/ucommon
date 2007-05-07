@@ -113,6 +113,12 @@ public:
 	inline const char *operator*() const
 		{return c_str();};
 
+	inline bool isNumeric(void) const
+		{return isnumeric(c_str());};
+
+	inline bool isInteger(void) const
+		{return isinteger(c_str());};
+
 	bool full(void) const;
 	string operator()(int offset, strsize_t len) const;
 	const char *operator()(int offset) const;
@@ -170,6 +176,8 @@ public:
 	static char *last(char *str, const char *clist);
 	static char *first(char *str, const char *clist);
 	static char *dup(const char *s);
+	static bool isnumeric(const char *s);
+	static bool isinteger(const char *s);
 
 	inline static unsigned ccount(string &s1, const char *clist)
 		{return s1.ccount(clist);};
@@ -207,6 +215,11 @@ public:
 	inline static const char *last(string &s, const char *c)
 		{return s.last(c);};
 
+	inline static bool isinteger(string &s)
+		{return isinteger(s.c_str());};
+
+	inline static bool isnumeric(string &s)
+		{return isnumeric(s.c_str());};
 };
 
 class __EXPORT memstring : public string

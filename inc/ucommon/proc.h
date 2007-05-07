@@ -93,9 +93,15 @@ public:
 		SPAWN_DETACH
 	};
 
+	typedef struct
+	{
+		char *name;
+		const char *value;
+	}	define;
+
 	typedef named_value<const char *> member;
 
-	proc(size_t paging);
+	proc(size_t paging, define *def = NULL);
 	~proc();
 
 	void dup(const char *id, const char *val);
@@ -112,14 +118,13 @@ public:
 	char **getEnviron(void);
 #endif
 
-	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL, const char *uid = NULL);
+	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL);
 
-	bool background(const char *id, const char *uid, int fac = 0);
-	bool foreground(const char *id, const char *uid, int fac = 0);
+	void background(const char *id, int fac = 0);
+	void foreground(const char *id, int fac = 0);
 
 protected:
-	static void setenv(proc *ep);
-	static bool setuser(const char *uid);
+	static void setenv(proc *ep, const char *sid = NULL);
 };
 
 template <class T>
