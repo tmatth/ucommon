@@ -656,7 +656,7 @@ void proc::setenv(proc *ep)
 #ifdef	HAVE_SETENV
 		::setenv(env->getId(), env->value, 1);
 #else
-		snprintf(buf, sizeof(buf), "%s=%s", env->getID(), env->value);
+		snprintf(buf, sizeof(buf), "%s=%s", env->getId(), env->value);
 		putenv(buf);
 #endif
 		env.next();
