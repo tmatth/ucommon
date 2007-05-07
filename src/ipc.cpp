@@ -1,5 +1,4 @@
 #include <config.h>
-#include <ucommon/cpr.h>
 #include <ucommon/thread.h>
 #include <ucommon/string.h>
 #include <ucommon/ipc.h>

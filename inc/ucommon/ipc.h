@@ -1,10 +1,6 @@
 #ifndef _UCOMMON_IPC_H_
 #define	_UCOMMON_IPC_H_
 
-#ifndef	_UCOMMON_CPR_H_
-#include <ucommon/cpr.h>
-#endif
-
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif

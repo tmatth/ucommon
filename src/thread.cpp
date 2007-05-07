@@ -1,6 +1,5 @@
 #include <config.h>
 #include <ucommon/thread.h>
-#include <ucommon/cpr.h>
 #include <ucommon/timers.h>
 #include <ucommon/linked.h>
 #include <errno.h>

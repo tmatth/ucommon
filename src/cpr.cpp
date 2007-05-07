@@ -1,5 +1,4 @@
 #include <config.h>
-#include <ucommon/cpr.h>
 #include <ucommon/string.h>
 #include <ucommon/misc.h>
 #include <errno.h>
@@ -644,6 +643,11 @@ extern "C" fd_t cpr_openfile(const char *fn, bool rewrite)
 		return open(fn, O_RDWR);
 	else
 		return open(fn, O_RDONLY);
+}
+
+extern "C" fd_t cpr_createfile(const char *fn)
+{
+	return creat(fn, 0660);
 }
 
 #endif

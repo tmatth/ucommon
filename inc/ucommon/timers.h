@@ -12,8 +12,6 @@
 
 #include <time.h>
 
-typedef unsigned long timeout_t;
-
 NAMESPACE_UCOMMON
 
 class __EXPORT Timer

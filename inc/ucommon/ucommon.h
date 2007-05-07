@@ -13,7 +13,6 @@
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
 #include <ucommon/misc.h>
-#include <ucommon/cpr.h>
 #include <ucommon/ipc.h>
 #include <ucommon/aio.h>
 #endif

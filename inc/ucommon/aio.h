@@ -5,10 +5,6 @@
 #include <ucommon/object.h>
 #endif
 
-#ifndef _UCOMMON_CPR_H_
-#include <ucommon/cpr.h>
-#endif
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
