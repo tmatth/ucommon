@@ -5,55 +5,55 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-OrderedIndex keyconfig::callback::list;
-SharedLock keyconfig::lock;
-keyconfig *keyconfig::cfg = NULL;
+OrderedIndex config::callback::list;
+SharedLock config::lock;
+config *config::cfg = NULL;
 
-keyconfig::callback::callback() :
+config::callback::callback() :
 OrderedObject(&list)
 {
 }
 
-keyconfig::callback::~callback()
+config::callback::~callback()
 {
 	release();
 }
 
-void keyconfig::callback::release(void)
+void config::callback::release(void)
 {
 	delist(&list);
 }
 
-void keyconfig::callback::reload(keyconfig *keys)
+void config::callback::reload(config *keys)
 {
 }
 
-void keyconfig::callback::commit(keyconfig *keys)
+void config::callback::commit(config *keys)
 {
 }
 
-keyconfig::instance::instance()
+config::instance::instance()
 {
-	keyconfig::protect();
+	config::protect();
 }
 
-keyconfig::instance::~instance()
+config::instance::~instance()
 {
-	keyconfig::release();
+	config::release();
 }
 
-keyconfig::keyconfig(char *name, size_t s) :
+config::config(char *name, size_t s) :
 mempager(s), root()
 {
 	root.setId(name);
 }
 
-keyconfig::~keyconfig()
+config::~config()
 {
 	mempager::purge();
 }
 
-keyconfig::keynode *keyconfig::getPath(const char *id)
+config::keynode *config::getPath(const char *id)
 {
 	const char *np;
 	char buf[65];
@@ -81,7 +81,7 @@ keyconfig::keynode *keyconfig::getPath(const char *id)
 	return node;
 }
 
-keyconfig::keynode *keyconfig::addNode(keynode *base, const char *id, const char *value)
+config::keynode *config::addNode(keynode *base, const char *id, const char *value)
 {
 	caddr_t mp;
 	keynode *node;
@@ -93,7 +93,7 @@ keyconfig::keynode *keyconfig::addNode(keynode *base, const char *id, const char
 	return node;
 }
 
-const char *keyconfig::getValue(keynode *node, const char *id, keynode *alt)
+const char *config::getValue(keynode *node, const char *id, keynode *alt)
 {
 	node = node->getChild(id);
 	if(!node && alt)
@@ -105,7 +105,7 @@ const char *keyconfig::getValue(keynode *node, const char *id, keynode *alt)
 	return node->getPointer();
 }
 
-keyconfig::keynode *keyconfig::addNode(keynode *base, define *defs)
+config::keynode *config::addNode(keynode *base, define *defs)
 {
 	keynode *node = getNode(base, defs->key, defs->value);
 	if(!node)
@@ -123,7 +123,7 @@ keyconfig::keynode *keyconfig::addNode(keynode *base, define *defs)
 }
 
 
-keyconfig::keynode *keyconfig::getNode(keynode *base, const char *id, const char *text)
+config::keynode *config::getNode(keynode *base, const char *id, const char *text)
 {
 	linked_pointer<keynode> node = base->getFirst();
 	char *cp;
@@ -139,7 +139,7 @@ keyconfig::keynode *keyconfig::getNode(keynode *base, const char *id, const char
 	return NULL;
 } 
 
-bool keyconfig::loadconf(const char *fn, keynode *node, char *gid, keynode *entry)
+bool config::loadconf(const char *fn, keynode *node, char *gid, keynode *entry)
 {
 	FILE *fp = fopen(fn, "r");
 	bool rtn = false;
@@ -200,7 +200,7 @@ exit:
 	return rtn;
 }
 
-bool keyconfig::loadxml(const char *fn, keynode *node)
+bool config::loadxml(const char *fn, keynode *node)
 {
 	FILE *fp = fopen(fn, "r");
 	char *cp, *ep, *bp, *id;
@@ -255,7 +255,7 @@ bool keyconfig::loadxml(const char *fn, keynode *node)
 				cp = string::chop(cp, " \r\n\t");
 				len = strlen(cp);
 				ep = (char *)alloc(len + 1);
-				cpr_xmldecode(ep, len, cp);
+				xmldecode(ep, len, cp);
 				node->setPointer(ep);
 				*bp = '<';
 				cp = bp;
@@ -335,7 +335,7 @@ exit:
 	return rtn;
 }
 
-void keyconfig::commit(void)
+void config::commit(void)
 {
 	cb = callback::list.begin();
 	while(cb) {
@@ -353,7 +353,7 @@ void keyconfig::commit(void)
 	lock.unlock();
 }
 
-void keyconfig::update(void)
+void config::update(void)
 {
 	lock.lock();
 	if(cb)

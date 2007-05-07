@@ -138,6 +138,8 @@ public:
 	void operator--();
 	void operator+=(vectorsize_t vs);
 	void operator-=(vectorsize_t vs);
+
+	static vectorsize_t size(void **list);
 };
 
 class __EXPORT MemVector : public Vector
@@ -277,9 +279,5 @@ public:
 };
 
 END_NAMESPACE
-
-extern "C" {
-	vectorsize_t cpr_vectorsize(void **list);
-};
 
 #endif

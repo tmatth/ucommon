@@ -15,11 +15,13 @@
 
 NAMESPACE_UCOMMON
 
-class __EXPORT keyconfig : public mempager
+const size_t uuid_size = 38;
+
+class __EXPORT config : public mempager
 {
 public:
 	typedef treemap<char *>keynode;
-
+	
 	typedef struct {
 		const char *key;
 		const char *value;
@@ -34,14 +36,14 @@ public:
 		instance();
 		~instance();
 		
-		inline const keyconfig *operator->()
-			{return keyconfig::cfg;};
+		inline const config *operator->()
+			{return config::cfg;};
 	};
 
 	class __EXPORT callback : public OrderedObject
     {
 	protected:
-		friend class keyconfig;
+		friend class config;
 
 		static OrderedIndex list;
 
@@ -50,12 +52,12 @@ public:
 
         void release(void);
 
-        virtual void commit(keyconfig *cfg);
-		virtual void reload(keyconfig *cfg);
+        virtual void commit(config *cfg);
+		virtual void reload(config *cfg);
     };
     
-	keyconfig(char *name, size_t s = 0);
-	virtual ~keyconfig();
+	config(char *name, size_t s = 0);
+	virtual ~config();
 
 	bool loadxml(const char *name, keynode *top = NULL);
 	bool loadconf(const char *name, keynode *top = NULL, char *gid = NULL, keynode *entry = NULL);
@@ -89,37 +91,26 @@ public:
 protected:
 	friend class instance;
 
-	static keyconfig *cfg;
+	static config *cfg;
 	static SharedLock lock;
 
 	linked_pointer<callback> cb; // for update...
 	keynode root;
 	stringbuf<1024> buffer;
+
+public:
+	static void md5hash(char *out, const char *source, size_t size = 0);
+	static int uuid(char *out);
+	static size_t urldecode(char *out, size_t limit, const char *src);
+	static size_t urlencode(char *out, size_t limit, const char *src);
+	static size_t urlencodesize(char *str);
+	static size_t xmldecode(char *out, size_t limit, const char *src);
+	static size_t xmlencode(char *out, size_t limit, const char *src);
+	static size_t b64decode(caddr_t out, const char *src, size_t count);
+	static size_t b64encode(char *out, caddr_t src, size_t count);
+	static size_t b64len(const char *str);
 };
 
 END_NAMESPACE
-
-extern "C" {
-	const size_t uuid_size = 38;
-
-	__EXPORT void cpr_md5hash(char *out, const char *source, size_t size = 0);
-	__EXPORT int cpr_uuid(char *out);
-	__EXPORT size_t cpr_urldecode(char *out, size_t limit, const char *src);
-	__EXPORT size_t cpr_urlencode(char *out, size_t limit, const char *src);
-	__EXPORT size_t cpr_urlencodesize(char *str);
-	__EXPORT size_t cpr_xmldecode(char *out, size_t limit, const char *src);
-	__EXPORT size_t cpr_xmlencode(char *out, size_t limit, const char *src);
-	__EXPORT size_t cpr_b64decode(caddr_t out, const char *src, size_t count);
-	__EXPORT size_t cpr_b64encode(char *out, caddr_t src, size_t count);
-	__EXPORT size_t cpr_b64len(const char *str);
-	__EXPORT size_t cpr_snprintf(char *buf, size_t size, const char *fmt, ...);
-	__EXPORT void cpr_printlog(const char *path, const char *fmt, ...);
-};
-
-#ifdef	DEBUG
-#define cpr_printdbg(fmt, ...)	printf(fmt, ...)
-#else
-#define	cpr_printdbg(fmt, ...)
-#endif
 
 #endif

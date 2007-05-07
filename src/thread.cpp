@@ -1,6 +1,6 @@
 #include <config.h>
 #include <ucommon/thread.h>
-#include <ucommon/process.h>
+#include <ucommon/cpr.h>
 #include <ucommon/timers.h>
 #include <ucommon/linked.h>
 #include <errno.h>
@@ -1188,19 +1188,19 @@ shared_release &shared_release::operator=(SharedPointer &p)
 	return *this;
 }
 
-extern "C" void cpr_cancel_async(cancellation *cancel)
+void Thread::cancel_async(cancellation *cancel)
 {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel->type);
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancel->state);
 }
 
-extern "C" void cpr_cancel_suspend(cancellation *cancel)
+void Thread::cancel_suspend(cancellation *cancel)
 {
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel->state);
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &cancel->type);
 }
 
-extern "C" void cpr_cancel_resume(cancellation *cancel)
+void Thread::cancel_resume(cancellation *cancel)
 {
 	pthread_setcanceltype(cancel->type, NULL);
 	pthread_setcancelstate(cancel->state, NULL);

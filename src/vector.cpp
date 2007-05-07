@@ -75,7 +75,7 @@ void Vector::array::set(Object **items)
 
 void Vector::array::add(Object **items)
 {
-	vectorsize_t size = cpr_vectorsize((void **)(items));
+	vectorsize_t size = Vector::size((void **)(items));
 
 	if(!size)
 		return;
@@ -135,7 +135,7 @@ Vector::Vector(Object **items, vectorsize_t limit)
 	}
 
 	if(!limit)
-		limit = cpr_vectorsize((void **)items);
+		limit = size((void **)items);
 
 	data = create(limit);
 	data->retain();
@@ -271,7 +271,7 @@ void Vector::rsplit(vectorsize_t pos)
 void Vector::set(Object **list)
 {
 	if(!data && list) {
-		data = create(cpr_vectorsize((void **)list));
+		data = create(size((void **)list));
 		data->retain();
 	}
 	if(data && list)
@@ -523,7 +523,7 @@ ReusableObject *ArrayReuse::request(void)
 	return obj;
 }
 
-extern "C" vectorsize_t cpr_vectorsize(void **list)
+vectorsize_t Vector::size(void **list)
 {
 	vectorsize_t pos = 0;
 	while(list[pos])

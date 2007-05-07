@@ -18,6 +18,7 @@
 #endif
 
 #endif
+using namespace UCOMMON_NAMESPACE;
 
 struct MD5Context {
 	uint32_t buf[4];
@@ -229,7 +230,7 @@ static void MD5Transform(uint32_t buf[4], uint32_t const in[16])
 	buf[3] += d;
 }
 
-extern "C" void cpr_md5hash(char *out, const char *source, size_t len)
+void config::md5hash(char *out, const char *source, size_t len)
 {
 	struct MD5Context md5;
 	unsigned char digest[16];
@@ -250,7 +251,7 @@ extern "C" void cpr_md5hash(char *out, const char *source, size_t len)
 	}
 }
 
-extern "C" int cpr_uuid(char *uuid)
+int config::uuid(char *uuid)
 {
 	int fd = open("/dev/urandom", O_RDONLY);
 	char buf[16];
@@ -272,7 +273,7 @@ extern "C" int cpr_uuid(char *uuid)
 	return 0;
 }
 
-extern "C" size_t cpr_urlencodesize(char *src)
+size_t config::urlencodesize(char *src)
 {
 	size_t size = 0;
 
@@ -285,7 +286,7 @@ extern "C" size_t cpr_urlencodesize(char *src)
 	return size;
 }
 
-extern "C" size_t cpr_urlencode(char *dest, size_t limit, const char *src)
+size_t config::urlencode(char *dest, size_t limit, const char *src)
 {
 	static const char *hex = "0123456789abcdef";
 	char *ret = dest;
@@ -312,7 +313,7 @@ extern "C" size_t cpr_urlencode(char *dest, size_t limit, const char *src)
 	return dest - ret;
 }
 
-extern "C" size_t cpr_urldecode(char *dest, size_t limit, const char *src)
+size_t config::urldecode(char *dest, size_t limit, const char *src)
 {
 	char *ret = dest;
 	char hex[3];
@@ -340,7 +341,7 @@ extern "C" size_t cpr_urldecode(char *dest, size_t limit, const char *src)
 	return dest - ret;
 }
 
-extern "C" size_t cpr_xmlencode(char *out, size_t limit, const char *src)
+size_t config::xmlencode(char *out, size_t limit, const char *src)
 {
 	char *ret = out;
 
@@ -383,7 +384,7 @@ extern "C" size_t cpr_xmlencode(char *out, size_t limit, const char *src)
 	return out - ret;
 }
 
-extern "C" size_t cpr_xmldecode(char *out, size_t limit, const char *src)
+size_t config::xmldecode(char *out, size_t limit, const char *src)
 {
 	char *ret = out;
 
@@ -419,24 +420,10 @@ extern "C" size_t cpr_xmldecode(char *out, size_t limit, const char *src)
 	return out - ret;
 }
 
-extern "C" size_t cpr_snprintf(char *out, size_t size, const char *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-
-	assert(fmt != NULL && size > 0 && out != NULL);
-
-	if(out)
-		vsnprintf(out, size, fmt, args);
-
-	va_end(args);
-	return strlen(out);
-}
-
 static const unsigned char alphabet[65] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-extern "C" size_t cpr_b64decode(caddr_t out, const char *src, size_t count)
+size_t config::b64decode(caddr_t out, const char *src, size_t count)
 {
 	static char *decoder = NULL;
 	int i, bits, c;
@@ -482,7 +469,7 @@ extern "C" size_t cpr_b64decode(caddr_t out, const char *src, size_t count)
 	return (size_t)((caddr_t)dest - out);
 }
 
-extern "C" size_t cpr_b64encode(char *out, caddr_t src, size_t count)
+size_t config::b64encode(char *out, caddr_t src, size_t count)
 {
 	unsigned bits;
 	char *dest = out;
@@ -517,7 +504,7 @@ extern "C" size_t cpr_b64encode(char *out, caddr_t src, size_t count)
 	return out - dest;
 }
 
-extern "C" size_t cpr_b64len(const char *str)
+size_t config::b64len(const char *str)
 {
 	unsigned count = strlen(str);
 	const char *ep = str + count - 1;
@@ -535,60 +522,6 @@ extern "C" size_t cpr_b64len(const char *str)
 	}
 	return count;
 }
-
-#ifdef	_MSWINDOWS_
-extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
-{
-	char buffer[256];
-	char *ep;
-	FILE *fp;
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
-	ep = buffer + strlen(buffer);
-    if(ep > buffer) {
-        --ep;
-        if(*ep != '\n') {
-            *(++ep) = '\n';
-            *ep = 0;
-        }
-    }
-	fp = fopen(path, "a+");
-	assert(fp != NULL);
-	if(!fp)
-		return; 
-	fprintf(fp, "%s\n", buffer);
-	fclose(fp);
-}
-
-#else
-extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
-{
-	char buffer[256];
-	char *ep;
-	int fd;
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
-	ep = buffer + strlen(buffer);
-	if(ep > buffer) {
-		--ep;
-		if(*ep != '\n') {
-			*(++ep) = '\n';
-			*ep = 0;
-		}
-	}
-	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0770);
-	assert(fd > -1);
-	if(fd < 0)
-		return;
-
-	write(fd, buffer, strlen(buffer));
-	fsync(fd);
-	close(fd);
-	va_end(args);
-}
-#endif
 
 // vim: set ts=4 sw=4:
 

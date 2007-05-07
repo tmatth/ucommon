@@ -228,6 +228,8 @@ protected:
 	Thread(size_t stack = 0);
 
 public:
+	typedef struct {int state; int type;} cancellation;
+
 	static void yield(void);
 
 	static void pause(timeout_t timeout);
@@ -237,6 +239,10 @@ public:
 	virtual ~Thread();
 
 	virtual void exit(void) = 0;
+
+	static void cancel_suspend(cancellation *cancel);
+	static void cancel_resume(cancellation *cancel);
+	static void cancel_async(cancellation *cancel);
 };
 
 class __EXPORT JoinableThread : protected Thread
@@ -555,13 +561,6 @@ inline bool cancel(DetachedThread *th)
 
 END_NAMESPACE
 
-extern "C" {
-	typedef struct {int state; int type;} cancellation;
-	__EXPORT void cpr_cancel_suspend(cancellation *cancel);
-	__EXPORT void cpr_cancel_resume(cancellation *cancel);
-	__EXPORT void cpr_cancel_async(cancellation *cancel);
-};
-
 #define	ENTER_EXCLUSIVE	\
 	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
 		pthread_mutex_lock(&__sync__);
@@ -570,12 +569,12 @@ extern "C" {
 	pthread_mutex_unlock(&__sync__);} while(0);
 
 #define	SUSPEND_CANCELLATION \
-	do { cancellation __cancel__; cpr_cancel_suspend(&__cancel__);
+	do { Thread::cancellation __cancel__; Thread::cancel_suspend(&__cancel__);
 
 #define ASYNC_CANCELLATION \
-	do { cancellation __cancel__; cpr_cancel_async(&__cancel__);
+	do { Thread::cancellation __cancel__; Thread::cancel_async(&__cancel__);
 
 #define	RESUME_CANCELLATION \
-	cpr_cancel_resume(&__cancel__);} while(0);
+	Thread::cancel_resume(&__cancel__);} while(0);
 
 #endif
