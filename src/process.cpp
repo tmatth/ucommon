@@ -1,7 +1,7 @@
 #include <config.h>
 #include <ucommon/thread.h>
 #include <ucommon/string.h>
-#include <ucommon/ipc.h>
+#include <ucommon/process.h>
 #include <errno.h>
 
 #ifdef	HAVE_PWD_H
@@ -629,24 +629,24 @@ bool MessageQueue::gets(char *data)
 
 #endif
 
-env::env(size_t ps) :
+proc::proc(size_t ps) :
 mempager(ps)
 {
 	root = NULL;
 }
 
-env::~env()
+proc::~proc()
 {
 	purge();
 }
 
-void env::setenv(env *ep)
+void proc::setenv(proc *ep)
 {
 #ifndef	HAVE_SETENV
 	char buf[128];
 #endif
 
-	linked_pointer<env::member> env;
+	linked_pointer<proc::member> env;
 
 	if(!ep)
 		return;
@@ -664,7 +664,7 @@ void env::setenv(env *ep)
 }
 
 
-const char *env::get(const char *id)
+const char *proc::get(const char *id)
 {
 	member *key = find(id);
 	if(!key)
@@ -674,7 +674,7 @@ const char *env::get(const char *id)
 }
 
 #ifdef	_MSWINDOWS_
-char **env::getEnviron(void)
+char **proc::getEnviron(void)
 {
 	char buf[1024 - 64];
 	linked_pointer<member> env;
@@ -693,7 +693,7 @@ char **env::getEnviron(void)
 }
 #endif
 
-void env::dup(const char *id, const char *value)
+void proc::dup(const char *id, const char *value)
 {
 	member *env = find(id);
 
@@ -704,7 +704,7 @@ void env::dup(const char *id, const char *value)
 	env->value = mempager::dup(value);
 };
 
-void env::set(char *id, const char *value)
+void proc::set(char *id, const char *value)
 {
     member *env = find(id);
 	
@@ -720,7 +720,7 @@ void env::set(char *id, const char *value)
 
 #else
 
-bool env::setuser(const char *uid)
+bool proc::setuser(const char *uid)
 {
 	bool rtn = false;
 	struct passwd *pwd;
@@ -755,7 +755,7 @@ bool env::setuser(const char *uid)
 	return rtn;
 }
 
-bool env::foreground(const char *id, const char *uid, int fac)
+bool proc::foreground(const char *id, const char *uid, int fac)
 {
 	bool rtn;
 
@@ -772,7 +772,7 @@ bool env::foreground(const char *id, const char *uid, int fac)
 	return rtn;
 }
 
-bool env::background(const char *id, const char *uid, int fac)
+bool proc::background(const char *id, const char *uid, int fac)
 {
 	bool rtn;
 
@@ -794,7 +794,7 @@ bool env::background(const char *id, const char *uid, int fac)
 	return rtn;
 }
 
-int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env *env, const char *uid)
+int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, proc *env, const char *uid)
 {
 	unsigned max = OPEN_MAX, idx = 0;
 	int status;

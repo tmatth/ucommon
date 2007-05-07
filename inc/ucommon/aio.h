@@ -73,6 +73,29 @@ public:
 		{next();};
 };
 
+template <class T, unsigned C = 1>
+class aio_array : public aio
+{
+public:
+	fd_t fd;
+	T value[C];
+
+	inline aio_array(fd_t fh) : 
+		aio() {fd = fh;};
+
+	inline T* operator*()
+		{return &value;};
+
+	inline T operator[](unsigned idx)
+		{return value[idx];};
+
+	inline void get(unsigned long offset)
+		{aio::read(fd, &value, sizeof(T) * C, sizeof(T) * offset);};
+
+	inline void put(unsigned long offset)
+		{aio::write(fd, &value, sizeof(T) * C, sizeof(T) * offset);};
+};
+
 #endif
 
 END_NAMESPACE

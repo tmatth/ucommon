@@ -2,6 +2,11 @@
 #include <ucommon/string.h>
 #include <ucommon/misc.h>
 #include <errno.h>
+#include <stdarg.h>
+
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
 
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -705,6 +710,104 @@ extern "C" caddr_t cpr_mapfile(const char *fn)
 
 #endif
 
+#ifdef	_MSWINDOWS_
+extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
+{
+	char buffer[256];
+	char *ep;
+	FILE *fp;
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
+	ep = buffer + strlen(buffer);
+    if(ep > buffer) {
+        --ep;
+        if(*ep != '\n') {
+            *(++ep) = '\n';
+            *ep = 0;
+        }
+    }
+	fp = fopen(path, "a+");
+	assert(fp != NULL);
+	if(!fp)
+		return; 
+	fprintf(fp, "%s\n", buffer);
+	fclose(fp);
+}
+
+#else
+extern "C" void cpr_critlog(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsyslog(LOG_CRIT, fmt, args);
+	va_end(args);
+	abort();
+}
+
+extern "C" void cpr_notice(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsyslog(LOG_NOTICE, fmt, args);
+	va_end(args);
+}
+
+extern "C" void cpr_warning(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsyslog(LOG_WARNING, fmt, args);
+	va_end(args);
+}
+
+extern "C" void cpr_infolog(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsyslog(LOG_INFO, fmt, args);
+	va_end(args);
+}
+
+extern "C" void cpr_errlog(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsyslog(LOG_ERR, fmt, args);
+	va_end(args);
+}
+
+
+extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
+{
+	char buffer[256];
+	char *ep;
+	int fd;
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
+	ep = buffer + strlen(buffer);
+	if(ep > buffer) {
+		--ep;
+		if(*ep != '\n') {
+			*(++ep) = '\n';
+			*ep = 0;
+		}
+	}
+
+	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0770);
+	assert(fd > -1);
+	if(fd < 0)
+		return;
+
+	write(fd, buffer, strlen(buffer));
+	fsync(fd);
+	close(fd);
+
+	va_end(args);
+}
+#endif
+
 extern "C" void *cpr_memalloc(size_t size)
 {
 	void *mem;
@@ -724,7 +827,6 @@ extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 	crit((size <= max));
 	return addr;
 }
-
 
 #ifdef	__GNUC__
 

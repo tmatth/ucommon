@@ -171,7 +171,6 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #define UCOMMON_ASYNC_IO 1
 #endif
 
-
 #define	CPR_PRIORITY_LOWEST 0
 #define	CPR_PRIORITY_LOW 1
 #define	CPR_PRIORITY_NORMAL 2
@@ -262,6 +261,11 @@ extern "C" {
 	__EXPORT fd_t cpr_createctrl(const char *path);
 	__EXPORT void cpr_unlinkctrl(const char *path);
 	__EXPORT fd_t cpr_openctrl(const char *path);
+	__EXPORT void cpr_infolog(const char *fmt, ...);
+	__EXPORT void cpr_notice(const char *fmt, ...);
+	__EXPORT void cpr_warning(const char *fmt, ...);
+	__EXPORT void cpr_errlog(const char *fmt, ...);
+	__EXPORT void cpr_critlog(const char *fmt, ...);
 };
 
 #ifdef	DEBUG
