@@ -1,5 +1,5 @@
-#ifndef _UCOMMON_IPC_H_
-#define	_UCOMMON_IPC_H_
+#ifndef _UCOMMON_PROC_H_
+#define	_UCOMMON_PROC_H_
 
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
@@ -80,7 +80,7 @@ public:
 	unsigned getPending(void) const;
 };
 
-class __EXPORT env : public mempager
+class __EXPORT proc : public mempager
 {
 protected:
 	LinkedObject *root;
@@ -95,8 +95,8 @@ public:
 
 	typedef named_value<const char *> member;
 
-	env(size_t paging);
-	~env();
+	proc(size_t paging);
+	~proc();
 
 	void dup(const char *id, const char *val);
 	void set(char *id, const char *val);
@@ -112,8 +112,14 @@ public:
 	char **getEnviron(void);
 #endif
 
-	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, env *ep = NULL);
-	static void setenv(env *ep);
+	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL, const char *uid = NULL);
+
+	bool background(const char *id, const char *uid, int fac = 0);
+	bool foreground(const char *id, const char *uid, int fac = 0);
+
+protected:
+	static void setenv(proc *ep);
+	static bool setuser(const char *uid);
 };
 
 template <class T>

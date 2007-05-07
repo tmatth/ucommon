@@ -1,7 +1,7 @@
 #include <config.h>
 #include <ucommon/thread.h>
 #include <ucommon/string.h>
-#include <ucommon/process.h>
+#include <ucommon/proc.h>
 #include <errno.h>
 
 #ifdef	HAVE_PWD_H
