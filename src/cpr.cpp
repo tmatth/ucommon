@@ -543,6 +543,155 @@ extern "C" bool cpr_isasync(fd_t fd)
 
 #endif
 
+#ifdef _MSWINDOWS_
+
+extern "C" bool cpr_isopen(fd_t fd)
+{
+	if(fd == INVALID_HANDLE_VALUE)
+		return false;
+	return true;
+}
+
+extern "C" void cpr_seekfile(fd_t fd, off_t offset)
+{
+	SetFilePointer(fd, offset, NULL, FILE_BEGIN);
+}
+
+extern "C" size_t cpr_filesize(fd_t fd)
+{
+	DWORD pos, end;
+	pos = SetFilePointer(fd, 0l, NULL, FILE_CURRENT);
+	end = SetFilePointer(fd, 0l, NULL, FILE_END);
+	SetFilePointer(fd, pos, NULL, FILE_BEGIN);
+	return (size_t)end;
+}
+
+extern "C" ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len)
+{
+	DWORD count = (DWORD)-1;
+	ReadFile(fd, data, (DWORD)len, &count, NULL);
+	return count;
+}
+
+extern "C" ssize_t cpr_writefile(fd_t fd, caddr_t data, size_t len)
+{
+	DWORD count = (DWORD)-1;
+	WriteFile(fd, data, (DWORD)len, &count, NULL);
+	return count;
+}
+
+extern "C" fd_t cpr_closefile(fd_t fd)
+{
+	if(fd != INVALID_HANDLE_VALUE)
+		CloseHandle(fd);
+	return INVALID_HANDLE_VALUE;
+}
+
+#else
+
+extern "C" bool cpr_isopen(fd_t fd)
+{
+	if(fd > -1)
+		return true;
+
+	return false;
+}
+
+extern "C" void cpr_seekfile(fd_t fd, off_t offset)
+{
+	lseek(fd, offset, SEEK_SET);
+}
+
+extern "C" size_t cpr_filesize(fd_t fd)
+{
+	struct stat ino;
+
+	if(fd < 0 || fstat(fd, &ino))
+		return 0;
+
+	return ino.st_size;
+}
+
+extern "C" ssize_t cpr_readfile(fd_t fd, caddr_t data, size_t len)
+{
+	return read(fd, data, len);
+}
+
+extern "C" ssize_t cpr_writefile(fd_t fd, caddr_t data, size_t len)
+{
+	return write(fd, data, len);
+}
+
+extern "C" fd_t cpr_closefile(fd_t fd)
+{
+	if(fd > -1)
+		close(fd);
+	return -1;
+}
+
+extern "C" fd_t cpr_openfile(const char *fn, bool rewrite)
+{
+	if(rewrite)
+		return open(fn, O_RDWR);
+	else
+		return open(fn, O_RDONLY);
+}
+
+#endif
+
+#if _POSIX_MAPPED_FILES > 0
+
+extern "C" caddr_t cpr_mapfile(const char *fn)
+{
+	struct stat ino;
+	int fd = open(fn, O_RDONLY);
+	void *map;
+
+	if(fd < 0)
+		return NULL;
+
+	if(fstat(fd, &ino) || !ino.st_size) {
+		close(fd);
+		return NULL;
+	}
+
+	map = mmap(NULL, ino.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	msync(map, ino.st_size, MS_SYNC);
+	cpr_closefile(fd);
+	if(map == MAP_FAILED)
+		return NULL;
+	
+	return (caddr_t)map;
+}
+#else
+
+extern "C" caddr_t cpr_mapfile(const char *fn)
+{
+/*	caddr_t mem;
+	fd_t fd;
+	size_t size;
+
+	fd = cpr_openfile(fn, false);
+	if(!cpr_isopen(fd))
+		return NULL;
+
+	size = cpr_filesize(fd);
+	if(size < 1) {
+		cpr_closefile(fd);
+		return NULL;
+	}
+	mem = (caddr_t)malloc(size);
+	if(!mem)
+		abort();
+	
+	cpr_readfile(fd, mem, size);
+	cpr_closefile(fd);
+	return (caddr_t)mem;
+*/
+}
+
+#endif
+
 extern "C" void *cpr_memalloc(size_t size)
 {
 	void *mem;

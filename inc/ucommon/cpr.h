@@ -26,6 +26,7 @@ typedef	HANDLE fd_t;
 #else
 typedef int fd_t;
 #include <dlfcn.h>
+#include <signal.h>
 #endif
 
 typedef	void (*sighandler_t)(int);
