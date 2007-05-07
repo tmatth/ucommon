@@ -111,6 +111,10 @@ AC_CHECK_LIB($clib, sysconf, [
 	AC_DEFINE(HAVE_SYSCONF, [1], [system config])
 ])
 
+AC_CHECK_LIB($clib, setenv, [
+	AC_DEFINE(HAVE_SETENV, [1], [have setenv])
+])
+
 AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])

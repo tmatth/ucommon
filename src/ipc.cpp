@@ -632,6 +632,7 @@ env::~env()
 
 void env::setenv(env *ep)
 {
+#ifdef	HAVE_SETENV
 	linked_pointer<env::member> env;
 
 	if(!ep)
@@ -642,6 +643,7 @@ void env::setenv(env *ep)
 		::setenv(env->getId(), env->value, 1);
 		env.next();
 	}
+#endif
 }
 
 
@@ -697,6 +699,9 @@ void env::set(char *id, const char *value)
     env->value = value;
 };
 
+#ifdef	_MSWINDOWS_
+
+#else
 int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env *env)
 {
 	unsigned max = OPEN_MAX, idx = 0;
@@ -742,4 +747,4 @@ int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env
 	execvp(fn, args);
 	exit(-1);
 }
-
+#endif
