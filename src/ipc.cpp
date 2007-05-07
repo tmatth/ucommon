@@ -4,6 +4,15 @@
 #include <ucommon/ipc.h>
 #include <errno.h>
 
+#ifdef	HAVE_PWD_H
+#include <pwd.h>
+#include <grp.h>
+#endif
+
+#ifdef	HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -633,7 +642,10 @@ env::~env()
 
 void env::setenv(env *ep)
 {
-#ifdef	HAVE_SETENV
+#ifndef	HAVE_SETENV
+	char buf[128];
+#endif
+
 	linked_pointer<env::member> env;
 
 	if(!ep)
@@ -641,10 +653,14 @@ void env::setenv(env *ep)
 
 	env = ep->begin();
 	while(env) {
+#ifdef	HAVE_SETENV
 		::setenv(env->getId(), env->value, 1);
+#else
+		snprintf(buf, sizeof(buf), "%s=%s", env->getID(), env->value);
+		putenv(buf);
+#endif
 		env.next();
 	}
-#endif
 }
 
 
@@ -703,7 +719,82 @@ void env::set(char *id, const char *value)
 #ifdef	_MSWINDOWS_
 
 #else
-int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env *env)
+
+bool env::setuser(const char *uid)
+{
+	bool rtn = false;
+	struct passwd *pwd;
+	struct group *grp;
+
+	if(!uid)
+		return true;
+
+	if(uid && *uid == '@') {
+		grp = getgrnam(++uid);
+		if(grp) {
+			rtn = true;
+			umask(002);
+			setgid(grp->gr_gid);
+		}
+		endgrent();
+	}
+	else if(uid) {
+		pwd = getpwnam(uid);
+		if(pwd) {
+			rtn = true;
+			umask(022);
+			::setenv("HOME", pwd->pw_dir, 1);
+			::setenv("USER", pwd->pw_name, 1);
+			::setenv("LOGNAME", pwd->pw_name, 1);
+			::setenv("SHELL", pwd->pw_shell, 1);
+			setgid(pwd->pw_gid);
+			setuid(pwd->pw_uid);
+		}
+		endpwent();
+	}
+	return rtn;
+}
+
+bool env::foreground(const char *id, const char *uid, int fac)
+{
+	bool rtn;
+
+	if(!fac)
+		fac = LOG_DAEMON;
+
+	rtn = setuser(uid);
+	setenv(this);
+	
+	if(id)
+		openlog(id, LOG_PERROR, fac);
+
+	purge();
+	return rtn;
+}
+
+bool env::background(const char *id, const char *uid, int fac)
+{
+	bool rtn;
+
+	if(!fac)
+		fac = LOG_DAEMON;
+
+	cpr_pdetach();
+
+	if(getppid() != 1)
+		return false;
+
+	rtn = setuser(uid);
+	setenv(this);
+
+	if(id)
+		openlog(id, LOG_CONS, fac);
+
+	purge();
+	return rtn;
+}
+
+int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env *env, const char *uid)
 {
 	unsigned max = OPEN_MAX, idx = 0;
 	int status;
@@ -737,6 +828,9 @@ int env::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, env
 	if(!getrlimit(RLIMIT_NOFILE, &rl))
 		max = rl.rlim_cur;
 #endif
+
+	closelog();
+	setuser(uid);
 
 	while(idx < max)
 		close(idx++);
