@@ -157,7 +157,7 @@ if test "$ac_cv_libc_sigwait2" = "yes" ; then
     AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
 fi
 
-AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h mach/clock.h sys/mman.h mqueue.h pwd.h syslog.h)
+AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h mach/clock.h sys/mman.h mqueue.h syslog.h)
 
 PTHREAD_FLAGS=""
 

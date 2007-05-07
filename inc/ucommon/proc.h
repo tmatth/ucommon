@@ -116,15 +116,11 @@ public:
 
 #ifdef	_MSWINDOWS_
 	char **getEnviron(void);
+#else
+	void setEnviron();
 #endif
 
 	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL);
-
-	void background(const char *id, int fac = 0);
-	void foreground(const char *id, int fac = 0);
-
-protected:
-	static void setenv(proc *ep, const char *sid = NULL);
 };
 
 template <class T>

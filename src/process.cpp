@@ -4,11 +4,6 @@
 #include <ucommon/proc.h>
 #include <errno.h>
 
-#ifdef	HAVE_PWD_H
-#include <pwd.h>
-#include <grp.h>
-#endif
-
 #ifdef	HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -645,72 +640,6 @@ proc::~proc()
 	purge();
 }
 
-void proc::setenv(proc *ep, const char *sid)
-{
-	char buf[128];
-	const char *id;
-
-	linked_pointer<proc::member> env;
-
-	if(!ep)
-		return;
-
-#ifndef	_MSWINDOWS_
-	if(!getuid() && sid) {
-		struct passwd *pwd;
-		const char *uid = ep->get("USER");
-
-		if(!uid)
-			uid = sid;
-		pwd = getpwnam(uid);
-		crit(pwd != NULL);
-
-		umask(002);
-		setgid(pwd->pw_gid);
-		setegid(pwd->pw_gid);
-	
-		snprintf(buf, sizeof(buf), "/var/run/%s", sid);
-		mkdir(buf, 0770);
-		mkdir(pwd->pw_dir, 02770);
-		chdir(pwd->pw_dir);
-		setuid(pwd->pw_uid);
-		endpwent();
-	}
-#endif
-
-	env = ep->begin();
-	while(env) {
-#ifdef	HAVE_SETENV
-		::setenv(env->getId(), env->value, 1);
-#else
-		snprintf(buf, sizeof(buf), "%s=%s", env->getId(), env->value);
-		putenv(buf);
-#endif
-		env.next();
-	}
-
-#ifndef	_MSWINDOWS_
-	if(getuid() == 0 && getppid() < 2)
-		umask(002);
-
-	id = ep->get("UID");
-	if(id && getuid() == 0) {
-		if(getppid() > 1)
-			umask(022);
-		setuid(atoi(id));
-	}
-
-	id = ep->get("HOME");
-	if(id)
-		chdir(id);
-#else
-#endif
-
-	id = ep->get("PWD");
-	if(id)
-		chdir(id);	
-}
-
 const char *proc::get(const char *id)
 {
 	member *key = find(id);
@@ -738,6 +667,44 @@ char **proc::getEnviron(void)
 	envp[idx] = NULL;
 	return envp;
 }
+#else
+
+void proc::setEnviron(void)
+{
+	const char *id;
+
+	linked_pointer<proc::member> env = begin();
+
+	while(env) {
+#ifdef	HAVE_SETENV
+		::setenv(env->getId(), env->value, 1);
+#else
+		char buf[128];
+		snprintf(buf, sizeof(buf), "%s=%s", env->getId(), env->value);
+		putenv(buf);
+#endif
+		env.next();
+	}
+
+	if(getuid() == 0 && getppid() < 2)
+		umask(002);
+
+	id = get("UID");
+	if(id && getuid() == 0) {
+		if(getppid() > 1)
+			umask(022);
+		setuid(atoi(id));
+	}
+
+	id = get("HOME");
+	if(id)
+		chdir(id);
+
+	id = get("PWD");
+	if(id)
+		chdir(id);	
+}
+
 #endif
 
 void proc::dup(const char *id, const char *value)
@@ -766,27 +733,6 @@ void proc::set(char *id, const char *value)
 #ifdef _MSWINDOW_
 
 #else
-
-void proc::foreground(const char *id, int fac)
-{
-	if(!fac)
-		fac = LOG_USER;
-
-	setenv(this, id);
-	openlog(id, LOG_PERROR, fac);
-	purge();
-}
-
-void proc::background(const char *id, int fac)
-{
-	if(!fac)
-		fac = LOG_DAEMON;
-
-	cpr_pdetach();
-	setenv(this, id);
-	openlog(id, LOG_CONS, fac);
-	purge();
-}
 
 int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, proc *env)
 {
@@ -831,7 +777,9 @@ int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, pr
 	if(mode == SPAWN_DETACH)
 		cpr_pdetach();
 
-	setenv(env);		
+	if(env)
+		env->setEnviron();
+
 	execvp(fn, args);
 	exit(-1);
 }
