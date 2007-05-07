@@ -17,16 +17,15 @@
 #include <ucommon/string.h>
 #endif
 
-#ifndef	_UCOMMON_FILE_H_
-#include <ucommon/file.h>
-#endif
-
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif
 
-#ifndef _UCOMMON_IPC_H_
-#include <ucommon/ipc.h>
+#ifdef	_MSWINDOWS_
+typedef	HANDLE fd_t;
+#else
+typedef int fd_t;
+#include <dlfcn.h>
 #endif
 
 typedef	void (*sighandler_t)(int);

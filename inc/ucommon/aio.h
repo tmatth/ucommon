@@ -5,16 +5,8 @@
 #include <ucommon/object.h>
 #endif
 
-#ifndef _UCOMMON_MEMORY_H_
-#include <ucommon/memory.h>
-#endif
-
-#ifndef _UCOMMON_THREAD_H_
-#include <ucommon/thread.h>
-#endif
-
-#ifndef	_MSWINDOWS_
-#include <dlfcn.h>
+#ifndef _UCOMMON_CPR_H_
+#include <ucommon/cpr.h>
 #endif
 
 #include <unistd.h>
@@ -22,12 +14,6 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
-#ifdef	_MSWINDOWS_
-typedef	HANDLE fd_t;
-#else
-typedef int fd_t;
-#endif
 
 #ifdef _POSIX_ASYNCHRONOUS_IO
 #include <aio.h>
