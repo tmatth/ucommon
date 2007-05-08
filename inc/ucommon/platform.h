@@ -87,6 +87,7 @@ typedef char *caddr_t;
 	
 #else
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -197,6 +198,12 @@ extern "C" {
 	inline void *cpr_getloadaddr(loader_handle_t mem, const char *sym)
 		{return (void *)GetProcAddress(mem, sym);};
 
+	inline bool cpr_createdir(const char *path)
+		{return CreateDirectory(path, NULL);};
+
+	inline bool cpr_removedir(const char *path)
+		{return RemoveDirectory(path);};
+
 #else
 	typedef	void *loader_handle_t;
 
@@ -214,12 +221,20 @@ extern "C" {
 
 	inline void cpr_unload(loader_handle_t mem)
 		{dlclose(mem);};
+
+	inline bool cpr_createdir(const char *path)
+		{return !mkdir(path, 0770);};
+
+	inline bool cpr_removedir(const char *path)
+		{return !rmdir(path);};
+
 #endif
 
 	__EXPORT bool cpr_isasync(fd_t fd);
 	__EXPORT bool cpr_isopen(fd_t fd);
 	__EXPORT fd_t cpr_createfile(const char *fn);
-	__EXPORT fd_t cpr_openfile(const char *fn, bool rewrite);
+	__EXPORT fd_t cpr_rewritefile(const char *fn);
+	__EXPORT fd_t cpr_openfile(const char *fn, bool write);
 	__EXPORT fd_t cpr_closefile(fd_t fd);
 	__EXPORT ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset);
 	__EXPORT ssize_t cpr_pwritefile(fd_t fd, caddr_t data, size_t len, off_t offset);

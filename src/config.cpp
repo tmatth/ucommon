@@ -131,7 +131,7 @@ config::keynode *config::getNode(keynode *base, const char *id, const char *text
 	while(node) {
 		if(!strcmp(id, node->getId())) {
 			cp = node->getData();
-			if(cp && !string::casecompare(cp, text))
+			if(cp && !stricmp(cp, text))
 				return *node;
 		}
 		node.next();

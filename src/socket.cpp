@@ -1224,7 +1224,7 @@ int Socket::bindaddr(SOCKET so, const char *host, const char *svc)
     if(!gethint(so, &hint) || !svc)
         return -1;
 
-	if(host && !string::compare(host, "*"))
+	if(host && !strcmp(host, "*"))
 		host = NULL;
 
 #ifdef	SO_BINDTODEVICE

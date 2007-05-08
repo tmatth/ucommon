@@ -1,8 +1,8 @@
 #ifndef	_UCOMMON_STRING_H_
 #define	_UCOMMON_STRING_H_
 
-#ifndef	_UCOMMON_OBJECT_H_
-#include <ucommon/object.h>
+#ifndef	_UCOMMON_MEMPRY_H_
+#include <ucommon/memory.h>
 #endif
 
 #ifndef	_UCOMMON_TIMERS_H_
@@ -161,8 +161,8 @@ public:
 	static size_t count(const char *s);
 	static int compare(const char *s1, const char *s2);
 	static int compare(const char *s1, const char *s2, size_t len);
-	static int casecompare(const char *s1, const char *s2);
-	static int casecompare(const char *s1, const char *s2, size_t len);
+	static int case_compare(const char *s1, const char *s2);
+	static int case_compare(const char *s1, const char *s2, size_t len);
 	static timeout_t totimeout(const char *cp, char **ep = NULL, bool sec = false);
 	static bool tobool(const char *cp, char **ep = NULL);
 	static int32_t toint(const char *cp, char **ep = NULL);
@@ -242,6 +242,9 @@ public:
 
 	memstring(void *mem, strsize_t size, char fill = 0);
 	~memstring();
+
+	static memstring *create(strsize_t size, char fill = 0);
+	static memstring *create(mempager *pager, strsize_t size, char fill = 0);
 };
 
 class __EXPORT tokenstring : protected string
@@ -281,6 +284,16 @@ public:
 	inline void operator=(string &s)
 		{set(s.c_str());};	
 };
+
+#ifndef _MSWINDOWS_
+
+extern "C" inline int stricmp(const char *s1, const char *s2)
+	{return string::case_compare(s1, s2);};
+
+extern "C" inline int strnicmp(const char *s1, const char *s2, size_t n)
+	{return string::case_compare(s1, s2, n);};
+
+#endif
 
 END_NAMESPACE
 

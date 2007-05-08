@@ -642,17 +642,22 @@ extern "C" fd_t cpr_closefile(fd_t fd)
 	return -1;
 }
 
-extern "C" fd_t cpr_openfile(const char *fn, bool rewrite)
+extern "C" fd_t cpr_openfile(const char *fn, bool write)
 {
-	if(rewrite)
+	if(write)
 		return open(fn, O_RDWR);
 	else
 		return open(fn, O_RDONLY);
 }
 
-extern "C" fd_t cpr_createfile(const char *fn)
+extern "C" fd_t cpr_rewritefile(const char *fn)
 {
 	return creat(fn, 0660);
+}
+
+extern "C" fd_t cpr_createfile(const char *fn)
+{
+	return open(fn, O_EXCL | O_CREAT | O_WRONLY, 0660);
 }
 
 #endif

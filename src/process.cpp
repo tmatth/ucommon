@@ -640,6 +640,29 @@ proc::~proc()
 	purge();
 }
 
+void proc::setenv(define *def)
+{
+	while(def && def->name) {
+		setenv(def->name, def->value);
+		++def;
+	}
+}
+
+void proc::setenv(const char *id, const char *value)
+{
+	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+	pthread_mutex_lock(&mutex);
+#ifdef	HAVE_SETENV
+	::setenv(id, value, 1);
+#else
+	char buf[128];
+	snprintf(buf, sizeof(buf), "%s=%s", id, value);
+	::putenv(buf);
+#endif
+	pthread_mutex_unlock(&mutex);
+}
+
 const char *proc::get(const char *id)
 {
 	member *key = find(id);
@@ -705,6 +728,115 @@ void proc::setEnviron(void)
 		chdir(id);	
 }
 
+pid_t proc::pidfile(const char *id, pid_t pid)
+{
+	char buf[128];
+	pid_t opid;
+	fd_t fd;
+
+	snprintf(buf, sizeof(buf), "/var/run/%s", id);
+	mkdir(buf, 0770);
+	if(cpr_isdir(buf))
+		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
+	else
+		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
+
+retry:
+	fd = open(buf, O_CREAT|O_WRONLY|O_TRUNC|O_EXCL, 0770);
+	if(fd < 0) {
+		opid = pidfile(id);
+		if(!opid || opid == 1 && pid > 1) {
+			remove(buf);
+			goto retry;
+		}
+		return opid;
+	}
+
+	if(pid > 1) {
+		snprintf(buf, sizeof(buf), "%d\n", pid);
+		write(fd, buf, strlen(buf));
+	}
+	close(fd);
+	return 0;
+}
+
+pid_t proc::pidfile(const char *id)
+{
+	struct stat ino;
+	time_t now;
+	char buf[128];
+	fd_t fd;
+	pid_t pid;
+
+	snprintf(buf, sizeof(buf), "/var/run/%s", id);
+	if(cpr_isdir(buf))
+		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
+	else
+		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
+
+	fd = open(buf, O_RDONLY);
+	if(fd < 0 && errno == EPERM)
+		return 1;
+
+	if(fd < 0)
+		return 0;
+
+	if(read(fd, buf, 16) < 1) {
+		goto bydate;
+	}
+	buf[16] = 0;
+	pid = atoi(buf);
+	if(pid == 1)
+		goto bydate;
+
+	close(fd);
+	if(kill(pid, 0))
+		return 0;
+
+	return pid;
+
+bydate:
+	time(&now);
+	fstat(fd, &ino);
+	close(fd);
+	if(ino.st_mtime + 30 < now)
+		return 0;
+	return 1;
+}
+
+bool proc::reload(const char *id)
+{
+	pid_t pid = pidfile(id);
+
+	if(pid < 2)
+		return false;
+
+	kill(pid, SIGHUP);
+	return true;
+}
+
+bool proc::shutdown(const char *id)
+{
+	pid_t pid = pidfile(id);
+
+	if(pid < 2)
+		return false;
+
+	kill(pid, SIGINT);
+	return true;
+}
+
+bool proc::terminate(const char *id)
+{
+	pid_t pid = pidfile(id);
+
+	if(pid < 2)
+		return false;
+
+	kill(pid, SIGTERM);
+	return true;
+}
+
 #endif
 
 void proc::dup(const char *id, const char *value)
@@ -754,8 +886,12 @@ int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, pr
 		}
 	}
 
-	while(iov && *iov > -1)
-		dup2(*(iov++), idx++);
+	while(iov && *iov > -1) {
+		if(*iov != (fd_t)idx)
+			dup2(*iov, idx);
+		++iov;
+		++idx;
+	}
 
 	while(idx < 3)
 		++idx;

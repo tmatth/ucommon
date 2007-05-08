@@ -11,7 +11,7 @@ class __EXPORT MappedMemory
 {
 private:
 	caddr_t map;
-	fd_t fd;
+	fd_t fd;	
 
 protected:
 	size_t size, used;
@@ -119,8 +119,23 @@ public:
 #else
 	void setEnviron();
 #endif
-
+	static void setenv(const char *id, const char *value);
+	static void setenv(define *list);
 	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL);
+	static void createiov(fd_t *iov, unsigned size = 4);
+	static void closeinput(fd_t *iov);
+	static void closeoutput(fd_t *iov);
+	static fd_t pipeinput(fd_t *iov, size_t size = 0);
+	static fd_t pipeoutput(fd_t *iov, size_t size = 0);
+	static bool createpipe(fd_t *pipe, size_t size = 0);
+
+#ifndef	_MSWINDOWS_
+	static pid_t pidfile(const char *id);
+	static pid_t pidfile(const char *id, pid_t pid);
+#endif
+	static bool reload(const char *id);
+	static bool shutdown(const char *id);
+	static bool terminate(const char *id);
 };
 
 template <class T>

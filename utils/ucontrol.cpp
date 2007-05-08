@@ -29,14 +29,41 @@ int main(int argc, char **argv)
 
 	if(argc > 1 && argv[1][0] == '-') {
 		timeout = atoi(argv[1] + 1);
-		++argv;
-		--argc;
+		if(timeout) {
+			++argv;
+			--argc;
+		}
 	}
 
 	if(argc != 3) {
-		fprintf(stderr, "use: control [-timeout] service \"command\" ...\n");
+		fprintf(stderr, "use: control [-timeout|-reload|-shutdown|-terminate] service [\"command\"] ...\n");
 		exit(-1);
 	}
+
+	if(!timeout && (!stricmp(argv[1], "-reload") || !stricmp(argv[1], "-r"))) {
+		if(!proc::reload(argv[2])) {
+			fprintf(stderr, "*** %s: cannot reload\n", argv[2]);
+			exit(-1);
+		}
+		exit(0);
+	}
+
+	if(!timeout && (!stricmp(argv[1], "-shutdown") || !stricmp(argv[1], "-s"))) {
+		if(!proc::shutdown(argv[2])) {
+			fprintf(stderr, "*** %s: cannot shutdown\n", argv[2]);
+			exit(-1);
+		}
+		exit(0);
+	}
+
+	if(!timeout && (!stricmp(argv[1], "-terminate") || !stricmp(argv[1], "-t"))) {
+		if(!proc::terminate(argv[2])) {
+			fprintf(stderr, "*** %s: cannot terminate\n", argv[2]);
+			exit(-1);
+		}
+		exit(0);
+	}
+
 	cpr_signal(SIGUSR1, signotify);
 	cpr_signal(SIGUSR2, signotify);
 	cpr_signal(SIGALRM, signotify);

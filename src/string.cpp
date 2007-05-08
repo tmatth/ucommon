@@ -1064,6 +1064,18 @@ memstring::~memstring()
 	str = NULL;
 }
 
+memstring *memstring::create(strsize_t size, char fill)
+{
+	caddr_t mem = (caddr_t)cpr_memalloc(size + sizeof(memstring) + 1);
+	return new(mem) memstring(mem + sizeof(memstring), size, fill);
+}
+
+memstring *memstring::create(mempager *pager, strsize_t size, char fill)
+{
+	caddr_t mem = (caddr_t)pager->alloc(size + sizeof(memstring) + 1);
+	return new(mem) memstring(mem + sizeof(memstring), size, fill);
+}
+
 void memstring::release(void)
 {
 	str = NULL;
@@ -1080,7 +1092,7 @@ void memstring::cow(strsize_t adj)
 
 string::cstring *memstring::c_copy(void) const
 {
-	cstring *tmp = create(str->max, str->fill);
+	cstring *tmp = string::create(str->max, str->fill);
 	tmp->set(str->text);
 	return tmp;
 }
@@ -1590,7 +1602,7 @@ int string::compare(const char *s1, const char *s2, size_t s)
     return strncmp(s1, s2, s);
 }
 
-int string::casecompare(const char *s1, const char *s2)
+int string::case_compare(const char *s1, const char *s2)
 {
 	if(!s1)
 		s1 = "";
@@ -1605,7 +1617,7 @@ int string::casecompare(const char *s1, const char *s2)
 #endif
 }
 
-int string::casecompare(const char *s1, const char *s2, size_t s)
+int string::case_compare(const char *s1, const char *s2, size_t s)
 {
     if(!s1)
         s1 = "";
@@ -1677,21 +1689,21 @@ bool string::tobool(const char *cp, char **ep)
 		goto exit;
 	}
 
-	if(!casecompare(cp, "true", 4)) {
+	if(!strnicmp(cp, "true", 4)) {
 		cp += 4;
 		rtn = true;
 		goto exit;
 	}
-	else if(!casecompare(cp, "yes", 3)) {
+	else if(!strnicmp(cp, "yes", 3)) {
 		cp += 3;
 		rtn = true;
 		goto exit;
 	}
-	else if(!casecompare(cp, "false", 5)) {
+	else if(!strnicmp(cp, "false", 5)) {
 		cp += 5;
 		goto exit;
 	}
-	else if(!casecompare(cp, "no", 2)) {
+	else if(!strnicmp(cp, "no", 2)) {
 		cp += 2;
 		goto exit;
 	}
