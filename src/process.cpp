@@ -862,7 +862,7 @@ void proc::set(char *id, const char *value)
     env->value = value;
 };
 
-#ifdef _MSWINDOW_
+#ifdef _MSWINDOWS_
 
 #else
 
