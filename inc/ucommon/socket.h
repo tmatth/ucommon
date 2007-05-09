@@ -162,7 +162,9 @@ public:
 	bool isConnected(void) const;
 	bool waitPending(timeout_t timeout = 0) const;
 	bool waitSending(timeout_t timeout = 0) const;
-	unsigned getPending(void) const;
+	
+	inline unsigned getPending(void) const
+		{return pending(so);};
 
 	inline int broadcast(bool enable)
 		{return broadcast(so, enable);};
@@ -173,8 +175,8 @@ public:
 	inline int blocking(bool enable)
 		{return blocking(so, enable);};
 
-	inline int multicast(bool enable)
-		{return multicast(so, enable);};
+	inline int multicast(unsigned ttl = 1)
+		{return multicast(so, ttl);};
 
 	inline int getError(void)
 		{return error(so);};
@@ -233,6 +235,7 @@ public:
 	inline SOCKET operator*() const
 		{return so;};
 
+	static unsigned pending(SOCKET so);
 	static int sendsize(SOCKET so, unsigned size);
 	static int recvsize(SOCKET so, unsigned size);
 	static int connect(SOCKET so, struct addrinfo *list);
@@ -240,7 +243,7 @@ public:
 	static int drop(SOCKET so, struct addrinfo *list);
 	static int join(SOCKET so, struct addrinfo *list);
 	static int error(SOCKET so);
-	static int multicast(SOCKET so, bool enable);
+	static int multicast(SOCKET so, unsigned ttl = 1); // zero disables
 	static int blocking(SOCKET so, bool enable);
 	static int keepalive(SOCKET so, bool live);
 	static int broadcast(SOCKET so, bool enable);

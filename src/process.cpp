@@ -868,28 +868,16 @@ void proc::set(char *id, const char *value)
 
 int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, proc *env)
 {
-	unsigned max = OPEN_MAX, idx = 0, np;
+	unsigned max = OPEN_MAX, idx = 0;
 	int status;
 
 	*pid = fork();
+
 	if(*pid < 0)
 		return -1;
 
 	if(*pid) {
-
-		// close non-stdio handles passed to child process
-		while(iov && iov[idx] > -1) {
-			if(iov[idx] != (fd_t)idx) {
-				close(iov[idx]);
-				np = idx;
-				while(iov[++np] != -1) {
-					if(iov[np] == iov[idx])
-						iov[np] = (fd_t)np;
-				}
-			}
-			++idx;
-		}
-
+		closeiov(iov);
 		switch(mode) {
 		case SPAWN_DETACH:
 		case SPAWN_NOWAIT:
@@ -932,6 +920,23 @@ int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, pr
 
 	execvp(fn, args);
 	exit(-1);
+}
+
+void proc::closeiov(fd_t *iov)
+{
+	unsigned idx = 0, np;
+
+	while(iov && iov[idx] > -1) {
+		if(iov[idx] != (fd_t)idx) {
+			close(iov[idx]);
+			np = idx;
+			while(iov[++np] != -1) {
+				if(iov[np] == iov[idx])
+					iov[np] = (fd_t)np;
+			}
+		}
+		++idx;
+	}
 }
 
 void proc::createiov(fd_t *fd)

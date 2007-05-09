@@ -178,6 +178,24 @@ public:
 		{return &attr.attr;};
 };
 
+class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
+{
+public:
+	ConditionalIndex();
+};
+
+class __EXPORT LockedIndex : public OrderedIndex
+{
+protected:
+	pthread_mutex_t mutex;
+
+public:
+	LockedIndex();
+
+	void lock(void);
+	void unlock(void);
+};
+
 class __EXPORT LockedPointer
 {
 private:

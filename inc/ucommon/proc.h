@@ -125,6 +125,7 @@ public:
 	static void setenv(define *list);
 	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL);
 	static void createiov(fd_t *iov);
+	static void closeiov(fd_t *iov);
 	static void attachiov(fd_t *iov, fd_t io);
 	static void detachiov(fd_t *iov);
 	static fd_t pipeInput(fd_t *iov, size_t size = 0);

@@ -719,13 +719,20 @@ int Socket::keepalive(SOCKET so, bool enable)
 #endif
 }				
 
-int Socket::multicast(SOCKET so, bool enable)
+int Socket::multicast(SOCKET so, unsigned ttl)
 {
 	inetsockaddr_t addr;
 	socklen_t len = sizeof(addr);
+	bool enable;
+	int rtn;
 
 	if(so == INVALID_SOCKET)
 		return -1;
+
+	if(ttl)
+		enable = true;
+	else
+		enable = false;
 
 	::getsockname(so, (struct sockaddr *)&addr, &len);
 	if(!enable)
@@ -745,11 +752,17 @@ int Socket::multicast(SOCKET so, bool enable)
 	switch(addr.addr.sa_family) {
 #ifdef	AF_INET6
 	case AF_INET6:
-		return ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+		rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+		if(rtn)
+			return rtn;
+		return ::setsockopt(so, IPPROTO_IPV6, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
 #endif
 	case AF_INET:
 #ifdef	IP_MULTICAST_IF
-		return ::setsockopt(so, IPPROTO_IP, IP_MULTICAST_IF, (char *)&addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
+		rtn = ::setsockopt(so, IPPROTO_IP, IP_MULTICAST_IF, (char *)&addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
+		if(rtn)
+			return rtn;
+		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
 #else
 		return -1;
 #endif
@@ -958,7 +971,7 @@ bool Socket::isPending(unsigned qio) const
 }
 
 #ifdef _MSWINDOWS_
-unsigned Socket::getPending(void) const
+unsigned Socket::pending(SOCKET so)
 {
 	u_long opt;
 	if(so == INVALID_SOCKET)
@@ -967,8 +980,9 @@ unsigned Socket::getPending(void) const
 	ioctlsocket(so, FIONREAD, &opt);
 	return (unsigned)opt;
 }
+
 #else
-unsigned Socket::getPending(void) const
+unsigned Socket::pending(SOCKET so)
 {
 	int opt;
 	if(so == INVALID_SOCKET)
@@ -978,6 +992,7 @@ unsigned Socket::getPending(void) const
 		return 0;
 	return (unsigned)opt;
 }
+
 #endif
 
 bool Socket::waitPending(timeout_t timeout) const

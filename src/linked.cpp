@@ -465,14 +465,16 @@ LinkedObject()
 
 void OrderedObject::delist(OrderedIndex *root)
 {
-    OrderedObject *prev = NULL, *node = root->head;
+    OrderedObject *prev = NULL, *node;
+
+	node = root->head;
 
     while(node && node != this) {
         prev = node;
 		node = node->getNext();
     }
 
-    if(!node)
+    if(!node) 
         return;
 
     if(!prev)
@@ -517,6 +519,7 @@ void LinkedList::enlist(OrderedIndex *r)
 	root = r;
 	prev = 0;
 	next = 0;
+
 	if(!root->head) {
 		root->head = root->tail = static_cast<OrderedObject *>(this);
 		return;
@@ -572,9 +575,10 @@ void OrderedIndex::purge(void)
 LinkedObject **OrderedIndex::index(void) const
 {
 	LinkedObject **op = new LinkedObject *[count() + 1];
-	LinkedObject *node = head;
+	LinkedObject *node;
 	unsigned idx = 0;
 
+	node = head;
 	while(node) {
 		op[idx++] = node;
 		node = node->next;
@@ -586,18 +590,22 @@ LinkedObject **OrderedIndex::index(void) const
 LinkedObject *OrderedIndex::find(unsigned index) const
 {
 	unsigned count = 0;
-	LinkedObject *node = head;
+	LinkedObject *node;
+
+	node = head;
 
 	while(node && ++count < index)
 		node = node->next;
-	
+
 	return node;
 }
 
 unsigned OrderedIndex::count(void) const
 {
 	unsigned count = 0;
-	LinkedObject *node = head;
+	LinkedObject *node;
+
+	node = head;
 
 	while(node) {
 		node = node->next;

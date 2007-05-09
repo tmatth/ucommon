@@ -353,6 +353,27 @@ void Barrier::wait(void)
 	Conditional::wait();
 	Conditional::unlock();
 }
+
+ConditionalIndex::ConditionalIndex() :
+OrderedIndex(), Conditional()
+{
+}
+
+LockedIndex::LockedIndex() :
+OrderedIndex()
+{
+	pthread_mutex_init(&mutex, NULL);
+}
+
+void LockedIndex::lock(void)
+{
+	pthread_mutex_lock(&mutex);
+}
+
+void LockedIndex::unlock(void)
+{
+	pthread_mutex_unlock(&mutex);
+}
 	
 LockedPointer::LockedPointer()
 {
