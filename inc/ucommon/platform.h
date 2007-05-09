@@ -66,6 +66,7 @@ inline int stat(const char *path, struct stat *buf)
 #else
 
 typedef	int fd_t;
+#define	INVALID_HANDLE_VALUE -1
 #include <dlfcn.h>
 #include <signal.h>
 
@@ -198,9 +199,6 @@ extern "C" {
 	inline void *cpr_getloadaddr(loader_handle_t mem, const char *sym)
 		{return (void *)GetProcAddress(mem, sym);};
 
-	inline bool cpr_createdir(const char *path)
-		{return CreateDirectory(path, NULL);};
-
 	inline bool cpr_removedir(const char *path)
 		{return RemoveDirectory(path);};
 
@@ -222,18 +220,16 @@ extern "C" {
 	inline void cpr_unload(loader_handle_t mem)
 		{dlclose(mem);};
 
-	inline bool cpr_createdir(const char *path)
-		{return !mkdir(path, 0770);};
-
-	inline bool cpr_removedir(const char *path)
-		{return !rmdir(path);};
-
+	inline void cpr_removedir(const char *fn)
+		{rmdir(fn);};
 #endif
 
 	__EXPORT bool cpr_isasync(fd_t fd);
 	__EXPORT bool cpr_isopen(fd_t fd);
-	__EXPORT fd_t cpr_createfile(const char *fn);
-	__EXPORT fd_t cpr_rewritefile(const char *fn);
+	__EXPORT bool cpr_createpipe(fd_t *fd, size_t size = 0);
+	__EXPORT bool cpr_createdir(const char *fn, bool pub = false);
+	__EXPORT fd_t cpr_createfile(const char *fn, bool pub = false);
+	__EXPORT fd_t cpr_rewritefile(const char *fn, bool pub = false);
 	__EXPORT fd_t cpr_openfile(const char *fn, bool write);
 	__EXPORT fd_t cpr_closefile(fd_t fd);
 	__EXPORT ssize_t cpr_preadfile(fd_t fd, caddr_t data, size_t len, off_t offset);

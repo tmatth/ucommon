@@ -508,7 +508,7 @@ Socket::Socket(SOCKET s)
 Socket::Socket(struct addrinfo *addr)
 {
 	while(addr) {
-		so = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+		so = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 		if(so != INVALID_SOCKET) {
 			if(!::connect(so, addr->ai_addr, addr->ai_addrlen))
 				return;
@@ -653,7 +653,7 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 	return ssize_t(max - nleft - 1);
 }
 
-int Socket::setTimeToLive(unsigned char ttl)
+int Socket::ttl(SOCKET so, unsigned char t)
 {
 	struct sockaddr_storage saddr;
 	struct sockaddr *addr = (struct sockaddr *)&saddr;
@@ -667,28 +667,37 @@ int Socket::setTimeToLive(unsigned char ttl)
 	family = addr->sa_family;
 	switch(family) {
 	case AF_INET:
-		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
+		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&t, sizeof(t));
 #ifdef	AF_INET6
 	case AF_INET6:
-		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&ttl, sizeof(ttl));
+		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&t, sizeof(t));
 #endif
 	}
 	return -1;
 }
 
-int Socket::setTypeOfService(unsigned tos)
+int Socket::priority(SOCKET so, int pri)
 {
-	if(so == INVALID_SOCKET)
-		return -1;
-
-#ifdef	SOL_IP
-	return setsockopt(so, SOL_IP, IP_TOS,(char *)&tos, (socklen_t)sizeof(tos));
+#ifdef	SO_PRIORITY
+	return setsockopt(so, SOL_SOCKET, SO_PRIORITY, (char *)&pri, (socklen_t)sizeof(pri));
 #else
 	return -1;
 #endif
 }
 
-int Socket::setBroadcast(bool enable)
+int Socket::tos(SOCKET so, int ts)
+{
+	if(so == INVALID_SOCKET)
+		return -1;
+
+#ifdef	SOL_IP
+	return setsockopt(so, SOL_IP, IP_TOS,(char *)&ts, (socklen_t)sizeof(ts));
+#else
+	return -1;
+#endif
+}
+
+int Socket::broadcast(SOCKET so, bool enable)
 {
 	if(so == INVALID_SOCKET)
 		return -1;
@@ -697,7 +706,7 @@ int Socket::setBroadcast(bool enable)
               (char *)&opt, (socklen_t)sizeof(opt));
 }
 
-int Socket::setKeepAlive(bool enable)
+int Socket::keepalive(SOCKET so, bool enable)
 {
 	if(so == INVALID_SOCKET)
 		return -1;
@@ -710,7 +719,7 @@ int Socket::setKeepAlive(bool enable)
 #endif
 }				
 
-int Socket::setMulticast(bool enable)
+int Socket::multicast(SOCKET so, bool enable)
 {
 	inetsockaddr_t addr;
 	socklen_t len = sizeof(addr);
@@ -749,25 +758,25 @@ int Socket::setMulticast(bool enable)
 	}	
 }
 
-int Socket::setNonBlocking(bool enable)
+int Socket::blocking(SOCKET so, bool enable)
 {
 	if(so == INVALID_SOCKET)
 		return -1;
 
 #if defined(_MSWINDOWS_)
-	unsigned long flag = (enable ? 1 : 0);
+	unsigned long flag = (enable ? 0 : 1);
 	return ioctlsocket(so, FIONBIO, &flag);
 #else
 	long flags = fcntl(so, F_GETFL);
 	if(enable)
-		flags |= O_NONBLOCK;
-	else
 		flags &=~ O_NONBLOCK;
+	else
+		flags |= O_NONBLOCK;
 	return fcntl(so, F_SETFL, flags);
 #endif
 }
 
-int Socket::disconnect(void)
+int Socket::disconnect(SOCKET so)
 {
 	struct sockaddr_storage saddr;
 	struct sockaddr *addr = (struct sockaddr *)&saddr;
@@ -787,7 +796,7 @@ int Socket::disconnect(void)
 	return ::connect(so, addr, len);
 }
 
-int Socket::join(struct addrinfo *node)
+int Socket::join(SOCKET so, struct addrinfo *node)
 {
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
@@ -826,7 +835,7 @@ int Socket::join(struct addrinfo *node)
 	return rtn;
 }
 
-int Socket::drop(struct addrinfo *node)
+int Socket::drop(SOCKET so, struct addrinfo *node)
 {
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
@@ -867,7 +876,7 @@ int Socket::drop(struct addrinfo *node)
 	return rtn;
 }
 	
-int Socket::connect(struct addrinfo *node)
+int Socket::connect(SOCKET so, struct addrinfo *node)
 {
 	int rtn = -1;
 	int family;
@@ -895,7 +904,7 @@ exit:
 	return rtn;
 }
 
-int Socket::getError(void)
+int Socket::error(SOCKET so)
 {
 	int opt;
 	socklen_t slen = sizeof(opt);
@@ -904,6 +913,24 @@ int Socket::getError(void)
 		return -1;
 	
 	return opt;
+}
+
+int Socket::sendsize(SOCKET so, unsigned size)
+{
+#ifdef	SO_SNDBUF
+	return setsockopt(so, SOL_SOCKET, SO_SNDBUF, (caddr_t)&size, sizeof(size));
+#else
+	return -1;
+#endif
+}
+
+int Socket::recvsize(SOCKET so, unsigned size)
+{
+#ifdef	SO_RCVBUF
+	return setsockopt(so, SOL_SOCKET, SO_RCVBUF, (caddr_t)&size, sizeof(size));
+#else
+	return -1;
+#endif
 }
 
 bool Socket::isConnected(void) const

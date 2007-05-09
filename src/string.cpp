@@ -1066,13 +1066,13 @@ memstring::~memstring()
 
 memstring *memstring::create(strsize_t size, char fill)
 {
-	caddr_t mem = (caddr_t)cpr_memalloc(size + sizeof(memstring) + 1);
+	caddr_t mem = (caddr_t)cpr_memalloc(size + sizeof(memstring) + sizeof(cstring));
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
 
 memstring *memstring::create(mempager *pager, strsize_t size, char fill)
 {
-	caddr_t mem = (caddr_t)pager->alloc(size + sizeof(memstring) + 1);
+	caddr_t mem = (caddr_t)pager->alloc(size + sizeof(memstring) + sizeof(cstring));
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
 

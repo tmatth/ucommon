@@ -111,7 +111,7 @@ public:
 		{return !isMember(saddr);}; 
 };
 
-class __EXPORT Socket
+class __EXPORT Socket 
 {
 protected:
 	Socket();
@@ -164,22 +164,52 @@ public:
 	bool waitSending(timeout_t timeout = 0) const;
 	unsigned getPending(void) const;
 
-	int setBroadcast(bool enable);
-	int setKeepAlive(bool enable);
-	int setNonBlocking(bool enable);
-	int setMulticast(bool enable);
-	int getError(void);
-	int setTimeToLive(unsigned char ttl);
-	int setTypeOfService(unsigned tos);
+	inline int broadcast(bool enable)
+		{return broadcast(so, enable);};
+
+	inline int keepalive(bool live)
+		{return keepalive(so, live);};
+
+	inline int blocking(bool enable)
+		{return blocking(so, enable);};
+
+	inline int multicast(bool enable)
+		{return multicast(so, enable);};
+
+	inline int getError(void)
+		{return error(so);};
+
+	inline int ttl(unsigned char t)
+		{return ttl(so, t);};
+
+	inline int sendsize(unsigned size)
+		{return sendsize(so, size);};
+
+	inline int recvsize(unsigned size)
+		{return recvsize(so, size);};
+
+	inline int tos(int t)
+		{return tos(so, t);};
+
+	inline int priority(int pri)
+		{return priority(so, pri);};
 
 	inline void shutdown(void)
 		{::shutdown(so, SHUT_RDWR);};
 
-	int connect(struct addrinfo *list);
+	inline int connect(struct addrinfo *list)
+		{return connect(so, list);};
+
 	bool create(int family, int type, int protocol = 0);
-	int disconnect(void);
-	int join(struct addrinfo *list);
-	int drop(struct addrinfo *list);
+	
+	inline int disconnect(void)
+		{return disconnect(so);};
+
+	inline int join(struct addrinfo *list)
+		{return join(so, list);};
+
+	inline int drop(struct addrinfo *list)
+		{return drop(so, list);};
 
 	size_t peek(void *data, size_t len) const;
 
@@ -203,6 +233,20 @@ public:
 	inline SOCKET operator*() const
 		{return so;};
 
+	static int sendsize(SOCKET so, unsigned size);
+	static int recvsize(SOCKET so, unsigned size);
+	static int connect(SOCKET so, struct addrinfo *list);
+	static int disconnect(SOCKET so);
+	static int drop(SOCKET so, struct addrinfo *list);
+	static int join(SOCKET so, struct addrinfo *list);
+	static int error(SOCKET so);
+	static int multicast(SOCKET so, bool enable);
+	static int blocking(SOCKET so, bool enable);
+	static int keepalive(SOCKET so, bool live);
+	static int broadcast(SOCKET so, bool enable);
+	static int priority(SOCKET so, int pri);
+	static int tos(SOCKET so, int tos);
+	static int ttl(SOCKET so, unsigned char t);
 	static int getfamily(SOCKET so);
 	static int bindaddr(SOCKET so, const char *host, const char *svc);
 	static char *hosttostr(struct sockaddr *sa, char *buf, size_t max);

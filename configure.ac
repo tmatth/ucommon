@@ -56,7 +56,7 @@ POSIX=false
 MSSYS=false
 
 AC_ARG_WITH(libc,
-	[  --with-libc          specify alternate libc],[
+	[  --with-libc             specify alternate libc],[
 	if test x$with_libc != x ; then
 		clib=`echo ${with_libc} | sed s/[-]l//`
         UCOMMON_LIBC=-l${clib} ; fi
@@ -97,6 +97,10 @@ AC_CHECK_LIB($clib, dlopen, [
 			])
 		fi
 	done
+])
+
+AC_CHECK_LIB($clib, socketpair, [
+	AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])
 ])
 
 AC_CHECK_LIB($clib, stricmp, [
@@ -198,7 +202,11 @@ posix4_lib=""
 rt_lib=""
 
 AC_CHECK_LIB(socket,socket,[
-	socket_lib="-lsocket"])
+	AC_CHECK_LIB(socket, socketpair,[
+		AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair in libsocket])
+	])
+	socket_lib="-lsocket"
+])
 
 for func in sched_setscheduler nanosleep clock_gettime pread shm_open ; do
 	found="no"

@@ -1,6 +1,7 @@
 #include <config.h>
 #include <ucommon/string.h>
 #include <ucommon/misc.h>
+#include <ucommon/socket.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -600,6 +601,11 @@ extern "C" fd_t cpr_closefile(fd_t fd)
 	return INVALID_HANDLE_VALUE;
 }
 
+extern "C" bool cpr_createdir(const char *fn, bool pub)
+{
+	return CreateDirectory(fn, NULL);
+}
+
 #else
 
 extern "C" bool cpr_isopen(fd_t fd)
@@ -650,14 +656,34 @@ extern "C" fd_t cpr_openfile(const char *fn, bool write)
 		return open(fn, O_RDONLY);
 }
 
-extern "C" fd_t cpr_rewritefile(const char *fn)
+extern "C" fd_t cpr_rewritefile(const char *fn, bool pub)
 {
-	return creat(fn, 0660);
+	int mode = 0660;
+
+	if(pub)
+		mode = 0664;
+
+	return creat(fn, mode);
 }
 
-extern "C" fd_t cpr_createfile(const char *fn)
+extern "C" bool cpr_createdir(const char *fn, bool pub)
 {
-	return open(fn, O_EXCL | O_CREAT | O_WRONLY, 0660);
+	int mode = 0770;
+
+	if(pub)
+		mode = 0775;
+
+	return !mkdir(fn, mode);
+}
+
+extern "C" fd_t cpr_createfile(const char *fn, bool pub)
+{
+	int mode = 0660;
+
+	if(pub)
+		mode = 0664;
+
+	return open(fn, O_EXCL | O_CREAT | O_WRONLY, mode);
 }
 
 #endif
@@ -714,6 +740,48 @@ extern "C" caddr_t cpr_mapfile(const char *fn)
 }
 
 #endif
+
+#if defined(_MSWINDOWS_)
+
+extern "C" bool cpr_createpipe(fd_t *fd, size_t size)
+{
+	if(CreatePipe(&fd[0], &fd[1], NULL, size)) {
+		fd[0] = fd[1] = INVALID_HANDLE_VALUE;
+		return false;
+	}
+	return true;
+}
+
+#elif defined(HAVE_SOCKETPAIR) && defined(AF_UNIX) && defined(SO_RCVBUF)
+
+extern "C" bool cpr_createpipe(fd_t *fd, size_t size)
+{
+	if(!size) {
+		if(pipe(fd) == 0)
+			return true;
+		fd[0] = fd[1] = INVALID_HANDLE_VALUE;
+		return false;
+	}
+
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd)) {
+		fd[0] = fd[1] = INVALID_HANDLE_VALUE;
+		return false;
+	}
+
+	shutdown(fd[1], SHUT_RD);
+	shutdown(fd[0], SHUT_WR);
+	setsockopt(fd[0], SOL_SOCKET, SO_RCVBUF, (char *)&size, sizeof(size));
+	return true;
+}
+
+#else
+
+extern "C" bool cpr_createpipe(fd_t *fd, size_t size)
+{
+	return pipe(fd) == 0;
+}
+#endif
+
 
 #ifdef	_MSWINDOWS_
 extern "C" void cpr_printlog(const char *path, const char *fmt, ...)

@@ -7,6 +7,8 @@
 
 NAMESPACE_UCOMMON
 
+typedef fd_t spawniov_t[4];
+
 class __EXPORT MappedMemory
 {
 private:
@@ -122,12 +124,12 @@ public:
 	static void setenv(const char *id, const char *value);
 	static void setenv(define *list);
 	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL);
-	static void createiov(fd_t *iov, unsigned size = 4);
-	static void closeinput(fd_t *iov);
-	static void closeoutput(fd_t *iov);
-	static fd_t pipeinput(fd_t *iov, size_t size = 0);
-	static fd_t pipeoutput(fd_t *iov, size_t size = 0);
-	static bool createpipe(fd_t *pipe, size_t size = 0);
+	static void createiov(fd_t *iov);
+	static void attachiov(fd_t *iov, fd_t io);
+	static void detachiov(fd_t *iov);
+	static fd_t pipeInput(fd_t *iov, size_t size = 0);
+	static fd_t pipeOutput(fd_t *iov, size_t size = 0);
+	static fd_t pipeError(fd_t *iov, size_t size = 0);
 
 #ifndef	_MSWINDOWS_
 	static pid_t pidfile(const char *id);

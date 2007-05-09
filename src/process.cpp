@@ -735,14 +735,14 @@ pid_t proc::pidfile(const char *id, pid_t pid)
 	fd_t fd;
 
 	snprintf(buf, sizeof(buf), "/var/run/%s", id);
-	mkdir(buf, 0770);
+	mkdir(buf, 0775);
 	if(cpr_isdir(buf))
 		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
 	else
 		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
 
 retry:
-	fd = open(buf, O_CREAT|O_WRONLY|O_TRUNC|O_EXCL, 0770);
+	fd = open(buf, O_CREAT|O_WRONLY|O_TRUNC|O_EXCL, 0755);
 	if(fd < 0) {
 		opid = pidfile(id);
 		if(!opid || opid == 1 && pid > 1) {
@@ -868,7 +868,7 @@ void proc::set(char *id, const char *value)
 
 int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, proc *env)
 {
-	unsigned max = OPEN_MAX, idx = 0;
+	unsigned max = OPEN_MAX, idx = 0, np;
 	int status;
 
 	*pid = fork();
@@ -876,6 +876,20 @@ int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, pr
 		return -1;
 
 	if(*pid) {
+
+		// close non-stdio handles passed to child process
+		while(iov && iov[idx] > -1) {
+			if(iov[idx] != (fd_t)idx) {
+				close(iov[idx]);
+				np = idx;
+				while(iov[++np] != -1) {
+					if(iov[np] == iov[idx])
+						iov[np] = (fd_t)np;
+				}
+			}
+			++idx;
+		}
+
 		switch(mode) {
 		case SPAWN_DETACH:
 		case SPAWN_NOWAIT:
@@ -919,4 +933,53 @@ int proc::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, pr
 	execvp(fn, args);
 	exit(-1);
 }
+
+void proc::createiov(fd_t *fd)
+{
+	fd[0] = 0;
+	fd[1] = 1;
+	fd[2] = 2;
+	fd[3] = INVALID_HANDLE_VALUE;
+}
+
+void proc::attachiov(fd_t *fd, fd_t io)
+{
+	fd[0] = fd[1] = io;
+	fd[2] = INVALID_HANDLE_VALUE;
+}
+
+void proc::detachiov(fd_t *fd)
+{
+	fd[0] = open("/dev/null", O_RDWR);
+	fd[1] = fd[2] = fd[0];
+	fd[3] = INVALID_HANDLE_VALUE;
+}
+
 #endif
+
+fd_t proc::pipeInput(fd_t *fd, size_t size)
+{
+	fd_t pfd[2];
+
+	if(!cpr_createpipe(pfd, size))
+		return INVALID_HANDLE_VALUE;
+
+	fd[0] = pfd[0];
+	return pfd[1];
+}
+
+fd_t proc::pipeOutput(fd_t *fd, size_t size)
+{
+	fd_t pfd[2];
+
+	if(!cpr_createpipe(pfd, size))
+		return INVALID_HANDLE_VALUE;
+
+	fd[1] = pfd[1];
+	return pfd[0];
+}
+
+fd_t proc::pipeError(fd_t *fd, size_t size)
+{
+	return pipeOutput(++fd, size);
+}	
