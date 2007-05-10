@@ -359,20 +359,29 @@ OrderedIndex(), Conditional()
 {
 }
 
+void ConditionalIndex::lock_index(void)
+{
+	Conditional::lock();
+}
+
+void ConditionalIndex::unlock_index(void)
+{
+	Conditional::unlock();
+}
+
 LockedIndex::LockedIndex() :
-OrderedIndex()
+OrderedIndex(), Mutex()
 {
-	pthread_mutex_init(&mutex, NULL);
 }
 
-void LockedIndex::lock(void)
+void LockedIndex::lock_index(void)
 {
-	pthread_mutex_lock(&mutex);
+	Mutex::lock();
 }
 
-void LockedIndex::unlock(void)
+void LockedIndex::unlock_index(void)
 {
-	pthread_mutex_unlock(&mutex);
+	Mutex::unlock();
 }
 	
 LockedPointer::LockedPointer()

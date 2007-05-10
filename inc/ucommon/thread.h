@@ -182,18 +182,20 @@ class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
 {
 public:
 	ConditionalIndex();
+
+private:
+	void lock_index(void);
+	void unlock_index(void);
 };
 
-class __EXPORT LockedIndex : public OrderedIndex
+class __EXPORT LockedIndex : public OrderedIndex, public Mutex
 {
-protected:
-	pthread_mutex_t mutex;
-
 public:
 	LockedIndex();
 
-	void lock(void);
-	void unlock(void);
+private:
+	void lock_index(void);
+	void unlock_index(void);
 };
 
 class __EXPORT LockedPointer

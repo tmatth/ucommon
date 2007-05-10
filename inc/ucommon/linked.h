@@ -70,13 +70,17 @@ protected:
 
 public:
 	OrderedIndex();
-	~OrderedIndex();
+	virtual ~OrderedIndex();
 
 	LinkedObject *find(unsigned index) const;
 
 	unsigned count(void) const;
 
 	void purge(void);
+
+	virtual void lock_index(void);
+
+	virtual void unlock_index(void);
 
 	LinkedObject **index(void) const;
 

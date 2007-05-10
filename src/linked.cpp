@@ -572,6 +572,14 @@ void OrderedIndex::purge(void)
 	}
 }
 
+void OrderedIndex::lock_index(void)
+{
+}
+
+void OrderedIndex::unlock_index(void)
+{
+}
+
 LinkedObject **OrderedIndex::index(void) const
 {
 	LinkedObject **op = new LinkedObject *[count() + 1];
