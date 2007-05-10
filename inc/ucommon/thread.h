@@ -20,13 +20,14 @@ class SharedPointer;
 class __EXPORT Conditional 
 {
 private:
-	class __EXPORT attribute
+	class __LOCAL attribute
 	{
 	public:
 		pthread_condattr_t attr;
 		attribute();
 	};
-	static attribute attr;
+
+	__LOCAL static attribute attr;
 
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
@@ -148,14 +149,15 @@ public:
 class __EXPORT Mutex : public Exclusive
 {
 private:
-	class __EXPORT attribute
+	class __LOCAL attribute
 	{
 	public:
 		pthread_mutexattr_t attr;
 		attribute();
 	};
 
-	static attribute attr;
+	__LOCAL static attribute attr;
+
 	pthread_mutex_t mutex;
 		
 public:
@@ -332,7 +334,7 @@ private:
 	LinkedObject *freelist;
 	size_t used;
 
-	class __EXPORT member : public OrderedObject
+	class __LOCAL member : public OrderedObject
 	{
 	public:
 		member(Queue *q, Object *obj);
@@ -359,7 +361,7 @@ private:
 	mempager *pager;
 	size_t used;
 
-	class __EXPORT member : public LinkedObject
+	class __LOCAL member : public LinkedObject
 	{
 	public:
 		member(Stack *s, Object *obj);

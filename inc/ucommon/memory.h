@@ -101,7 +101,7 @@ public:
 class __EXPORT keyassoc 
 {
 private:
-	class __EXPORT keydata : public NamedObject
+	class __LOCAL keydata : public NamedObject
 	{
 	public:
 		void *data;
@@ -113,7 +113,7 @@ private:
 	NamedObject **root;
 	mempager *pager;
 
-	size_t minsize(unsigned max, size_t ps);
+	__LOCAL size_t minsize(unsigned max, size_t ps);
 
 public:
 	keyassoc(unsigned keysize = 177, mempager *pager = NULL);

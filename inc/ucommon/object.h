@@ -146,7 +146,7 @@ public:
 		{return get(idx);};
 
 private:
-	Object *create(void)
+	__LOCAL Object *create(void)
 		{return new T;};
 };
 

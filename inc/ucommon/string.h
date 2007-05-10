@@ -224,8 +224,10 @@ public:
 
 class __EXPORT memstring : public string
 {
-private:
+public:
 	static const size_t header;
+
+private:
 	bool resize(strsize_t size);
 	void cow(strsize_t adj = 0);
 	void release(void);
