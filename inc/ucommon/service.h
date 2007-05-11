@@ -69,11 +69,11 @@ protected:
 public:
 	typedef enum
 	{
-		INFO,
-		NOTICE,
-		WARN,
-		ERROR
-	} log_t;
+		SERVICE_INFO,
+		SERVICE_NOTICE,
+		SERVICE_WARNING,
+		SERVICE_ERROR
+	} err_t;
 
 	typedef enum
 	{
@@ -120,7 +120,7 @@ public:
 	static fd_t pipeError(fd_t *iov, size_t size = 0);
 
 	static void openlog(const char *id);
-	static void errlog(log_t level, const char *fmt, ...);
+	static void errlog(err_t level, const char *fmt, ...);
 
 	static void logfile(const char *id, const char *name, const char *fmt, ...);
 	static size_t createctrl(const char *id);

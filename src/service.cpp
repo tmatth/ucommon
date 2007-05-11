@@ -1355,7 +1355,7 @@ void service::openlog(const char *id)
 {
 }
 
-void service::errlog(log_t log, const char *fmt, ...)
+void service::errlog(err_t log, const char *fmt, ...)
 {
 	char buf[128];
 	const char *level = "error";
@@ -1365,16 +1365,16 @@ void service::errlog(log_t log, const char *fmt, ...)
 
 	switch(log)
 	{
-	case INFO:
+	case SERVICE_INFO:
 		level = "info";
 		break;
-	case NOTICE:
+	case SERVICE_NOTICE:
 		level = "notice";
 		break;
-	case WARN:
+	case SERVICE_WARNING:
 		level = "warning";
 		break;
-	case ERROR:
+	case SERVICE_ERROR:
 		level = "error";
 		break;
 	}
@@ -1450,7 +1450,7 @@ void service::openlog(const char *id)
 		::openlog(id, LOG_PERROR, LOG_USER);
 }
 
-void service::errlog(log_t log, const char *fmt, ...)
+void service::errlog(err_t log, const char *fmt, ...)
 {
 	int level = LOG_ERR;
 	va_list args;
@@ -1459,16 +1459,16 @@ void service::errlog(log_t log, const char *fmt, ...)
 
 	switch(log)
 	{
-	case INFO:
+	case SERVICE_INFO:
 		level = LOG_INFO;
 		break;
-	case NOTICE:
+	case SERVICE_NOTICE:
 		level = LOG_NOTICE;
 		break;
-	case WARN:
+	case SERVICE_WARNING:
 		level = LOG_WARNING;
 		break;
-	case ERROR:
+	case SERVICE_ERROR:
 		level = LOG_ERR;
 		break;
 	}
