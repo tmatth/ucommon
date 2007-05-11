@@ -21,9 +21,6 @@ static RETSIGTYPE signotify(int signo)
 
 int main(int argc, char **argv)
 {
-	char cpath[65];
-	char ctrlcmd[512];
-	fd_t fd;
 	int timeout = 0;
 
 	if(argc > 1 && argv[1][0] == '-') {
@@ -67,24 +64,17 @@ int main(int argc, char **argv)
 	cpr_signal(SIGUSR2, signotify);
 	cpr_signal(SIGALRM, signotify);
 
-	snprintf(cpath, sizeof(cpath), "/%s", argv[1]);
-
-	fd = cpr_openctrl(cpath);
-	if(!cpr_isopen(fd)) {
-		fprintf(stderr, "*** control: %s; cannot access\n", argv[1]);
-		exit(-1);
-	}
-
-	snprintf(ctrlcmd, sizeof(ctrlcmd), "%d %s\n", getpid(), argv[2]);
-
 	if(timeout)
 		alarm(timeout);
 
-	cpr_writefile(fd, ctrlcmd, strlen(ctrlcmd));
-	cpr_closefile(fd);
+	if(!service::control(argv[1], "%d %s\n", getpid(), argv[2])) {
+		fprintf(stderr, "*** control: %s; cannot access\n", argv[1]);
+		exit(-1);
+	}
 
 	if(timeout)
 		pause();
 
 	exit(0);
 }
+

@@ -111,6 +111,13 @@ public:
 	static fd_t pipeOutput(fd_t *iov, size_t size = 0);
 	static fd_t pipeError(fd_t *iov, size_t size = 0);
 
+	static size_t createctrl(const char *id);
+	static bool openctrl(const char *id);
+	static void closectrl(void);
+	static bool control(const char *id, const char *fmt, ...);
+	static size_t recvctrl(char *buf, size_t size);
+	static void releasectrl(const char *id);
+
 #ifndef	_MSWINDOWS_
 	static pid_t pidfile(const char *id);
 	static pid_t pidfile(const char *id, pid_t pid);

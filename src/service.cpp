@@ -1345,5 +1345,131 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 	return pipeOutput(++fd, size);
 }	
 
+#ifdef _MSWINDOWS_
+
+#else
+
+static FILE *fifo = NULL;
+static int ctrl = -1;
+
+static void ctrl_name(char *buf, const char *id, size_t size)
+{
+	if(*id == '/')
+		++id;
+
+	snprintf(buf, size, "/var/run/%s", id);
+
+	if(cpr_isdir(buf))	
+		snprintf(buf, size, "/var/run/%s/%s.ctrl", id, id);
+	else
+		snprintf(buf, size, "/tmp/.%s.ctrl", id);
+}
+
+void service::closectrl(void)
+{
+	if(ctrl > -1) {
+		close(ctrl);
+		ctrl = -1;
+	}
+}
+
+bool service::openctrl(const char *id)
+{
+	char buf[65];
+
+	ctrl_name(buf, id, sizeof(buf));
+	ctrl = open(buf, O_RDWR);
+	if(ctrl < 0)
+		return false;
+	return true;
+}
+
+bool service::control(const char *id, const char *fmt, ...)
+{
+	va_list args;
+	int fd;
+	char buf[512];
+	char *ep;
+	size_t len;
+
+	va_start(args, fmt);
+
+	if(id) {
+		ctrl_name(buf, id, 65);
+		fd = open(buf, O_RDWR);
+		if(fd < 0)
+			return false;
+	}
+	else if(ctrl > -1)
+		fd = ctrl;
+	else 
+		return false;
+
+	vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+	va_end(args); 
+	
+	ep = strchr(buf, '\n');
+	if(ep)
+		*ep = 0;
+
+	len = strlen(buf);
+	buf[len++] = '\n';
+		
+	write(fd, buf, len);
+	if(ctrl != fd)
+		close(fd);
+
+	return true;
+}
+
+size_t service::createctrl(const char *id)
+{
+	char buf[65];
+
+	ctrl_name(buf, id, sizeof(buf));
+	remove(buf);
+	if(mkfifo(buf, 0660))
+		return 0;
+
+	fifo = fopen(buf, "r+");
+	if(fifo)
+		return 512;
+	else
+		return 0;
+}
+
+void service::releasectrl(const char *id)
+{
+	char buf[65];
+
+	if(!fifo)
+		return;
+
+	ctrl_name(buf, id, sizeof(buf));
+
+	fclose(fifo);
+	fifo = NULL;
+	remove(buf);
+}
+
+size_t service::recvctrl(char *buf, size_t max)
+{
+	char *ep;
+
+	if(!fifo)
+		return 0;
+
+	fgets(buf, max, fifo);
+	ep = strchr(buf, '\n');
+	if(ep) {
+		*ep = 0;
+		return strlen(buf);
+	}
+	else
+		return 0;
+}
+
+#endif
+
 // vim: set ts=4 sw=4:
 
