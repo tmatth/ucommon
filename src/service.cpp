@@ -1096,6 +1096,51 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 
 #ifdef _MSWINDOWS_
 
+static HANDLE hFIFO = INVALID_HANDLE_VALUE;
+static HANDLE hEvent;
+static OVERLAPPED ov;
+
+static void ctrl_name(char *buf, const char *id, size_t size)
+{
+	if(*id == '/')
+		++id;
+
+	snprintf(buf, size, "\\\\.\\mailslot\\%s_ctrl", id);
+}
+
+size_t service::createctrl(const char *id)
+{
+	char buf[65];
+
+	ctrl_name(buf, id, sizeof(buf));
+
+	hFIFO = CreateMailslot(buf, 0, MAILSLOT_WAIT_FOREVER, NULL);
+	if(hFIFO == INVALID_HANDLE_VALUE)
+		return 0;
+
+	hEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("Control FIFO"));
+	if(NULL == hEvent) {
+		CloseHandle(hFIFO);
+		hFIFO = INVALID_HANDLE_VALUE;
+		return 0;
+	}
+
+	ov.Offset = 0;
+	ov.OffsetHigh = 0;
+	ov.hEvent = hEvent;
+
+	return 464;
+}
+
+void service::releasectrl(const char *id)
+{
+	if(hFIFO != INVALID_HANDLE_VALUE) {
+		CloseHandle(hEvent);
+		CloseHandle(hFIFO);
+		hFIFO = INVALID_HANDLE_VALUE;
+	}
+}
+
 void service::logfile(const char *id, const char *name, const char *fmt, ...)
 {
 }
@@ -1139,7 +1184,6 @@ void service::errlog(err_t log, const char *fmt, ...)
 	if(log == SERVICE_FAILURE)
 		abort();
 }
-
 
 #else
 
