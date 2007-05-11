@@ -97,10 +97,11 @@ static bool createpipe(fd_t *fd, size_t size)
 
 static void ftok_name(const char *name, char *buf, size_t max)
 {
+	struct stat ino;
 	if(*name == '/')
 		++name;
 
-	if(cpr_isdir("/var/run/ipc"))
+	if(!stat("/var/run/ipc", &ino) && S_ISDIR(ino.st_mode))
 		snprintf(buf, sizeof(buf), "/var/run/ipc/%s", name);
 	else
 		snprintf(buf, sizeof(buf), "/tmp/.%s.ipc", name);
@@ -1088,11 +1089,12 @@ pid_t service::pidfile(const char *id, pid_t pid)
 {
 	char buf[128];
 	pid_t opid;
+	struct stat ino;
 	fd_t fd;
 
 	snprintf(buf, sizeof(buf), "/var/run/%s", id);
 	mkdir(buf, 0775);
-	if(cpr_isdir(buf))
+	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode)) 
 		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
 	else
 		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
@@ -1125,7 +1127,7 @@ pid_t service::pidfile(const char *id)
 	pid_t pid;
 
 	snprintf(buf, sizeof(buf), "/var/run/%s", id);
-	if(cpr_isdir(buf))
+	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode))
 		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
 	else
 		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
@@ -1377,12 +1379,18 @@ void service::errlog(err_t log, const char *fmt, ...)
 	case SERVICE_ERROR:
 		level = "error";
 		break;
+	case SERVICE_FAILURE:
+		level = "crit";
+		break;
 	}
 
 	snprintf(buf, sizeof(buf), "%s %s", "[%s]", fmt);
 
 	vfprintf(stderr, buf, args);
 	va_end(args);
+
+	if(log == SERVICE_FAILURE)
+		abort();
 }
 
 
@@ -1393,12 +1401,13 @@ static int ctrl = -1;
 
 static void ctrl_name(char *buf, const char *id, size_t size)
 {
+	struct stat ino;
 	if(*id == '/')
 		++id;
 
 	snprintf(buf, size, "/var/run/%s", id);
 
-	if(cpr_isdir(buf))	
+	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode))	
 		snprintf(buf, size, "/var/run/%s/%s.ctrl", id, id);
 	else
 		snprintf(buf, size, "/tmp/.%s.ctrl", id);
@@ -1471,10 +1480,16 @@ void service::errlog(err_t log, const char *fmt, ...)
 	case SERVICE_ERROR:
 		level = LOG_ERR;
 		break;
+	case SERVICE_FAILURE:
+		level = LOG_CRIT;
+		break;
 	}
 
 	::vsyslog(level, fmt, args);
 	va_end(args);
+
+	if(level == LOG_CRIT)
+		abort();
 }
 
 void service::closectrl(void)
@@ -1582,6 +1597,72 @@ size_t service::recvctrl(char *buf, size_t max)
 }
 
 #endif
+
+int service::scheduler(int policy, priority_t priority)
+{
+#if _POSIX_PRIORITY_SCHEDULING > 0
+	struct sched_param sparam;
+    int min = sched_get_priority_min(policy);
+    int max = sched_get_priority_max(policy);
+	int pri = (int)priority;
+
+	if(min == max)
+		pri = min;
+	else 
+		pri += min;
+	if(pri > max)
+		pri = max;
+
+	if(policy == SCHED_OTHER) 
+		setpriority(PRIO_PROCESS, 0, -(priority - PRIORITY_NORMAL));
+	else
+		setpriority(PRIO_PROCESS, 0, -(priority - PRIORITY_LOW));
+
+	memset(&sparam, 0, sizeof(sparam));
+	sparam.sched_priority = pri;
+	return sched_setscheduler(0, policy, &sparam);	
+#elif defined(_MSWINDOWS_)
+	return priority(priority);
+#endif
+}
+
+int service::priority(priority_t priority)
+{
+#if defined(_POSIX_PRIORITY_SCHEDULING)
+	struct sched_param sparam;
+	pthread_t tid = pthread_self();
+    int min, max, policy;
+	int pri = (int)priority;
+
+	if(pthread_getschedparam(tid, &policy, &sparam))
+		return -1;
+
+	min = sched_get_priority_min(policy);
+    max = sched_get_priority_max(policy);
+
+	if(min == max)
+		return 0;
+
+	pri += min;
+	if(pri > max)
+		pri = max;
+	sparam.sched_priority = pri;
+	return pthread_setschedparam(tid, policy, &sparam);
+#elif defined(_MSWINDOWS_)
+	int pri = THREAD_PRIORITY_ABOVE_NORMAL;
+	switch(priority) {
+	case PRIORITY_LOWEST:
+	case PRIORITY_LOW:
+		pri = THREAD_PRIORITY_LOWEST;
+		break;
+	case PRIORITY_NORMAL:
+		pri = THREAD_PRIORITY_NORMAL;
+		break;
+	}
+	SetThreadPriority(GetCurrentThread(), priority);
+	return 0;
+#endif
+}
 
 // vim: set ts=4 sw=4:
 

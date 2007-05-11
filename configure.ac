@@ -208,7 +208,7 @@ AC_CHECK_LIB(socket,socket,[
 	socket_lib="-lsocket"
 ])
 
-for func in sched_setscheduler nanosleep clock_gettime pread shm_open ; do
+for func in sched_setscheduler nanosleep clock_gettime shm_open ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func

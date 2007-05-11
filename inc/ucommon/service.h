@@ -19,6 +19,31 @@ const size_t uuid_size = 38;
 
 typedef fd_t spawniov_t[4];
 
+typedef enum
+{
+	PRIORITY_LOWEST = 0,
+	PRIORITY_LOW,
+	PRIORITY_NORMAL,
+	PRIORITY_HIGH
+}	priority_t;
+
+typedef enum
+{
+	SERVICE_INFO,
+	SERVICE_NOTICE,
+	SERVICE_WARNING,
+	SERVICE_ERROR,
+	SERVICE_FAILURE
+} err_t;
+
+typedef enum
+{
+	SPAWN_WAIT = 0,
+	SPAWN_NOWAIT,
+	SPAWN_DETACH
+} spawn_t;
+
+
 class __EXPORT MappedMemory
 {
 private:
@@ -67,21 +92,6 @@ protected:
 	LinkedObject *root;
 
 public:
-	typedef enum
-	{
-		SERVICE_INFO,
-		SERVICE_NOTICE,
-		SERVICE_WARNING,
-		SERVICE_ERROR
-	} err_t;
-
-	typedef enum
-	{
-		SPAWN_WAIT = 0,
-		SPAWN_NOWAIT,
-		SPAWN_DETACH
-	} spawn_t;
-
 	typedef struct
 	{
 		char *name;
@@ -119,6 +129,8 @@ public:
 	static fd_t pipeOutput(fd_t *iov, size_t size = 0);
 	static fd_t pipeError(fd_t *iov, size_t size = 0);
 
+	static int scheduler(int policy, priority_t priority = PRIORITY_NORMAL);
+	static int priority(priority_t priority);
 	static void openlog(const char *id);
 	static void errlog(err_t level, const char *fmt, ...);
 
