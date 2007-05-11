@@ -1753,3 +1753,254 @@ bool string::isnumeric(const char *cp)
 
 	return true;
 }
+
+size_t string::urlencodesize(char *src)
+{
+	size_t size = 0;
+
+	while(src && *src) {
+		if(isalnum(*src) ||  strchr("/.-:;, ", *src))
+			++size;
+		else
+			size += 3;
+	}
+	return size;
+}
+
+size_t string::urlencode(char *dest, size_t limit, const char *src)
+{
+	static const char *hex = "0123456789abcdef";
+	char *ret = dest;
+	unsigned char ch;
+
+	assert(dest != NULL && src != NULL && limit > 3);
+	
+	while(limit-- > 3 && *src) {
+		if(*src == ' ') {
+			*(dest++) = '+';
+			++src;
+		}
+		else if(isalnum(*src) ||  strchr("/.-:;,", *src))
+			*(dest++) = *(src++);
+		else {		
+			limit -= 2;
+			ch = (unsigned char)(*(src++));
+			*(dest++) = '%';
+			*(dest++) = hex[(ch >> 4)&0xF];
+			*(dest++) = hex[ch % 16];
+		}
+	}		
+	*dest = 0;
+	return dest - ret;
+}
+
+size_t string::urldecode(char *dest, size_t limit, const char *src)
+{
+	char *ret = dest;
+	char hex[3];
+
+	assert(dest != NULL && src != NULL && limit > 1);
+
+	while(limit-- > 1 && *src && !strchr("?&", *src)) {
+		if(*src == '%') {
+			memset(hex, 0, 3);
+			hex[0] = *(++src);
+			if(*src)
+				hex[1] = *(++src);
+			if(*src)
+				++src;			
+			*(dest++) = (char)strtol(hex, NULL, 16);	
+		}
+		else if(*src == '+') {
+			*(dest++) = ' ';
+			++src;
+		}
+		else
+			*(dest++) = *(src++);
+	}
+	*dest = 0;
+	return dest - ret;
+}
+
+size_t string::xmlencode(char *out, size_t limit, const char *src)
+{
+	char *ret = out;
+
+	assert(src != NULL && out != NULL && limit > 0);
+
+	while(src && *src && limit > 6) {
+		switch(*src) {
+		case '<':
+			strcpy(out, "&lt;");
+			limit -= 4;
+			out += 4;
+			break;
+		case '>':
+			strcpy(out, "&gt;");
+			limit -= 4;
+			out += 4;
+			break;
+		case '&':
+			strcpy(out, "&amp;");
+			limit -= 5;
+			out += 5;
+			break;
+		case '\"':
+			strcpy(out, "&quot;");
+			limit -= 6;
+			out += 6;
+			break;
+		case '\'':
+			strcpy(out, "&apos;");
+			limit -= 6;
+			out += 6;
+			break;
+		default:
+			--limit;
+			*(out++) = *src;
+		}
+		++src;
+	}
+	*out = 0;
+	return out - ret;
+}
+
+size_t string::xmldecode(char *out, size_t limit, const char *src)
+{
+	char *ret = out;
+
+	assert(src != NULL && out != NULL && limit > 0);
+
+	if(*src == '\'' || *src == '\"')
+		++src;
+	while(src && limit-- > 1 && !strchr("<\'\">", *src)) {
+		if(!strncmp(src, "&amp;", 5)) {
+			*(out++) = '&';
+			src += 5;
+		}
+		else if(!strncmp(src, "&lt;", 4)) {
+			src += 4;
+			*(out++) = '<';
+		}
+		else if(!strncmp(src, "&gt;", 4)) {
+			src += 4;
+			*(out++) = '>';
+		}
+		else if(!strncmp(src, "&quot;", 6)) {
+			src += 6;
+			*(out++) = '\"';
+		}
+		else if(!strncmp(src, "&apos;", 6)) {
+			src += 6;
+			*(out++) = '\'';
+		}
+		else
+			*(out++) = *(src++);
+	}
+	*out = 0;
+	return out - ret;
+}
+
+static const unsigned char alphabet[65] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+size_t string::b64decode(caddr_t out, const char *src, size_t count)
+{
+	static char *decoder = NULL;
+	int i, bits, c;
+
+	unsigned char *dest = (unsigned char *)out;
+
+	if(!decoder) {
+		decoder = (char *)malloc(256);
+		for (i = 0; i < 256; ++i)
+			decoder[i] = 64;
+		for (i = 0; i < 64 ; ++i)
+			decoder[alphabet[i]] = i;
+	}
+
+	bits = 1;
+
+	while(*src) {
+		c = (unsigned char)(*(src++));
+		if (c == '=') {
+			if (bits & 0x40000) {
+				if (count < 2) break;
+				*(dest++) = (bits >> 10);
+				*(dest++) = (bits >> 2) & 0xff;
+				break;
+			}
+			if (bits & 0x1000 && count)
+				*(dest++) = (bits >> 4);
+			break;
+		}
+		// skip invalid chars
+		if (decoder[c] == 64)
+			continue;
+		bits = (bits << 6) + decoder[c];
+		if (bits & 0x1000000) {
+			if (count < 3) break;
+			*(dest++) = (bits >> 16);
+			*(dest++) = (bits >> 8) & 0xff;
+			*(dest++) = (bits & 0xff);
+		    	bits = 1;
+			count -= 3;
+		}
+	}
+	return (size_t)((caddr_t)dest - out);
+}
+
+size_t string::b64encode(char *out, caddr_t src, size_t count)
+{
+	unsigned bits;
+	char *dest = out;
+
+	assert(out != NULL && src != NULL && count > 0);
+
+	while(count >= 3) {
+		bits = (((unsigned)src[0])<<16) | (((unsigned)src[1])<<8)
+			| ((unsigned)src[2]);
+		src += 3;
+		count -= 3;
+		*(out++) = alphabet[bits >> 18];
+	    *(out++) = alphabet[(bits >> 12) & 0x3f];
+	    *(out++) = alphabet[(bits >> 6) & 0x3f];
+	    *(out++) = alphabet[bits & 0x3f];
+	}
+	if (count) {
+		bits = ((unsigned)src[0])<<16;
+		*(out++) = alphabet[bits >> 18];
+		if (count == 1) {
+			*(out++) = alphabet[(bits >> 12) & 0x3f];
+	    		*(out++) = '=';
+		}
+		else {
+			bits |= ((unsigned)src[1])<<8;
+			*(out++) = alphabet[(bits >> 12) & 0x3f];
+	    		*(out++) = alphabet[(bits >> 6) & 0x3f];
+		}
+	    	*(out++) = '=';
+	}
+	*out = 0;
+	return out - dest;
+}
+
+size_t string::b64len(const char *str)
+{
+	unsigned count = strlen(str);
+	const char *ep = str + count - 1;
+
+	if(!count)
+		return 0;
+
+	count /= 4;
+	count *= 3;
+	if(*ep == '=') {
+		--ep;
+		--count;
+		if(*ep == '=')
+			--count;
+	}
+	return count;
+}
+

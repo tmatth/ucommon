@@ -178,6 +178,9 @@ public:
 	inline int multicast(unsigned ttl = 1)
 		{return multicast(so, ttl);};
 
+	inline int loopback(bool enable)
+		{return loopback(so, enable);};
+
 	inline int getError(void)
 		{return error(so);};
 
@@ -244,6 +247,7 @@ public:
 	static int join(SOCKET so, struct addrinfo *list);
 	static int error(SOCKET so);
 	static int multicast(SOCKET so, unsigned ttl = 1); // zero disables
+	static int loopback(SOCKET so, bool enable);
 	static int blocking(SOCKET so, bool enable);
 	static int keepalive(SOCKET so, bool live);
 	static int broadcast(SOCKET so, bool enable);
@@ -275,10 +279,12 @@ public:
         {return so;};
 };
 
-inline struct addrinfo *addrinfo(Socket::address &a)
+typedef	Socket socket;
+
+inline struct addrinfo *addrinfo(socket::address &a)
 	{return a.getList();};
 
-inline struct sockaddr *addr(Socket::address &a)
+inline struct sockaddr *addr(socket::address &a)
 	{return a.getAddr();};
 
 END_NAMESPACE

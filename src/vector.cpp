@@ -547,6 +547,10 @@ PagerReuse::~PagerReuse()
 bool PagerReuse::avail(void)
 {
 	bool rtn = false;
+
+	if(!limit)
+		return true;
+
 	lock();
 	if(count < limit)
 		rtn = true;
@@ -565,7 +569,7 @@ ReusableObject *PagerReuse::request(void)
 {
 	ReusableObject *obj = NULL;
 	lock();
-	if(count < limit) {
+	if(!limit || count < limit) {
 		if(freelist) {
 			++count;
 			obj = freelist;
@@ -601,7 +605,7 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
 		expires.set(timeout);
 
 	lock();
-	while(rtn && count >= limit) {
+	while(rtn && limit && count >= limit) {
 		++waiting;
 		if(timeout == Timer::inf)
 			wait();

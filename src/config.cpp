@@ -255,7 +255,7 @@ bool config::loadxml(const char *fn, keynode *node)
 				cp = string::chop(cp, " \r\n\t");
 				len = strlen(cp);
 				ep = (char *)alloc(len + 1);
-				xmldecode(ep, len, cp);
+				string::xmldecode(ep, len, cp);
 				node->setPointer(ep);
 				*bp = '<';
 				cp = bp;

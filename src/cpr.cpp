@@ -881,6 +881,55 @@ extern "C" void cpr_printlog(const char *path, const char *fmt, ...)
 }
 #endif
 
+extern "C" uint16_t lsb_getshort(uint8_t *b)
+{
+	return (b[1] * 256) + b[0];
+}
+	
+extern "C" uint32_t lsb_getlong(uint8_t *b)
+{
+	return (b[3] * 16777216l) + (b[2] * 65536l) + (b[1] * 256) + b[0];
+}
+
+extern "C" uint16_t msb_getshort(uint8_t *b)
+{
+	return (b[0] * 256) + b[1];
+}
+	
+extern "C" uint32_t msb_getlong(uint8_t *b)
+{
+	return (b[0] * 16777216l) + (b[1] * 65536l) + (b[2] * 256) + b[3];
+}
+
+extern "C" void lsb_setshort(uint8_t *b, uint16_t v)
+{
+	b[0] = v & 0x0ff;
+	b[1] = (v / 256) & 0xff;
+}
+
+extern "C" void msb_setshort(uint8_t *b, uint16_t v)
+{
+	b[1] = v & 0x0ff;
+	b[0] = (v / 256) & 0xff;
+}
+
+extern "C" void lsb_setlong(uint8_t *b, uint32_t v)
+{
+	b[0] = v & 0x0ff;
+	b[1] = (v / 256) & 0xff;
+	b[2] = (v / 65536l) & 0xff;
+	b[3] = (v / 16777216l) & 0xff;
+}
+
+extern "C" void msb_setling(uint8_t *b, uint32_t v)
+{
+	b[3] = v & 0x0ff;
+	b[2] = (v / 256) & 0xff;
+	b[1] = (v / 65536l) & 0xff;
+	b[0] = (v / 16777216l) & 0xff;
+}
+
+
 extern "C" void *cpr_memalloc(size_t size)
 {
 	void *mem;

@@ -653,6 +653,33 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 	return ssize_t(max - nleft - 1);
 }
 
+int Socket::loopback(SOCKET so, bool enable)
+{
+	struct sockaddr_storage saddr;
+	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	int family;
+	socklen_t len = sizeof(addr);
+	int opt = 0;
+
+	if(enable)
+		opt = 1;
+
+	if(so == INVALID_SOCKET)
+		return -1;
+
+	getsockname(so, (struct sockaddr *)&addr, &len);
+	family = addr->sa_family;
+	switch(family) {
+	case AF_INET:
+		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
+#ifdef	AF_INET6
+	case AF_INET6:
+		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
+#endif
+	}
+	return -1;
+}
+
 int Socket::ttl(SOCKET so, unsigned char t)
 {
 	struct sockaddr_storage saddr;
@@ -667,10 +694,10 @@ int Socket::ttl(SOCKET so, unsigned char t)
 	family = addr->sa_family;
 	switch(family) {
 	case AF_INET:
-		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&t, sizeof(t));
+		return setsockopt(so, IPPROTO_IP, IP_TTL, (char *)&t, sizeof(t));
 #ifdef	AF_INET6
 	case AF_INET6:
-		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&t, sizeof(t));
+		return setsockopt(so, IPPROTO_IPV6, IPV6_UNICAST_HOPS, (char *)&t, sizeof(t));
 #endif
 	}
 	return -1;
@@ -755,7 +782,7 @@ int Socket::multicast(SOCKET so, unsigned ttl)
 		rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
 		if(rtn)
 			return rtn;
-		return ::setsockopt(so, IPPROTO_IPV6, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
+		return ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&ttl, sizeof(ttl));
 #endif
 	case AF_INET:
 #ifdef	IP_MULTICAST_IF

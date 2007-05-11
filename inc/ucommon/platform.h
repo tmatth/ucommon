@@ -277,6 +277,17 @@ extern "C" {
 	__EXPORT void cpr_warning(const char *fmt, ...);
 	__EXPORT void cpr_errlog(const char *fmt, ...);
 	__EXPORT void cpr_critlog(const char *fmt, ...);
+
+	__EXPORT uint16_t lsb_getshort(uint8_t *b);
+	__EXPORT uint32_t lsb_getlong(uint8_t *b);
+	__EXPORT uint16_t msb_getshort(uint8_t *b);
+	__EXPORT uint32_t msb_getlong(uint8_t *b);
+
+	__EXPORT void lsb_setshort(uint8_t *b, uint16_t v);
+	__EXPORT void lsb_setlong(uint8_t *b, uint32_t v);
+	__EXPORT void msb_setshort(uint8_t *b, uint16_t v);
+	__EXPORT void msb_setlong(uint8_t *b, uint32_t v);
+
 };
 
 #ifdef	DEBUG

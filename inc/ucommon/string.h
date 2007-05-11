@@ -178,6 +178,15 @@ public:
 	static char *dup(const char *s);
 	static bool isnumeric(const char *s);
 	static bool isinteger(const char *s);
+	static size_t urldecode(char *out, size_t limit, const char *src);
+	static size_t urlencode(char *out, size_t limit, const char *src);
+	static size_t urlencodesize(char *str);
+	static size_t xmldecode(char *out, size_t limit, const char *src);
+	static size_t xmlencode(char *out, size_t limit, const char *src);
+	static size_t b64decode(caddr_t out, const char *src, size_t count);
+	static size_t b64encode(char *out, caddr_t src, size_t count);
+	static size_t b64len(const char *str);
+
 
 	inline static unsigned ccount(string &s1, const char *clist)
 		{return s1.ccount(clist);};
