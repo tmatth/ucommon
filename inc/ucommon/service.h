@@ -1,11 +1,21 @@
-#ifndef _UCOMMON_PROC_H_
-#define	_UCOMMON_PROC_H_
+#ifndef _UCOMMON_SERVICE_H_
+#define	_UCOMMON_SERVICE_H_
 
-#ifndef _UCOMMON_THREAD_H_
+#ifndef _UCOMMON_LINKED_H_
+#include <ucommon/linked.h>
+#endif
+
+#ifndef	_UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif
 
+#ifndef	_UCOMMON_STRING_H_
+#include <ucommon/string.h>
+#endif
+
 NAMESPACE_UCOMMON
+
+const size_t uuid_size = 38;
 
 typedef fd_t spawniov_t[4];
 
@@ -51,38 +61,7 @@ protected:
 	ReusableObject *get(timeout_t timeout);
 };
 
-class __EXPORT MessageQueue
-{
-private:
-	struct ipc;
-
-	ipc *mq;
-
-public:
-	MessageQueue(const char *name, size_t objsize, unsigned count);
-	MessageQueue(const char *name);
-	~MessageQueue();
-
-	bool get(void *data, size_t len);
-	bool put(void *data, size_t len);
-	bool puts(char *data);
-	bool gets(char *data);
-
-	void release(void);
-
-	inline operator bool() const
-		{return mq != NULL;};
-		
-	inline bool operator!() const
-		{return mq == NULL;};
-
-	inline bool isPending(void) const
-		{return getPending() > 0;};
-
-	unsigned getPending(void) const;
-};
-
-class __EXPORT proc : public mempager
+class __EXPORT service : public mempager
 {
 protected:
 	LinkedObject *root;
@@ -103,8 +82,8 @@ public:
 
 	typedef named_value<const char *> member;
 
-	proc(size_t paging, define *def = NULL);
-	~proc();
+	service(size_t paging, define *def = NULL);
+	~service();
 
 	void dup(const char *id, const char *val);
 	void set(char *id, const char *val);
@@ -123,7 +102,7 @@ public:
 #endif
 	static void setenv(const char *id, const char *value);
 	static void setenv(define *list);
-	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, proc *ep = NULL);
+	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, service *ep = NULL);
 	static void createiov(fd_t *iov);
 	static void closeiov(fd_t *iov);
 	static void attachiov(fd_t *iov, fd_t io);
@@ -139,35 +118,90 @@ public:
 	static bool reload(const char *id);
 	static bool shutdown(const char *id);
 	static bool terminate(const char *id);
+	static void md5hash(char *out, uint8_t *source, size_t size = 0);
+	static int uuid(char *out);
 };
 
-template <class T>
-class mqueue : private MessageQueue
+class __EXPORT config : public mempager
 {
-protected:
-	unsigned getPending(void)
-		{return MessageQueue::getPending();};
-
 public:
-	inline mqueue(const char *name) :
-		MessageQueue(name) {};
+	typedef treemap<char *>keynode;
 	
-	inline mqueue(const char *name, unsigned count) :
-		MessageQueue(name, sizeof(T), count) {};
+	typedef struct {
+		const char *key;
+		const char *value;
+	} define;
 
-	inline ~mqueue() {release();};
-
-	inline operator bool() const
-		{return mq != NULL;};
-
-	inline bool operator!() const
-		{return mq == NULL;};
-
-	inline bool get(T *buf)
-		{return MessageQueue::get(buf, sizeof(T));};
+	class __EXPORT instance
+	{
+	private:
+		int state;
 	
-	inline bool put(T *buf)
-		{return MessageQueue::put(buf, sizeof(T));};
+	public:
+		instance();
+		~instance();
+		
+		inline const config *operator->()
+			{return config::cfg;};
+	};
+
+	class __EXPORT callback : public OrderedObject
+    {
+	protected:
+		friend class config;
+
+		static OrderedIndex list;
+
+        callback();
+        virtual ~callback();
+
+        void release(void);
+
+        virtual void commit(config *cfg);
+		virtual void reload(config *cfg);
+    };
+    
+	config(char *name, size_t s = 0);
+	virtual ~config();
+
+	bool loadxml(const char *name, keynode *top = NULL);
+	bool loadconf(const char *name, keynode *top = NULL, char *gid = NULL, keynode *entry = NULL);
+	keynode *getPath(const char *path);
+	keynode *getNode(keynode *base, const char *id, const char *value);	
+	keynode *addNode(keynode *base, define *defs);
+	keynode *addNode(keynode *base, const char *id, const char *value);
+	const char *getValue(keynode *base, const char *id, keynode *copy = NULL);
+
+	inline static bool isLinked(keynode *node)
+		{return node->isLeaf();};
+
+	inline static bool isValue(keynode *node)
+		{return (node->getPointer() != NULL);};
+
+	inline static bool isUndefined(keynode *node)
+		{return !isLinked(node) && !isValue(node);};
+
+	inline static bool isNode(keynode *node)
+		{return isLinked(node) && isValue(node);};
+
+	void update(void);
+	void commit(void);
+
+	inline static void protect(void)
+		{lock.access();};
+
+	inline static void release(void)
+		{lock.release();};
+
+protected:
+	friend class instance;
+
+	static config *cfg;
+	static SharedLock lock;
+
+	linked_pointer<callback> cb; // for update...
+	keynode root;
+	stringbuf<1024> buffer;
 };
 
 template <class T>
@@ -249,4 +283,3 @@ public:
 END_NAMESPACE
 
 #endif
-

@@ -1,4 +1,4 @@
-#include <ucommon/proc.h>
+#include <ucommon/service.h>
 #include <ucommon/string.h>
 #include <sys/stat.h>
 #include <config.h>
@@ -21,7 +21,6 @@ static RETSIGTYPE signotify(int signo)
 
 int main(int argc, char **argv)
 {
-	MessageQueue *mq;
 	char cpath[65];
 	char ctrlcmd[512];
 	fd_t fd;
@@ -41,7 +40,7 @@ int main(int argc, char **argv)
 	}
 
 	if(!timeout && (!stricmp(argv[1], "-reload") || !stricmp(argv[1], "-r"))) {
-		if(!proc::reload(argv[2])) {
+		if(!service::reload(argv[2])) {
 			fprintf(stderr, "*** %s: cannot reload\n", argv[2]);
 			exit(-1);
 		}
@@ -49,7 +48,7 @@ int main(int argc, char **argv)
 	}
 
 	if(!timeout && (!stricmp(argv[1], "-shutdown") || !stricmp(argv[1], "-s"))) {
-		if(!proc::shutdown(argv[2])) {
+		if(!service::shutdown(argv[2])) {
 			fprintf(stderr, "*** %s: cannot shutdown\n", argv[2]);
 			exit(-1);
 		}
@@ -57,7 +56,7 @@ int main(int argc, char **argv)
 	}
 
 	if(!timeout && (!stricmp(argv[1], "-terminate") || !stricmp(argv[1], "-t"))) {
-		if(!proc::terminate(argv[2])) {
+		if(!service::terminate(argv[2])) {
 			fprintf(stderr, "*** %s: cannot terminate\n", argv[2]);
 			exit(-1);
 		}
@@ -72,9 +71,6 @@ int main(int argc, char **argv)
 
 	fd = cpr_openctrl(cpath);
 	if(!cpr_isopen(fd)) {
-		mq = new MessageQueue(cpath);
-		if(*mq)
-			goto queue;
 		fprintf(stderr, "*** control: %s; cannot access\n", argv[1]);
 		exit(-1);
 	}
@@ -86,10 +82,9 @@ int main(int argc, char **argv)
 
 	cpr_writefile(fd, ctrlcmd, strlen(ctrlcmd));
 	cpr_closefile(fd);
-	pause();
-	exit(-1);
-queue:
-	mq->puts(argv[2]);
-	delete mq;
+
+	if(timeout)
+		pause();
+
 	exit(0);
 }

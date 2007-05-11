@@ -12,7 +12,6 @@
 #include <ucommon/bitmap.h>
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
-#include <ucommon/proc.h>
-#include <ucommon/misc.h>
+#include <ucommon/service.h>
 #include <ucommon/aio.h>
 #endif

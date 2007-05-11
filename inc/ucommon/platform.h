@@ -226,7 +226,6 @@ extern "C" {
 
 	__EXPORT bool cpr_isasync(fd_t fd);
 	__EXPORT bool cpr_isopen(fd_t fd);
-	__EXPORT bool cpr_createpipe(fd_t *fd, size_t size = 0);
 	__EXPORT bool cpr_createdir(const char *fn, bool pub = false);
 	__EXPORT fd_t cpr_createfile(const char *fn, bool pub = false);
 	__EXPORT fd_t cpr_rewritefile(const char *fn, bool pub = false);
