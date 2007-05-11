@@ -1222,7 +1222,7 @@ void service::set(char *id, const char *value)
 
 #else
 
-int service::spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov, service *env)
+int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *iov, service *env)
 {
 	unsigned max = OPEN_MAX, idx = 0;
 	int status;
@@ -1347,6 +1347,45 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 
 #ifdef _MSWINDOWS_
 
+void service::logfile(const char *id, const char *name, const char *fmt, ...)
+{
+}
+
+void service::openlog(const char *id)
+{
+}
+
+void service::errlog(log_t log, const char *fmt, ...)
+{
+	char buf[128];
+	const char *level = "error";
+	va_list args;
+	
+	va_start(args, fmt);
+
+	switch(log)
+	{
+	case INFO:
+		level = "info";
+		break;
+	case NOTICE:
+		level = "notice";
+		break;
+	case WARN:
+		level = "warning";
+		break;
+	case ERROR:
+		level = "error";
+		break;
+	}
+
+	snprintf(buf, sizeof(buf), "%s %s", "[%s]", fmt);
+
+	vfprintf(stderr, buf, args);
+	va_end(args);
+}
+
+
 #else
 
 static FILE *fifo = NULL;
@@ -1363,6 +1402,79 @@ static void ctrl_name(char *buf, const char *id, size_t size)
 		snprintf(buf, size, "/var/run/%s/%s.ctrl", id, id);
 	else
 		snprintf(buf, size, "/tmp/.%s.ctrl", id);
+}
+
+void service::logfile(const char *id, const char *name, const char *fmt, ...)
+{
+	char buffer[256];
+	char path[256];
+	char *ep;
+	int fd;
+	va_list args;
+
+	va_start(args, fmt);
+	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
+
+	if(*id == '/')
+		++id;
+	snprintf(path, sizeof(path), "/var/log/%s/%s", id, name);
+	ep = buffer + strlen(buffer);
+	if(ep > buffer) {
+		--ep;
+		if(*ep != '\n') {
+			*(++ep) = '\n';
+			*ep = 0;
+		}
+	}
+
+	fd = open(path, O_CREAT | O_WRONLY | O_APPEND, 0770);
+	assert(fd > -1);
+	if(fd < 0)
+		return;
+
+	write(fd, buffer, strlen(buffer));
+	fsync(fd);
+	close(fd);
+
+	va_end(args);
+}
+
+void service::openlog(const char *id)
+{
+	if(*id == '/')
+		++id;
+
+	if(getppid() == 1)
+		::openlog(id, LOG_CONS | LOG_NDELAY, LOG_DAEMON);
+	else
+		::openlog(id, LOG_PERROR, LOG_USER);
+}
+
+void service::errlog(log_t log, const char *fmt, ...)
+{
+	int level = LOG_ERR;
+	va_list args;
+	
+	va_start(args, fmt);
+
+	switch(log)
+	{
+	case INFO:
+		level = LOG_INFO;
+		break;
+	case NOTICE:
+		level = LOG_NOTICE;
+		break;
+	case WARN:
+		level = LOG_WARNING;
+		break;
+	case ERROR:
+		level = LOG_ERR;
+		break;
+	}
+
+	::vsyslog(level, fmt, args);
+	va_end(args);
 }
 
 void service::closectrl(void)

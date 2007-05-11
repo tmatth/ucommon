@@ -67,12 +67,20 @@ protected:
 	LinkedObject *root;
 
 public:
-	enum
+	typedef enum
+	{
+		INFO,
+		NOTICE,
+		WARN,
+		ERROR
+	} log_t;
+
+	typedef enum
 	{
 		SPAWN_WAIT = 0,
 		SPAWN_NOWAIT,
 		SPAWN_DETACH
-	};
+	} spawn_t;
 
 	typedef struct
 	{
@@ -102,7 +110,7 @@ public:
 #endif
 	static void setenv(const char *id, const char *value);
 	static void setenv(define *list);
-	static int spawn(const char *fn, char **args, int mode, pid_t *pid, fd_t *iov = NULL, service *ep = NULL);
+	static int spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *iov = NULL, service *ep = NULL);
 	static void createiov(fd_t *iov);
 	static void closeiov(fd_t *iov);
 	static void attachiov(fd_t *iov, fd_t io);
@@ -111,6 +119,10 @@ public:
 	static fd_t pipeOutput(fd_t *iov, size_t size = 0);
 	static fd_t pipeError(fd_t *iov, size_t size = 0);
 
+	static void openlog(const char *id);
+	static void errlog(log_t level, const char *fmt, ...);
+
+	static void logfile(const char *id, const char *name, const char *fmt, ...);
 	static size_t createctrl(const char *id);
 	static bool openctrl(const char *id);
 	static void closectrl(void);

@@ -240,7 +240,6 @@ extern "C" {
 	__EXPORT caddr_t cpr_mapfile(const char *fn); 
 	__EXPORT bool cpr_isfile(const char *fn);	
 	__EXPORT bool cpr_isdir(const char *fn);	
-	__EXPORT void cpr_printlog(const char *path, const char *fmt, ...);
 	__EXPORT size_t cpr_pagesize(void);
 	__EXPORT int cpr_scheduler(int policy, unsigned priority = CPR_PRIORITY_NORMAL);
 	__EXPORT void cpr_pattach(const char *path);
@@ -252,12 +251,6 @@ extern "C" {
 	__EXPORT sighandler_t cpr_signal(int sig, sighandler_t handler);
 	__EXPORT void cpr_hangup(pid_t pid);
 	__EXPORT int cpr_sigwait(sigset_t *set);
-
-	inline void cpr_reload(pid_t pid)
-		{kill(pid, SIGHUP);};
-
-	inline void cpr_terminate(pid_t pid)
-		{kill(pid, SIGTERM);};
 #else
 	#define cpr_signal(sig, handler) signal(sig, handler)
 #endif
@@ -268,11 +261,6 @@ extern "C" {
 	__EXPORT int cpr_priority(unsigned priority);
 	__EXPORT void cpr_memlock(void *addr, size_t len);
 	__EXPORT void cpr_memunlock(void *addr, size_t len);
-	__EXPORT void cpr_infolog(const char *fmt, ...);
-	__EXPORT void cpr_notice(const char *fmt, ...);
-	__EXPORT void cpr_warning(const char *fmt, ...);
-	__EXPORT void cpr_errlog(const char *fmt, ...);
-	__EXPORT void cpr_critlog(const char *fmt, ...);
 
 	__EXPORT uint16_t lsb_getshort(uint8_t *b);
 	__EXPORT uint32_t lsb_getlong(uint8_t *b);
@@ -287,9 +275,9 @@ extern "C" {
 };
 
 #ifdef	DEBUG
-#define cpr_printdbg(fmt, ...)	printf(fmt, ...)
+#define cpr_debug(fmt, ...)	fprintf(stderr, fmt, ...)
 #else
-#define	cpr_printdbg(fmt, ...)
+#define	cpr_debug(fmt, ...)
 #endif
 
 #endif
