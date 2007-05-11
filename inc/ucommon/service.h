@@ -15,8 +15,6 @@
 
 NAMESPACE_UCOMMON
 
-const size_t uuid_size = 38;
-
 typedef fd_t spawniov_t[4];
 
 typedef enum
@@ -149,8 +147,6 @@ public:
 	static bool reload(const char *id);
 	static bool shutdown(const char *id);
 	static bool terminate(const char *id);
-	static void md5hash(char *out, uint8_t *source, size_t size = 0);
-	static int uuid(char *out);
 };
 
 class __EXPORT config : public mempager
