@@ -1622,7 +1622,7 @@ int service::scheduler(int policy, priority_t priority)
 	sparam.sched_priority = pri;
 	return sched_setscheduler(0, policy, &sparam);	
 #elif defined(_MSWINDOWS_)
-	return priority(priority);
+	return service::priority(priority);
 #endif
 }
 
