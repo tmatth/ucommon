@@ -1,6 +1,6 @@
 #include <config.h>
-#include <ucommon/misc.h>
 #include <ucommon/string.h>
+#include <ucommon/service.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdarg.h>
