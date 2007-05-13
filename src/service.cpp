@@ -1097,8 +1097,6 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 #ifdef _MSWINDOWS_
 
 static HANDLE hFIFO = INVALID_HANDLE_VALUE;
-static HANDLE hEvent;
-static OVERLAPPED ov;
 
 static void ctrl_name(char *buf, const char *id, size_t size)
 {
@@ -1106,6 +1104,68 @@ static void ctrl_name(char *buf, const char *id, size_t size)
 		++id;
 
 	snprintf(buf, size, "\\\\.\\mailslot\\%s_ctrl", id);
+}
+
+void service::closectrl(void)
+{
+	if(hFIFO != INVALID_HANDLE_VALUE) {
+		CloseHandle(hFIFO);
+		hFIFO = INVALID_HANDLE_VALUE;
+	}
+}
+
+bool service::openctrl(const char *id)
+{
+	char buf[65];
+
+	ctrl_name(buf, id, sizeof(buf));
+	hFIFO = CreateFile(buf, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(hFIFO == NULL || hFIFO == INVALID_HANDLE_VALUE) {
+		hFIFO = INVALID_HANDLE_VALUE;
+		return false;
+	}
+	return true;
+}
+
+bool service::control(const char *id, const char *fmt, ...)
+{
+	va_list args;
+	fd_t fd;
+	char buf[464];
+	char *ep;
+	size_t len;
+	DWORD msgresult;
+	BOOL result;
+
+	va_start(args, fmt);
+
+	if(id) {
+		ctrl_name(buf, id, 65);
+		fd = CreateFile(buf, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		if(fd == INVALID_HANDLE_VALUE)
+			return false;
+	}
+	else if(hFIFO != INVALID_HANDLE_VALUE)
+		fd = hFIFO;
+	else 
+		return false;
+
+	vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+	va_end(args); 
+	
+	ep = strchr(buf, '\n');
+	if(ep)
+		*ep = 0;
+
+	len = strlen(buf);
+	buf[len++] = '\n';
+		
+	result = WriteFile(fd, buf, (DWORD)strlen(buf) + 1, &msgresult, NULL);
+
+	if(hFIFO != fd)
+		CloseHandle(fd);
+
+	return result;
 }
 
 size_t service::createctrl(const char *id)
@@ -1118,27 +1178,62 @@ size_t service::createctrl(const char *id)
 	if(hFIFO == INVALID_HANDLE_VALUE)
 		return 0;
 
-	hEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("Control FIFO"));
-	if(NULL == hEvent) {
-		CloseHandle(hFIFO);
-		hFIFO = INVALID_HANDLE_VALUE;
-		return 0;
-	}
-
-	ov.Offset = 0;
-	ov.OffsetHigh = 0;
-	ov.hEvent = hEvent;
-
 	return 464;
 }
 
 void service::releasectrl(const char *id)
 {
 	if(hFIFO != INVALID_HANDLE_VALUE) {
-		CloseHandle(hEvent);
 		CloseHandle(hFIFO);
 		hFIFO = INVALID_HANDLE_VALUE;
 	}
+}
+
+size_t service::recvctrl(char *buf, size_t max)
+{
+	BOOL result;
+	static DWORD msgsize, msgcount, msgresult;
+	static HANDLE hEvent = NULL;
+	static OVERLAPPED ov;
+
+	*buf = 0;
+	if(hFIFO == INVALID_HANDLE_VALUE)
+		return 0;
+
+	if(!hEvent) {
+		hEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("Control FIFO"));
+		if(NULL == hEvent) {
+			CloseHandle(hFIFO);
+			hFIFO = INVALID_HANDLE_VALUE;
+			return 0;
+		}
+
+		ov.Offset = 0;
+		ov.OffsetHigh = 0;
+		ov.hEvent = hEvent;
+	}
+
+	result = GetMailslotInfo(hFIFO, (LPDWORD)NULL, &msgsize, &msgcount, NULL);
+	
+	if(!result)
+		return 0;
+
+	if(msgsize == MAILSLOT_NO_MESSAGE)
+		return 0;
+
+	if(msgsize >= max)
+		msgsize = max - 1;
+	result = ReadFile(hFIFO, buf, msgsize, &msgresult, &ov);
+	if(!result || msgresult < 1)
+		return 0; 
+
+	buf[msgresult] = 0;
+	result = GetMailslotInfo(hFIFO, (LPDWORD)NULL, &msgsize, &msgcount, NULL);
+	if(!msgcount) {
+		CloseHandle(hEvent);
+		hEvent = NULL;
+	}
+	return msgresult + 1;
 }
 
 void service::logfile(const char *id, const char *name, const char *fmt, ...)
