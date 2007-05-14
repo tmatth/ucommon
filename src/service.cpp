@@ -854,8 +854,6 @@ char **service::getEnviron(void)
 void service::block(int signo)
 {
 	sigset_t set;
-	va_list args;
-	va_start(args, signo);
 	
 	sigemptyset(&set);
 	sigaddset(&set, signo);
