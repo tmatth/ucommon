@@ -849,6 +849,8 @@ char **service::getEnviron(void)
 	return envp;
 }
 
+#else
+
 void service::block(int signo)
 {
 	sigset_t set;
@@ -860,8 +862,6 @@ void service::block(int signo)
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 	
-#else
-
 void service::setEnviron(void)
 {
 	const char *id;
@@ -1438,7 +1438,7 @@ void service::releasectrl(const char *id)
 {
 	if(hFIFO != INVALID_HANDLE_VALUE) {
 		CloseHandle(hFIFO);
-		CloseHanlde(hLoopback);
+		CloseHandle(hLoopback);
 		hFIFO = hLoopback = INVALID_HANDLE_VALUE;
 	}
 }
