@@ -51,6 +51,25 @@
 
 #if defined(_MSWINDOWS_)
 
+static fd_t duplocal(fd_t fd)
+{
+	fd_t nh;
+	DuplicateHandle(GetCurrentProcess(), fd, GetCurrentProcess(), &nh, 0, 0, DUPLICATE_SAME_ACCESS);
+	CloseHandle(fd);
+	return nh;
+}
+
+#else
+
+static fd_t duplocal(fd_t fd)
+{
+	return fd;
+}
+
+#endif
+
+#if defined(_MSWINDOWS_)
+
 static bool createpipe(fd_t *fd, size_t size)
 {
 	if(CreatePipe(&fd[0], &fd[1], NULL, size)) {
@@ -969,6 +988,73 @@ void service::set(char *id, const char *value)
 
 #ifdef _MSWINDOWS_
 
+int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *iov, service *env)
+{
+	char buf[32000];
+	STARTUPINFO start;
+	PROCESS_INFORMATION ps;
+	BOOL result;
+	unsigned pos;
+	DWORD cflags = 0;
+	char **envp = NULL;
+	char *pwd = NULL;
+	DWORD status = 0;
+
+	if(env) {
+		pwd = const_cast<char *>(env->get("PWD"));
+		envp = env->getEnviron();
+	}
+
+	snprintf(buf, sizeof(buf), "%s", fn);
+	pos = strlen(buf);
+	while(pos < sizeof(buf) - 2 && args && *args) {
+		snprintf(buf + pos, sizeof(buf) - pos - 2, " %s", *(args++));
+		pos = strlen(buf);
+	}
+
+	buf[pos] = 0;
+	
+	memset(&ps, 0, sizeof(ps));
+	memset(&start, 0, sizeof(start));
+	start.dwFlags = 0x101;
+	start.wShowWindow = 0;
+
+	if(iov && iov[0] != INVALID_HANDLE_VALUE) {
+		start.hStdInput = iov[0];
+		if(iov[1] != INVALID_HANDLE_VALUE) {
+			start.hStdOutput = iov[1];
+			if(iov[2] != INVALID_HANDLE_VALUE) {
+				start.hStdError = iov[2];
+			}
+		}
+	}
+
+	switch(mode) {
+	SPAWN_DETACH:
+		cflags = CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS;
+		break;
+	SPAWN_NOWAIT:
+	SPAWN_WAIT:
+		break;
+	}
+
+	result = CreateProcess(NULL, buf, NULL, NULL, FALSE, cflags, env, pwd, &start, &ps);
+	if(!result)
+		return -1;
+
+	*pid = ps.dwProcessId;
+	if(mode == SPAWN_WAIT) {
+		WaitForSingleObject(ps.hProcess, INFINITE);
+		GetExitCodeProcess(ps.hProcess, &status);
+	}
+	else if(mode == SPAWN_NOWAIT)
+		WaitForInputIdle(ps.hProcess, 10);
+	
+	CloseHandle(ps.hThread);
+	CloseHandle(ps.hProcess);
+	return status;
+}
+
 #else
 
 int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *iov, service *env)
@@ -1075,7 +1161,7 @@ fd_t service::pipeInput(fd_t *fd, size_t size)
 		return INVALID_HANDLE_VALUE;
 
 	fd[0] = pfd[0];
-	return pfd[1];
+	return duplocal(pfd[1]);
 }
 
 fd_t service::pipeOutput(fd_t *fd, size_t size)
@@ -1086,7 +1172,7 @@ fd_t service::pipeOutput(fd_t *fd, size_t size)
 		return INVALID_HANDLE_VALUE;
 
 	fd[1] = pfd[1];
-	return pfd[0];
+	return duplocal(pfd[0]);
 }
 
 fd_t service::pipeError(fd_t *fd, size_t size)
