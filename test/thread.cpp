@@ -16,7 +16,7 @@ public:
 void mythread::run(void)
 {
 	printf("starting thread...\n");
-	pause(10000);
+	Thread::sleep(10000);
 	printf("finishing thread\n");
 };
 
@@ -27,7 +27,7 @@ extern "C" int main()
 	printf("before\n");
 	start(thr);
 	printf("sleeping main...\n");
-	Thread::pause(1000);
+	Thread::sleep(1000);
 	printf("wakeup main...\n");
 	cancel(thr);
 	printf("joining\n");

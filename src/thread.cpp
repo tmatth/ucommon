@@ -28,6 +28,22 @@ static void gettimeout(timeout_t msec, struct timespec *ts)
 	}
 }
 
+static void cpr_sleep(timeout_t timeout)
+{
+#ifdef	_MSWINDOWS_
+	SleepEx(timeout, FALSE);
+#else
+	timespec ts;
+	ts.tv_sec = timeout / 1000l;
+	ts.tv_nsec = (timeout % 1000l) * 1000000l;
+#ifdef	HAVE_PTHREAD_DELAY
+	pthread_delay(&ts);
+#else
+	nanosleep(&ts, NULL);
+#endif
+#endif
+}
+
 Mutex::attribute Mutex::attr;
 Conditional::attribute Conditional::attr;
 
@@ -448,6 +464,21 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
+#ifndef _MSWINDOWS_
+
+int Thread::wait(sigset_t *set)
+{
+#ifdef	HAVE_SIGWAIT2
+	int status;
+	crit(sigwait(set, &status) == 0);
+	return status;
+#else
+	return sigwait(set);
+#endif
+}
+
+#endif
+
 JoinableThread::JoinableThread(size_t size)
 {
 	running = false;
@@ -459,7 +490,7 @@ DetachedThread::DetachedThread(size_t size)
 	stack = size;
 }
 
-void Thread::pause(timeout_t timeout)
+void Thread::sleep(timeout_t timeout)
 {
 	int state;
 	int mode;
@@ -668,7 +699,7 @@ void JoinableThread::exit(void)
 {
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	for(;;) {
-		pause(Timer::inf);
+		sleep(Timer::inf);
 		pthread_testcancel();
 	}
 }

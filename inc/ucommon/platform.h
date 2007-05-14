@@ -219,27 +219,6 @@ extern "C" {
 		{rmdir(fn);};
 #endif
 
-
-	__EXPORT void cpr_yield(void);
-	__EXPORT void cpr_sleep(timeout_t timeout);
-	__EXPORT caddr_t cpr_mapfile(const char *fn); 
-	__EXPORT size_t cpr_pagesize(void);
-	__EXPORT void cpr_sleep(timeout_t timeout);
-	__EXPORT void cpr_yield(void);
-
-#ifndef	_MSWINDOWS_
-	__EXPORT sighandler_t cpr_intsignal(int sig, sighandler_t handler);
-	__EXPORT sighandler_t cpr_signal(int sig, sighandler_t handler);
-	__EXPORT int cpr_sigwait(sigset_t *set);
-#else
-	#define cpr_signal(sig, handler) signal(sig, handler)
-#endif
-	__EXPORT bool cpr_isrunning(pid_t pid);
-	__EXPORT pid_t cpr_waitpid(pid_t pid = 0, int *status = NULL);
-	__EXPORT int cpr_exitpid(pid_t pid);
-	__EXPORT void cpr_memlock(void *addr, size_t len);
-	__EXPORT void cpr_memunlock(void *addr, size_t len);
-
 	__EXPORT uint16_t lsb_getshort(uint8_t *b);
 	__EXPORT uint32_t lsb_getlong(uint8_t *b);
 	__EXPORT uint16_t msb_getshort(uint8_t *b);

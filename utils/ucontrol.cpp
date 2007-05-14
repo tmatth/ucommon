@@ -60,9 +60,9 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	cpr_signal(SIGUSR1, signotify);
-	cpr_signal(SIGUSR2, signotify);
-	cpr_signal(SIGALRM, signotify);
+	signal(SIGUSR1, signotify);
+	signal(SIGUSR2, signotify);
+	signal(SIGALRM, signotify);
 
 	if(timeout)
 		alarm(timeout);

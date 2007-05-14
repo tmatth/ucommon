@@ -13,9 +13,14 @@
 #include <ucommon/string.h>
 #endif
 
+#ifndef	_MSWINDOWS_
+#include <signal.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 typedef fd_t spawniov_t[4];
+typedef void (*action_t)(int signo);
 
 typedef enum
 {
@@ -40,7 +45,6 @@ typedef enum
 	SPAWN_NOWAIT,
 	SPAWN_DETACH
 } spawn_t;
-
 
 class __EXPORT MappedMemory
 {
@@ -114,6 +118,11 @@ public:
 #ifdef	_MSWINDOWS_
 	char **getEnviron(void);
 #else
+	inline void block(sigset_t *set)
+		{pthread_sigmask(SIG_BLOCK, set, NULL);};
+
+	void block(int signo);
+
 	void setEnviron();
 #endif
 	static void setenv(const char *id, const char *value);
@@ -134,10 +143,8 @@ public:
 
 	static void logfile(const char *id, const char *name, const char *fmt, ...);
 	static size_t createctrl(const char *id);
-	static bool openctrl(const char *id);
-	static void closectrl(void);
 	static bool control(const char *id, const char *fmt, ...);
-	static size_t recvctrl(char *buf, size_t size);
+	static size_t receive(char *buf, size_t max);
 	static void releasectrl(const char *id);
 
 #ifndef	_MSWINDOWS_

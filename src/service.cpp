@@ -848,6 +848,18 @@ char **service::getEnviron(void)
 	envp[idx] = NULL;
 	return envp;
 }
+
+void service::block(int signo)
+{
+	sigset_t set;
+	va_list args;
+	va_start(args, signo);
+	
+	sigemptyset(&set);
+	sigaddset(&set, signo);
+	pthread_sigmask(SIG_BLOCK, &set, NULL);
+}
+	
 #else
 
 void service::setEnviron(void)
@@ -1012,15 +1024,15 @@ void service::attach(const char *dev)
 	close(1);
 	close(2);
 #ifdef	SIGTTOU
-	cpr_signal(SIGTTOU, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
 #endif
 
 #ifdef	SIGTTIN
-	cpr_signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTIN, SIG_IGN);
 #endif
 
 #ifdef	SIGTSTP
-	cpr_signal(SIGTSTP, SIG_IGN);
+	signal(SIGTSTP, SIG_IGN);
 #endif
 	pid = fork();
 	if(pid > 0)
@@ -1040,7 +1052,7 @@ void service::attach(const char *dev)
 #else
 	crit(setpgid(0, getpid()) == 0);
 #endif
-	cpr_signal(SIGHUP, SIG_IGN);
+	signal(SIGHUP, SIG_IGN);
 	pid = fork();
 	if(pid > 0)
 		exit(0);
@@ -1136,7 +1148,7 @@ int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *
 		break;
 	}
 
-	result = CreateProcess(NULL, buf, NULL, NULL, FALSE, cflags, env, pwd, &start, &ps);
+	result = CreateProcess(NULL, buf, NULL, NULL, TRUE, cflags, env, pwd, &start, &ps);
 	if(!result)
 		return -1;
 
@@ -1357,6 +1369,7 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 #ifdef _MSWINDOWS_
 
 static HANDLE hFIFO = INVALID_HANDLE_VALUE;
+static HANDLE hLoopback = INVALID_HANDLE_VALUE;
 
 static void ctrl_name(char *buf, const char *id, size_t size)
 {
@@ -1364,27 +1377,6 @@ static void ctrl_name(char *buf, const char *id, size_t size)
 		++id;
 
 	snprintf(buf, size, "\\\\.\\mailslot\\%s_ctrl", id);
-}
-
-void service::closectrl(void)
-{
-	if(hFIFO != INVALID_HANDLE_VALUE) {
-		CloseHandle(hFIFO);
-		hFIFO = INVALID_HANDLE_VALUE;
-	}
-}
-
-bool service::openctrl(const char *id)
-{
-	char buf[65];
-
-	ctrl_name(buf, id, sizeof(buf));
-	hFIFO = CreateFile(buf, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(hFIFO == NULL || hFIFO == INVALID_HANDLE_VALUE) {
-		hFIFO = INVALID_HANDLE_VALUE;
-		return false;
-	}
-	return true;
 }
 
 bool service::control(const char *id, const char *fmt, ...)
@@ -1405,8 +1397,8 @@ bool service::control(const char *id, const char *fmt, ...)
 		if(fd == INVALID_HANDLE_VALUE)
 			return false;
 	}
-	else if(hFIFO != INVALID_HANDLE_VALUE)
-		fd = hFIFO;
+	else if(hLoopback != INVALID_HANDLE_VALUE)
+		fd = hLoopback;
 	else 
 		return false;
 
@@ -1422,7 +1414,7 @@ bool service::control(const char *id, const char *fmt, ...)
 		
 	result = WriteFile(fd, buf, (DWORD)strlen(buf) + 1, &msgresult, NULL);
 
-	if(hFIFO != fd)
+	if(hLoopback != fd)
 		CloseHandle(fd);
 
 	return result;
@@ -1438,6 +1430,7 @@ size_t service::createctrl(const char *id)
 	if(hFIFO == INVALID_HANDLE_VALUE)
 		return 0;
 
+	hLoopback = CreateFile(buf, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	return 464;
 }
 
@@ -1445,11 +1438,12 @@ void service::releasectrl(const char *id)
 {
 	if(hFIFO != INVALID_HANDLE_VALUE) {
 		CloseHandle(hFIFO);
-		hFIFO = INVALID_HANDLE_VALUE;
+		CloseHanlde(hLoopback);
+		hFIFO = hLoopback = INVALID_HANDLE_VALUE;
 	}
 }
 
-size_t service::recvctrl(char *buf, size_t max)
+size_t service::receive(char *buf, size_t max)
 {
 	BOOL result;
 	static DWORD msgsize, msgcount, msgresult;
@@ -1543,7 +1537,6 @@ void service::errlog(err_t log, const char *fmt, ...)
 #else
 
 static FILE *fifo = NULL;
-static int ctrl = -1;
 
 static void ctrl_name(char *buf, const char *id, size_t size)
 {
@@ -1638,25 +1631,6 @@ void service::errlog(err_t log, const char *fmt, ...)
 		abort();
 }
 
-void service::closectrl(void)
-{
-	if(ctrl > -1) {
-		close(ctrl);
-		ctrl = -1;
-	}
-}
-
-bool service::openctrl(const char *id)
-{
-	char buf[65];
-
-	ctrl_name(buf, id, sizeof(buf));
-	ctrl = open(buf, O_RDWR);
-	if(ctrl < 0)
-		return false;
-	return true;
-}
-
 bool service::control(const char *id, const char *fmt, ...)
 {
 	va_list args;
@@ -1673,8 +1647,8 @@ bool service::control(const char *id, const char *fmt, ...)
 		if(fd < 0)
 			return false;
 	}
-	else if(ctrl > -1)
-		fd = ctrl;
+	else if(fifo)
+		fd = fileno(fifo);
 	else 
 		return false;
 
@@ -1689,7 +1663,7 @@ bool service::control(const char *id, const char *fmt, ...)
 	buf[len++] = '\n';
 		
 	write(fd, buf, len);
-	if(ctrl != fd)
+	if(!fifo || fileno(fifo) != fd)
 		close(fd);
 
 	return true;
@@ -1705,7 +1679,7 @@ size_t service::createctrl(const char *id)
 		return 0;
 
 	fifo = fopen(buf, "r+");
-	if(fifo)
+	if(fifo) 
 		return 512;
 	else
 		return 0;
@@ -1725,17 +1699,20 @@ void service::releasectrl(const char *id)
 	remove(buf);
 }
 
-size_t service::recvctrl(char *buf, size_t max)
+size_t service::receive(char *buf, size_t max)
 {
-	char *ep;
+	char *cp;
 
 	if(!fifo)
 		return 0;
 
-	fgets(buf, max, fifo);
-	ep = strchr(buf, '\n');
-	if(ep) {
-		*ep = 0;
+	cp = fgets(buf, max, fifo);
+	if(!cp)
+		return 0;
+
+	cp = strchr(buf, '\n');
+	if(cp) {
+		*cp = 0;
 		return strlen(buf);
 	}
 	else
