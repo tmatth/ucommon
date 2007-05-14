@@ -35,8 +35,30 @@
 #include <sys/shm.h>
 #endif
 
+#if defined(HAVE_SIGACTION) && defined(HAVE_BSD_SIGNAL_H)
+#undef	HAVE_BSD_SIGNAL_H
+#endif
+
+#if defined(HAVE_BSD_SIGNAL_H)
+#include <bsd/signal.h>
+#define	HAVE_SIGNALS
+#elif defined(HAVE_SIGNAL_H)
+#include <signal.h>
+#define	HAVE_SIGNALS
+#endif
+
+#ifdef	HAVE_SIGNALS
+#ifndef	SA_ONESHOT
+#define	SA_ONESHOT	SA_RESETHAND
+#endif
+#endif
+
 #ifdef	HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
+#endif
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
 #endif
 
 #include <ctype.h>
@@ -47,6 +69,19 @@
 
 #ifndef	OPEN_MAX
 #define	OPEN_MAX 20
+#endif
+
+#ifdef  SIGTSTP
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#endif
+
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(status) ((unsigned)(status) >> 8)
+#endif
+
+#ifndef	_PATH_TTY
+#define	_PATH_TTY	"/dev/tty"
 #endif
 
 #if defined(_MSWINDOWS_)
@@ -914,7 +949,7 @@ pid_t service::pidfile(const char *id)
 		goto bydate;
 
 	close(fd);
-	if(kill(pid, 0))
+	if(running(pid))
 		return 0;
 
 	return pid;
@@ -959,6 +994,69 @@ bool service::terminate(const char *id)
 
 	kill(pid, SIGTERM);
 	return true;
+}
+
+void service::detach(void)
+{
+	if(getppid() == 1)
+		return;
+	service::attach("/dev/null");
+}
+
+void service::attach(const char *dev)
+{
+	pid_t pid;
+	int fd;
+
+	close(0);
+	close(1);
+	close(2);
+#ifdef	SIGTTOU
+	cpr_signal(SIGTTOU, SIG_IGN);
+#endif
+
+#ifdef	SIGTTIN
+	cpr_signal(SIGTTIN, SIG_IGN);
+#endif
+
+#ifdef	SIGTSTP
+	cpr_signal(SIGTSTP, SIG_IGN);
+#endif
+	pid = fork();
+	if(pid > 0)
+		exit(0);
+	crit(pid == 0);
+
+#if defined(SIGTSTP) && defined(TIOCNOTTY)
+	crit(setpgid(0, getpid()) == 0);
+	if((fd = open(_PATH_TTY, O_RDWR)) >= 0) {
+		ioctl(fd, TIOCNOTTY, NULL);
+		close(fd);
+	}
+#else
+
+#ifdef HAVE_SETPGRP
+	crit(setpgrp() == 0);
+#else
+	crit(setpgid(0, getpid()) == 0);
+#endif
+	cpr_signal(SIGHUP, SIG_IGN);
+	pid = fork();
+	if(pid > 0)
+		exit(0);
+	crit(pid == 0);
+#endif
+	if(dev && *dev) {
+		fd = open(dev, O_RDWR);
+		if(fd > 0)
+			dup2(fd, 0);
+		if(fd != 1)
+			dup2(fd, 1);
+		if(fd != 2)
+			dup2(fd, 2);
+		if(fd > 2)
+			close(fd);
+	}
 }
 
 #endif
@@ -1043,6 +1141,9 @@ int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *
 		return -1;
 
 	*pid = ps.dwProcessId;
+	if(ps.hProcess == NULL || ps.hProcess == INVALID_HANDLE_VALUE)
+		return -1;
+
 	if(mode == SPAWN_WAIT) {
 		WaitForSingleObject(ps.hProcess, INFINITE);
 		GetExitCodeProcess(ps.hProcess, &status);
@@ -1055,12 +1156,86 @@ int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *
 	return status;
 }
 
+int service::wait(pid_t pid)
+{
+	DWORD status = -1;
+	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE);
+
+	if(hProc && hProc != INVALID_HANDLE_VALUE) {
+		WaitForSingleObject(hProc, INFINITE);
+		GetExitCodeProcess(hProc, &status);
+		CloseHandle(hProc);
+	}
+	return status;
+}	
+
+bool service::getexit(pid_t pid, int *result)
+{
+    DWORD status = STILL_ACTIVE;
+    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE);
+
+    if(hProc && hProc != INVALID_HANDLE_VALUE) {
+        GetExitCodeProcess(hProc, &status);
+        CloseHandle(hProc);
+    }
+	if(status == STILL_ACTIVE || !hProc || hProc == INVALID_HANDLE_VALUE)
+		return false;
+    return *result = status;
+	return true;
+}
+
+void service::terminate(pid_t pid)
+{
+	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+	if(hProc && hProc != INVALID_HANDLE_VALUE) {
+		TerminateProcess(hProc, 0 );
+		CloseHandle(hProc);
+	}
+}
+
+bool service::running(pid_t pid)
+{
+	HANDLE hProc;
+	DWORD status;
+
+	hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+	if(hProc != NULL) {
+		CloseHandle(hProc);
+		return true;
+	}
+
+	return false;
+}
+
 #else
+
+bool service::getexit(pid_t pid, int *status)
+{
+	if(waitpid(pid, status, WNOHANG) != pid)
+		return false;
+
+	*status = WEXITSTATUS(*status);
+	return true;
+}
+
+int service::wait(pid_t pid)
+{
+	int status;
+	waitpid(pid, &status, 0);
+	return WEXITSTATUS(status);
+}
+
+bool service::running(pid_t pid)
+{
+	if((kill(pid, 0) == -1) && (errno == ESRCH))
+		return false;
+
+	return true;
+}
 
 int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *iov, service *env)
 {
 	unsigned max = OPEN_MAX, idx = 0;
-	int status;
 
 	*pid = fork();
 
@@ -1074,8 +1249,7 @@ int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *
 		case SPAWN_NOWAIT:
 			return 0;
 		case SPAWN_WAIT:
-			cpr_waitpid(*pid, &status);
-			return status;
+			return wait(*pid);
 		}
 	}
 
@@ -1104,7 +1278,7 @@ int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *
 		close(idx++);
 
 	if(mode == SPAWN_DETACH)
-		cpr_pdetach();
+		detach();
 
 	if(env)
 		env->setEnviron();

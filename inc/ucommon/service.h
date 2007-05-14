@@ -141,9 +141,14 @@ public:
 	static void releasectrl(const char *id);
 
 #ifndef	_MSWINDOWS_
+	static void attach(const char *dev);
+	static void detach(void);
 	static pid_t pidfile(const char *id);
 	static pid_t pidfile(const char *id, pid_t pid);
 #endif
+	static bool getexit(pid_t pid, int *status);
+	static int  wait(pid_t pid);
+	static bool running(pid_t pid);
 	static bool reload(const char *id);
 	static bool shutdown(const char *id);
 	static bool terminate(const char *id);

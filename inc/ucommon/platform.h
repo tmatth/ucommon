@@ -227,18 +227,14 @@ extern "C" {
 	__EXPORT void cpr_sleep(timeout_t timeout);
 	__EXPORT void cpr_yield(void);
 
-	__EXPORT void cpr_pattach(const char *path);
-	__EXPORT void cpr_pdetach(void);
-	__EXPORT void cpr_closeall(void);
-	__EXPORT void cpr_cancel(pid_t pid);
 #ifndef	_MSWINDOWS_
 	__EXPORT sighandler_t cpr_intsignal(int sig, sighandler_t handler);
 	__EXPORT sighandler_t cpr_signal(int sig, sighandler_t handler);
-	__EXPORT void cpr_hangup(pid_t pid);
 	__EXPORT int cpr_sigwait(sigset_t *set);
 #else
 	#define cpr_signal(sig, handler) signal(sig, handler)
 #endif
+	__EXPORT bool cpr_isrunning(pid_t pid);
 	__EXPORT pid_t cpr_waitpid(pid_t pid = 0, int *status = NULL);
 	__EXPORT int cpr_exitpid(pid_t pid);
 	__EXPORT void cpr_memlock(void *addr, size_t len);

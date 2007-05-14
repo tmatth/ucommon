@@ -85,98 +85,9 @@ extern "C" void cpr_yield(void)
 #define	OPEN_MAX 20
 #endif
 
-#ifndef	_MSWINDOWS_
-extern "C" void cpr_pdetach(void)
-{
-	if(getppid() == 1)
-		return;
-	cpr_pattach("/dev/null");
-}
+#ifdef _MSWINDOWS_
 
-extern "C" void cpr_pattach(const char *dev)
-{
-	pid_t pid;
-	int fd;
-
-	close(0);
-	close(1);
-	close(2);
-#ifdef	SIGTTOU
-	cpr_signal(SIGTTOU, SIG_IGN);
-#endif
-
-#ifdef	SIGTTIN
-	cpr_signal(SIGTTIN, SIG_IGN);
-#endif
-
-#ifdef	SIGTSTP
-	cpr_signal(SIGTSTP, SIG_IGN);
-#endif
-	pid = fork();
-	if(pid > 0)
-		exit(0);
-	crit(pid == 0);
-
-#if defined(SIGTSTP) && defined(TIOCNOTTY)
-	crit(setpgid(0, getpid()) == 0);
-	if((fd = open(_PATH_TTY, O_RDWR)) >= 0) {
-		ioctl(fd, TIOCNOTTY, NULL);
-		close(fd);
-	}
 #else
-
-#ifdef HAVE_SETPGRP
-	crit(setpgrp() == 0);
-#else
-	crit(setpgid(0, getpid()) == 0);
-#endif
-	cpr_signal(SIGHUP, SIG_IGN);
-	pid = fork();
-	if(pid > 0)
-		exit(0);
-	crit(pid == 0);
-#endif
-	if(dev && *dev) {
-		fd = open(dev, O_RDWR);
-		if(fd > 0)
-			dup2(fd, 0);
-		if(fd != 1)
-			dup2(fd, 1);
-		if(fd != 2)
-			dup2(fd, 2);
-		if(fd > 2)
-			close(fd);
-	}
-}
-
-extern "C" void cpr_closeall(void)
-{
-	unsigned max = OPEN_MAX;
-#if defined(HAVE_SYSCONF)
-	max = sysconf(_SC_OPEN_MAX);
-#endif
-#if defined(HAVE_SYS_RESOURCE_H)
-	struct rlimit rl;
-	if(!getrlimit(RLIMIT_NOFILE, &rl))
-		max = rl.rlim_cur;
-#endif
-	for(unsigned fd = 3; fd < max; ++fd)
-		::close(fd);
-}
-
-extern "C" void cpr_cancel(pid_t pid)
-{
-#ifdef	HAVE_SIGNAL_H
-	kill(pid, SIGTERM);
-#endif
-}
-
-extern "C" void cpr_hangup(pid_t pid)
-{
-#ifdef  HAVE_SIGNAL_H
-    kill(pid, SIGHUP);
-#endif
-}
 
 extern "C" sighandler_t cpr_intsignal(int signo, sighandler_t func)
 {
@@ -257,10 +168,6 @@ extern "C" int cpr_exitpid(pid_t pid)
 	return status;
 }
 
-#else
-extern "C" void cpr_closeall(void)
-{
-}
 #endif
 
 extern "C" size_t cpr_pagesize(void)
