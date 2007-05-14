@@ -1158,8 +1158,8 @@ int service::spawn(const char *fn, char **args, spawn_t mode, pid_t *pid, fd_t *
 
 int service::wait(pid_t pid)
 {
-	DWORD status = -1;
-	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE);
+	DWORD status = (DWORD)(-1);
+	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
 
 	if(hProc && hProc != INVALID_HANDLE_VALUE) {
 		WaitForSingleObject(hProc, INFINITE);
@@ -1172,7 +1172,7 @@ int service::wait(pid_t pid)
 bool service::getexit(pid_t pid, int *result)
 {
     DWORD status = STILL_ACTIVE;
-    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE);
+    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
 
     if(hProc && hProc != INVALID_HANDLE_VALUE) {
         GetExitCodeProcess(hProc, &status);
@@ -1184,7 +1184,7 @@ bool service::getexit(pid_t pid, int *result)
 	return true;
 }
 
-void service::terminate(pid_t pid)
+/* void service::terminate(pid_t pid)
 {
 	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
 	if(hProc && hProc != INVALID_HANDLE_VALUE) {
@@ -1192,7 +1192,7 @@ void service::terminate(pid_t pid)
 		CloseHandle(hProc);
 	}
 }
-
+*/
 bool service::running(pid_t pid)
 {
 	HANDLE hProc;
