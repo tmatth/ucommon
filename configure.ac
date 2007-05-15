@@ -389,5 +389,5 @@ AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
 AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile 
-inc/ucommon/Makefile utils/Makefile ucommon.pc)
+inc/ucommon/Makefile util/Makefile ucommon.pc)
 
