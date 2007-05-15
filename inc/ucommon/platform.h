@@ -65,7 +65,9 @@ inline int stat(const char *path, struct stat *buf)
 
 #else
 
+typedef	int SOCKET;
 typedef	int fd_t;
+#define	INVALID_SOCKET -1
 #define	INVALID_HANDLE_VALUE -1
 #include <dlfcn.h>
 #include <signal.h>

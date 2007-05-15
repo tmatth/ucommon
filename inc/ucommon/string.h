@@ -1,8 +1,12 @@
 #ifndef	_UCOMMON_STRING_H_
 #define	_UCOMMON_STRING_H_
 
-#ifndef	_UCOMMON_MEMPRY_H_
+#ifndef	_UCOMMON_MEMORY_H_
 #include <ucommon/memory.h>
+#endif
+
+#ifndef	_UCOMMON_SOCKET_H_
+#include <ucommon/socket.h>
 #endif
 
 #ifndef	_UCOMMON_TIMERS_H_
@@ -145,6 +149,10 @@ public:
 	bool operator>(const char *str) const;
 	bool operator>=(const char *str) const;
 
+	static bool getline(Socket &so, string &s);
+	static bool putline(Socket &so, string &s);
+	static bool getline(FILE *fp, string &s);
+	static bool putline(FILE *fp, string &s);
 	static void swap(string &s1, string &s2);
 	static void fix(string &s);
 	static void lower(char *s);

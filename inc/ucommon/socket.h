@@ -22,8 +22,6 @@ struct addrinfo;
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netdb.h>
-typedef	int SOCKET;
-#define	INVALID_SOCKET -1
 #endif
 
 #ifndef IPTOS_LOWDELAY

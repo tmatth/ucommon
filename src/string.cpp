@@ -1164,6 +1164,66 @@ void string::swap(string &s1, string &s2)
 	s2.str = s;
 }
 
+bool string::putline(Socket &so, string &s)
+{
+	if(s[-1] != '\n')
+		s.add("\r\n");
+		
+	if(so.puts(mem(s)) >= 0)
+		return true;
+
+	return false;
+}
+
+bool string::putline(FILE *fp, string &s)
+{
+	if(s[-1] != '\n')
+		s.add("\n");
+		
+	if(fputs(mem(s), fp) >= 0)
+		return true;
+
+	return false;
+}
+
+bool string::getline(Socket &so, string &s)
+{
+	if(!mem(s))
+		return true;
+
+	if(so.gets(mem(s), size(s)) < 0) 
+		return false;
+
+	fix(s);
+
+	if(s[-1] == '\n')
+		--s;
+
+	if(s[-1] == '\r')
+		--s;
+
+	return true;
+}
+
+bool string::getline(FILE *fp, string &s)
+{
+	if(!mem(s))
+		return true;
+
+	fgets(mem(s), size(s), fp);
+	fix(s);
+	if(feof(fp)) 
+		return false;
+
+	if(s[-1] == '\n')
+		--s;
+
+	if(s[-1] == '\r')
+		--s;
+
+	return true;
+}
+	
 char *string::dup(const char *cp)
 {
 	char *mem;
