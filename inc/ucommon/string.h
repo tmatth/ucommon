@@ -186,9 +186,6 @@ public:
 	static size_t b64encode(char *out, caddr_t src, size_t count);
 	static size_t b64len(const char *str);
 
-	static string uuid(void);
-	static string md5(uint8_t *data, size_t len = 0);
-
 	inline static unsigned ccount(string &s1, const char *clist)
 		{return s1.ccount(clist);};
 
