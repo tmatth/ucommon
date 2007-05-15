@@ -1389,6 +1389,7 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 
 #ifdef _MSWINDOWS_
 
+static HANDLE hEvent = INVALID_HANDLE_VALUE;
 static HANDLE hFIFO = INVALID_HANDLE_VALUE;
 static HANDLE hLoopback = INVALID_HANDLE_VALUE;
 
@@ -1448,6 +1449,7 @@ size_t service::createctrl(const char *id)
 	if(hFIFO == INVALID_HANDLE_VALUE)
 		return 0;
 
+	hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	hLoopback = CreateFile(buf, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	return 464;
 }
@@ -1457,6 +1459,7 @@ void service::releasectrl(const char *id)
 	if(hFIFO != INVALID_HANDLE_VALUE) {
 		CloseHandle(hFIFO);
 		CloseHandle(hLoopback);
+		CloseHandle(hEvent);
 		hFIFO = hLoopback = INVALID_HANDLE_VALUE;
 	}
 }
@@ -1464,47 +1467,29 @@ void service::releasectrl(const char *id)
 size_t service::receive(char *buf, size_t max)
 {
 	BOOL result;
-	static DWORD msgsize, msgcount, msgresult;
-	static HANDLE hEvent = NULL;
+	DWORD msgresult;
 	static OVERLAPPED ov;
 
 	*buf = 0;
 	if(hFIFO == INVALID_HANDLE_VALUE)
 		return 0;
 
-	if(!hEvent) {
-		hEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("Control FIFO"));
-		if(NULL == hEvent) {
-			CloseHandle(hFIFO);
-			hFIFO = INVALID_HANDLE_VALUE;
+	ov.Offset = 0;
+	ov.OffsetHigh = 0;
+	ov.hEvent = hEvent;
+	ResetEvent(hEvent);
+	result = ReadFile(hFIFO, buf, max - 1, &msgresult, &ov);
+	if(!result && GetLastError() == ERROR_IO_PENDING) {
+		int ret = WaitForSingleObject(ov.hEvent, INFINITE);
+		if(ret != WAIT_OBJECT_0)
 			return 0;
-		}
+		result = GetOverlappedResult(hFIFO, &ov, &msgresult, TRUE);
+	} 
 
-		ov.Offset = 0;
-		ov.OffsetHigh = 0;
-		ov.hEvent = hEvent;
-	}
-
-	result = GetMailslotInfo(hFIFO, (LPDWORD)NULL, &msgsize, &msgcount, NULL);
-	
-	if(!result)
-		return 0;
-
-	if(msgsize == MAILSLOT_NO_MESSAGE)
-		return 0;
-
-	if(msgsize >= max)
-		msgsize = max - 1;
-	result = ReadFile(hFIFO, buf, msgsize, &msgresult, &ov);
 	if(!result || msgresult < 1)
-		return 0; 
+		return 0;
 
 	buf[msgresult] = 0;
-	result = GetMailslotInfo(hFIFO, (LPDWORD)NULL, &msgsize, &msgcount, NULL);
-	if(!msgcount) {
-		CloseHandle(hEvent);
-		hEvent = NULL;
-	}
 	return msgresult + 1;
 }
 
