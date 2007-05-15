@@ -1392,6 +1392,7 @@ fd_t service::pipeError(fd_t *fd, size_t size)
 static HANDLE hEvent = INVALID_HANDLE_VALUE;
 static HANDLE hFIFO = INVALID_HANDLE_VALUE;
 static HANDLE hLoopback = INVALID_HANDLE_VALUE;
+static OVERLAPPED ov;
 
 static void ctrl_name(char *buf, const char *id, size_t size)
 {
@@ -1451,6 +1452,10 @@ size_t service::createctrl(const char *id)
 
 	hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	hLoopback = CreateFile(buf, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	ov.Offset = 0;
+	ov.OffsetHigh = 0;
+	ov.hEvent = hEvent;
+
 	return 464;
 }
 
@@ -1468,16 +1473,11 @@ size_t service::receive(char *buf, size_t max)
 {
 	BOOL result;
 	DWORD msgresult;
-	static OVERLAPPED ov;
-
+	
 	*buf = 0;
 	if(hFIFO == INVALID_HANDLE_VALUE)
 		return 0;
 
-	ov.Offset = 0;
-	ov.OffsetHigh = 0;
-	ov.hEvent = hEvent;
-	ResetEvent(hEvent);
 	result = ReadFile(hFIFO, buf, max - 1, &msgresult, &ov);
 	if(!result && GetLastError() == ERROR_IO_PENDING) {
 		int ret = WaitForSingleObject(ov.hEvent, INFINITE);
