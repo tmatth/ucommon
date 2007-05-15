@@ -1085,140 +1085,78 @@ void memstring::cow(strsize_t adj)
 {
 }
 
+const char *string::token(char *text, char **token, const char *clist, const char *quote, const char *eol)
+{
+	char *result;
+
+	if(!eol)
+		eol = "";
+
+	if(!token || !clist)
+		return NULL;
+
+	if(!*token)
+		*token = text;
+	
+	if(!**token) {
+		*token = text;
+		return NULL;
+	}
+
+	while(**token && strchr(clist, **token))
+		++token;
+
+	result = *token;
+
+	if(*result && *eol && NULL != (eol = strchr(eol, *result))) {
+		if(eol[0] != eol[1] || *result == eol[1]) {
+			*token = text;
+			return NULL;
+		}
+	}
+
+	if(!*result) {
+		*token = text;
+		return NULL;
+	}
+
+	while(quote && *quote && *result != *quote) {
+		quote += 2;
+	}
+
+	if(quote && *quote) {
+		++result;
+		++quote;
+		*token = strchr(result, *quote);
+		if(!*token)
+			*token = result + strlen(result);
+		else
+			*(*token++) = 0;
+		return result;
+	}
+
+	while(**token && !strchr(clist, **token))
+		++(*token);
+
+	if(**token)
+		*(*(token++)) = 0; 	
+
+	return result;
+}
+
 string::cstring *memstring::c_copy(void) const
 {
 	cstring *tmp = string::create(str->max, str->fill);
 	tmp->set(str->text);
 	return tmp;
 }
+
+void string::fix(string &s)
+{
+	if(s.str)
+		s.str->fix();
+}
 	
-tokenstring::tokenstring(const char *cl) :
-string()
-{
-	clist = cl;
-	token = NULL;
-}
-
-tokenstring::tokenstring(caddr_t mem, const char *cl) :
-string()
-{
-	clist = cl;
-	token = trim(mem, cl);
-}
-
-const char *tokenstring::get(void)
-{
-	const char *mem;
-
-	if(!token && !str)
-		return NULL;
-
-	if(!token) {
-		cow();
-		chop(clist);
-		token = str->text;
-	}
-	else if(!*token)
-		return NULL;
-
-	while(*token && strchr(clist, *token))
-		++token;
-
-	mem = token;	
-	while(*token && !strchr(clist, *token))
-		++token;
-
-	if(*token)
-		*(token++) = 0;
-
-	return mem;
-}
-
-const char *tokenstring::get(const char *q)
-{
-	char *mem;
-
-	if(!token && !str)
-		return NULL;
-
-	if(!token) {
-		cow();
-		chop(clist);
-		token = str->text;
-	}
-	else if(!*token)
-		return NULL;
-
-	while(*token && strchr(clist, *token))
-		++token;
-
-	mem = token;	
-	
-	if(strchr(q, *mem)) {
-		++token;
-		switch(*mem) {
-		case '{':
-			*mem = '}';
-			break;
-		case '(':
-			*mem = ')';
-			break;
-		case '[':
-			*mem = ']';
-			break;
-		case '<':
-			*mem = '>';
-			break;
-		}
-		while(*token && *token != *mem)
-			++token;
-		++mem;
-	}
-	else while(*token && !strchr(clist, *token))
-		++token;
-
-	if(*token)
-		*(token++) = 0;
-
-	return mem;
-}
-
-
-const char *tokenstring::next(void)
-{
-	const char *p = token;
-
-	if(!p && str) {
-		cow();
-		chop(clist);
-		p = str->text;
-	}
-	else if(!p)
-		return NULL;
-
-	while(*p && strchr(clist, *p))
-		++p;
-
-	return p;
-}
-
-tokenstring &tokenstring::operator=(caddr_t s)
-{
-	token = NULL;
-	if(str)
-		set(s);
-	else
-		token = trim(s, clist);
-	return *this;
-}
-
-tokenstring &tokenstring::operator=(const string &s)
-{
-	set(s.c_str());
-	token = NULL;
-	return *this;
-}
-
 void string::swap(string &s1, string &s2)
 {
 	string::cstring *s = s1.str;

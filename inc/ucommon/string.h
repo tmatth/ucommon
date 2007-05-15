@@ -146,9 +146,10 @@ public:
 	bool operator>=(const char *str) const;
 
 	static void swap(string &s1, string &s2);
-	
+	static void fix(string &s);
 	static void lower(char *s);
 	static void upper(char *s);
+	static const char *token(char *s, char **tokens, const char *clist, const char *quote = NULL, const char *eol = NULL);
 	static char *skip(char *s, const char *clist);
 	static char *rskip(char *s, const char *clist);
 	static char *unquote(char *s, const char *clist);
@@ -185,6 +186,18 @@ public:
 	static size_t b64decode(caddr_t out, const char *src, size_t count);
 	static size_t b64encode(char *out, caddr_t src, size_t count);
 	static size_t b64len(const char *str);
+
+	inline static strsize_t len(string &s)
+		{return s.len();};
+
+	inline static char *mem(string &s)
+		{return s.c_mem();};
+
+	inline static strsize_t max(string &s)
+		{return s.size();};
+
+	inline static void clear(string &s)
+		{s.clear();};
 
 	inline static unsigned ccount(string &s1, const char *clist)
 		{return s1.ccount(clist);};
@@ -254,28 +267,6 @@ public:
 
 	static memstring *create(strsize_t size, char fill = 0);
 	static memstring *create(mempager *pager, strsize_t size, char fill = 0);
-};
-
-class __EXPORT tokenstring : protected string
-{
-private:
-	const char *clist;
-	char *token;
-
-public:
-	tokenstring(const char *cl);
-	tokenstring(caddr_t mem, const char *cl);
-	
-	const char *get(const char *quoting);
-	const char *get(void);
-	const char *next(void);
-
-	tokenstring &operator=(caddr_t s);
-
-	tokenstring &operator=(const string &s);
-
-	inline const char *operator*()
-		{return get();};
 };
 
 template<strsize_t S>

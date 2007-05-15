@@ -35,14 +35,19 @@ int main(int argc, char **argv)
 	}
 
 	if(argc != 3) {
-		fprintf(stderr, "use: control [-timeout|-reload|-shutdown|-terminate|-dump] service|id [\"command\"] ...\n");
+		fprintf(stderr, "use: control [-timeout|-reload|-shutdown|-terminate|-dump|-unlink] service|id [\"command\"] ...\n");
 		exit(-1);
 	}
 
-	if(!timeout && (!stricmp(argv[1], "-dump") || !stricmp(argv[1], "-d"))) {
+	if(!timeout && (!stricmp(argv[1], "-unlink") || !stricmp(argv[1], "-u"))) {
+		MappedMemory::remove(argv[2]);
+		exit(0);
+	}
+
+	if(!timeout && (!stricmp(argv[2], "-dump") || !stricmp(argv[1], "-d"))) {
 		MappedMemory *view = new MappedMemory(argv[1]);
 		if(!(*view)) {
-			fprintf(stderr, "*** %s: cannot access\n", argv[1]);
+			fprintf(stderr, "*** %s: cannot access\n", argv[2]);
 			exit(-1);
 		}
 

@@ -61,6 +61,10 @@ public:
 	MappedMemory(const char *fname, size_t len = 0);
 	virtual ~MappedMemory();
 
+	void release(void);
+
+	static	void remove(const char *id);
+
 	inline operator bool() const
 		{return (size != 0);};
 
@@ -296,7 +300,7 @@ public:
 		{return static_cast<T*>(MappedReuse::request());};
 
 	inline void release(T *o)
-		{MappedReuse::release(o);};
+		{ReusableAllocator::release(o);};
 };
 	
 template <class T>

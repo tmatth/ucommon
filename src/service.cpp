@@ -584,6 +584,15 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 
 MappedMemory::~MappedMemory()
 {
+	release();
+}
+
+void MappedMemory::remove(const char *id)
+{
+}
+
+void MappedMemory::release(void)
+{
 	if(map) {
 		VirtualUnlock(map, size);
 		UnmapViewOfFile(fd);
@@ -611,7 +620,6 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 	
 	if(len) {
 		prot |= PROT_WRITE;
-		shm_unlink(fn);
 		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
 		if(fd > -1)
 			ftruncate(fd, len);
@@ -637,6 +645,11 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 
 MappedMemory::~MappedMemory()
 {
+	release();
+}
+
+void MappedMemory::release()
+{
 	if(size) {
 		munlock(map, size);
 		munmap(map, size);
@@ -644,7 +657,32 @@ MappedMemory::~MappedMemory()
 	}
 }
 
+void MappedMemory::remove(const char *fn)
+{
+	char fbuf[65];
+
+	if(*fn != '/') {
+		snprintf(fbuf, sizeof(fbuf), "/%s", fn);
+		fn = fbuf;
+	}
+
+	shm_unlink(fn);
+}
+
 #else
+
+void MappedMemory::remove(const char *id)
+{
+	key_t key;
+	fd_t fd;
+
+	key = accessipc(name, 'S');
+	if(key) {
+        fd = shmget(key, 0, 0);
+        if(fd > -1) {
+			shmctl(fd, IPC_RMID, NULL);
+	}
+}
 
 MappedMemory::MappedMemory(const char *name, size_t len)
 {
@@ -686,6 +724,11 @@ remake:
 }
 
 MappedMemory::~MappedMemory()
+{
+	release();
+}
+
+void MappedMemory::release(void)
 {
 	if(size > 0) {
 #ifdef	SHM_UNLOCK
@@ -928,10 +971,10 @@ pid_t service::pidfile(const char *id, pid_t pid)
 
 	snprintf(buf, sizeof(buf), "/var/run/%s", id);
 	mkdir(buf, 0775);
-	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode)) 
+	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode))
 		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
 	else
-		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
+		snprintf(buf, sizeof(buf), "/tmp/.%s.pid", id);
 
 retry:
 	fd = open(buf, O_CREAT|O_WRONLY|O_TRUNC|O_EXCL, 0755);
@@ -961,10 +1004,10 @@ pid_t service::pidfile(const char *id)
 	pid_t pid;
 
 	snprintf(buf, sizeof(buf), "/var/run/%s", id);
-	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode))
+	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode)) 
 		snprintf(buf, sizeof(buf), "/var/run/%s/%s.pid", id, id);
 	else
-		snprintf(buf, sizeof(buf), "/tmp/%s.pid", id);
+		snprintf(buf, sizeof(buf), "/tmp/.%s.pid", id);
 
 	fd = open(buf, O_RDONLY);
 	if(fd < 0 && errno == EPERM)
@@ -1548,7 +1591,7 @@ static void ctrl_name(char *buf, const char *id, size_t size)
 		++id;
 
 	snprintf(buf, size, "/var/run/%s", id);
-
+	
 	if(!stat(buf, &ino) && S_ISDIR(ino.st_mode))	
 		snprintf(buf, size, "/var/run/%s/%s.ctrl", id, id);
 	else
