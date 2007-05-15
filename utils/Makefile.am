@@ -4,13 +4,8 @@ CXXLINK = $(LIBTOOL) --tag=CC --mode=link $(CXX) $(AM_CXXFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 LDADD = ../src/libucommon.la @UCOMMON_LIBS@
 
-bin_PROGRAMS = ushmdump
-
-if POSIX
-bin_PROGRAMS += ucontrol
-endif
+bin_PROGRAMS = ucontrol
 
 ucontrol_SOURCES = ucontrol.cpp
-ushmdump_SOURCES = ushmdump.cpp
 
 

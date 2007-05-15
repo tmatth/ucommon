@@ -5,6 +5,8 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+#ifndef _MSWINDOWS_
+
 static RETSIGTYPE signotify(int signo)
 {
 	switch(signo) {
@@ -18,6 +20,7 @@ static RETSIGTYPE signotify(int signo)
 		exit(signo);
 	}
 }
+#endif
 
 int main(int argc, char **argv)
 {
@@ -32,8 +35,19 @@ int main(int argc, char **argv)
 	}
 
 	if(argc != 3) {
-		fprintf(stderr, "use: control [-timeout|-reload|-shutdown|-terminate] service [\"command\"] ...\n");
+		fprintf(stderr, "use: control [-timeout|-reload|-shutdown|-terminate|-dump] service|id [\"command\"] ...\n");
 		exit(-1);
+	}
+
+	if(!timeout && (!stricmp(argv[1], "-dump") || !stricmp(argv[1], "-d"))) {
+		MappedMemory *view = new MappedMemory(argv[1]);
+		if(!(*view)) {
+			fprintf(stderr, "*** %s: cannot access\n", argv[1]);
+			exit(-1);
+		}
+
+		fwrite(view->get(0), view->len(), 1, stdout);
+		exit(0);
 	}
 
 	if(!timeout && (!stricmp(argv[1], "-reload") || !stricmp(argv[1], "-r"))) {
@@ -60,6 +74,12 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
+#ifdef _MSWINDOWS_
+	if(!service::control(argv[1], "%s\n", argv[2])) {
+		fprintf(stderr, "*** control: %s; cannot access\n", argv[1]);
+		exit(-1);
+	}
+#else
 	signal(SIGUSR1, signotify);
 	signal(SIGUSR2, signotify);
 	signal(SIGALRM, signotify);
@@ -74,7 +94,7 @@ int main(int argc, char **argv)
 
 	if(timeout)
 		pause();
-
+#endif
 	exit(0);
 }
 

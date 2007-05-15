@@ -560,15 +560,17 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 	used = 0;
 	map = NULL;
 
+	if(*fn == '/')
+		++fn;
+
 	if(len) {
 		prot = FILE_MAP_WRITE;
 		mode |= GENERIC_WRITE;
 		share |= FILE_SHARE_WRITE;
-		fd = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, len, fn + 1);
-
+		fd = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, len, fn);
 	}
 	else
-		fd = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, fn + 1);
+		fd = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, fn);
 	
 	if(fd == INVALID_HANDLE_VALUE || fd == NULL) 
 		return;
@@ -597,9 +599,15 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 {
 	int prot = PROT_READ;
 	struct stat ino;
+	char fbuf[65];
 
 	size = 0;
 	used = 0;
+
+	if(*fn != '/') {
+		snprintf(fbuf, sizeof(fbuf), "/%s", fn);
+		fn = fbuf;
+	}
 	
 	if(len) {
 		prot |= PROT_WRITE;
@@ -847,6 +855,21 @@ char **service::getEnviron(void)
 	}
 	envp[idx] = NULL;
 	return envp;
+}
+
+bool service::reload(const char *id)
+{
+	return control(id, "%s\n", "reload");
+}
+
+bool service::shutdown(const char *id)
+{
+	return control(id, "%s\n", "down");
+}
+
+bool service::terminate(const char *id)
+{
+	return control(id, "%s\n", "quit");
 }
 
 #else
@@ -1406,10 +1429,7 @@ bool service::control(const char *id, const char *fmt, ...)
 	ep = strchr(buf, '\n');
 	if(ep)
 		*ep = 0;
-
-	len = strlen(buf);
-	buf[len++] = '\n';
-		
+	
 	result = WriteFile(fd, buf, (DWORD)strlen(buf) + 1, &msgresult, NULL);
 
 	if(hLoopback != fd)
