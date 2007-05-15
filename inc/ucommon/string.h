@@ -193,7 +193,7 @@ public:
 	inline static char *mem(string &s)
 		{return s.c_mem();};
 
-	inline static strsize_t max(string &s)
+	inline static strsize_t size(string &s)
 		{return s.size();};
 
 	inline static void clear(string &s)
