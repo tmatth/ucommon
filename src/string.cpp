@@ -570,7 +570,7 @@ strsize_t string::ccount(const char *clist) const
 	return ccount(str->text, clist);
 }
 
-void string::printf(const char *format, ...)
+strsize_t string::printf(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -580,6 +580,36 @@ void string::printf(const char *format, ...)
 		str->fix();
 	}
 	va_end(args);
+	return len();
+}
+
+strsize_t string::vprintf(const char *format, va_list args)
+{
+	if(str) {
+		vsnprintf(str->text, str->max + 1, format, args);
+		str->len = strlen(str->text);
+		str->fix();
+	}
+	return len();
+}
+
+int string::vscanf(const char *format, va_list args)
+{
+	if(str)
+		return vsscanf(str->text, format, args);
+	return -1;
+}
+
+int string::scanf(const char *format, ...)
+{
+	va_list args;
+	int rtn = -1;
+
+	va_start(args, format);
+	if(str)
+		rtn = vsscanf(str->text, format, args);
+	va_end(args);
+	return rtn;
 }
 
 void string::rsplit(const char *s)
@@ -1153,10 +1183,32 @@ string::cstring *memstring::c_copy(void) const
 
 void string::fix(string &s)
 {
-	if(s.str)
+	if(s.str) {
+		s.str->len = strlen(s.str->text);
 		s.str->fix();
+	}
+}
+
+int string::scanf(string &s, const char *fmt, ...)
+{
+	int rtn;
+	va_list args;
+
+	va_start(args, fmt);
+	rtn = s.vscanf(fmt, args);
+	va_end(args);
+	return rtn;
 }
 	
+strsize_t string::printf(string &s, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	s.vprintf(fmt, args);
+	va_end(args);
+	return len(s);
+}
+
 void string::swap(string &s1, string &s2)
 {
 	string::cstring *s = s1.str;

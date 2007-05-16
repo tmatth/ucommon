@@ -70,7 +70,10 @@ public:
 	virtual ~string();
 
 	string get(strsize_t offset, strsize_t size = 0) const;
-	void printf(const char *format, ...);	
+	int scanf(const char *format, ...);
+	int vscanf(const char *format, va_list args);
+	strsize_t printf(const char *format, ...);	
+	strsize_t vprintf(const char *format, va_list args);
 	char *c_mem(void) const;
 	const char *c_str(void) const;
 	virtual bool resize(strsize_t size);
@@ -149,6 +152,8 @@ public:
 	bool operator>(const char *str) const;
 	bool operator>=(const char *str) const;
 
+	static int scanf(string &s, const char *fmt, ...);
+	static strsize_t printf(string &s, const char *fmt, ...);
 	static bool getline(Socket &so, string &s);
 	static bool putline(Socket &so, string &s);
 	static bool getline(FILE *fp, string &s);
@@ -194,6 +199,12 @@ public:
 	static size_t b64decode(caddr_t out, const char *src, size_t count);
 	static size_t b64encode(char *out, caddr_t src, size_t count);
 	static size_t b64len(const char *str);
+
+	inline static int vscanf(string &s, const char *fmt, va_list args)
+		{return s.vscanf(fmt, args);};
+
+	inline static strsize_t vprintf(string &s, const char *fmt, va_list args)
+		{return s.vprintf(fmt, args);};
 
 	inline static strsize_t len(string &s)
 		{return s.len();};
