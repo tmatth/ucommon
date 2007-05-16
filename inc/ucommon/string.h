@@ -70,10 +70,10 @@ public:
 	virtual ~string();
 
 	string get(strsize_t offset, strsize_t size = 0) const;
-	int scanf(const char *format, ...);
-	int vscanf(const char *format, va_list args);
-	strsize_t printf(const char *format, ...);	
-	strsize_t vprintf(const char *format, va_list args);
+	int scanf(const char *format, ...) __SCANF(2, 3);
+	int vscanf(const char *format, va_list args) __SCANF(2, 0);
+	strsize_t printf(const char *format, ...) __PRINTF(2, 3);
+	strsize_t vprintf(const char *format, va_list args) __PRINTF(2, 0);
 	char *c_mem(void) const;
 	const char *c_str(void) const;
 	virtual bool resize(strsize_t size);
@@ -152,8 +152,8 @@ public:
 	bool operator>(const char *str) const;
 	bool operator>=(const char *str) const;
 
-	static int scanf(string &s, const char *fmt, ...);
-	static strsize_t printf(string &s, const char *fmt, ...);
+	static int scanf(string &s, const char *fmt, ...) __SCANF(2, 3);
+	static strsize_t printf(string &s, const char *fmt, ...) __PRINTF(2, 3);
 	static bool getline(Socket &so, string &s);
 	static bool putline(Socket &so, string &s);
 	static bool getline(FILE *fp, string &s);
@@ -201,10 +201,10 @@ public:
 	static size_t b64len(const char *str);
 
 	inline static int vscanf(string &s, const char *fmt, va_list args)
-		{return s.vscanf(fmt, args);};
+		{return s.vscanf(fmt, args);} __SCANF(2, 0);
 
 	inline static strsize_t vprintf(string &s, const char *fmt, va_list args)
-		{return s.vprintf(fmt, args);};
+		{return s.vprintf(fmt, args);} __PRINTF(2, 0);
 
 	inline static strsize_t len(string &s)
 		{return s.len();};

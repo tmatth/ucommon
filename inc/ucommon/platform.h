@@ -13,6 +13,30 @@
 #define	_POSIX_PTHREAD_SEMANTICS
 #endif
 
+#ifdef	__GNUC__
+#define	__PRINTF(x,y)	__attribute__ ((format (printf, x, y)))
+#define	__SCANF(x, y) __attribute__ ((format (scanf, x, y)))
+#define	__MALLOC	  __attribute__ ((malloc))
+#endif
+
+#ifndef	__MALLOC
+#define	__PRINTF(x, y)
+#define	__SCANF(x, y)
+#define __MALLOC
+#endif
+
+#ifndef	DEBUG
+#ifndef	NDEBUG
+#define	NDEBUG
+#endif
+#endif
+
+#ifdef	DEBUG
+#ifdef	NDEBUG
+#undef	NDEBUG
+#endif
+#endif
+
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_
 #if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501
@@ -106,8 +130,8 @@ typedef	double rpcdouble_t;
 
 #include <stdlib.h>
 
-extern "C" __EXPORT void *cpr_memalloc(size_t size);
-extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t place, size_t max);
+extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
+extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t place, size_t max) __MALLOC;
 
 inline void *operator new(size_t size)
 	{return cpr_memalloc(size);};
