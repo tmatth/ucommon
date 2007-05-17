@@ -229,20 +229,28 @@ PagerObject *PagerPool::get(size_t size)
 	return ptr;
 }
 
-keyassoc::keydata::keydata(NamedObject **root, char *id, unsigned max) :
-NamedObject(root, id, max)
+keyassoc::keydata::keydata(keyassoc *assoc, char *id, unsigned max) :
+NamedObject(assoc->root, id, max)
 {
+	strcpy(text, id);
 	data = NULL;
+	id = text;
 }
 
-keyassoc::keyassoc(unsigned max, mempager *mem) 
+keyassoc::keyassoc(unsigned pathmax, size_t strmax, size_t ps) :
+mempager(ps)
 {
-	pager = mem;
-	if(mem)
-		root = (NamedObject **)mem->alloc(sizeof(NamedObject *) * max);
+	paths = pathmax;
+	keysize = strmax;
+
+	root = (NamedObject **)alloc(sizeof(NamedObject *) * pathmax);
+	memset(root, 0, sizeof(NamedObject *) * pathmax);
+	if(keysize) {
+		list = (LinkedObject **)alloc(sizeof(LinkedObject *) * (keysize / 8));
+		memset(list, 0, sizeof(LinkedObject *) * (keysize / 8));
+	}
 	else
-		root = new NamedObject *[max];
-	memset(root, 0, sizeof(NamedObject *) * max);
+		list = NULL;
 };
 
 keyassoc::~keyassoc()
@@ -252,76 +260,93 @@ keyassoc::~keyassoc()
 
 void keyassoc::purge(void)
 {
-	if(!root || pager)
-		return;
-
-	delete[] root;
+	mempager::purge();
+	list = NULL;
 	root = NULL;
 }
 
-void *keyassoc::get(const char *id)
+void *keyassoc::locate(const char *id)
 {
 	keydata *kd;
 
-	if(pager)
-		pager->lock();
-	kd = static_cast<keydata *>(NamedObject::map(root, id, max));
-
-	if(pager)
-		pager->unlock();
+	lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
+	unlock();
 	if(!kd)
 		return NULL;
 
 	return kd->data;
 }
 
-void keyassoc::set(char *id, void *d)
+void *keyassoc::remove(const char *id)
+{
+	keydata *kd;
+	LinkedObject *obj;
+	void *data;
+	unsigned path = NamedObject::keyindex(id, paths);
+	unsigned size = strlen(id);
+
+	if(!keysize || size >= keysize || !list)
+		return NULL;
+
+	lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
+	data = kd->data;
+	obj = static_cast<LinkedObject*>(kd);
+	obj->delist((LinkedObject**)(&root[path]));
+	obj->enlist(&list[size / 8]);
+	unlock();
+	return data;
+}
+
+void keyassoc::create(char *id, void *data)
 {
     keydata *kd;
+	LinkedObject *obj;
+	unsigned size;
 
-	if(pager)
-		pager->lock();
-	kd = static_cast<keydata *>(NamedObject::map(root, id, max));
-	if(!kd) {
-		if(pager) {
-			id = pager->dup_locked(id);
-			caddr_t ptr = (caddr_t)pager->alloc_locked(sizeof(keydata));
-			kd = new(ptr) keydata(root, id, max);
-		}	
-		else {
-			id = strdup(id);
-			kd = new keydata(root, id, max);
-		}
+	lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
+	if(kd) {
+		unlock();
+		return;
 	}
-	kd->data = d;
-	if(pager)
-		pager->unlock();
+	caddr_t ptr = NULL;
+	size = strlen(id);
+	if(size < keysize && list && list[size / 8]) {
+		obj = list[size / 8];
+		list[size / 8] = obj->getNext();
+		ptr = (caddr_t)obj;
+	}
+	if(ptr == NULL)
+		ptr = (caddr_t)alloc_locked(sizeof(keydata) + (size / 8) * 8);
+	kd = new(ptr) keydata(this, id, paths);					
+	kd->data = data;
+	unlock();
 }
 
-void keyassoc::clear(const char *id)
+void keyassoc::assign(char *id, void *data)
 {
     keydata *kd;
+	LinkedObject *obj;
+	unsigned size;
 
-	if(pager)
-		pager->lock();
-	kd = static_cast<keydata *>(NamedObject::map(root, id, max));
-	if(kd)
-		kd->data = NULL;
-	if(pager)
-		pager->unlock();
+	lock();
+	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
+	if(!kd) {
+		caddr_t ptr = NULL;
+		size = strlen(id);
+		if(size < keysize && list && list[size / 8]) {
+			obj = list[size / 8];
+			list[size / 8] = obj->getNext();
+			ptr = (caddr_t)obj;
+		}
+		if(ptr == NULL)
+			ptr = (caddr_t)alloc_locked(sizeof(keydata) + (size / 8) * 8);
+		kd = new(ptr) keydata(this, id, paths);					
+	}
+	kd->data = data;
+	unlock();
 }
 
-size_t keyassoc::minsize(unsigned max, size_t size)
-{
-	size_t min;
-
-	if(pager)
-		min = (sizeof(NamedObject *) * max) + pager->overhead();
-	else
-		min = size;
-	
-	if(size < min)
-		size = min;
-	return size;
-}
 

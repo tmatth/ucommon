@@ -98,31 +98,32 @@ public:
 	void put(PagerObject *obj);
 };
 
-class __EXPORT keyassoc 
+class __EXPORT keyassoc : mempager
 {
 private:
 	class __LOCAL keydata : public NamedObject
 	{
 	public:
 		void *data;
+		char text[8];
 
-		keydata(NamedObject **root, char *id, unsigned max);
+		keydata(keyassoc *assoc, char *id, unsigned max);
 	};
 
-	unsigned max;
+	unsigned paths;
+	size_t keysize;
 	NamedObject **root;
-	mempager *pager;
-
-	__LOCAL size_t minsize(unsigned max, size_t ps);
+	LinkedObject **list;
 
 public:
-	keyassoc(unsigned keysize = 177, mempager *pager = NULL);
+	keyassoc(unsigned indexing = 177, size_t keymax = 0, size_t ps = 0);
 	~keyassoc();
 
 	void purge(void);
-	void *get(const char *id);
-	void set(char *id, void *data);
-	void clear(const char *id);
+	void *locate(const char *id);
+	void assign(char *id, void *data);
+	void create(char *id, void *data);
+	void *remove(const char *id);
 };
 
 template <class T>
@@ -139,26 +140,6 @@ public:
 
 	inline T *operator*()
 		{return new(get(sizeof(T))) T;};
-};
-
-template <class T>
-class keymem
-{
-private:
-	keyassoc *heap;
-
-public:
-	inline keymem(keyassoc *h)
-		{heap = h;};
-
-	inline T &get(const char *id)
-		{return *(new(heap, id) T);};
-
-	inline T *find(const char *id)
-		{return static_cast<T*>(get(id));};
-
-	inline void set(const char *id, const T& v)
-		{*(new(heap, id) T) = v;};
 };
 
 END_NAMESPACE
