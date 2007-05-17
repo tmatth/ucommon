@@ -291,6 +291,10 @@ void *keyassoc::remove(const char *id)
 
 	lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
+	if(!kd) {
+		unlock();
+		return NULL;
+	}
 	data = kd->data;
 	obj = static_cast<LinkedObject*>(kd);
 	obj->delist((LinkedObject**)(&root[path]));
