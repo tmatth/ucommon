@@ -161,7 +161,7 @@ if test "$ac_cv_libc_sigwait2" = "yes" ; then
     AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
 fi
 
-AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h mach/clock.h sys/mman.h syslog.h)
+AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h mach/clock.h)
 
 PTHREAD_FLAGS=""
 
@@ -388,6 +388,5 @@ AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile test/Makefile inc/Makefile 
-inc/ucommon/Makefile util/Makefile ucommon.pc)
+AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile ucommon.pc)
 

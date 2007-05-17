@@ -154,6 +154,10 @@ public:
 
 	static int scanf(string &s, const char *fmt, ...) __SCANF(2, 3);
 	static strsize_t printf(string &s, const char *fmt, ...) __PRINTF(2, 3);
+	static int read(Socket &so, string &s);
+	static int write(Socket &so, string &s);
+	static int read(FILE *fp, string &s);
+	static int write(FILE *fp, string &s); 
 	static bool getline(Socket &so, string &s);
 	static bool putline(Socket &so, string &s);
 	static bool getline(FILE *fp, string &s);

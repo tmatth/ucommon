@@ -10,6 +10,6 @@ lib_LTLIBRARIES = libucommon.la
 libucommon_la_LDFLAGS = @UCOMMON_LIBS@ $(RELEASE) @UCOMMON_SHARED@
 libucommon_la_SOURCES = object.cpp linked.cpp string.cpp \
 	counter.cpp bitmap.cpp timer.cpp memory.cpp socket.cpp \
-	access.cpp thread.cpp cpr.cpp vector.cpp service.cpp
+	access.cpp thread.cpp cpr.cpp vector.cpp
 
 

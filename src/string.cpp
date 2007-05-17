@@ -1216,6 +1216,56 @@ void string::swap(string &s1, string &s2)
 	s2.str = s;
 }
 
+int string::read(Socket &so, string &s)
+{
+	int rtn;
+
+	if(!mem(s))
+		return 0;
+
+	clear(s);
+
+	rtn = so.get(mem(s), size(s));
+	if(rtn > -1) {
+		s.str->len = rtn;
+		s.str->text[rtn] = 0;
+	}
+	return rtn;
+}
+
+int string::write(Socket &so, string &s)
+{
+	if(!mem(s))
+		return 0;
+
+	return so.put(mem(s), len(s));
+}
+
+int string::read(FILE *fp, string &s)
+{
+	int rtn;
+
+	if(!mem(s))
+		return 0;
+
+	clear(s);
+
+	rtn = fread(mem(s), 1, size(s), fp);
+	if(rtn > -1) {
+		s.str->len = rtn;
+		s.str->text[rtn] = 0;
+	}
+	return rtn;
+}
+
+int string::write(FILE *fp, string &s)
+{
+	if(!mem(s))
+		return 0;
+
+	return fwrite(mem(s), 1, len(s), fp);
+}
+
 bool string::putline(Socket &so, string &s)
 {
 	if(s[-1] != '\n')

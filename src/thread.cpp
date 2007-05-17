@@ -157,6 +157,11 @@ unsigned Semaphore::getCount(void)
 
 bool Semaphore::wait(timeout_t timeout)
 {
+	return request(1, timeout);
+}
+
+bool Semaphore::request(size_t size, timeout_t timeout)
+{
 	bool result = true;
 	Timer expires;
 
@@ -164,9 +169,9 @@ bool Semaphore::wait(timeout_t timeout)
 		expires.set(timeout);
 
 	lock();
-	if(used >= count) {
+	if(used + size > count) {
 		++waits;
-		while(used >= count && result) {
+		while(used + size > count && result) {
 			if(timeout == Timer::inf)
 				Conditional::wait();
 			else if(timeout)
@@ -177,11 +182,11 @@ bool Semaphore::wait(timeout_t timeout)
 		--waits;
 	}
 	if(result)
-		++used;
+		used += size;
 	unlock();
 	return result;
 }
-		
+
 void Semaphore::wait(void)
 {
 	lock();
@@ -193,6 +198,25 @@ void Semaphore::wait(void)
 	}
 	++used;
 	unlock();
+}
+
+void Semaphore::request(size_t size)
+{
+	lock();
+	if(used + size > count) {
+		++waits;
+		while(used + size > count)
+			Conditional::wait();
+		--waits;
+	}
+	used += size;
+	unlock();
+}
+
+void Semaphore::release(unsigned size)
+{
+	while(size--)
+		release();
 }
 
 void Semaphore::release(void)

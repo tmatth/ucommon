@@ -122,12 +122,15 @@ public:
 	inline void Unlock(void)
 		{release();};
 
+	void request(unsigned size);
+	bool request(unsigned size, timeout_t timeout);
 	void wait(void);
 	bool wait(timeout_t timeout);
 	unsigned getCount(void);
 	unsigned getUsed(void);
 	void set(unsigned limit);
 	void release(void);
+	void release(unsigned size);
 };
 
 class __EXPORT Event : public Conditional

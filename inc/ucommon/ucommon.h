@@ -12,5 +12,4 @@
 #include <ucommon/bitmap.h>
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
-#include <ucommon/service.h>
 #endif
