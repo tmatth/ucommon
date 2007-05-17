@@ -18,8 +18,6 @@ protected:
 
 	LinkedObject *next;
 
-	virtual void release(void);
-
 	LinkedObject(LinkedObject **root);
 	LinkedObject();
 
@@ -29,6 +27,9 @@ public:
 
 	virtual ~LinkedObject();
 
+	virtual void release(void);
+
+	void retain(void);
 	void enlist(LinkedObject **root);
 	void delist(LinkedObject **root);
 
@@ -46,14 +47,8 @@ class __EXPORT ReusableObject : protected LinkedObject
 {
 	friend class ReusableAllocator;
 
-	inline void setNil(void)
-		{next = nil;};
-
 protected:
 	virtual void release(void);
-
-	inline void setInvalid(void)
-		{next = inv;};
 
 	inline ReusableObject *getNext(void)
 		{return static_cast<ReusableObject*>(LinkedObject::getNext());};

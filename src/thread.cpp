@@ -64,7 +64,7 @@ void ReusableAllocator::release(ReusableObject *obj)
 {
 	LinkedObject **ru = (LinkedObject **)freelist;
 
-	obj->setNil();
+	obj->retain();
 	obj->release();
 
 	lock();

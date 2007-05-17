@@ -162,6 +162,11 @@ void NamedList::delist(void)
 	keyroot = NULL;
 }
 
+void LinkedObject::retain(void)
+{
+	next = this;
+}
+
 void LinkedObject::release(void)
 {
 	if(next != this) {
