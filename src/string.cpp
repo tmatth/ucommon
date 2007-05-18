@@ -1565,77 +1565,6 @@ char *string::rfind(char *str, const char *clist)
 	return NULL;
 }
 
-timeout_t string::totimeout(const char *cp, char **ep, bool sec)
-{
-	char *end, *nend;
-	timeout_t base = strtol(cp, &end, 10);
-	timeout_t rem = 0;
-	unsigned dec = 0;
-
-	if(!cp)
-		return 0;
-
-	if(ep)
-		*ep = NULL;
-
-	if(!end)
-		return base;
-
-	while(end && *end == ':') {
-		cp = ++end;
-		base *= 60;
-		base += strtol(cp, &end, 10);
-		sec = true;
-	}
-
-	if(end && *end == '.') {
-		sec = true;
-		rem = strtol(end, &nend, 10);
-		while(rem > 1000l)
-			rem /= 10;
-		while(++dec < 4) {
-			rem *= 10;
-		}
-		end = nend;
-	}
-	
-	switch(*end)
-	{
-	case 'm':
-	case 'M':
-		++end;
-		if(*end == 's' || *end == 'S') {
-			++end;
-			break;
-		}
-		base *= 60000l;
-		if(dec)
-			base += (rem * 60l);
-		break;
-	case 's':
-	case 'S':
-		base *= 1000l;
-		if(dec)
-			base += rem;
-		break;
-	case 'h':
-		base *= 3600000l;
-		if(dec)
-			base += (rem * 3600l);
-		break;
-	default:
-		if(sec)
-			base *= 1000l;
-		if(sec && dec)
-			base += rem;
-	}
-		
-	if(ep)
-		*ep = end;
-	
-	return base;
-}
-
 char *string::last(char *str, const char *clist)
 {
 	char *cp, *lp = NULL;
@@ -1727,17 +1656,6 @@ int string::case_compare(const char *s1, const char *s2, size_t s)
 #endif
 }
 
-int32_t string::toint(const char *cp, char **ep)
-{
-	if(!cp) {
-		if(ep)
-			*ep = NULL;
-		return 0;
-	}
-	long value = strtol(cp, ep, 10);
-	return (int32_t)value;
-}	
-
 char *string::unquote(char *str, const char *clist)
 {
 	size_t len = count(str);
@@ -1764,89 +1682,5 @@ char *string::fill(char *str, size_t size, const char fill)
 	return str;
 }
 
-bool string::tobool(const char *cp, char **ep)
-{
-	bool rtn = false;
-
-	if(!cp) {
-		if(ep)
-			*ep = NULL;
-		return false;
-	}
-
-	if(*cp == '1') {
-		rtn = true;
-		++cp;
-		goto exit;
-	}
-	else if(*cp == '0') {
-		++cp;
-		goto exit;
-	}
-
-	if(!strnicmp(cp, "true", 4)) {
-		cp += 4;
-		rtn = true;
-		goto exit;
-	}
-	else if(!strnicmp(cp, "yes", 3)) {
-		cp += 3;
-		rtn = true;
-		goto exit;
-	}
-	else if(!strnicmp(cp, "false", 5)) {
-		cp += 5;
-		goto exit;
-	}
-	else if(!strnicmp(cp, "no", 2)) {
-		cp += 2;
-		goto exit;
-	}
-
-	if(strchr("yYtT", *cp)) {
-		++cp;
-		rtn = true;
-		goto exit;
-	}
-
-	if(strchr("nNfF", *cp)) {
-		++cp;
-		goto exit;
-	}
-
-exit:
-	if(ep)
-		*ep = (char *)cp;
-
-	return rtn;
-}
-
-bool string::isinteger(const char *cp)
-{
-	if(!cp)
-		return false;
-
-	while(*cp && isdigit(*cp))
-		++cp;
-
-	if(*cp)
-		return false;
-
-	return true;
-}
-
-bool string::isnumeric(const char *cp)
-{
-	if(!cp)
-		return false;
-
-	while(*cp && strchr("0123456789.+-e", *cp))
-		++cp;
-
-	if(*cp)
-		return false;
-
-	return true;
-}
 
 

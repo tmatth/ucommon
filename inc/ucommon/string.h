@@ -180,9 +180,6 @@ public:
 	static int compare(const char *s1, const char *s2, size_t len);
 	static int case_compare(const char *s1, const char *s2);
 	static int case_compare(const char *s1, const char *s2, size_t len);
-	static timeout_t totimeout(const char *cp, char **ep = NULL, bool sec = false);
-	static bool tobool(const char *cp, char **ep = NULL);
-	static int32_t toint(const char *cp, char **ep = NULL);
 	static char *trim(char *str, const char *clist); 
 	static char *chop(char *str, const char *clist); 
 	static char *strip(char *str, const char *clist);
@@ -250,11 +247,17 @@ public:
 	inline static const char *last(string &s, const char *c)
 		{return s.last(c);};
 
-	inline static bool isinteger(string &s)
-		{return isinteger(s.c_str());};
+	inline static double tod(string &s, char **out = NULL)
+		{return strtod(mem(s), out);};
 
-	inline static bool isnumeric(string &s)
-		{return isnumeric(s.c_str());};
+	inline static long tol(string &s, char **out = NULL)
+		{return strtol(mem(s), out, 0);};
+
+	inline static double tod(const char *cp, char **out = NULL)
+		{return strtod(cp, out);};
+
+	inline static long tol(const char *cp, char **out = NULL)
+		{return strtol(cp, out, 0);};
 };
 
 class __EXPORT memstring : public string
