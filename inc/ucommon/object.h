@@ -87,17 +87,17 @@ public:
 	~auto_delete();
 };
 
-class __EXPORT auto_release
+class __EXPORT auto_pointer
 {
 protected:
 	Object *object;
 	
-	auto_release();
+	auto_pointer();
 
 public:
-	auto_release(Object *o);
-	auto_release(const auto_release &from);
-	~auto_release();
+	auto_pointer(Object *o);
+	auto_pointer(const auto_pointer &from);
+	~auto_pointer();
 
 	void release(void);
 
@@ -109,7 +109,7 @@ public:
 
 	bool operator!=(Object *o) const;
 
-	auto_release &operator=(Object *x);
+	auto_pointer &operator=(Object *x);
 };	
 
 class __EXPORT sparse_array
@@ -195,7 +195,7 @@ public:
 		{value = v;};
 };
 
-template <class T, class P = auto_release>
+template <class T, class P = auto_pointer>
 class pointer : public P
 {
 public:

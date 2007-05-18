@@ -67,6 +67,20 @@ public:
 	void *dup(void *mem, size_t size);
 };
 
+class __EXPORT autorelease
+{
+private:
+	LinkedObject *pool;
+
+public:
+	autorelease();
+	~autorelease();
+
+	void release(void);
+
+	void operator+=(LinkedObject *obj);
+};
+
 class __EXPORT PagerObject : public LinkedObject, public CountedObject
 {
 protected:
@@ -110,6 +124,7 @@ private:
 		keydata(keyassoc *assoc, char *id, unsigned max);
 	};
 
+	unsigned count;
 	unsigned paths;
 	size_t keysize;
 	NamedObject **root;
@@ -119,10 +134,13 @@ public:
 	keyassoc(unsigned indexing = 177, size_t keymax = 0, size_t ps = 0);
 	~keyassoc();
 
+	inline unsigned getCount(void)
+		{return count;};
+
 	void purge(void);
 	void *locate(const char *id);
-	void assign(char *id, void *data);
-	void create(char *id, void *data);
+	bool assign(char *id, void *data);
+	bool create(char *id, void *data);
 	void *remove(const char *id);
 };
 

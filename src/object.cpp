@@ -67,57 +67,57 @@ auto_delete::~auto_delete()
 	object = 0;
 }
 
-auto_release::auto_release(Object *o)
+auto_pointer::auto_pointer(Object *o)
 {
 	o->retain();
 	object = o;
 }
 
-auto_release::auto_release()
+auto_pointer::auto_pointer()
 {
 	object = 0;
 }
 
-void auto_release::release(void)
+void auto_pointer::release(void)
 {
 	if(object)
 		object->release();
 	object = 0;
 }
 
-auto_release::~auto_release()
+auto_pointer::~auto_pointer()
 {
 	release();
 }
 
-auto_release::auto_release(const auto_release &from)
+auto_pointer::auto_pointer(const auto_pointer &from)
 {
 	object = from.object;
 	if(object)
 		object->retain();
 }
 
-bool auto_release::operator!() const
+bool auto_pointer::operator!() const
 {
 	return (object == 0);
 }
 
-auto_release::operator bool() const
+auto_pointer::operator bool() const
 {
     return (object != 0);
 }
 
-bool auto_release::operator==(Object *o) const
+bool auto_pointer::operator==(Object *o) const
 {
 	return object == o;
 }
 
-bool auto_release::operator!=(Object *o) const
+bool auto_pointer::operator!=(Object *o) const
 {
 	return object != o;
 }
 
-auto_release &auto_release::operator=(Object *o)
+auto_pointer &auto_pointer::operator=(Object *o)
 {
 	if(object == o)
 		return *this;

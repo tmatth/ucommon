@@ -176,6 +176,32 @@ void *mempager::dup(void *obj, size_t size)
 	return mem;
 }
 
+autorelease::autorelease()
+{
+	pool = NULL;
+}
+
+autorelease::~autorelease()
+{
+	release();
+}
+
+void autorelease::release()
+{
+	LinkedObject *obj;
+
+	while(pool) {
+		obj = pool;
+		pool = obj->getNext();
+		obj->release();
+	}
+}
+
+void autorelease::operator+=(LinkedObject *obj)
+{
+	obj->enlist(&pool);
+}
+
 PagerObject::PagerObject() :
 LinkedObject(NULL), CountedObject()
 {
@@ -242,6 +268,7 @@ mempager(ps)
 {
 	paths = pathmax;
 	keysize = strmax;
+	count = 0;
 
 	root = (NamedObject **)alloc(sizeof(NamedObject *) * pathmax);
 	memset(root, 0, sizeof(NamedObject *) * pathmax);
@@ -299,58 +326,69 @@ void *keyassoc::remove(const char *id)
 	obj = static_cast<LinkedObject*>(kd);
 	obj->delist((LinkedObject**)(&root[path]));
 	obj->enlist(&list[size / 8]);
+	--count;
 	unlock();
 	return data;
 }
 
-void keyassoc::create(char *id, void *data)
+bool keyassoc::create(char *id, void *data)
 {
     keydata *kd;
 	LinkedObject *obj;
-	unsigned size;
+	unsigned size = strlen(id);
+
+	if(keysize && size >= keysize)
+		return false;
 
 	lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
 	if(kd) {
 		unlock();
-		return;
+		return false;
 	}
 	caddr_t ptr = NULL;
-	size = strlen(id);
-	if(size < keysize && list && list[size / 8]) {
-		obj = list[size / 8];
-		list[size / 8] = obj->getNext();
+	size /= 8;
+	if(list && list[size]) {
+		obj = list[size];
+		list[size] = obj->getNext();
 		ptr = (caddr_t)obj;
 	}
 	if(ptr == NULL)
-		ptr = (caddr_t)alloc_locked(sizeof(keydata) + (size / 8) * 8);
+		ptr = (caddr_t)alloc_locked(sizeof(keydata) + size * 8);
 	kd = new(ptr) keydata(this, id, paths);					
 	kd->data = data;
+	++count;
 	unlock();
+	return true;
 }
 
-void keyassoc::assign(char *id, void *data)
+bool keyassoc::assign(char *id, void *data)
 {
     keydata *kd;
 	LinkedObject *obj;
-	unsigned size;
+	unsigned size = strlen(id);
+
+	if(keysize && size >= keysize)
+		return false;
 
 	lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
 	if(!kd) {
 		caddr_t ptr = NULL;
-		size = strlen(id);
-		if(size < keysize && list && list[size / 8]) {
-			obj = list[size / 8];
-			list[size / 8] = obj->getNext();
+		size /= 8;
+		if(list && list[size]) {
+			obj = list[size];
+			list[size] = obj->getNext();
 			ptr = (caddr_t)obj;
 		}
 		if(ptr == NULL)
-			ptr = (caddr_t)alloc_locked(sizeof(keydata) + (size / 8) * 8);
-		kd = new(ptr) keydata(this, id, paths);					
+			ptr = (caddr_t)alloc_locked(sizeof(keydata) + size * 8);
+		kd = new(ptr) keydata(this, id, paths);				
+		++count;	
 	}
 	kd->data = data;
 	unlock();
+	return true;
 }
 
 

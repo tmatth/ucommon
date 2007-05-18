@@ -9,7 +9,7 @@ NAMESPACE_UCOMMON
 
 class OrderedObject;
 
-class __EXPORT LinkedObject
+class __EXPORT LinkedObject : public Object
 {
 protected:
 	friend class OrderedIndex;

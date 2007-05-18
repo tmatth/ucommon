@@ -1325,6 +1325,35 @@ bool string::getline(FILE *fp, string &s)
 
 	return true;
 }
+
+void string::puttime(time_t now, const char *format)
+{
+	struct tm *dt, buf;
+	if(!str)
+		return;
+
+#ifdef	HAVE_LOCALTIME_R
+	dt = localtime_r(&now, &buf);
+#else
+	dt = localtime(now);
+#endif
+	str->len = strftime(str->text, str->max + 1, format, dt);
+	str->fix();
+}
+
+time_t string::gettime(const char *format)
+{
+	struct tm dt;
+	memset(&dt, 0, sizeof(dt));
+
+	if(!str)
+		return 0;
+
+	if(!strptime(str->text, format, &dt))
+		return 0;
+
+	return mktime(&dt);
+}
 	
 char *string::dup(const char *cp)
 {

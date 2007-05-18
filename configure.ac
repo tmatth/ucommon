@@ -76,16 +76,12 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h mach/clock.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
 	UCOMMON_LIBC="-lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
 ])
-
-# AC_CHECK_LIB(supc++, __cxa_pure_virtual, [
-#	UCOMMON_LIBC="$UCOMMON_LIBC -lsupc++"
-# ])
 
 AC_CHECK_LIB($clib, dlopen, [
 	UCOMMON_LOADER=""
@@ -115,36 +111,9 @@ AC_CHECK_LIB($clib, sysconf, [
 	AC_DEFINE(HAVE_SYSCONF, [1], [system config])
 ])
 
-AC_CHECK_LIB($clib, setenv, [
-	AC_DEFINE(HAVE_SETENV, [1], [have setenv])
-])
-
 AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])
-
-AC_CHECK_LIB($clib, mkfifo, [
-    AC_DEFINE(HAVE_MKFIFO, [1], [fifo control port])
-])
-
-AC_CHECK_LIB($clib, ftok, [
-    AC_DEFINE(HAVE_FTOK, [1], [ftok ipc support])
-])
-
-AC_CHECK_LIB($clib, sigaction, [
-    AC_DEFINE(HAVE_SIGACTION, [1], [posix signal handling])
-])
-
-AC_CHECK_LIB($clib, setpgrp, [
-    AC_DEFINE(HAVE_SETPGRP, [1], [process set group])
-])
-
-AC_CHECK_LIB($clib, fork, [
-	POSIX="true"
-	AC_DEFINE(WITH_POSIX, [1], [has posix])
-])
-
-AC_TYPE_SIGNAL
 
 AC_CACHE_CHECK(whether sigwait has 2 arguments,
 	ac_cv_libc_sigwait2,
@@ -160,8 +129,6 @@ AC_CACHE_CHECK(whether sigwait has 2 arguments,
 if test "$ac_cv_libc_sigwait2" = "yes" ; then
     AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
 fi
-
-AC_CHECK_HEADERS(bsd/signal.h signal.h sys/resource.h sys/wait.h mach/clock.h)
 
 PTHREAD_FLAGS=""
 
@@ -182,9 +149,6 @@ AC_CHECK_HEADER(pthread.h, [
 	if test ! -z "$tlib" ; then
 		AC_CHECK_LIB($tlib,pthread_condattr_setclock,[
 			AC_DEFINE(HAVE_PTHREAD_CONDATTR_SETCLOCK, [1], ["pthread clocking"])
-		])
-		AC_CHECK_LIB($tlib,pthread_atfork,[
-			AC_DEFINE(HAVE_PTHREAD_ATFORK, [1], ["fork support"])			
 		])
 		AC_CHECK_LIB($tlib,pthread_yield,[
 			AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"])
@@ -208,7 +172,7 @@ AC_CHECK_LIB(socket,socket,[
 	socket_lib="-lsocket"
 ])
 
-for func in sched_setscheduler nanosleep clock_gettime shm_open ; do
+for func in nanosleep clock_gettime localtime_r ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -224,14 +188,8 @@ for func in sched_setscheduler nanosleep clock_gettime shm_open ; do
 		])
 	])
 	case $found in
-	pread)
-		AC_DEFINE(HAVE_PREAD, [1], [has posix reading])
-		;;
-	shm_open)
-		AC_DEFINE(HAVE_SHM_OPEN, [1], [shared mem objects])
-		;;
-	sched_setscheduler)
-		AC_DEFINE(HAVE_SCHEDULING, [1], [has posix scheduling])
+	localtime_r)
+		AC_DEFINE(HAVE_LOCALTIME_R, [1], [has localtime_r])
 		;;
 	nanosleep)
 		AC_DEFINE(HAVE_NANOSLEEP, [1], [has nanosleep])

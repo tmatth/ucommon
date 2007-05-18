@@ -19,6 +19,8 @@
 
 typedef	unsigned short strsize_t;
 
+#define	TIME_ISO8601 "%Y-%m-%dT%H:%M%S"
+
 NAMESPACE_UCOMMON
 
 class __EXPORT string : public Object
@@ -69,6 +71,8 @@ public:
 	string(const string &copy);
 	virtual ~string();
 
+	time_t gettime(const char *format = TIME_ISO8601);
+	void puttime(time_t time, const char *format = TIME_ISO8601);
 	string get(strsize_t offset, strsize_t size = 0) const;
 	int scanf(const char *format, ...) __SCANF(2, 3);
 	int vscanf(const char *format, va_list args) __SCANF(2, 0);
@@ -195,6 +199,12 @@ public:
 	static char *dup(const char *s);
 	static bool isnumeric(const char *s);
 	static bool isinteger(const char *s);
+
+	inline static time_t gettime(string &s, const char *fmt = TIME_ISO8601)
+		{return s.gettime(fmt);};
+
+	inline static void puttime(string &s, time_t time, const char *fmt = TIME_ISO8601)
+		{return s.puttime(time, fmt);};
 
 	inline static int vscanf(string &s, const char *fmt, va_list args)
 		{return s.vscanf(fmt, args);} __SCANF(2, 0);
