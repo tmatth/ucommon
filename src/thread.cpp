@@ -160,7 +160,7 @@ bool Semaphore::wait(timeout_t timeout)
 	return request(1, timeout);
 }
 
-bool Semaphore::request(size_t size, timeout_t timeout)
+bool Semaphore::request(unsigned size, timeout_t timeout)
 {
 	bool result = true;
 	Timer expires;
@@ -200,7 +200,7 @@ void Semaphore::wait(void)
 	unlock();
 }
 
-void Semaphore::request(size_t size)
+void Semaphore::request(unsigned size)
 {
 	lock();
 	if(used + size > count) {
@@ -1019,7 +1019,7 @@ size_t Stack::getCount(void)
 	return count;
 }
 
-Buffer::Buffer(size_t osize, unsigned c) : 
+Buffer::Buffer(size_t osize, size_t c) : 
 Conditional()
 {
 	size = osize * count;
