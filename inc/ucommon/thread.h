@@ -252,10 +252,6 @@ protected:
 
 	Thread(size_t stack = 0);
 
-#ifndef	_MSWINDOWS_
-	int wait(sigset_t *set);
-#endif
-
 public:
 	typedef struct {int state; int type;} cancellation;
 

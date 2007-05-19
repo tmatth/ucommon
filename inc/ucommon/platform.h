@@ -183,67 +183,7 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #define	crit(x) if(!(x)) abort()
 #endif
 
-#if _POSIX_MAPPED_FILES > 0 && _POSIX_SHARED_MEMORY_OBJECTS > 0
-#define	UCOMMON_MAPPED_MEMORY 1
-#endif
-
-#if _POSIX_MAPPED_FILES > 0 || defined(_MSWINDOWS_)
-#define	UCOMMON_MAPPED_FILES 1
-#endif
-
-#if _POSIX_SHARED_MEMORY_OBJECTS > 0 && _POSIX_THREAD_PROCESS_SHARED > 0
-#define	UCOMMON_MAPPED_THREADS 1
-#endif
-
-#if _POSIX_ASYCHRONOUS_IO > 0
-#define UCOMMON_ASYNC_IO 1
-#endif
-
 extern "C" {
-#ifdef	_MSWINDOWS_
-#define	RTLD_LAZY 0
-#define	RTLD_NOW 0
-#define	RTLD_LOCAL 0
-#define RTLD_GLOBAL 0
-	
-	typedef	HINSTANCE loader_handle_t;
-
-	inline bool cpr_isloaded(loader_handle_t mem)
-		{return mem != NULL;};
-
-	inline loader_handle_t cpr_load(const char *fn, unsigned flags)
-		{return LoadLibrary(fn);};
-
-	inline void cpr_unload(loader_handle_t mem)
-		{FreeLibrary(mem);};
-
-	inline void *cpr_getloadaddr(loader_handle_t mem, const char *sym)
-		{return (void *)GetProcAddress(mem, sym);};
-
-	inline bool cpr_removedir(const char *path)
-		{return RemoveDirectory(path);};
-
-#else
-	typedef	void *loader_handle_t;
-
-	inline bool cpr_isloaded(loader_handle_t mem)
-		{return mem != NULL;};
-
-	inline loader_handle_t cpr_load(const char *fn, unsigned flags)
-		{return dlopen(fn, flags);};
-
-	inline const char *cpr_loaderror(void)
-		{return dlerror();};
-
-	inline void *cpr_getloadaddr(loader_handle_t mem, const char *sym)
-		{return dlsym(mem, sym);};
-
-	inline void cpr_unload(loader_handle_t mem)
-		{dlclose(mem);};
-
-	inline void cpr_removedir(const char *fn)
-		{rmdir(fn);};
-#endif
 
 	__EXPORT uint16_t lsb_getshort(uint8_t *b);
 	__EXPORT uint32_t lsb_getlong(uint8_t *b);

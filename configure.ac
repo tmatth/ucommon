@@ -83,18 +83,6 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	UCOMMON_LIBC="-lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
 ])
 
-AC_CHECK_LIB($clib, dlopen, [
-	UCOMMON_LOADER=""
-],[
-	for lib in dl compat ; do
-		if test -z "$UCOMMON_LOADER" ; then
-			AC_CHECK_LIB($lib, dlopen, [
-				UCOMMON_LOADER="-l"$lib
-			])
-		fi
-	done
-])
-
 AC_CHECK_LIB($clib, socketpair, [
 	AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])
 ])
@@ -114,21 +102,6 @@ AC_CHECK_LIB($clib, sysconf, [
 AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])
-
-AC_CACHE_CHECK(whether sigwait has 2 arguments,
-	ac_cv_libc_sigwait2,
-    AC_TRY_COMPILE([
-        #define _POSIX_PTHREAD_SEMANTICS
-        #include <stdio.h>
-        #include <signal.h>],
-        [sigwait(NULL, NULL);],
-         ac_cv_libc_sigwait2=yes,
-        ac_cv_libc_sigwait2=no
-    )
-)
-if test "$ac_cv_libc_sigwait2" = "yes" ; then
-    AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
-fi
 
 PTHREAD_FLAGS=""
 

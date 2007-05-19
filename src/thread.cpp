@@ -488,21 +488,6 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
-#ifndef _MSWINDOWS_
-
-int Thread::wait(sigset_t *set)
-{
-#ifdef	HAVE_SIGWAIT2
-	int status;
-	crit(sigwait(set, &status) == 0);
-	return status;
-#else
-	return sigwait(set);
-#endif
-}
-
-#endif
-
 JoinableThread::JoinableThread(size_t size)
 {
 	running = false;
