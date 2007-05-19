@@ -319,5 +319,6 @@ AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile ucommon.pc)
+AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
+ucommon.pc)
 
