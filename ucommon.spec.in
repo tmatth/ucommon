@@ -1,0 +1,64 @@
+%{!?release: %define release 0}
+%{!?epoch: %define epoch 0}
+%{!?version: %define version @VERSION@}
+%{!?major: %define major @LT_MAJOR@}
+
+Name: ucommon
+Summary: "ucommon" - portable embedded runtime
+Version: %{version}
+Release: %{release}%{?dist}
+Epoch: %{epoch}
+License: LGPL
+Group: Development/Libraries
+Source0: ucommon-%{PACKAGE_VERSION}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRequires: gcc-c++
+
+%package -n libucommon%{major}
+Group: Development/Libraries
+Summary: ucommon runtime library
+
+%package -n libucommon-devel
+Requires: libucommon%{major} = %{epoch}:%{version}-%{release}
+Group: Development/Libraries
+Summary: Headers and static link library for ucommon
+
+%description
+
+%description -n libucommon%{major}
+
+%description -n libucommon-devel
+
+%prep
+%setup
+%build
+
+%configure CXXFLAGS="$RPM_OPT_FLAGS"
+make %{?_smp_mflags} LDFLAGS="-s"
+
+%install
+
+%makeinstall
+rm -rf %{buildroot}/%{_infodir}
+
+%clean
+rm -fr %{buildroot}
+
+%files -n libucommon%{major}
+%defattr(-,root,root,-)
+%doc 
+%{_libdir}/*.so.*
+
+%files -n libucommon-devel
+%defattr(-,root,root,-)
+%{_libdir}/*.a
+%{_libdir}/*.so
+%{_libdir}/*.la
+%dir %{_includedir}/ucommon
+%{_includedir}/ucommon/*.h
+%{_libdir}/pkgconfig/*.pc
+
+%post -n libucommon%{major} -p /sbin/ldconfig
+
+%postun -n libucommon%{major} -p /sbin/ldconfig
+
