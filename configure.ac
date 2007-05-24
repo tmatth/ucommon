@@ -50,7 +50,6 @@ AC_SUBST(LT_MINOR)
 UCOMMON_VISIBILITY="0"
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
-UCOMMON_LOADER=""
 
 POSIX=false
 MSSYS=false
@@ -80,7 +79,8 @@ AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h mach/clock.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
-	UCOMMON_LIBC="-lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32 -lmsvcrt -lgcc"
+	UCOMMON_LIBS="$UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
+	UCOMMON_LIBC="-lmsvcrt -lgcc"
 ])
 
 AC_CHECK_LIB($clib, socketpair, [
@@ -112,10 +112,12 @@ AC_CHECK_HEADER(pthread.h, [
 		tlib="pthread"
 		UCOMMON_LIBS="$UCOMMON_LIBS -lpthread"
 	])
-	AC_CHECK_LIB(pthreadGC2,pthread_create,[
-		tlib="pthreadGC2"
-		UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
-	])
+	if test -z "$tlib" ; then
+		AC_CHECK_LIB(pthreadGC2,pthread_create,[
+			tlib="pthreadGC2"
+			UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
+		])
+	fi
 	if test -z "$tlib" ; then
 		AC_CHECK_LIB($clib, pthread_create, [tlib="$clib"])
 	fi
@@ -173,10 +175,11 @@ for func in nanosleep clock_gettime localtime_r ; do
 	esac
 done
 
+UCOMMON_LINKED="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS"
 UCOMMON_LIBS="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS $UCOMMON_LIBC"
 
 AC_CHECK_LIB(Systemstubs, printf, [
-	UCOMMON_LIBS="$UCOMMON_LIBS -lSystemstubs"
+	UCOMMON_CLINK="$UCOMMON_CLINK -lSystemstubs"
 ])
 
 AC_LANG_SAVE
@@ -289,6 +292,7 @@ rm -f conftest*
 
 AC_LANG_RESTORE
 
+UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 UCOMMON_SHARED=""
 UCOMMON_MODULE="-module -shared"
 
@@ -311,7 +315,7 @@ esac
 
 AC_SUBST(CXXFLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
-AC_SUBST(UCOMMON_LOADER)
+AC_SUBST(UCOMMON_LINKED)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_FLAGS)

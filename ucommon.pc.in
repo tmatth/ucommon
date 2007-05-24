@@ -4,7 +4,7 @@ module=@UCOMMON_MODULE@
 Name: ucommon
 Description: 
 Version: @VERSION@
-Libs:  -lucommon @UCOMMON_LIBS@ 
+Libs:  -lucommon @UCOMMON_LINKED@ 
 Cflags: @UCOMMON_FLAGS@ 
 Clink: @UCOMMON_CLINK@
  
