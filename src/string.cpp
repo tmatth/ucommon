@@ -899,54 +899,6 @@ string &string::operator--()
     return *this;
 }
 
-string &string::operator<<(::DIR *dp)
-{
-	dirent *d;
-
-	if(!str || !dp)
-		return *this;
-
-	d = readdir(dp);
-	if(d)
-		set(d->d_name);
-	else
-		set("");
-
-	return *this;
-}	
-
-string &string::operator<<(::FILE *fp)
-{
-	if(!str || !fp)
-		return *this;
-
-	if(!::fgets(str->text, str->max, fp) || feof(fp)) {
-		clear();
-		return *this;
-	}
-
-	str->len = strlen(str->text);
-	if(!str->fill)
-		return *this;
-
-	if(str->len && str->text[str->len - 1] == '\n')
-		--str->len;
-
-	if(str->len && str->text[str->len - 1] == '\r')
-		--str->len;
-	str->fix();
-	return *this;
-}
-
-string &string::operator>>(::FILE *fp)
-{
-	if(!str || !fp)
-		return *this;
-
-	fputs(str->text, fp);
-	return *this;
-}
-
 string &string::operator-=(strsize_t offset)
 {
     if(str)
@@ -1309,6 +1261,19 @@ bool string::getline(Socket &so, string &s)
 		--s;
 
 	return true;
+}
+
+int string::read(DIR *dir, string &s)
+{
+	struct dirent *dno = ::readdir(dir);
+
+	if(!dno) {
+		clear(s);
+		return 0;
+	}
+
+	s.set(dno->d_name);
+	return dno->d_reclen;
 }
 
 bool string::getline(FILE *fp, string &s)

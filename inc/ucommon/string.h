@@ -132,9 +132,6 @@ public:
 	const char operator[](int offset) const;
 	bool operator!() const;
 	operator bool() const;
-	string &operator<<(::DIR *dir);
-	string &operator<<(::FILE *fp);
-	string &operator>>(::FILE *fp);
 	string &operator^=(const string &s);
 	string &operator^=(const char *str);
 	string &operator+(const char *str);
@@ -158,6 +155,7 @@ public:
 	static int write(Socket &so, string &s);
 	static int read(FILE *fp, string &s);
 	static int write(FILE *fp, string &s); 
+	static int read(DIR *dir, string &s);
 	static bool getline(Socket &so, string &s);
 	static bool putline(Socket &so, string &s);
 	static bool getline(FILE *fp, string &s);
