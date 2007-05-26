@@ -920,7 +920,11 @@ string &string::operator<<(::FILE *fp)
 	if(!str || !fp)
 		return *this;
 
-	::fgets(str->text, str->max, fp);
+	if(!::fgets(str->text, str->max, fp) || feof(fp)) {
+		clear();
+		return *this;
+	}
+
 	str->len = strlen(str->text);
 	if(!str->fill)
 		return *this;
@@ -1312,11 +1316,11 @@ bool string::getline(FILE *fp, string &s)
 	if(!mem(s))
 		return true;
 
-	fgets(mem(s), size(s), fp);
-	fix(s);
-	if(feof(fp)) 
+	if(!::fgets(mem(s), size(s), fp) || feof(fp)) {
+		clear(s);
 		return false;
-
+	}
+	fix(s);
 	if(s[-1] == '\n')
 		--s;
 
