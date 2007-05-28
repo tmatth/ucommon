@@ -1,10 +1,10 @@
 shared=@UCOMMON_SHARED@
 module=@UCOMMON_MODULE@
+clink=@UCOMMON_CLINK@
 
 Name: ucommon
 Description: 
 Version: @VERSION@
 Libs:  -lucommon @UCOMMON_LINKED@ 
 Cflags: @UCOMMON_FLAGS@ 
-Clink: @UCOMMON_CLINK@
  
