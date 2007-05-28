@@ -13,7 +13,7 @@
 WANT_AUTOCONF_2_5=1
 export WANT_AUTOCONF_2_5
 
-rm -rf auto* libtool
+rm -rf autoconf auto*.cache libtool
 if test ! -d autoconf ; then mkdir autoconf ; fi
 
 libtoolize="libtoolize"
