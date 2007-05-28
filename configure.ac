@@ -1,4 +1,4 @@
-AC_INIT(reconfig)
+AC_INIT(autogen.sh)
 
 VERSION="0.4.0"
 LT_RELEASE="0.4"

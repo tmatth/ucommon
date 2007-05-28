@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = reconfig README *.pc.in *.spec.in *.spec
+EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec
 
 DIST_SUBDIRS = src inc test
 SUBDIRS = src inc
