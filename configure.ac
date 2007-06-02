@@ -48,6 +48,8 @@ AC_SUBST(LT_MAJOR)
 AC_SUBST(LT_MINOR)
 
 UCOMMON_VISIBILITY="0"
+UCOMMON_MODEL="CC"
+UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 
@@ -178,74 +180,68 @@ done
 UCOMMON_LINKED="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS"
 UCOMMON_LIBS="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS $UCOMMON_LIBC"
 
-AC_CHECK_LIB(Systemstubs, printf, [
-	UCOMMON_CLINK="$UCOMMON_CLINK -lSystemstubs"
-])
+if test "$UCOMMON_MODEL" = "CC" ; then
+	AC_CHECK_LIB(Systemstubs, printf, [
+		UCOMMON_CLINK="$UCOMMON_CLINK -lSystemstubs"
+	])
+fi
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-COMPILER=""
+COMPILER_FLAGS=""
 UCOMMON_FLAGS=""
 for flag in $CXXFLAGS ; do
 	case $flag in
 		-f*exceptions|-f*rtti|-f*check-new|-f*enforce-eh-specs|-finline|-f*except)
+		if "$UCOMMON_MODEL" = "CXX" ; then
+			UCOMMON_FLAGS="$UCOMMON_FLAGS $flag" ; fi
 		;;
 	-fvisibility=*)
 		VISIBLE_FLAGS=""
-		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+		COMPILER_FLAGS="$COMPILER_FLAGS $flag"
 		;;
 	*)
-		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+		COMPILER_FLAGS="$COMPILER_FLAGS $flag"
 		;;
 	esac
 done
-export CXXFLAGS="$UCOMMON_FLAGS"
-UCOMMON_FLAGS="-DNOSTDCPP"
-UCOMMON_CLINK=""
+export CXXFLAGS="$COMPILER_FLAGS"
 
-if test "$GCC" = yes ; then
-	ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs"
-	lcflags="-nodefaultlibs -nostdinc++"
-else
-	ucflags="-features=no%except -features=namespace -features=no%rtti"
-	lcflags="-xnolib"
+if test "$UCOMMON_MODEL" = "CC" ; then	
+	UCOMMON_FLAGS="$UCOMMON_FLAGS -DNOSTDCPP"
+
+	if test "$GCC" = yes ; then
+		ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs"
+		lcflags="-nodefaultlibs -nostdinc++"
+	else
+		ucflags="-features=no%except -features=namespace -features=no%rtti"
+		lcflags="-xnolib"
+	fi
+
+	for flag in $ucflags ; do
+		AC_MSG_CHECKING([whether ${CXX} supports $flag])
+		echo 'void f(){}' >conftest.cpp
+		if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
+			UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
+			AC_MSG_RESULT(yes)
+		else
+			AC_MSG_RESULT(no)
+		fi
+		rm -f conftest*
+	done
+
+	for flag in $lcflags ; do
+		AC_MSG_CHECKING([whether ${CXX} supports $flag])
+		echo 'void f(){}' >conftest.cpp
+		if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
+			UCOMMON_CLINK="$UCOMMON_CLINK $flag"
+			AC_MSG_RESULT(yes)
+		else
+			AC_MSG_RESULT(no)
+		fi
+		rm -f conftest*
+	done
 fi
-
-for flag in $ucflags ; do
-	AC_MSG_CHECKING([whether ${CXX} supports $flag])
-	echo 'void f(){}' >conftest.cpp
-	if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
-		UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
-		AC_MSG_RESULT(yes)
-    else
-		AC_MSG_RESULT(no)
-    fi
-    rm -f conftest*
-done
-
-for flag in $lcflags ; do
-    AC_MSG_CHECKING([whether ${CXX} supports $flag])
-    echo 'void f(){}' >conftest.cpp
-    if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
-        UCOMMON_CLINK="$UCOMMON_CLINK $flag"
-        AC_MSG_RESULT(yes)
-    else
-        AC_MSG_RESULT(no)
-    fi
-    rm -f conftest*
-done
-
-flags=""
-for flag in $CXXFLAGS ; do
-	case "$flags" in
-	*$flag*)
-		;;
-	*)
-		flags="$flags $flag"
-		;;
-	esac
-done
-CXXFLAGS="$flags"
 
 if test ! -z "$PTHREAD_FLAGS" ; then
 	for flag in $PTHREAD_FLAGS ; do
@@ -292,7 +288,9 @@ rm -f conftest*
 
 AC_LANG_RESTORE
 
-UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
+if test "$UCOMMON_MODEL" = "CC" ; then
+	UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC" ; fi
+
 UCOMMON_SHARED=""
 UCOMMON_MODULE="-module -shared"
 
@@ -318,6 +316,7 @@ AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LINKED)
 AC_SUBST(UCOMMON_SHARED)
 AC_SUBST(UCOMMON_MODULE)
+AC_SUBST(UCOMMON_MODEL)
 AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)

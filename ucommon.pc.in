@@ -1,6 +1,7 @@
 shared=@UCOMMON_SHARED@
 module=@UCOMMON_MODULE@
 clink=@UCOMMON_CLINK@
+model=@UCOMMON_MODEL@
 
 Name: ucommon
 Description: 

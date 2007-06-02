@@ -1,7 +1,8 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION) -release $(LT_RELEASE)
+MODEL = $(UCOMMON_MODEL)
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS)
-CXXLINK = $(LIBTOOL) --tag=CC --mode=link $(CXX) $(AM_CFLAGS) $(CFLAGS) \
+CXXLINK = $(LIBTOOL) --tag=$(MODEL) --mode=link $(CXX) $(AM_CFLAGS) $(CFLAGS) \
     $(AM_LDFLAGS) $(LDFLAGS) -o $@
 
 lib_LTLIBRARIES = libucommon.la 

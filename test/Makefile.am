@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS) 
-MODEL=CC
+MODEL=@UCOMMON_MODEL@
 CXXLINK = $(LIBTOOL) --tag=$(MODEL) --mode=link $(CXX) $(AM_CXXFLAGS) $(CFLAGS) \
     $(AM_LDFLAGS) $(LDFLAGS) -o $@
 LDADD = ../src/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
