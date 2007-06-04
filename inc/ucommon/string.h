@@ -191,6 +191,9 @@ public:
 	static bool isnumeric(const char *s);
 	static bool isinteger(const char *s);
 
+	inline static const char *token(string &s, char **tokens, const char *clist, const char *quote = NULL, const char *eol = NULL)
+		{return token(s.c_mem(), tokens, clist, quote, eol);};
+
 	inline static int vscanf(string &s, const char *fmt, va_list args)
 		{return s.vscanf(fmt, args);} __SCANF(2, 0);
 
