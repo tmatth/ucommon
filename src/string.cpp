@@ -1435,17 +1435,16 @@ char *string::chop(char *str, const char *clist)
 		return str;
 
 	size_t offset = strlen(str);
-	while(offset && strchr(clist, str[offset - 1])) {
-		*(--str) = 0;
-		--offset;
-	}
+	while(offset && strchr(clist, str[offset - 1]))
+		str[--offset] = 0;
 	return str;
 }
 
 char *string::strip(char *str, const char *clist)
 {
 	str = trim(str, clist);
-	return chop(str, clist);
+	chop(str, clist);
+	return str;
 }
 
 void string::upper(char *str)

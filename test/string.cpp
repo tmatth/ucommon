@@ -16,4 +16,6 @@ extern "C" int main()
 	printf("STARTING %s\n", *mystr);
 	printf("SECOND %s\n", *testing);
 	printf("AN OFFSET %s\n", mystr(-10));
+	mystr = "  abc 123 \n  ";
+	printf("CHOP [%s]\n", string::strip(mystr.c_mem(), " \n"));
 };
