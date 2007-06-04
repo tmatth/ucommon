@@ -9,6 +9,10 @@
 #define _REENTRANT 1
 #endif
 
+#ifndef	_THREADSAFE
+#define	_THREADSAFE 1
+#endif
+
 #ifndef	_POSIX_PTHREAD_SEMANTICS
 #define	_POSIX_PTHREAD_SEMANTICS
 #endif

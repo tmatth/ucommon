@@ -109,7 +109,6 @@ PTHREAD_FLAGS=""
 
 AC_CHECK_HEADER(pthread.h, [
 	PTHREAD_FLAGS="-mt -pthread -pthreads"
-	UCOMMON_FLAGS="$UCOMMON_FLAGS -D_REENTRANT"
 	AC_CHECK_LIB(pthread,pthread_create,[
 		tlib="pthread"
 		UCOMMON_LIBS="$UCOMMON_LIBS -lpthread"
