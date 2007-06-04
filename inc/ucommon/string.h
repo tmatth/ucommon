@@ -294,6 +294,8 @@ private:
 public:
 	inline stringbuf() : memstring(buffer, S) {};
 
+	inline stringbuf(const char *s) : memstring(buffer, S) {set(s);};
+
 	inline void operator=(const char *s)
 		{set(s);};
 
