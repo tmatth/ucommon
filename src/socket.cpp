@@ -53,7 +53,7 @@ using namespace UCOMMON_NAMESPACE;
 
 typedef unsigned char   bit_t;
 
-static void bitmask(bit_t *bits, bit_t *mask, unsigned len)
+static x void bitmask(bit_t *bits, bit_t *mask, unsigned len)
 {
     while(len--)
         *(bits++) &= *(mask++);
