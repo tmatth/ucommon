@@ -122,6 +122,13 @@ AC_CHECK_HEADER(pthread.h, [
 	if test -z "$tlib" ; then
 		AC_CHECK_LIB($clib, pthread_create, [tlib="$clib"])
 	fi
+	if test -z "$tlib" ; then
+		AC_CHECK_LIB(c_r, pthread_create, [
+			tlib="c_r"
+			if test "$clib" = "c" ; then
+				clib="c_r" ; fi
+		])
+	fi
 	if test ! -z "$tlib" ; then
 		AC_CHECK_LIB($tlib,pthread_condattr_setclock,[
 			AC_DEFINE(HAVE_PTHREAD_CONDATTR_SETCLOCK, [1], ["pthread clocking"])
