@@ -637,21 +637,6 @@ public:
 		{return static_cast<const T*>(ptr->pointer);};
 };
 
-inline void init(pthread_mutex_t *mutex)
-	{pthread_mutex_init(mutex, NULL);};
-
-inline void lock(pthread_mutex_t *mutex)
-	{pthread_mutex_lock(mutex);};
-
-inline void lock(Mutex &m)
-	{Mutex::lock(m);};
-
-inline void unlock(pthread_mutex_t *mutex)
-	{pthread_mutex_unlock(mutex);};
-
-inline void unlock(Mutex &m)
-	{Mutex::unlock(m);};
-
 inline void start(JoinableThread *th)
 	{th->start();};
 
