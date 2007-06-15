@@ -126,7 +126,8 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB(c_r, pthread_create, [
 			tlib="c_r"
 			if test "$clib" = "c" ; then
-				clib="c_r" ; fi
+				AC_CHECK_LIB(c_r, malloc, [clib="c_r"])
+			fi
 		])
 	fi
 	if test ! -z "$tlib" ; then

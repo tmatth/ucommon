@@ -106,6 +106,12 @@ public:
 
 	void set(unsigned count);
 	void wait(void);
+
+	inline static void wait(Barrier &b)
+		{b.wait();};
+
+	inline static void set(Barrier &b, unsigned count)
+		{b.set(count);};
 };
 
 class __EXPORT Semaphore : public Shared, public Conditional
@@ -131,6 +137,15 @@ public:
 	void set(unsigned limit);
 	void release(void);
 	void release(unsigned size);
+
+	inline static void wait(Semaphore &s)
+		{s.wait();};
+
+	inline static bool wait(Semaphore &s, timeout_t timeout)
+		{return s.wait(timeout);};
+
+	inline static void release(Semaphore &s)
+		{s.release();};
 };
 
 class __EXPORT Event : public Conditional
@@ -147,6 +162,18 @@ public:
 
 	bool wait(timeout_t timeout);
 	void wait(void);
+
+	inline static void signal(Event &e)
+		{e.signal();};
+
+	inline static void reset(Event &e)
+		{e.reset();};
+
+	inline static bool wait(Event &e, timeout_t timeout)
+		{return e.wait(timeout);};
+
+	inline static void wait(Event &e)
+		{e.wait();};
 };
 
 class __EXPORT Mutex : public Exclusive
@@ -179,8 +206,20 @@ public:
 	inline void release(void)
 		{pthread_mutex_unlock(&mutex);};
 
-	static inline pthread_mutexattr_t *initializer(void)
+	inline static pthread_mutexattr_t *initializer(void)
 		{return &attr.attr;};
+
+	inline static void lock(pthread_mutex_t *mutex)
+		{pthread_mutex_lock(mutex);};
+
+	inline static void lock(Mutex &m)
+		{pthread_mutex_lock(&m.mutex);};
+
+	inline static void unlock(pthread_mutex_t *mutex)
+		{pthread_mutex_unlock(mutex);};
+
+	inline static void unlock(Mutex &m)
+		{pthread_mutex_unlock(&m.mutex);};
 };
 
 class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
@@ -330,7 +369,7 @@ public:
 	void start(unsigned count);
 };
 	
-class __EXPORT Queue : protected OrderedIndex, protected Conditional
+class __EXPORT queue : protected OrderedIndex, protected Conditional
 {
 private:
 	mempager *pager;
@@ -340,7 +379,7 @@ private:
 	class __LOCAL member : public OrderedObject
 	{
 	public:
-		member(Queue *q, Object *obj);
+		member(queue *q, Object *obj);
 		Object *object;
 	};
 
@@ -348,16 +387,31 @@ protected:
 	size_t limit;
 
 public:
-	Queue(mempager *mem);
+	queue(mempager *mem, size_t size);
 
 	bool remove(Object *obj);
 	bool post(Object *obj, timeout_t timeout = 0);
 	Object *fifo(timeout_t timeout = 0);
 	Object *lifo(timeout_t timeout = 0);
 	size_t getCount(void);
+
+	static bool remove(queue &q, Object *obj)
+		{return q.remove(obj);};
+
+	static bool post(queue &q, Object *obj, timeout_t timeout = 0)
+		{return q.post(obj, timeout);};
+
+	static Object *fifo(queue &q, timeout_t timeout = 0)
+		{return q.fifo(timeout);};
+
+	static Object *lifo(queue &q, timeout_t timeout = 0)
+		{return q.lifo(timeout);};
+
+	static size_t count(queue &q)
+		{return q.getCount();};
 };
 
-class __EXPORT Stack : protected Conditional
+class __EXPORT stack : protected Conditional
 {
 private:
 	LinkedObject *freelist, *usedlist;
@@ -367,7 +421,7 @@ private:
 	class __LOCAL member : public LinkedObject
 	{
 	public:
-		member(Stack *s, Object *obj);
+		member(stack *s, Object *obj);
 		Object *object;
 	};
 
@@ -377,12 +431,24 @@ protected:
 	size_t limit;
 
 public:
-	Stack(mempager *pager);
+	stack(mempager *pager, size_t size);
 
 	bool remove(Object *obj);
 	bool push(Object *obj, timeout_t timeout = 0);
 	Object *pull(timeout_t timeout = 0);
 	size_t getCount(void);
+
+	static inline bool remove(stack &stack, Object *obj)
+		{return stack.remove(obj);};
+
+	static inline bool push(stack &stack, Object *obj, timeout_t timeout = 0)
+		{return stack.push(obj, timeout);};
+
+	static inline Object *pull(stack &stack, timeout_t timeout = 0)
+		{return stack.pull(timeout);};  
+
+	static inline size_t count(stack &stack)
+		{return stack.getCount();};
 };
 
 class __EXPORT Buffer : public Conditional
@@ -447,45 +513,45 @@ public:
 };
 
 template<class T, mempager *P = NULL, size_t L = 0>
-class queue : public Queue
+class queueof : public queue
 {
 public:
-	inline queue() : Queue(P) {limit = L;};
+	inline queueof() : queue(P, L) {};
 
 	inline bool remove(T *obj)
-		{return Queue::remove(obj);};	
+		{return queue::remove(obj);};	
 
 	inline bool post(T *obj, timeout_t timeout = 0)
-		{return Queue::post(obj);};
+		{return queue::post(obj);};
 
 	inline T *fifo(timeout_t timeout = 0)
-		{return static_cast<T *>(Queue::fifo(timeout));};
+		{return static_cast<T *>(queue::fifo(timeout));};
 
     inline T *lifo(timeout_t timeout = 0)
-        {return static_cast<T *>(Queue::lifo(timeout));};
+        {return static_cast<T *>(queue::lifo(timeout));};
 };
 
 template<class T, mempager *P = NULL, size_t L = 0>
-class stack : public Stack
+class stackof : public stack
 {
 public:
-	inline stack() : Stack(P) {limit = L;};
+	inline stackof() : stack(P, L) {};
 
 	inline bool remove(T *obj)
-		{return Stack::remove(obj);};	
+		{return stack::remove(obj);};	
 
 	inline bool push(T *obj, timeout_t timeout = 0)
-		{return Stack::push(obj);};
+		{return stack::push(obj);};
 
 	inline T *pull(timeout_t timeout = 0)
-		{return static_cast<T *>(Stack::pull(timeout));};
+		{return static_cast<T *>(stack::pull(timeout));};
 };
 
 template<class T>
-class buffer : public Buffer
+class bufferof : public Buffer
 {
 public:
-	inline buffer(unsigned count) :
+	inline bufferof(unsigned count) :
 		Buffer(sizeof(T), count) {};
 
 	inline T *get(void)
@@ -570,6 +636,21 @@ public:
 	inline const T* get(void) const
 		{return static_cast<const T*>(ptr->pointer);};
 };
+
+inline void init(pthread_mutex_t *mutex)
+	{pthread_mutex_init(mutex, NULL);};
+
+inline void lock(pthread_mutex_t *mutex)
+	{pthread_mutex_lock(mutex);};
+
+inline void lock(Mutex &m)
+	{Mutex::lock(m);};
+
+inline void unlock(pthread_mutex_t *mutex)
+	{pthread_mutex_unlock(mutex);};
+
+inline void unlock(Mutex &m)
+	{Mutex::unlock(m);};
 
 inline void start(JoinableThread *th)
 	{th->start();};

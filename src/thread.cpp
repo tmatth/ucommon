@@ -732,22 +732,23 @@ bool JoinableThread::cancel(void)
 	return true;
 }
 
-Queue::member::member(Queue *q, Object *o) :
+queue::member::member(queue *q, Object *o) :
 OrderedObject(q)
 {
 	o->retain();
 	object = o;
 }
 
-Queue::Queue(mempager *p) :
+queue::queue(mempager *p, size_t size) :
 OrderedIndex(), Conditional()
 {
 	pager = p;
 	freelist = NULL;
-	limit = used = 0;
+	used = 0;
+	limit = size;
 }
 
-bool Queue::remove(Object *o)
+bool queue::remove(Object *o)
 {
 	bool rtn = false;
 	linked_pointer<member> node;
@@ -769,7 +770,7 @@ bool Queue::remove(Object *o)
 	return rtn;
 }
 
-Object *Queue::lifo(timeout_t timeout)
+Object *queue::lifo(timeout_t timeout)
 {
 	bool rtn = true;
 	Timer expires;
@@ -790,7 +791,7 @@ Object *Queue::lifo(timeout_t timeout)
 	}
     if(rtn && tail) {
         --used;
-        member = static_cast<Queue::member *>(head);
+        member = static_cast<queue::member *>(head);
         obj = member->object;
 		member->delist(this);
         member->LinkedObject::enlist(&freelist);
@@ -801,7 +802,7 @@ Object *Queue::lifo(timeout_t timeout)
     return obj;
 }
 
-Object *Queue::fifo(timeout_t timeout)
+Object *queue::fifo(timeout_t timeout)
 {
 	bool rtn = true;
 	Timer expires;
@@ -836,7 +837,7 @@ Object *Queue::fifo(timeout_t timeout)
 	return obj;
 }
 
-bool Queue::post(Object *object, timeout_t timeout)
+bool queue::post(Object *object, timeout_t timeout)
 {
 	bool rtn = true;
 	Timer expires;
@@ -881,7 +882,7 @@ bool Queue::post(Object *object, timeout_t timeout)
 	return true;
 }
 
-size_t Queue::getCount(void)
+size_t queue::getCount(void)
 {
 	size_t count;
 	lock();
@@ -891,22 +892,23 @@ size_t Queue::getCount(void)
 }
 
 
-Stack::member::member(Stack *S, Object *o) :
+stack::member::member(stack *S, Object *o) :
 LinkedObject((&S->usedlist))
 {
 	o->retain();
 	object = o;
 }
 
-Stack::Stack(mempager *p) :
+stack::stack(mempager *p, size_t size) :
 Conditional()
 {
 	pager = p;
 	freelist = usedlist = NULL;
-	limit = used = 0;
+	limit = size;
+	used = 0;
 }
 
-bool Stack::remove(Object *o)
+bool stack::remove(Object *o)
 {
 	bool rtn = false;
 	linked_pointer<member> node;
@@ -928,7 +930,7 @@ bool Stack::remove(Object *o)
 	return rtn;
 }
 
-Object *Stack::pull(timeout_t timeout)
+Object *stack::pull(timeout_t timeout)
 {
 	bool rtn = true;
 	Timer expires;	
@@ -952,7 +954,7 @@ Object *Stack::pull(timeout_t timeout)
 		return NULL;
 	}
     if(usedlist) {
-        member = static_cast<Stack::member *>(usedlist);
+        member = static_cast<stack::member *>(usedlist);
         obj = member->object;
 		usedlist = member->getNext();
         member->enlist(&freelist);
@@ -963,7 +965,7 @@ Object *Stack::pull(timeout_t timeout)
     return obj;
 }
 
-bool Stack::push(Object *object, timeout_t timeout)
+bool stack::push(Object *object, timeout_t timeout)
 {
 	bool rtn = true;
 	Timer expires;
@@ -1010,7 +1012,7 @@ bool Stack::push(Object *object, timeout_t timeout)
 	return true;
 }
 
-size_t Stack::getCount(void)
+size_t stack::getCount(void)
 {
 	size_t count;
 	lock();

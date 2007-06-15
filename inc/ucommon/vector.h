@@ -161,11 +161,11 @@ public:
 };
 
 template<class T>
-class vector : public Vector
+class vectorof : public Vector
 {
 public:
-	inline vector() : Vector() {};
-	inline vector(vectorsize_t size) : Vector(size) {};
+	inline vectorof() : Vector() {};
+	inline vectorof(vectorsize_t size) : Vector(size) {};
 
 	inline operator Vector()
 		{return static_cast<Vector>(*this);};
