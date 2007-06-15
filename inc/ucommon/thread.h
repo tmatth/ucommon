@@ -92,6 +92,18 @@ public:
 
 	inline void operator--()
 		{release();};
+
+	inline static void lock(SharedLock &s)
+		{s.lock();};
+
+	inline static void unlock(SharedLock &s)
+		{s.unlock();};
+
+	inline static void access(SharedLock &s)
+		{s.access();};
+
+	inline static void release(SharedLock &s)
+		{s.release();};
 };	
 
 class __EXPORT Barrier : public Conditional 
