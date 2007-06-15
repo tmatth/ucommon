@@ -73,37 +73,33 @@ protected:
 	void release(ReusableObject *obj);
 };
 
-class __EXPORT SharedLock : public Conditional
+class __EXPORT Lock : public Conditional
 {
 private:
 	unsigned waits;
-	unsigned reads;
+	volatile unsigned reads;
 
 public:
-	SharedLock();
+	Lock();
 
-	void lock(void);
-	void unlock(void);
-	void access(void);
+	void exclusive(void);
+	void shared(void);
 	void release(void);
 
 	inline void operator++()
-		{access();};
+		{shared();};
 
 	inline void operator--()
 		{release();};
 
-	inline static void lock(SharedLock &s)
-		{s.lock();};
+	inline static void exclusive(Lock &s)
+		{s.exclusive();};
 
-	inline static void unlock(SharedLock &s)
-		{s.unlock();};
-
-	inline static void access(SharedLock &s)
-		{s.access();};
-
-	inline static void release(SharedLock &s)
+	inline static void release(Lock &s)
 		{s.release();};
+
+	inline static void shared(Lock &s)
+		{s.shared();};
 };	
 
 class __EXPORT Barrier : public Conditional 
@@ -281,7 +277,7 @@ public:
 	virtual ~SharedObject();
 };
 
-class __EXPORT SharedPointer : public SharedLock
+class __EXPORT SharedPointer : public Lock
 {
 private:
 	friend class shared_release;

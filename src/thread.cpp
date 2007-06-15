@@ -308,14 +308,14 @@ void Mutex::Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
-SharedLock::SharedLock() :
+Lock::Lock() :
 Conditional()
 {
 	waits = 0;
 	reads = 0;
 }
 
-void SharedLock::lock(void)
+void Lock::exclusive(void)
 {
 	Conditional::lock();
 	while(reads) {
@@ -325,15 +325,10 @@ void SharedLock::lock(void)
 	}
 }
 
-void SharedLock::unlock(void)
+void Lock::release(void)
 {
-	Conditional::unlock();
-}
-
-void SharedLock::release(void)
-{
-	Conditional::lock();
 	if(reads) {
+		Conditional::lock();
 		--reads;
 		if(!reads && waits)
 			Conditional::broadcast();
@@ -341,7 +336,7 @@ void SharedLock::release(void)
 	Conditional::unlock();
 }
 
-void SharedLock::access(void)
+void Lock::shared(void)
 {
 	Conditional::lock();
 	++reads;
@@ -457,7 +452,7 @@ SharedObject::~SharedObject()
 }
 
 SharedPointer::SharedPointer() :
-SharedLock()
+Lock()
 {
 	pointer = NULL;
 }
@@ -468,18 +463,18 @@ SharedPointer::~SharedPointer()
 
 void SharedPointer::replace(SharedObject *ptr)
 {
-	SharedLock::lock();
+	Lock::exclusive();
 	if(pointer)
 		delete pointer;
 	pointer = ptr;
 	if(ptr)
 		ptr->commit(this);
-	SharedLock::unlock();
+	Lock::unlock();
 }
 
 SharedObject *SharedPointer::share(void)
 {
-	SharedLock::access();
+	Lock::shared();
 	return pointer;
 }
 
