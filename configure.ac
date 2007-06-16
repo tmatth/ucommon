@@ -56,6 +56,22 @@ UCOMMON_LIBS=""
 POSIX=false
 MSSYS=false
 
+AC_DEFUN([AC_SUBST_DIR], [
+        ifelse($2,,,$1="[$]$2")
+        result="***"
+        prior="A"
+        while test "$prior" != "$result" ; do
+                prior=`(echo "[$]$1")`
+                $1=`(
+                test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+                test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+                eval echo \""[$]$1"\"
+                )`
+                result=`(echo "[$]$1")`
+        done
+        AC_SUBST($1)
+])
+
 AC_ARG_WITH(libc,
 	[  --with-libc             specify alternate libc],[
 	if test x$with_libc != x ; then
@@ -297,6 +313,15 @@ AC_LANG_RESTORE
 
 UCOMMON_SHARED=""
 UCOMMON_MODULE="-module -shared"
+
+AC_SUBST_DIR(includes, includedir)
+AC_SUBST_DIR(libs, libdir)
+
+if test "$libs" != "/usr/lib" ; then
+	UCOMMON_LINKED="-L$libs $UCOMMON_LINKED" ; fi
+
+if test "$includes" != "/usr/include" ; then
+	UCOMMON_FLAGS="$UCOMMON_FLAGS -I$includes" ; fi
 
 case "$target_os" in
 *bsd*)
