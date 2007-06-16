@@ -163,9 +163,9 @@ AutoObject *AutoObject::base_exit::get(void)
 	return (AutoObject *)pthread_getspecific(exit_key);
 }
 
-void AutoObject::base_exit::set(AutoObject *ex)
+void AutoObject::base_exit::set(AutoObject *ao)
 {
-	pthread_setspecific(exit_key, ex);
+	pthread_setspecific(exit_key, ao);
 }
 
 AutoObject::AutoObject()

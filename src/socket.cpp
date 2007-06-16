@@ -16,6 +16,10 @@
 #include <sys/poll.h>
 #endif
 
+#if defined(HAVE_SYS_FILIO_H)
+#include <sys/filio.h>
+#endif
+
 #if defined(HAVE_POLL) && defined(POLLRDNORM)
 #define	USE_POLL
 #endif
@@ -351,7 +355,7 @@ void cidr::set(const char *cp)
 		memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
 		bitset((bit_t *)&netmask.ipv4, getMask(cp));
 		string::set(cbuf, sizeof(cbuf), cp);
-		ep = strchr(cp, '/');
+		ep = (char *)strchr(cp, '/');
 		if(ep)
 			*ep = 0;
 
@@ -377,7 +381,7 @@ void cidr::set(const char *cp)
 		memset(&netmask.ipv6, 0, sizeof(netmask));
 		bitset((bit_t *)&netmask.ipv6, getMask(cp));
 		string::set(cbuf, sizeof(cbuf), cp);
-		ep = strchr(cp, '/');
+		ep = (char *)strchr(cp, '/');
 		if(ep)
 			*ep = 0;
 #ifdef	_MSWINDOWS_
@@ -843,7 +847,7 @@ int Socket::join(SOCKET so, struct addrinfo *node)
 	socklen_t len = sizeof(addr);
 	inetsockaddr_t *target;
 	int family;
-	int rtn;
+	int rtn = 0;
 
 	if(so == INVALID_SOCKET)
 		return -1;
@@ -882,7 +886,7 @@ int Socket::drop(SOCKET so, struct addrinfo *node)
 	socklen_t len = sizeof(addr);
 	inetsockaddr_t *target;
 	int family;
-	int rtn;
+	int rtn = 0;
 
 	if(so == INVALID_SOCKET)
 		return -1;

@@ -322,74 +322,74 @@ NamedTree::~NamedTree()
 	purge();
 }
 
-NamedTree *NamedTree::getChild(const char *id) const
+NamedTree *NamedTree::getChild(const char *tid) const
 {
 	linked_pointer<NamedTree> node = child.begin();
 	
 	while(node) {
-		if(!strcmp(node->id, id))
+		if(!strcmp(node->id, tid))
 			return *node;
 		node.next();
 	}
 	return NULL;
 }
 
-NamedTree *NamedTree::path(const char *id) const
+NamedTree *NamedTree::path(const char *tid) const
 {
 	const char *np;
 	char buf[65];
 	char *ep;
 	NamedTree *node = const_cast<NamedTree*>(this);
 
-	if(!id || !*id)
+	if(!tid || !*tid)
 		return const_cast<NamedTree*>(this);
 
-	while(*id == '.') {
+	while(*tid == '.') {
 		if(!node->parent)
 			return NULL;
 		node = node->parent;
 
-		++id;
+		++tid;
 	}
 		
-	while(id && *id && node) {
-		string::set(buf, sizeof(buf), id);
+	while(tid && *tid && node) {
+		string::set(buf, sizeof(buf), tid);
 		ep = strchr(buf, '.');
 		if(ep)
 			*ep = 0;
-		np = strchr(id, '.');
+		np = strchr(tid, '.');
 		if(np)
-			id = ++np;
+			tid = ++np;
 		else
-			id = NULL;
+			tid = NULL;
 		node = node->getChild(buf);
 	}
 	return node;
 }
 
-NamedTree *NamedTree::getLeaf(const char *id) const
+NamedTree *NamedTree::getLeaf(const char *tid) const
 {
     linked_pointer<NamedTree> node = child.begin();
 
     while(node) {
-        if(node->isLeaf() && !strcmp(node->id, id))
+        if(node->isLeaf() && !strcmp(node->id, tid))
             return *node;
         node.next();
     }
     return NULL;
 }
 
-NamedTree *NamedTree::leaf(const char *id) const
+NamedTree *NamedTree::leaf(const char *tid) const
 {
     linked_pointer<NamedTree> node = child.begin();
     NamedTree *obj;
 
 	while(node) {
-		if(node->isLeaf() && !strcmp(node->id, id))
+		if(node->isLeaf() && !strcmp(node->id, tid))
 			return *node;
 		obj = NULL;
 		if(!node->isLeaf())
-			obj = node->leaf(id);
+			obj = node->leaf(tid);
 		if(obj)
 			return obj;
 		node.next();
@@ -397,16 +397,16 @@ NamedTree *NamedTree::leaf(const char *id) const
 	return NULL;
 }
 
-NamedTree *NamedTree::find(const char *id) const
+NamedTree *NamedTree::find(const char *tid) const
 {
 	linked_pointer<NamedTree> node = child.begin();
 	NamedTree *obj;
 
 	while(node) {
 		if(!node->isLeaf()) {
-			if(!strcmp(node->id, id))
+			if(!strcmp(node->id, tid))
 				return *node;
-			obj = node->find(id);
+			obj = node->find(tid);
 			if(obj)
 				return obj;
 		}

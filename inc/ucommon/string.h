@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <dirent.h>
 
 typedef	unsigned short strsize_t;
@@ -168,11 +169,11 @@ public:
 	static char *skip(char *s, const char *clist);
 	static char *rskip(char *s, const char *clist);
 	static char *unquote(char *s, const char *clist);
-	static char *rset(char *s, size_t s, const char *d);
-	static char *set(char *s, size_t s, const char *d);
-	static char *set(char *s, size_t s, const char *d, size_t l);
-	static char *add(char *s, size_t s, const char *d); 
-	static char *add(char *s, size_t s, const char *d, size_t l);
+	static char *rset(char *s, size_t sl, const char *d);
+	static char *set(char *s, size_t sl, const char *d);
+	static char *set(char *s, size_t sl, const char *d, size_t l);
+	static char *add(char *s, size_t sl, const char *d); 
+	static char *add(char *s, size_t sl, const char *d, size_t l);
 	static size_t count(const char *s);
 	static int compare(const char *s1, const char *s2);
 	static int compare(const char *s1, const char *s2, size_t len);

@@ -93,12 +93,16 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h mach/clock.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h mach/clock.h sys/filio.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
 	UCOMMON_LIBS="$UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
+])
+
+AC_CHECK_LIB(Crun, _ex_register, [
+	UCOMMON_LIBC="-lCrun $UCOMMON_LIBC"
 ])
 
 AC_CHECK_LIB($clib, socketpair, [

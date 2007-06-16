@@ -1043,15 +1043,15 @@ Buffer::~Buffer()
 
 unsigned Buffer::getCount(void)
 {
-	unsigned count = 0;
+	unsigned bcount = 0;
 
 	lock();
 	if(tail > head) 
-		count = (unsigned)((size_t)(tail - head) / objsize);
+		bcount = (unsigned)((size_t)(tail - head) / objsize);
 	else if(head > tail)
-		count = (unsigned)((((buf + size) - head) + (tail - buf)) / objsize);
+		bcount = (unsigned)((((buf + size) - head) + (tail - buf)) / objsize);
 	unlock();
-	return count;
+	return bcount;
 }
 
 unsigned Buffer::getSize(void)
