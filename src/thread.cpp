@@ -39,7 +39,7 @@ static void cpr_sleep(timeout_t timeout)
 #ifdef	HAVE_PTHREAD_DELAY
 	pthread_delay(&ts);
 #else
-	usleep(timeout);
+	usleep(timeout * 1000);
 #endif
 #endif
 }
