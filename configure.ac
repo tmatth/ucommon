@@ -295,13 +295,19 @@ rm -f conftest*
 
 AC_LANG_RESTORE
 
-if test "$UCOMMON_MODEL" = "CC" ; then
-	UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC" ; fi
-
 UCOMMON_SHARED=""
 UCOMMON_MODULE="-module -shared"
 
 case "$target_os" in
+*bsd*)
+	if test "$UCOMMON_MODEL" = "CC" ; then
+		if test "$GCC" = "yes" -a "$UCOMMON_LIBC" = "-lc" ; then
+			UCOMMON_LIBC="-Wl,-lc"
+		elif test "$GCC" = "yes" -a "$UCOMMON_LIBC" = "-lc_r" ; then
+			UCOMMON_LIBC="-Wl,-lc_r"
+		fi
+    fi
+	;;
 osf*)
     UCOMMON_FLAGS="$UCOMMON_FLAGS -D_POSIX_C_SOURCE=1 -D_OSF_SOURCE=1 -D__USE_STD_IOSTREAM"
     ;;
@@ -317,6 +323,9 @@ darwin*)
     UCOMMON_MODULE="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
     ;;
 esac
+
+if test "$UCOMMON_MODEL" = "CC" ; then
+	UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC" ; fi
 
 AC_SUBST(CXXFLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
