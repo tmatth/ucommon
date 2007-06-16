@@ -101,9 +101,11 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
 ])
 
-AC_CHECK_LIB(Crun, _ex_register, [
-	UCOMMON_LIBC="-lCrun $UCOMMON_LIBC"
-])
+if test "$GCC" != "yes" ; then
+	AC_CHECK_LIB(Crun, _ex_register, [
+		UCOMMON_LIBC="-lCrun $UCOMMON_LIBC"
+	])
+fi
 
 AC_CHECK_LIB($clib, socketpair, [
 	AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])
