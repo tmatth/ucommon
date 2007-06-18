@@ -112,7 +112,7 @@ public:
 	void put(PagerObject *obj);
 };
 
-class __EXPORT keyassoc : mempager
+class __EXPORT keyassoc : protected mempager
 {
 private:
 	class __LOCAL keydata : public NamedObject
@@ -142,6 +142,37 @@ public:
 	bool assign(char *id, void *data);
 	bool create(char *id, void *data);
 	void *remove(const char *id);
+};
+
+template <class T, unsigned I = 177, size_t M = 0, size_t P = 0>
+class assocof : private keyassoc
+{
+public:
+	inline assocof() : keyassoc(I, M, P) {};
+
+	inline unsigned getCount(void)
+		{return count;};
+
+	inline void purge(void)
+		{keyassoc::purge();};
+
+	inline T *locate(const char *id)
+		{return static_cast<T*>(keyassoc::locate(id));};
+
+	inline bool assign(char *id, T *data)
+		{return keyassoc::assign(id, data);};
+
+	inline bool create(char *id, T *data)
+		{return keyassoc::create(id, data);};
+
+	inline void remove(char *id)
+		{keyassoc::remove(id);};
+
+	inline void lock(void)
+		{mempager::lock();};
+
+	inline void unlock(void)
+		{mempager::unlock();};
 };
 
 template <class T>
