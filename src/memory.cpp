@@ -67,6 +67,25 @@ mempager::~mempager()
 	pthread_mutex_destroy(&mutex);
 }
 
+unsigned mempager::utilization(void)
+{
+	unsigned long used = 0, alloc = 0;
+	page_t *mp = page;
+
+	while(mp) {
+		alloc += pagesize;
+		used += mp->used;
+		mp = mp->next;
+	}
+
+	if(!used)
+		return 0;
+
+	alloc /= 100;
+	used /= alloc;
+	return used;
+}
+
 void mempager::purge(void)
 {
 	page_t *next;

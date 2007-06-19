@@ -60,6 +60,8 @@ public:
 	inline unsigned getAlloc(void)
 		{return pagesize;};
 
+	unsigned utilization(void);
+
 	void purge(void);
 	virtual void dealloc(void *mem);
 	void *alloc(size_t size);
