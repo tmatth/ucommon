@@ -312,8 +312,10 @@ NamedObject(), child()
 }
 
 NamedTree::NamedTree(NamedTree *p, char *nid) :
-NamedObject(&(p->child), nid), child()
+NamedObject(), child()
 {
+	enlist(&p->child);
+	id = nid;
 	parent = p;
 }
 
