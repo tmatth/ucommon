@@ -147,10 +147,10 @@ public:
 };
 
 template <class T, unsigned I = 177, size_t M = 0, size_t P = 0>
-class assocof : private keyassoc
+class assoc : private keyassoc
 {
 public:
-	inline assocof() : keyassoc(I, M, P) {};
+	inline assoc() : keyassoc(I, M, P) {};
 
 	inline unsigned getCount(void)
 		{return count;};
