@@ -139,6 +139,9 @@ public:
 	inline unsigned getCount(void)
 		{return count;};
 
+	inline void *operator()(const char *id)
+		{return locate(id);};
+
 	void purge(void);
 	void *locate(const char *id);
 	bool assign(char *id, void *data);
@@ -160,6 +163,9 @@ public:
 
 	inline T *locate(const char *id)
 		{return static_cast<T*>(keyassoc::locate(id));};
+
+	inline T *operator()(const char *id)
+		{return locate(id);};
 
 	inline bool assign(char *id, T *data)
 		{return keyassoc::assign(id, data);};
