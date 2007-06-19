@@ -156,7 +156,7 @@ public:
 	inline assoc_pointer() : keyassoc(I, M, P) {};
 
 	inline unsigned getCount(void)
-		{return count;};
+		{return keyassoc::getCount();};
 
 	inline void purge(void)
 		{keyassoc::purge();};
@@ -175,6 +175,12 @@ public:
 
 	inline void remove(char *id)
 		{keyassoc::remove(id);};
+
+	inline unsigned utilization(void)
+		{return mempager::utilization();};
+
+	inline unsigned getPages(void)
+		{return mempager::getPages();};
 
 	inline void lock(void)
 		{mempager::lock();};
