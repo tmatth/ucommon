@@ -43,11 +43,11 @@ public:
 		{return next;};
 };
 
-class __EXPORT ReusableObject : protected LinkedObject
+class __EXPORT ReusableObject : public LinkedObject
 {
 	friend class ReusableAllocator;
 
-protected:
+public:
 	virtual void release(void);
 
 	inline ReusableObject *getNext(void)
