@@ -1,0 +1,6 @@
+UCommon Library NEWS -- history of visible user changes. 2006-09-11
+
+UCommon 0.4 codebase completed and ready for release with the introduction of
+the GNU GPL V3.  This is a complete rewrite of UCommon as a C++ library for
+threading and design patterns suitable for deeply embedded targets.
+
