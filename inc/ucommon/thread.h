@@ -172,6 +172,39 @@ public:
 		{s.release();};
 };
 
+class __EXPORT Completion : private Conditional
+{
+private:
+	unsigned count;
+	bool signalled;
+
+public:
+	Completion();
+
+	unsigned request(void);
+	bool accepts(unsigned id);
+	bool wait(timeout_t timeout);
+	bool wait(void);
+
+	inline void release(void)
+		{unlock();};
+
+	inline static unsigned request(Completion &e)
+		{return e.request();};
+
+	inline static bool accepts(Completion &e, unsigned id)
+		{return e.accepts(id);};
+
+	inline static void release(Completion &e)
+		{e.unlock();};
+
+	inline static bool wait(Completion &e, timeout_t timeout)
+		{return e.wait(timeout);};
+
+	inline static bool wait(Completion &e)
+		{return e.wait();};
+};
+
 class __EXPORT Event : public Conditional
 {
 private:

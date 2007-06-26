@@ -90,6 +90,81 @@ void ReusableAllocator::release(ReusableObject *obj)
 	unlock();
 }
 
+Completion::Completion() :
+Conditional()
+{
+	count = 0;
+	signalled = false;
+}
+
+unsigned Completion::request(void)
+{
+	unsigned id;
+	lock();
+	id = ++count;
+	signalled = false;
+	signal();
+	unlock();
+	return id;
+}
+
+bool Completion::accepts(unsigned id)
+{
+	lock();
+	if(id != count) {
+		unlock();
+		return false;
+	}
+
+	signal();
+	++signalled;
+	return true;
+}
+
+bool Completion::wait(timeout_t timeout)
+{
+	bool notimeout = true;
+	Timer expires;
+	unsigned last;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
+
+	lock();
+	last = count;
+	while(!signalled && count == last && notimeout) {
+		if(timeout == Timer::inf)
+			Conditional::wait();
+		else if(timeout)		
+			notimeout = Conditional::wait(*expires);
+		else
+			notimeout = false;
+	}
+	if(last != count)
+		notimeout = false;
+	else
+		++count;
+	unlock();
+	return notimeout;
+}
+
+bool Completion::wait(void)
+{
+	bool rtn = true;
+	lock();
+	unsigned last = count;
+	while(!signalled && count == last)
+		Conditional::wait();
+	if(last != count)
+		rtn = false;
+	else
+		++count;
+	unlock();
+	return rtn;
+}
+
+
+
 Event::Event() : 
 Conditional()
 {
