@@ -409,7 +409,8 @@ void rwlock::release(void)
 	}
 	if(reading) {
 		--reading;
-		signal();
+		if(!reading && waiting)
+			signal();
 	}
 	unlock();
 }
