@@ -111,6 +111,9 @@ public:
 		{return *get(idx);};
 };
 
+typedef	counter counter_t;
+typedef	toggle toggle_t;
+
 END_NAMESPACE
 
 #endif

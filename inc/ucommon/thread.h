@@ -93,6 +93,12 @@ public:
 	bool shared(timeout_t timeout = Timer::inf);
 	void release(void);
 
+	inline static bool exclusive(rwlock &lock, timeout_t timeout = Timer::inf)
+		{return lock.exclusive(timeout);};
+
+	inline static bool shared(rwlock &lock, timeout_t timeout = Timer::inf)
+		{return lock.shared(timeout);};
+
 	inline static void release(rwlock &lock)
 		{lock.release();};
 };
@@ -743,6 +749,56 @@ typedef rwlock rwlock_t;
 typedef semaphore semaphore_t;
 typedef recursive_mutex recursive_mutex_t;
 typedef	barrier barrier_t;
+typedef stack stack_t;
+typedef	queue queue_t;
+
+inline void wait(barrier_t &b)
+	{barrier::wait(b);};
+
+inline void wait(semaphore_t &s, timeout_t timeout = Timer::inf)
+	{semaphore::wait(s, timeout);};
+
+inline void lock(recursive_mutex_t &rm)
+	{recursive_mutex::lock(rm);};
+
+inline void lock(mutex_t &ml)
+	{mutex::lock(ml);};
+
+inline void release(recursive_mutex_t &rm)
+	{recursive_mutex::release(rm);};
+
+inline void release(mutex_t &ml)
+	{mutex::release(ml);};
+
+inline bool exclusive(rwlock_t &rw, timeout_t timeout = Timer::inf)
+	{return rwlock::exclusive(rw, timeout);};
+
+inline bool shared(rwlock_t &rw, timeout_t timeout = Timer::inf)
+	{return rwlock::shared(rw, timeout);};
+
+inline void release(rwlock_t &rw)
+	{rwlock::release(rw);};
+
+inline void push(stack_t &s, Object *obj)
+	{stack::push(s, obj);};
+
+inline Object *pull(stack_t &s, timeout_t timeout = Timer::inf)
+	{return stack::pull(s, timeout);};
+
+inline void remove(stack_t &s, Object *obj)
+	{stack::remove(s, obj);};
+
+inline void post(queue_t &s, Object *obj)
+	{queue::post(s, obj);};
+
+inline Object *lifo(queue_t &s, timeout_t timeout = Timer::inf)
+	{return queue::lifo(s, timeout);};
+
+inline Object *fifo(queue_t &s, timeout_t timeout = Timer::inf)
+	{return queue::fifo(s, timeout);};
+
+inline void remove(queue_t &s, Object *obj)
+	{queue::remove(s, obj);};
 
 END_NAMESPACE
 

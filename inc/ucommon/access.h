@@ -87,6 +87,9 @@ inline void share(Shared *sh)
 inline void release(Shared *sh)
 	{sh->Unlock();};
 
+typedef	exclusive_lock exlock_t;
+typedef	shared_lock shlock_t;
+
 END_NAMESPACE
 
 #endif
