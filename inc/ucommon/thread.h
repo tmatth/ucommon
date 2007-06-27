@@ -242,6 +242,9 @@ public:
 	mutex();
 	~mutex();
 
+	inline void acquire(void)
+		{pthread_mutex_lock(&mlock);};
+
 	inline void lock(void)
 		{pthread_mutex_lock(&mlock);};
 
@@ -251,6 +254,9 @@ public:
 	inline void release(void)
 		{pthread_mutex_unlock(&mlock);};
 
+	inline static void acquire(mutex &m)
+		{pthread_mutex_lock(&m.mlock);};
+
 	inline static void lock(mutex &m)
 		{pthread_mutex_lock(&m.mlock);};
 
@@ -259,6 +265,9 @@ public:
 
 	inline static void release(mutex &m)
 		{pthread_mutex_unlock(&m.mlock);};
+
+	inline static void acquire(pthread_mutex_t *lock)
+		{pthread_mutex_lock(lock);};
 
 	inline static void lock(pthread_mutex_t *lock)
 		{pthread_mutex_lock(lock);};
@@ -291,6 +300,9 @@ public:
 	recursive_mutex();
 	~recursive_mutex();
 
+	inline void acquire(void)
+		{pthread_mutex_lock(&mutex);};
+
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};
 
@@ -302,6 +314,9 @@ public:
 
 	inline static pthread_mutexattr_t *initializer(void)
 		{return &attr.attr;};
+
+	inline static void acquire(recursive_mutex &m)
+		{pthread_mutex_lock(&m.mutex);};
 
 	inline static void lock(recursive_mutex &m)
 		{pthread_mutex_lock(&m.mutex);};
@@ -753,52 +768,49 @@ typedef stack stack_t;
 typedef	queue queue_t;
 
 inline void wait(barrier_t &b)
-	{barrier::wait(b);};
+	{b.wait();};
 
 inline void wait(semaphore_t &s, timeout_t timeout = Timer::inf)
-	{semaphore::wait(s, timeout);};
+	{s.wait(timeout);};
 
-inline void lock(recursive_mutex_t &rm)
-	{recursive_mutex::lock(rm);};
+inline void acquire(recursive_mutex_t &rm)
+	{rm.lock();};
 
-inline void lock(mutex_t &ml)
-	{mutex::lock(ml);};
+inline void acquire(mutex_t &ml)
+	{ml.lock();};
 
 inline void release(recursive_mutex_t &rm)
-	{recursive_mutex::release(rm);};
+	{rm.release();};
 
 inline void release(mutex_t &ml)
-	{mutex::release(ml);};
+	{ml.release();};
 
 inline bool exclusive(rwlock_t &rw, timeout_t timeout = Timer::inf)
-	{return rwlock::exclusive(rw, timeout);};
+	{return rw.exclusive(timeout);};
 
 inline bool shared(rwlock_t &rw, timeout_t timeout = Timer::inf)
-	{return rwlock::shared(rw, timeout);};
+	{return rw.shared(timeout);};
 
 inline void release(rwlock_t &rw)
-	{rwlock::release(rw);};
+	{rw.release();};
 
 inline void push(stack_t &s, Object *obj)
-	{stack::push(s, obj);};
+	{s.push(obj);};
 
 inline Object *pull(stack_t &s, timeout_t timeout = Timer::inf)
-	{return stack::pull(s, timeout);};
+	{return s.pull(timeout);};
 
 inline void remove(stack_t &s, Object *obj)
-	{stack::remove(s, obj);};
+	{s.remove(obj);};
 
-inline void post(queue_t &s, Object *obj)
-	{queue::post(s, obj);};
+inline void push(queue_t &s, Object *obj)
+	{s.post(obj);};
 
-inline Object *lifo(queue_t &s, timeout_t timeout = Timer::inf)
-	{return queue::lifo(s, timeout);};
-
-inline Object *fifo(queue_t &s, timeout_t timeout = Timer::inf)
-	{return queue::fifo(s, timeout);};
+inline Object *pull(queue_t &s, timeout_t timeout = Timer::inf)
+	{return s.fifo(timeout);};
 
 inline void remove(queue_t &s, Object *obj)
-	{queue::remove(s, obj);};
+	{s.remove(obj);};
 
 END_NAMESPACE
 
