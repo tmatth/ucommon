@@ -131,6 +131,7 @@ public:
 };	
 
 typedef TimerQueue::event TimerEvent;
+typedef	Timer timer_t;
 
 END_NAMESPACE
 

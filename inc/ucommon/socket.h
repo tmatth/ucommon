@@ -294,6 +294,7 @@ public:
         {return so;};
 };
 
+typedef	Socket socket_t;
 typedef	Socket socket;
 
 inline struct addrinfo *addrinfo(socket::address &a)

@@ -333,6 +333,8 @@ extern "C" inline int strnicmp(const char *s1, const char *s2, size_t n)
 
 #endif
 
+typedef	string string_t;
+
 END_NAMESPACE
 
 #endif

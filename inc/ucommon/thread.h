@@ -738,6 +738,11 @@ inline void start(DetachedThread *th)
 inline bool cancel(DetachedThread *th)
 	{return th->cancel();};
 
+typedef	mutex mutex_t;
+typedef rwlock rwlock_t;
+typedef semaphore semaphore_t;
+typedef recursive_mutex recursive_mutex_t;
+typedef	barrier barrier_t;
 
 END_NAMESPACE
 
