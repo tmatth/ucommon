@@ -357,7 +357,11 @@ void rwlock::Unlock(void)
 
 bool rwlock::exclusive(timeout_t timeout)
 {
+	Timer expires;
 	bool rtn = true;
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);
 	
 	lock();
 	while(reading && rtn) {
@@ -365,7 +369,7 @@ bool rwlock::exclusive(timeout_t timeout)
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(timeout);
+			rtn = wait(*expires);
 		else
 			rtn = false;
 		--waiting;
@@ -378,15 +382,19 @@ bool rwlock::exclusive(timeout_t timeout)
 
 bool rwlock::shared(timeout_t timeout)
 {
+	Timer expires;
 	bool rtn = true;
-	
+
+	if(timeout && timeout != Timer::inf)
+		expires.set(timeout);	
+
 	lock();
 	while(writers && rtn) {
 		++waiting;
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(timeout);
+			rtn = wait(*expires);
 		else
 			rtn = false;
 		--waiting;
@@ -460,6 +468,16 @@ Conditional()
 {
 	waits = 0;
 	reads = 0;
+}
+
+void ConditionalLock::Shlock(void)
+{
+	shared();
+}
+
+void ConditionalLock::Unlock(void)
+{
+	release();
 }
 
 void ConditionalLock::exclusive(void)

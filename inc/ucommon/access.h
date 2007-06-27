@@ -58,6 +58,12 @@ private:
 public:
 	exclusive_lock(Exclusive *l);
 	~exclusive_lock();
+
+	bool operator!()
+		{return lock == NULL;};
+
+	operator bool()
+		{return lock != NULL;};
 	
 	void release(void);
 };
@@ -71,6 +77,13 @@ private:
 public:
     shared_lock(Shared *l);
     ~shared_lock();
+
+	bool operator!()
+		{return lock == NULL;};
+
+	operator bool()
+		{return lock != NULL;};
+
 
     void release(void);
 };
@@ -89,6 +102,17 @@ inline void release(Shared *sh)
 
 typedef	exclusive_lock exlock_t;
 typedef	shared_lock shlock_t;
+
+inline void release(exlock_t &ex)
+	{ex.release();};
+
+inline void release(shlock_t &sh)
+	{sh.release();};
+
+#define	exclusive_object()	exlock_t __autolock__ = this
+#define	protected_object()	shlock_t __autolock__ = this
+#define	exclusive_access(x)	exlock_t __autolock__ = &x
+#define	protected_access(x) shlock_t __autolock__ = &x
 
 END_NAMESPACE
 

@@ -117,11 +117,14 @@ protected:
 	void release(ReusableObject *obj);
 };
 
-class __EXPORT ConditionalLock : public Conditional
+class __EXPORT ConditionalLock : public Conditional, public Shared
 {
 private:
 	unsigned waits;
 	volatile unsigned reads;
+
+	void Shlock(void);
+	void Unlock(void);
 
 public:
 	ConditionalLock();
