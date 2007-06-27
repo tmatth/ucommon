@@ -60,10 +60,10 @@ static void cpr_sleep(timeout_t timeout)
 #endif
 }
 
-Mutex::attribute Mutex::attr;
+recursive_mutex::attribute recursive_mutex::attr;
 Conditional::attribute Conditional::attr;
 
-Mutex::attribute::attribute()
+recursive_mutex::attribute::attribute()
 {
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
@@ -163,64 +163,7 @@ bool Completion::wait(void)
 	return rtn;
 }
 
-
-
-Event::Event() : 
-Conditional()
-{
-	count = 0;
-	signalled = false;
-}
-
-void Event::signal(void)
-{
-	lock();
-    signalled = true;
-    ++count;
-	broadcast();
-	unlock();
-}
-
-void Event::reset(void)
-{
-	lock();
-    signalled = true;
-	unlock();
-}
-
-bool Event::wait(timeout_t timeout)
-{
-	bool notimeout = true;
-	Timer expires;
-	unsigned last;
-
-	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
-
-	lock();
-	last = count;
-	while(!signalled && count == last && notimeout) {
-		if(timeout == Timer::inf)
-			Conditional::wait();
-		else if(timeout)		
-			notimeout = Conditional::wait(*expires);
-		else
-			notimeout = false;
-	}
-	unlock();
-	return notimeout;
-}
-
-void Event::wait(void)
-{
-	lock();
-	unsigned last = count;
-	while(!signalled && count == last)
-		Conditional::wait();
-	unlock();
-}
-
-Semaphore::Semaphore(unsigned limit) : 
+semaphore::semaphore(unsigned limit) : 
 Conditional()
 {
 	count = limit;
@@ -228,7 +171,17 @@ Conditional()
 	used = 0;
 }
 
-unsigned Semaphore::getUsed(void)
+void semaphore::Shlock(void)
+{
+	wait();
+}
+
+void semaphore::Unlock(void)
+{
+	release();
+}
+
+unsigned semaphore::getUsed(void)
 {
 	unsigned rtn;
 	lock();
@@ -237,7 +190,7 @@ unsigned Semaphore::getUsed(void)
 	return rtn;
 }
 
-unsigned Semaphore::getCount(void)
+unsigned semaphore::getCount(void)
 {
     unsigned rtn;
 	lock();
@@ -246,12 +199,12 @@ unsigned Semaphore::getCount(void)
     return rtn;
 }
 
-bool Semaphore::wait(timeout_t timeout)
+bool semaphore::wait(timeout_t timeout)
 {
 	return request(1, timeout);
 }
 
-bool Semaphore::request(unsigned size, timeout_t timeout)
+bool semaphore::request(unsigned size, timeout_t timeout)
 {
 	bool result = true;
 	Timer expires;
@@ -278,7 +231,7 @@ bool Semaphore::request(unsigned size, timeout_t timeout)
 	return result;
 }
 
-void Semaphore::wait(void)
+void semaphore::wait(void)
 {
 	lock();
 	if(used >= count) {
@@ -291,7 +244,7 @@ void Semaphore::wait(void)
 	unlock();
 }
 
-void Semaphore::request(unsigned size)
+void semaphore::request(unsigned size)
 {
 	lock();
 	if(used + size > count) {
@@ -304,13 +257,13 @@ void Semaphore::request(unsigned size)
 	unlock();
 }
 
-void Semaphore::release(unsigned size)
+void semaphore::release(unsigned size)
 {
 	while(size--)
 		release();
 }
 
-void Semaphore::release(void)
+void semaphore::release(void)
 {
 	lock();
 	if(used)
@@ -320,7 +273,7 @@ void Semaphore::release(void)
 	unlock();
 }
 
-void Semaphore::set(unsigned value)
+void semaphore::set(unsigned value)
 {
 	unsigned diff;
 
@@ -379,34 +332,136 @@ bool Conditional::wait(timeout_t timeout)
 	return true;
 }
 
-Mutex::Mutex()
+rwlock::rwlock() :
+Conditional()
+{
+	writers = false;
+	reading = 0;
+	waiting = 0;
+}
+
+void rwlock::Exlock(void)
+{
+	exclusive();
+}
+
+void rwlock::Shlock(void)
+{
+	shared();
+}
+
+void rwlock::Unlock(void)
+{
+	release();
+}
+
+bool rwlock::exclusive(timeout_t timeout)
+{
+	bool rtn = true;
+	
+	lock();
+	while(reading && rtn) {
+		++waiting;
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(timeout);
+		else
+			rtn = false;
+		--waiting;
+	}
+	if(rtn)
+		writers = true;
+	unlock();
+	return rtn;
+}
+
+bool rwlock::shared(timeout_t timeout)
+{
+	bool rtn = true;
+	
+	lock();
+	while(writers && rtn) {
+		++waiting;
+		if(timeout == Timer::inf)
+			wait();
+		else if(timeout)
+			rtn = wait(timeout);
+		else
+			rtn = false;
+		--waiting;
+	}
+	if(rtn)
+		++reading;
+	unlock();
+	return rtn;
+}
+
+void rwlock::release(void)
+{
+	lock();
+	if(writers) {
+		writers = false;
+		if(waiting)
+			broadcast();
+		unlock();
+		return;
+	}
+	if(reading) {
+		--reading;
+		signal();
+	}
+	unlock();
+}
+
+recursive_mutex::recursive_mutex()
 {
 	crit(pthread_mutex_init(&mutex, &attr.attr) == 0);
 }
 
-Mutex::~Mutex()
+recursive_mutex::~recursive_mutex()
 {
 	pthread_mutex_destroy(&mutex);
 }
 
-void Mutex::Exlock(void)
+void recursive_mutex::Exlock(void)
 {
 	pthread_mutex_lock(&mutex);
 }
 
-void Mutex::Unlock(void)
+void recursive_mutex::Unlock(void)
 {
 	pthread_mutex_unlock(&mutex);
 }
 
-Lock::Lock() :
+mutex::mutex()
+{
+	crit(pthread_mutex_init(&mlock, NULL) == 0);
+}
+
+mutex::~mutex()
+{
+	pthread_mutex_destroy(&mlock);
+}
+
+void mutex::Exlock(void)
+{
+	pthread_mutex_lock(&mlock);
+}
+
+void mutex::Unlock(void)
+{
+	pthread_mutex_unlock(&mlock);
+}
+
+ConditionalLock::ConditionalLock() :
 Conditional()
 {
 	waits = 0;
 	reads = 0;
 }
 
-void Lock::exclusive(void)
+void ConditionalLock::exclusive(void)
 {
 	Conditional::lock();
 	while(reads) {
@@ -416,7 +471,7 @@ void Lock::exclusive(void)
 	}
 }
 
-void Lock::release(void)
+void ConditionalLock::release(void)
 {
 	if(reads) {
 		Conditional::lock();
@@ -427,21 +482,21 @@ void Lock::release(void)
 	Conditional::unlock();
 }
 
-void Lock::shared(void)
+void ConditionalLock::shared(void)
 {
 	Conditional::lock();
 	++reads;
 	Conditional::unlock();
 }
 
-Barrier::Barrier(unsigned limit) :
+barrier::barrier(unsigned limit) :
 Conditional()
 {
 	count = limit;
 	waits = 0;
 }
 
-Barrier::~Barrier()
+barrier::~barrier()
 {
 	for(;;)
 	{
@@ -452,7 +507,7 @@ Barrier::~Barrier()
 	}
 }
 
-void Barrier::set(unsigned limit)
+void barrier::set(unsigned limit)
 {
 	lock();
 	count = limit;
@@ -463,7 +518,7 @@ void Barrier::set(unsigned limit)
 	unlock();
 }
 
-void Barrier::wait(void)
+void barrier::wait(void)
 {
 	Conditional::lock();
 	if(!count) {
@@ -496,18 +551,19 @@ void ConditionalIndex::unlock_index(void)
 }
 
 LockedIndex::LockedIndex() :
-OrderedIndex(), Mutex()
+OrderedIndex()
 {
+	pthread_mutex_init(&mutex, NULL);
 }
 
 void LockedIndex::lock_index(void)
 {
-	Mutex::lock();
+	pthread_mutex_lock(&mutex);
 }
 
 void LockedIndex::unlock_index(void)
 {
-	Mutex::unlock();
+	pthread_mutex_unlock(&mutex);
 }
 	
 LockedPointer::LockedPointer()
@@ -543,7 +599,7 @@ SharedObject::~SharedObject()
 }
 
 SharedPointer::SharedPointer() :
-Lock()
+ConditionalLock()
 {
 	pointer = NULL;
 }
@@ -554,18 +610,18 @@ SharedPointer::~SharedPointer()
 
 void SharedPointer::replace(SharedObject *ptr)
 {
-	Lock::exclusive();
+	ConditionalLock::exclusive();
 	if(pointer)
 		delete pointer;
 	pointer = ptr;
 	if(ptr)
 		ptr->commit(this);
-	Lock::unlock();
+	ConditionalLock::unlock();
 }
 
 SharedObject *SharedPointer::share(void)
 {
-	Lock::shared();
+	ConditionalLock::shared();
 	return pointer;
 }
 

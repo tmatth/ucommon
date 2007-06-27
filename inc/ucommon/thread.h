@@ -75,6 +75,28 @@ public:
 
 };
 
+class __EXPORT rwlock : private Conditional, public Exclusive, public Shared
+{
+private:
+	unsigned waiting;
+	unsigned reading;
+	bool writers;
+
+	__LOCAL void Exlock(void);
+	__LOCAL void Shlock(void);
+	__LOCAL void Unlock(void);
+
+public:
+	rwlock();
+
+	bool exclusive(timeout_t timeout = Timer::inf);
+	bool shared(timeout_t timeout = Timer::inf);
+	void release(void);
+
+	inline static void release(rwlock &lock)
+		{lock.release();};
+};
+
 class __EXPORT ReusableAllocator : public Conditional
 {
 protected:
@@ -89,14 +111,14 @@ protected:
 	void release(ReusableObject *obj);
 };
 
-class __EXPORT Lock : public Conditional
+class __EXPORT ConditionalLock : public Conditional
 {
 private:
 	unsigned waits;
 	volatile unsigned reads;
 
 public:
-	Lock();
+	ConditionalLock();
 
 	void exclusive(void);
 	void shared(void);
@@ -108,49 +130,46 @@ public:
 	inline void operator--()
 		{release();};
 
-	inline static void exclusive(Lock &s)
+	inline static void exclusive(ConditionalLock &s)
 		{s.exclusive();};
 
-	inline static void release(Lock &s)
+	inline static void release(ConditionalLock &s)
 		{s.release();};
 
-	inline static void shared(Lock &s)
+	inline static void shared(ConditionalLock &s)
 		{s.shared();};
 };	
 
-class __EXPORT Barrier : public Conditional 
+class __EXPORT barrier : private Conditional 
 {
 private:
 	unsigned count;
 	unsigned waits;
 
 public:
-	Barrier(unsigned count);
-	~Barrier();
+	barrier(unsigned count);
+	~barrier();
 
 	void set(unsigned count);
 	void wait(void);
 
-	inline static void wait(Barrier &b)
+	inline static void wait(barrier &b)
 		{b.wait();};
 
-	inline static void set(Barrier &b, unsigned count)
+	inline static void set(barrier &b, unsigned count)
 		{b.set(count);};
 };
 
-class __EXPORT Semaphore : public Shared, public Conditional
+class __EXPORT semaphore : public Shared, private Conditional
 {
 private:
 	unsigned count, waits, used;
 
+	__LOCAL void Shlock(void);
+	__LOCAL void Unlock(void);
+
 public:
-	Semaphore(unsigned limit = 0);
-
-	inline void Shlock(void)
-		{wait();};
-
-	inline void Unlock(void)
-		{release();};
+	semaphore(unsigned limit = 0);
 
 	void request(unsigned size);
 	bool request(unsigned size, timeout_t timeout);
@@ -162,13 +181,13 @@ public:
 	void release(void);
 	void release(unsigned size);
 
-	inline static void wait(Semaphore &s)
+	inline static void wait(semaphore &s)
 		{s.wait();};
 
-	inline static bool wait(Semaphore &s, timeout_t timeout)
+	inline static bool wait(semaphore &s, timeout_t timeout)
 		{return s.wait(timeout);};
 
-	inline static void release(Semaphore &s)
+	inline static void release(semaphore &s)
 		{s.release();};
 };
 
@@ -205,35 +224,47 @@ public:
 		{return e.wait();};
 };
 
-class __EXPORT Event : public Conditional
+class __EXPORT mutex : public Exclusive
 {
 private:
-	unsigned count;
-	bool signalled;
+	pthread_mutex_t mlock;
 
+	__LOCAL void Exlock(void);
+	__LOCAL void Unlock(void);
+		
 public:
-	Event();
+	mutex();
+	~mutex();
 
-	void signal(void);
-	void reset(void);
+	inline void lock(void)
+		{pthread_mutex_lock(&mlock);};
 
-	bool wait(timeout_t timeout);
-	void wait(void);
+	inline void unlock(void)
+		{pthread_mutex_unlock(&mlock);};
 
-	inline static void signal(Event &e)
-		{e.signal();};
+	inline void release(void)
+		{pthread_mutex_unlock(&mlock);};
 
-	inline static void reset(Event &e)
-		{e.reset();};
+	inline static void lock(mutex &m)
+		{pthread_mutex_lock(&m.mlock);};
 
-	inline static bool wait(Event &e, timeout_t timeout)
-		{return e.wait(timeout);};
+	inline static void unlock(mutex &m)
+		{pthread_mutex_unlock(&m.mlock);};
 
-	inline static void wait(Event &e)
-		{e.wait();};
+	inline static void release(mutex &m)
+		{pthread_mutex_unlock(&m.mlock);};
+
+	inline static void lock(pthread_mutex_t *lock)
+		{pthread_mutex_lock(lock);};
+
+	inline static void unlock(pthread_mutex_t *lock)
+		{pthread_mutex_unlock(lock);};
+
+	inline static void release(pthread_mutex_t *lock)
+		{pthread_mutex_unlock(lock);};
 };
 
-class __EXPORT Mutex : public Exclusive
+class __EXPORT recursive_mutex : public Exclusive
 {
 private:
 	class __LOCAL attribute
@@ -246,13 +277,13 @@ private:
 	__LOCAL static attribute attr;
 
 	pthread_mutex_t mutex;
+
+	__LOCAL void Exlock(void);
+	__LOCAL void Unlock(void);
 		
 public:
-	Mutex();
-	~Mutex();
-
-	void Exlock(void);
-	void Unlock(void);
+	recursive_mutex();
+	~recursive_mutex();
 
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};
@@ -266,17 +297,15 @@ public:
 	inline static pthread_mutexattr_t *initializer(void)
 		{return &attr.attr;};
 
-	inline static void lock(pthread_mutex_t *mutex)
-		{pthread_mutex_lock(mutex);};
-
-	inline static void lock(Mutex &m)
+	inline static void lock(recursive_mutex &m)
 		{pthread_mutex_lock(&m.mutex);};
 
-	inline static void unlock(pthread_mutex_t *mutex)
-		{pthread_mutex_unlock(mutex);};
-
-	inline static void unlock(Mutex &m)
+	inline static void unlock(recursive_mutex &m)
 		{pthread_mutex_unlock(&m.mutex);};
+
+	inline static void release(recursive_mutex &m)
+		{pthread_mutex_unlock(&m.mutex);};
+
 };
 
 class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
@@ -284,17 +313,20 @@ class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
 public:
 	ConditionalIndex();
 
-private:
+protected:
 	void lock_index(void);
 	void unlock_index(void);
 };
 
-class __EXPORT LockedIndex : public OrderedIndex, public Mutex
+class __EXPORT LockedIndex : public OrderedIndex
 {
 public:
 	LockedIndex();
 
 private:
+	pthread_mutex_t mutex;
+
+protected:
 	void lock_index(void);
 	void unlock_index(void);
 };
@@ -326,7 +358,7 @@ public:
 	virtual ~SharedObject();
 };
 
-class __EXPORT SharedPointer : public Lock
+class __EXPORT SharedPointer : public ConditionalLock
 {
 private:
 	friend class shared_release;
