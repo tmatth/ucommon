@@ -18,7 +18,6 @@ EXTRA_DIST = stdcpp.cpp
 
 TESTS = ucommonThreads ucommonLinked ucommonStrings
 check_PROGRAMS = $(TESTS)
-noinst_PROGRAMS = string
 
 ucommonThreads_SOURCES = thread.cpp
 ucommonStrings_SOURCES = string.cpp

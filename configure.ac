@@ -53,7 +53,7 @@ UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 
-CHECK=""
+CHECK="test"
 POSIX=false
 MSSYS=false
 
@@ -78,7 +78,7 @@ if test "$enable_stdcpp" = "yes" ; then
 	AM_PATH_CPPUNIT(1.9.6, [
 		CHECK="cppunit"
 	],[
-		CHECK=""
+		CHECK="$CHECK"
 	])
 	UCOMMON_MODEL="CXX"
 fi

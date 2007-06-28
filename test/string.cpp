@@ -21,9 +21,10 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+static string testing("second test");
+
 extern "C" int main()
 {
-	static string testing("second test");
 	char buff[33];
 	string::fill(buff, 32, ' ');
 	stringbuf<128> mystr;
