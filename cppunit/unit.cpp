@@ -21,7 +21,6 @@
 #include <ucommon/ucommon.h>
 
 using namespace UCOMMON_NAMESPACE;
-using namespace std;
 
 extern "C" void callThreading();
 
@@ -29,13 +28,56 @@ class ucommonTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(ucommonTest);
 	CPPUNIT_TEST(testThreading);
+	CPPUNIT_TEST(testStrings);
+	CPPUNIT_TEST(testLinked);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void testThreading();
+	void testStrings();
+	void testLinked();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ucommonTest);
+
+void ucommonTest::testStrings()
+{
+	static string testing("second test");
+	char buff[33];
+	string::fill(buff, 32, ' ');
+	stringbuf<128> mystr;
+	mystr = (string)"hello" + (string)" this is a test";
+	CPPUNIT_ASSERT(!stricmp("hello this is a test", *mystr));
+	CPPUNIT_ASSERT(!stricmp("second test", *testing));
+	CPPUNIT_ASSERT(!stricmp(" is a test", mystr(-10)));
+	mystr = "  abc 123 \n  ";
+	CPPUNIT_ASSERT(!stricmp("abc 123", string::strip(mystr.c_mem(), " \n")));
+}
+
+void ucommonTest::testLinked()
+{
+	typedef linked_value<int> ints;
+	OrderedIndex list;
+	linked_pointer<ints> ptr;
+	unsigned count = 0;
+	ints v1(&list, 3);
+	ints v2(&list);
+	v2 = 5;
+
+	ptr = &list;
+	while(ptr) {
+		switch(++count)
+		{
+		case 1:
+			CPPUNIT_ASSERT(ptr->value == 3);
+			break;
+		case 2:
+			CPPUNIT_ASSERT(ptr->value == 5);
+		}
+		++ptr;
+	}
+	CPPUNIT_ASSERT(count == 2);
+}
 
 void ucommonTest::testThreading()
 {
@@ -77,7 +119,7 @@ int main(int argc, char **argv)
 	CppUnit::TextUi::TestRunner runner;
 	runner.addTest( suite );
 
-	runner.setOutputter( new CppUnit::CompilerOutputter( &runner.result(), cerr ) );
+	runner.setOutputter( new CppUnit::CompilerOutputter( &runner.result(), std::cerr ) );
 
 	bool result = runner.run();
 	return result ? 0 : 1;

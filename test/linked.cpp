@@ -28,14 +28,22 @@ static OrderedIndex list;
 extern "C" int main()
 {
 	linked_pointer<ints> ptr;
+	unsigned count = 0;
 	ints v1(&list, 3);
 	ints v2(&list);
 	v2 = 5;
 
 	ptr = &list;
 	while(ptr) {
-		printf("VALUE %d\n", ptr->value);
+		switch(++count)
+		{
+		case 1:
+			assert(ptr->value == 3);
+			break;
+		case 2:
+			assert(ptr->value == 5);
+		}
 		++ptr;
 	}
-	printf("DONE!\n");
+	assert(count == 2);
 };

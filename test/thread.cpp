@@ -21,32 +21,33 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-class mythread : public JoinableThread
+class testThread : public JoinableThread
 {
 public:
-	inline mythread() : JoinableThread() {};
+	int count;
 
-	void run(void);
-};
+	testThread() : JoinableThread() {
+		count = 0;};
 
-void mythread::run(void)
-{
-	printf("starting thread...\n");
-	Thread::sleep(10000);
-	printf("finishing thread\n");
+	void run(void) {
+		++count;
+		sleep(10000);
+	};
 };
 
 extern "C" int main()
 {
-	mythread *thr = new mythread();
+	time_t now, later;
+	testThread *thr;
 
-	printf("before\n");
+	time(&now);
+	thr = new testThread();
 	start(thr);
-	printf("sleeping main...\n");
 	Thread::sleep(1000);
-	printf("wakeup main...\n");
+	assert(thr->count == 1);
 	cancel(thr);
-	printf("joining\n");
 	delete thr;
-	printf("ending\n");
+	time(&later);
+	assert(later == now + 1);
 };
+
