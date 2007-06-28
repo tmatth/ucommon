@@ -53,6 +53,7 @@ UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 
+CHECK=""
 POSIX=false
 MSSYS=false
 
@@ -71,6 +72,16 @@ AC_DEFUN([AC_SUBST_DIR], [
         done
         AC_SUBST($1)
 ])
+
+AC_ARG_ENABLE(stdcpp, [ --enable-stdcpp         compile for stdc++])
+if test "$enable_stdcpp" = "yes" ; then
+	AM_PATH_CPPUNIT(1.9.6, [
+		CHECK="cppunit"
+	],[
+		CHECK=""
+	])
+	UCOMMON_MODEL="CXX"
+fi
 
 AC_ARG_WITH(libc,
 	[  --with-libc             specify alternate libc],[
@@ -358,6 +369,7 @@ esac
 if test "$UCOMMON_MODEL" = "CC" ; then
 	UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC" ; fi
 
+AC_SUBST(CHECK)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LINKED)
@@ -369,6 +381,7 @@ AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
+AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile 
+cppunit/Makefile test/Makefile
 ucommon.pc ucommon.spec)
 
