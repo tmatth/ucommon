@@ -42,9 +42,14 @@ void ucommonTest::testThreading()
 	class testThread : public JoinableThread
 	{
 	public:
-		inline testThread() : JoinableThread() {};
+		int runflag;
+
+		testThread() : JoinableThread() {
+			runflag = 0;
+		}
 
 		void run(void) {
+			++runflag;
 			Thread::sleep(10000);
 		};
 	};
@@ -56,6 +61,7 @@ void ucommonTest::testThreading()
 	thread = new testThread();
 	start(thread);
 	Thread::sleep(1000);
+	CPPUNIT_ASSERT(thread->runflag == 1);
 	cancel(thread);
 	delete thread;
 	time(&later);
