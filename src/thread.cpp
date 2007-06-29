@@ -56,7 +56,14 @@ static void cpr_sleep(timeout_t timeout)
 	pthread_delay(&ts);
 #elif defined(__MACH__)
 	Timer expires;
-	expires.set(timer);
+	int state;
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
+	if(state != PTHREAD_CANCEL_ENABLE) {
+		usleep(timeout);
+		return;
+	}
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	expires.set(timeout);
 	while((timeout = *expires) > 0) {
 		if(timeout > 20000)
 			timeout = 20000;
