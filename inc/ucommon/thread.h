@@ -123,8 +123,8 @@ private:
 	unsigned waits;
 	volatile unsigned reads;
 
-	void Shlock(void);
-	void Unlock(void);
+	__LOCAL void Shlock(void);
+	__LOCAL void Unlock(void);
 
 public:
 	ConditionalLock();

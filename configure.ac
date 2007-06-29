@@ -75,11 +75,7 @@ AC_DEFUN([AC_SUBST_DIR], [
 
 AC_ARG_ENABLE(stdcpp, [ --enable-stdcpp         compile for stdc++])
 if test "$enable_stdcpp" = "yes" ; then
-	AM_PATH_CPPUNIT(1.9.6, [
-		CHECK="cppunit"
-	],[
-		CHECK="$CHECK"
-	])
+	CHECK="cppunit"
 	UCOMMON_MODEL="CXX"
 fi
 

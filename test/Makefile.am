@@ -23,8 +23,6 @@ ucommonThreads_SOURCES = thread.cpp
 ucommonStrings_SOURCES = string.cpp
 ucommonLinked_SOURCES = linked.cpp
 
-string_SOURCES = string.cpp
-
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp
 	$(CXX) @UCOMMON_FLAGS@ -o stdcpp -I../inc -L../src/.libs -lucommon stdcpp.cpp @UCOMMON_LIBS@

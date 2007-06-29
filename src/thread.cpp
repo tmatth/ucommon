@@ -364,7 +364,7 @@ bool rwlock::exclusive(timeout_t timeout)
 		expires.set(timeout);
 	
 	lock();
-	while(reading && rtn) {
+	while((writers || reading) && rtn) {
 		++waiting;
 		if(timeout == Timer::inf)
 			wait();
