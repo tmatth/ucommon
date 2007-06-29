@@ -660,6 +660,8 @@ DetachedThread::DetachedThread(size_t size)
 	stack = size;
 }
 
+#include <stdio.h>
+
 void Thread::sleep(timeout_t timeout)
 {
 	int state;

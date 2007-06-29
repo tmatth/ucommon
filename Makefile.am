@@ -11,8 +11,7 @@
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec
 
-DIST_SUBDIRS = src inc test cppunit
-SUBDIRS = src inc @CHECK@
+SUBDIRS = src inc test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ucommon.pc

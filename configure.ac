@@ -75,7 +75,6 @@ AC_DEFUN([AC_SUBST_DIR], [
 
 AC_ARG_ENABLE(stdcpp, [ --enable-stdcpp         compile for stdc++])
 if test "$enable_stdcpp" = "yes" ; then
-	CHECK="cppunit"
 	UCOMMON_MODEL="CXX"
 fi
 
@@ -219,6 +218,7 @@ UCOMMON_LIBS="$socket_lib $posix4_lib $rt_lib $UCOMMON_LIBS $UCOMMON_LIBC"
 if test "$UCOMMON_MODEL" = "CC" ; then
 	AC_CHECK_LIB(Systemstubs, printf, [
 		UCOMMON_CLINK="$UCOMMON_CLINK -lSystemstubs"
+		UCOMMON_LIBC="$UCOMMON_LIBC -lgcc"
 	])
 fi
 
@@ -377,7 +377,6 @@ AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
-AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile 
-cppunit/Makefile test/Makefile
+AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
 ucommon.pc ucommon.spec)
 
