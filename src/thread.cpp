@@ -869,11 +869,16 @@ void DetachedThread::start(void)
 
 void JoinableThread::exit(void)
 {
+#if defined(__MACH__) || defined(__GNU__)
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	pthread_exit(NULL);
+#else	
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	for(;;) {
 		sleep(Timer::inf);
 		pthread_testcancel();
 	}
+#endif
 }
 
 bool JoinableThread::cancel(void)
