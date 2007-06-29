@@ -52,8 +52,18 @@ static void cpr_sleep(timeout_t timeout)
 	timespec ts;
 	ts.tv_sec = timeout / 1000l;
 	ts.tv_nsec = (timeout % 1000l) * 1000000l;
-#ifdef	HAVE_PTHREAD_DELAY
+#if defined(HAVE_PTHREAD_DELAY)
 	pthread_delay(&ts);
+#elif defined(__MACH__)
+	Timer expires;
+	expires.set(timer);
+	while((timeout = *expires) > 0) {
+		if(timeout > 20000)
+			timeout = 20000;
+		usleep(timeout);
+		Thread::check();
+	}
+	Thread::check();
 #else
 	usleep(timeout * 1000);
 #endif
