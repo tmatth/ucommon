@@ -16,7 +16,7 @@ CXXLINK = $(LIBTOOL) --tag=$(MODEL) --mode=link $(CXX) $(AM_CXXFLAGS) $(CFLAGS) 
 LDADD = ../src/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = stdcpp.cpp
 
-TESTS = ucommonThreads ucommonLinked ucommonStrings
+TESTS = ucommonLinked ucommonStrings ucommonThreads
 check_PROGRAMS = $(TESTS)
 
 ucommonThreads_SOURCES = thread.cpp

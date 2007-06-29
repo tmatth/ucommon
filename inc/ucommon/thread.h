@@ -407,6 +407,9 @@ protected:
 public:
 	typedef struct {int state; int type;} cancellation;
 
+	inline static void check(void)
+		{pthread_testcancel();};
+
 	static void yield(void);
 
 	static void sleep(timeout_t timeout);
