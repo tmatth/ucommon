@@ -75,12 +75,36 @@ public:
 
 };
 
+class __EXPORT rexlock : private Conditional, public Exclusive
+{
+private:
+	unsigned waiting;
+	unsigned lockers;
+	pthread_t locker;
+
+	__LOCAL void Exlock(void);
+	__LOCAL void Unlock(void);
+
+public:
+	rexlock();
+
+	void lock(void);
+	void release(void);
+
+	inline static void lock(rexlock &rex)
+		{rex.lock();};
+
+	inline static void release(rexlock &rex)
+		{rex.release();};
+};
+
 class __EXPORT rwlock : private Conditional, public Exclusive, public Shared
 {
 private:
 	unsigned waiting;
 	unsigned reading;
-	bool writers;
+	unsigned writers;
+	pthread_t writer;
 
 	__LOCAL void Exlock(void);
 	__LOCAL void Shlock(void);
@@ -280,56 +304,6 @@ public:
 
 	inline static void release(pthread_mutex_t *lock)
 		{pthread_mutex_unlock(lock);};
-};
-
-class __EXPORT recursive_mutex : public Exclusive
-{
-private:
-	class __LOCAL attribute
-	{
-	public:
-		pthread_mutexattr_t attr;
-		attribute();
-	};
-
-	__LOCAL static attribute attr;
-
-	pthread_mutex_t mutex;
-
-	__LOCAL void Exlock(void);
-	__LOCAL void Unlock(void);
-		
-public:
-	recursive_mutex();
-	~recursive_mutex();
-
-	inline void acquire(void)
-		{pthread_mutex_lock(&mutex);};
-
-	inline void lock(void)
-		{pthread_mutex_lock(&mutex);};
-
-	inline void unlock(void)
-		{pthread_mutex_unlock(&mutex);};
-
-	inline void release(void)
-		{pthread_mutex_unlock(&mutex);};
-
-	inline static pthread_mutexattr_t *initializer(void)
-		{return &attr.attr;};
-
-	inline static void acquire(recursive_mutex &m)
-		{pthread_mutex_lock(&m.mutex);};
-
-	inline static void lock(recursive_mutex &m)
-		{pthread_mutex_lock(&m.mutex);};
-
-	inline static void unlock(recursive_mutex &m)
-		{pthread_mutex_unlock(&m.mutex);};
-
-	inline static void release(recursive_mutex &m)
-		{pthread_mutex_unlock(&m.mutex);};
-
 };
 
 class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
@@ -767,8 +741,8 @@ inline bool cancel(DetachedThread *th)
 
 typedef	mutex mutex_t;
 typedef rwlock rwlock_t;
+typedef	rexlock rexlock_t;
 typedef semaphore semaphore_t;
-typedef recursive_mutex recursive_mutex_t;
 typedef	barrier barrier_t;
 typedef stack stack_t;
 typedef	queue queue_t;
@@ -779,14 +753,8 @@ inline void wait(barrier_t &b)
 inline void wait(semaphore_t &s, timeout_t timeout = Timer::inf)
 	{s.wait(timeout);};
 
-inline void acquire(recursive_mutex_t &rm)
-	{rm.lock();};
-
 inline void acquire(mutex_t &ml)
 	{ml.lock();};
-
-inline void release(recursive_mutex_t &rm)
-	{rm.release();};
 
 inline void release(mutex_t &ml)
 	{ml.release();};
@@ -799,6 +767,12 @@ inline bool shared(rwlock_t &rw, timeout_t timeout = Timer::inf)
 
 inline void release(rwlock_t &rw)
 	{rw.release();};
+
+inline void lock(rexlock_t &rex)
+	{rex.lock();};
+
+inline void release(rexlock_t &rex)
+	{rex.release();};
 
 inline void push(stack_t &s, Object *obj)
 	{s.push(obj);};

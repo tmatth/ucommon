@@ -1,7 +1,7 @@
 AC_INIT(autogen.sh)
 
-VERSION="0.4.0"
-LT_RELEASE="0.4"
+VERSION="0.5.0"
+LT_RELEASE="0.5"
 LT_VERSION="0:0"
 
 # use ~/.configure to hold default options when I use no options...

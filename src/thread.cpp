@@ -77,14 +77,7 @@ static void cpr_sleep(timeout_t timeout)
 #endif
 }
 
-recursive_mutex::attribute recursive_mutex::attr;
 Conditional::attribute Conditional::attr;
-
-recursive_mutex::attribute::attribute()
-{
-	pthread_mutexattr_init(&attr);
-	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-}
 
 ReusableAllocator::ReusableAllocator() :
 Conditional()
@@ -349,10 +342,53 @@ bool Conditional::wait(timeout_t timeout)
 	return true;
 }
 
+rexlock::rexlock() :
+Conditional()
+{
+	lockers = 0;
+	waiting = 0;
+}
+
+void rexlock::Exlock(void)
+{
+	lock();
+}
+
+void rexlock::Unlock(void)
+{
+	release();
+}
+
+void rexlock::lock(void)
+{
+	Conditional::lock();
+	while(lockers) {
+		if(pthread_equal(locker, pthread_self()))
+			break;
+		++waiting;
+		Conditional::wait();
+		--waiting;
+	}
+	if(!lockers)
+		locker = pthread_self();
+	++lockers;
+	Conditional::unlock();
+	return;
+}
+
+void rexlock::release(void)
+{
+	Conditional::lock();
+	--lockers;
+	if(!lockers && waiting)
+		Conditional::signal();
+	Conditional::unlock();
+}
+
 rwlock::rwlock() :
 Conditional()
 {
-	writers = false;
+	writers = 0;
 	reading = 0;
 	waiting = 0;
 }
@@ -382,6 +418,8 @@ bool rwlock::exclusive(timeout_t timeout)
 	
 	lock();
 	while((writers || reading) && rtn) {
+		if(writers && pthread_equal(writer, pthread_self()))
+			break;
 		++waiting;
 		if(timeout == Timer::inf)
 			wait();
@@ -391,8 +429,11 @@ bool rwlock::exclusive(timeout_t timeout)
 			rtn = false;
 		--waiting;
 	}
-	if(rtn)
-		writers = true;
+	if(rtn) {
+		if(!writers)
+			writer = pthread_self();
+		++writers;
+	}
 	unlock();
 	return rtn;
 }
@@ -426,8 +467,8 @@ void rwlock::release(void)
 {
 	lock();
 	if(writers) {
-		writers = false;
-		if(waiting)
+		--writers;
+		if(waiting && !writers)
 			broadcast();
 		unlock();
 		return;
@@ -438,26 +479,6 @@ void rwlock::release(void)
 			signal();
 	}
 	unlock();
-}
-
-recursive_mutex::recursive_mutex()
-{
-	crit(pthread_mutex_init(&mutex, &attr.attr) == 0);
-}
-
-recursive_mutex::~recursive_mutex()
-{
-	pthread_mutex_destroy(&mutex);
-}
-
-void recursive_mutex::Exlock(void)
-{
-	pthread_mutex_lock(&mutex);
-}
-
-void recursive_mutex::Unlock(void)
-{
-	pthread_mutex_unlock(&mutex);
 }
 
 mutex::mutex()
