@@ -4,29 +4,6 @@ VERSION="0.5.0"
 LT_RELEASE="0.5"
 LT_VERSION="0:0"
 
-# use ~/.configure to hold default options when I use no options...
-
-cfg_options=""
-if test -z "$*" ; then
-	if test -f ~/.configure ; then
-		cfg_options=`grep ^ucommon: ~/.configure | sed -e s/^ucommon://`
-	elif test -f /etc/configure.conf ; then
-		cfg_options=`grep ^ucommon: /etc/configure.conf | sed -e s/^ucommon://`
-	fi
-fi
-
-if test ! -z "$cfg_options" ; then
-    echo "using ~/.configure defaults...$cfg_options"
-    case "$SHELL" in
-    */bash*)
-        exec $SHELL $0 $cfg_options
-        exit -1        
-		;;
-    esac
-    exec $0 $cfg_options
-	exit -1
-fi
-
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
 AC_PROG_CPP
