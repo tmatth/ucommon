@@ -510,7 +510,7 @@ Conditional()
 
 void ConditionalLock::Shlock(void)
 {
-	shared();
+	access();
 }
 
 void ConditionalLock::Unlock(void)
@@ -518,7 +518,7 @@ void ConditionalLock::Unlock(void)
 	release();
 }
 
-void ConditionalLock::exclusive(void)
+void ConditionalLock::modify(void)
 {
 	Conditional::lock();
 	while(reads) {
@@ -539,7 +539,7 @@ void ConditionalLock::release(void)
 	Conditional::unlock();
 }
 
-void ConditionalLock::shared(void)
+void ConditionalLock::access(void)
 {
 	Conditional::lock();
 	++reads;
@@ -667,7 +667,7 @@ SharedPointer::~SharedPointer()
 
 void SharedPointer::replace(SharedObject *ptr)
 {
-	ConditionalLock::exclusive();
+	ConditionalLock::modify();
 	if(pointer)
 		delete pointer;
 	pointer = ptr;
@@ -678,7 +678,7 @@ void SharedPointer::replace(SharedObject *ptr)
 
 SharedObject *SharedPointer::share(void)
 {
-	ConditionalLock::shared();
+	ConditionalLock::access();
 	return pointer;
 }
 

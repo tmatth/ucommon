@@ -153,24 +153,24 @@ private:
 public:
 	ConditionalLock();
 
-	void exclusive(void);
-	void shared(void);
+	void modify(void);
+	void access(void);
 	void release(void);
 
 	inline void operator++()
-		{shared();};
+		{access();};
 
 	inline void operator--()
 		{release();};
 
-	inline static void exclusive(ConditionalLock &s)
-		{s.exclusive();};
+	inline static void modify(ConditionalLock &s)
+		{s.modify();};
 
 	inline static void release(ConditionalLock &s)
 		{s.release();};
 
-	inline static void shared(ConditionalLock &s)
-		{s.shared();};
+	inline static void access(ConditionalLock &s)
+		{s.access();};
 };	
 
 class __EXPORT barrier : private Conditional 
@@ -739,6 +739,7 @@ inline void start(DetachedThread *th)
 inline bool cancel(DetachedThread *th)
 	{return th->cancel();};
 
+typedef ConditionalLock condlock_t;
 typedef	mutex mutex_t;
 typedef rwlock rwlock_t;
 typedef	rexlock rexlock_t;
@@ -758,6 +759,15 @@ inline void acquire(mutex_t &ml)
 
 inline void release(mutex_t &ml)
 	{ml.release();};
+
+inline void modify(condlock_t &cl)
+	{cl.modify();};
+
+inline void access(condlock_t &cl)
+	{cl.access();};
+
+inline void release(condlock_t &cl)
+	{cl.release();};
 
 inline bool exclusive(rwlock_t &rw, timeout_t timeout = Timer::inf)
 	{return rw.exclusive(timeout);};
