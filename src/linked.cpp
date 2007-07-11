@@ -482,6 +482,7 @@ OrderedObject::OrderedObject() : LinkedObject()
 OrderedObject::OrderedObject(OrderedIndex *root) :
 LinkedObject()
 {
+	next = NULL;
 	if(root)
 		enlist(root);
 }
@@ -513,8 +514,7 @@ void OrderedObject::enlist(OrderedIndex *root)
 {
 	if(root->head == NULL)
 		root->head = this;
-	
-	if(root->tail)
+	else if(root->tail)
 		root->tail->next = this;
 
 	root->tail = this;

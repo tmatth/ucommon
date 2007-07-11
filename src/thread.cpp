@@ -528,14 +528,17 @@ void ConditionalLock::modify(void)
 	}
 }
 
+void ConditionalLock::commit(void)
+{
+	Conditional::unlock();
+}
+
 void ConditionalLock::release(void)
 {
-	if(reads) {
-		Conditional::lock();
-		--reads;
-		if(!reads && waits)
-			Conditional::broadcast();
-	}
+	Conditional::lock();
+	--reads;
+	if(!reads && waits)
+		Conditional::broadcast();
 	Conditional::unlock();
 }
 
@@ -673,7 +676,7 @@ void SharedPointer::replace(SharedObject *ptr)
 	pointer = ptr;
 	if(ptr)
 		ptr->commit(this);
-	ConditionalLock::unlock();
+	ConditionalLock::commit();
 }
 
 SharedObject *SharedPointer::share(void)

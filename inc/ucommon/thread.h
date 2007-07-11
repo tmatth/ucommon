@@ -154,6 +154,7 @@ public:
 	ConditionalLock();
 
 	void modify(void);
+	void commit(void);
 	void access(void);
 	void release(void);
 
@@ -165,6 +166,9 @@ public:
 
 	inline static void modify(ConditionalLock &s)
 		{s.modify();};
+
+	inline static void commit(ConditionalLock &s)
+		{s.commit();};
 
 	inline static void release(ConditionalLock &s)
 		{s.release();};
@@ -762,6 +766,9 @@ inline void release(mutex_t &ml)
 
 inline void modify(condlock_t &cl)
 	{cl.modify();};
+
+inline void commit(condlock_t &cl)
+	{cl.commit();};
 
 inline void access(condlock_t &cl)
 	{cl.access();};
