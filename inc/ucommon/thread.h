@@ -447,7 +447,7 @@ public:
 class __EXPORT PooledThread : public DetachedThread, protected Conditional
 {
 protected:
-	unsigned poolsize, poolused, waits;
+	unsigned volatile poolsize, poolused, waits;
 
 	PooledThread(size_t stack = 0);
 	void suspend(void);

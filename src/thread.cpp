@@ -734,11 +734,13 @@ void PooledThread::exit(void)
 	--poolused;
 	if(!poolused)
 		delete this;
+	pthread_exit(NULL);
 }
 
 void DetachedThread::exit(void)
 {
 	delete this;
+	pthread_exit(NULL);
 }
 
 bool DetachedThread::cancel(void)
