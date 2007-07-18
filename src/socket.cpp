@@ -479,11 +479,8 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	struct addrinfo hint;
 	struct addrinfo *ah = NULL;
 
-	memset(&hint, 0, sizeof(hint));
 	if(so != INVALID_SOCKET)
 		ah = gethint(so, &hint);
-	else
-		ah = &hint;
 
 	getaddrinfo(host, svc, ah, &list);
 }
