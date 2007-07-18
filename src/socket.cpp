@@ -17,6 +17,7 @@
 #include <config.h>
 #include <ucommon/socket.h>
 #include <ucommon/string.h>
+#include <ucommon/thread.h>
 #ifndef	_MSWINDOWS_
 #include <net/if.h>
 #include <sys/un.h>
@@ -1337,6 +1338,35 @@ exit:
 	if(res)
 		freeaddrinfo(res);
 	return rtn;
+}
+
+char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
+{
+	switch(addr->sa_family) {
+#ifdef	AF_UNIX
+	case AF_UNIX:
+		string::set(name, size, ((struct sockaddr_un *)(addr))->sun_path);
+		return name;
+#endif
+#ifdef	HAVE_INET_NTOP
+#ifdef	AF_INET6
+	case AF_INET6:
+		inet_ntop(addr->sa_family, &((struct sockaddr_in6 *)(addr))->sin6_addr, name, size);
+		return name;
+#endif
+	case AF_INET:
+		inet_ntop(addr->sa_family, &((struct sockaddr_in *)(addr))->sin_addr, name, size);
+		return name;
+#else
+	case AF_INET:
+		ENTER_EXCLUSIVE
+		string::set(name, size, inet_ntoa(((struct sockaddr_in *)(addr))->sin_addr));
+		EXIT_EXCLUSIVE
+		return name;
+#endif
+	}
+	*name = 0;
+	return NULL;
 }
 
 void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)

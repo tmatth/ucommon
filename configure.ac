@@ -34,6 +34,10 @@ CHECK="test"
 POSIX=false
 MSSYS=false
 
+socket_lib=""
+posix4_lib=""
+rt_lib=""
+
 AC_DEFUN([AC_SUBST_DIR], [
         ifelse($2,,,$1="[$]$2")
         result="***"
@@ -82,6 +86,25 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
 	UCOMMON_LIBS="$UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
+	AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
+],[
+	AC_CHECK_LIB($clib, socketpair, [
+		AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])
+	],[
+			AC_CHECK_LIB(socket, socketpair, [AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])])
+	])
+	AC_CHECK_LIB($clib, inet_ntop, [
+		AC_DEFINE(HAVE_INET_NTOP, [1], [have inet ntop])
+	],[
+			AC_CHECK_LIB(socket, inet_ntop, [AC_DEFINE(HAVE_INET_NTOP, [1], [have inet ntop])])
+	])
+
+	AC_CHECK_LIB(socket,socket,[
+		AC_CHECK_LIB(socket, socketpair,[
+			AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair in libsocket])
+		])
+		socket_lib="-lsocket"
+	])
 ])
 
 if test "$GCC" != "yes" ; then
@@ -89,10 +112,6 @@ if test "$GCC" != "yes" ; then
 		UCOMMON_LIBC="-lCrun $UCOMMON_LIBC"
 	])
 fi
-
-AC_CHECK_LIB($clib, socketpair, [
-	AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])
-])
 
 AC_CHECK_LIB($clib, stricmp, [
 	AC_DEFINE(HAVE_STRICMP, [1], [string icmp])
@@ -148,17 +167,6 @@ AC_CHECK_HEADER(pthread.h, [
 	fi		
 ],[
 	AC_MSG_ERROR("pthread support required")
-])
-
-socket_lib=""
-posix4_lib=""
-rt_lib=""
-
-AC_CHECK_LIB(socket,socket,[
-	AC_CHECK_LIB(socket, socketpair,[
-		AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair in libsocket])
-	])
-	socket_lib="-lsocket"
 ])
 
 for func in nanosleep clock_gettime localtime_r ; do

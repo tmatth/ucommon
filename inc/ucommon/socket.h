@@ -277,6 +277,7 @@ public:
 	static socklen_t getlen(struct sockaddr *addr);
 	static bool equal(struct sockaddr *s1, struct sockaddr *s2);
 	static void getinterface(struct sockaddr *iface, struct sockaddr *dest);
+	static char *getaddress(struct sockaddr *addr, char *buf, socklen_t size);
 };
 
 class __EXPORT ListenSocket : protected Socket
