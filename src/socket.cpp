@@ -479,10 +479,13 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	struct addrinfo hint;
 	struct addrinfo *ah = NULL;
 
-	if(so)
+	memset(&hint, 0, sizeof(hint));
+	if(so != INVALID_SOCKET)
 		ah = gethint(so, &hint);
+	else
+		ah = &hint;
 
-	getaddrinfo(host, svc, ah, &list);	
+	getaddrinfo(host, svc, ah, &list);
 }
 
 Socket::address::~address()
@@ -1342,6 +1345,10 @@ exit:
 
 char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 {
+	*name = 0;
+	if(!addr)
+		return NULL;
+
 	switch(addr->sa_family) {
 #ifdef	AF_UNIX
 	case AF_UNIX:
@@ -1365,7 +1372,6 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		return name;
 #endif
 	}
-	*name = 0;
 	return NULL;
 }
 
@@ -1380,7 +1386,7 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 	case AF_INET6:
 #endif
 	case AF_INET:
-		so = socket(iface->sa_family, SOCK_DGRAM, 0);
+		so = ::socket(iface->sa_family, SOCK_DGRAM, 0);
 		if(so == INVALID_SOCKET)
 			return;
 		if(!::connect(so, dest, len))
@@ -1426,6 +1432,9 @@ bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 
 socklen_t Socket::getlen(struct sockaddr *sa)
 {
+	if(!sa)
+		return 0;
+
 	switch(sa->sa_family)
 	{
 	case AF_INET:
