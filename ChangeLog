@@ -1,7 +1,9 @@
-From ucommon 0.5.0 to 0.5.1
+From ucommon 0.5.0 to 0.6.0
 - detached & pooled thread exit support fixed
 - equal test for socket address
 - getinterface to find interface to destination address
+- subnet test for socket address comparison
+- getaddress replaces hosttostr
 
 From ucommon 0.4.0 to 0.5.0
 - rwlock now also recursive writers

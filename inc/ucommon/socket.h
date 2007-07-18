@@ -62,14 +62,19 @@ typedef	struct
 #ifdef	AF_INET6
 struct sockaddr_internet
 {
-	unsigned short sa_family;
-	char sa_data[sizeof(struct sockaddr_in6) - 2];
+	union {
+		unsigned short sa_family;
+		struct sockaddr_in6 ipv6;
+		struct sockaddr_in ipv4;
+	};
 };
 #else
 struct sockaddr_internet
 {
-	unsigned short sa_family;
-	char sa_data[sizeof(struct sockaddr_in) - 2];
+	union {
+		unsigned short sa_family;
+		struct sockaddr_in ipv4;
+	};
 };
 
 struct sockaddr_storage
@@ -271,11 +276,12 @@ public:
 	static int ttl(SOCKET so, unsigned char t);
 	static int getfamily(SOCKET so);
 	static int bindaddr(SOCKET so, const char *host, const char *svc);
-	static char *hosttostr(struct sockaddr *sa, char *buf, size_t max);
+	static char *gethostname(struct sockaddr *sa, char *buf, size_t max);
 	static struct addrinfo *gethint(SOCKET so, struct addrinfo *h);
 	static socklen_t getaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
 	static socklen_t getlen(struct sockaddr *addr);
 	static bool equal(struct sockaddr *s1, struct sockaddr *s2);
+	static bool subnet(struct sockaddr *s1, struct sockaddr *s2);
 	static void getinterface(struct sockaddr *iface, struct sockaddr *dest);
 	static char *getaddress(struct sockaddr *addr, char *buf, socklen_t size);
 };

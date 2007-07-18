@@ -401,6 +401,9 @@ public:
 	static void cancel_suspend(cancellation *cancel);
 	static void cancel_resume(cancellation *cancel);
 	static void cancel_async(cancellation *cancel);
+
+	inline static bool equal(pthread_t t1, pthread_t t2)
+		{return pthread_equal(t1, t2);};
 };
 
 class __EXPORT JoinableThread : protected Thread

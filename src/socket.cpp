@@ -1233,7 +1233,7 @@ struct addrinfo *Socket::gethint(SOCKET so, struct addrinfo *hint)
 	return hint;
 }
 
-char *Socket::hosttostr(struct sockaddr *sa, char *buf, size_t max)
+char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
 {
 	socklen_t sl;
 
@@ -1414,17 +1414,74 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 	}
 }
 
-bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
+bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
 {
-	socklen_t l1 = getlen(s1), l2 = getlen(s2);
-
-	if(l1 != l2)
+	unsigned char *a1, *a2;
+	if(s1->sa_family != s2->sa_family)
 		return false;
 
-	if(memcmp(s1, s2, l1))
+	if(s1->sa_family != AF_INET)
+		return true;
+
+	a1 = (unsigned char *)&(((struct sockaddr_in *)(s1))->sin_addr);
+	a2 = (unsigned char *)&(((struct sockaddr_in *)(s1))->sin_addr);
+
+	if(*a1 == *a2 && *a1 < 128)
+		return true;
+
+	if(*a1 != *a2)
+		return false;
+
+	if(*a1 > 127 && *a1 < 192 && a1[1] == a2[1])
+		return true;
+
+	if(a1[1] != a2[1])
+		return false;
+
+	if(a1[2] != a2[2])
 		return false;
 
 	return true;
+}
+
+bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
+{
+	if(s1->sa_family != s2->sa_family)
+		return false;
+
+	switch(s1->sa_family) {
+	case AF_INET:
+		if(memcmp(&(((struct sockaddr_in *)s1)->sin_addr), 
+			&(((struct sockaddr_in *)s1)->sin_addr), 4))
+				return false;
+
+		if(!((struct sockaddr_in *)s1)->sin_port || !((struct sockaddr_in *)s2)->sin_port)
+			return true;
+
+		if(((struct sockaddr_in *)s1)->sin_port != ((struct sockaddr_in *)s2)->sin_port)
+			return false;
+
+		return true;
+#ifdef	AF_INET6
+	case AF_INET6:
+		if(memcmp(&(((struct sockaddr_in6 *)s1)->sin6_addr), 
+			&(((struct sockaddr_in6 *)s1)->sin6_addr), 4))
+				return false;
+
+		if(!((struct sockaddr_in6 *)s1)->sin6_port || !((struct sockaddr_in6 *)s2)->sin6_port)
+			return true;
+
+		if(((struct sockaddr_in6 *)s1)->sin6_port != ((struct sockaddr_in6 *)s2)->sin6_port)
+			return false;
+
+		return true;
+#endif		
+	default:
+		if(memcmp(s1, s2, getlen(s1)))
+			return false;
+		return true;
+	}
+	return false;
 }
 
 socklen_t Socket::getlen(struct sockaddr *sa)

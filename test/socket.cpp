@@ -33,4 +33,6 @@ extern "C" int main()
 	Socket::getinterface((struct sockaddr *)&addr, localhost.getAddr());
 	Socket::getaddress((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
+	assert(Socket::equal((struct sockaddr *)&addr, localhost.getAddr()));
+	assert(Socket::subnet((struct sockaddr *)&addr, localhost.getAddr()));
 };
