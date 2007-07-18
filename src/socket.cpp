@@ -1339,6 +1339,61 @@ exit:
 	return rtn;
 }
 
+void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
+{
+	int so = INVALID_SOCKET;
+	socklen_t len = getlen(dest);
+	memset(iface, 0, len);
+	iface->sa_family = dest->sa_family;
+	switch(iface->sa_family) {
+#ifdef	AF_INET6
+	case AF_INET6:
+#endif
+	case AF_INET:
+		so = socket(iface->sa_family, SOCK_DGRAM, 0);
+		if(so == INVALID_SOCKET)
+			return;
+		if(!::connect(so, dest, len))
+			getsockname(so, iface, &len);
+		break;
+	default:
+		return;
+	}
+	switch(iface->sa_family) {
+	case AF_INET:
+		((struct sockaddr_in*)(iface))->sin_port = 0;
+		break;
+#ifdef	AF_INET6
+	case AF_INET6:
+		((struct sockaddr_in6*)(iface))->sin6_port = 0;
+		break;
+#endif
+	}
+
+	if(so != INVALID_SOCKET) {
+#ifdef	_MSWINDOWS_
+		::closesocket(so);
+#else
+		::shutdown(so, SHUT_RDWR);
+		::close(so);
+#endif
+		so = INVALID_SOCKET;
+	}
+}
+
+bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
+{
+	socklen_t l1 = getlen(s1), l2 = getlen(s2);
+
+	if(l1 != l2)
+		return false;
+
+	if(memcmp(s1, s2, l1))
+		return false;
+
+	return true;
+}
+
 socklen_t Socket::getlen(struct sockaddr *sa)
 {
 	switch(sa->sa_family)
