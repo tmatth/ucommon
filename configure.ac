@@ -149,13 +149,10 @@ AC_CHECK_HEADER(pthread.h, [
 	])
 	if test -z "$tlib" ; then
 		AC_CHECK_LIB(pthreadGC2,pthread_create,[
-			if test "$enable_shared" = "yes" ; then
-				tlib="pthreadGC2.dll"	
-				UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2.dll"
-			else
+			tlib="pthreadGC2"	
+			UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
+			if test "$enable_shared" = "no" ; then
 				UCOMMON_FLAGS="$UCOMMON_FLAGS -DPTW32_STATIC_LIB" 
-				UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
-				tlib="pthreadGC2"
 			fi
 		])
 	fi
@@ -180,6 +177,10 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_delay,[
 			AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
 		])
+		AC_CHECK_LIB($tlib,pthread_delay_np,[
+			AC_DEFINE(HAVE_PTHREAD_DELAY_NP, [1], ["pthread delay np"])
+		])
+
 	fi		
 ],[
 	AC_MSG_ERROR("pthread support required")
