@@ -55,9 +55,6 @@ static void gettimeout(timeout_t msec, struct timespec *ts)
 
 static void cpr_sleep(timeout_t timeout)
 {
-#ifdef	_MSWINDOWS_
-	SleepEx(timeout, FALSE);
-#else
 	timespec ts;
 	ts.tv_sec = timeout / 1000l;
 	ts.tv_nsec = (timeout % 1000l) * 1000000l;
@@ -84,7 +81,6 @@ static void cpr_sleep(timeout_t timeout)
 	Thread::check();
 #else
 	usleep(timeout * 1000);
-#endif
 #endif
 }
 
