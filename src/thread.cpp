@@ -24,6 +24,15 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+#ifdef	PTW32_STATIC_LIB
+static class _init_
+{
+public:
+	_init_() {pthread_win32_process_attach_np();};
+	~_init_() {pthread_win32_process_detach_np();};
+} initial;
+#endif
+
 static void gettimeout(timeout_t msec, struct timespec *ts)
 {
 #if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
@@ -54,6 +63,8 @@ static void cpr_sleep(timeout_t timeout)
 	ts.tv_nsec = (timeout % 1000l) * 1000000l;
 #if defined(HAVE_PTHREAD_DELAY)
 	pthread_delay(&ts);
+#elif defined(HAVE_PTHREAD_DELAY_NP)
+	pthread_delay_np(&ts);
 #elif defined(__MACH__)
 	Timer expires;
 	int state;
@@ -734,12 +745,18 @@ void PooledThread::exit(void)
 	--poolused;
 	if(!poolused)
 		delete this;
+#ifdef	PTW32_STATIC_LIB
+	pthread_win32_thread_detach_np();
+#endif
 	pthread_exit(NULL);
 }
 
 void DetachedThread::exit(void)
 {
 	delete this;
+#ifdef	PTW32_STATIC_LIB
+	pthread_win32_thread_detach_np();
+#endif
 	pthread_exit(NULL);
 }
 
@@ -840,8 +857,14 @@ extern "C" {
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
+#ifdef	PTW32_STATIC_LIB
+		pthread_win32_thread_attach_np();
+#endif
 		th->run();
 		th->exit();
+#ifdef	PTW32_STATIC_LIB
+		pthread_win32_thread_detach_np();
+#endif
 		return NULL;
 	};
 }
