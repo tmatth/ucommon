@@ -149,8 +149,14 @@ AC_CHECK_HEADER(pthread.h, [
 	])
 	if test -z "$tlib" ; then
 		AC_CHECK_LIB(pthreadGC2,pthread_create,[
-			tlib="pthreadGC2"
-			UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
+			if test "$enable_shared" = "yes" ; then
+				tlib="pthreadGC2.dll"	
+				UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2.dll"
+			else
+				UCOMMON_FLAGS="$UCOMMON_FLAGS -DPTW32_STATIC_LIB" 
+				UCOMMON_LIBS="$UCOMMON_LIBS -lpthreadGC2"
+				tlib="pthreadGC2"
+			fi
 		])
 	fi
 	if test -z "$tlib" ; then
