@@ -1,0 +1,3 @@
+pkgname=ucommon
+libname=-lucommon
+bldname=src/libucommon.la
