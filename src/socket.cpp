@@ -1352,6 +1352,15 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		string::set(name, size, ((struct sockaddr_un *)(addr))->sun_path);
 		return name;
 #endif
+#ifdef	_MSWINDOWS_
+#ifdef	AF_INET6
+	case AF_INET6:
+#endif
+	case AF_INET:
+		DWORD slen = size;
+		WSAAddressToString(addr, getlen(addr), NULL, name, &slen);
+		return name;
+#else
 #ifdef	HAVE_INET_NTOP
 #ifdef	AF_INET6
 	case AF_INET6:
@@ -1367,6 +1376,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		string::set(name, size, inet_ntoa(((struct sockaddr_in *)(addr))->sin_addr));
 		EXIT_EXCLUSIVE
 		return name;
+#endif
 #endif
 	}
 	return NULL;
