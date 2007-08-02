@@ -49,8 +49,6 @@
 #define	MSG_NOSIGNAL 0
 #endif
 
-xxx
-
 typedef struct
 {
 	union {
