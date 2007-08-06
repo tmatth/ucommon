@@ -64,19 +64,21 @@ AC_DEFUN([AC_SUBST_DIR], [
         AC_SUBST($1)
 ])
 
-AC_ARG_ENABLE(stdcpp, [ --enable-stdcpp         compile for stdc++])
+AC_ARG_ENABLE(stdcpp, 
+	AC_HELP_STRING([--enable-stdcpp],[compile for stdc++ runtime]))
 if test "$enable_stdcpp" = "yes" ; then
 	UCOMMON_MODEL="CXX"
 fi
 
-AC_ARG_WITH(libc,
-	[  --with-libc             specify alternate libc],[
+AC_ARG_WITH(libc, 
+	AC_HELP_STRING([--with-libc=path],[specify path to alternate libc]),[
 	if test x$with_libc != x ; then
 		clib=`echo ${with_libc} | sed s/[-]l//`
         UCOMMON_LIBC=-l${clib} ; fi
 ])
 
-AC_ARG_ENABLE(debug, [  --enable-debug          compile for debugging])
+AC_ARG_ENABLE(debug, 
+	AC_HELP_STRING([--enable-debug],[compile for debugging]))
 if test -z "$enable_debug" ; then
 	enable_debug="no"
 elif test $enable_debug = "yes" ; then
