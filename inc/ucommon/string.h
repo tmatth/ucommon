@@ -137,12 +137,6 @@ public:
 	inline const char *operator*() const
 		{return c_str();};
 
-	inline bool isNumeric(void) const
-		{return isnumeric(c_str());};
-
-	inline bool isInteger(void) const
-		{return isinteger(c_str());};
-
 	bool full(void) const;
 	string operator()(int offset, strsize_t len) const;
 	const char *operator()(int offset) const;
@@ -205,8 +199,6 @@ public:
 	static char *last(char *str, const char *clist);
 	static char *first(char *str, const char *clist);
 	static char *dup(const char *s);
-	static bool isnumeric(const char *s);
-	static bool isinteger(const char *s);
 
 	inline static const char *token(string &s, char **tokens, const char *clist, const char *quote = NULL, const char *eol = NULL)
 		{return token(s.c_mem(), tokens, clist, quote, eol);};

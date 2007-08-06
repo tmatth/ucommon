@@ -280,6 +280,7 @@ public:
 	static struct addrinfo *gethint(SOCKET so, struct addrinfo *h);
 	static socklen_t getaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
 	static socklen_t getlen(struct sockaddr *addr);
+	static void copy(struct sockaddr *from, struct sockaddr *to);
 	static bool equal(struct sockaddr *s1, struct sockaddr *s2);
 	static bool subnet(struct sockaddr *s1, struct sockaddr *s2);
 	static void getinterface(struct sockaddr *iface, struct sockaddr *dest);

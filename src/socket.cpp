@@ -1454,6 +1454,12 @@ bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
 	return true;
 }
 
+void Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
+{
+	socklen_t len = getlen(s1);
+	memcpy(s2, s1, len);
+}
+
 bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 {
 	if(s1->sa_family != s2->sa_family)
