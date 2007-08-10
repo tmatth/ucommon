@@ -328,9 +328,6 @@ rm -f conftest*
 
 AC_LANG_RESTORE
 
-UCOMMON_SHARED=""
-UCOMMON_MODULE="-module -shared"
-
 AC_SUBST_DIR(includes, includedir)
 AC_SUBST_DIR(libs, libdir)
 
@@ -354,27 +351,17 @@ osf*)
     UCOMMON_FLAGS="$UCOMMON_FLAGS -D_POSIX_C_SOURCE=1 -D_OSF_SOURCE=1 -D__USE_STD_IOSTREAM"
     ;;
 cygwin*|mingw*)
-    UCOMMON_SHARED="-no-undefined"
-    UCOMMON_MODULE="-module -shared -no-undefined"
-    ;;
-darwin6*)
-    UCOMMON_MODULE="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
-    STAGE2="macosx"
-    ;;
-darwin*)
-    UCOMMON_MODULE="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
+    UCOMMON_FLAGS="$UCOMMON_FLAGS -no-undefined"
     ;;
 esac
 
 if test "$UCOMMON_MODEL" = "CC" ; then
-	UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC" ; fi
+	UCOMMON_LINKED="$UCOMMON_LINKED $UCOMMON_LIBC" ; fi
 
 AC_SUBST(CHECK)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LINKED)
-AC_SUBST(UCOMMON_SHARED)
-AC_SUBST(UCOMMON_MODULE)
 AC_SUBST(UCOMMON_MODEL)
 AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_CLINK)
@@ -382,5 +369,5 @@ AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 
 AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
-ucommon.pc ucommon.spec)
+ucommon.pc ucommon.spec ucommon-config)
 

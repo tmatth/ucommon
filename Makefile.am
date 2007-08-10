@@ -9,11 +9,13 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec
+EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec *-config.in
 
 SUBDIRS = src inc test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ucommon.pc
 
+scriptdir = $(bindir)
+script_DATA = ucommon-config
 

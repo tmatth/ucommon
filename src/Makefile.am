@@ -18,7 +18,7 @@ CXXLINK = $(LIBTOOL) --tag=$(MODEL) --mode=link $(CXX) $(AM_CFLAGS) $(CFLAGS) \
 lib_LTLIBRARIES = libucommon.la 
 
 # libucommon_la_CXXFLAGS = $(UCOMMON_FLAGS)
-libucommon_la_LDFLAGS = @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE) @UCOMMON_SHARED@
+libucommon_la_LDFLAGS = @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE) 
 libucommon_la_SOURCES = object.cpp linked.cpp string.cpp \
 	counter.cpp bitmap.cpp timer.cpp memory.cpp socket.cpp \
 	access.cpp thread.cpp cpr.cpp vector.cpp
