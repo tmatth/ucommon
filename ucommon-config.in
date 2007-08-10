@@ -99,6 +99,7 @@ while test $# -gt 0; do
 
 	--clink)
 		echo @UCOMMON_CLINK@
+		;;
 
     --libs)
 		echo -lucommon @UCOMMON_LINKED@ 
