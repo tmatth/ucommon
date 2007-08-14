@@ -402,6 +402,13 @@ public:
 	static void cancel_resume(cancellation *cancel);
 	static void cancel_async(cancellation *cancel);
 
+#if _POSIX_PRIORITY_SCHEDULING > 0
+	static void raisePriority(unsigned pri, struct sched_param *sparam = NULL);
+	static void resetPriority(struct sched_param *sparam);
+#else
+	inline static void raisePriority(unsigned pri) {};
+#endif
+
 	inline static bool equal(pthread_t t1, pthread_t t2)
 		{return pthread_equal(t1, t2);};
 };
@@ -813,6 +820,21 @@ inline void remove(queue_t &s, Object *obj)
 	{s.remove(obj);};
 
 END_NAMESPACE
+
+#if _POSIX_PRIORITY_SCHEDULING > 0
+
+#define RAISE_PRIORITY(x) \
+	do { struct sched_param __sparam_; \
+		Thread::raisePriority(&__sparam__, x);
+
+#define	END_PRIORITY \
+		Thread::resetPriority(&__sparam); \
+	} while(0);
+
+#else
+#define	SET_PRIORITY(x)
+#define	END_PRIORITY
+#endif
 
 #define	ENTER_EXCLUSIVE	\
 	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \

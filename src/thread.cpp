@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sched.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -696,6 +697,36 @@ Thread::Thread(size_t size)
 {
 	stack = size;
 }
+
+#if _POSIX_PRIORITY_SCHEDULING > 0
+
+void Thread::resetPriority(struct sched_param *sparam)
+{
+	pthread_t tid = pthread_self();
+	pthread_setschedprio(tid, sparam->sched_priority);
+}
+
+void Thread::raisePriority(unsigned adj, struct sched_param *sparam)
+{
+	int policy;
+	struct sched_param lp;
+	pthread_t tid = pthread_self();
+	int pri;
+
+	if(!sparam)
+		sparam = &lp;
+
+	if(pthread_getschedparam(tid, &policy, sparam))
+		return;
+
+	pri = sparam->sched_priority + adj;
+	if(pri > sched_get_priority_max(policy))
+		pri = sched_get_priority_max(policy);
+
+	pthread_setschedprio(tid, pri);
+}
+	
+#endif
 
 JoinableThread::JoinableThread(size_t size)
 {
