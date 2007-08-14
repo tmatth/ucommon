@@ -405,7 +405,9 @@ public:
 #if _POSIX_PRIORITY_SCHEDULING > 0
 	static void raisePriority(unsigned pri, struct sched_param *sparam = NULL);
 	static void resetPriority(struct sched_param *sparam);
+	static void lowerPriority(void);
 #else
+	inline static void lowerPriority(void) {};
 	inline static void raisePriority(unsigned pri) {};
 #endif
 

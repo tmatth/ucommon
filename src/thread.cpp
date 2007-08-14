@@ -706,6 +706,18 @@ void Thread::resetPriority(struct sched_param *sparam)
 	pthread_setschedprio(tid, sparam->sched_priority);
 }
 
+void Thread::lowerPriority(void)
+{
+	int policy;
+	struct sched_param sp;
+	pthread_t tid = pthread_self();
+
+	if(pthread_getschedparam(tid, &policy, &sp))
+		return;
+
+	pthread_setschedprio(tid, sched_get_priority_min(policy));
+}
+
 void Thread::raisePriority(unsigned adj, struct sched_param *sparam)
 {
 	int policy;
