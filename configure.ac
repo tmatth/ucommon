@@ -351,7 +351,8 @@ osf*)
     UCOMMON_FLAGS="$UCOMMON_FLAGS -D_POSIX_C_SOURCE=1 -D_OSF_SOURCE=1 -D__USE_STD_IOSTREAM"
     ;;
 cygwin*|mingw*)
-    UCOMMON_FLAGS="$UCOMMON_FLAGS -no-undefined"
+    UCOMMON_LINKED="$UCOMMON_LINKED -no-undefined"
+	UCOMMON_LIBS="$UCOMMON_LIBS -no-undefined"
     ;;
 esac
 
