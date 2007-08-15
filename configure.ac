@@ -64,9 +64,9 @@ AC_DEFUN([AC_SUBST_DIR], [
         AC_SUBST($1)
 ])
 
-AC_ARG_ENABLE(stdcpp, 
-	AC_HELP_STRING([--enable-stdcpp],[compile for stdc++ runtime]))
-if test "$enable_stdcpp" = "yes" ; then
+AC_ARG_ENABLE(ucommon-stdcpp, 
+	AC_HELP_STRING([--enable-ucommon-stdcpp],[compile ucommon for stdc++ runtime]))
+if test "$enable_ucommon_stdcpp" = "yes" ; then
 	UCOMMON_MODEL="CXX"
 fi
 
