@@ -1340,6 +1340,19 @@ exit:
 	return rtn;
 }
 
+short Socket::getservice(struct sockaddr *addr)
+{
+	switch(addr->sa_family) {
+#ifdef	AF_INET6
+	case AF_INET6:
+		return ntohs(((struct sockaddr_in6 *)(addr))->sin6_port);
+#endif
+	case AF_INET:
+		return ntohs(((struct sockaddr_in *)(addr))->sin_port);
+	}
+	return 0;
+}
+
 char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 {
 	*name = 0;

@@ -285,6 +285,7 @@ public:
 	static bool subnet(struct sockaddr *s1, struct sockaddr *s2);
 	static void getinterface(struct sockaddr *iface, struct sockaddr *dest);
 	static char *getaddress(struct sockaddr *addr, char *buf, socklen_t size);
+	static short getservice(struct sockaddr *addr);
 };
 
 class __EXPORT ListenSocket : protected Socket
