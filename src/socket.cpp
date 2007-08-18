@@ -1340,6 +1340,34 @@ exit:
 	return rtn;
 }
 
+unsigned Socket::keyindex(struct sockaddr *addr, unsigned keysize)
+{
+	unsigned key = 0;
+	caddr_t cp = NULL;
+	unsigned len;
+switch(addr->sa_family) {
+#ifdef	AF_INET6
+	case AF_INET6:
+		cp = (caddr_t)(&((struct sockaddr_in6 *)(addr))->sin6_addr);
+		len = 16;
+		key = getservice(addr);
+		break;
+#endif
+	case AF_INET:
+		cp = (caddr_t)(&((struct sockaddr_in *)(addr))->sin_addr);
+		len = 4;
+		key = getservice(addr);
+		break;
+	default:
+		return 0;
+	}
+	while(len--) {
+		key = key << 1;
+		key ^= cp[len];
+	}
+	return key % keysize;	
+}
+
 short Socket::getservice(struct sockaddr *addr)
 {
 	switch(addr->sa_family) {

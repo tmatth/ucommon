@@ -286,6 +286,7 @@ public:
 	static void getinterface(struct sockaddr *iface, struct sockaddr *dest);
 	static char *getaddress(struct sockaddr *addr, char *buf, socklen_t size);
 	static short getservice(struct sockaddr *addr);
+	static unsigned keyindex(struct sockaddr *addr, unsigned keysize);
 };
 
 class __EXPORT ListenSocket : protected Socket
