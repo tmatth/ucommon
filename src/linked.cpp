@@ -116,6 +116,10 @@ OrderedObject()
 		root->tail->next = this;
 }
 
+// One thing to watch out for is that the id is freed in the destructor.
+// This means that you should use a dup'd string for your nid.  Otherwise
+// you will need to set it to NULL before destroying the object.
+
 NamedObject::NamedObject(NamedObject **root, char *nid, unsigned max) :
 OrderedObject()
 {
@@ -151,6 +155,8 @@ OrderedObject()
 
 NamedObject::~NamedObject()
 {
+	// this assumes the id is a malloc'd or strdup'd string.
+
 	if(id) {
 		free(id);
 		id = NULL;
@@ -178,10 +184,15 @@ void NamedList::delist(void)
 	keyroot = NULL;
 }
 
+// Linked objects are assumed to be freeable if they are released.  The retain
+// simply marks it into a self reference state which can never otherwise happen
+// naturally.  This is used to mark avoid freeing during release.
+
 void LinkedObject::retain(void)
 {
 	next = this;
 }
+
 
 void LinkedObject::release(void)
 {
@@ -320,6 +331,10 @@ NamedObject *NamedObject::find(NamedObject *root, const char *id)
 	return root;
 }
 
+// Like in NamedObject, the nid that is used will be deleted by the
+// destructor through calling purge.  Hence it should be passed from 
+// a malloc'd or strdup'd string.
+
 NamedTree::NamedTree(char *nid) :
 NamedObject(), child()
 {
@@ -441,6 +456,9 @@ void NamedTree::setId(char *nid)
 	id = nid;
 }
 
+// If you remove the tree node, the id is NULL'd also.  This keeps the
+// destructor from freeing it.
+
 void NamedTree::remove(void)
 {
 	if(parent)
@@ -463,6 +481,8 @@ void NamedTree::purge(void)
 		node.next();
 		delete obj;
 	}
+
+	// this assumes the object id is a malloc'd/strdup string.
 
 	if(id) {
 		free(id);
