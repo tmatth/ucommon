@@ -44,6 +44,7 @@ rm -fr %{buildroot}
 
 %files devel
 %defattr(-,root,root,-)
+%{_bindir}/ucommon-config
 %{_libdir}/*.a
 %{_libdir}/*.so
 %{_libdir}/*.la
