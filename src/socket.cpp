@@ -337,7 +337,7 @@ void cidr::set(const char *cp)
 		memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
 		bitset((bit_t *)&netmask.ipv4, getMask(cp));
 		string::set(cbuf, sizeof(cbuf), cp);
-		ep = (char *)strchr(cp, '/');
+		ep = (char *)strchr(cbuf, '/');
 		if(ep)
 			*ep = 0;
 
