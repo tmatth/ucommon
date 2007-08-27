@@ -328,8 +328,14 @@ public:
 	inline char *operator*() const
 		{return buffer;};
 
-	inline char operator[](size_t offset)
+	inline char operator[](size_t offset) const
 		{return buffer[offset];};
+
+	inline char *operator()(size_t offset) const
+		{return buffer + offset;};
+
+	inline size_t size(void) const
+		{return S;};
 };
 
 template<strsize_t S>
