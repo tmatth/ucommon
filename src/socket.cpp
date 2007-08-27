@@ -126,19 +126,30 @@ LinkedObject()
 	family = AF_UNSPEC;
 	memset(&network, 0, sizeof(network));
 	memset(&netmask, 0, sizeof(netmask));
+	name[0] = 0;
 }
 
 cidr::cidr(const char *cp) :
 LinkedObject()
 {
 	set(cp);
+	name[0] = 0;
 }
 
-cidr::cidr(LinkedObject **policy, const char *cp) :
+cidr::cidr(policy **policy, const char *cp) :
 LinkedObject(policy)
 {
 	set(cp);
+	name[0] = 0;
 }
+
+cidr::cidr(policy **policy, const char *cp, const char *id) :
+LinkedObject(policy)
+{
+	set(cp);
+	string::set(name, sizeof(name), id);
+}
+
 
 cidr::cidr(const cidr &copy) :
 LinkedObject()
@@ -146,6 +157,7 @@ LinkedObject()
 	family = copy.family;
 	memcpy(&network, &copy.network, sizeof(network));
 	memcpy(&netmask, &copy.netmask, sizeof(netmask));
+	memcpy(&name, &copy.name, sizeof(name));
 }
 
 unsigned cidr::getMask(void) const
@@ -163,69 +175,22 @@ unsigned cidr::getMask(void) const
 	}
 }
 
-int cidr::policy(SOCKET so, cidr *paccept, cidr *preject, int prior)
+cidr *cidr::find(policy *policy, const struct sockaddr *s)
 {
-	struct sockaddr_storage addr;
-	socklen_t slen = sizeof(addr);
-	int allowed = 0, denied = 0, masked;
-	linked_pointer<cidr> accept = paccept;
-	linked_pointer<cidr> reject = preject;
+	cidr *member = NULL;
+	unsigned top = 0;
 
-	if(so == INVALID_SOCKET)
-		return false;
-
-	if(getpeername(so, (struct sockaddr *)&addr, &slen))
-		return false;
-
-	while(accept) {
-		if(accept->isMember((struct sockaddr *)&addr)) {
-			masked = accept->getMask();
-			if(masked > allowed)
-				allowed = masked;
-		}
-		accept.next();
-	}
-
-    while(reject) {
-        if(reject->isMember((struct sockaddr *)&addr)) {
-			masked = reject->getMask();
-			if(masked > denied)
-				denied = masked;
-        }
-		reject.next();
-    }
-
-	if(allowed == denied)
-		return prior;
-	else if(allowed > denied) {
-		if(prior < 0 && allowed > -prior)
-			return allowed;
-		if(prior >= 0 && allowed > prior)
-			return allowed;
-		if(allowed == -prior)
-			return 0;
-		return prior;
-	}
-	else {
-		if(prior > 0 && denied > prior)
-			return -denied;
-		if(prior <= 0 && denied > -prior)
-			return -denied;
-		if(denied == prior)
-			return 0;
-		return prior;
-	}
-}	
-
-bool cidr::find(cidr *policy, const struct sockaddr *s)
-{
 	linked_pointer<cidr> p = policy;
 	while(p) {
-		if(policy->isMember(s))
-			return true;
+		if(p->isMember(s)) {
+			if(p->getMask() > top) {
+				top = p->getMask();
+				member = *p;
+			}
+		}
 		p.next();
 	}
-	return false;
+	return member;
 }
 
 bool cidr::isMember(const struct sockaddr *s) const

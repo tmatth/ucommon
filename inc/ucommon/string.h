@@ -322,16 +322,16 @@ public:
 	inline bool operator!() const
 		{return buffer[0] == 0;};	
 
-	inline operator char *() const
+	inline operator char *()
 		{return buffer;};
 
-	inline char *operator*() const
+	inline char *operator*()
 		{return buffer;};
 
 	inline char operator[](size_t offset) const
 		{return buffer[offset];};
 
-	inline char *operator()(size_t offset) const
+	inline char *operator()(size_t offset)
 		{return buffer + offset;};
 
 	inline size_t size(void) const

@@ -3,6 +3,7 @@ From ucommon 0.6.1 to 0.7.0
 - changed base configure options to avoid collisions with other packages
 - added getservice interface to get socket port #
 - added charbuf template
+- cidr policy chains simplified
 
 From ucommon 0.6.0 to 0.6.1
 - support for static libpthreadGC2

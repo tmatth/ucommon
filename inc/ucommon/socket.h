@@ -95,17 +95,22 @@ class __EXPORT cidr : public LinkedObject
 protected:
 	int family;
 	inethostaddr_t netmask, network;
-
+	char name[16];
 	unsigned getMask(const char *cp) const;
 
 public:
+	typedef	LinkedObject policy;
+
 	cidr();
 	cidr(const char *str);
-	cidr(LinkedObject **policy, const char *str);
+	cidr(policy **policy, const char *str);
+	cidr(policy **policy, const char *str, const char *id);
 	cidr(const cidr &copy);
 
-	static int policy(SOCKET so, cidr *accept, cidr *reject, int prior = 0);
-	static bool find(cidr *policy, const struct sockaddr *addr);
+	static cidr *find(policy *policy, const struct sockaddr *addr);
+
+	inline const char *getName(void) const
+		{return name;};
 
 	inline int getFamily(void) const
 		{return family;};
