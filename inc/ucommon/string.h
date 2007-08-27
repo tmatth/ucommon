@@ -297,6 +297,41 @@ public:
 	static memstring *create(mempager *pager, strsize_t size, char fill = 0);
 };
 
+template<size_t S>
+class charbuf
+{
+private:
+	char buffer[S];
+
+public:
+	inline charbuf() 
+		{buffer[0] = 0;};
+
+	inline charbuf(const char *s) 
+		{string::set(buffer, S, s);};
+
+	inline void operator=(const char *s)
+		{string::set(buffer, S, s);};
+
+	inline void operator+=(const char *s)
+		{string::add(buffer, S, s);};
+
+	inline operator bool() const
+		{return buffer[0];};
+
+	inline bool operator!() const
+		{return buffer[0] == 0;};	
+
+	inline operator char *() const
+		{return buffer;};
+
+	inline char *operator*() const
+		{return buffer;};
+
+	inline char operator[](size_t offset)
+		{return buffer[offset];};
+};
+
 template<strsize_t S>
 class stringbuf : public memstring
 {
