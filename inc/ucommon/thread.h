@@ -91,6 +91,9 @@ public:
 	void lock(void);
 	void release(void);
 
+	unsigned getLocking(void);
+	unsigned getWaiting(void);
+
 	inline static void lock(rexlock &rex)
 		{rex.lock();};
 
@@ -116,6 +119,10 @@ public:
 	bool exclusive(timeout_t timeout = Timer::inf);
 	bool shared(timeout_t timeout = Timer::inf);
 	void release(void);
+
+	unsigned getReaders(void);
+	unsigned getWriters(void);
+	unsigned getWaiters(void);
 
 	inline static bool exclusive(rwlock &lock, timeout_t timeout = Timer::inf)
 		{return lock.exclusive(timeout);};
@@ -157,6 +164,9 @@ public:
 	void commit(void);
 	void access(void);
 	void release(void);
+
+	unsigned getReaders(void);
+	unsigned getWaiters(void);
 
 	inline void operator++()
 		{access();};

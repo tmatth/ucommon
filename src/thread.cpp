@@ -357,6 +357,26 @@ Conditional()
 	waiting = 0;
 }
 
+unsigned rexlock::getWaiting(void)
+{
+	unsigned count;
+	Conditional::lock();
+	count = waiting;
+	Conditional::unlock();
+	return count;
+}
+
+unsigned rexlock::getLocking(void)
+{
+	unsigned count;
+	Conditional::lock();
+	count = lockers;
+	Conditional::unlock();
+	return count;
+}
+
+
+
 void rexlock::Exlock(void)
 {
 	lock();
@@ -399,6 +419,33 @@ Conditional()
 	writers = 0;
 	reading = 0;
 	waiting = 0;
+}
+
+unsigned rwlock::getReaders(void)
+{
+	unsigned count;
+	Conditional::lock();
+	count = reading;
+	Conditional::unlock();
+	return count;
+}
+
+unsigned rwlock::getWriters(void)
+{
+	unsigned count;
+	Conditional::lock();
+	count = writers;
+	Conditional::unlock();
+	return count;
+}
+
+unsigned rwlock::getWaiters(void)
+{
+	unsigned count;
+	Conditional::lock();
+	count = waiting;
+	Conditional::unlock();
+	return count;
 }
 
 void rwlock::Exlock(void)
@@ -514,6 +561,26 @@ Conditional()
 {
 	waits = 0;
 	reads = 0;
+}
+
+unsigned ConditionalLock::getReaders(void)
+{
+	unsigned count;
+
+	Conditional::lock();
+	count = reads;
+	Conditional::unlock();
+	return count;
+}
+
+unsigned ConditionalLock::getWaiters(void)
+{
+	unsigned count;
+
+	Conditional::lock();
+	count = waits;
+	Conditional::unlock();
+	return count;
 }
 
 void ConditionalLock::Shlock(void)
