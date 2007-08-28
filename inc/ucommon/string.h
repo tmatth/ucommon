@@ -184,6 +184,8 @@ public:
 	static char *set(char *s, size_t sl, const char *d, size_t l);
 	static char *add(char *s, size_t sl, const char *d); 
 	static char *add(char *s, size_t sl, const char *d, size_t l);
+	static const char *ifind(const char *s, const char *key, const char *delim);
+	static const char *find(const char *s, const char *key, const char *delim);
 	static size_t count(const char *s);
 	static int compare(const char *s1, const char *s2);
 	static int compare(const char *s1, const char *s2, size_t len);
