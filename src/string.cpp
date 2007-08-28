@@ -1339,7 +1339,7 @@ const char *string::find(const char *str, const char *key, const char *delim)
 
 	while(l1 >= l2) {
 		if(!strncmp(key, str, l2)) {
-			if(l1 == l2 || !delim || !strchr(delim, str[l2]))
+			if(l1 == l2 || !delim || strchr(delim, str[l2]))
 				return str;
 		}
 		++str;
@@ -1355,7 +1355,7 @@ const char *string::ifind(const char *str, const char *key, const char *delim)
 
 	while(l1 >= l2) {
 		if(!strnicmp(key, str, l2)) {
-			if(l1 == l2 || !delim || !strchr(delim, str[l2]))
+			if(l1 == l2 || !delim || strchr(delim, str[l2]))
 				return str;
 		}
 		++str;
