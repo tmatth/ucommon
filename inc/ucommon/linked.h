@@ -95,6 +95,8 @@ public:
 
 	LinkedObject **index(void) const;
 
+	LinkedObject *get(void);
+
 	inline LinkedObject *begin(void) const
 		{return (LinkedObject*)(head);};
 

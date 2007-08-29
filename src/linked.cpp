@@ -607,6 +607,21 @@ OrderedIndex::~OrderedIndex()
 	head = tail = 0;
 }
 
+LinkedObject *OrderedIndex::get(void)
+{
+	LinkedObject *node;
+
+	if(!head)
+		return NULL;
+
+	node = head;
+	head = static_cast<OrderedObject *>(node->getNext());
+	if(!head)
+		tail = NULL;
+
+	return node;
+}
+
 void OrderedIndex::purge(void)
 {
 	if(head) {
