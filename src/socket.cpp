@@ -466,6 +466,18 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
+struct sockaddr *Socket::address::find(struct sockaddr *addr)
+{
+	struct addrinfo *node = list;
+
+	while(node) {
+		if(equal(addr, node->ai_addr))
+			return node->ai_addr;
+		node = node->ai_next;
+	}
+	return NULL;
+}
+
 Socket::Socket(const Socket &s)
 {
 #ifdef	_MSWINDOWS_

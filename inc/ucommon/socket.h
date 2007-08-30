@@ -158,6 +158,7 @@ public:
 		~address();
 
 		struct sockaddr *getAddr(void);
+		struct sockaddr *find(struct sockaddr *addr);
 
 		inline struct addrinfo *getList(void)
 			{return list;};
