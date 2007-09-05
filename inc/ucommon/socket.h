@@ -147,7 +147,7 @@ public:
 	class __EXPORT address
 	{
 	protected:
-		struct addrinfo *list;
+		struct addrinfo *list, hint;
 
 	public:
 		address(const char *a, int family = 0, int type = SOCK_STREAM, int protocol = 0);
@@ -175,7 +175,7 @@ public:
 		inline operator struct sockaddr *()
 			{return getAddr();};
 
-		void join(address *target);
+		void add(const char *host, const char *svc = NULL, int family = 0);
 	};
 
 	Socket(const Socket &s);

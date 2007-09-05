@@ -384,7 +384,6 @@ void cidr::set(const char *cp)
 
 Socket::address::address(const char *a, int family, int type, int protocol)
 {
-	struct addrinfo hint;
 	char *addr = strdup(a);
 	char *host = strchr(addr, '@');
 	char *ep;
@@ -426,8 +425,6 @@ proc:
 
 Socket::address::address(int family, const char *host, const char *svc)
 {
-	struct addrinfo hint;
-
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = family;
 
@@ -441,7 +438,6 @@ Socket::address::address(Socket &s, const char *host, const char *svc)
 
 Socket::address::address(const char *host, const char *svc, SOCKET so)
 {
-	struct addrinfo hint;
 	struct addrinfo *ah = NULL;
 
 	if(so != INVALID_SOCKET)
@@ -466,25 +462,28 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
-void Socket::address::join(address *target)
+void Socket::address::add(const char *host, const char *svc, int family)
 {
-	struct addrinfo *last = list;
+	struct addrinfo *join, *last = NULL;
 
-	if(!list)
-		return;
-
-	if(!target->list) {
-		target->list = list;
-		list = NULL;
-		return;
+	if(family) {
+		memset(&hint, 0, sizeof(hint));
+		hint.ai_family = family;
 	}
 
+	getaddrinfo(host, svc, &hint, &join);
+
+	if(!join)
+		return;
+
+	if(!list) {
+		list = join;
+		return;
+	}
+	last = list;
 	while(last->ai_next)
 		last = last->ai_next;
-
-	last->ai_next = target->list;
-	target->list = list;
-	list = NULL;
+	last->ai_next = join;
 }
 
 struct sockaddr *Socket::address::find(struct sockaddr *addr)
