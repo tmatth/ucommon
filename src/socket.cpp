@@ -466,6 +466,27 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
+void Socket::address::join(address *target)
+{
+	struct addrinfo *last = list;
+
+	if(!list)
+		return;
+
+	if(!target->list) {
+		target->list = list;
+		list = NULL;
+		return;
+	}
+
+	while(last->ai_next)
+		last = last->ai_next;
+
+	last->ai_next = target->list;
+	target->list = list;
+	list = NULL;
+}
+
 struct sockaddr *Socket::address::find(struct sockaddr *addr)
 {
 	struct addrinfo *node = list;

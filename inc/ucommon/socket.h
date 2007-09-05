@@ -174,6 +174,8 @@ public:
 
 		inline operator struct sockaddr *()
 			{return getAddr();};
+
+		void join(address *target);
 	};
 
 	Socket(const Socket &s);
