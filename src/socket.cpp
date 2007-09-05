@@ -1405,13 +1405,13 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 	int so = INVALID_SOCKET;
 	socklen_t len = getlen(dest);
 	memset(iface, 0, len);
-	iface->sa_family = dest->sa_family;
-	switch(iface->sa_family) {
+	iface->sa_family = AF_UNSPEC;
+	switch(dest->sa_family) {
 #ifdef	AF_INET6
 	case AF_INET6:
 #endif
 	case AF_INET:
-		so = ::socket(iface->sa_family, SOCK_DGRAM, 0);
+		so = ::socket(dest->sa_family, SOCK_DGRAM, 0);
 		if(so == INVALID_SOCKET)
 			return;
 		if(!::connect(so, dest, len))
