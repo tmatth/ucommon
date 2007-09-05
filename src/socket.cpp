@@ -462,6 +462,16 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
+void Socket::address::add(struct sockaddr *addr)
+{
+	char buffer[80];
+	char svc[8];
+
+	Socket::getaddress(addr, buffer, sizeof(buffer));
+	snprintf(svc, sizeof(svc), "%d", Socket::getservice(addr));
+	add(buffer, svc, addr->sa_family);
+}
+
 void Socket::address::add(const char *host, const char *svc, int family)
 {
 	struct addrinfo *join, *last = NULL;

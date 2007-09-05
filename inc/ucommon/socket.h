@@ -176,6 +176,7 @@ public:
 			{return getAddr();};
 
 		void add(const char *host, const char *svc = NULL, int family = 0);
+		void add(struct sockaddr *addr);
 	};
 
 	Socket(const Socket &s);
