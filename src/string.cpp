@@ -1337,13 +1337,27 @@ const char *string::find(const char *str, const char *key, const char *delim)
 	unsigned l1 = strlen(str);
 	unsigned l2 = strlen(key);
 
+	if(!delim[0])
+		delim = NULL;
+
 	while(l1 >= l2) {
 		if(!strncmp(key, str, l2)) {
 			if(l1 == l2 || !delim || strchr(delim, str[l2]))
 				return str;
 		}
-		++str;
-		--l1;
+		if(!delim) {
+			++str;
+			--l1;
+			continue;
+		}
+		while(l1 >= l2 && !strchr(delim, *str)) {
+			++str;
+			--l1;
+		}
+		while(l1 >= l2 && strchr(delim, *str)) {
+			++str;
+			--l1;
+		} 
 	}
 	return NULL;
 }
@@ -1353,13 +1367,27 @@ const char *string::ifind(const char *str, const char *key, const char *delim)
 	unsigned l1 = strlen(str);
 	unsigned l2 = strlen(key);
 
+	if(!delim[0])
+		delim = NULL;
+
 	while(l1 >= l2) {
 		if(!strnicmp(key, str, l2)) {
 			if(l1 == l2 || !delim || strchr(delim, str[l2]))
 				return str;
 		}
-		++str;
-		--l1;
+		if(!delim) {
+			++str;
+			--l1;
+			continue;
+		}
+		while(l1 >= l2 && !strchr(delim, *str)) {
+			++str;
+			--l1;
+		}
+		while(l1 >= l2 && strchr(delim, *str)) {
+			++str;
+			--l1;
+		} 
 	}
 	return NULL;
 }
