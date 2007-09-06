@@ -1360,8 +1360,10 @@ const char *string::ifind(const char *str, const char *key, const char *delim)
 			if(l1 == l2 || !delim || strchr(delim, str[l2]))
 				return str;
 		}
-		++str;
-		--l1;
+		do {
+			++str;
+			--l1;
+		} while(l1 >= l2 && (delim && strchr(delim, *str)));
 	}
 	return NULL;
 }
