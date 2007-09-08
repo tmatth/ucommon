@@ -4,3 +4,7 @@ UCommon 0.4 codebase completed and ready for release with the introduction of
 the GNU GPL V3.  This is a complete rewrite of UCommon as a C++ library for
 threading and design patterns suitable for deeply embedded targets.
 
+UCommon 0.7 codebase now has core documentation and basic library theory
+in header files.  This documentation can be generated with doxygen or by
+using "make doxy".
+
