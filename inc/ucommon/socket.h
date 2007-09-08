@@ -14,6 +14,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Common socket class and address manipulation.
+ * This offers a common socket base class that exposes socket functionality
+ * based on what the target platform supports.  Support for multicast, IPV6
+ * addressing, and manipulation of cidr policies are all supported here.
+ * @file ucommon/socket.h
+ */
+
 #ifndef _UCOMMON_SOCKET_H_
 #define	_UCOMMON_SOCKET_H_
 

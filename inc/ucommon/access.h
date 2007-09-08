@@ -14,6 +14,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Locking classes for member function automatic operations.
+ * This header covers ucommon access related classes.  These are used to
+ * provide automatic management of locks and sychronization objects through
+ * common virtual base classes which can be used with automatic objects. This
+ * allows member functions to aquire a lock when entered and automatically
+ * release the lock when the member function returns.
+ * @file ucommon/access.h
+ */
+
 #ifndef _UCOMMON_ACCESS_H_
 #define	_UCOMMON_ACCESS_H_
 

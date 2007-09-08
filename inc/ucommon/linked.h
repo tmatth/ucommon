@@ -14,6 +14,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Linked objects, lists, templates, and containers.
+ * Common support for objects that might be organized as single and double 
+ * linked lists, rings and queues, and tree oriented data structures.  These
+ * generic classes may be used to help form anything from callback 
+ * registration systems and indexed memory hashes to xml parsed tree nodes.  
+ * @file ucommon/linked.h
+ */
+
 #ifndef _UCOMMON_LINKED_H_
 #define	_UCOMMON_LINKED_H_
 

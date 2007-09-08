@@ -14,6 +14,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Top level include file for the ucommon library.
+ * This is the only include file you need to have in your sources; it 
+ * includes the remaining header files.
+ * @file ucommon/ucommon.h
+ */
+
 #ifndef	_UCOMMON_UCOMMON_H_
 #define	_UCOMMON_UCOMMON_H_
 #include <ucommon/platform.h>

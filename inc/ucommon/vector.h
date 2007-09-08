@@ -14,6 +14,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Basic array and reusable object factory heap support.
+ * This offers ucommon support for vector arrays, and for forming
+ * reusable object pools.  Reusable object pools can be tied to local
+ * heaps and offer a means to create type factories that do not require
+ * global locking through malloc.
+ * @file ucommon/vector.h
+ */
+
 #ifndef	_UCOMMON_VECTOR_H_
 #define	_UCOMMON_VECTOR_H_
 

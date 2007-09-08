@@ -14,8 +14,28 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Various miscelanous platform specific headers and defines.
+ * This is used to support ucommon on different platforms.  The ucommon
+ * library assumes at least a real posix threading library is present (or
+ * the redhat suppported pthread-w32 for the Microsoft Windows legacy platform).
+ * This header also deals with issues related to common base types.
+ * @file ucommon/platform.h
+ */
+
 #ifndef	_UCOMMON_PLATFORM_H_
 #define	_UCOMMON_PLATFORM_H_
+
+/**
+ * Common namespace for all ucommon objects.
+ * We are using a common namespace to easily seperate ucommon from other
+ * libraries.  This namespace may be changed from ucc to gnu when we
+ * merge code with GNU Common C++.  In any case, it is controlled by
+ * macros and so any changes will be hidden from user applications so long 
+ * as the namespace macros (UCOMMON_NAMESPACE, NAMESPACE_UCOMMON, 
+ * END_NAMESPACE) are used in place of direct namespace declarations.
+ * @namespace ucc
+ */ 
 
 #define	UCOMMON_NAMESPACE	ucc
 #define	NAMESPACE_UCOMMON	namespace ucc {

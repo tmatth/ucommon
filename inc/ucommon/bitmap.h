@@ -14,6 +14,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * A simple class to perform bitmap manipulation.
+ * Bitmaps are used to manage bit-aligned objects, such as network cidr
+ * addresses.  This header introduces a common bitmap management class
+ * for the ucommon library.
+ * @file ucommon/bitmap.h
+ */
+
 #ifndef _UCOMMON_BITMAP_H_
 #define	_UCOMMON_BITMAP_H_
 

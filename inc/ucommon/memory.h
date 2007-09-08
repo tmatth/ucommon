@@ -14,6 +14,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Private heaps, pools, and associations.
+ * Private heaps often can reduce locking contention in threaded applications
+ * since they do not require using the global "malloc" function.  Private
+ * heaps also can be used as auto-release heaps, where all memory allocated
+ * and parsled out for small objects can be automatically released all at once.
+ * Pager pools are used to optimize system allocation around page boundries.
+ * Associations allow private memory to be tagged and found by string
+ * identifiers.
+ * @file ucommon/memory.h
+ */
+
 #ifndef	_UCOMMON_MEMORY_H_
 #define	_UCOMMON_MEMORY_H_
 

@@ -14,6 +14,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * A common object base class with auto-pointer support.
+ * A common object class is used which may be referenced counted and
+ * associated with a smart auto-pointer class.  A lot of the things
+ * found here were inspired by working with Objective-C.
+ * @file ucommon/object.h
+ */
+
 #ifndef	_UCOMMON_OBJECT_H_
 #define	_UCOMMON_OBJECT_H_
 

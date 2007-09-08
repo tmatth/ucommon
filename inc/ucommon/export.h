@@ -14,6 +14,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Export interfaces for library interfaces.
+ * This is a special header used when we have to build DLL's for dumb
+ * platforms which require explicit declaration of imports and exports.
+ * The real purpose is to include our local headers in a new library
+ * module with external headers referenced as imports, and then to define
+ * our own interfaces in our new library as exports.  This allows native
+ * contruction of new DLL's based on/that use ucommon on Microsoft Windows
+ * and perhaps for other similarly defective legacy platforms.  Otherwise
+ * this header is not used at all, and not when building applications.
+ * @file ucommon/export.h
+ */
+
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #ifdef	__EXPORT
 #undef	__EXPORT

@@ -14,6 +14,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Realtime timers and timer queues.
+ * This offers ucommon support for realtime high-resolution threadsafe
+ * timers and timer queues.  Threads may be scheduled by timers and timer
+ * queues may be used to inject timer events into callback objects or through
+ * virtuals.
+ * @file ucommon/timers.h
+ */
+
 #ifndef _UCOMMON_TIMERS_H_
 #define	_UCOMMON_TIMERS_H_
 

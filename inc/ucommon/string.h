@@ -14,6 +14,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * A common string class and character string support functions.
+ * Ucommon offers a simple string class that operates through copy-on-write 
+ * when needing to expand buffer size.  Derived classes and templates allows
+ * one to create strings which live entirely in the stack frame rather
+ * than using the heap.  This offers the benefit of the string class
+ * manipulative members without compromising performance or locking issues
+ * in threaded applications.  Other things found here include better and
+ * safer char array manipulation functions.
+ * @file ucommon/string.h
+ */
+
 #ifndef	_UCOMMON_STRING_H_
 #define	_UCOMMON_STRING_H_
 

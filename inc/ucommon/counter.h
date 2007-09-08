@@ -14,6 +14,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Support for various automatic counting objects.
+ * This header defines templates for various kinds of automatic counting
+ * and sequencing objects.  Templates are used to allow manipulation of
+ * various numerical-like types.
+ * @file ucommon/counter.h
+ */
+
 #ifndef _UCOMMON_COUNTER_H_
 #define	_UCOMMON_COUNTER_H_
 

@@ -14,6 +14,29 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+/**
+ * Thread classes and sychronization objects.
+ * The theory behind ucommon thread classes is that they would be used
+ * to create derived classes where thread-specific data can be stored as
+ * member data of the derived class.  The run method is called when the
+ * context is executed.  Since we use a pthread foundation, we support
+ * both detached threads and joinable threads.  Objects based on detached
+ * threads should be created with new, and will automatically delete when
+ * the thread context exits.  Joinable threads will be joined with deleted.
+ *
+ * The theory behind ucommon sychronization objects is that all upper level
+ * sychronization objects can be formed directly from a mutex and conditional.
+ * This includes semaphores, barriers, rwlock, our own specialized conditional
+ * lock, resource-bound locking, and recurive exclusive locks.  Using only
+ * conditionals means we are not dependent on platform specific pthread
+ * implimentations that may not impliment some of these, and hence improves
+ * portability and consistency.  Given that our rwlocks are recursive access
+ * locks, one can safely create read/write threading pairs where the read
+ * threads need not worry about deadlocks and the writers need not either if
+ * they only write-lock one instance at a time to change state.
+ * @file ucommon/thread.h
+ */
+
 #ifndef _UCOMMON_THREAD_H_
 #define	_UCOMMON_THREAD_H_
 
