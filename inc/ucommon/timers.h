@@ -88,7 +88,7 @@ public:
 class __EXPORT TimerQueue : public OrderedIndex
 {
 public:
-	class __EXPORT event : private Timer, public LinkedList
+	class __EXPORT event : protected Timer, public LinkedList
 	{
 	protected:
 		friend class TimerQueue;
@@ -96,14 +96,14 @@ public:
 		event(timeout_t arm);
 		event(TimerQueue *tq, timeout_t arm);
 
-		void attach(TimerQueue *tq);
-		void detach(void);
-
 		virtual void expired(void) = 0;
 		virtual timeout_t timeout(void);
 
 	public:
 		virtual ~event();
+
+		void attach(TimerQueue *tq);
+		void detach(void);
 
         inline void arm(timeout_t timeout)
 			{set(timeout);};

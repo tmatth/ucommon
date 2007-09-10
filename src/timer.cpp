@@ -355,6 +355,14 @@ timeout_t TimerEvent::timeout(void)
 	return timeout;
 }
 
+TimerQueue::TimerQueue() : OrderedIndex()
+{
+}
+
+TimerQueue::~TimerQueue()
+{
+}
+
 timeout_t TimerQueue::expire(void)
 {
 	timeout_t first = Timer::inf, next;
@@ -371,10 +379,7 @@ timeout_t TimerQueue::expire(void)
 	return first;	
 }
 
-void TimerQueue::operator+=(event &te)
-{
-	te.attach(this);
-}
+void TimerQueue::operator+=(event &te) { te.attach(this); }
 
 void TimerQueue::operator-=(event &te)
 {
