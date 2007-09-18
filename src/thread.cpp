@@ -108,6 +108,9 @@ void ReusableAllocator::release(ReusableObject *obj)
 	unlock();
 }
 
+void ReusableAllocator::exlock(void)
+
+
 Completion::Completion() :
 Conditional()
 {
@@ -591,6 +594,23 @@ void ConditionalLock::Shlock(void)
 void ConditionalLock::Unlock(void)
 {
 	release();
+}
+
+void ConditionalLock::exclusive(void)
+{
+	Conditional::lock();
+	--reads;	// remove ourselves as reader
+	while(reads) {
+		++waits;
+		Conditional::wait();
+		--waits;
+	}
+}
+
+void ConditionalLock::share(void)
+{
+	++reads;
+	Conditional::unlock();
 }
 
 void ConditionalLock::modify(void)
