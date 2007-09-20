@@ -187,8 +187,6 @@ public:
 	void commit(void);
 	void access(void);
 	void release(void);
-	void exclusive(void);
-	void share(void);
 
 	unsigned getReaders(void);
 	unsigned getWaiters(void);
@@ -210,12 +208,6 @@ public:
 
 	inline static void access(ConditionalLock &s)
 		{s.access();};
-
-	inline static void exclusive(ConditionalLock &s)
-		{s.exclusive();};
-
-	inline static void share(ConditionalLock &s)
-		{s.share();};
 };	
 
 class __EXPORT barrier : private Conditional 
@@ -828,12 +820,6 @@ inline void access(condlock_t &cl)
 
 inline void release(condlock_t &cl)
 	{cl.release();};
-
-inline void exclusive(condlock_t &cl)
-	{cl.exclusive();};
-
-inline void share(condlock_t &cl)
-	{cl.share();};
 
 inline bool exclusive(rwlock_t &rw, timeout_t timeout = Timer::inf)
 	{return rw.exclusive(timeout);};

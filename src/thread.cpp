@@ -593,29 +593,6 @@ void ConditionalLock::Unlock(void)
 	release();
 }
 
-void ConditionalLock::exclusive(void)
-{
-	Conditional::lock();
-	--reads;	// remove ourselves as reader
-	while(reads) {
-		++waits;
-		Conditional::wait();
-		--waits;
-	}
-}
-
-void ConditionalLock::share(void)
-{
-	if(waits) {
-		Conditional::signal();
-		Conditional::unlock();
-		access();
-	} else {			
-		++reads;
-		Conditional::unlock();
-	}
-}
-
 void ConditionalLock::modify(void)
 {
 	Conditional::lock();
@@ -628,8 +605,6 @@ void ConditionalLock::modify(void)
 
 void ConditionalLock::commit(void)
 {
-	if(waits)
-		Conditional::signal();
 	Conditional::unlock();
 }
 
