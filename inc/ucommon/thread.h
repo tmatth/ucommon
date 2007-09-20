@@ -209,7 +209,7 @@ public:
 	inline static void access(ConditionalLock &s)
 		{s.access();};
 };	
-
+	
 class __EXPORT barrier : private Conditional 
 {
 private:
