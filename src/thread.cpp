@@ -25,6 +25,8 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+unsigned Conditional::max_sharing = 0;
+
 #ifdef	PTW32_STATIC_LIB
 static class _init_
 {
@@ -484,6 +486,7 @@ bool rwlock::exclusive(timeout_t timeout)
 			rtn = false;
 		--waiting;
 	}
+	assert(!max_sharing || writers < max_sharing);
 	if(rtn) {
 		if(!writers)
 			writer = pthread_self();
@@ -512,6 +515,7 @@ bool rwlock::shared(timeout_t timeout)
 			rtn = false;
 		--waiting;
 	}
+	assert(!max_sharing || reading < max_sharing);
 	if(rtn)
 		++reading;
 	unlock();
@@ -521,7 +525,10 @@ bool rwlock::shared(timeout_t timeout)
 void rwlock::release(void)
 {
 	lock();
+	assert(reading || writers);
+
 	if(writers) {
+		assert(!reading);
 		--writers;
 		if(waiting && !writers)
 			broadcast();
@@ -529,6 +536,7 @@ void rwlock::release(void)
 		return;
 	}
 	if(reading) {
+		assert(!writers);
 		--reading;
 		if(!reading && waiting)
 			signal();
@@ -613,6 +621,7 @@ void ConditionalLock::commit(void)
 void ConditionalLock::release(void)
 {
 	Conditional::lock();
+	assert(reads);
 	--reads;
 	if(!reads && waits)
 		Conditional::signal();
@@ -622,6 +631,7 @@ void ConditionalLock::release(void)
 void ConditionalLock::access(void)
 {
 	Conditional::lock();
+	assert(!max_sharing || reads < max_sharing);
 	++reads;
 	Conditional::unlock();
 }
@@ -629,6 +639,7 @@ void ConditionalLock::access(void)
 void ConditionalLock::exclusive(void)
 {
 	lock();
+	assert(reads);
 	--reads;
 	while(reads) {
 		++waits;
@@ -639,6 +650,7 @@ void ConditionalLock::exclusive(void)
 
 void ConditionalLock::share(void)
 {
+	assert(!reads);
 	++reads;
 	unlock();
 }

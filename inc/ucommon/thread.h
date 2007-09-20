@@ -93,6 +93,8 @@ protected:
 	~Conditional();
 
 public:
+	static unsigned max_sharing;
+
 	static inline pthread_condattr_t *initializer(void)
 		{return &attr.attr;};
 
