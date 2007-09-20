@@ -174,8 +174,9 @@ protected:
 class __EXPORT ConditionalLock : public Conditional, public Shared
 {
 private:
-	unsigned waits;
-	volatile unsigned reads;
+	friend class SharedLock;
+
+	unsigned waits, reads;
 
 	__LOCAL void Shlock(void);
 	__LOCAL void Unlock(void);
@@ -209,6 +210,28 @@ public:
 	inline static void access(ConditionalLock &s)
 		{s.access();};
 };	
+
+class __EXPORT SharedLock : public ConditionalLock
+{
+private:
+	unsigned locks;
+
+public:
+	SharedLock();
+
+	void modify(void);
+	void exclusive(void);
+	void share(void);
+
+	inline static void modify(SharedLock &s)
+		{s.modify();};
+
+	inline static void exclusive(SharedLock &s)
+		{s.exclusive();};
+
+	inline static void share(SharedLock &s)
+		{s.share();};
+};
 	
 class __EXPORT barrier : private Conditional 
 {
@@ -789,6 +812,7 @@ inline bool cancel(DetachedThread *th)
 	{return th->cancel();};
 
 typedef ConditionalLock condlock_t;
+typedef	SharedLock tranlock_t;
 typedef	mutex mutex_t;
 typedef rwlock rwlock_t;
 typedef	rexlock rexlock_t;
@@ -808,6 +832,24 @@ inline void acquire(mutex_t &ml)
 
 inline void release(mutex_t &ml)
 	{ml.release();};
+
+inline void modify(tranlock_t &cl)
+	{cl.modify();};
+
+inline void commit(tranlock_t &cl)
+	{cl.commit();};
+
+inline void access(tranlock_t &cl)
+	{cl.access();};
+
+inline void release(tranlock_t &cl)
+	{cl.release();};
+
+inline void exclusive(tranlock_t &cl)
+	{cl.exclusive();};
+
+inline void share(tranlock_t &cl)
+	{cl.share();};
 
 inline void modify(condlock_t &cl)
 	{cl.modify();};
