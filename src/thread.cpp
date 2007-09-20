@@ -606,7 +606,7 @@ void ConditionalLock::modify(void)
 void ConditionalLock::commit(void)
 {
 	if(waits)
-		signal();
+		Conditional::signal();
 	Conditional::unlock();
 }
 
@@ -615,7 +615,7 @@ void ConditionalLock::release(void)
 	Conditional::lock();
 	--reads;
 	if(!reads && waits)
-		Conditional::broadcast();
+		Conditional::signal();
 	Conditional::unlock();
 }
 
