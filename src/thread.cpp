@@ -605,6 +605,8 @@ void ConditionalLock::modify(void)
 
 void ConditionalLock::commit(void)
 {
+	if(waits)
+		signal();
 	Conditional::unlock();
 }
 
@@ -624,32 +626,18 @@ void ConditionalLock::access(void)
 	Conditional::unlock();
 }
 
-SharedLock::SharedLock() : ConditionalLock()
-{
-	locks = 0;
-}
-
-void SharedLock::modify(void)
-{
-	ConditionalLock::modify();
-	if(waits > locks)
-		broadcast();
-}
-
-void SharedLock::exclusive(void)
+void ConditionalLock::exclusive(void)
 {
 	lock();
 	--reads;
 	while(reads) {
-		++locks;
 		++waits;
 		wait();
 		--waits;
-		--locks;
 	}
 }
 
-void SharedLock::share(void)
+void ConditionalLock::share(void)
 {
 	++reads;
 	unlock();
