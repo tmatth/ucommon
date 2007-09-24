@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="0.7.1"
-LT_RELEASE="0.7"
-LT_VERSION="0:1"
+VERSION="0.8.0"
+LT_RELEASE="0.8"
+LT_VERSION="0:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -35,7 +35,7 @@ AC_SUBST(LT_MAJOR)
 AC_SUBST(LT_MINOR)
 
 UCOMMON_VISIBILITY="0"
-UCOMMON_MODEL="CC"
+UCOMMON_MODEL="CXX"
 UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
@@ -64,10 +64,10 @@ AC_DEFUN([AC_SUBST_DIR], [
         AC_SUBST($1)
 ])
 
-AC_ARG_ENABLE(ucommon-stdcpp, 
-	AC_HELP_STRING([--enable-ucommon-stdcpp],[compile ucommon for stdc++ runtime]))
-if test "$enable_ucommon_stdcpp" = "yes" ; then
-	UCOMMON_MODEL="CXX"
+AC_ARG_ENABLE(stdcpp, 
+	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime]))
+if test "$enable_stdcpp" = "no" ; then
+	UCOMMON_MODEL="CC"
 fi
 
 AC_ARG_WITH(libc, 
