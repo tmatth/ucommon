@@ -65,7 +65,7 @@ AC_DEFUN([AC_SUBST_DIR], [
 ])
 
 AC_ARG_ENABLE(stdcpp, 
-	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime]))
+	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime overhead]))
 if test "$enable_stdcpp" = "no" ; then
 	UCOMMON_MODEL="CC"
 fi

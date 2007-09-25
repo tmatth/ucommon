@@ -567,8 +567,9 @@ void mutex::Unlock(void)
 ConditionalLock::ConditionalLock() :
 Conditional()
 {
-	waits = 0;
-	reads = 0;
+	waiting = 0;
+	pending = 0;
+	sharing = 0;
 }
 
 unsigned ConditionalLock::getReaders(void)
@@ -576,7 +577,7 @@ unsigned ConditionalLock::getReaders(void)
 	unsigned count;
 
 	Conditional::lock();
-	count = reads;
+	count = sharing;
 	Conditional::unlock();
 	return count;
 }
@@ -586,7 +587,7 @@ unsigned ConditionalLock::getWaiters(void)
 	unsigned count;
 
 	Conditional::lock();
-	count = waits;
+	count = pending + waiting;
 	Conditional::unlock();
 	return count;
 }
@@ -604,16 +605,18 @@ void ConditionalLock::Unlock(void)
 void ConditionalLock::modify(void)
 {
 	Conditional::lock();
-	while(reads) {
-		++waits;
+	while(sharing) {
+		++pending;
 		Conditional::wait();
-		--waits;
+		--pending;
 	}
 }
 
 void ConditionalLock::commit(void)
 {
-	if(waits)
+	if(waiting)
+		Conditional::broadcast();
+	else if(pending)
 		Conditional::signal();
 	Conditional::unlock();
 }
@@ -621,9 +624,11 @@ void ConditionalLock::commit(void)
 void ConditionalLock::release(void)
 {
 	Conditional::lock();
-	assert(reads);
-	--reads;
-	if(!reads && waits)
+	assert(sharing);
+	--sharing;
+	if(waiting && (!pending || !sharing))
+		Conditional::broadcast();
+	else if(pending && !sharing)
 		Conditional::signal();
 	Conditional::unlock();
 }
@@ -631,27 +636,36 @@ void ConditionalLock::release(void)
 void ConditionalLock::access(void)
 {
 	Conditional::lock();
-	assert(!max_sharing || reads < max_sharing);
-	++reads;
+	assert(!max_sharing || sharing < max_sharing);
+
+	// reschedule if pending exclusives to make sure modify threads are not
+	// starved.
+
+	while(pending) {
+		++waiting;
+		wait();
+		--waiting;
+	}
+	++sharing;
 	Conditional::unlock();
 }
 
 void ConditionalLock::exclusive(void)
 {
 	lock();
-	assert(reads);
-	--reads;
-	while(reads) {
-		++waits;
+	assert(sharing);
+	--sharing;
+	while(sharing) {
+		++pending;
 		wait();
-		--waits;
+		--pending;
 	}
 }
 
 void ConditionalLock::share(void)
 {
-	assert(!reads);
-	++reads;
+	assert(!sharing);
+	++sharing;
 	unlock();
 }
 

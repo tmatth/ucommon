@@ -571,6 +571,12 @@ bool Socket::create(int family, int type, int protocol)
 	return so != INVALID_SOCKET;
 }
 
+void Socket::cancel(void)
+{
+	if(so != INVALID_SOCKET)
+		::shutdown(so, SHUT_RDWR);
+}
+
 void Socket::release(void)
 {
 	if(so != INVALID_SOCKET) {

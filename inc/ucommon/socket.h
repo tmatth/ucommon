@@ -194,6 +194,7 @@ public:
 	Socket(const char *iface, const char *port, int family, int type, int protocol = 0);
 	virtual ~Socket();
 
+	void cancel(void);
 	void release(void);
 	bool isPending(unsigned qio) const;
 	bool isConnected(void) const;

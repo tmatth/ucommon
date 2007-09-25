@@ -176,7 +176,7 @@ protected:
 class __EXPORT ConditionalLock : public Conditional, public Shared
 {
 private:
-	unsigned waits, reads;
+	unsigned pending, sharing, waiting;
 
 	__LOCAL void Shlock(void);
 	__LOCAL void Unlock(void);
