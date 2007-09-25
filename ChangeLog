@@ -1,5 +1,10 @@
-From ucommon 0.7.0 to 0.7.1
+From ucommon 0.7.0 to 0.8.0
 - fix for timerqueue class.
+- potential writer starvation issues resolved in rwlock/condlock classes.
+- consolidated and improved Conditional timed waits.
+- introduction of transformable conditional locking.
+- access shared locking extended to cover transformable conditional locks.
+- default compile mode is now stdcpp; first step in gnu common c++ merge.
 
 From ucommon 0.6.1 to 0.7.0
 - added basic thread priority support
