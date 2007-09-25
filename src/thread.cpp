@@ -339,7 +339,7 @@ Conditional::~Conditional()
 	pthread_mutex_destroy(&mutex);
 }
 
-bool Conditional::waitTimeout(timeout_t timeout)
+bool Conditional::wait(timeout_t timeout)
 {
 	struct timespec ts;
 	gettimeout(timeout, &ts);

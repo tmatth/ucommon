@@ -77,7 +77,7 @@ protected:
 
 	static void gettimeout(timeout_t timeout, struct timespec *ts);
 
-	bool waitTimeout(timeout_t timeout);
+	bool wait(timeout_t timeout);
 
 	bool wait(struct timespec *ts);
 
