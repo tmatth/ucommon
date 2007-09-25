@@ -27,9 +27,18 @@ Exclusive::~Exclusive()
 {
 }
 
+void Shared::Exclusive(void)
+{
+}
+
+void Shared::Share(void)
+{
+}
+
 shared_lock::shared_lock(Shared *obj)
 {
 	lock = obj;
+	modify = false;
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
 	lock->Shlock();
 
@@ -45,9 +54,12 @@ exclusive_lock::exclusive_lock(Exclusive *obj)
 shared_lock::~shared_lock()
 {
 	if(lock) {
+		if(modify)
+			lock->Share();
 		lock->Unlock();
 		pthread_setcancelstate(state, NULL);
 		lock = NULL;
+		modify = false;
 	}
 }
 
@@ -63,9 +75,12 @@ exclusive_lock::~exclusive_lock()
 void shared_lock::release()
 {
 	if(lock) {
+		if(modify)
+			lock->Share();
 		lock->Unlock();
 		pthread_setcancelstate(state, NULL);
 		lock = NULL;
+		modify = false;
 		if(state == PTHREAD_CANCEL_ENABLE)
 			pthread_testcancel();
 	}
@@ -82,4 +97,19 @@ void exclusive_lock::release()
     }
 }
 
+void shared_lock::exclusive(void)
+{
+	if(lock && !modify) {
+		lock->Exclusive();
+		modify = true;
+	}
+}
+
+void shared_lock::share(void)
+{
+	if(lock && modify) {
+		lock->Share();
+		modify = false;
+	}
+}
 

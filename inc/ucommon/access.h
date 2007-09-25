@@ -55,6 +55,9 @@ public:
 	virtual void Shlock(void) = 0;
 	virtual void Unlock(void) = 0;
 
+	virtual void Share(void);
+	virtual void Exclusive(void);
+
 	inline void Lock(void)
 		{return Shlock();};
 };
@@ -83,6 +86,7 @@ class __EXPORT shared_lock
 private:
     Shared *lock;
 	int state;
+	bool modify;
 
 public:
     shared_lock(Shared *l);
@@ -94,8 +98,9 @@ public:
 	operator bool()
 		{return lock != NULL;};
 
-
     void release(void);
+	void exclusive(void);
+	void share(void);
 };
 
 inline void lock(Exclusive *ex)
@@ -104,11 +109,17 @@ inline void lock(Exclusive *ex)
 inline void unlock(Exclusive *ex)
 	{ex->Unlock();};
 
-inline void share(Shared *sh)
+inline void access(Shared *sh)
 	{sh->Shlock();};
 
 inline void release(Shared *sh)
 	{sh->Unlock();};
+
+inline void exclusive(Shared *sh)
+	{sh->Exclusive();};
+
+inline void share(Shared *sh)
+	{sh->Share();};
 
 typedef	exclusive_lock exlock_t;
 typedef	shared_lock shlock_t;

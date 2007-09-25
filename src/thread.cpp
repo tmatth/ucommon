@@ -420,10 +420,11 @@ Conditional()
 {
 	writers = 0;
 	reading = 0;
+	pending = 0;
 	waiting = 0;
 }
 
-unsigned rwlock::getReaders(void)
+unsigned rwlock::getAccess(void)
 {
 	unsigned count;
 	Conditional::lock();
@@ -432,7 +433,7 @@ unsigned rwlock::getReaders(void)
 	return count;
 }
 
-unsigned rwlock::getWriters(void)
+unsigned rwlock::getModify(void)
 {
 	unsigned count;
 	Conditional::lock();
@@ -441,23 +442,23 @@ unsigned rwlock::getWriters(void)
 	return count;
 }
 
-unsigned rwlock::getWaiters(void)
+unsigned rwlock::getWaiting(void)
 {
 	unsigned count;
 	Conditional::lock();
-	count = waiting;
+	count = waiting + pending;
 	Conditional::unlock();
 	return count;
 }
 
 void rwlock::Exlock(void)
 {
-	exclusive();
+	modify();
 }
 
 void rwlock::Shlock(void)
 {
-	shared();
+	access();
 }
 
 void rwlock::Unlock(void)
@@ -465,7 +466,7 @@ void rwlock::Unlock(void)
 	release();
 }
 
-bool rwlock::exclusive(timeout_t timeout)
+bool rwlock::modify(timeout_t timeout)
 {
 	Timer expires;
 	bool rtn = true;
@@ -477,14 +478,14 @@ bool rwlock::exclusive(timeout_t timeout)
 	while((writers || reading) && rtn) {
 		if(writers && pthread_equal(writer, pthread_self()))
 			break;
-		++waiting;
+		++pending;
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
 			rtn = wait(*expires);
 		else
 			rtn = false;
-		--waiting;
+		--pending;
 	}
 	assert(!max_sharing || writers < max_sharing);
 	if(rtn) {
@@ -496,7 +497,7 @@ bool rwlock::exclusive(timeout_t timeout)
 	return rtn;
 }
 
-bool rwlock::shared(timeout_t timeout)
+bool rwlock::access(timeout_t timeout)
 {
 	Timer expires;
 	bool rtn = true;
@@ -505,7 +506,7 @@ bool rwlock::shared(timeout_t timeout)
 		expires.set(timeout);	
 
 	lock();
-	while(writers && rtn) {
+	while((writers || pending) && rtn) {
 		++waiting;
 		if(timeout == Timer::inf)
 			wait();
@@ -532,13 +533,17 @@ void rwlock::release(void)
 		--writers;
 		if(waiting && !writers)
 			broadcast();
+		else if(pending && !writers)
+			signal();
 		unlock();
 		return;
 	}
 	if(reading) {
 		assert(!writers);
 		--reading;
-		if(!reading && waiting)
+		if(waiting && (!pending || !reading))
+			broadcast();
+		else if(!reading && pending)
 			signal();
 	}
 	unlock();
@@ -600,6 +605,16 @@ void ConditionalLock::Shlock(void)
 void ConditionalLock::Unlock(void)
 {
 	release();
+}
+
+void ConditionalLock::Exclusive(void)
+{
+	exclusive();
+}
+
+void ConditionalLock::Share(void)
+{
+	share();
 }
 
 void ConditionalLock::modify(void)

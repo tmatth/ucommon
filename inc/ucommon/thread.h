@@ -131,6 +131,7 @@ class __EXPORT rwlock : private Conditional, public Exclusive, public Shared
 private:
 	unsigned waiting;
 	unsigned reading;
+	unsigned pending;
 	unsigned writers;
 	pthread_t writer;
 
@@ -141,19 +142,19 @@ private:
 public:
 	rwlock();
 
-	bool exclusive(timeout_t timeout = Timer::inf);
-	bool shared(timeout_t timeout = Timer::inf);
+	bool modify(timeout_t timeout = Timer::inf);
+	bool access(timeout_t timeout = Timer::inf);
 	void release(void);
 
-	unsigned getReaders(void);
-	unsigned getWriters(void);
-	unsigned getWaiters(void);
+	unsigned getAccess(void);
+	unsigned getModify(void);
+	unsigned getWaiting(void);
 
-	inline static bool exclusive(rwlock &lock, timeout_t timeout = Timer::inf)
-		{return lock.exclusive(timeout);};
+	inline static bool modify(rwlock &lock, timeout_t timeout = Timer::inf)
+		{return lock.modify(timeout);};
 
-	inline static bool shared(rwlock &lock, timeout_t timeout = Timer::inf)
-		{return lock.shared(timeout);};
+	inline static bool access(rwlock &lock, timeout_t timeout = Timer::inf)
+		{return lock.access(timeout);};
 
 	inline static void release(rwlock &lock)
 		{lock.release();};
@@ -180,6 +181,8 @@ private:
 
 	__LOCAL void Shlock(void);
 	__LOCAL void Unlock(void);
+	__LOCAL void Exclusive(void);
+	__LOCAL void Share(void);
 
 public:
 	ConditionalLock();
@@ -836,11 +839,11 @@ inline void access(condlock_t &cl)
 inline void release(condlock_t &cl)
 	{cl.release();};
 
-inline bool exclusive(rwlock_t &rw, timeout_t timeout = Timer::inf)
-	{return rw.exclusive(timeout);};
+inline bool modify(rwlock_t &rw, timeout_t timeout = Timer::inf)
+	{return rw.modify(timeout);};
 
-inline bool shared(rwlock_t &rw, timeout_t timeout = Timer::inf)
-	{return rw.shared(timeout);};
+inline bool access(rwlock_t &rw, timeout_t timeout = Timer::inf)
+	{return rw.access(timeout);};
 
 inline void release(rwlock_t &rw)
 	{rw.release();};
