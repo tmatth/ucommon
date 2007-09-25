@@ -479,11 +479,11 @@ bool ArrayReuse::avail(void)
 ReusableObject *ArrayReuse::get(timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;
+	struct timespec ts;
 	ReusableObject *obj = NULL;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(!freelist && used >= limit && rtn) {
@@ -491,7 +491,7 @@ ReusableObject *ArrayReuse::get(timeout_t timeout)
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(*expires);
+			rtn = wait(&ts);
 		else
 			rtn = false;
 		--waiting;
@@ -614,11 +614,11 @@ ReusableObject *PagerReuse::get(void)
 ReusableObject *PagerReuse::get(timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;
+	struct timespec ts;
 	ReusableObject *obj;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(rtn && limit && count >= limit) {
@@ -626,7 +626,7 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(*expires);
+			rtn = wait(&ts);
 		else
 			rtn = false;
 		--waiting;

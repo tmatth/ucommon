@@ -75,7 +75,11 @@ protected:
 	inline void wait(void)
 		{pthread_cond_wait(&cond, &mutex);};
 
-	bool wait(timeout_t expires);
+	static void gettimeout(timeout_t timeout, struct timespec *ts);
+
+	bool waitTimeout(timeout_t timeout);
+
+	bool wait(struct timespec *ts);
 
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};

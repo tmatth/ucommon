@@ -36,26 +36,6 @@ public:
 } initial;
 #endif
 
-static void gettimeout(timeout_t msec, struct timespec *ts)
-{
-#if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
-	clock_gettime(CLOCK_MONOTONIC, ts);
-#elif _POSIX_TIMERS > 0
-	clock_gettime(CLOCK_REALTIME, ts);
-#else
-	timeval tv;
-	gettimeofday(&tv, NULL);
-	ts->tv_sec = tv.tv_sec;
-	ts->tv_nsec = tv.tv_usec * 1000l;
-#endif
-	ts->tv_sec += msec / 1000;
-	ts->tv_nsec += (msec % 1000) * 1000000l;
-	while(ts->tv_nsec > 1000000000l) {
-		++ts->tv_sec;
-		ts->tv_nsec -= 1000000000l;
-	}
-}
-
 static void cpr_sleep(timeout_t timeout)
 {
 	timespec ts;
@@ -144,19 +124,19 @@ bool Completion::accepts(unsigned id)
 bool Completion::wait(timeout_t timeout)
 {
 	bool notimeout = true;
-	Timer expires;
+	struct timespec ts;
 	unsigned last;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	last = count;
 	while(!signalled && count == last && notimeout) {
 		if(timeout == Timer::inf)
 			Conditional::wait();
-		else if(timeout)		
-			notimeout = Conditional::wait(*expires);
+		else if(timeout)
+			notimeout = Conditional::wait(&ts);
 		else
 			notimeout = false;
 	}
@@ -182,6 +162,27 @@ bool Completion::wait(void)
 	unlock();
 	return rtn;
 }
+
+void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
+{
+#if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
+	clock_gettime(CLOCK_MONOTONIC, ts);
+#elif _POSIX_TIMERS > 0
+	clock_gettime(CLOCK_REALTIME, ts);
+#else
+	timeval tv;
+	gettimeofday(&tv, NULL);
+	ts->tv_sec = tv.tv_sec;
+	ts->tv_nsec = tv.tv_usec * 1000l;
+#endif
+	ts->tv_sec += msec / 1000;
+	ts->tv_nsec += (msec % 1000) * 1000000l;
+	while(ts->tv_nsec > 1000000000l) {
+		++ts->tv_sec;
+		ts->tv_nsec -= 1000000000l;
+	}
+}
+
 
 semaphore::semaphore(unsigned limit) : 
 Conditional()
@@ -227,10 +228,10 @@ bool semaphore::wait(timeout_t timeout)
 bool semaphore::request(unsigned size, timeout_t timeout)
 {
 	bool result = true;
-	Timer expires;
+	struct timespec ts;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	if(used + size > count) {
@@ -239,7 +240,7 @@ bool semaphore::request(unsigned size, timeout_t timeout)
 			if(timeout == Timer::inf)
 				Conditional::wait();
 			else if(timeout)
-				result = Conditional::wait(*expires);
+				result = Conditional::wait(&ts);
 			else
 				result = false;
 		}
@@ -338,15 +339,16 @@ Conditional::~Conditional()
 	pthread_mutex_destroy(&mutex);
 }
 
-bool Conditional::wait(timeout_t timeout)
+bool Conditional::waitTimeout(timeout_t timeout)
 {
 	struct timespec ts;
-
-	if(!timeout)
-		return false;
-
 	gettimeout(timeout, &ts);
-	if(pthread_cond_timedwait(&cond, &mutex, &ts))
+	return wait(&ts);
+}
+
+bool Conditional::wait(struct timespec *ts)
+{
+	if(pthread_cond_timedwait(&cond, &mutex, ts))
 		return false;
 
 	return true;
@@ -468,11 +470,11 @@ void rwlock::Unlock(void)
 
 bool rwlock::modify(timeout_t timeout)
 {
-	Timer expires;
 	bool rtn = true;
+	struct timespec ts;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 	
 	lock();
 	while((writers || reading) && rtn) {
@@ -482,7 +484,7 @@ bool rwlock::modify(timeout_t timeout)
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(*expires);
+			rtn = wait(&ts);
 		else
 			rtn = false;
 		--pending;
@@ -499,11 +501,11 @@ bool rwlock::modify(timeout_t timeout)
 
 bool rwlock::access(timeout_t timeout)
 {
-	Timer expires;
+	struct timespec ts;
 	bool rtn = true;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);	
+		gettimeout(timeout, &ts);
 
 	lock();
 	while((writers || pending) && rtn) {
@@ -511,7 +513,7 @@ bool rwlock::access(timeout_t timeout)
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(*expires);
+			rtn = wait(&ts);
 		else
 			rtn = false;
 		--waiting;
@@ -964,10 +966,13 @@ void PooledThread::sync(void)
 bool PooledThread::suspend(timeout_t timeout)
 {
 	bool result;
+	struct timespec ts;
+
+	gettimeout(timeout, &ts);
 
     lock();
     ++waits;
-	result = Conditional::wait(timeout);
+	result = Conditional::wait(&ts);
     --waits;
     unlock();
 	return result;
@@ -1172,20 +1177,20 @@ bool queue::remove(Object *o)
 
 Object *queue::lifo(timeout_t timeout)
 {
+	struct timespec ts;
 	bool rtn = true;
-	Timer expires;
     member *member;
     Object *obj = NULL;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(!tail && rtn) {
 		if(timeout == Timer::inf)
 			Conditional::wait();
 		else if(timeout)
-			rtn = Conditional::wait(*expires);
+			rtn = Conditional::wait(&ts);
 		else
 			rtn = false;
 	}
@@ -1205,19 +1210,19 @@ Object *queue::lifo(timeout_t timeout)
 Object *queue::fifo(timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;
+	struct timespec ts;
 	linked_pointer<member> node;
 	Object *obj = NULL;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(rtn && !head) {
 		if(timeout == Timer::inf)
 			Conditional::wait();
 		else if(timeout)
-			rtn = Conditional::wait(*expires);
+			rtn = Conditional::wait(&ts);
 		else
 			rtn = false;
 	}
@@ -1240,19 +1245,19 @@ Object *queue::fifo(timeout_t timeout)
 bool queue::post(Object *object, timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;
+	struct timespec ts;
 	member *node;
 	LinkedObject *mem;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(rtn && limit && used == limit) {
 		if(timeout == Timer::inf)
 			Conditional::wait();
 		else if(timeout)
-			rtn = Conditional::wait(*expires);
+			rtn = Conditional::wait(&ts);
 		else
 			rtn = false;
 	}
@@ -1333,19 +1338,19 @@ bool stack::remove(Object *o)
 Object *stack::pull(timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;	
+	struct timespec ts;
     member *member;
     Object *obj = NULL;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(rtn && !usedlist) {
 		if(timeout == Timer::inf)
 			Conditional::wait();
 		else if(timeout)
-			rtn = Conditional::wait(*expires);
+			rtn = Conditional::wait(&ts);
 		else
 			rtn = false;
 	} 
@@ -1368,19 +1373,19 @@ Object *stack::pull(timeout_t timeout)
 bool stack::push(Object *object, timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;
+	struct timespec ts;
 	member *node;
 	LinkedObject *mem;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(rtn && limit && used == limit) {
 		if(timeout == Timer::inf)
 			Conditional::wait();
 		else if(timeout)
-			rtn = Conditional::wait(*expires);
+			rtn = Conditional::wait(&ts);
 		else
 			rtn = false;
 	}
@@ -1479,18 +1484,18 @@ void *Buffer::get(void)
 void *Buffer::get(timeout_t timeout)
 {
 	caddr_t dbuf = NULL;
-	Timer expires;
+	struct timespec ts;
 	bool rtn = true;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(!count && rtn) {
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(*expires);
+			rtn = wait(&ts);
 		else
 			rtn = false;
 	}
@@ -1528,17 +1533,17 @@ void Buffer::put(void *dbuf)
 bool Buffer::put(void *dbuf, timeout_t timeout)
 {
 	bool rtn = true;
-	Timer expires;
+	struct timespec ts;
 
 	if(timeout && timeout != Timer::inf)
-		expires.set(timeout);
+		gettimeout(timeout, &ts);
 
 	lock();
 	while(count == limit && rtn) {
 		if(timeout == Timer::inf)
 			wait();
 		else if(timeout)
-			rtn = wait(*expires);
+			rtn = wait(&ts);
 		else
 			rtn = false;
 	}
