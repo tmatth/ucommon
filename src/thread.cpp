@@ -830,9 +830,16 @@ Thread::Thread(size_t size)
 #if _POSIX_PRIORITY_SCHEDULING > 0
 
 void Thread::resetPriority(struct sched_param *sparam)
-{
+{	
 	pthread_t tid = pthread_self();
+#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
 	pthread_setschedprio(tid, sparam->sched_priority);
+#else
+	int policy;
+	struct sched_param lp;
+	pthread_getschedparam(tid, &policy, &lp);
+	pthread_setschedparam(tid, policy, sparam);
+#endif
 }
 
 void Thread::lowerPriority(void)
@@ -844,7 +851,12 @@ void Thread::lowerPriority(void)
 	if(pthread_getschedparam(tid, &policy, &sp))
 		return;
 
+#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
 	pthread_setschedprio(tid, sched_get_priority_min(policy));
+#else
+	sp.sched_priority = sched_get_priority_min(policy);
+	pthread_setschedparam(tid, policy, &sp);
+#endif
 }
 
 void Thread::raisePriority(unsigned adj, struct sched_param *sparam)
@@ -864,7 +876,14 @@ void Thread::raisePriority(unsigned adj, struct sched_param *sparam)
 	if(pri > sched_get_priority_max(policy))
 		pri = sched_get_priority_max(policy);
 
+#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
 	pthread_setschedprio(tid, pri);
+#else
+	if(sparam != &lp)
+		memcpy(&lp, sparam, sizeof(lp));
+	lp.sched_priority = pri;
+	pthread_setschedparam(tid, policy, &lp);
+#endif
 }
 	
 #endif

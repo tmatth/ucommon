@@ -1,3 +1,6 @@
+From ucommon 0.8.0 to 0.8.1
+- fix for pthread without setschedprio
+
 From ucommon 0.7.0 to 0.8.0
 - fix for timerqueue class.
 - potential writer starvation issues resolved in rwlock/condlock classes.

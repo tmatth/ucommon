@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="0.8.0"
+VERSION="0.8.1"
 LT_RELEASE="0.8"
-LT_VERSION="0:0"
+LT_VERSION="0:1"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -182,7 +182,9 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_delay_np,[
 			AC_DEFINE(HAVE_PTHREAD_DELAY_NP, [1], ["pthread delay np"])
 		])
-
+		AC_CHECK_LIB($tlib,pthread_setschedprio,[
+			AC_DEFINE(HAVE_PTHREAD_SETSCHEDPRIO, [1], ["pthread scheduling"])
+		])
 	fi		
 ],[
 	AC_MSG_ERROR("pthread support required")
