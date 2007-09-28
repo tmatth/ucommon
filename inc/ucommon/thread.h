@@ -188,13 +188,15 @@ private:
 	__LOCAL void Exclusive(void);
 	__LOCAL void Share(void);
 
+protected:
+	void protect(void);
+
 public:
 	ConditionalLock();
 
 	void modify(void);
 	void commit(void);
 	void access(void);
-	void protect(void);
 	void release(void);
 	void exclusive(void);
 	void share(void);
