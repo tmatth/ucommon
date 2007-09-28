@@ -650,6 +650,23 @@ void ConditionalLock::release(void)
 	Conditional::unlock();
 }
 
+void ConditionalLock::protect(void)
+{
+	Conditional::lock();
+	assert(!max_sharing || sharing < max_sharing);
+
+	// reschedule if pending exclusives to make sure modify threads are not
+	// starved.
+
+	while(pending && !sharing) {
+		++waiting;
+		wait();
+		--waiting;
+	}
+	++sharing;
+	Conditional::unlock();
+}
+
 void ConditionalLock::access(void)
 {
 	Conditional::lock();

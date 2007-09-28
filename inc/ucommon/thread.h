@@ -194,6 +194,7 @@ public:
 	void modify(void);
 	void commit(void);
 	void access(void);
+	void protect(void);
 	void release(void);
 	void exclusive(void);
 	void share(void);

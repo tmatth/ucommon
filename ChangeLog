@@ -1,3 +1,6 @@
+From ucommon 0.8.1 to 0.8.2
+- conditional lock protect for shared recursive/short lock use
+
 From ucommon 0.8.0 to 0.8.1
 - fix for pthread without setschedprio
 
