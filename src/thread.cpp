@@ -27,15 +27,6 @@ using namespace UCOMMON_NAMESPACE;
 
 unsigned Conditional::max_sharing = 0;
 
-#ifdef	PTW32_STATIC_LIB
-static class _init_
-{
-public:
-	_init_() {pthread_win32_process_attach_np();};
-	~_init_() {pthread_win32_process_detach_np();};
-} initial;
-#endif
-
 static void cpr_sleep(timeout_t timeout)
 {
 	timespec ts;
@@ -317,6 +308,7 @@ void semaphore::set(unsigned value)
 
 Conditional::attribute::attribute()
 {
+	Thread::init();
 	pthread_condattr_init(&attr);
 #if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK)
 #if defined(_POSIX_MONOTONIC_CLOCK)
@@ -1699,6 +1691,22 @@ shared_release &shared_release::operator=(SharedPointer &p)
 	p.share();
 	return *this;
 }
+
+#ifdef	PTW32_STATIC_LIB
+void Thread::init(void)
+{
+	static bool started = false;
+
+	if(!started) {
+		pthread_win32_process_attach_np();
+		atexit(pthread_win32_process_detach_np());
+	}
+}
+#else
+void Thread::init(void)
+{
+}
+#endif
 
 void Thread::cancel_async(cancellation *cancel)
 {

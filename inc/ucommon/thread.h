@@ -450,6 +450,8 @@ public:
 
 	virtual void exit(void) = 0;
 
+	static void init(void);
+
 	static void cancel_suspend(cancellation *cancel);
 	static void cancel_resume(cancellation *cancel);
 	static void cancel_async(cancellation *cancel);

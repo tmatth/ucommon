@@ -1,8 +1,11 @@
+From ucommon 0.8.2 to 0.8.3
+- slight change to thread init for pthread-win32 static libs.
+
 From ucommon 0.8.1 to 0.8.2
-- conditional lock protect for shared recursive/short lock use
+- conditional lock protect for shared recursive/short lock use.
 
 From ucommon 0.8.0 to 0.8.1
-- fix for pthread without setschedprio
+- fix for pthread without setschedprio.
 
 From ucommon 0.7.0 to 0.8.0
 - fix for timerqueue class.
