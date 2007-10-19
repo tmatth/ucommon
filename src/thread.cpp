@@ -616,25 +616,25 @@ void mutex::Unlock(void)
 	pthread_mutex_unlock(&mlock);
 }
 
-ConditionalTimer::ConditionalTimer() : 
+EventTimer::EventTimer() : 
 Timer(), Conditional()
 {
 	waiting = false;
 }
 
-ConditionalTimer::ConditionalTimer(timeout_t timeout) :
+EventTimer::EventTimer(timeout_t timeout) :
 Timer(timeout), Conditional()
 {
 	waiting = false;
 }
 
-ConditionalTimer::ConditionalTimer(time_t timer) :
+EventTimer::EventTimer(time_t timer) :
 Timer(timer), Conditional()
 {
 	waiting = false;
 }
 
-bool ConditionalTimer::wait(void) 
+bool EventTimer::wait(void) 
 {
 	bool result;
 	struct timespec ts;

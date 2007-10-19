@@ -1,7 +1,7 @@
 From ucommon 0.8.2 to 0.8.3
 - slight change to thread init for pthread-win32 static libs.
 - new steplock formed purely from staircase mutexes.
-- new conditional timer for timed completion signalling.
+- new event timer for timed completion event signalling.
 
 From ucommon 0.8.1 to 0.8.2
 - conditional lock protect for shared recursive/short lock use.

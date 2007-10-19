@@ -104,15 +104,15 @@ public:
 
 };
 
-class __EXPORT ConditionalTimer : public Timer, private Conditional
+class __EXPORT EventTimer : public Timer, private Conditional
 {
 private:
 	bool waiting;
 
 public:
-	ConditionalTimer(void);
-	ConditionalTimer(timeout_t timeout);
-	ConditionalTimer(time_t timer);
+	EventTimer(void);
+	EventTimer(timeout_t timeout);
+	EventTimer(time_t timer);
 
 	inline void signal(void)
 		{Conditional::signal();};
@@ -856,7 +856,7 @@ inline bool cancel(DetachedThread *th)
 
 typedef	StepLock steplock_t;
 typedef ConditionalLock condlock_t;
-typedef ConditionalTimer condtimer_t;
+typedef EventTimer timedevent_t;
 typedef	mutex mutex_t;
 typedef rwlock rwlock_t;
 typedef	rexlock rexlock_t;
