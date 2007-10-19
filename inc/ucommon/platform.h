@@ -17,8 +17,8 @@
 /**
  * Various miscelanous platform specific headers and defines.
  * This is used to support ucommon on different platforms.  The ucommon
- * library assumes at least a real posix threading library is present (or
- * the redhat suppported pthread-w32 for the Microsoft Windows legacy platform).
+ * library assumes at least a real posix threading library is present or
+ * will build thread support native on Microsoft Windows legacy platform.
  * This header also deals with issues related to common base types.
  * @file ucommon/platform.h
  */

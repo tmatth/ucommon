@@ -535,7 +535,10 @@ public:
 
 	static void init(void);
 
-#if _POSIX_PRIORITY_SCHEDULING > 0
+#if defined(_MSWINDOWS_)
+	static void lowerPriority(void) {};
+	static void raisePriority(unsigned pri) {};
+#elif _POSIX_PRIORITY_SCHEDULING > 0
 	static void raisePriority(unsigned pri, struct sched_param *sparam = NULL);
 	static void resetPriority(struct sched_param *sparam);
 	static void lowerPriority(void);
