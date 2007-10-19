@@ -43,9 +43,9 @@ extern "C" int main()
 	time(&now);
 	thr = new testThread();
 	start(thr);
-	assert(thr->count == 1);
 	delete thr;
+	assert(thr->count == 1);
 	time(&later);
-	assert(later == now + 1);
+	assert(later >= now + 1);
 };
 

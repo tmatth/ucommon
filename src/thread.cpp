@@ -898,6 +898,10 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
+void Thread::enter(void)
+{
+}
+
 #if _POSIX_PRIORITY_SCHEDULING > 0
 
 void Thread::resetPriority(struct sched_param *sparam)
@@ -1088,6 +1092,12 @@ JoinableThread::~JoinableThread()
 	join();
 }
 
+void JoinableThread::enter(void)
+{
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	running = true;
+}
+
 void JoinableThread::join(void)
 {
 	pthread_t self = pthread_self();
@@ -1098,11 +1108,19 @@ void JoinableThread::join(void)
 		exit();
 	}
 
-	if(running) {
-		pthread_cancel(tid);
-		if(!pthread_join(tid, NULL)) 
-			running = false;
-	}	
+	// already joined, so we ignore...
+	if(!running && pthread_equal(tid, self))
+		return;
+
+	// wait to sync up...
+	while(!running)
+		Thread::yield();
+
+	pthread_cancel(tid);
+	if(!pthread_join(tid, NULL)) {
+		running = false;
+		tid = self;
+	}
 }
 
 DetachedThread::~DetachedThread()
@@ -1116,7 +1134,7 @@ extern "C" {
 #ifdef	PTW32_STATIC_LIB
 		pthread_win32_thread_attach_np();
 #endif
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+		th->enter();
 		th->run();
 		th->exit();
 #ifdef	PTW32_STATIC_LIB
@@ -1147,7 +1165,6 @@ void JoinableThread::start(void)
 		pthread_attr_setstacksize(&attr, stack);
 	pthread_create(&tid, &attr, &exec_thread, this);
 	pthread_attr_destroy(&attr);
-	running = true;
 }
 
 void PooledThread::start(void)
