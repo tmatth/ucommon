@@ -898,7 +898,24 @@ Thread::Thread(size_t size)
 	stack = size;
 }
 
-#if _POSIX_PRIORITY_SCHEDULING > 0
+#if defined(_MSWINDOWS_)
+void Thread::lowerPriority(void)
+{
+	HANDLE hThread = GetCurrentThread();
+	SetThreadPriority(hThread, THREAD_PRIORITY_LOWEST);
+}
+
+void Thread::raisePriority(unsigned adj)
+{
+	HANDLE hThread = GetCurrentThread();
+	if(adj == 0)
+		SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
+	elif(adj ==1) 
+		SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL)
+	else
+		SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
+}
+#elif _POSIX_PRIORITY_SCHEDULING > 0
 
 void Thread::resetPriority(struct sched_param *sparam)
 {	
