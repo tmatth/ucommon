@@ -27,37 +27,6 @@ using namespace UCOMMON_NAMESPACE;
 
 unsigned Conditional::max_sharing = 0;
 
-static void cpr_sleep(timeout_t timeout)
-{
-	timespec ts;
-	ts.tv_sec = timeout / 1000l;
-	ts.tv_nsec = (timeout % 1000l) * 1000000l;
-#if defined(HAVE_PTHREAD_DELAY)
-	pthread_delay(&ts);
-#elif defined(HAVE_PTHREAD_DELAY_NP)
-	pthread_delay_np(&ts);
-#elif defined(__MACH__)
-	Timer expires;
-	int state;
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
-	if(state != PTHREAD_CANCEL_ENABLE) {
-		usleep(timeout);
-		return;
-	}
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	expires.set(timeout);
-	while((timeout = *expires) > 0) {
-		if(timeout > 20000)
-			timeout = 20000;
-		usleep(timeout);
-		Thread::check();
-	}
-	Thread::check();
-#else
-	usleep(timeout * 1000);
-#endif
-}
-
 Conditional::attribute Conditional::attr;
 
 ReusableAllocator::ReusableAllocator() :
@@ -1005,18 +974,16 @@ DetachedThread::DetachedThread(size_t size)
 
 void Thread::sleep(timeout_t timeout)
 {
-	int state;
-	int mode;
-	
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state);
-	if(state == PTHREAD_CANCEL_ENABLE) {
-		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &mode);
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		cpr_sleep(timeout);
-		pthread_setcanceltype(mode, NULL);
-	}
-	else
-		cpr_sleep(timeout);
+	timespec ts;
+	ts.tv_sec = timeout / 1000l;
+	ts.tv_nsec = (timeout % 1000l) * 1000000l;
+#if defined(HAVE_PTHREAD_DELAY)
+	pthread_delay(&ts);
+#elif defined(HAVE_PTHREAD_DELAY_NP)
+	pthread_delay_np(&ts);
+#else
+	usleep(timeout * 1000);
+#endif
 }
 
 void Thread::yield(void)
@@ -1026,7 +993,6 @@ void Thread::yield(void)
 #else
 	sched_yield();
 #endif
-	pthread_testcancel();
 }
 
 void PooledThread::exit(void)
@@ -1047,25 +1013,6 @@ void DetachedThread::exit(void)
 	pthread_win32_thread_detach_np();
 #endif
 	pthread_exit(NULL);
-}
-
-bool DetachedThread::cancel(void)
-{
-	pthread_t self = pthread_self();
-
-	if(pthread_equal(tid, self)) {
-		pthread_testcancel();
-	}
-	else if(!pthread_cancel(tid)) {
-		exit();
-		return true;
-	}
-	return false;
-}
-
-bool PooledThread::cancel(void)
-{
-	return false;
 }
 
 void PooledThread::sync(void)
@@ -1138,7 +1085,24 @@ Thread::~Thread()
 
 JoinableThread::~JoinableThread()
 {
-	cancel();
+	join();
+}
+
+void JoinableThread::join(void)
+{
+	pthread_t self = pthread_self();
+
+	if(running && pthread_equal(tid, self)) {
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		pthread_testcancel();
+		exit();
+	}
+
+	if(running) {
+		pthread_cancel(tid);
+		if(!pthread_join(tid, NULL)) 
+			running = false;
+	}	
 }
 
 DetachedThread::~DetachedThread()
@@ -1152,6 +1116,7 @@ extern "C" {
 #ifdef	PTW32_STATIC_LIB
 		pthread_win32_thread_attach_np();
 #endif
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 		th->run();
 		th->exit();
 #ifdef	PTW32_STATIC_LIB
@@ -1228,34 +1193,13 @@ void DetachedThread::start(void)
 void JoinableThread::exit(void)
 {
 #if defined(__MACH__) || defined(__GNU__)
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	pthread_exit(NULL);
 #else	
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	for(;;) {
-		sleep(Timer::inf);
-		pthread_testcancel();
+		Thread::sleep(Timer::inf);
 	}
 #endif
-}
-
-bool JoinableThread::cancel(void)
-{
-	pthread_t self = pthread_self();
-
-	if(running && pthread_equal(tid, self)) {
-		pthread_testcancel();
-		return false;
-	}
-
-	if(running) {
-		pthread_cancel(tid);
-		if(!pthread_join(tid, NULL)) 
-			running = false;
-	}	
-	if(running)
-		return false;
-	return true;
 }
 
 queue::member::member(queue *q, Object *o) :
@@ -1801,24 +1745,5 @@ void Thread::init(void)
 }
 #endif
 
-void Thread::cancel_async(cancellation *cancel)
-{
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &cancel->type);
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancel->state);
-}
-
-void Thread::cancel_suspend(cancellation *cancel)
-{
-	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel->state);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &cancel->type);
-}
-
-void Thread::cancel_resume(cancellation *cancel)
-{
-	pthread_setcanceltype(cancel->type, NULL);
-	pthread_setcancelstate(cancel->state, NULL);
-	if(cancel->state == PTHREAD_CANCEL_ENABLE)
-		pthread_testcancel();
-}
 
 

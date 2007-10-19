@@ -480,11 +480,6 @@ protected:
 	Thread(size_t stack = 0);
 
 public:
-	typedef struct {int state; int type;} cancellation;
-
-	inline static void check(void)
-		{pthread_testcancel();};
-
 	static void yield(void);
 
 	static void sleep(timeout_t timeout);
@@ -496,10 +491,6 @@ public:
 	virtual void exit(void) = 0;
 
 	static void init(void);
-
-	static void cancel_suspend(cancellation *cancel);
-	static void cancel_resume(cancellation *cancel);
-	static void cancel_async(cancellation *cancel);
 
 #if _POSIX_PRIORITY_SCHEDULING > 0
 	static void raisePriority(unsigned pri, struct sched_param *sparam = NULL);
@@ -523,6 +514,7 @@ protected:
 	JoinableThread(size_t size = 0);
 	virtual ~JoinableThread();
 	void exit(void);
+	void join(void);
 
 public:
 	inline bool isRunning(void)
@@ -531,7 +523,6 @@ public:
 	inline bool isDetached(void)
 		{return false;};
 
-	bool cancel(void);
 	void start(void);
 };
 
@@ -545,8 +536,6 @@ protected:
 
 public:
 	void start(void);
-
-	bool cancel(void);
 
 	inline bool isDetached(void)
 		{return true;};
@@ -566,7 +555,6 @@ protected:
 	void sync(void);
 	
 	void exit(void);
-	bool cancel(void);
 
 public:
 	unsigned wakeup(unsigned limit = 1);
@@ -845,14 +833,8 @@ public:
 inline void start(JoinableThread *th)
 	{th->start();};
 
-inline bool cancel(JoinableThread *th)
-	{return th->cancel();};
-
 inline void start(DetachedThread *th)
     {th->start();};
-
-inline bool cancel(DetachedThread *th)
-	{return th->cancel();};
 
 typedef	StepLock steplock_t;
 typedef ConditionalLock condlock_t;
@@ -958,16 +940,7 @@ END_NAMESPACE
 	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
 		pthread_mutex_lock(&__sync__);
 
-#define EXIT_EXCLUSIVE \
+#define LEAVE_EXCLUSIVE \
 	pthread_mutex_unlock(&__sync__);} while(0);
-
-#define	SUSPEND_CANCELLATION \
-	do { Thread::cancellation __cancel__; Thread::cancel_suspend(&__cancel__);
-
-#define ASYNC_CANCELLATION \
-	do { Thread::cancellation __cancel__; Thread::cancel_async(&__cancel__);
-
-#define	RESUME_CANCELLATION \
-	Thread::cancel_resume(&__cancel__);} while(0);
 
 #endif
