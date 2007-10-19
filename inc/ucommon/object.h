@@ -77,31 +77,6 @@ protected:
 	virtual ~Temporary();
 };
 
-class __EXPORT AutoObject
-{
-protected:
-	class __EXPORT base_exit
-	{
-	public:
-		base_exit();
-		~base_exit();
-		void set(AutoObject *obj);
-		AutoObject *get(void);
-	};
-
-	static base_exit ex;
-
-	AutoObject();
-	virtual ~AutoObject();
-
-	void delist(void);
-
-public:
-	AutoObject *next;
-
-	virtual void release(void);
-};
-
 class __EXPORT auto_delete
 {
 protected:

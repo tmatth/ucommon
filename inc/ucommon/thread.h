@@ -59,6 +59,13 @@ class SharedPointer;
 class __EXPORT Conditional 
 {
 private:
+#ifdef	_MSWINDOWS_
+	enum {SIGNAL = 0, BROADCAST = 1};
+	HANDLE events[2];
+	unsigned waiting;
+	CRITICAL_SECTION mlock;
+	CRITICAL_SECTION mutex;
+#else
 	class __LOCAL attribute
 	{
 	public:
@@ -70,28 +77,42 @@ private:
 
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
+#endif
 
 protected:
-	inline void wait(void)
-		{pthread_cond_wait(&cond, &mutex);};
-
 	static void gettimeout(timeout_t timeout, struct timespec *ts);
 
 	bool wait(timeout_t timeout);
 
 	bool wait(struct timespec *ts);
 
+#ifdef	_MSWINDOWS_
+	inline void lock(void)
+		{EnterCriticalSection(&mutex);};
+
+	inline void unlock(void)
+		{LeaveCriticalSection(&mutex);};
+
+	void wait(void);
+	void signal(void);
+	void broadcast(void);
+
+#else
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};
 
 	inline void unlock(void)
 		{pthread_mutex_unlock(&mutex);};
 
+	inline void wait(void)
+		{pthread_cond_wait(&cond, &mutex);};
+
 	inline void signal(void)
 		{pthread_cond_signal(&cond);};
 
 	inline void broadcast(void)
 		{pthread_cond_broadcast(&cond);};
+#endif
 
 	Conditional();
 	~Conditional();
@@ -99,11 +120,32 @@ protected:
 public:
 	static unsigned max_sharing;
 
+#ifndef	_MSWINDOWS_
 	static inline pthread_condattr_t *initializer(void)
 		{return &attr.attr;};
+#endif
 
 };
 
+#ifdef	_MSWINDOWS_
+class __EXPORT EventTimer : public Timer
+{
+private:
+	bool waiting;
+	HANDLE event;
+
+public:
+	EventTimer(void);
+	EventTimer(timeout_t timeout);
+	EventTimer(time_t timer);
+	~EventTimer();
+
+	void signal(void);
+
+	bool wait(void);
+};
+
+#else
 class __EXPORT EventTimer : public Timer, private Conditional
 {
 private:
@@ -119,6 +161,7 @@ public:
 
 	bool wait(void);
 };
+#endif
 
 class __EXPORT rexlock : private Conditional, public Exclusive
 {
@@ -508,7 +551,11 @@ public:
 class __EXPORT JoinableThread : protected Thread
 {
 private:
+#ifdef	_MSWINDOWS_
+	HANDLE joining;
+#else
 	volatile bool running;
+#endif
 
 protected:
 	JoinableThread(size_t size = 0);
@@ -516,8 +563,13 @@ protected:
 	void join(void);
 
 public:
+#ifdef	_MSWINDOWS_
+	inline bool isRunning(void)
+		{joining != INVALID_HANDLE_VALUE;};
+#else
 	inline bool isRunning(void)
 		{return running;};
+#endif
 
 	inline bool isDetached(void)
 		{return false;};

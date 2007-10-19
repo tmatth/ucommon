@@ -55,7 +55,6 @@ shared_lock::~shared_lock()
 		if(modify)
 			lock->Share();
 		lock->Unlock();
-		pthread_setcancelstate(state, NULL);
 		lock = NULL;
 		modify = false;
 	}

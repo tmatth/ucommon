@@ -89,6 +89,7 @@
 #endif
 
 #include <windows.h>
+#include <process.h>
 #ifndef	__EXPORT
 #define	__EXPORT	__declspec(dllimport)
 #endif
@@ -101,17 +102,40 @@
 #define	__LOCAL
 #endif
 
-#include <pthread.h>
-
 #ifdef	_MSWINDOWS_
 
 #include <sys/stat.h>
 #include <malloc.h>
 
+typedef	DWORD pthread_t;
+typedef	CRITICAL_SECTION pthread_mutex_t;
 typedef char *caddr_t;
 typedef	HANDLE fd_t;
 
+typedef	struct timespec {
+	time_t tv_sec;
+	long  tv_nsec;
+} timespec_t;
+
 extern "C" {
+
+inline void pthread_exit(void *p)
+	{_endthreadex((DWORD)p);};
+
+inline bool pthread_equal(pthread_t x, pthread_t y)
+	{return (x == y);};
+
+inline void pthread_mutex_init(pthread_mutex_t *mutex, void *x)
+	{InitializeCriticalSection(mutex);};
+
+inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
+	{DeleteCriticalSection(mutex);};
+
+inline void pthread_mutex_lock(pthread_mutex_t *mutex)
+	{EnterCriticalSection(mutex);};
+
+inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
+	{LeaveCriticalSection(mutex);};
 
 inline char *strdup(const char *s)
 	{return _strdup(s);};
@@ -128,6 +152,8 @@ inline int stat(const char *path, struct stat *buf)
 };
 
 #else
+
+#include <pthread.h>
 
 typedef	int SOCKET;
 typedef	int fd_t;

@@ -21,8 +21,6 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-AutoObject::base_exit AutoObject::ex;
-
 CountedObject::CountedObject()
 {
 	count = 0;
@@ -144,78 +142,6 @@ auto_pointer &auto_pointer::operator=(Object *o)
 		object->release();
 	object = o;
 	return *this;
-}
-
-static pthread_key_t exit_key;
-
-extern "C" {
-	static void exit_handler(void *obj)
-	{
-		AutoObject *node = (AutoObject *)obj;
-		AutoObject *next;
-		while(node) {
-			next = node->next;
-			node->release();
-			node = next;
-		}
-	}
-}
-
-AutoObject::base_exit::base_exit()
-{
-	pthread_key_create(&exit_key, &exit_handler);
-}
-
-AutoObject::base_exit::~base_exit()
-{
-	AutoObject *obj = get();
-	set(NULL);
-	if(obj)
-		exit_handler(obj);
-}
-
-AutoObject *AutoObject::base_exit::get(void)
-{
-	return (AutoObject *)pthread_getspecific(exit_key);
-}
-
-void AutoObject::base_exit::set(AutoObject *ao)
-{
-	pthread_setspecific(exit_key, ao);
-}
-
-AutoObject::AutoObject()
-{
-	next = ex.get();
-	ex.set(this);
-}
-
-AutoObject::~AutoObject()
-{
-	delist();
-}
-
-// We assume auto for heap object by default, hence release deletes...
-
-void AutoObject::release(void)
-{
-	delete this;
-}
-
-// this protects in case objects are deleted or auto-released from a
-// stack frame out of reverse order, otherwise it peals off the objects
-// in reverse order that they were created...
-
-void AutoObject::delist(void)
-{
-	AutoObject *node = ex.get();
-	while(node) {
-		if(node == this) {
-			ex.set(next);
-			return;
-		}
-		node = node->next;
-	}
 }
 
 sparse_array::sparse_array(unsigned m)
