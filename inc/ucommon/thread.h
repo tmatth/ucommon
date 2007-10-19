@@ -488,9 +488,7 @@ public:
 	
 	virtual ~Thread();
 
-	virtual void enter(void);
-
-	virtual void exit(void) = 0;
+	virtual void exit(void);
 
 	static void init(void);
 
@@ -515,8 +513,6 @@ private:
 protected:
 	JoinableThread(size_t size = 0);
 	virtual ~JoinableThread();
-	void enter(void);
-	void exit(void);
 	void join(void);
 
 public:
@@ -535,7 +531,7 @@ protected:
 	DetachedThread(size_t size = 0);
 	~DetachedThread();
 
-	virtual void exit(void);
+	void exit(void);
 
 public:
 	void start(void);

@@ -21,13 +21,12 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+static unsigned count = 0;
+
 class testThread : public JoinableThread
 {
 public:
-	int count;
-
-	testThread() : JoinableThread() {
-		count = 0;};
+	testThread() : JoinableThread() {};
 
 	void run(void) {
 		++count;
@@ -43,8 +42,9 @@ extern "C" int main()
 	time(&now);
 	thr = new testThread();
 	start(thr);
+	Thread::sleep(10);
 	delete thr;
-	assert(thr->count == 1);
+	assert(count == 1);
 	time(&later);
 	assert(later >= now + 1);
 };
