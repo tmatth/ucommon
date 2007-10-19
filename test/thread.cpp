@@ -31,7 +31,7 @@ public:
 
 	void run(void) {
 		++count;
-		sleep(10000);
+		sleep(1000);
 	};
 };
 
@@ -43,9 +43,7 @@ extern "C" int main()
 	time(&now);
 	thr = new testThread();
 	start(thr);
-	Thread::sleep(1000);
 	assert(thr->count == 1);
-	cancel(thr);
 	delete thr;
 	time(&later);
 	assert(later == now + 1);
