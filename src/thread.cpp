@@ -543,6 +543,59 @@ void rwlock::release(void)
 	unlock();
 }
 
+StepLock::StepLock(mutex *base)
+{
+	parent = base;
+	stepping = false;
+	crit(pthread_mutex_init(&mlock, NULL) == 0);
+}
+
+StepLock::~StepLock()
+{
+	pthread_mutex_destroy(&mlock);
+	if(stepping)
+		parent->unlock();
+}
+
+void StepLock::release(void)
+{
+	if(stepping) {
+		stepping = false;
+		parent->unlock();
+	}
+	else
+		pthread_mutex_unlock(&mlock);
+}
+
+void StepLock::lock(void)
+{
+	parent->lock();
+	stepping = true;
+}
+
+void StepLock::access(void)
+{
+	pthread_mutex_lock(&mlock);
+	if(stepping)
+		parent->unlock();
+	stepping = false;
+}
+
+void StepLock::Exlock(void)
+{
+	lock();
+}
+
+void StepLock::Shlock(void)
+{
+	access();
+}
+
+void StepLock::Unlock(void)
+{
+	release();
+}
+
 mutex::mutex()
 {
 	crit(pthread_mutex_init(&mlock, NULL) == 0);
@@ -563,6 +616,46 @@ void mutex::Unlock(void)
 	pthread_mutex_unlock(&mlock);
 }
 
+ConditionalTimer::ConditionalTimer() : 
+Timer(), Conditional()
+{
+	waiting = false;
+}
+
+ConditionalTimer::ConditionalTimer(timeout_t timeout) :
+Timer(timeout), Conditional()
+{
+	waiting = false;
+}
+
+ConditionalTimer::ConditionalTimer(time_t timer) :
+Timer(timer), Conditional()
+{
+	waiting = false;
+}
+
+bool ConditionalTimer::wait(void) 
+{
+	bool result;
+	struct timespec ts;
+	timeout_t timeout;
+
+	Conditional::lock();		
+	timeout = get();
+
+	// only one thread can wait on a conditional timer...
+	if(waiting || !timeout) {
+		Conditional::unlock();
+		return false;
+	}
+	waiting = true;
+	Conditional::gettimeout(timeout, &ts);
+	result = Conditional::wait(&ts);
+	waiting = false;
+	Conditional::unlock();
+	return result;
+}
+	
 ConditionalLock::ConditionalLock() :
 Conditional()
 {

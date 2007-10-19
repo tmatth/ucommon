@@ -104,6 +104,22 @@ public:
 
 };
 
+class __EXPORT ConditionalTimer : public Timer, private Conditional
+{
+private:
+	bool waiting;
+
+public:
+	ConditionalTimer(void);
+	ConditionalTimer(timeout_t timeout);
+	ConditionalTimer(time_t timer);
+
+	inline void signal(void)
+		{Conditional::signal();};
+
+	bool wait(void);
+};
+
 class __EXPORT rexlock : private Conditional, public Exclusive
 {
 private:
@@ -360,6 +376,35 @@ public:
 
 	inline static void release(pthread_mutex_t *lock)
 		{pthread_mutex_unlock(lock);};
+};
+
+class __EXPORT StepLock : public Exclusive, public Shared
+{
+private:
+	pthread_mutex_t mlock;
+	mutex *parent;
+	bool stepping;
+
+	__LOCAL void Exlock(void);
+	__LOCAL void Shlock(void);
+	__LOCAL void Unlock(void);
+
+public:
+	StepLock(mutex *base);
+	~StepLock();
+
+	void lock(void);
+	void access(void);
+	void release(void);
+	
+	inline static void lock(StepLock &sl)
+		{sl.lock();};
+
+	inline static void access(StepLock &sl)
+		{sl.access();};
+
+	inline static void release(StepLock &sl)
+		{sl.release();};
 };
 
 class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
@@ -809,7 +854,9 @@ inline void start(DetachedThread *th)
 inline bool cancel(DetachedThread *th)
 	{return th->cancel();};
 
+typedef	StepLock steplock_t;
 typedef ConditionalLock condlock_t;
+typedef ConditionalTimer condtimer_t;
 typedef	mutex mutex_t;
 typedef rwlock rwlock_t;
 typedef	rexlock rexlock_t;
@@ -829,6 +876,15 @@ inline void acquire(mutex_t &ml)
 
 inline void release(mutex_t &ml)
 	{ml.release();};
+
+inline void lock(steplock_t &sl)
+	{sl.lock();};
+
+inline void access(steplock_t &sl)
+	{sl.access();};
+
+inline void release(steplock_t &sl)
+	{sl.release();};
 
 inline void exclusive(condlock_t &cl)
 	{cl.exclusive();};
