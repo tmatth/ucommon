@@ -66,7 +66,6 @@ class __EXPORT exclusive_lock
 {
 private:
 	Exclusive *lock;
-	int state;
 
 public:
 	exclusive_lock(Exclusive *l);
