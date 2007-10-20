@@ -122,11 +122,14 @@ extern "C" {
 inline void pthread_exit(void *p)
 	{_endthreadex((DWORD)p);};
 
+inline pthread_t pthread_self(void)
+	{return (pthread_t)GetCurrentThreadId();};
+
 inline bool pthread_equal(pthread_t x, pthread_t y)
 	{return (x == y);};
 
-inline void pthread_mutex_init(pthread_mutex_t *mutex, void *x)
-	{InitializeCriticalSection(mutex);};
+inline int pthread_mutex_init(pthread_mutex_t *mutex, void *x)
+	{InitializeCriticalSection(mutex); return 0;};
 
 inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
 	{DeleteCriticalSection(mutex);};

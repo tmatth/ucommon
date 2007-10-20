@@ -131,7 +131,6 @@ public:
 class __EXPORT EventTimer : public Timer
 {
 private:
-	bool waiting;
 	HANDLE event;
 
 public:
@@ -140,7 +139,8 @@ public:
 	EventTimer(time_t timer);
 	~EventTimer();
 
-	void signal(void);
+	inline void signal(void)
+		{SetEvent(event);};
 
 	bool wait(void);
 };
@@ -536,8 +536,8 @@ public:
 	static void init(void);
 
 #if defined(_MSWINDOWS_)
-	static void lowerPriority(void) {};
-	static void raisePriority(unsigned pri) {};
+	static void lowerPriority(void);
+	static void raisePriority(unsigned pri);
 #elif _POSIX_PRIORITY_SCHEDULING > 0
 	static void raisePriority(unsigned pri, struct sched_param *sparam = NULL);
 	static void resetPriority(struct sched_param *sparam);

@@ -21,13 +21,18 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
+
+#ifndef	_MSWINDOWS_
 #include <sched.h>
+#endif
 
 using namespace UCOMMON_NAMESPACE;
 
 unsigned Conditional::max_sharing = 0;
 
+#ifndef	_MSWINDOWS_
 Conditional::attribute Conditional::attr;
+#endif
 
 ReusableAllocator::ReusableAllocator() :
 Conditional()
@@ -142,7 +147,6 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 		ts->tv_nsec -= 1000000000l;
 	}
 }
-
 
 semaphore::semaphore(unsigned limit) : 
 Conditional()
@@ -275,6 +279,92 @@ void semaphore::set(unsigned value)
 	}
 }
 
+#ifdef	_MSWINDOWS_
+
+void Conditional::wait(void)
+{
+	int result;
+
+	EnterCriticalSection(&mlock);
+	++waiting;
+	LeaveCriticalSection(&mlock);
+	LeaveCriticalSection(&mutex);
+	result = WaitForMultipleObjects(2, events, FALSE, INFINITE);
+	EnterCriticalSection(&mlock);
+	--waiting;
+	result = ((result == WAIT_OBJECT_0 + BROADCAST) && (waiting == 0));
+	LeaveCriticalSection(&mlock);
+	if(result)
+		ResetEvent(&events[BROADCAST]);
+	EnterCriticalSection(&mutex);
+}
+
+void Conditional::signal(void)
+{
+	EnterCriticalSection(&mlock);
+	if(waiting)
+		SetEvent(&events[SIGNAL]);
+	LeaveCriticalSection(&mlock);
+}
+
+void Conditional::broadcast(void)
+{
+	EnterCriticalSection(&mlock);
+	if(waiting)
+		SetEvent(&events[BROADCAST]);
+	LeaveCriticalSection(&mlock);
+
+}
+
+Conditional::Conditional()
+{
+	waiting = 0;
+
+	InitializeCriticalSection(&mutex);
+	InitializeCriticalSection(&mlock);
+	events[SIGNAL] = CreateEvent(NULL, FALSE, FALSE, NULL);
+	events[BROADCAST] = CreateEvent(NULL, TRUE, FALSE, NULL);	
+}
+
+Conditional::~Conditional()
+{
+	DeleteCriticalSection(&mlock);
+	DeleteCriticalSection(&mutex);
+	CloseHandle(events[SIGNAL]);
+	CloseHandle(events[BROADCAST]);
+}
+
+bool Conditional::wait(timeout_t timeout)
+{
+	int result;
+	bool rtn = true;
+
+	if(!timeout)
+		return false;
+
+	EnterCriticalSection(&mlock);
+	++waiting;
+	LeaveCriticalSection(&mlock);
+	LeaveCriticalSection(&mutex);
+	result = WaitForMultipleObjects(2, events, FALSE, timeout);
+	EnterCriticalSection(&mlock);
+	--waiting;
+	if(result == WAIT_OBJECT_0 || result == WAIT_OBJECT_0 + BROADCAST)
+		rtn = true;
+	result = ((result == WAIT_OBJECT_0 + BROADCAST) && (waiting == 0));
+	LeaveCriticalSection(&mlock);
+	if(result)
+		ResetEvent(&events[BROADCAST]);
+	EnterCriticalSection(&mutex);
+	return rtn;
+}
+
+bool Conditional::wait(struct timespec *ts)
+{
+	return wait(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
+}
+
+#else
 Conditional::attribute::attribute()
 {
 	Thread::init();
@@ -314,6 +404,8 @@ bool Conditional::wait(struct timespec *ts)
 
 	return true;
 }
+
+#endif
 
 rexlock::rexlock() :
 Conditional()
@@ -585,6 +677,53 @@ void mutex::Unlock(void)
 	pthread_mutex_unlock(&mlock);
 }
 
+#ifdef	_MSWINDOWS_
+
+EventTimer::EventTimer() : 
+Timer()
+{
+	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+EventTimer::~EventTimer()
+{
+	if(event != INVALID_HANDLE_VALUE) {
+		CloseHandle(event);
+		event = INVALID_HANDLE_VALUE;
+	}
+}
+
+EventTimer::EventTimer(timeout_t timeout) :
+Timer(timeout)
+{
+	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+EventTimer::EventTimer(time_t timer) :
+Timer(timer)
+{
+	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+bool EventTimer::wait(void) 
+{
+	int result;
+	timeout_t timeout;
+
+	timeout = get();
+
+	// only one thread can wait on a conditional timer...
+	if(!timeout)
+		return false;
+
+	result = WaitForSingleObject(event, timeout);
+	if(result == WAIT_OBJECT_0)
+		return true;
+	return false;
+}
+
+#else
+
 EventTimer::EventTimer() : 
 Timer(), Conditional()
 {
@@ -624,6 +763,8 @@ bool EventTimer::wait(void)
 	Conditional::unlock();
 	return result;
 }
+
+#endif
 	
 ConditionalLock::ConditionalLock() :
 Conditional()
@@ -836,8 +977,12 @@ void LockedIndex::unlock_index(void)
 	
 LockedPointer::LockedPointer()
 {
+#ifdef	_MSWINDOWS_
+	InitializeCriticalSection(&mutex);
+#else
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	memcpy(&mutex, &lock, sizeof(mutex));
+#endif
 	pointer = NULL;
 }
 
@@ -908,10 +1053,12 @@ void Thread::lowerPriority(void)
 void Thread::raisePriority(unsigned adj)
 {
 	HANDLE hThread = GetCurrentThread();
-	if(adj == 0)
+	if(adj == 0) {
 		SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
-	elif(adj ==1) 
-		SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL)
+	}
+	else if(adj == 1) {
+		SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
+	}
 	else
 		SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
 }
@@ -978,7 +1125,11 @@ void Thread::raisePriority(unsigned adj, struct sched_param *sparam)
 
 JoinableThread::JoinableThread(size_t size)
 {
+#ifdef	_MSWINDOWS_
+	joining = INVALID_HANDLE_VALUE;
+#else
 	running = false;
+#endif
 	stack = size;
 }
 
@@ -998,6 +1149,8 @@ void Thread::sleep(timeout_t timeout)
 	pthread_delay(&ts);
 #elif defined(HAVE_PTHREAD_DELAY_NP)
 	pthread_delay_np(&ts);
+#elif defined(_MSWINDOWS_)
+	::Sleep(timeout);
 #else
 	usleep(timeout * 1000);
 #endif
@@ -1005,7 +1158,9 @@ void Thread::sleep(timeout_t timeout)
 
 void Thread::yield(void)
 {
-#ifdef	HAVE_PTHREAD_YIELD
+#if defined(_MSWINDOWS_)
+	SwitchToThread();
+#elif defined(HAVE_PTHREAD_YIELD)
 	pthread_yield();
 #else
 	sched_yield();
@@ -1105,40 +1260,95 @@ JoinableThread::~JoinableThread()
 	join();
 }
 
-void JoinableThread::join(void)
-{
-	pthread_t self = pthread_self();
-
-	if(running && pthread_equal(tid, self))
-		Thread::exit();
-
-	// already joined, so we ignore...
-	if(!running)
-		return;
-
-	if(!pthread_join(tid, NULL))
-		running = false;
-}
-
 DetachedThread::~DetachedThread()
 {
 }
 		
 extern "C" {
+#ifdef	_MSWINDOWS_
+	static unsigned __stdcall exec_thread(void *obj) {
+		Thread *th = static_cast<Thread *>(obj);
+		th->run();
+		th->exit();
+		return 0;
+	}
+#else
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
-#ifdef	PTW32_STATIC_LIB
-		pthread_win32_thread_attach_np();
-#endif
 		th->run();
 		th->exit();
-#ifdef	PTW32_STATIC_LIB
-		pthread_win32_thread_detach_np();
-#endif
 		return NULL;
 	};
+#endif
 }
+
+void PooledThread::start(void)
+{
+	lock();
+	++poolsize;
+	++poolused;
+	DetachedThread::start();
+	unlock();
+}
+
+void PooledThread::start(unsigned count)
+{
+	lock();
+	poolsize = count;
+	while(poolused < poolsize) {
+		DetachedThread::start();
+		++poolused;
+	}
+	unlock();
+}
+
+#ifdef	_MSWINDOWS_
+void JoinableThread::start(void)
+{
+	if(joining != INVALID_HANDLE_VALUE)
+		return;
+
+	if(stack == 1)
+		stack = 1024;
+
+	joining = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
+	if(!joining)
+		joining = INVALID_HANDLE_VALUE;
+}
+
+void DetachedThread::start(void)
+{
+	HANDLE hThread;
+	unsigned temp;
+	
+	if(stack == 1)
+		stack = 1024;
+
+	hThread = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
+	CloseHandle(hThread);
+}		
+
+void JoinableThread::join(void)
+{
+	pthread_t self = pthread_self();
+	int rc;
+
+	if(joining && pthread_equal(tid, self))
+		Thread::exit();
+
+	// already joined, so we ignore...
+	if(joining == INVALID_HANDLE_VALUE)
+		return;
+
+	rc = WaitForSingleObject(joining, INFINITE);
+	if(rc == WAIT_OBJECT_0 || rc == WAIT_ABANDONED) {
+		CloseHandle(joining);
+		joining = INVALID_HANDLE_VALUE;
+	}	
+}
+
+#else
 
 void JoinableThread::start(void)
 {
@@ -1167,26 +1377,6 @@ void JoinableThread::start(void)
 		running = true;
 }
 
-void PooledThread::start(void)
-{
-	lock();
-	++poolsize;
-	++poolused;
-	DetachedThread::start();
-	unlock();
-}
-
-void PooledThread::start(unsigned count)
-{
-	lock();
-	poolsize = count;
-	while(poolused < poolsize) {
-		DetachedThread::start();
-		++poolused;
-	}
-	unlock();
-}
-
 void DetachedThread::start(void)
 {
 	pthread_attr_t attr;
@@ -1206,6 +1396,23 @@ void DetachedThread::start(void)
 	pthread_create(&tid, &attr, &exec_thread, this);
 	pthread_attr_destroy(&attr);
 }
+
+void JoinableThread::join(void)
+{
+	pthread_t self = pthread_self();
+
+	if(running && pthread_equal(tid, self))
+		Thread::exit();
+
+	// already joined, so we ignore...
+	if(!running)
+		return;
+
+	if(!pthread_join(tid, NULL))
+		running = false;
+}
+
+#endif
 
 void Thread::exit(void)
 {
