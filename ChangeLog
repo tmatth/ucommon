@@ -3,6 +3,7 @@ From ucommon 0.9.0 to 0.9.1
 - migrated thread functions to use pure win32 threading for mingw32; no
   more redhat pthread-win32.  This became possible when we dropped
   cancellable threads.
+- fixed cc mode library build because libtool still forces libstdc++!
 
 From ucommon 0.8.2 to 0.9.0
 - slight change to thread init for pthread-win32 static libs.
