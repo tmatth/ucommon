@@ -35,6 +35,7 @@ AC_SUBST(LT_MAJOR)
 AC_SUBST(LT_MINOR)
 
 UCOMMON_VISIBILITY="0"
+UCOMMON_FLAGS=""
 UCOMMON_MODEL="CXX"
 UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
@@ -143,6 +144,9 @@ AC_CHECK_LIB($clib, posix_memalign, [
 
 PTHREAD_FLAGS=""
 
+if test "$enable_shared" = "no" ; then
+	UCOMMON_FLAGS="$UCOMMON_FLAGS -DUCOMMON_STATIC" ; fi
+
 AC_CHECK_HEADER(pthread.h, [
 	PTHREAD_FLAGS="-mt -pthread -pthreads"
 	AC_CHECK_LIB(pthread,pthread_create,[
@@ -223,7 +227,6 @@ fi
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
-UCOMMON_FLAGS=""
 for flag in $CXXFLAGS ; do
 	case $flag in
 		-f*exceptions|-f*rtti|-f*check-new|-f*enforce-eh-specs|-finline|-f*except)

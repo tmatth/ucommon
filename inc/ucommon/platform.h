@@ -91,7 +91,11 @@
 #include <windows.h>
 #include <process.h>
 #ifndef	__EXPORT
+#ifdef	UCOMMON_STATIC
+#define	__EXPORT
+#else
 #define	__EXPORT	__declspec(dllimport)
+#endif
 #endif
 #define	__LOCAL
 #elif UCOMMON_VISIBILITY > 0
