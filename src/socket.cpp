@@ -1522,7 +1522,7 @@ bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 	switch(s1->sa_family) {
 	case AF_INET:
 		if(memcmp(&(((struct sockaddr_in *)s1)->sin_addr), 
-			&(((struct sockaddr_in *)s1)->sin_addr), 4))
+			&(((struct sockaddr_in *)s2)->sin_addr), 4))
 				return false;
 
 		if(!((struct sockaddr_in *)s1)->sin_port || !((struct sockaddr_in *)s2)->sin_port)
@@ -1535,7 +1535,7 @@ bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 #ifdef	AF_INET6
 	case AF_INET6:
 		if(memcmp(&(((struct sockaddr_in6 *)s1)->sin6_addr), 
-			&(((struct sockaddr_in6 *)s1)->sin6_addr), 4))
+			&(((struct sockaddr_in6 *)s2)->sin6_addr), 4))
 				return false;
 
 		if(!((struct sockaddr_in6 *)s1)->sin6_port || !((struct sockaddr_in6 *)s2)->sin6_port)
