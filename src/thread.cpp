@@ -399,7 +399,7 @@ bool Conditional::wait(timeout_t timeout)
 
 bool Conditional::wait(struct timespec *ts)
 {
-	if(pthread_cond_timedwait(&cond, &mutex, ts))
+	if(pthread_cond_timedwait(&cond, &mutex, ts) == ETIMEDOUT)
 		return false;
 
 	return true;
