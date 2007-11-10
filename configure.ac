@@ -245,7 +245,7 @@ done
 export CXXFLAGS="$COMPILER_FLAGS"
 
 if test "$UCOMMON_MODEL" = "CC" ; then	
-	UCOMMON_FLAGS="$UCOMMON_FLAGS -DNOSTDCPP"
+	UCOMMON_FLAGS="$UCOMMON_FLAGS"
 
 	if test "$GCC" = yes ; then
 		ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs"
@@ -297,9 +297,10 @@ else
 		}
     ],[return 0;],[
 		AC_MSG_RESULT(no)
+		UCOMMON_FLAGS="$UCOMMON_FLAGS -DNEW_STDCPP"
 	],[
 		AC_MSG_RESULT(yes)
-		UCOMMON_FLAGS="$UCOMMON_FLAGS -DOLDSTDCPP"
+		UCOMMON_FLAGS="$UCOMMON_FLAGS -DOLD_STDCPP"
 	])
 	AC_LANG_RESTORE
 fi
