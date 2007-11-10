@@ -380,8 +380,8 @@ Conditional::attribute::attribute()
 
 Conditional::Conditional()
 {
-	crit(pthread_cond_init(&cond, &attr.attr) == 0);
-	crit(pthread_mutex_init(&mutex, NULL) == 0);
+	crit(pthread_cond_init(&cond, &attr.attr) == 0, "conditional init failed");
+	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
 }
 
 Conditional::~Conditional()
@@ -608,7 +608,7 @@ StepLock::StepLock(mutex *base)
 {
 	parent = base;
 	stepping = false;
-	crit(pthread_mutex_init(&mlock, NULL) == 0);
+	crit(pthread_mutex_init(&mlock, NULL) == 0, "mutex init failed");
 }
 
 StepLock::~StepLock()
@@ -659,7 +659,7 @@ void StepLock::Unlock(void)
 
 mutex::mutex()
 {
-	crit(pthread_mutex_init(&mlock, NULL) == 0);
+	crit(pthread_mutex_init(&mlock, NULL) == 0, "mutex init failed");
 }
 
 mutex::~mutex()
@@ -1718,7 +1718,7 @@ Conditional()
 
 	if(osize) {
 		buf = (char *)malloc(size);
-		crit(buf != NULL);
+		crit(buf != NULL, "buffer alloc failed");
 	}
 	else 
 		buf = NULL;

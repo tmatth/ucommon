@@ -120,11 +120,11 @@ mempager::page_t *mempager::pager(void)
 	page_t *npage = NULL;
 	void *addr;
 
-	crit(!limit || count < limit);
+	crit(!limit || count < limit, "mempager limit reached");
 
 #ifdef	HAVE_POSIX_MEMALIGN
 	if(align) {
-		crit(posix_memalign(&addr, align, pagesize) == 0);
+		crit(posix_memalign(&addr, align, pagesize) == 0, "mempager alloc failed");
 		npage = (page_t *)addr;
 		goto use;
 	}
@@ -132,7 +132,7 @@ mempager::page_t *mempager::pager(void)
 	npage = (page_t *)malloc(pagesize);
 
 use:
-	crit(npage != NULL);
+	crit(npage != NULL, "mempager alloc failed");
 
 	++count;
 	npage->used = sizeof(page_t);
@@ -153,7 +153,7 @@ void *mempager::alloc_locked(size_t size)
 	caddr_t mem;
 	page_t *p = page;
 
-	crit(size <= (pagesize - sizeof(page_t)));
+	crit(size <= (pagesize - sizeof(page_t)), "mempager alloc failed");
 
 	while(size % sizeof(void *))
 		++size;
@@ -175,7 +175,7 @@ void *mempager::alloc(size_t size)
 {
 	void *mem;
 
-	crit(size <= (pagesize - sizeof(page_t)));
+	crit(size <= (pagesize - sizeof(page_t)), "mempager page size exceeded");
 
 	while(size % sizeof(void *))
 		++size;

@@ -15,6 +15,11 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <config.h>
+
+#ifdef	HAVE_STDEXCEPT
+#include <stdexcept>
+#endif
+
 #include <ucommon/string.h>
 #include <ucommon/socket.h>
 #include <errno.h>
@@ -26,6 +31,14 @@
 #include <limits.h>
 
 using namespace UCOMMON_NAMESPACE;
+
+void cpr_runtime_error(const char *str)
+{
+#ifdef	HAVE_STDEXCEPT
+	throw std::runtime_error(str);
+#endif
+	abort();
+}
 
 extern "C" uint16_t lsb_getshort(uint8_t *b)
 {
@@ -84,7 +97,7 @@ extern "C" void *cpr_memalloc(size_t size)
 		++size;
 
 	mem = malloc(size);
-	crit(mem != NULL);
+	crit(mem != NULL, "memory alloc failed");
 	return mem;
 }
 
@@ -92,7 +105,7 @@ extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 {
 	if(!addr)
 		addr = (caddr_t)malloc(size);
-	crit((size <= max));
+	crit((size <= max), "memory assign failed");
 	return addr;
 }
 

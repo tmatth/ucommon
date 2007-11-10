@@ -1319,7 +1319,7 @@ char *string::dup(const char *cp)
 		return NULL;
 
 	mem = (char *)malloc(strlen(cp) + 1);
-	crit(mem != NULL);
+	crit(mem != NULL, "string dup allocation error");
 	strcpy(mem, cp);
 	return mem;
 }	

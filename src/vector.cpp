@@ -455,7 +455,7 @@ ReusableAllocator()
 	limit = c;
 	used = 0;
 	mem = (caddr_t)malloc(size * count);
-	crit(mem != NULL);
+	crit(mem != NULL, "vector reuse alloc failed");
 }
 
 ArrayReuse::~ArrayReuse()
@@ -577,7 +577,7 @@ bool PagerReuse::avail(void)
 ReusableObject *PagerReuse::alloc(void)
 {
 	ReusableObject *obj = (ReusableObject *)malloc(osize);
-	crit(obj != NULL);
+	crit(obj != NULL, "reusable alloc failed");
 	return obj;
 }
 

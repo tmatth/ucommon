@@ -203,6 +203,8 @@ typedef	double rpcdouble_t;
 
 #include <stdlib.h>
 
+__EXPORT void cpr_runtime_error(const char *text);
+
 extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
 extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t place, size_t max) __MALLOC;
 
@@ -251,9 +253,9 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 
 #include <assert.h>
 #ifdef	DEBUG
-#define	crit(x)	assert(x)
+#define	crit(x, text)	assert(x)
 #else
-#define	crit(x) if(!(x)) abort()
+#define	crit(x, text) if(!(x)) cpr_runtime_error(text)
 #endif
 
 extern "C" {

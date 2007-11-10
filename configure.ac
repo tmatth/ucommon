@@ -278,6 +278,30 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 		fi
 		rm -f conftest*
 	done
+else
+	AC_LANG_SAVE
+	AC_LANG_CPLUSPLUS
+	AC_CHECK_HEADERS(stdexcept)
+	AC_MSG_CHECKING(for old style iostream)
+    AC_TRY_COMPILE([
+		#include <iostream>
+		using namespace std;
+
+		class mystr : public streambuf, public iostream
+		{
+			mystr();
+		};
+
+		mystr::mystr() : streambuf(), iostream((streambuf *)this)
+		{
+		}
+    ],[return 0;],[
+		AC_MSG_RESULT(no)
+	],[
+		AC_MSG_RESULT(yes)
+		UCOMMON_FLAGS="$UCOMMON_FLAGS -DOLDSTDCPP"
+	])
+	AC_LANG_RESTORE
 fi
 
 if test ! -z "$PTHREAD_FLAGS" ; then
