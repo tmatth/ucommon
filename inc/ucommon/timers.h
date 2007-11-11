@@ -39,6 +39,12 @@
 
 NAMESPACE_UCOMMON
 
+/**
+ * Timer class to use when scheduling realtime events.  The timer generally 
+ * uses millisecond values but has a microsecond accuracy.  On platforms that 
+ * support it, the timer uses posix realtime monotonic clock extensions, 
+ * otherwise lower accuracy timer systems might be used.
+ */
 class __EXPORT Timer
 {
 private:
@@ -54,71 +60,227 @@ private:
 	bool updated;
 
 public:
-	static const timeout_t inf;
-	static const time_t reset;
+	static const timeout_t inf;	/**< A value to use for infinite time */
+	static const time_t reset;	/**< A value to use when resetting */
 
+	/**
+	 * Construct an untriggered timer set to the time of creation.
+	 */
 	Timer();
+
+	/**
+	 * Construct a triggered timer that expires at specified offset.
+	 * @param offset to expire in milliseconds.
+	 */
 	Timer(timeout_t offset);
+
+	/**
+	 * Construct a triggered timer that expires at specified offset.
+	 * @param offset to expire in seconds.
+	 */
 	Timer(time_t offset);
 
+	/**
+	 * Check if timer expired.
+	 * @return true if expired.
+	 */
 	bool isExpired(void);
+
+	/**
+	 * Check if timer has been updated since last check.
+	 * @return true if updated.
+	 */
 	bool isUpdated(void);
 
-	void set(timeout_t offset);
-	void set(time_t offset);
+	/**
+	 * Set the timer to expire.
+	 * @param expire time in milliseconds.
+	 */
+	void set(timeout_t expire);
+
+	/**
+	 * Set the timer to expire.
+	 * @param expire time in seconds.
+	 */
+	void set(time_t expire);
+
+	/**
+	 * Set (update) the timer with current time.
+	 */
 	void set(void);
+
+	/**
+	 * Clear pending timer, has no value.
+	 */
 	void clear(void);	
+
+	/**
+	 * Get remaining time until the timer expires.
+	 * @return 0 if expired or milliseconds still waiting.
+	 */
 	timeout_t get(void);
 
+	/**
+	 * Get remaining time until timer expires by reference.
+	 * @return 0 if expired or milliseconds still waiting.
+	 */
 	inline timeout_t operator*()
 		{return get();};
 
+	/**
+	 * Check if timer has expired.
+	 * @return true if timer still pending.
+	 */
 	bool operator!();
-	void operator=(time_t offset);
-	void operator=(timeout_t offset);
-	void operator+=(time_t adj);
-	void operator+=(timeout_t adj);
-	void operator-=(time_t adj);
-	void operator-=(timeout_t adj);
 
+	/**
+	 * Set timer expiration.
+	 * @param expire timer in specified seconds.
+	 */
+	void operator=(time_t expire);
+
+	/**
+	 * Set timer expiration.
+	 * @param expire timer in milliseconds.
+	 */
+	void operator=(timeout_t expire);
+
+	/**
+	 * Adjust timer expiration.
+	 * @param expire time to add in seconds.
+	 */
+	void operator+=(time_t expire);
+
+	/**
+	 * Adjust timer expiration.
+	 * @param expire time to add in milliseconds.
+	 */
+	void operator+=(timeout_t expire);
+
+	/**
+	 * Adjust timer expiration.
+	 * @param expire time to subtract in seconds.
+	 */
+	void operator-=(time_t expire);
+
+	/**
+	 * Adjust timer expiration.
+	 * @param expire time to subtract in milliseconds.
+	 */
+	void operator-=(timeout_t expire);
+
+	/**
+	 * Sleep current thread until the specified timer expires.
+	 * @param timer to reference for sleep.
+	 */
 	static void sync(Timer &timer);
 };
-
 	
+/**
+ * A timer queue for timer events.  The timer queue is used to hold a
+ * linked list of timers that must be processed together.  The timer
+ * queue processes the timer event list and calls an expired function
+ * on events that have expired.  The timer queue also determines the
+ * wait time until the next timer will expire.  When timer events are
+ * modified, they can retrigger the queue to re-examine the list to
+ * find when the next timer will now expire.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT TimerQueue : public OrderedIndex
 {
 public:
+	/**
+	 * A timer event object that lives on a timer queue.  Timer events are
+	 * triggered through the timer queue's expire method.  Timer events
+	 * also modify the queue when they are changed, particularly to force
+	 * re-evaluation of the expiration period.  This class is not used by
+	 * itself but rather as a base class for a timer event object.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
 	class __EXPORT event : protected Timer, public LinkedList
 	{
 	protected:
 		friend class TimerQueue;
 
-		event(timeout_t arm);
-		event(TimerQueue *tq, timeout_t arm);
+		/**
+		 * Construct a timer event object and initially arm.
+		 * @param expire timer in specified milliseconds.
+		 */
+		event(timeout_t expire);
 
+		/**
+		 * Construct an armed timer event object and attach to queue.
+		 * @param queue to add event to.
+		 * @param expire timer in specified milliseconds.
+		 */
+		event(TimerQueue *queue, timeout_t expire);
+
+		/**
+		 * Event method to call in derived class when timer expires.
+		 */
 		virtual void expired(void) = 0;
+
+		/**
+		 * Expected next timeout for the timer.  This may be overriden
+		 * for strategy purposes when evaluted by timer queue's expire.
+		 * @return milliseconds until timer next triggers.
+		 */
 		virtual timeout_t timeout(void);
 
 	public:
+		/**
+		 * Detaches from queue when destroyed.
+		 */
 		virtual ~event();
 
-		void attach(TimerQueue *tq);
+		/**
+		 * Attach event to a timer queue.  Detaches from previous list if
+		 * already attached elsewhere.
+		 * @param queue to attach to.
+		 */
+		void attach(TimerQueue *queue);
+
+		/**
+		 * Detach event from a timer queue.
+		 */
 		void detach(void);
 
+		/**
+		 * Arm event to trigger at specified timeout.
+		 * @param timeout to expire and trigger.
+		 */
         inline void arm(timeout_t timeout)
 			{set(timeout);};
 
+		/**
+		 * Disarm event.
+		 */
 		inline void disarm(void)
 			{clear();};
 
+		/**
+		 * Test if event has expired.
+		 * @return true if expired.
+		 */
 		inline bool isExpired(void)
 			{return Timer::isExpired();};
 
+		/**
+		 * Time remaining until expired.
+		 * @return milliseconds until timer expires.
+		 */
 		inline timeout_t get(void)
 			{return Timer::get();};
 
+		/**
+		 * Notify timer queue that the timer has been updated.
+		 */
 		void update(void);
 
+		/**
+		 * Get the timer queue we are attached to.
+		 * @return timer queue or NULL if not attached.
+		 */
 		inline TimerQueue *getQueue(void)
 			{return static_cast<TimerQueue*>(root);};
 	};	
@@ -126,20 +288,60 @@ public:
 protected:
 	friend class event;
 
-	virtual void update(void) = 0;
+	/**
+	 * Called in derived class when the queue is being modified.
+	 * This is often used to lock the list.
+	 */
 	virtual void modify(void) = 0;
 
+	/**
+	 * Called in derived class after the queue has been modified.  This often 
+	 * releases a lock that modify set and to wakeup a timer thread to
+	 * evaluate when the next timer will now expire.
+	 */
+	virtual void update(void) = 0;
+
 public:
+	/**
+	 * Create an empty timer queue.
+	 */
 	TimerQueue();
+
+	/**
+	 * Destroy queue, does not remove event objects.
+	 */
 	virtual ~TimerQueue();
 
-	void operator+=(event &te);
-	void operator-=(event &te);
+	/**
+	 * Add a timer event to the timer queue.
+	 * @param timer event to add.
+	 */
+	void operator+=(event &timer);
 
+	/**
+	 * Remove a timer event from the timer queue.
+	 * @param timer event to remove.
+	 */
+	void operator-=(event &timer);
+
+	/**
+	 * Process timer queue and find when next event triggers.  This function 
+	 * will call the expired methods on expired timers.  Normally this function
+	 * will be called in the context of a timer thread which sleeps for the
+	 * timeout returned unless it is awoken on an update event.
+	 * @return timeout until next timer expires in milliseconds.
+	 */
 	timeout_t expire();
 };	
 
-typedef TimerQueue::event TimerEvent;
+/**
+ * A convenience type for timer queue timer events.
+ */
+typedef TimerQueue::event TQEvent;
+
+/**
+ * A convenience type for timers.
+ */
 typedef	Timer timer_t;
 
 END_NAMESPACE

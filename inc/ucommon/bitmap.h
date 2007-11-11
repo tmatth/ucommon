@@ -31,6 +31,22 @@
 
 NAMESPACE_UCOMMON
 
+/**
+ * A class to access bit fields in external bitmaps.  The actual bitmap this 
+ * object manipulates may not be stored in the obect.  Bitmaps may be 
+ * referenced on special memory mapped or i/o bus based devices or other 
+ * structures that have varying data word sizes which may differ from the 
+ * default cpu bus size.  The bitmap class can be set to the preferred memory 
+ * bus size of the specific external bitmap being used.  Bitmap size may also 
+ * be relevant when accessing individual bits in memory mapped device registers 
+ * where performing refence and manipulations may change the state of the
+ * device and hence must be aligned with the device register being effected.
+ *
+ * This class offers only the most basic bit manipulations, getting and
+ * setting individual bits in the bitmap.  More advanced bit manipulations
+ * and other operations can be created in derived classes.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT bitmap
 {
 protected:
@@ -48,12 +64,15 @@ protected:
 	addr_t addr;
 
 public:
+	/**
+	 * Specify data word size to use in accessing a bitmap.
+	 */
 	typedef enum {
-		BMALLOC,
-		B8,
-		B16,
-		B32,
-		B64
+		BMALLOC,	/**< Use default cpu size */
+		B8,			/**< Accessing a bitmap on 8 bit bus device */
+		B16,		/**< Accessing a bitmap on a 16 bit device */
+		B32,		/**< Accessing a bitmap on a 32 bit device */
+		B64			/**< Accessing a bitmap on a 64 bit device */
 	} bus_t;
 
 protected:
@@ -62,14 +81,46 @@ protected:
 	unsigned memsize(void);
 
 public:
-	bitmap(void *addr, size_t size, bus_t access = B8); 
-	bitmap(size_t size);
+	/**
+	 * Create an object to reference the specified bitmap.
+	 * @param addr of the bitmap in mapped memory.
+	 * @param length of the bitmap being accessed in bits.
+	 * @param size of the memory bus or manipulation to use.
+	 */
+	bitmap(void *addr, size_t length, bus_t size = B8); 
+
+	/**
+	 * Create a bitmap to manipulate locally.  This bitmap is created
+	 * as part of the object itself, and uses the BMALLOC bus mode.
+	 * @param length of bitmap to create in bits.
+	 */
+	bitmap(size_t length);
+
+	/**
+	 * Destroy bitmap manipulation object.  If a bitmap was locally
+	 * created with the alternate constructor, that bitmap will also be
+	 * removed from memory.
+	 */
 	~bitmap();
 
+	/**
+	 * Clear (zero) all the bits in the bitmap.
+	 */
 	void clear(void);
 
+	/**
+	 * Get the value of a "bit" in the bitmap.
+	 * @param offset to bit in map to get.
+	 * @return true if bit is set.
+	 */
 	bool get(size_t offset);
-	void set(size_t offset, bool bit);
+
+	/**
+	 * Set an individual bit in the bitmask.
+	 * @param offset to bit in map to change.
+	 * @param value to change specified bit to. 
+	 */
+	void set(size_t offset, bool value);
 };
 
 END_NAMESPACE

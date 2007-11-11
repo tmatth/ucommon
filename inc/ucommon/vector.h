@@ -34,6 +34,13 @@ typedef	unsigned short vectorsize_t;
 
 NAMESPACE_UCOMMON
 
+/**
+ * An array of reusable objects.  This class is used to support the
+ * array_use template.  A pool of objects are created which can be
+ * allocated as needed.  Deallocated objects are returned to the pool
+ * so they can be reallocated later.  This is a private fixed size heap.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT ArrayReuse : public ReusableAllocator
 {
 private:
@@ -45,6 +52,9 @@ protected:
 	ArrayReuse(size_t objsize, unsigned c);
 
 public:
+	/**
+	 * Destroy reusable private heap array.
+	 */
 	~ArrayReuse();
 
 protected:
@@ -55,6 +65,13 @@ protected:
 	ReusableObject *request(void);
 };
 
+/**
+ * A mempager source of reusable objects.  This is used by the reuse_pager
+ * template to allocate new objects either from a memory pager used as
+ * a private heap, or from previously allocated objects that have been
+ * returned for reuse.  
+  * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT PagerReuse : protected ReusableAllocator
 {
 private:
@@ -74,6 +91,21 @@ protected:
 	ReusableObject *request(void);
 };	
 
+/**
+ * A managed vector for generic object pointers.  This vector is memory
+ * managed at runtime by basic cow (copy-on-write) operations of a reference
+ * counted object list.  This allows the size of the vector to be changed
+ * at runtime and for the vector to be copied by managing reference counted 
+ * copies of the list of objects as needed.  
+ *
+ * This class is somewhat anagalous
+ * to the string class, but rather than holding a string "array of chars" that
+ * may be re-sized and reallocated, the Vector holds an array of Object 
+ * pointers.  Since the object pointers we store in the vector are objects 
+ * inherited from Object, a vector can itself act as a vector of smart 
+ * pointers to  reference counted objects (derived from CountedObject).
+ * @author David Sugar <dyfet@gnutelephony.org>.
+ */
 class __EXPORT Vector
 {
 protected:
@@ -105,68 +137,254 @@ protected:
 	Object **list(void) const;
 
 public:
+	/**
+	 * npos is a constant for an "invalid" position value.
+	 */
 	static const vectorsize_t npos;
 
+	/**
+	 * Create an initially empty vector.
+	 */
 	Vector();
+
+	/**
+	 * Create a vector of size object pointers.
+	 * @param size of vector to create.
+	 */
 	Vector(vectorsize_t size);
+
+	/**
+	 * Create a vector of size objects from existing object pointers.
+	 * This allocates the vector and initializes the object pointers from
+	 * an existing array of object pointers.  Either a specific vector
+	 * size may be used, or the end of the vector will be found by a NULL
+	 * object pointer.
+	 * @param items to place into the vector.
+	 * @param size of the vector to create, or use NULL item for end.
+	 */
 	Vector(Object **items, vectorsize_t size = 0);
+
+	/**
+	 * Destroy the current reference counted vector of object pointers.
+	 */
 	virtual ~Vector();
 
+	/**
+	 * Get the size of the vector (number of active members).
+	 * @return number of active pointers in vector.
+	 */
 	vectorsize_t len(void) const;
+
+	/**
+	 * Get the effective allocation space used by the vector.  This is the
+	 * number of pointers it can hold before it needs to be resized.
+	 * @return storage size of vector.
+	 */
 	vectorsize_t size(void) const;
 
+	/**
+	 * Get an object pointer from a specified member of the vector.
+	 * @param index of member pointer to return.  Negative values from end.
+	 * @return object pointer of member.
+	 */
 	Object *get(int index) const;
-	vectorsize_t get(void **mem, vectorsize_t max) const;
-	Object *begin(void) const;
-	Object *end(void) const;
-	vectorsize_t find(Object *obj, vectorsize_t pos) const;
 
-	void split(vectorsize_t pos);
-	void rsplit(vectorsize_t pos);
-	void set(vectorsize_t pos, Object *obj);
+	/**
+	 * Copy the vector to an external pointer array.
+	 * @param mem array of external pointers to hold vector.
+	 * @param max size of the external array.
+	 * @return number of elements copied into external array.
+	 */
+	vectorsize_t get(void **mem, vectorsize_t max) const;
+
+	/**
+	 * Get the first object pointer contained in the vector.  Typically used
+	 * in iterations.
+	 * @return first object pointer.
+	 */
+	Object *begin(void) const;
+
+	/**
+	 * Get the last object pointer contained in the vector.  Typically used
+	 * in iterations.
+	 * @return last object pointer.
+	 */
+	Object *end(void) const;
+
+	/**
+	 * Find the first instance of a specific pointer in the vector.
+	 * @param pointer to locate in the vector.
+	 * @param offset to start searching in vector.
+	 * @return position of pointer in vector or npos if not found.
+	 */
+	vectorsize_t find(Object *pointer, vectorsize_t offset = 0) const;
+
+	/**
+	 * Split the vector at a specified offset.  All members after the split
+	 * are de-referenced and dropped from the vector.
+	 * @param position to split vector at.
+	 */
+	void split(vectorsize_t position);
+
+	/**
+	 * Split the vector after a specified offset.  All members before the split
+	 * are de-referenced and dropped.  The member starting at the split point
+	 * becomes the first member of the vector.
+	 * @param position to split vector at.
+	 */
+	void rsplit(vectorsize_t position);
+
+	/**
+	 * Set a member of the vector to an object.  If an existing member was
+	 * present and is being replaced, it is de-referenced.
+	 * @param position in vector to place object pointer.
+	 * @param pointer to place in vector.
+	 */
+	void set(vectorsize_t position, Object *pointer);
+
+	/**
+	 * Set the vector to a list of objects terminated by a NULL pointer.
+	 * @param list of object pointers.
+	 */
 	void set(Object **list);
+
+	/**
+	 * Add (append) a NULL terminated list of objects to the vector.
+	 * @param list of object pointers to add.
+	 */
 	void add(Object **list);
-	void add(Object *obj);
+
+	/**
+	 * Add (append) a single object pointer to the vector.
+	 * @param pointer to add to vector.
+	 */
+	void add(Object *pointer);
+
+	/**
+	 * De-reference and remove all pointers from the vector.
+	 */
 	void clear(void);
+
+	/**
+	 * Re-size & re-allocate the total (allocated) size of the vector.
+	 * @param size to allocate for vector.
+	 */
 	virtual bool resize(vectorsize_t size);
 
-	inline void set(Vector &v)
-		{set(v.list());};
+	/**
+	 * Set (duplicate) an existing vector into our vector.
+	 * @param vector to duplicate.
+	 */
+	inline void set(Vector &vector)
+		{set(vector.list());};
 
-	inline void add(Vector &v)
-		{add(v.list());};
+	/**
+	 * Add (append) an existing vector to our vector.
+	 * @param vector to append.
+	 */
+	inline void add(Vector &vector)
+		{add(vector.list());};
 
+	/**
+	 * Return a pointer from the vector by array reference.
+	 * @param index of vector member pointer to return.
+	 */
 	inline Object *operator[](int index)
 		{return get(index);};
 
-	inline void operator()(vectorsize_t pos, Object *obj)
-		{set(pos, obj);};
+	/**
+	 * Assign a member of the vector directly.
+	 * @param position to assign.
+	 * @param pointer to object to assign to vector.
+	 */
+	inline void operator()(vectorsize_t position, Object *pointer)
+		{set(position, pointer);};
 
-	inline Object *operator()(vectorsize_t pos)
-		{return get(pos);};
+	/**
+	 * Retrieve a member of the vector directly.
+	 * @param position to retrieve object from.
+	 * @return object pointer retrieved from vector.
+	 */
+	inline Object *operator()(vectorsize_t position)
+		{return get(position);};
 
-	inline void operator()(Object *obj)
-		{return add(obj);};
+	/**
+	 * Append a member to the vector directly.
+	 * @param pointer to object to add to vector.
+	 */
+	inline void operator()(Object *pointer)
+		{return add(pointer);};
 
-	inline void operator=(Vector &v)
-		{set(v.list());};
+	/**
+	 * Assign (copy) into our existing vector from another vector.
+	 * @param vector to assign from.
+	 */
+	inline void operator=(Vector &vector)
+		{set(vector.list());};
 
-	inline void operator+=(Vector &v)
-		{add(v.list());};
+	/**
+	 * Append into our existing vector from another vector.
+	 * @param vector to append from.
+	 */
+	inline void operator+=(Vector &vector)
+		{add(vector.list());};
 
-	inline Vector& operator+(Vector &v)
-		{add(v.list()); return *this;};
+	/**
+	 * Concatenate into our existing vector from assignment list.
+	 * @param vector to append from.
+	 */
+	inline Vector& operator+(Vector &vector)
+		{add(vector.list()); return *this;};
 
-	Vector &operator^(Vector &v);
-	void operator^=(Vector &v);
+	/**
+	 * Release vector and concat vector from another vector.
+	 * @param vector to assign from.
+	 */
+	Vector &operator^(Vector &vector);
+
+	/**
+	 * Release our existing vector and duplicate from another vector.  This
+	 * differs from assign in that the allocated size of the vector is reset
+	 * to the new list.
+	 * @param vector to assign from.
+	 */
+	void operator^=(Vector &vector);
+
+	/**
+	 * Drop first member of vector.
+	 */
 	void operator++();
+
+	/**
+	 * Drop last member of the vector.
+	 */
 	void operator--();
-	void operator+=(vectorsize_t vs);
+
+	/**
+	 * Drop first specified members from the vector.
+	 * @param count of members to drop.
+	 */
+	void operator+=(vectorsize_t count);
+
+	/**
+	 * Drop last specified members from the vector.
+	 * @param count of members to drop.
+	 */
 	void operator-=(vectorsize_t vs);
 
+	/**
+	 * Compute the effective vector size of a list of object pointers.
+	 * The size is found as the NULL pointer in the list.
+	 * @return size of list.
+	 */
 	static vectorsize_t size(void **list);
 };
 
+/**
+ * Vector with fixed size member list.  This is analogous to the memstring
+ * class and is used to tie a vector to a fixed list in memory.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT MemVector : public Vector
 {
 private:
@@ -178,103 +396,261 @@ protected:
 	array *copy(void) const;
 
 public:
-	inline void operator=(Vector &v)
-		{set(v);};
+	/**
+	 * Create and manage a vector stored in fixed memory.
+	 * @param pointer to where our vector list lives.
+	 * @param size of vector list in memory.
+	 */
+	MemVector(void *pointer, vectorsize_t size);
 
-	MemVector(void *mem, vectorsize_t size);
+	/**
+	 * Destroy the vector.
+	 */
 	~MemVector();
+
+	/**
+	 * Assign an existing vector into our fixed vector list.
+	 * @param vector to copy from.
+	 */
+	inline void operator=(Vector &vector)
+		{set(vector);};
+
 };
 
+/**
+ * A templated vector for a list of a specific Object subtype.  The
+ * templated type must be derived from Object.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<class T>
 class vectorof : public Vector
 {
 public:
+	/**
+	 * Create an empty vector for specified type.
+	 */
 	inline vectorof() : Vector() {};
+
+	/**
+	 * Create an empty vector of allocated size for specified type.
+	 * @param size of vector to allocate.
+	 */
 	inline vectorof(vectorsize_t size) : Vector(size) {};
 
+	/**
+	 * Cast vector of type to Vector base class.
+	 * @return Vector base object.
+	 */
 	inline operator Vector()
 		{return static_cast<Vector>(*this);};
 
-	inline T *get(int pos)
-		{return static_cast<T *>(Vector::get(pos));};
+	/**
+	 * Get object pointer of specified type from vector.
+	 * @param index of typed member to return, < 0 to use from end of list.
+	 * @return typed object pointer of member.
+	 */ 
+	inline T *get(int index)
+		{return static_cast<T *>(Vector::get(index));};
 
-    inline T *operator()(vectorsize_t pos)
-        {return static_cast<T *>(Vector::get(pos));};
+	/**
+	 * Retrieve a typed member of the vector directly.
+	 * @param position to retrieve object from.
+	 * @return typed object pointer retrieved from vector.
+	 */
+    inline T *operator()(vectorsize_t position)
+        {return static_cast<T *>(Vector::get(position));};
 
+	/**
+	 * Get the first typed object pointer contained in the vector.
+	 * @return first typed object pointer.
+	 */
 	inline T *begin(void)
 		{return static_cast<T *>(Vector::begin());};
 
+	/**
+	 * Get the last typed object pointer contained in the vector.
+	 * @return last typed object pointer.
+	 */
 	inline T *end(void)
 		{return static_cast<T *>(Vector::end());};
 
-	inline Vector &operator+(Vector &v)
-		{Vector::add(v); return static_cast<Vector &>(*this);};
+	/**
+	 * Concatenate typed vector in an expression.
+	 * @param vector to concatenate.
+	 * @return effective object to continue in expression.
+	 */
+	inline Vector &operator+(Vector &vector)
+		{Vector::add(vector); return static_cast<Vector &>(*this);};
 };
 
+/**
+ * An array of reusable types.  A pool of typed objects is created which can 
+ * be allocated as needed.  Deallocated typed objects are returned to the pool
+ * so they can be reallocated later.  This is a private fixed size heap.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<class T>
 class array_reuse : protected ArrayReuse
 {
 public:
+	/**
+	 * Create private heap of reusable objects of specified type.
+	 * @param count of objects of specified type to allocate.
+	 */
 	inline array_reuse(unsigned count) :
 		ArrayReuse(sizeof(T), count) {};
 
+	/**
+	 * Test if typed objects available in heap or re-use list.
+	 * @return true if objects still are available.
+	 */
 	inline operator bool()
 		{return avail();};
 
+	/**
+	 * Test if the entire heap has been allocated.
+	 * @return true if no objects are available.
+	 */
 	inline bool operator!()
 		{return !avail();};
 
+	/**
+	 * Request immediately next available typed object from the heap.
+	 * @return typed object pointer or NULL if heap is empty.
+	 */
 	inline T* request(void)
 		{return static_cast<T*>(ArrayReuse::request());};
 
+	/**
+	 * Get a typed object from the heap.  This function blocks when the
+	 * heap is empty until an object is returned to the heap.
+	 * @return typed object pointer from heap.
+	 */
 	inline T* get(void)
 		{return static_cast<T*>(ArrayReuse::get());};
 
+	/**
+	 * Get a typed object from the heap.  This function blocks until the
+	 * the heap has an object to return or the timer has expired.
+	 * @param timeout to wait for heap in milliseconds.
+	 * @return typed object pointer from heap or NULL if timeout.
+	 */
 	inline T* get(timeout_t timeout)
 		{return static_cast<T*>(ArrayReuse::get(timeout));};
 
-	inline void release(T *o)
-		{ArrayReuse::release(o);};
+	/**
+	 * Release (return) a typed object back to the heap for re-use.
+	 * @param object to return.
+	 */
+	inline void release(T *object)
+		{ArrayReuse::release(object);};
 
+	/**
+	 * Get a typed object from the heap by type casting reference.  This
+	 * function blocks while the heap is empty.
+	 * @return typed object pointer from heap.
+	 */
 	inline operator T*()
 		{return array_reuse::get();};
 
+	/**
+	 * Get a typed object from the heap by pointer reference.  This
+	 * function blocks while the heap is empty.
+	 * @return typed object pointer from heap.
+	 */
 	inline T *operator*()
 		{return array_reuse::get();};
 };
 
+/**
+ * A reusable private pool of reusable types.  A pool of typed objects is 
+ * created which can be allocated from a memory pager.  Deallocated typed 
+ * objects are also returned to this pool so they can be reallocated later.  
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T>
 class paged_reuse : protected PagerReuse
 {
 public: 
-	inline paged_reuse(mempager *M, unsigned count) :
-		PagerReuse(M, sizeof(T), count) {};
+	/**
+	 * Create a managed reusable typed object pool.  This manages a heap of
+	 * typed objects that can either be reused from released objects or 
+	 * allocate from an existing memory pager pool.
+	 * @param pager pool to allocate from.
+	 * @param count of objects of specified type to allocate.
+	 */
+	inline paged_reuse(mempager *pager, unsigned count) :
+		PagerReuse(pager, sizeof(T), count) {};
 
+	/**
+	 * Test if typed objects available from the pager or re-use list.
+	 * @return true if objects still are available.
+	 */
 	inline operator bool()
 		{return PagerReuse::avail();};
 
+	/**
+	 * Test if no objects are available for reuse or the pager.
+	 * @return true if no objects are available.
+	 */
 	inline bool operator!()
 		{return !PagerReuse::avail();};
 
+	/**
+	 * Get a typed object from the pager heap.  This function blocks when the
+	 * heap is empty until an object is returned to the heap.
+	 * @return typed object pointer from heap.
+	 */
 	inline T *get(void)
 		{return static_cast<T*>(PagerReuse::get());};
 
+	/**
+	 * Get a typed object from the heap.  This function blocks until the
+	 * the heap has an object to return or the timer has expired.
+	 * @param timeout to wait for heap in milliseconds.
+	 * @return typed object pointer from heap or NULL if timeout.
+	 */
 	inline T *get(timeout_t timeout)
 		{return static_cast<T*>(PagerReuse::get(timeout));};
 
+	/**
+	 * Request immediately next available typed object from the pager heap.
+	 * @return typed object pointer or NULL if heap is empty.
+	 */
 	inline T *request(void)
 		{return static_cast<T*>(PagerReuse::request());};
 
+	/**
+	 * Release (return) a typed object back to the pager heap for re-use.
+	 * @param object to return.
+	 */
+	inline void release(T *object)
+		{PagerReuse::release(object);};
+
+	/**
+	 * Get a typed object from the pager heap by type casting reference.  This
+	 * function blocks while the heap is empty.
+	 * @return typed object pointer from heap.
+	 */
 	inline T *operator*()
 		{return paged_reuse::get();};
 
+	/**
+	 * Get a typed object from the pager heap by pointer reference.  This
+	 * function blocks while the heap is empty.
+	 * @return typed object pointer from heap.
+	 */
 	inline operator T*()
 		{return paged_reuse::get();};
-
-	inline void release(T *o)
-		{PagerReuse::release(o);};
 };
 
+/**
+ * Allocated vector list of a specified type.  This analogous to the stringbuf 
+ * class and allows one to create a vector with it's member list as a single
+ * object that can live in the heap or that can be created at once and used as 
+ * a auto variable.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<class T, vectorsize_t S>
 class vectorbuf : public MemVector
 {
@@ -282,25 +658,55 @@ private:
 	char buffer[sizeof(array) + (S * sizeof(void *))];
 	
 public:
+	/**
+	 * Construct fixed sized vector object in heap or stack.
+	 */
 	inline vectorbuf() : MemVector(buffer, S) {};
 
+	/**
+	 * Recast object to generic vector.
+	 * @return generic vector object.
+	 */
 	inline operator Vector()
 		{return static_cast<Vector>(*this);};
 
+	/**
+	 * Get object pointer of specified type from fixed vector.
+	 * @param index of typed member to return, < 0 to use from end of list.
+	 * @return typed object pointer of member.
+	 */ 
 	inline T *get(int pos)
 		{return static_cast<T *>(Vector::get(pos));};
 
+	/**
+	 * Retrieve a typed member of the fixed vector directly.
+	 * @param position to retrieve object from.
+	 * @return typed object pointer retrieved from vector.
+	 */
     inline T *operator()(vectorsize_t pos)
         {return static_cast<T *>(Vector::get(pos));};
 
+	/**
+	 * Get the first typed object pointer contained in the fixed vector.
+	 * @return first typed object pointer.
+	 */
 	inline T *begin(void)
 		{return static_cast<T *>(Vector::begin());};
 
+	/**
+	 * Get the last typed object pointer contained in the fixed vector.
+	 * @return last typed object pointer.
+	 */
 	inline T *end(void)
 		{return static_cast<T *>(Vector::end());};
 
-	inline Vector &operator+(Vector &v)
-		{Vector::add(v); return static_cast<Vector &>(*this);};
+	/**
+	 * Concatenate fixed typed vector in an expression.
+	 * @param vector to concatenate.
+	 * @return effective object to continue in expression.
+	 */
+	inline Vector &operator+(Vector &vector)
+		{Vector::add(vector); return static_cast<Vector &>(*this);};
 };
 
 END_NAMESPACE

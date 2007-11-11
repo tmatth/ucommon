@@ -343,7 +343,7 @@ void Timer::sync(Timer &t)
 #endif
 }
 
-timeout_t TimerEvent::timeout(void)
+timeout_t TQEvent::timeout(void)
 {
 	timeout_t timeout = get();
 	if(!isExpired() && !timeout) {

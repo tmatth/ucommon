@@ -77,6 +77,14 @@
 #endif
 #endif
 
+// see if we are building for or using extended stdc++ runtime library support
+
+#if defined(NEW_STDCPP) || defined(OLD_STDCPP)
+#define	UCOMMON_EXTENDED
+#endif
+
+// see if targetting legacy microsoft windows platform 
+
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_
 #if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501

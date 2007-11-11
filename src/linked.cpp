@@ -20,8 +20,8 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
-LinkedObject *LinkedObject::inv = (LinkedObject *)-1;
+const LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
+const LinkedObject *LinkedObject::inv = (LinkedObject *)-1;
 
 LinkedObject::LinkedObject(LinkedObject **root)
 {
