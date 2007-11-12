@@ -37,6 +37,26 @@ NAMESPACE_UCOMMON
 
 class PagerPool;
 
+/**
+ * A managed private heap for small allocations.  This is used to allocate
+ * a large number of small objects from a paged heap as needed and to then
+ * release them together all at once.  This pattern has significiently less
+ * overhead than using malloc and offers less locking contention since the 
+ * memory pager can also have it's own mutex.  Pager pool allocated memory
+ * is always aligned to the optimal data size for the cpu bus and pages are
+ * themselves created from memory aligned allocations.  A page size for a
+ * memory pager should be some multiple of the OS paging size.
+ *
+ * The mempager uses a strategy of allocating fixed size pages as needed
+ * from the real heap and allocating objects from these pages as needed.
+ * A new page is allocated from the real heap when there is insufficient
+ * space in the existing page to complete a request.  The largest single
+ * memory allocation one can make is restricted by the page size used, and
+ * it is best to allocate objects a significent fraction smaller than the
+ * page size, as fragmentation occurs at the end of pages when there is
+ * insufficent space in the current page to complete a request. 
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
 class __EXPORT mempager
 {
 private:
@@ -57,60 +77,202 @@ private:
 protected:
 	unsigned limit;
 
-	inline size_t getOverhead(void)
-		{return sizeof(page_t);};
-
+	/**
+	 * Acquire a new page from the heap.  This is mostly used internally.
+	 * @return page structure of the newly aquired memory page.
+	 */
 	page_t *pager(void);
 
 public:
-	virtual void *alloc_locked(size_t size);
-	
-	char *dup_locked(const char *cp);
+	/**
+	 * Construct a memory pager.
+	 * @param page size to use or 0 for OS allocation size.
+	 */
+	mempager(size_t page = 0);
 
+	/**
+	 * Destroy a memory pager.  Release all pages back to the heap at once.
+	 */
+	virtual ~mempager();
+
+	/**
+	 * Allocate memory from private heap while holding mutex lock.  Sometimes
+	 * an external class may make use of the mutex lock of a mempager for it's
+	 * own purposes.  When doing so, it can directly call this routine to
+	 * allocate memory from the pager while it holds the mutex.  This is a
+	 * virtual because it can be overriden in derived classes to impliment
+	 * different strategies such as page scavanging older pages when being
+	 * unable to satisfy a request with the current page, in addition to
+	 * allocating a new page from the heap.
+	 * @param size of memory request.
+	 * @return allocated memory or NULL if invalid size or limit exceeded.
+	 */
+	virtual void *alloc_locked(size_t size);
+
+	/**
+	 * Duplicate a NULL terminated string into allocated memory.  This
+	 * version of dup is used when one is already holding the pager's
+	 * mutex lock.
+	 * @param string to duplicate.
+	 * @return newly allocated copy of the string or NULL if cannot allocate.
+	 */	
+	char *dup_locked(const char *string);
+
+	/**
+	 * Duplicate existing memory into an allocated copy.  This version of
+	 * dup is used when one is already holding the pager's mutex lock.
+	 * @param memory to duplicate.
+	 * @param size of allocation.
+	 * @return newly allocated copy or NULL if cannot allocate.
+	 */	
+	char *dup_locked(void *memory, size_t size);
+
+	/**
+	 * Lock the memory pager mutex.  It will be more efficient to lock
+	 * the pager and then call the locked allocator than using alloc which
+	 * seperately locks and unlocks for each request when a large number of
+	 * allocation requests are being batched together.
+	 */
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};
 
+	/**
+	 * Unlock the memory pager mutex.
+	 */
 	inline void unlock(void)
 		{pthread_mutex_unlock(&mutex);};
-	
-	mempager(size_t ps = 0);
-	virtual ~mempager();
 
+	/**
+	 * Overhead size used for management of heap pages.
+	 * @return per page overhead.
+	 */	
 	inline unsigned overhead(void)
 		{return sizeof(page_t);};
 
+	/**
+	 * Get the number of pages that have been allocated from the real heap.
+	 * @return pages allocated from heap.
+	 */
 	inline unsigned getPages(void)
 		{return count;};
 
+	/**
+	 * Get the maximum number of pages that are permitted.  One can use a
+	 * derived class to set and enforce a maximum limit to the number of
+	 * pages that will be allocated from the real heap.  This is often used
+	 * to detect and bring down apps that are leaking.
+	 * @return page allocation limit.
+	 */
 	inline unsigned getLimit(void)
 		{return limit;};
 
+	/**
+	 * Get the size of a memory page.
+	 * @return size of each pager heap allocation.
+	 */
 	inline unsigned getAlloc(void)
 		{return pagesize;};
 
+	/**
+	 * Determine fragmentation level of acquired heap pages.  This is
+	 * represented as an average % utilization (0-100) and represents the
+	 * used portion of each allocated heap page vs the page size.  Since
+	 * requests that cannot fit on an already allocated page are moved into
+	 * a new page, there is some unusable space left over at the end of the
+	 * page.  When utilization approaches 100, this is good.  A low utilization
+	 * may suggest a larger page size should be used.
+	 * @return pager utilization.
+	 */
 	unsigned utilization(void);
 
+	/**
+	 * Purge all allocated memory and heap pages immediately.
+	 */
 	void purge(void);
-	virtual void dealloc(void *mem);
+
+	/**
+	 * Return memory back to pager heap.  This actually does nothing, but
+	 * might be used in a derived class to create a memory heap that can
+	 * also receive (free) memory allocated from our heap and reuse it,
+	 * for example in a full private malloc implimentation in a derived class.
+	 * @param memory to free back to private heap.
+	 */
+	virtual void dealloc(void *memory);
+
+	/**
+	 * Allocate memory from the pager heap.  The size of the request must be
+	 * less than the size of the memory page used.  The memory pager mutex
+	 * is locked during this operation and then released.
+	 * @param size of memory request.
+	 * @return allocated memory or NULL if not possible.
+	 */
 	void *alloc(size_t size);
-	char *dup(const char *cp);
-	void *dup(void *mem, size_t size);
+
+	/**
+	 * Duplicate NULL terminated string into allocated memory.  The mutex
+	 * lock is acquired to perform this operation and then released.
+	 * @param string to copy into memory.
+	 * @return allocated memory with copy of string or NULL if cannot allocate.
+	 */
+	char *dup(const char *string);
+
+	/**
+	 * Duplicate existing memory block into allocated memory.  The mutex
+	 * lock is acquired to perform this operation and then released.
+	 * @param memory to data copy from.
+	 * @param size of memory to allocate.
+	 * @return allocated memory with copy or NULL if cannot allocate.
+	 */
+	void *dup(void *memory, size_t size);
 };
 
+/**
+ * Create a linked list of auto-releasable objects.  LinkedObject derived
+ * objects can be created that are assigned to an autorelease object list.
+ * When the autorelease object falls out of scope, all the objects listed'
+ * with it are automatically deleted.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT autorelease
 {
 private:
 	LinkedObject *pool;
 
 public:
+	/**
+	 * Create an initially empty autorelease pool.
+	 */
 	autorelease();
+
+	/**
+	 * Destroy an autorelease pool and delete member objects.
+	 */
 	~autorelease();
 
+	/**
+	 * Destroy an autorelease pool and delete member objects.  This may be
+	 * used to release an existing pool programatically when desired rather
+	 * than requiring the object to fall out of scope.
+	 */
 	void release(void);
 
-	void operator+=(LinkedObject *obj);
+	/**
+	 * Add a linked object to the autorelease pool.
+	 * @param object to add to pool.
+	 */
+	void operator+=(LinkedObject *object);
 };
 
+/**
+ * This is a base class for objects that may be created in pager pools.
+ * This is also used to create objects which can be maintained as managed
+ * memory and returned to a pool.  The linked list is used when freeing
+ * and re-allocating the object.  These objects are reference counted
+ * so that they are returned to the pool they come from automatically
+ * when falling out of scope.  This can be used to create automatic
+ * garbage collection pools.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT PagerObject : public LinkedObject, public CountedObject
 {
 protected:
@@ -118,13 +280,27 @@ protected:
 
 	PagerPool *pager;
 
+	/**
+	 * Create a pager object.  This is object is constructed by a PagerPool.
+	 */
 	PagerObject();
 
+	/**
+	 * Release a pager object reference.
+	 */
 	void release(void);
 
+	/**
+	 * Return the pager object back to it's originating pool.
+	 */
 	void dealloc(void);
 };	
 
+/**
+ * Pager pool base class for managed memory pools.  This is a helper base
+ * class for the pager template and generally is not used by itself.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT PagerPool 
 {
 private:
@@ -139,12 +315,30 @@ protected:
 	PagerObject *get(size_t size);
 
 public:
-	void put(PagerObject *obj);
+	/**
+	 * Return a pager object back to our free list.
+	 * @param object to return to pool.
+	 */
+	void put(PagerObject *object);
 };
 
+/**
+ * A class to hold memory pointers referenced by string names.  This is
+ * used to form a typeless data pointer that can be associated and
+ * referenced by string/logical name.  The memory used for forming
+ * the string names can itself be managed in reusable memory pools and
+ * the entire structure uses it's own private pager heap.  This allows
+ * new string named pointers to be added and deleted at runtime in a thread-
+ * safe manner.  This might typically be used as a session id manager or for
+ * symbol tables.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
 class __EXPORT keyassoc : protected mempager
 {
 private:
+	/**
+	 * Internal paged memory residing data class for name associated pointers.
+	 */
 	class __LOCAL keydata : public NamedObject
 	{
 	public:
@@ -161,74 +355,195 @@ private:
 	LinkedObject **list;
 
 public:
-	keyassoc(unsigned indexing = 177, size_t keymax = 0, size_t ps = 0);
+	/**
+	 * Create a key associated memory pointer table.
+	 * @param indexing size for hash map.
+	 * @param max size of a string name if names are in reusable managed memory.
+	 * @param page size of memory pager.
+	 */
+	keyassoc(unsigned indexing = 177, size_t max = 0, size_t page = 0);
+
+	/**
+	 * Destroy association object.  Release all pages back to the heap.
+	 */
 	~keyassoc();
 
+	/**
+	 * Get the number of associations we have in our object.
+	 * @return number of associations stored.
+	 */
 	inline unsigned getCount(void)
 		{return count;};
 
-	inline void *operator()(const char *id)
-		{return locate(id);};
+	/**
+	 * Lookup the data pointer of a string by direct operation.
+	 * @param name to lookup.
+	 * @return pointer to data or NULL if not found.
+	 */
+	inline void *operator()(const char *name)
+		{return locate(name);};
 
+	/**
+	 * Purge all associations and return allocated pages to heap.
+	 */
 	void purge(void);
-	void *locate(const char *id);
-	bool assign(char *id, void *data);
-	bool create(char *id, void *data);
-	void *remove(const char *id);
+
+	/**
+	 * Lookup the data pointer by the string name given.
+	 * @param name to lookup.
+	 * @return pointer to data or NULL if not found.
+	 */
+	void *locate(const char *name);
+
+	/**
+	 * Assign a name to a data pointer.  If the name exists, it is re-assigned
+	 * with the new pointer value, otherwise it is created.
+	 * @param name to assign.
+	 * @param pointer value to assign with name.
+	 * @return false if failed because name is too long for managed table.
+	 */
+	bool assign(char *name, void *pointer);
+
+	/**
+	 * Create a new name in the association table and assign it's value.
+	 * @param name to create.
+	 * @param pointer value to assign with name.
+	 * @return false if already exists or name is too long for managed table.
+	 */
+	bool create(char *name, void *pointer);
+
+	/**
+	 * Remove a name and pointer association.  If managed key names are used
+	 * then the memory allocated for the name will be re-used.
+	 * @param name to remove.
+	 * @return pointer value of the name or NULL if not found.
+	 */
+	void *remove(const char *name);
 };
 
+/**
+ * A typed template for using a key association with typed objects.
+ * This essentially forms a form of "smart pointer" that is a reference
+ * to specific typed objects by symbolic name.  This is commonly used as
+ * for associated indexing of typed objects.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T, unsigned I = 177, size_t M = 0, size_t P = 0>
 class assoc_pointer : private keyassoc
 {
 public:
+	/**
+	 * Construct an associated pointer hash map based on the class template.
+	 */
 	inline assoc_pointer() : keyassoc(I, M, P) {};
 
+	/**
+	 * Get the count of typed objects stored in our hash map.
+	 * @return typed objects in map.
+	 */
 	inline unsigned getCount(void)
 		{return keyassoc::getCount();};
 
+	/**
+	 * Purge the hash map of typed objects.
+	 */
 	inline void purge(void)
 		{keyassoc::purge();};
 
-	inline T *locate(const char *id)
-		{return static_cast<T*>(keyassoc::locate(id));};
+	/**
+	 * Lookup a typed object by name.
+	 * @param name of typed object to locate.
+	 * @return typed object pointer or NULL if not found.
+	 */
+	inline T *locate(const char *name)
+		{return static_cast<T*>(keyassoc::locate(name));};
 
-	inline T *operator()(const char *id)
-		{return locate(id);};
+	/**
+	 * Reference a typed object directly by name.
+	 * @param name of typed object to locate.
+	 * @return typed object pointer or NULL if not found.
+	 */
+	inline T *operator()(const char *name)
+		{return locate(name);};
 
-	inline bool assign(char *id, T *data)
-		{return keyassoc::assign(id, data);};
+	/**
+	 * Assign a name for a pointer to a typed object.  If the name exists, 
+	 * it is re-assigned with the new pointer value, otherwise it is created.
+	 * @param name to assign.
+	 * @param pointer of typed object to assign with name.
+	 * @return false if failed because name is too long for managed table.
+	 */
+	inline bool assign(char *name, T *pointer)
+		{return keyassoc::assign(name, pointer);};
 
-	inline bool create(char *id, T *data)
-		{return keyassoc::create(id, data);};
+	/**
+	 * Create a new name in the association table and assign typed object.
+	 * @param name to create.
+	 * @param pointer of typed object to assign with name.
+	 * @return false if already exists or name is too long for managed table.
+	 */
+	inline bool create(char *name, T *pointer)
+		{return keyassoc::create(name, pointer);};
 
-	inline void remove(char *id)
-		{keyassoc::remove(id);};
+	/**
+	 * Remove a name and typed pointer association.  If managed key names are 
+	 * used then the memory allocated for the name will be re-used.
+	 * @param name to remove.
+	 */
+	inline void remove(char *name)
+		{keyassoc::remove(name);};
 
+	/**
+	 * Access to pager utilization stats.  This is needed because we
+	 * inherit keyassoc privately.
+	 * @return pager utilization, 0-100.
+	 */
 	inline unsigned utilization(void)
 		{return mempager::utilization();};
 
+	/**
+	 * Access to number of pages allocated from heap for our associated
+	 * index pointer.  This is needed because we inherit keyassoc
+	 * privately.
+	 * @return count of heap pages used.
+	 */
 	inline unsigned getPages(void)
 		{return mempager::getPages();};
-
-	inline void lock(void)
-		{mempager::lock();};
-
-	inline void unlock(void)
-		{mempager::unlock();};
 };
 
+/**
+ * Mempager managed type factory for pager pool objects.  This is used to
+ * construct a type factory that creates and manages typed objects derived
+ * from PagerObject which can be managed through a private heap.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T>
 class pager : private PagerPool
 {
 public:
+	/**
+	 * Construct a pager and optionally assign a private pager heap.
+	 * @param pager heap to use.  If NULL, uses global heap.
+	 */
 	inline pager(mempager *P = NULL) : PagerPool(P) {};
 
+	/**
+	 * Purge managed objects.
+	 */
 	inline ~pager()
 		{mempager::purge();};
 
+	/**
+	 * Create a managed object by casting reference.
+	 * @return pointer to typed managed pager pool object.
+	 */
 	inline T *operator()(void)
 		{return new(get(sizeof(T))) T;};
 
+	/**
+	 * Create a managed object by pointer reference.
+	 * @return pointer to typed managed pager pool object.
+	 */
 	inline T *operator*()
 		{return new(get(sizeof(T))) T;};
 };

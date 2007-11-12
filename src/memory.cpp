@@ -204,6 +204,15 @@ char *mempager::dup_locked(const char *str)
     return mem;
 }
 
+char *mempager::dup_locked(void *obj, size_t size)
+{
+    if(!obj)
+        return NULL;
+    char *mem = static_cast<char *>(alloc_locked(size));
+	memcpy(mem, obj, size);
+    return mem;
+}
+
 void *mempager::dup(void *obj, size_t size)
 {
 	void *mem = alloc(size);
