@@ -585,40 +585,6 @@ public:
 };
 
 /**
- * A named hash map member object.  This is used to form a named object
- * which belongs to a specific hash map table.  This is a convienence
- * base class.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT NamedList : public NamedObject
-{
-protected:
-	friend class objmap;
-
-	NamedObject **keyroot;
-	unsigned keysize;
-
-	/**
-	 * Create a named list member node.
-	 * @param hash map table list belongs to.
-	 * @param name of our member node.
-	 * @param size of the map table used.
-	 */
-	NamedList(NamedObject **hash, char *id, unsigned size);
-
-	/**
-	 * Destroy list member.  Removes node from hash map table.
-	 */
-	virtual ~NamedList();
-
-public:
-	/**
-	 * Remove node from hash map table.
-	 */
-	void delist(void);
-};		
-
-/**
  * A double linked list object.  This is used as a base class for objects
  * that will be organized through ordered double linked lists which allow
  * convenient insertion and deletion of list members anywhere in the list.
@@ -689,59 +655,103 @@ public:
 		{return static_cast<LinkedList*>(LinkedObject::getNext());};
 };
 	
-class __EXPORT objmap
-{
-protected:
-	NamedList *object;
-
-public:
-	objmap(NamedList *obj);
-
-	void operator++();
-
-	objmap &operator=(NamedList *root);
-
-	unsigned count(void) const;
-
-	void begin(void) const;
-};
-
+/**
+ * Templated value class to embed data structure into a named list.
+ * This is used to form a class which can be searched by name and that
+ * contains a member value object.  Most of the core logic for this 
+ * template is found in and derived from the object_value template.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T, class O=NamedObject>
 class named_value : public object_value<T, O>
 {
 public:
-	inline named_value(LinkedObject **root, char *i) 
-		{LinkedObject::enlist(root); O::id = i;};
+	/**
+	 * Construct embedded named object on a linked list.
+	 * @param root node or pointer for list.
+	 * @param name of our object.
+	 */
+	inline named_value(LinkedObject **root, char *name) 
+		{LinkedObject::enlist(root); O::id = name;};
 
-	inline void operator=(T v)
-		{set(v);};
+	/**
+	 * Assign embedded value from related type.
+	 * @param value to assign.
+	 */
+	inline void operator=(T value)
+		{set(value);};
 
-	inline static named_value find(named_value *base, const char *id)
-		{return static_cast<named_value *>(NamedObject::find(base, id));};
+	/**
+	 * Find embedded object in chain by name.
+	 * @param first object in list to search from.
+	 * @param name to search for.
+	 * @return composite object found by name or NULL if not found.
+	 */
+	inline static named_value find(named_value *first, const char *name)
+		{return static_cast<named_value *>(NamedObject::find(first, name));};
 };
 
+/**
+ * Templated value class to embed data structure into a linked list.
+ * This is used to form a class which can be linked together using
+ * either an ordered index or simple linked pointer chain and that
+ * contains a member value object.  Most of the core logic for this 
+ * template is found in and derived from the object_value template.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T, class O=OrderedObject>
 class linked_value : public object_value<T, O>
 {
 public:
+	/**
+	 * Create embedded value object unlinked.
+	 */
 	inline linked_value() {};
 
+	/**
+	 * Construct embedded object on a linked list.
+	 * @param root node or pointer for list.
+	 */
 	inline linked_value(LinkedObject **root)
 		{LinkedObject::enlist(root);};
 
+	/**
+	 * Construct embedded object on an ordered list.
+	 * @param index pointer for the ordered list.
+	 */
 	inline linked_value(OrderedIndex *index) 
 		{O::enlist(index);};
 
-	inline linked_value(LinkedObject **root, T v) 
-		{LinkedObject::enlist(root); set(v);};
+	/**
+	 * Assign embedded value from related type and link to list.
+	 * @param root node or pointer for list.
+	 * @param value to assign.
+	 */
+	inline linked_value(LinkedObject **root, T value) 
+		{LinkedObject::enlist(root); set(value);};
 
-	inline linked_value(OrderedIndex *index, T v)
- 		{O::enlist(index); set(v);};
+	/**
+	 * Assign embedded value from related type and add to list.
+	 * @param index to list our object on.
+	 * @param value to assign.
+	 */
+	inline linked_value(OrderedIndex *index, T value)
+ 		{O::enlist(index); set(value);};
 
-	inline void operator=(T v)
-		{set(v);};
+	/**
+	 * Assign embedded value from related type.
+	 * @param value to assign.
+	 */
+	inline void operator=(T value)
+		{set(value);};
 };	
 
+/**
+ * A templated smart pointer for iterating linked lists.  This class allows
+ * one to access a list of single or double linked objects and iterate
+ * through each member of a list.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T>
 class linked_pointer
 {
@@ -749,76 +759,181 @@ private:
 	T *ptr;
 
 public:
-	inline linked_pointer(T *p)
-		{ptr = p;};
+	/**
+	 * Create a linked pointer and assign to start of a list.
+	 * @param pointer to first member of a linked list.
+	 */
+	inline linked_pointer(T *pointer)
+		{ptr = pointer;};
 
-	inline linked_pointer(const linked_pointer &p)
-		{ptr = p.ptr;};
+	/**
+	 * Create a copy of an existing linked pointer.
+	 * @param pointer to copy from.
+	 */
+	inline linked_pointer(const linked_pointer &pointer)
+		{ptr = pointer.ptr;};
 
-	inline linked_pointer(LinkedObject *p)
-		{ptr = static_cast<T*>(p);};
+	/**
+	 * Create a linked pointer assigned from a raw linked object pointer.
+	 * @param pointer to linked object.
+	 */
+	inline linked_pointer(LinkedObject *pointer)
+		{ptr = static_cast<T*>(pointer);};
 
-	inline linked_pointer(OrderedIndex *a)
-		{ptr = static_cast<T*>(a->begin());};
+	/**
+	 * Create a linked pointer to examine an ordered index.
+	 * @param index of linked objects to iterate through.
+	 */
+	inline linked_pointer(OrderedIndex *index)
+		{ptr = static_cast<T*>(index->begin());};
 
+	/**
+	 * Create a linked pointer not attached to a list.
+	 */
 	inline linked_pointer() 
 		{ptr = NULL;};
 
-	inline void operator=(T *v)
-		{ptr = v;};
+	/**
+	 * Assign our typed iterative pointer from a matching typed object.
+	 * @param pointer to typed object.
+	 */
+	inline void operator=(T *pointer)
+		{ptr = pointer;};
 
-	inline void operator=(linked_pointer &p)
-		{ptr = p.ptr;};
+	/**
+	 * Assign our pointer from another pointer.
+	 * @param pointer to assign from.
+	 */
+	inline void operator=(linked_pointer &pointer)
+		{ptr = pointer.ptr;};
 
-	inline void operator=(OrderedIndex *a)
-		{ptr = static_cast<T*>(a->begin());};
+	/**
+	 * Assign our pointer from the start of an ordered index.
+	 * @param index to assign pointer from.
+	 */
+	inline void operator=(OrderedIndex *index)
+		{ptr = static_cast<T*>(index->begin());};
 
-	inline void operator=(LinkedObject *p)
-		{ptr = static_cast<T*>(p);};
+	/**
+	 * Assign our pointer from a generic linked object pointer.
+	 * @param pointer of linked list.
+	 */
+	inline void operator=(LinkedObject *pointer)
+		{ptr = static_cast<T*>(pointer);};
 
+	/**
+	 * Return member from typed object our pointer references.
+	 * @return evaluated member of object we point to.
+	 */
 	inline T* operator->() const
 		{return ptr;};
 
+	/**
+	 * Return object we currently point to.
+	 * @return object linked pointer references.
+	 */
 	inline T* operator*() const
 		{return ptr;};
 
+	/**
+	 * Return object we point to by casting.
+	 * @return object linked pointer references.
+	 */
 	inline operator T*() const
 		{return ptr;};
 
+	/**
+	 * Move (iterate) pointer to previous member in double linked list.
+	 */
 	inline void prev(void)
 		{ptr = static_cast<T*>(ptr->getPrev());};
 
+	/**
+	 * Move (iterate) pointer to next member in linked list.
+	 */
 	inline void next(void)
 		{ptr = static_cast<T*>(ptr->getNext());};
 
+	/**
+	 * Get the next member in linked list.  Do not change who we point to.
+	 * @return next member in list or NULL if end of list.
+	 */
 	inline T *getNext(void) const
 		{return static_cast<T*>(ptr->getNext());};
 
+	/**
+	 * Get the previous member in double linked list.  Do not change who we 
+	 * point to.
+	 * @return previous member in list or NULL if start of list.
+	 */
     inline T *getPrev(void) const
         {return static_cast<T*>(ptr->getPrev());};
 
+	/**
+	 * Move (iterate) pointer to next member in linked list.
+	 */
 	inline void operator++()
 		{ptr = static_cast<T*>(ptr->getNext());};
 
+	/**
+	 * Move (iterate) pointer to previous member in double linked list.
+	 */
     inline void operator--()
         {ptr = static_cast<T*>(ptr->getPrev());};
 
+	/**
+	 * Test for next member in linked list.
+	 * @return true if there is more members after current one.
+	 */
 	inline bool isNext(void) const
 		{return (ptr->getNext() != NULL);};
 
+	/**
+	 * Test for previous member in double linked list.
+	 * @return true if there is more members before current one.
+	 */
 	inline bool isPrev(void) const
 		{return (ptr->getPrev() != NULL);};
 
+	/**
+	 * Test if linked pointer is set/we are not at end of list.
+	 * @return true if we are not at end of list.
+	 */
 	inline operator bool() const
 		{return (ptr != NULL);};
 
+	/**
+	 * Test if linked list is empty/we are at end of list.
+	 * @return true if we are at end of list.
+	 */
 	inline bool operator!() const
 		{return (ptr == NULL);};
 
+	/**
+	 * Return pointer to our linked pointer to use as root node of a chain.
+	 * @return our object pointer as a root index.
+	 */
     inline LinkedObject **root(void) const
 		{T **r = &ptr; return (LinkedObject**)r;};
 };
 
+/**
+ * Embed data objects into a tree structured memory database.  This can
+ * be used to form XML documentent trees or other data structures that
+ * can be organized in trees.  The NamedTree class is used to manage
+ * the structure of the tree, and the type specified is embedded as a
+ * data value object which can be manipulated.  Name identifiers are
+ * assumed to be dynamically allocated if tree node elements are deletable.
+ *
+ * Embedded values can either be of direct types that are then stored as
+ * part of the templated object, or of class types that are data pointers.
+ * The latter might be used for trees that contain data which might be
+ * parsed dynamically from a document and/or saved on a heap.  Pointer trees
+ * assume that NULL pointers are for nodes that are empty, and that NULL data
+ * value nodes with children are trunk nodes.  Generally data values are then
+ * allocated with a pointer stored in pure leaf nodes.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T>
 class treemap : public NamedTree
 {
@@ -826,63 +941,170 @@ protected:
 	T value;
 
 public:
-	inline treemap(char *id = NULL) : NamedTree(id) {};
-	inline treemap(treemap *parent, char *id) : NamedTree(parent, id) {};
-	inline treemap(treemap *parent, char *id, T &v) :
-		NamedTree(parent, id) {value = v;};
+	/**
+	 * Construct a typed root node for the tree.  The root node may be
+	 * named as a stand-alone node or unnamed. 
+	 * @param name of the node we are creating.
+	 */
+	inline treemap(char *name = NULL) : NamedTree(name) {};
 
+	/**
+	 * Construct a child node on an existing tree.
+	 * @param parent of this node to attach.
+	 * @param name of this node.
+	 */
+	inline treemap(treemap *parent, char *name) : NamedTree(parent, name) {};
+
+	/**
+	 * Construct a child node on an existing tree and assign it's value.
+	 * @param parent of this node to attach.
+	 * @param name of this node.
+	 * @param reference to value to assign to this node.
+	 */
+	inline treemap(treemap *parent, char *name, T &reference) :
+		NamedTree(parent, name) {value = reference;};
+
+	/**
+	 * Return the typed value of this node.
+	 * @return reference to value of node.
+	 */
 	inline T &get(void) const
 		{return value;};
 
+	/**
+	 * Return typed value of this node by pointer reference.
+	 * @return value of node.
+	 */
 	inline T operator*() const
 		{return value;};
 
+	/**
+	 * Return value from tree element when value is a pointer.
+	 * @param node in our typed tree.
+	 * @return value of node.
+	 */
 	static inline T getPointer(treemap *node)
 		{(node == NULL) ? NULL : node->value;};
 
+	/**
+	 * Test if this node is a leaf node for a tree pointer table.
+	 * @return true if value pointer is not NULL and there are no children.
+	 */
 	inline bool isAttribute(void) const
 		{return (!child.begin() && value != NULL);};
 
+	/**
+	 * Get the pointer of a pointer based value tree.
+	 * @return value pointer of node.
+	 */
 	inline T getPointer(void) const
 		{return value;};
 
+	/**
+	 * Get the data value of a data based value tree.
+	 * @return data value of node.
+	 */
 	inline T getData(void) const
 		{return value;};
 
-	inline void setPointer(const T p)
-		{value = p;};
+	/**
+	 * Set the pointer of a pointer based value tree.
+	 * @param pointer to set.
+	 */
+	inline void setPointer(const T pointer)
+		{value = pointer;};
 
-	inline void set(const T &v)
-		{value = v;};
+	/**
+	 * Set the value of a data based value tree.
+	 * @param reference to value to copy into node.
+	 */
+	inline void set(const T &reference)
+		{value = reference;};
 
-	inline void operator=(const T &v)
-		{value = v;};
+	/**
+	 * Assign the value of our node.
+	 * @param data value to assign.
+	 */
+	inline void operator=(const T &data)
+		{value = data;};
 
+	/**
+	 * Get the typed parent node for our node.
+	 * @return parent node or NULL if root of tree.
+	 */
 	inline treemap *getParent(void) const
 		{return static_cast<treemap*>(parent);};
 
-	inline treemap *getChild(const char *id) const
-		{return static_cast<treemap*>(NamedTree::getChild(id));};
+	/**
+	 * Get direct typed child node of our node of specified name.  This
+	 * does not perform a recursive search.
+	 * @param name of child node.
+	 * @return typed child node pointer or NULL if not found.
+	 */
+	inline treemap *getChild(const char *name) const
+		{return static_cast<treemap*>(NamedTree::getChild(name));};
 
-	inline treemap *getLeaf(const char *id) const
-		{return static_cast<treemap*>(NamedTree::getLeaf(id));};
+	/**
+	 * Find a direct typed leaf node on our node.  A leaf node is a node that
+	 * has no children of it's own.  This does not perform a recursive search.
+	 * @param name of leaf child node to find.
+	 * @return typed leaf node object of leaf or NULL.
+	 */
+	inline treemap *getLeaf(const char *name) const
+		{return static_cast<treemap*>(NamedTree::getLeaf(name));};
 
-	inline T getValue(const char *id) const
-		{return getPointer(getLeaf(id));};
+	/**
+	 * Get the value pointer of a leaf node of a pointer tree.  This allows 
+	 * one to find a leaf node and return it's pointer value in a single 
+	 * operation.
+	 * @param name of leaf node.
+	 * @return value of leaf pointer if found and contains value, or NULL.
+	 */
+	inline T getValue(const char *name) const
+		{return getPointer(getLeaf(name));};
 
-	inline treemap *find(const char *id) const
-		{return static_cast<treemap*>(NamedTree::find(id));};
+	/**
+	 * Find a subnode from our node by name.  This performs a recursive
+	 * search.
+	 * @param name to search for.
+	 * @return typed node that is found or NULL if none is found.
+	 */
+	inline treemap *find(const char *name) const
+		{return static_cast<treemap*>(NamedTree::find(name));};
 
+	/**
+	 * Find a subnode by pathname.  This is the same as the NamedTree
+	 * path member function.
+	 * @param path name to search for node.
+	 * @return typed node that is found at path or NULL.
+	 */
 	inline treemap *path(const char *path) const
 		{return static_cast<treemap*>(NamedTree::path(path));};
 
-	inline treemap *leaf(const char *id) const
-		{return static_cast<treemap*>(NamedTree::leaf(id));};
+	/**
+	 * Search for a leaf node of our node.  This performs a recursive
+	 * search.
+	 * @param name to search for.
+	 * @return typed not that is found or NULL if none is found.
+	 */
+	inline treemap *leaf(const char *name) const
+		{return static_cast<treemap*>(NamedTree::leaf(name));};
 
+	/**
+	 * Get first child of our node.  This is useful for iterating children.
+	 * @return first child or NULL.
+	 */
 	inline treemap *getFirst(void) const
 		{return static_cast<treemap*>(NamedTree::getFirst());};
 };
 
+/**
+ * A templated class for a hash map.  This provides a has map index object as
+ * a chain of keyindex selected linked pointers of a specified size.  This
+ * is used for the index and size values for NamedObject's which are listed
+ * on a hash map.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T, unsigned M = 177>
 class keymap
 {
@@ -890,61 +1112,158 @@ private:
 	NamedObject *idx[M];
 
 public:
+	/**
+	 * Destroy the hash map by puring the index chains.
+	 */
 	inline ~keymap()
 		{NamedObject::purge(idx, M);};
 
+	/**
+	 * Retrieve root of index to use in NamedObject constructors.
+	 * @return root node of index.
+	 */
 	inline NamedObject **root(void) const
 		{return idx;};
 
+	/**
+	 * Retreive key size to use in NamedObject constructors.
+	 * @return key size of hash map.
+	 */
 	inline unsigned limit(void) const
 		{return M;};
 
-	inline T *get(const char *id) const
-		{return static_cast<T*>(NamedObject::map(idx, id, M));};
+	/**
+	 * Find a typed object in the hash map by name.
+	 * @param name to search for.
+	 * @return typed object if found through map or NULL.
+	 */
+	inline T *get(const char *name) const
+		{return static_cast<T*>(NamedObject::map(idx, name, M));};
 
+	/**
+	 * Find first typed object in hash map to iterate.
+	 * @return first typed object or NULL if nothing in list.
+	 */
 	inline T *begin(void) const
 		{return static_cast<T*>(NamedObject::skip(idx, NULL, M));};
 
+	/**
+	 * Find next typed object in hash map for iteration.
+	 * @param current typed object we are referencing.
+	 * @return next iterative object or NULL if past end of map.
+	 */
 	inline T *next(T *current) const
 		{return static_cast<T*>(NamedObject::skip(idx, current, M));};
 
+	/**
+	 * Count the number of typed objects in our hash map.
+	 * @return count of typed objects.
+	 */
 	inline unsigned count(void) const
 		{return NamedObject::count(idx, M);};
 
+	/**
+	 * Convert our hash map into a linear object pointer array.  The
+	 * object pointer array is created from the heap and must be deleted
+	 * when no longer used.
+	 * @return array of typed named object pointers.
+	 */
 	inline T **index(void) const
 		{return NamedObject::index(idx, M);};
 
+	/**
+	 * Convert our hash map into an alphabetically sorted linear object 
+	 * pointer array.  The object pointer array is created from the heap 
+	 * and must be deleted when no longer used.
+	 * @return sorted array of typed named object pointers.
+	 */
 	inline T **sort(void) const
 		{return NamedObject::sort(NamedObject::index(idx, M));};
 }; 
 
+/**
+ * A template for ordered index of typed name key mapped objects.
+ * This is used to hold an iterable linked list of typed named objects
+ * where we can find objects by their name as well as through iteration.
+ * @David Sugar <dyfet@gnutelephony.org>
+ */
 template <class T>
 class keylist : public OrderedIndex
 {
 public:
+	/**
+	 * Return a root node pointer to use in NamedObject constructors.
+	 * @return pointer to index root.
+	 */
 	inline NamedObject **root(void)
 		{return static_cast<NamedObject*>(&head);};
 
+	/**
+	 * Return first item in ordered list.  This is commonly used to
+	 * iterate the list.
+	 * @return first item in list or NULL if empty.
+	 */
 	inline T *begin(void)
 		{return static_cast<T*>(head);};
 
+	/**
+	 * Return last item in ordered list.  This is commonly used to determine
+	 * end of list iteration.
+	 * @return last item in list or NULL if empty.
+	 */
 	inline T *end(void)
 		{return static_cast<T*>(tail);};
 
-	inline T *create(const char *id)
-		{return new T(this, id);};
+	/**
+	 * Create a new typed named object with default constructor.
+	 * This creates a new object which can be deleted.
+	 * @param name of object to create.
+	 * @return typed named object.
+	 */
+	inline T *create(const char *name)
+		{return new T(this, name);};
 
+	/**
+	 * Iterate next object in list.
+	 * @param current object we are referencing.
+	 * @return next logical object in linked list or NULL if end.
+	 */
     inline T *next(LinkedObject *current)
         {return static_cast<T*>(current->getNext());};
 
-    inline T *find(const char *id)
-        {return static_cast<T*>(NamedObject::find(begin(), id));};
+	/**
+	 * Find a specific object by name.
+	 * @param name to search for.
+	 * @return type named object that matches or NULL if not found.
+	 */
+    inline T *find(const char *name)
+        {return static_cast<T*>(NamedObject::find(begin(), name));};
 
-    inline T *operator[](unsigned index)
-        {return static_cast<T*>(OrderedIndex::find(index));};
+	/**
+	 * Retrieve a specific object by position in list.
+	 * @param offset in list for object we want.
+	 * @return type named object or NULL if past end of list.
+	 */
+    inline T *operator[](unsigned offset)
+        {return static_cast<T*>(OrderedIndex::find(offset));};
 
+	/**
+	 * Convert our linked list into a linear object pointer array.  The
+	 * object pointer array is created from the heap and must be deleted
+	 * when no longer used.
+	 * @return array of typed named object pointers.
+	 */
+	inline T **index(void)
+		{return static_cast<T**>(OrderedIndex::index());};
+
+	/**
+	 * Convert our linked list into an alphabetically sorted linear object 
+	 * pointer array.  The object pointer array is created from the heap 
+	 * and must be deleted when no longer used.
+	 * @return array of typed named object pointers.
+	 */
 	inline T **sort(void)
-		{return NamedObject::sort(index());};
+		{return static_cast<T**>(NamedObject::sort(index()));};
 };
 
 /**

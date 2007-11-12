@@ -163,27 +163,6 @@ NamedObject::~NamedObject()
 	}
 }
 
-NamedList::NamedList(NamedObject **root, char *id, unsigned max) :
-NamedObject(root, id, max)
-{
-	keyroot = root;
-	keysize = max;
-}
-
-NamedList::~NamedList()
-{
-	delist();
-}
-
-void NamedList::delist(void)
-{
-	if(!keyroot)
-		return;
-	
-	LinkedObject::delist((LinkedObject**)(&keyroot[keyindex(id, keysize)]));	
-	keyroot = NULL;
-}
-
 // Linked objects are assumed to be freeable if they are released.  The retain
 // simply marks it into a self reference state which can never otherwise happen
 // naturally.  This is used to mark avoid freeing during release.
@@ -678,17 +657,5 @@ unsigned OrderedIndex::count(void) const
 		++count;
 	}
 	return count;
-}
-
-objmap::objmap(NamedList *o)
-{
-	object = o;
-}
-
-void objmap::operator++()
-{
-	if(object)
-		object = static_cast<NamedList *>(NamedObject::skip(object->keyroot, 
-			static_cast<NamedObject*>(object), object->keysize));
 }
 
