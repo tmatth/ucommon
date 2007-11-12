@@ -56,6 +56,18 @@ struct addrinfo;
 #define IPTOS_MINCOST       0x02
 #endif
 
+/**
+ * An object that can hold a ipv4 or ipv6 socket address.  This would be
+ * used for tcpip socket connections.  We do not use sockaddr_storage
+ * because it is not present in pre ipv6 stacks, and because the storage
+ * size also includes the size of the path of a unix domain socket on
+ * posix systems.
+ */
+struct sockaddr_internet;
+
+/**
+ * An object that holds ipv4 or ipv6 binary encoded host addresses.
+ */
 typedef	struct
 {
 	union
@@ -98,6 +110,15 @@ struct sockaddr_storage
 
 NAMESPACE_UCOMMON
 
+/**
+ * A class to hold internet segment routing rules.  This class can be used
+ * to provide a stand-alone representation of a cidr block of internet
+ * addresses or chained together into some form of access control list.  The
+ * cidr class can hold segments for both IPV4 and IPV6 addresses.  The class
+ * accepts cidr's defined as C strings, typically in the form of address/bits
+ * or address/submask.  These routines auto-detect ipv4 and ipv6 addresses.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT cidr : public LinkedObject
 {
 protected:
@@ -107,43 +128,133 @@ protected:
 	unsigned getMask(const char *cp) const;
 
 public:
+	/**
+	 * A convenience type for using a pointer to a linked list as a policy chain.
+	 */
 	typedef	LinkedObject policy;
 
+	/**
+	 * Create an uninitialized cidr.
+	 */
 	cidr();
-	cidr(const char *str);
-	cidr(policy **policy, const char *str);
-	cidr(policy **policy, const char *str, const char *id);
-	cidr(const cidr &copy);
 
-	static cidr *find(policy *policy, const struct sockaddr *addr);
+	/**
+	 * Create an unlinked cidr from a string.  The string is typically in
+	 * the form base-host-address/range, where range might be a bit count
+	 * or a network mask.
+	 * @param string for cidr block.
+	 */
+	cidr(const char *string);
+	
+	/**
+	 * Create an unnamed cidr entry on a specified policy chain.
+	 * @param policy chain to link cidr to.
+	 * @param string for cidr block.
+	 */
+	cidr(policy **policy, const char *string);
 
+	/**
+	 * Create a named cidr entry on a specified policy chain.
+	 * @param policy chain to link cidr to.
+	 * @param string for cidr block.
+	 * @param name of this policy object.
+	 */
+	cidr(policy **policy, const char *string, const char *name);
+
+	/**
+	 * Construct a copy of an existing cidr.
+	 * @param existing cidr we copy from.
+	 */
+	cidr(const cidr &existing);
+
+	/**
+	 * Find the smallest cidr entry in a list that matches the socket address.
+	 * @param policy chain to search.
+	 * @param address to search for.
+	 * @return smallest cidr or NULL if none match.
+	 */
+	static cidr *find(policy *policy, const struct sockaddr *address);
+
+	/**
+	 * Get the saved name of our cidr.  This is typically used with find
+	 * when the same policy name might be associated with multiple non-
+	 * overlapping cidr blocks.  A typical use might to have a cidr
+	 * block like 127/8 named "localdomain", as well as the ipv6 "::1".
+	 * @return name of cidr.
+	 */
 	inline const char *getName(void) const
 		{return name;};
 
+	/**
+	 * Get the address family of our cidr block object.
+	 * @return family of our cidr.
+	 */
 	inline int getFamily(void) const
 		{return family;};
 
+	/**
+	 * Get the network host base address of our cidr block.
+	 * @return binary network host address.
+	 */
 	inline inethostaddr_t getNetwork(void) const
 		{return network;};
 
+	/**
+	 * Get the effective network mask for our cidr block.
+	 * @return binary network mask for our cidr.
+	 */
 	inline inethostaddr_t getNetmask(void) const
 		{return netmask;};
 
+	/**
+	 * Get the broadcast host address represented by our cidr.
+	 * @return binary broadcast host address.
+	 */
 	inethostaddr_t getBroadcast(void) const;
 
+	/**
+	 * Get the number of bits in the cidr bitmask.
+	 * @return bit mask of cidr.
+	 */
 	unsigned getMask(void) const;
-		
-	void set(const char *c);
+	
+	/**
+	 * Set our cidr to a string address.  Replaces prior value.
+	 * @param string to set for cidr.
+	 */	
+	void set(const char *string);
 
-	bool isMember(const struct sockaddr *saddr) const;
+	/**
+	 * Test if a given socket address falls within this cidr.
+	 * @param address of socket to test.
+	 * @return true if address is within cidr.
+	 */
+	bool isMember(const struct sockaddr *address) const;
 
-	inline bool operator==(const struct sockaddr *saddr) const
-		{return isMember(saddr);};
-		
-	inline bool operator!=(const struct sockaddr *saddr) const
-		{return !isMember(saddr);}; 
+	/**
+	 * Test if a given socket address falls within this cidr.
+	 * @param address of socket to test.
+	 * @return true if address is within cidr.
+	 */
+	inline bool operator==(const struct sockaddr *address) const
+		{return isMember(address);};
+	
+	/**
+	 * Test if a given socket address falls outside this cidr.
+	 * @param address of socket to test.
+	 * @return true if address is outside cidr.
+	 */
+	inline bool operator!=(const struct sockaddr *address) const
+		{return !isMember(address);}; 
 };
 
+/**
+ * A generic socket base class.  This class can be used directly or as a
+ * base class for building network protocol stacks.  This common base tries
+ * to handle UDP and TCP sockets, as well as support multicast, IPV4/IPV6
+ * addressing, and additional addressing domains (such as Unix domain sockets).
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT Socket 
 {
 protected:
@@ -152,6 +263,14 @@ protected:
 	SOCKET so;
 
 public:
+	/**
+	 * A generic socket address class.  This class uses the addrinfo list
+	 * to store socket multiple addresses in a protocol and family
+	 * independent manner.  Hence, this address class can be used for ipv4
+	 * and ipv6 sockets, for assigning connections to multiple hosts, etc.
+	 * The address class will call the resolver when passed host names.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
 	class __EXPORT address
 	{
 	protected:

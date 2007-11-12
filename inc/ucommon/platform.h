@@ -202,46 +202,126 @@ typedef char *caddr_t;
 
 #endif
 
-typedef	void (*sighandler_t)(int);
-typedef	unsigned long timeout_t;
-typedef	int32_t rpcint_t;
-typedef	rpcint_t rpcbool_t;
-typedef	char *rpcstring_t;
-typedef	double rpcdouble_t;
+typedef	void (*sighandler_t)(int);	/**< Convenient typedef for signal handlers. */
+typedef	unsigned long timeout_t;	/**< Typedef for millisecond timer values. */
 
 #include <stdlib.h>
 
+/**
+ * Function to handle runtime errors.  When using the standard C library,
+ * runtime errors are handled by a simple abort.  When using the stdc++
+ * library with stdexcept, then std::runtime_error will be thrown.
+ * @param text of runtime error.
+ */
 __EXPORT void cpr_runtime_error(const char *text);
 
+/**
+ * Portable memory allocation helper function.  Handles out of heap error
+ * as a runtime error.
+ * @param size of memory block to allocate from heap.
+ * @return memory address of allocated heap space.
+ */
 extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
-extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t place, size_t max) __MALLOC;
 
+/**
+ * Portable memory placement helper function.  This is used to process
+ * "placement" new operators where a new object is constructed over a
+ * pre-allocated area of memory.  This handles invalid values through
+ * runtime error.
+ * @param size of object being constructed.
+ * @param address where the object is being placed.
+ * @param known size of the location we are constructing the object in.
+ */
+extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t address, size_t known) __MALLOC;
+
+/**
+ * Our generic new operator.  Uses our heap memory allocator.
+ * @param size of object being constructed.
+ * @return memory allocated from heap.
+ */
 inline void *operator new(size_t size)
 	{return cpr_memalloc(size);};
 
+/**
+ * Our generic new array operator.  Uses our heap memory allocator.
+ * @param size of memory needed for object array.
+ * @return memory allocated from heap.
+ */
 inline void *operator new[](size_t size)
 	{return cpr_memalloc(size);};
 
-inline void *operator new[](size_t size, caddr_t place)
-	{return cpr_memassign(size, place, size);};
+/**
+ * A placement new array operator where we assume the size of memory is good.
+ * We construct the array at a specified place in memory which we assume is
+ * valid for our needs.
+ * @param size of memory needed for object array.
+ * @param address where to place object array.
+ * @return memory we placed object array.
+ */
+inline void *operator new[](size_t size, caddr_t address)
+	{return cpr_memassign(size, address, size);};
 
-inline void *operator new[](size_t size, caddr_t place, size_t max)
-	{return cpr_memassign(size, place, max);};
+/**
+ * A placement new array operator where we know the allocated size.  We
+ * find out how much memory is needed by the new and can prevent arrayed
+ * objects from exceeding the available space we are placing the object.
+ * @param size of memory needed for object array.
+ * @param address where to place object array.
+ * @param known size of location we are placing array.
+ * @return memory we placed object array.
+ */
+inline void *operator new[](size_t size, caddr_t address, size_t known)
+	{return cpr_memassign(size, address, known);};
 
+/**
+ * Overdraft new to allocate extra memory for object from heap.  This is
+ * used for objects that must have a known class size but store extra data
+ * behind the class.  The last member might be an unsized or 0 element
+ * array, and the actual size needed from the heap is hence not the size of 
+ * the class itself but is known by the routine allocating the object.
+ * @param size of object.
+ * @param extra heap space needed for data.
+ */
 inline void *operator new(size_t size, size_t extra)
 	{return cpr_memalloc(size + extra);};
 
-inline void *operator new(size_t size, caddr_t place)
-	{return cpr_memassign(size, place, size);};
+/**
+ * A placement new operator where we assume the size of memory is good.
+ * We construct the object at a specified place in memory which we assume is
+ * valid for our needs.
+ * @param size of memory needed for object.
+ * @param address where to place object.
+ * @return memory we placed object.
+ */
+inline void *operator new(size_t size, caddr_t address)
+	{return cpr_memassign(size, address, size);};
 
-inline void *operator new(size_t size, caddr_t place, size_t max)
-	{return cpr_memassign(size, place, max);};
+/**
+ * A placement new operator where we know the allocated size.  We
+ * find out how much memory is needed by the new and can prevent the object
+ * from exceeding the available space we are placing the object.
+ * @param size of memory needed for object.
+ * @param address where to place object.
+ * @param known size of location we are placing object.
+ * @return memory we placed object.
+ */
 
-inline void operator delete(void *mem)
-	{free(mem);};
+inline void *operator new(size_t size, caddr_t address, size_t known)
+	{return cpr_memassign(size, address, known);};
 
-inline void operator delete[](void *mem)
-	{free(mem);};
+/**
+ * Delete an object from the heap.
+ * @param object to delete.
+ */
+inline void operator delete(void *object)
+	{free(object);};
+
+/**
+ * Delete an array from the heap.  All array element destructors are called.
+ * @param array to delete.
+ */
+inline void operator delete[](void *array)
+	{free(array);};
 
 #ifdef	__GNUC__
 extern "C" __EXPORT void __cxa_pure_virtual(void);
