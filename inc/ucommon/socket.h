@@ -277,180 +277,729 @@ public:
 		struct addrinfo *list, hint;
 
 	public:
-		address(const char *a, int family = 0, int type = SOCK_STREAM, int protocol = 0);
-		address(Socket &s, const char *host, const char *svc = NULL);
-		address(const char *host, const char *svc = NULL, SOCKET so = INVALID_SOCKET);
-		address(int family, const char *host, const char *svc = NULL);
+		/**
+		 * Construct a socket address.
+		 * @param address or hostname.
+		 * @param family of socket address.  Needed when hostnames are used.
+		 * @param type of socket (stream, dgram, etc).
+		 * @param protocol number of socket.
+		 */
+		address(const char *address, int family = 0, int type = SOCK_STREAM, int protocol = 0);
+
+		/**
+		 * Construct a socket address for an existing socket.
+		 * @param socket to use for family of socket address.
+		 * @param hostname or ip address.  The socket family is used for hostnames.
+		 * @param service port or name we are referencing or NULL.
+		 */
+		address(Socket &socket, const char *hostname, const char *service = NULL);
+
+		/**
+		 * Construct a socket address for a socket descriptor.
+		 * @param hostname or address to use.
+		 * @param service port or name we are referencing or NULL.
+		 * @param socket descriptor to use for family.
+		 */
+		address(const char *hostname, const char *service = NULL, SOCKET socket = INVALID_SOCKET);
+
+		/**
+		 * Construct a socket address from host and service.
+		 * @param family of socket address.
+		 * @param hostname or address to use.
+		 * @param service port or name we are referencing or NULL.
+		 */
+		address(int family, const char *hostname, const char *service = NULL);
+
+		/**
+		 * Construct an empty address.
+		 */
 		address();
+
+		/**
+		 * Destroy address.  Deallocate addrinfo structure.
+		 */
 		~address();
 
+		/**
+		 * Get the first socket address in our address list.
+		 * @return first socket address or NULL if none.
+		 */
 		struct sockaddr *getAddr(void);
+
+		/**
+		 * Find a specific socket address in our address list.
+		 * @return matching address from list or NULL if not found.
+		 */
 		struct sockaddr *find(struct sockaddr *addr);
 
+		/**
+		 * Get the full socket address list from the object.
+		 * @return addrinfo list we resolved or NULL if none.
+		 */
 		inline struct addrinfo *getList(void)
 			{return list;};
 
+		/**
+		 * Get the full socket address list by casted reference.
+		 * @return addrinfo list we resolved or NULL if none.
+		 */
 		inline operator struct addrinfo *()
 			{return list;};
 
+		/**
+		 * Test if the address list is valid.
+		 * @return true if we have an address list.
+		 */
 		inline operator bool()
 			{return list != NULL;};
 
+		/**
+		 * Test if we have no address list.
+		 * @return true if we have no address list.
+		 */
 		inline bool operator!()
 			{return list == NULL;};
 
+		/**
+		 * Get the first socket address by casted reference.
+		 * @return first socket address we resolved or NULL if none.
+		 */
 		inline operator struct sockaddr *()
 			{return getAddr();};
 
-		void add(const char *host, const char *svc = NULL, int family = 0);
-		void add(struct sockaddr *addr);
+		/**
+		 * Append additional host addresses to our list.
+		 * @param hostname or address to resolve.
+		 * @param service name or port number, or NULL if not used.
+		 * @param family of hostname.
+		 */
+		void add(const char *hostname, const char *service = NULL, int family = 0);
+
+		/**
+		 * Add an individual socket address to our address list.
+		 * @param address to add.
+		 */
+		void add(struct sockaddr *address);
 	};
 
-	Socket(const Socket &s);
-	Socket(SOCKET so);
-	Socket(struct addrinfo *addr);
+	/**
+	 * Create socket as duped handle of existing socket.
+	 * @param existing socket to dup.
+	 */
+	Socket(const Socket &existing);
+
+	/**
+	 * Create socket from existing socket descriptor.
+	 * @param socket descriptor to use.
+	 */
+	Socket(SOCKET socket);
+
+	/**
+	 * Create and connect a socket to an address from an address list.  The
+	 * type of socket created is based on the type we are connecting to.
+	 * @param address list to connect with.
+	 */ 
+	Socket(struct addrinfo *address);
+
+	/**
+	 * Create an unbound socket of a specific type.
+	 * @param family of our new socket.
+	 * @param type (stream, udp, etc) of our new socket.
+	 * @param protocol number of our new socket.'
+	 */
 	Socket(int family, int type, int protocol = 0);
+
+	/**
+	 * Create a bound socket.
+	 * @param interface to bind or "*" for all
+	 * @param port number of service to bind.
+	 * @param family to bind as.
+	 * @param type of socket to bind (stream, udp, etc).
+	 * @param protocol of socket to bind.
+	 */
 	Socket(const char *iface, const char *port, int family, int type, int protocol = 0);
+
+	/**
+	 * Shutdown, close, and destroy socket.
+	 */
 	virtual ~Socket();
 
+	/**
+	 * Cancel pending i/o by shutting down the socket.
+	 */
 	void cancel(void);
+
+	/**
+	 * Shutdown and close the socket.
+	 */
 	void release(void);
-	bool isPending(unsigned qio) const;
+
+	/**
+	 * See the number of bytes in the receive queue.
+	 * @param value to test for.
+	 * @return true if at least that many bytes waiting in receive queue.
+	 */
+	bool isPending(unsigned value) const;
+
+	/**
+	 * Test if socket is connected.
+	 * @return true if connected.
+	 */
 	bool isConnected(void) const;
+
+	/**
+	 * Test for pending input data.  This function can wait up to a specified
+	 * timeout for data to appear.
+	 * @param timeout or 0 if none.
+	 * @return true if input data waiting.
+	 */
 	bool waitPending(timeout_t timeout = 0) const;
+
+	/**
+	 * Test for output data sent.  This function can wait up to a specified
+	 * timeout for data to appear sent.
+	 * @param timeout or 0 if none.
+	 * @return false if cannot send more output/out of buffer space.
+	 */
 	bool waitSending(timeout_t timeout = 0) const;
 	
+	/**
+	 * Get the number of bytes of data in the socket receive buffer.
+	 * @return bytes pending.
+	 */
 	inline unsigned getPending(void) const
 		{return pending(so);};
 
+	/**
+	 * Set socket for unicast mode broadcasts.
+	 * @param enable broadcasting if true.
+	 * @return 0 on success, -1 if error.
+	 */
 	inline int broadcast(bool enable)
 		{return broadcast(so, enable);};
 
-	inline int keepalive(bool live)
-		{return keepalive(so, live);};
+	/**
+	 * Set socket for keepalive packets.
+	 * @param enable keep-alive if true.
+	 * @return 0 on success, -1 if error.
+	 */
+	inline int keepalive(bool enable)
+		{return keepalive(so, enable);};
 
+	/**
+	 * Set socket blocking I/O mode.
+	 * @param enable true for blocking I/O.
+	 * @return 0 on success, -1 if error.
+	 */ 
 	inline int blocking(bool enable)
 		{return blocking(so, enable);};
 
+	/**
+	 * Set multicast mode and multicast broadcast range.
+	 * @param ttl to set for multicast socket or 0 to disable multicast.
+	 * @return 0 on success, -1 if error.
+	 */
 	inline int multicast(unsigned ttl = 1)
 		{return multicast(so, ttl);};
 
+	/**
+	 * Set loopback to read multicast packets we broadcast.
+	 * @param enable true to loopback, false to ignore.
+	 * @return 0 on success, -1 if error.
+	 */
 	inline int loopback(bool enable)
 		{return loopback(so, enable);};
 
+	/**
+	 * Get socket error code.
+	 * @return socket error code.
+	 */
 	inline int getError(void)
 		{return error(so);};
 
-	inline int ttl(unsigned char t)
-		{return ttl(so, t);};
+	/**
+	 * Set the time to live before packets expire.
+	 * @param time to live to set.
+	 * @return 0 on success, -1 on error.
+	 */
+	inline int ttl(unsigned char time)
+		{return ttl(so, time);};
 
+	/**
+	 * Set the size of the socket send buffer.
+	 * @param size of send buffer to set.
+	 * @return 0 on success, -1 on error.
+	 */
 	inline int sendsize(unsigned size)
 		{return sendsize(so, size);};
 
+	/**
+	 * Set the size of the socket receive buffer.
+	 * @param size of recv buffer to set.
+	 * @return 0 on success, -1 on error.
+	 */
 	inline int recvsize(unsigned size)
 		{return recvsize(so, size);};
 
+	/**
+	 * Set the type of service field of outgoing packets.  Some useful
+	 * values include IPTOS_LOWDELAY to minimize delay for interactive 
+	 * traffic, IPTOS_THROUGHPUT to optimize thoughput, OPTOS_RELIABILITY
+	 * to optimize for reliability, and IPTOS_MINCOST for low speed use.
+	 * @param type of service value.
+	 * @return 0 on success or -1 on error.
+	 */
 	inline int tos(int t)
 		{return tos(so, t);};
 
-	inline int priority(int pri)
-		{return priority(so, pri);};
+	/**
+	 * Set packet priority, 0 to 6 unless privileged.  Should be set before
+	 * type-of-service.
+	 * @param scheduling priority for packet scheduling.
+	 * @return 0 on success, -1 on error.
+	 */
+	inline int priority(int scheduling)
+		{return priority(so, scheduling);};
 
+	/**
+	 * Shutdown the socket communication channel.
+	 */
 	inline void shutdown(void)
 		{::shutdown(so, SHUT_RDWR);};
 
+	/**
+	 * Connect our socket to a remote host from an address list.
+	 * For TCP sockets, the entire list may be tried.  For UDP, connect
+	 * is only a state and the first valid entry in the list is used.
+	 * @param list of addresses to connect to.
+	 * @return 0 on success, -1 on error.
+	 */
 	inline int connect(struct addrinfo *list)
 		{return connect(so, list);};
 
+	/**
+	 * Close and re-create the socket.
+	 * @param family of socket.
+	 * @param type of socket (stream, udp, etc).
+	 * @param protocol number of socket.
+	 */
 	bool create(int family, int type, int protocol = 0);
 	
+	/**
+	 * Disconnect a connected socket.  Depending on the implimentation, this
+	 * might be done by connecting to AF_UNSPEC, connecting to a 0 address,
+	 * or connecting to self.
+	 * @return 0 on success, -1 on error.
+	 */
 	inline int disconnect(void)
 		{return disconnect(so);};
 
+	/**
+	 * Join socket to multicast group.
+	 * @param list of groups to join.
+	 * @return 0 on success, -1 on error.
+	 */
 	inline int join(struct addrinfo *list)
 		{return join(so, list);};
 
+	/**
+	 * Drop socket from multicast group.
+	 * @param list of groups to drop.
+	 * @return 0 on success, -1 on error.
+	 */
 	inline int drop(struct addrinfo *list)
 		{return drop(so, list);};
 
-	size_t peek(void *data, size_t len) const;
+	/**
+	 * Peek at data waiting in the socket receive buffer.
+	 * @param data pointer to save data in.
+	 * @param number of bytes to peek.
+	 * @return number of bytes actually read, or 0 if no data waiting.
+	 */
+	size_t peek(void *data, size_t number) const;
 
-	virtual ssize_t get(void *data, size_t len, struct sockaddr *from = NULL);
+	/**
+	 * Read data from the socket receive buffer.  This is a virtual so that
+	 * the ssl layer can override the core get method.
+	 * @param data pointer to save data in.
+	 * @param number of bytes to read.
+	 * @param address of peer data was received from.
+	 * @return number of bytes actually read, 0 if none, -1 if error.
+	 */
+	virtual ssize_t get(void *data, size_t number, struct sockaddr *address = NULL);
 
-	virtual ssize_t put(const void *data, size_t len, struct sockaddr *to = NULL);
+	/**
+	 * Write data to the socket send buffer.  This is a virtual so that the ssl
+	 * layer can override the core put method.
+	 * @param data pointer to write data from.
+	 * @param number of bytes to write.
+	 * @param address of peer to send data to if not connected.
+	 * @return number of bytes actually sent, 0 if none, -1 if error.
+	 */
+	virtual ssize_t put(const void *data, size_t number, struct sockaddr *address = NULL);
 
-	virtual ssize_t gets(char *data, size_t max, timeout_t to = Timer::inf);
+	/**
+	 * Read a newline of text data from the socket and save in NULL terminated
+	 * string.  This uses an optimized I/O method that takes advantage of
+	 * socket peeking.  As such, it has to be rewritten to be used in a ssl
+	 * layer socket.
+	 * @param data to save input line.
+	 * @param size of input line buffer.
+	 * @param timeout to wait for a complete input line.
+	 * @return number of bytes read, 0 if none, -1 if error.
+	 */
+	virtual ssize_t gets(char *data, size_t size, timeout_t timeout = Timer::inf);
 
-	ssize_t puts(const char *str);
+	/**
+	 * Write a null terminated string to the socket.
+	 * @param string to write.
+	 * @return number of bytes sent, 0 if none, -1 if error.
+	 */
+	ssize_t puts(const char *string);
 
+	/**
+	 * Test if socket is valid.
+	 * @return true if valid socket.
+	 */
 	operator bool();
 
+	/**
+	 * Test if socket is invalid.
+	 * @return true if socket is invalid.
+	 */
 	bool operator!() const;
 
-	Socket &operator=(SOCKET s);
+	/**
+	 * Assign socket from a socket descriptor.  Release existing socket if
+	 * one present.
+	 * @param socket descriptor to assign to object.
+	 */
+	Socket &operator=(SOCKET socket);
 
+	/**
+	 * Get the socket descriptor by casting.
+	 * @return socket descriptor of object.
+	 */
 	inline operator SOCKET() const
 		{return so;};
 
+	/**
+	 * Get the socket descriptor by pointer reference.
+	 * @return socket descriptor of object.
+	 */
 	inline SOCKET operator*() const
 		{return so;};
 
-	static unsigned pending(SOCKET so);
-	static int sendsize(SOCKET so, unsigned size);
-	static int recvsize(SOCKET so, unsigned size);
-	static int connect(SOCKET so, struct addrinfo *list);
-	static int disconnect(SOCKET so);
-	static int drop(SOCKET so, struct addrinfo *list);
-	static int join(SOCKET so, struct addrinfo *list);
-	static int error(SOCKET so);
-	static int multicast(SOCKET so, unsigned ttl = 1); // zero disables
-	static int loopback(SOCKET so, bool enable);
-	static int blocking(SOCKET so, bool enable);
-	static int keepalive(SOCKET so, bool live);
-	static int broadcast(SOCKET so, bool enable);
-	static int priority(SOCKET so, int pri);
-	static int tos(SOCKET so, int tos);
-	static int ttl(SOCKET so, unsigned char t);
-	static int getfamily(SOCKET so);
-	static int bindaddr(SOCKET so, const char *host, const char *svc);
-	static char *gethostname(struct sockaddr *sa, char *buf, size_t max);
-	static struct addrinfo *gethint(SOCKET so, struct addrinfo *h);
-	static socklen_t getaddr(SOCKET so, struct sockaddr_storage *addr, const char *host, const char *svc);
-	static socklen_t getlen(struct sockaddr *addr);
+	/**
+	 * Get the number of bytes pending in the receive buffer of a socket
+	 * descriptor.
+	 * @param socket descriptor.
+	 * @return number of pending bytes.
+	 */
+	static unsigned pending(SOCKET socket);
+
+	/**
+	 * Set the send size of a socket descriptor.
+	 * @param socket descriptor.
+	 * @param size of send buffer to set.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int sendsize(SOCKET socket, unsigned size);
+
+	/**
+	 * Set the receive size of a socket descriptor.
+	 * @param socket descriptor.
+	 * @param size of receive buffer to set.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int recvsize(SOCKET socket, unsigned size);
+
+	/**
+	 * Connect socket descriptor to a remote host from an address list.
+	 * For TCP sockets, the entire list may be tried.  For UDP, connect
+	 * is only a state and the first valid entry in the list is used.
+	 * @param socket descriptor.
+	 * @param list of addresses to connect to.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int connect(SOCKET socket, struct addrinfo *list);
+
+	/**
+	 * Disconnect a connected socket descriptor.
+	 * @param socket descriptor.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int disconnect(SOCKET socket);
+
+	/**
+	 * Drop socket descriptor from multicast group.
+	 * @param socket descriptor.
+	 * @param list of groups to drop.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int drop(SOCKET socket, struct addrinfo *list);
+
+	/**
+	 * Join socket descriptor to multicast group.
+	 * @param socket descriptor.
+	 * @param list of groups to join.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int join(SOCKET socket, struct addrinfo *list);
+
+	/**
+	 * Get socket error code of socket descriptor.
+	 * @param socket descriptor.
+	 * @return socket error code.
+	 */
+	static int error(SOCKET socket);
+
+	/**
+	 * Set multicast mode and multicast broadcast range for socket descriptor.
+	 * @param socket descriptor.
+	 * @param ttl to set for multicast socket or 0 to disable multicast.
+	 * @return 0 if success, -1 if error.
+	 */
+	static int multicast(SOCKET socket, unsigned ttl = 1);
+
+	/**
+	 * Set loopback to read multicast packets socket descriptor broadcasts.
+	 * @param socket descriptor.
+	 * @param enable true to loopback, false to ignore.
+	 * @return 0 if success, -1 if error.
+	 */
+	static int loopback(SOCKET socket, bool enable);
+
+	/**
+	 * Set socket blocking I/O mode of socket descriptor.
+	 * @param socket descriptor.
+	 * @param enable true for blocking I/O.
+	 * @return 0 if success, -1 if error.
+	 */ 
+	static int blocking(SOCKET socket, bool enable);
+
+	/**
+	 * Set socket for keepalive packets for socket descriptor.
+	 * @param socket descriptor.
+	 * @param enable keep-alive if true.
+	 * @return 0 if success, -1 if error.
+	 */
+	static int keepalive(SOCKET socket, bool enable);
+
+	/**
+	 * Set socket for unicast mode broadcasts on socket descriptor.
+	 * @param socket descriptor.
+	 * @param enable broadcasting if true.
+	 * @return 0 if success, -1 if error.
+	 */
+	static int broadcast(SOCKET socket, bool enable);
+
+	/**
+	 * Set packet priority of socket descriptor.
+	 * @param socket descriptor.
+	 * @param scheduling priority for packet scheduling.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int priority(SOCKET socket, int scheduling);
+
+	/**
+	 * Set type of service of socket descriptor.
+	 * @param socket descriptor.
+	 * @param type of service.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int tos(SOCKET socket, int type);
+
+	/**
+	 * Set the time to live for the socket descriptor.
+	 * @param socket descriptor.
+	 * @param time to live to set.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int ttl(SOCKET socket, unsigned char time);
+	
+	/**
+	 * Get the address family of the socket descriptor.
+	 * @return address family.
+	 */
+	static int getfamily(SOCKET socket);
+
+	/**
+	 * Bind the socket descriptor to a known interface and service port.
+	 * @param socket descriptor to bind.
+	 * @param interface to bind to or "*" for all.
+	 * @param service port to bind.
+	 */
+	static int bindaddr(SOCKET socket, const char *interface, const char *service);
+
+	/**
+	 * Lookup and return the host name associated with a socket address.
+	 * @param address to lookup.
+	 * @param buffer to save hostname into.
+	 * @param size of buffer to save hostname into.
+	 * @return buffer or NULL if lookup fails.
+	 */
+	static char *gethostname(struct sockaddr *address, char *buffer, size_t size);
+
+	/**
+	 * Create an address info lookup hint based on the family and type
+	 * properties of a socket descriptor.
+	 * @param socket descriptor.
+	 * @param hint buffer.
+	 * @return hint buffer.
+	 */
+	static struct addrinfo *gethint(SOCKET socket, struct addrinfo *hint);
+
+	/**
+	 * Lookup a host name and service address based on the addressing family
+	 * and socket type of a socket descriptor.  Store the result in a socket
+	 * address structure.
+	 * @param socket descriptor.
+	 * @param address that is resolved.
+	 * @param hostname to resolve.
+	 * @param service port.
+	 * @return socket address size.
+	 */
+	static socklen_t getaddr(SOCKET socket, struct sockaddr_storage *address, const char *hostname, const char *service);
+
+	/**
+	 * Get the size of a socket address.
+	 * @param address of socket.
+	 * @return size to use for this socket address object.
+	 */
+	static socklen_t getlen(struct sockaddr *address);
+
+	/**
+	 * Copy a socket address from one structure to another.  The size of
+	 * the address is determined by getlen.
+	 * @param from address of original.
+	 * @param to address to save.
+	 */
 	static void copy(struct sockaddr *from, struct sockaddr *to);
-	static bool equal(struct sockaddr *s1, struct sockaddr *s2);
-	static bool subnet(struct sockaddr *s1, struct sockaddr *s2);
-	static void getinterface(struct sockaddr *iface, struct sockaddr *dest);
-	static char *getaddress(struct sockaddr *addr, char *buf, socklen_t size);
-	static short getservice(struct sockaddr *addr);
-	static unsigned keyindex(struct sockaddr *addr, unsigned keysize);
+
+	/**
+	 * Compare socket addresses.  Test if the address and service matches
+	 * or if there is no service, then just the host address values.
+	 * @param address1 to compare.
+	 * @param address2 to compare.
+	 * @return true if same family and equal.
+	 */
+	static bool equal(struct sockaddr *address1, struct sockaddr *address2);
+
+	/**
+	 * See if both addresses are in the same subnet.  This is only relevent
+	 * to IPV4 and class domain routing.
+	 * @param address1 to test.
+	 * @param address2 to test.
+	 * @return true if in same subnet.
+	 */
+	static bool subnet(struct sockaddr *address1, struct sockaddr *address2);
+
+	/**
+	 * Get the socket address of the interface needed to reach a destination
+	 * address.
+	 * @param interface address that is found.
+	 * @param address of destination.
+	 */
+	static void getinterface(struct sockaddr *interface, struct sockaddr *destination);
+
+	/**
+	 * Get the hostname of a socket address.
+	 * @param address to lookup.
+	 * @param buffer to save hostname in.
+	 * @param size of hostname buffer.
+	 * @return buffer if found or NULL if not.
+	 */
+	static char *getaddress(struct sockaddr *address, char *buffer, socklen_t size);
+
+	/**
+	 * Get the service port of a socket.
+	 * @param address of socket to examine.
+	 * @return service port number.
+	 */
+	static short getservice(struct sockaddr *address);
+	
+	/**
+	 * Convert a socket address into a hash map index.
+	 * @param socket address to convert.
+	 * @param size of map index.
+	 * @return key index path.
+	 */
+	static unsigned keyindex(struct sockaddr *address, unsigned size);
 };
 
+/**
+ * A bound socket used to listen for inbound socket connections.  This class 
+ * is commonly used for TCP listener sockets.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT ListenSocket : protected Socket
 {
 public:
-	ListenSocket(const char *iface, const char *svc, unsigned backlog = 5);
+	/**
+	 * Create and bind a listener socket.
+	 * @param interface to bind on or "*" for all.
+	 * @param service port to bind listener.
+	 * @param backlog size for buffering pending connections.
+	 */
+	ListenSocket(const char *interface, const char *service, unsigned backlog = 5);
 
-	SOCKET accept(struct sockaddr *addr = NULL);
+	/**
+	 * Accept a socket connection.
+	 * @param address to save peer connecting.  
+	 * @return socket descriptor of connected socket.
+	 */
+	SOCKET accept(struct sockaddr *address = NULL);
 
+	/**
+	 * Wait for a pending connection.
+	 * @param timeout to wait.
+	 * @return true when acceptable connection is pending.
+	 */
 	inline bool waitConnection(timeout_t timeout = Timer::inf) const
 		{return Socket::waitPending(timeout);};
 
+	/**
+	 * Get the socket descriptor of the listener.
+	 * @return socket descriptor.
+	 */
     inline operator SOCKET() const
         {return so;};
 
+	/**
+	 * Get the socket descriptor of the listener by pointer reference.
+	 * @return socket descriptor.
+	 */
     inline SOCKET operator*() const
         {return so;};
 };
 
+/**
+ * A convenience class for socket.
+ */
 typedef	Socket socket_t;
+
+/**
+ * A convenience class for socket.
+ */
 typedef	Socket socket;
 
-inline struct addrinfo *addrinfo(socket::address &a)
-	{return a.getList();};
+/**
+ * A convenience function to convert a socket address list into an addrinfo.
+ * @param address list object.
+ * @return addrinfo list or NULL if empty.
+ */
+inline struct addrinfo *addrinfo(socket::address &address)
+	{return address.getList();};
 
-inline struct sockaddr *addr(socket::address &a)
-	{return a.getAddr();};
+/**
+ * A convenience function to convert a socket address list into a socket 
+ * address.
+ * @param address list object.
+ * @return first socket address in list or NULL if empty.
+ */
+inline struct sockaddr *addr(socket::address &address)
+	{return address.getAddr();};
 
 END_NAMESPACE
 
