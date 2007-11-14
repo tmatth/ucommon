@@ -96,7 +96,17 @@
 #define	_WIN32_WINNT 0x0501
 #endif
 
+// older sdk's require windows header first
+#if !defined(_MSC_VER) || _MSC_VER < 1400
 #include <windows.h>
+#endif
+// these MUST be included first on newer sdk...
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#include <windows.h>
+#endif
+
 #include <process.h>
 #ifndef	__EXPORT
 #ifdef	UCOMMON_STATIC
@@ -190,8 +200,10 @@ typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 typedef char *caddr_t;
 
+#if _MSC_VER < 1400
 #define	snprintf _snprintf
 #define vsnprintf _vsnprintf
+#endif
 	
 #else
 

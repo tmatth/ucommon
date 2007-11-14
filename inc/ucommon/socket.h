@@ -36,8 +36,6 @@
 struct addrinfo;
 
 #ifdef	_MSWINDOWS_
-#include <ws2tcpip.h>
-#include <winsock2.h>
 #define	SHUT_RDWR	SD_BOTH
 #define	SHUT_WR		SD_SEND
 #define	SHUT_RD		SD_RECV

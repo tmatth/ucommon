@@ -46,72 +46,336 @@
 #include <stdarg.h>
 #include <dirent.h>
 
-typedef	unsigned short strsize_t;
-
 NAMESPACE_UCOMMON
 
+/**
+ * A convenience class for size of strings.
+ */
+typedef	unsigned short strsize_t;
+
+/**
+ * A copy-on-write string class that operates by reference count.  This string
+ * class anchors a counted object that is managed as a copy-on-write
+ * instance of the string data.  This means that multiple instances of the
+ * string class can refer to the same string in memory if it has not been
+ * modifed, which reduces heap allocation.  The string class offers functions
+ * to manipulate both the string object, and generic safe string functions to
+ * manipulate ordinary null terminated character arrays directly in memory. 
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT string : public Object
 {
 protected:
+	/**
+	 * This is an internal class which contains the actual string data
+	 * along with some control fields.  The string can be either NULL
+	 * terminated or filled like a Pascal-style string, but with a user
+	 * selected fill character.  The cstring object is an overdraft
+	 * object, as the actual string text which is of unknown size follows 
+	 * immediately after the class control data.  This class is primarely
+	 * for internal use.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
 	class __EXPORT cstring : public CountedObject
 	{
 	public:
 #pragma pack(1)
-		strsize_t max, len;
-		char fill;
-		char text[1];
+		strsize_t max;	/**< Allocated size of cstring text */
+		strsize_t len;  /**< Current length of cstring text */
+		char fill;		/**< Filler character or 0 for none */
+		char text[1];	/**< Null terminated text, in overdraft space */
 #pragma pack()
 
+		/**
+		 * Create a cstring node allocated for specified string size.  The
+		 * new operator would also need the size as an overdraft value.
+		 * @param size of string.
+		 */
 		cstring(strsize_t size);
+
+		/**
+		 * Create a filled cstring node allocated for specified string size.  
+		 * The new operator would also need the size as an overdraft value.
+		 * The newly allocated string is filled with the fill value.
+		 * @param size of string.
+		 */
 		cstring(strsize_t size, char fill);
+
+		/**
+		 * Used to clear a string.  If null terminated, then the string ends
+		 * at the offset, otherwise it is simply filled with fill data up to
+		 * the specified size.
+		 * @param offset to clear from.
+		 * @param size of field to clear.
+		 */
 		void clear(strsize_t offset, strsize_t size);
-		void set(strsize_t offset, const char *str, strsize_t size);
-		void set(const char *str);
-		void add(const char *str);
-		void add(char ch);
+
+		/**
+		 * Set part or all of a string with new text.
+		 * @param offset to set from.
+		 * @param text to insert from null terminated string.
+		 * @param size of field to modify.  This is filled for fill mode.
+		 */
+		void set(strsize_t offset, const char *text, strsize_t size);
+
+		/**
+		 * Set our string from null terminated text up to our allocated size.
+		 * @param text to set from.
+		 */
+		void set(const char *text);
+
+		/**
+		 * Append null terminated text to our string buffer.
+		 * @param text to append.
+		 */
+		void add(const char *text);
+
+		/**
+		 * Append a single character to our string buffer.
+		 * @param character to append.
+		 */
+		void add(char character);
+
+		/**
+		 * Fill our string buffer to end if fill mode.
+		 */
 		void fix(void);
+
+		/**
+		 * Trim filler at end to reduce filled string to null terminated
+		 * string for further processing.
+		 */
 		void unfix(void);
-		void inc(strsize_t adj);
-		void dec(strsize_t adj);
+
+		/**
+		 * Adjust size of our string buffer by deleting characters from
+		 * start of buffer.
+		 * @param number of characters to delete.
+		 */ 
+		void inc(strsize_t number);
+
+		/**
+		 * Adjust size of our string buffer by deleting characters from
+		 * end of buffer.
+		 * @param number of characters to delete.
+		 */ 
+		void dec(strsize_t number);
 	};
 
-	cstring *str;
+	cstring *str;  /**< cstring instance our object references. */
 
+	/**
+	 * Factory create a cstring object of specified size.
+	 * @param size of allocated space for string buffer.
+	 * @param fill character to use or 0 if null.
+	 * @return new cstring object.
+	 */
 	cstring *create(strsize_t size, char fill = 0) const;
 
-	virtual int compare(const char *s) const;
+	/**
+	 * Compare the values of two string.  This is a virtual so that it
+	 * can be overriden for example if we want to create strings which
+	 * ignore case, or which have special ordering rules.
+	 * @param string to compare with.
+	 * @return 0 if equal, <0 if less than, 0> if greater than.
+	 */
+	virtual int compare(const char *string) const;
+
+	/**
+	 * Increase retention of our reference counted cstring.  May be overriden
+	 * for memstring which has fixed cstring object.
+	 */
 	virtual void retain(void);
+
+	/**
+	 * Decrease retention of our reference counted cstring.  May be overriden
+	 * for memstring which has fixed cstring object.
+	 */
 	virtual void release(void);
+
+	/**
+	 * Return cstring to use in copy constructors.  Is virtual for memstring.
+	 * @return cstring for copy constructor.
+	 */
 	virtual cstring *c_copy(void) const;
-	virtual void cow(strsize_t adj = 0);
+
+	/**
+	 * Copy on write operation for cstring.  This always creates a new
+	 * unique copy for write/modify operations and is a virtual for memstring
+	 * to disable.
+	 * @param new allocated maximum size for our cstring.
+	 */
+	virtual void cow(strsize_t size = 0);
 
 public:
+	/**
+	 * A constant for an invalid position value.
+	 */
 	static const strsize_t npos;
 
+	/**
+	 * Create a new empty string object.
+	 */
 	string();
+
+	/**
+	 * Create an empty string with a buffer pre-allocated to a specified size.
+	 * @param size of buffer to allocate.
+	 */
 	string(strsize_t size);
+
+	/**
+	 * Create a filled string with a buffer pre-allocated to a specified size.
+	 * @param size of buffer to allocate.
+	 * @param fill character to use.
+	 */
 	string(strsize_t size, char fill);
-	string(strsize_t size, const char *fmt, ...);
-	string(const char *str);
-	string(const char *str, strsize_t size);
-	string(const char *str, const char *end);
-	string(const string &copy);
+
+	/**
+	 * Create a string by printf-like formating into a pre-allocated space
+	 * of a specified size.
+	 * @param size of buffer to allocate.
+	 * @param format control for string.
+	 */
+	string(strsize_t size, const char *format, ...) __PRINTF(3, 4);
+
+	/**
+	 * Create a string from null terminated text.
+	 * @param text to use for string.
+	 */ 
+	string(const char *text);
+
+	/**
+	 * Create a string from null terminated text up to a maximum specified
+	 * size.
+	 * @param text to use for string.
+	 * @param size limit of new string.
+	 */ 
+	string(const char *text, strsize_t size);
+
+	/**
+	 * Create a string for a substring.  The end of the substring is a
+	 * pointer within the substring itself.
+	 * @param text to use for string.
+	 * @param end of text in substring.
+	 */
+	string(const char *text, const char *end);
+
+	/**
+	 * Construct a copy of a string object.  Our copy inherets the same 
+	 * reference counted instance of cstring as in the original.
+	 * @param existing string to copy from.
+	 */
+	string(const string &existing);
+
+	/**
+	 * Destroy string.  De-reference cstring.  If last reference to cstring, 
+	 * then also remove cstring from heap.
+	 */
 	virtual ~string();
 
+	/**
+	 * Get a new string object as a substring of the current object.
+	 * @param offset of substring.
+	 * @param size of substring or 0 if to end.
+	 * @return string object holding substring.
+	 */
 	string get(strsize_t offset, strsize_t size = 0) const;
+
+	/**
+	 * Scan input items from a string object.
+	 * @param format string of input to scan.
+	 * @return number of items scanned.
+	 */
 	int scanf(const char *format, ...) __SCANF(2, 3);
+
+	/**
+	 * Scan input items from a string object.
+	 * @param format string of input to scan.
+	 * @param args list to scan into.
+	 * @return number of items scanned.
+	 */
 	int vscanf(const char *format, va_list args) __SCANF(2, 0);
+
+	/**
+	 * Print items into a string object.
+	 * @param format string of print format.
+	 * @return number of bytes written to string.
+	 */
 	strsize_t printf(const char *format, ...) __PRINTF(2, 3);
+
+	/**
+	 * Print items into a string object.
+	 * @param format string of print format.
+	 * @param args list to print.
+	 * @return number of bytes written to string.
+	 */
 	strsize_t vprintf(const char *format, va_list args) __PRINTF(2, 0);
+
+	/**
+	 * Return memory text buffer of string object.
+	 * @return writable string buffer.
+	 */
 	char *c_mem(void) const;
+
+	/**
+	 * Return character text buffer of string object.
+	 * @return character text buffer.
+	 */
 	const char *c_str(void) const;
+
+	/**
+	 * Resize and re-allocate string memory.
+	 * @param size to allocate for string.
+	 * @return true if re-allocated.  False in derived memstring.
+	 */
 	virtual bool resize(strsize_t size);
-	void set(const char *s);
-	void set(strsize_t offset, const char *str, strsize_t size = 0);
-	void set(const char *s, char overflow, strsize_t offset, strsize_t size = 0);
-	void rset(const char *s, char overflow, strsize_t offset, strsize_t size = 0);
-	void add(const char *s);
-	void add(char ch);
+
+	/**
+	 * Set string object to text of a null terminated string.
+	 * @param text string to set.
+	 */
+	void set(const char *text);
+	
+	/**
+	 * Set a portion of the string object at a specified offset to a text
+	 * string.
+	 * @param offset in object string buffer.
+	 * @param text to set at offset.
+	 * @param size of text area to set or 0 until end of text.
+	 */
+	void set(strsize_t offset, const char *text, strsize_t size = 0);
+
+	/**
+	 * Set a text field within our string object.
+	 * @param text to set.
+	 * @param overflow character to use as filler if text is too short.
+	 * @param offset in object string buffer to set text at.
+	 * @param size of part of buffer to set with text and overflow.
+	 */
+	void set(const char *text, char overflow, strsize_t offset, strsize_t size = 0);
+
+	/**
+	 * Set a text field within our string object offset from the end of buffer.
+	 * @param text to set.
+	 * @param overflow character to use as filler if text is too short.
+	 * @param offset from end of object string buffer to set text at.
+	 * @param size of part of buffer to set with text and overflow.
+	 */
+	void rset(const char *text, char overflow, strsize_t offset, strsize_t size = 0);
+
+	/**
+	 * Append null terminated text to our string buffer.
+	 * @param text to append.
+	 */
+	void add(const char *text);
+
+	/**
+	 * Append a single character to our string buffer.
+	 * @param character to append.
+	 */
+	void add(char character);
+
 	void trim(const char *clist);
 	void chop(const char *clist);
 	void strip(const char *clist);
@@ -352,6 +616,16 @@ public:
 		{return S;};
 };
 
+/**
+ * A string class that has a predefined string buffer.  The string class
+ * and buffer are allocated together as one object.  This allows one to use
+ * string objects entirely resident on the local stack as well as on the
+ * heap.  Using a string class on the local stack may be more convenient
+ * than a char array since one can use all the features of the class
+ * including assignment and concatenation which a char buffer cannot as
+ * easily do.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<strsize_t S>
 class stringbuf : public memstring
 {
@@ -359,27 +633,58 @@ private:
 	char buffer[sizeof(cstring) + S];
 	
 public:
+	/**
+	 * Create an empty instance of a string buffer.
+	 */
 	inline stringbuf() : memstring(buffer, S) {};
 
-	inline stringbuf(const char *s) : memstring(buffer, S) {set(s);};
+	/**
+	 * Create a string buffer from a null terminated string.
+	 * @param text to place in object.
+	 */
+	inline stringbuf(const char *text) : memstring(buffer, S) {set(text);};
 
-	inline void operator=(const char *s)
-		{set(s);};
+	/**
+	 * Assign a string buffer from a null terminated string.
+	 * @param text to assign to object.
+	 */
+	inline void operator=(const char *text)
+		{set(text);};
 
-	inline void operator=(string &s)
-		{set(s.c_str());};	
+	/**
+	 * Assign a string buffer from another string object.
+	 * @param object to assign from.
+	 */
+	inline void operator=(string &object)
+		{set(object.c_str());};	
 };
 
 #ifndef _MSWINDOWS_
 
-extern "C" inline int stricmp(const char *s1, const char *s2)
-	{return string::case_compare(s1, s2);};
+/**
+ * Convenience function for case insensitive null terminated string compare.
+ * @param string1 to compare.
+ * @param string2 to compare.
+ * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
+ */
+extern "C" inline int stricmp(const char *string1, const char *string2)
+	{return string::case_compare(string1, string2);};
 
-extern "C" inline int strnicmp(const char *s1, const char *s2, size_t n)
-	{return string::case_compare(s1, s2, n);};
+/**
+ * Convenience function for case insensitive null terminated string compare.
+ * @param string1 to compare.
+ * @param string2 to compare.
+ * @param max size of string to compare.
+ * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
+ */
+extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
+	{return string::case_compare(string1, string2, max);};
 
 #endif
 
+/**
+ * A convenience type for string.
+ */
 typedef	string string_t;
 
 END_NAMESPACE
