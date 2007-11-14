@@ -1172,18 +1172,12 @@ void PooledThread::exit(void)
 	--poolused;
 	if(!poolused)
 		delete this;
-#ifdef	PTW32_STATIC_LIB
-	pthread_win32_thread_detach_np();
-#endif
 	pthread_exit(NULL);
 }
 
 void DetachedThread::exit(void)
 {
 	delete this;
-#ifdef	PTW32_STATIC_LIB
-	pthread_win32_thread_detach_np();
-#endif
 	pthread_exit(NULL);
 }
 
@@ -1946,21 +1940,9 @@ shared_release &shared_release::operator=(SharedPointer &p)
 	return *this;
 }
 
-#ifdef	PTW32_STATIC_LIB
-void Thread::init(void)
-{
-	static bool started = false;
-
-	if(!started) {
-		pthread_win32_process_attach_np();
-		atexit(pthread_win32_process_detach_np());
-	}
-}
-#else
 void Thread::init(void)
 {
 }
-#endif
 
 
 

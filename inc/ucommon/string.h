@@ -203,7 +203,7 @@ protected:
 	 * Copy on write operation for cstring.  This always creates a new
 	 * unique copy for write/modify operations and is a virtual for memstring
 	 * to disable.
-	 * @param new allocated maximum size for our cstring.
+	 * @param size to add to allocated space when creating new cstring.
 	 */
 	virtual void cow(strsize_t size = 0);
 
@@ -376,79 +376,483 @@ public:
 	 */
 	void add(char character);
 
-	void trim(const char *clist);
-	void chop(const char *clist);
-	void strip(const char *clist);
-	bool unquote(const char *clist);
+	/**
+	 * Trim lead characters from the string.
+	 * @param list of characters to remove.
+	 */
+	void trim(const char *list);
+
+	/**
+	 * Trim trailing characters from the string.
+	 * @param list of characters to remove.
+	 */
+	void chop(const char *list);
+
+	/**
+	 * Strip lead and trailing characters from the string.
+	 * @param list of characters to remove.
+	 */
+	void strip(const char *list);
+
+	/**
+	 * Unquote a quoted string.  Removes lead and trailing quote marks.
+	 * @param list of character pairs for open and close quote.
+	 */
+	bool unquote(const char *list);
+
+	/**
+	 * Cut (remove) text from string.
+	 * @param offset to start of text field to remove.
+	 * @param size of text field to remove or 0 to remove to end of string.
+	 */
 	void cut(strsize_t offset, strsize_t size = 0);
+
+	/**
+	 * Clear a field of a filled string with filler.
+	 * @param offset to start of field to clear.
+	 * @param size of field to fill or 0 to fill to end of string.
+	 */
 	void clear(strsize_t offset, strsize_t size = 0);
+
+	/**
+	 * Clear string by setting to empty.
+	 */
 	void clear(void);
+
+	/**
+	 * Convert string to upper case.
+	 */
 	void upper(void);
+
+	/**
+	 * Convert string to lower case.
+	 */
 	void lower(void);
-	strsize_t ccount(const char *clist) const;
+
+	/**
+	 * Count number of occurrances of characters in string.
+	 * @param list of characters to find.
+	 * @return count of instances of characters in string.
+	 */
+	strsize_t ccount(const char *list) const;
+
+	/**
+	 * Count all characters in the string (strlen).
+	 * @return count of characters.
+	 */
 	strsize_t count(void) const;
+
+	/**
+	 * Size of currently allocated space for string.
+	 */
 	strsize_t size(void) const;
-	strsize_t offset(const char *c) const;
+
+	/**
+	 * Find offset of a pointer into our string buffer.  This can be used
+	 * to find the offset position of a pointer returned by find, for
+	 * example.  This is used when one needs to convert a member function
+	 * that returns a pointer to call a member function that operates by
+	 * a offset value.  If the pointer is outside the range of the string
+	 * then npos is returned.
+	 * @param pointer into our object's string buffer.
+	 */
+	strsize_t offset(const char *pointer) const;
+
+	/**
+	 * Return character found at a specific position in the string.
+	 * @param string position, negative values computed from end.
+	 * @return character code at specified position in string.
+	 */
 	char at(int ind) const;
-	const char *last(const char *clist) const;
+
+	/**
+	 * Find last occurance of a character in the string.
+	 * @param list of characters to search for.
+	 * @return pointer to last occurance from list or NULL.
+	 */
+	const char *last(const char *list) const;
+
+	/**
+	 * Find first occurance of a character in the string.
+	 * @param list of characters to search for.
+	 * @return pointer to first occurance from list or NULL.
+	 */
 	const char *first(const char *clist) const;
+
+	/**
+	 * Get pointer to first character in string for iteration.
+	 * @return first character pointer or NULL if empty.
+	 */
 	const char *begin(void) const;
+
+	/**
+	 * Get pointer to last character in string for iteration.
+	 * @return last character pointer or NULL if empty.
+	 */
 	const char *end(void) const;
-	const char *skip(const char *clist, strsize_t offset = 0) const;
-	const char *rskip(const char *clist, strsize_t offset = npos) const;
-	const char *find(const char *clist, strsize_t offset = 0) const;
-	const char *rfind(const char *clist, strsize_t offset = npos) const;
-	void split(const char *mark);
+
+	/**
+	 * Skip lead characters in the string.
+	 * @param list of characters to skip when found.
+	 * @param offset to start of scan.
+	 * @return pointer to first part of string past skipped characters.
+	 */
+	const char *skip(const char *list, strsize_t offset = 0) const;
+
+	/**
+	 * Skip trailing characters in the string.  This searches the
+	 * string in reverse order.
+	 * @param list of characters to skip when found.
+	 * @param offset to start of scan.  Default is end of string.
+	 * @return pointer to first part of string before skipped characters.
+	 */
+	const char *rskip(const char *list, strsize_t offset = npos) const;
+
+	/**
+	 * Find a character in the string.
+	 * @param list of characters to search for.
+	 * @param offset to start of search.
+	 * @return pointer to first occurance of character.
+	 */
+	const char *find(const char *list, strsize_t offset = 0) const;
+
+	/**
+	 * Find last occurance of character in the string.
+	 * @param list of characters to search for.
+	 * @param offset to start of search.  Default is end of string.
+	 * @return pointer to last occurance of character.
+	 */
+	const char *rfind(const char *list, strsize_t offset = npos) const;
+
+	/**
+	 * Split the string by a pointer position.  Everything after the pointer
+	 * is removed.
+	 * @param pointer to split position in string.
+	 */
+	void split(const char *pointer);
+
+	/**
+	 * Split the string at a specific offset.  Everything after the offset
+	 * is removed.
+	 * @param offset to split position in string.
+	 */
 	void split(strsize_t offset);
-	void rsplit(const char *mark);
+
+	/**
+	 * Split the string by a pointer position.  Everything before the pointer
+	 * is removed.
+	 * @param pointer to split position in string.
+	 */
+	void rsplit(const char *pointer);
+
+	/**
+	 * Split the string at a specific offset.  Everything before the offset
+	 * is removed.
+	 * @param offset to split position in string.
+	 */
 	void rsplit(strsize_t offset);
-	const char *chr(char ch) const;
-	const char *rchr(char ch) const;
+
+	/**
+	 * Find pointer in string where specified character appears.
+	 * @param character to find.
+	 * @return string pointer for character if found, NULL if not.
+	 */
+	const char *chr(char character) const;
+
+	/**
+	 * Find pointer in string where specified character last appears.
+	 * @param character to find.
+	 * @return string pointer for last occurance of character if found, 
+	 * NULL if not.
+	 */
+	const char *rchr(char character) const;
+
+	/**
+	 * Get length of string.
+	 * @return length of string.
+	 */
 	strsize_t len(void);
+
+	/**
+	 * Get filler character used for field array strings.
+	 * @return filler character or 0 if none.
+	 */
 	char fill(void);
 
+	/**
+	 * Casting reference to raw text string.
+	 * @return null terminated text of string.
+	 */
 	inline operator const char *() const
 		{return c_str();};
 
+	/**
+	 * Reference raw text buffer by pointer operator.
+	 * @return null terminated text of string.
+	 */
 	inline const char *operator*() const
 		{return c_str();};
 
+	/**
+	 * Test if the string's allocated space is all used up.
+	 * @return true if no more room for append.
+	 */
 	bool full(void) const;
-	string operator()(int offset, strsize_t len) const;
-	const char *operator()(int offset) const;
-	const char operator[](int offset) const;
-	bool operator!() const;
-	operator bool() const;
-	string &operator^=(const string &s);
-	string &operator^=(const char *str);
-	string &operator+(const char *str);
-	string &operator&(const char *str);
-	string &operator=(const string &s);
-	string &operator=(const char *str);
-	string &operator++(void);
-	string &operator+=(strsize_t inc);
-	string &operator--(void);
-	string &operator-=(strsize_t dec);
-	bool operator==(const char *str) const;
-	bool operator!=(const char *str) const;
-	bool operator<(const char *str) const;
-	bool operator<=(const char *str) const;
-	bool operator>(const char *str) const;
-	bool operator>=(const char *str) const;
 
-	static int scanf(string &s, const char *fmt, ...) __SCANF(2, 3);
+	/**
+	 * Get a new substring through object expression.
+	 * @param offset of substring.
+	 * @param size of substring or 0 if to end.
+	 * @return string object holding substring.
+	 */
+	string operator()(int offset, strsize_t size) const;
+
+	/**
+	 * Reference a string in the object by relative offset.  Positive
+	 * offsets are from the start of the string, negative from the
+	 * end.
+	 * @param offset to string position.
+	 * @return pointer to string data or NULL if invalid offset.
+	 */
+	const char *operator()(int offset) const;
+
+	/**
+	 * Reference a single character in string object by array offset.
+	 * @param offset to character.
+	 * @return character value at offset.
+	 */
+	const char operator[](int offset) const;
+
+	/**
+	 * Test if string is empty.
+	 * @return true if string is empty.
+	 */
+	bool operator!() const;
+
+	/**
+	 * Test if string has data.
+	 * @return true if string has data.
+	 */
+	operator bool() const;
+
+	/**
+	 * Create new cow instance and assign value from another string object.
+	 * @param object to assign from.
+	 * @return our object for expression use.
+	 */
+	string &operator^=(const string &object);
+
+	/**
+	 * Create new cow instance and assign value from null terminated text.
+	 * @param text to assign from.
+	 * @return our object for expression use.
+	 */
+	string &operator^=(const char *text);
+
+	/**
+	 * Concatenate null terminated text to our object.  This creates a new
+	 * copy-on-write instance to hold the concatenated string.
+	 * @param text to concatenate.
+	 */
+	string &operator+(const char *text);
+
+	/**
+	 * Concatenate null terminated text to our object.  This directly
+	 * appends the text to the string buffer and does not resize the
+	 * object if the existing cstring allocation space is fully used.
+	 * @param text to concatenate.
+	 */
+	string &operator&(const char *text);
+
+	/**
+	 * Assign our string with the cstring of another object.  If we had
+	 * an active string reference, it is released.  The object now has
+	 * a duplicate reference to the cstring of the other object.
+	 * @param object to assign from.
+	 */
+	string &operator=(const string &object);
+
+	/**
+	 * Assign text to our existing buffer.  This performs a set method.
+	 * @param text to assign from.
+	 */
+	string &operator=(const char *text);
+
+	/**
+	 * Delete first character from string.
+	 */
+	string &operator++(void);
+
+	/**
+	 * Delete a specified number of characters from start of string.
+	 * @param number of characters to delete.
+	 */
+	string &operator+=(strsize_t number);
+
+	/**
+	 * Delete last character from string.
+	 */
+	string &operator--(void);
+
+	/**
+	 * Delete a specified number of characters from end of string.
+	 * @param number of characters to delete.
+	 */
+	string &operator-=(strsize_t number);
+
+	/**
+	 * Compare our object with null terminated text.
+	 * @param text to compare with.
+	 * @return true if we are equal.
+	 */
+	bool operator==(const char *text) const;
+
+	/**
+	 * Compare our object with null terminated text.  Compare method is used.
+	 * @param text to compare with.
+	 * @return true if we are not equal.
+	 */
+	bool operator!=(const char *text) const;
+
+	/**
+	 * Compare our object with null terminated text.  Compare method is used.
+	 * @param text to compare with.
+	 * @return true if we are less than text.
+	 */
+	bool operator<(const char *text) const;
+
+	/**
+	 * Compare our object with null terminated text.  Compare method is used.
+	 * @param text to compare with.
+	 * @return true if we are less than or equal to text.
+	 */
+	bool operator<=(const char *text) const;
+
+	/**
+	 * Compare our object with null terminated text.  Compare method is used.
+	 * @param text to compare with.
+	 * @return true if we are greater than text.
+	 */
+	bool operator>(const char *text) const;
+
+	/**
+	 * Compare our object with null terminated text.  Compare method is used.
+	 * @param text to compare with.
+	 * @return true if we are greater than or equal to text.
+	 */
+	bool operator>=(const char *text) const;
+
+	/**
+	 * Scan input items from a string object.
+	 * @param object to scan from.
+	 * @param format string of input to scan.
+	 * @return number of items scanned.
+	 */
+	static int scanf(string &object, const char *format, ...) __SCANF(2, 3);
+
+	/**
+	 * Print formatted items into a string object.
+	 * @param object to print into.
+	 * @param format string to print with.
+	 * @return number of bytes written into object.
+	 */
 	static strsize_t printf(string &s, const char *fmt, ...) __PRINTF(2, 3);
-	static int read(Socket &so, string &s);
-	static int write(Socket &so, string &s);
-	static int read(FILE *fp, string &s);
-	static int write(FILE *fp, string &s); 
-	static int read(DIR *dir, string &s);
-	static bool getline(Socket &so, string &s);
-	static bool putline(Socket &so, string &s);
-	static bool getline(FILE *fp, string &s);
-	static bool putline(FILE *fp, string &s);
-	static void swap(string &s1, string &s2);
-	static void fix(string &s);
+
+	/**
+	 * Read arbitrary binary data from socket into a string object.  The 
+	 * total number of bytes that may be read is based on the allocated
+	 * size of the object.
+	 * @param socket to read from.
+	 * @param object to save read data.
+	 * @return number of bytes read.
+	 */
+	static int read(Socket &socket, string &object);
+	
+	/**
+	 * Write the string object to a socket.
+	 * @param socket to write to.
+	 * @param object to get data from.
+	 * @return number of bytes written.
+	 */
+	static int write(Socket &socket, string &object);
+
+	/**
+	 * Read arbitrary binary data from a file into a string object.  The 
+	 * total number of bytes that may be read is based on the allocated
+	 * size of the object.
+	 * @param file to read from.
+	 * @param object to save read data.
+	 * @return number of bytes read.
+	 */
+	static int read(FILE *file, string &object);
+
+	/**
+	 * Write the string object to a file.
+	 * @param file to write to.
+	 * @param object to get data from.
+	 * @return number of bytes written.
+	 */
+	static int write(FILE *file, string &object); 
+
+	/**
+	 * Read a directory entry filename into a string.
+	 * @param directory to read from.
+	 * @param object to save read data.
+	 * @return number of bytes read.
+	 */
+	static int read(DIR *directory, string &object);
+
+	/**
+	 * Read a line of text input from a socket into the object.  The 
+	 * maximum number of bytes that may be read is based on the currently
+	 * allocated size of the object.
+	 * @param socket to read from.
+	 * @param object to save read data.
+	 * @return false if end of file.
+	 */
+	static bool getline(Socket &socket, string &object);
+
+	/**
+	 * Write string as a line of text data to a socket.  A newline will be 
+	 * appended to the end.
+	 * @param socket to print to.
+	 * @param object to get line from.
+	 * @return true if successful.
+	 */
+	static bool putline(Socket &socket, string &object);
+
+	/**
+	 * Read a line of text input from a file into the object.  The 
+	 * maximum number of bytes that may be read is based on the currently
+	 * allocated size of the object.
+	 * @param file to read from.
+	 * @param object to save read data.
+	 * @return false if end of file.
+	 */
+	static bool getline(FILE *file, string &object);
+
+	/**
+	 * Write string as a line of text data to a file.  A newline will be 
+	 * appended to the end.
+	 * @param socket to print to.
+	 * @param object to get line from.
+	 * @return true if successful.
+	 */
+	static bool putline(FILE *file, string &object);
+
+	/**
+	 * Swap the cstring references between two strings.
+	 * @param object1 to swap.
+	 * @param object2 to swap.
+	 */
+	static void swap(string &object1, string &object2);
+	
+	/**
+	 * Fix and reset string object filler.
+	 * @param object to fix.
+	 */
+	static void fix(string &object);
+
 	static void lower(char *s);
 	static void upper(char *s);
 	static const char *token(char *s, char **tokens, const char *clist, const char *quote = NULL, const char *eol = NULL);
