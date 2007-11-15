@@ -1670,7 +1670,7 @@ int string::compare(const char *s1, const char *s2, size_t s)
     return strncmp(s1, s2, s);
 }
 
-int string::case_compare(const char *s1, const char *s2)
+int string::icompare(const char *s1, const char *s2)
 {
 	if(!s1)
 		s1 = "";
@@ -1685,7 +1685,7 @@ int string::case_compare(const char *s1, const char *s2)
 #endif
 }
 
-int string::case_compare(const char *s1, const char *s2, size_t s)
+int string::icompare(const char *s1, const char *s2, size_t s)
 {
     if(!s1)
         s1 = "";

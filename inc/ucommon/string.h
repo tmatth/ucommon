@@ -313,13 +313,13 @@ public:
 	strsize_t vprintf(const char *format, va_list args) __PRINTF(2, 0);
 
 	/**
-	 * Return memory text buffer of string object.
+	 * Get memory text buffer of string object.
 	 * @return writable string buffer.
 	 */
 	char *c_mem(void) const;
 
 	/**
-	 * Return character text buffer of string object.
+	 * Get character text buffer of string object.
 	 * @return character text buffer.
 	 */
 	const char *c_str(void) const;
@@ -383,7 +383,7 @@ public:
 	void trim(const char *list);
 
 	/**
-	 * Trim trailing characters from the string.
+	 * Chop trailing characters from the string.
 	 * @param list of characters to remove.
 	 */
 	void chop(const char *list);
@@ -396,9 +396,10 @@ public:
 
 	/**
 	 * Unquote a quoted string.  Removes lead and trailing quote marks.
-	 * @param list of character pairs for open and close quote.
+	 * @param quote pairs of characters for open and close quote.
+	 * @return true if string was quoted.
 	 */
-	bool unquote(const char *list);
+	bool unquote(const char *quote);
 
 	/**
 	 * Cut (remove) text from string.
@@ -443,7 +444,8 @@ public:
 	strsize_t count(void) const;
 
 	/**
-	 * Size of currently allocated space for string.
+	 * Get the size of currently allocated space for string.
+	 * @return size allocated for text.
 	 */
 	strsize_t size(void) const;
 
@@ -477,7 +479,7 @@ public:
 	 * @param list of characters to search for.
 	 * @return pointer to first occurance from list or NULL.
 	 */
-	const char *first(const char *clist) const;
+	const char *first(const char *list) const;
 
 	/**
 	 * Get pointer to first character in string for iteration.
@@ -853,105 +855,465 @@ public:
 	 */
 	static void fix(string &object);
 
-	static void lower(char *s);
-	static void upper(char *s);
-	static const char *token(char *s, char **tokens, const char *clist, const char *quote = NULL, const char *eol = NULL);
-	static char *skip(char *s, const char *clist);
-	static char *rskip(char *s, const char *clist);
-	static char *unquote(char *s, const char *clist);
-	static char *rset(char *s, size_t sl, const char *d);
-	static char *set(char *s, size_t sl, const char *d);
-	static char *set(char *s, size_t sl, const char *d, size_t l);
-	static char *add(char *s, size_t sl, const char *d); 
-	static char *add(char *s, size_t sl, const char *d, size_t l);
-	static const char *ifind(const char *s, const char *key, const char *delim);
-	static const char *find(const char *s, const char *key, const char *delim);
-	static size_t count(const char *s);
-	static int compare(const char *s1, const char *s2);
-	static int compare(const char *s1, const char *s2, size_t len);
-	static int case_compare(const char *s1, const char *s2);
-	static int case_compare(const char *s1, const char *s2, size_t len);
-	static char *trim(char *str, const char *clist); 
-	static char *chop(char *str, const char *clist); 
-	static char *strip(char *str, const char *clist);
-	static char *fill(char *str, size_t size, char chr);
-	static unsigned ccount(const char *str, const char *clist);
-	static char *find(char *str, const char *clist);
-	static char *rfind(char *str, const char *clist);
-	static char *last(char *str, const char *clist);
-	static char *first(char *str, const char *clist);
-	static char *dup(const char *s);
+	/**
+	 * Convert null terminated text to lower case.
+	 * @param text to convert.
+	 */
+	static void lower(char *text);
+	
+	/**
+	 * Convert null terminated text to upper case.
+	 * @param text to convert.
+	 */
+	static void upper(char *text);
 
-	inline static const char *token(string &s, char **tokens, const char *clist, const char *quote = NULL, const char *eol = NULL)
-		{return token(s.c_mem(), tokens, clist, quote, eol);};
+	/**
+	 * A thread-safe token parsing routine for null terminated strings.  This 
+	 * is related to strtok, but with safety checks for NULL values and a
+	 * number of enhancements including support for quoted text that may
+	 * contain token seperators within quotes.  The text string is modified 
+	 * as it is parsed.
+	 * @param text string to examine for tokens.
+	 * @param last token position or set to NULL for start of string.
+	 * @param list of characters to use as token seperators.
+	 * @param quote pairs of characters for quoted text or NULL if not used.
+	 * @param end of line marker characters or NULL if not used.
+	 * @return token extracted from string or NULL if no more tokens found.
+	 */
+	static const char *token(char *text, char **last, const char *list, const char *quote = NULL, const char *end = NULL);
 
-	inline static int vscanf(string &s, const char *fmt, va_list args)
-		{return s.vscanf(fmt, args);} __SCANF(2, 0);
+	/**
+	 * Skip after lead characters in a null terminated string.
+	 * @param text pointer to start at.
+	 * @param list of characters to skip when found.
+	 * @return pointer to first part of string past skipped characters.
+	 */
+	static char *skip(char *text, const char *list);
 
-	inline static strsize_t vprintf(string &s, const char *fmt, va_list args)
-		{return s.vprintf(fmt, args);} __PRINTF(2, 0);
+	/**
+	 * Skip before trailing characters in a null terminated string.
+	 * @param text pointer to start at.
+	 * @param list of characters to skip when found.
+	 * @return pointer to last part of string past skipped characters.
+	 */
+	static char *rskip(char *text, const char *list);
 
-	inline static strsize_t len(string &s)
-		{return s.len();};
+	/**
+	 * Unquote a quoted null terminated string.  Returns updated string
+	 * position and replaces trailing quote with null byte if quoted.
+	 * @param text to examine.
+	 * @param quote pairs of character for open and close quote.
+	 * @return new text pointer if quoted, NULL if unchanged.
+	 */
+	static char *unquote(char *text, const char *quote);
 
-	inline static char *mem(string &s)
-		{return s.c_mem();};
+	/**
+	 * Set a field in a null terminated string relative to the end of text.
+	 * @param buffer to modify.
+	 * @param size of field to set.
+	 * @param text to replace end of string with.
+	 * @return pointer to text buffer.
+	 */
+	static char *rset(char *buffer, size_t size, const char *text);
+	
+	/**
+	 * Safely set a null terminated string buffer in memory.  If the text
+	 * is too large to fit into the buffer, it is truncated to the size.
+	 * @param buffer to set.
+	 * @param size of buffer.  Includes null byte at end of string.
+	 * @param text to set in buffer.
+	 * @return pointer to text buffer.
+	 */
+	static char *set(char *text, size_t size, const char *text);
+	
+    /**
+     * Safely set a null terminated string buffer in memory.  If the text
+     * is too large to fit into the buffer, it is truncated to the size.
+     * @param buffer to set.
+     * @param size of buffer.  Includes null byte at end of string.
+     * @param text to set in buffer.
+	 * @param max size of text to set.
+     * @return pointer to text buffer.
+     */
+	static char *set(char *buffer, size_t size, const char *text, size_t max);
 
-	inline static strsize_t size(string &s)
-		{return s.size();};
+	/**
+     * Safely append a null terminated string into an existing string in 
+	 * memory.  If the resulting string is too large to fit into the buffer, 
+	 * it is truncated to the size.
+     * @param buffer to set.
+     * @param size of buffer.  Includes null byte at end of string.
+     * @param text to set in buffer.
+     * @return pointer to text buffer.
+     */
+	static char *add(char *buffer, size_t size, const char *text); 
 
-	inline static void clear(string &s)
-		{s.clear();};
+	/**
+     * Safely append a null terminated string into an existing string in 
+	 * memory.  If the resulting string is too large to fit into the buffer, 
+	 * it is truncated to the size.
+     * @param buffer to set.
+     * @param size of buffer.  Includes null byte at end of string.
+     * @param text to set in buffer.
+	 * @param max size of text to append.
+     * @return pointer to text buffer.
+     */
+	static char *add(char *buffer, size_t size, const char *text, size_t max);
+	
+	/**
+	 * Find position of case insensitive substring within a string.
+	 * @param text to search in.
+	 * @param key string to locate.
+	 * @param optional separator chars if formatted as list of keys.
+	 * @return substring position if found, or NULL.
+	 */
+	static const char *ifind(const char *text, const char *key, const char *optional);
 
-	inline static unsigned ccount(string &s1, const char *clist)
-		{return s1.ccount(clist);};
+	/**
+	 * Find position of substring within a string.
+	 * @param text to search in.
+	 * @param key string to locate.
+	 * @param optional separator chars if formatted as list of keys.
+	 * @return substring position if found, or NULL.
+	 */
+	static const char *find(const char *text, const char *key, const char *optional);
 
-	inline static size_t count(string &s1)
-		{return s1.count();};
+	/**
+	 * Safe version of strlen function.  Accepts NULL as 0 length strings.
+	 * @param text string.
+	 * @return length of string.
+	 */
+	static size_t count(const char *text);
 
-	inline static void upper(string &s1)
-		{s1.upper();};
+	/**
+	 * Safe string comparison function.
+	 * @param text1 to compare.
+	 * @param text2 to compare.
+	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
+	 */
+	static int compare(const char *text1, const char *text2);
 
-	inline static void lower(string &s1)
-		{s1.lower();};
+	/**
+	 * Safe string comparison function.
+	 * @param text1 to compare.
+	 * @param text2 to compare.
+	 * @param size limit of strings to compare.
+	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
+	 */
+	static int compare(const char *text1, const char *text2, size_t size);
 
-	inline static bool unquote(string &s1, const char *clist)
-		{return s1.unquote(clist);};
+	/**
+	 * Safe case insensitive string comparison function.
+	 * @param text1 to compare.
+	 * @param text2 to compare.
+	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
+	 */
+	static int icompare(const char *text1, const char *text2);
 
-	inline static void trim(string &s, const char *clist)
-		{return s.trim(clist);};
+	/**
+	 * Safe case insensitive string comparison function.
+	 * @param text1 to compare.
+	 * @param text2 to compare.
+	 * @param size limit of strings to compare.
+	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
+	 */
+	static int icompare(const char *text1, const char *text2, size_t size);
 
-	inline static void chop(string &s, const char *clist)
-		{return s.trim(clist);};
+	/**
+	 * Return start of string after characters to trim from beginning.
+	 * This function does not modify memory.
+	 * @param text buffer to examine.
+	 * @param list of characters to skip from start.
+	 * @return position in text past lead trim.
+	 */
+	static char *trim(char *text, const char *list); 
 
-	inline static void strip(string &s, const char *clist)
-		{return s.trim(clist);};
+	/**
+	 * Strip trailing characters from the text string.  This function will
+	 * modify memory.
+	 * @param text buffer to examine.
+	 * @param list of characters to chop from trailing end of string.
+	 * @return pointer to text buffer.
+	 */
+	static char *chop(char *text, const char *list); 
 
-	inline static const char *find(string &s, const char *c)
-		{return s.find(c);};
+	/**
+	 * Skip lead and remove trailing characters from a text string.  This
+	 * function will modify memory.
+	 * @param text buffer to examine.
+	 * @param list of characters to trim and chop.
+	 * @return position in text past lead trim.
+	 */
+	static char *strip(char *text, const char *list);
 
-	inline static const char *rfind(string &s, const char *c)
-		{return s.rfind(c);};
+	/**
+	 * Fill a section of memory will a fixed text character.  Adds a null
+	 * byte at the end.
+	 * @param text buffer to fill.
+	 * @param size of text buffer with null terminated byte.
+	 * @param character to fill with.
+	 * @return pointer to text buffer.
+	 */
+	static char *fill(char *text, size_t size, char character);
 
-	inline static const char *first(string &s, const char *c)
-		{return s.first(c);};
+	/**
+	 * Count instances of characters in a list in a text buffer.
+	 * @param text buffer to examine.
+	 * @param list of characters to count in buffer.
+	 * @return number of instances of the characters in buffer.
+	 */
+	static unsigned ccount(const char *text, const char *list);
 
-	inline static const char *last(string &s, const char *c)
-		{return s.last(c);};
+	/**
+	 * Find the first occurance of a character in a text buffer.
+	 * @param text buffer to examine.
+	 * @param list of characters to search for.
+	 * @return pointer to first instance found or NULL.
+	 */
+	static char *find(char *text, const char *list);
 
-	inline static double tod(string &s, char **out = NULL)
-		{return strtod(mem(s), out);};
+	/**
+	 * Find the last occurance of a character in a text buffer.
+	 * @param text buffer to examine.
+	 * @param list of characters to search for.
+	 * @return pointer to last instance found or NULL.
+	 */
+	static char *rfind(char *text, const char *list);
 
-	inline static long tol(string &s, char **out = NULL)
-		{return strtol(mem(s), out, 0);};
+	/**
+	 * Get pointer to first character past character requested.
+	 * @param text buffer to examine.
+	 * @param list of characters.
+	 * @return first character pointer past list.
+	 */
+	static char *first(char *text, const char *list);
 
-	inline static double tod(const char *cp, char **out = NULL)
-		{return strtod(cp, out);};
+	/**
+	 * Get pointer to last character before character requested.
+	 * @param text buffer to examine.
+	 * @param list of characters.
+	 * @return last character pointer past list.
+	 */
+	static char *last(char *text, const char *list);
 
-	inline static long tol(const char *cp, char **out = NULL)
-		{return strtol(cp, out, 0);};
+	/**
+	 * Duplicate null terminated text into the heap.
+	 * @param text to duplicate.
+	 * @return duplicate copy of text allocated from heap.
+	 */
+	static char *dup(const char *text);
+
+	/**
+	 * A thread-safe token parsing routine for strings objects.  This 
+	 * is related to strtok, but with safety checks for NULL values and a
+	 * number of enhancements including support for quoted text that may
+	 * contain token seperators within quotes.  The object is modified 
+	 * as it is parsed.
+	 * @param object to examine for tokens.
+	 * @param last token position or set to NULL for start of string.
+	 * @param list of characters to use as token seperators.
+	 * @param quote pairs of characters for quoted text or NULL if not used.
+	 * @param end of line marker characters or NULL if not used.
+	 * @return token extracted from string or NULL if no more tokens found.
+	 */
+	inline static const char *token(string &object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
+		{return token(object.c_mem(), last, list, quote, end);};
+
+	/**
+	 * Scan input items from a string object.
+	 * @param object to scan.
+	 * @param format string of input to scan.
+	 * @param args list to scan into.
+	 * @return number of items scanned.
+	 */
+	inline static int vscanf(string &object, const char *format, va_list args)
+		{return object.vscanf(format, args);} __SCANF(2, 0);
+
+	/**
+	 * Print items into a string object.
+	 * @param object to print into.
+	 * @param format string of print format.
+	 * @param args list to print.
+	 * @return number of bytes written to string.
+	 */
+	inline static strsize_t vprintf(string &object, const char *format, va_list args)
+		{return object.vprintf(format, args);} __PRINTF(2, 0);
+
+	/**
+	 * Count all characters in the string object (strlen).
+	 * @param object to count.
+	 * @return count of characters.
+	 */
+	inline static strsize_t len(string &object)
+		{return object.len();};
+
+	/**
+	 * Get memory text buffer of string object.
+	 * @param object to get string buffer from.
+	 * @return writable string buffer.
+	 */
+	inline static char *mem(string &object)
+		{return object.c_mem();};
+
+	/**
+	 * Get the size of currently allocated space for string.
+	 * @param object to examine.
+	 * @return size allocated for text.
+	 */
+	inline static strsize_t size(string &object)
+		{return object.size();};
+
+	/**
+	 * Clear a string object.
+	 * @param object to clear.
+	 */
+	inline static void clear(string &object)
+		{object.clear();};
+
+	/**
+	 * Count number of occurrances of characters in string object.
+	 * @param object to examine.
+	 * @param list of characters to find.
+	 * @return count of instances of characters.
+	 */
+	inline static unsigned ccount(string &object, const char *list)
+		{return object.ccount(list);};
+
+	/**
+	 * Count all characters in the string object (strlen).
+	 * @param object to count.
+	 * @return count of characters.
+	 */
+	inline static size_t count(string &object)
+		{return object.count();};
+
+	/**
+	 * Convert string object to upper case.
+	 * @param object to modify.
+	 */
+	inline static void upper(string &object)
+		{object.upper();};
+
+	/**
+	 * Convert string object to lower case.
+	 * @param object to modify.
+	 */
+	inline static void lower(string &object)
+		{object.lower();};
+
+	/**
+	 * Unquote a quoted string.  Removes lead and trailing quote marks.
+	 * @param object to unquote.
+	 * @param quote pairs of characters for open and close quote.
+	 * @return true if string was quoted.
+	 */
+	inline static bool unquote(string &object, const char *quote)
+		{return object.unquote(quote);};
+
+	/**
+	 * Trim lead characters from the string.
+	 * @param object to trim.
+	 * @param list of characters to remove.
+	 */
+	inline static void trim(string &object, const char *list)
+		{return object.trim(list);};
+
+	/**
+	 * Chop trailing characters from the string.
+	 * @param object to chop.
+	 * @param list of characters to remove.
+	 */
+	inline static void chop(string &object, const char *list)
+		{return object.trim(list);};
+
+	/**
+	 * Strip lead and trailing characters from the string.
+	 * @param object to strip.
+	 * @param list of characters to remove.
+	 */
+	inline static void strip(string &object, const char *list)
+		{return object.trim(list);};
+
+	/**
+	 * Find a character in the string.
+	 * @param object to search.
+	 * @param list of characters to search for.
+	 * @return pointer to first occurance of character.
+	 */
+	inline static const char *find(string &object, const char *list)
+		{return object.find(list);};
+
+	/**
+	 * Find last character in the string.
+	 * @param object to search.
+	 * @param list of characters to search for.
+	 * @return pointer to last occurance of character.
+	 */
+	inline static const char *rfind(string &object, const char *list)
+		{return object.rfind(list);};
+
+	/**
+	 * Get pointer to first character past character requested.
+	 * @param object to examine.
+	 * @param list of characters.
+	 * @return first character pointer past list.
+	 */
+	inline static const char *first(string &object, const char *list)
+		{return object.first(list);};
+
+	/**
+	 * Get pointer to last character past character requested.
+	 * @param object to examine.
+	 * @param list of characters.
+	 * @return last character pointer before list.
+	 */
+	inline static const char *last(string &object, const char *list)
+		{return object.last(list);};
+
+	/**
+	 * Convert string to a double value.
+	 * @param object to convert.
+	 * @param pointer to update with end of parsed value.
+	 * @return double value of object.
+	 */
+	inline static double tod(string &object, char **pointer = NULL)
+		{return strtod(mem(object), pointer);};
+
+	/**
+	 * Convert string to a long value.
+	 * @param object to convert.
+	 * @param pointer to update with end of parsed value.
+	 * @return long value of object.
+	 */
+	inline static long tol(string &object, char **pointer = NULL)
+		{return strtol(mem(object), pointer, 0);};
+
+	/**
+	 * Convert text to a double value.
+	 * @param text to convert.
+	 * @param pointer to update with end of parsed value.
+	 * @return double value of object.
+	 */
+	inline static double tod(const char *text, char **pointer = NULL)
+		{return strtod(text, pointer);};
+
+	/**
+	 * Convert text to a long value.
+	 * @param text to convert.
+	 * @param pointer to update with end of parsed value.
+	 * @return long value of object.
+	 */
+	inline static long tol(const char *text, char **pointer = NULL)
+		{return strtol(text, pointer, 0);};
 };
 
+/**
+ * A string class that uses a cstring buffer that is fixed in memory.
+ * This allows one to manipulate a fixed buffer of text in memory through
+ * the string class.  The size of the memory used must include space for
+ * the overhead() size needed for the cstring object control data.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT memstring : public string
 {
 public:
@@ -966,19 +1328,56 @@ protected:
 	cstring *c_copy(void) const;
 
 public:
-	inline void operator=(string &s)
-		{set(s.c_str());};
+	/**
+	 * Assign the text of a string to our object.
+	 * @param object to copy text from.
+	 */
+	inline void operator=(string &object)
+		{set(object.c_str());};
 
-	inline void operator=(const char *s)
-		{set(s);};
+	/**
+	 * Assign null terminated text to our object.
+	 * @param text to copy.
+	 */
+	inline void operator=(const char *text)
+		{set(text);};
 
+	/**
+	 * Create an instance of a memory string.
+	 * @param memory to use for cstring object.
+	 * @param size of string.  Total size must include space for overhead.
+	 * @param fill character for fixed character fields.
+	 */
 	memstring(void *mem, strsize_t size, char fill = 0);
+
+	/**
+	 * Destroy memory string.
+	 */
 	~memstring();
 
+	/**
+	 * Create a memory string with memory allocated from the heap.
+	 * @param size of string to allocate.  Automatically adds control size.
+	 * @param fill character for fixed field strings.
+	 */
 	static memstring *create(strsize_t size, char fill = 0);
+
+	/**
+	 * Create a memory string with memory allocated from a pager.
+	 * @param pager to allocate memory from.
+	 * @param size of string to allocate.  Automatically adds control size.
+	 * @param fill character for fixed field strings.
+	 */
 	static memstring *create(mempager *pager, strsize_t size, char fill = 0);
 };
 
+/**
+ * A template to create a character array that can be manipulated as a string.
+ * This is a mini string/stringbuf class that supports a subset of
+ * functionality but does not require a complex supporting object.  Like
+ * stringbuf, this can be used to create local string variables.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<size_t S>
 class charbuf
 {
@@ -986,36 +1385,83 @@ private:
 	char buffer[S];
 
 public:
+	/**
+	 * Create a new character buffer with an empty string.
+	 */
 	inline charbuf() 
 		{buffer[0] = 0;};
 
-	inline charbuf(const char *s) 
-		{string::set(buffer, S, s);};
+	/**
+	 * Create a character buffer with assigned text.  If the text is
+	 * larger than the size of the object, it is truncated.
+	 * @param text to assign.
+	 */
+	inline charbuf(const char *text) 
+		{string::set(buffer, S, text);};
 
-	inline void operator=(const char *s)
-		{string::set(buffer, S, s);};
+	/**
+	 * Assign null terminated text to the object.
+	 * @param text to assign.
+	 */
+	inline void operator=(const char *text)
+		{string::set(buffer, S, text);};
 
-	inline void operator+=(const char *s)
-		{string::add(buffer, S, s);};
+	/**
+	 * Concatenate text into the object.  If the text is larger than the
+	 * size of the object, then it is truncated.
+	 * @param text to append.
+	 */
+	inline void operator+=(const char *text)
+		{string::add(buffer, S, text);};
 
+	/**
+	 * Test if data is contained in the object.
+	 * @return true if there is text.
+	 */
 	inline operator bool() const
 		{return buffer[0];};
 
+	/**
+	 * Test if the object is empty.
+	 * @return true if the object is empty.
+	 */
 	inline bool operator!() const
 		{return buffer[0] == 0;};	
 
+	/**
+	 * Get text by casting reference.
+	 * @return pointer to text in object.
+	 */
 	inline operator char *()
 		{return buffer;};
 
+	/**
+	 * Get text by object pointer reference.
+	 * @return pointer to text in object.
+	 */
 	inline char *operator*()
 		{return buffer;};
 
+	/**
+	 * Array operator to get a character from the object.
+	 * @param offset of character in string buffer.
+	 * @return character at offset.
+	 */
 	inline char operator[](size_t offset) const
 		{return buffer[offset];};
 
+	/**
+	 * Get a pointer to an offset in the object by expression operator.
+	 * @param offset of character in string buffer.
+	 * @return pointer to offset in object.
+	 */
 	inline char *operator()(size_t offset)
 		{return buffer + offset;};
 
+	/**
+	 * Get allocated size of the object.
+	 * @return allocated size.
+	 */
 	inline size_t size(void) const
 		{return S;};
 };
@@ -1072,7 +1518,7 @@ public:
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int stricmp(const char *string1, const char *string2)
-	{return string::case_compare(string1, string2);};
+	{return string::icompare(string1, string2);};
 
 /**
  * Convenience function for case insensitive null terminated string compare.
@@ -1082,7 +1528,7 @@ extern "C" inline int stricmp(const char *string1, const char *string2)
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
-	{return string::case_compare(string1, string2, max);};
+	{return string::icompare(string1, string2, max);};
 
 #endif
 
