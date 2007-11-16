@@ -56,6 +56,16 @@ NAMESPACE_UCOMMON
 
 class SharedPointer;
 
+/**
+ * The conditional is a common base for other thread synchronizing classes.
+ * Many of the complex sychronization objects, including barriers, semaphores,
+ * and various forms of read/write locks are all built from the conditional.
+ * This assures that the minimum functionality to build higher order thread
+ * synchronizing objects is a pure conditional, and removes dependencies on
+ * what may be optional features or functions that may have different
+ * behaviors on different pthread implimentations and platforms.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT Conditional 
 {
 private:
@@ -80,11 +90,27 @@ private:
 #endif
 
 protected:
-	static void gettimeout(timeout_t timeout, struct timespec *ts);
+	/**
+	 * Convert a millisecond timeout into use for high resolution
+	 * conditional timers.
+	 * @param timeout to convert.
+	 * @param hires timespec representation to fill.
+	 */
+	static void gettimeout(timeout_t timeout, struct timespec *hires);
 
+	/**
+	 * Conditional wait for signal on millisecond timeout.
+	 * @param timeout in milliseconds.
+	 * @return true if signalled, false if timer expired.
+	 */
 	bool wait(timeout_t timeout);
 
-	bool wait(struct timespec *ts);
+	/**
+	 * Conditional wait for signal on timespec timeout.
+	 * @param timeout as a high resolution timespec.
+	 * @return true if signalled, false if timer expired.
+	 */
+	bool wait(struct timespec *timeout);
 
 #ifdef	_MSWINDOWS_
 	inline void lock(void)
@@ -98,29 +124,61 @@ protected:
 	void broadcast(void);
 
 #else
+	/**
+	 * Lock the conditional's supporting mutex.
+	 */
 	inline void lock(void)
 		{pthread_mutex_lock(&mutex);};
 
+	/**
+	 * Unlock the conditional's supporting mutex.
+	 */
 	inline void unlock(void)
 		{pthread_mutex_unlock(&mutex);};
 
+	/**
+	 * Wait (block) until signalled.
+	 */
 	inline void wait(void)
 		{pthread_cond_wait(&cond, &mutex);};
 
+	/**
+	 * Signal the conditional to release one waiting thread.
+	 */
 	inline void signal(void)
 		{pthread_cond_signal(&cond);};
 
+	/**
+	 * Signal the conditional to release all waiting threads.
+	 */
 	inline void broadcast(void)
 		{pthread_cond_broadcast(&cond);};
 #endif
 
+	/**
+	 * Initialize and construct conditional.
+	 */
 	Conditional();
+
+	/**
+	 * Destroy conditional, release any blocked threads.
+	 */
 	~Conditional();
 
 public:
+	/**
+	 * Specify a maximum sharing (concurrency) limit.  This can be used
+	 * to detect locking errors, such as when aquiring locks that are
+	 * not released.
+	 */
 	static unsigned max_sharing;
 
 #ifndef	_MSWINDOWS_
+	/**
+	 * Support function for getting conditional attributes for realtime
+	 * scheduling.
+	 * @return attributes to use for creating realtime conditionals.
+	 */ 
 	static inline pthread_condattr_t *initializer(void)
 		{return &attr.attr;};
 #endif

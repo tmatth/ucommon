@@ -237,6 +237,12 @@ public:
 	 */
 	inline LinkedObject *operator*() const
 		{return (LinkedObject*)(head);};
+
+	/**
+	 * Add object to our list.
+	 * @param object to add.
+	 */
+	void operator*=(OrderedObject *object);
 };
 
 /**
@@ -267,7 +273,20 @@ public:
 	 * List our ordered object at end of a linked list on an index.
 	 * @param index we are listing on.
 	 */
-	void enlist(OrderedIndex *index);
+	void enlistTail(OrderedIndex *index);
+
+	/**
+	 * List our ordered object at start of a linked list on an index.
+	 * @param index we are listing on.
+	 */
+	void enlistHead(OrderedIndex *index);
+
+	/**
+	 * List our ordered object in default strategy mode.  The default
+	 * base class uses enlistTail.
+	 * @param index we are listing on.
+	 */
+	virtual void enlist(OrderedIndex *index);
 
 	/**
 	 * Remove our ordered object from an existing index.
@@ -620,8 +639,22 @@ public:
 	void delist(void);
 
 	/**
-	 * Attach our object to a new linked list though an ordered index.
+	 * Attach our object to the start of a linked list though an ordered index.
 	 * If we are already attached to a list we are delisted first.
+	 * @param index of linked list we are joining.
+	 */
+	void enlistHead(OrderedIndex *index);
+
+	/**
+	 * Attach our object to the end of a linked list though an ordered index.
+	 * If we are already attached to a list we are delisted first.
+	 * @param index of linked list we are joining.
+	 */
+	void enlistTail(OrderedIndex *index);
+
+	/**
+	 * Attach our object to a linked list.  The default strategy is to add
+	 * to tail.
 	 * @param index of linked list we are joining.
 	 */
 	void enlist(OrderedIndex *index);
@@ -653,6 +686,45 @@ public:
 	 */
 	inline LinkedList *getNext(void) const
 		{return static_cast<LinkedList*>(LinkedObject::getNext());};
+
+	/**
+	 * Insert object behind our object.
+	 * @param object to add to list.
+	 */
+	void insertTail(LinkedList *object);
+
+	/**
+	 * Insert object in front of our object.
+	 * @param object to add to list.
+	 */
+	void insertHead(LinkedList *object);
+
+	/**
+	 * Insert object, method in derived object.
+	 * @param object to add to list.
+	 */
+	virtual void insert(LinkedList *object);
+
+	/**
+	 * Insert object behind our object.
+	 * @param object to add to list.
+	 */
+	inline void operator+=(LinkedList *object)
+		{insertTail(object);};
+
+	/**
+	 * Insert object in front of our object.
+	 * @param object to add to list.
+	 */
+	inline void operator-=(LinkedList *object)
+		{insertHead(object);};
+
+	/**
+	 * Insert object in list with our object.
+	 * @param object to add to list.
+	 */
+	inline void operator*=(LinkedList *object)
+		{insert(object);};
 };
 	
 /**

@@ -324,7 +324,7 @@ NamedObject(), child()
 NamedTree::NamedTree(NamedTree *p, char *nid) :
 NamedObject(), child()
 {
-	enlist(&p->child);
+	enlistTail(&p->child);
 	id = nid;
 	parent = p;
 }
@@ -483,7 +483,7 @@ LinkedObject()
 {
 	next = NULL;
 	if(root)
-		enlist(root);
+		enlistTail(root);
 }
 
 void OrderedObject::delist(OrderedIndex *root)
@@ -511,12 +511,28 @@ void OrderedObject::delist(OrderedIndex *root)
 
 void OrderedObject::enlist(OrderedIndex *root)
 {
+	enlistTail(root);
+}
+
+void OrderedObject::enlistTail(OrderedIndex *root)
+{
 	if(root->head == NULL)
 		root->head = this;
 	else if(root->tail)
 		root->tail->next = this;
 
 	root->tail = this;
+}
+
+void OrderedObject::enlistHead(OrderedIndex *root)
+{
+	next = NULL;
+	if(root->tail == NULL)
+		root->tail = this;
+	else if(root->head)
+		next = root->head;
+
+	root->head = this;
 }
 
 LinkedList::LinkedList()
@@ -535,6 +551,71 @@ LinkedList::LinkedList(OrderedIndex *r)
 }
 
 void LinkedList::enlist(OrderedIndex *r)
+{
+	enlistTail(r);
+}
+
+void LinkedList::insert(LinkedList *o)
+{
+	insertTail(o);
+}
+
+void LinkedList::insertHead(LinkedList *o)
+{
+	if(o->root)
+		o->delist();
+
+	if(prev) {
+		o->next = this;
+		o->prev = prev;
+	}
+	else {
+		root->head = o;
+		o->prev = NULL;
+	}
+	o->root = root;
+	o->next = this;
+	prev = o;
+}
+
+void LinkedList::insertTail(LinkedList *o)
+{
+	if(o->root)
+		o->delist();
+
+	if(next) {
+		o->prev = this;
+		o->next = next;
+	}
+	else {
+		root->tail = o;
+		o->next = NULL;
+	}
+	o->root = root;
+	o->prev = this;
+	next = o;
+}
+
+void LinkedList::enlistHead(OrderedIndex *r)
+{
+	if(root)
+		delist();
+	root = r;
+	prev = 0;
+	next = 0;
+
+	if(!root->tail) {
+		root->tail = root->head = static_cast<OrderedObject *>(this);
+		return;
+	}
+
+	next = static_cast<LinkedList *>(root->head);
+	((LinkedList*)next)->prev = this;
+	root->head = static_cast<OrderedObject *>(this);
+}
+
+
+void LinkedList::enlistTail(OrderedIndex *r)
 {
 	if(root)
 		delist();
@@ -584,6 +665,11 @@ OrderedIndex::OrderedIndex()
 OrderedIndex::~OrderedIndex()
 {
 	head = tail = 0;
+}
+
+void OrderedIndex::operator*=(OrderedObject *object)
+{
+	object->enlist(this);
 }
 
 LinkedObject *OrderedIndex::get(void)
