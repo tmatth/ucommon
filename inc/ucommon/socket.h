@@ -825,10 +825,10 @@ public:
 	/**
 	 * Bind the socket descriptor to a known interface and service port.
 	 * @param socket descriptor to bind.
-	 * @param interface to bind to or "*" for all.
+	 * @param address to bind to or "*" for all.
 	 * @param service port to bind.
 	 */
-	static int bindaddr(SOCKET socket, const char *interface, const char *service);
+	static int bindaddr(SOCKET socket, const char *address, const char *service);
 
 	/**
 	 * Lookup and return the host name associated with a socket address.
@@ -896,10 +896,10 @@ public:
 	/**
 	 * Get the socket address of the interface needed to reach a destination
 	 * address.
-	 * @param interface address that is found.
-	 * @param address of destination.
+	 * @param address of interface found.
+	 * @param destination address.
 	 */
-	static void getinterface(struct sockaddr *interface, struct sockaddr *destination);
+	static void getinterface(struct sockaddr *address, struct sockaddr *destination);
 
 	/**
 	 * Get the hostname of a socket address.
@@ -936,11 +936,11 @@ class __EXPORT ListenSocket : protected Socket
 public:
 	/**
 	 * Create and bind a listener socket.
-	 * @param interface to bind on or "*" for all.
+	 * @param address to bind on or "*" for all.
 	 * @param service port to bind listener.
 	 * @param backlog size for buffering pending connections.
 	 */
-	ListenSocket(const char *interface, const char *service, unsigned backlog = 5);
+	ListenSocket(const char *address, const char *service, unsigned backlog = 5);
 
 	/**
 	 * Accept a socket connection.
