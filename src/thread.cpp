@@ -654,7 +654,7 @@ bool TimedEvent::expire(void)
 	LeaveCriticalSection(&mutex);
 	result = WaitForSingleObject(event, timeout);
 	EnterCriticalSection(&mutex);
-	if(result == WAIT_OBJECT_0)
+	if(result != WAIT_OBJECT_0)
 		return true;
 	return false;
 }
@@ -708,23 +708,28 @@ void TimedEvent::signal(void)
 
 bool TimedEvent::expire(void) 
 {
-	bool result = true;
 	timeout_t timeout = get();
 
 	if(!timeout)
-		result = false;
-	else
-		result = cond.wait(timeout);
+		return true;
 
-	return result;
+	if(cond.wait(timeout))
+		return false;
+
+	return true;
 }
 
 bool TimedEvent::wait(void) 
 {
 	bool result;
+	timeout_t timeout = get();
 
 	cond.lock();
-	result = expire();
+	if(!timeout)
+		result = false;
+	else
+		result = cond.wait(timeout);
+
 	cond.unlock();
 	return result;
 }
