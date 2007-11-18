@@ -679,13 +679,14 @@ void mutex::Unlock(void)
 
 #ifdef	_MSWINDOWS_
 
-EventTimer::EventTimer() : 
+TimedEvent::TimedEvent() : 
 Timer()
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	pending = 0;
 }
 
-EventTimer::~EventTimer()
+TimedEvent::~TimedEvent()
 {
 	if(event != INVALID_HANDLE_VALUE) {
 		CloseHandle(event);
@@ -693,74 +694,89 @@ EventTimer::~EventTimer()
 	}
 }
 
-EventTimer::EventTimer(timeout_t timeout) :
+TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	pending = 0;
 }
 
-EventTimer::EventTimer(time_t timer) :
+TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	pending = 0;
 }
 
-bool EventTimer::wait(void) 
+void TimedEvent::signal(void)
+{
+	--pending;
+	SetEvent(event);
+}
+
+bool TimedEvent::wait(void) 
 {
 	int result;
 	timeout_t timeout;
 
-	timeout = get();
+	++pending;
+	while(pending) {
+		timeout = get();
+		if(!timeout)
+			return false;
 
-	// only one thread can wait on a conditional timer...
-	if(!timeout)
-		return false;
-
-	result = WaitForSingleObject(event, timeout);
-	if(result == WAIT_OBJECT_0)
-		return true;
-	return false;
+		result = WaitForSingleObject(event, timeout);
+		if(result != WAIT_OBJECT_0)
+			return false;
+	}
+	return true;
 }
 
 #else
 
-EventTimer::EventTimer() : 
-Timer(), Conditional()
+TimedEvent::TimedEvent() : 
+Timer()
 {
-	waiting = false;
+	pending = 0;
 }
 
-EventTimer::EventTimer(timeout_t timeout) :
-Timer(timeout), Conditional()
+TimedEvent::TimedEvent(timeout_t timeout) :
+Timer(timeout)
 {
-	waiting = false;
+	pending = 0;
 }
 
-EventTimer::EventTimer(time_t timer) :
-Timer(timer), Conditional()
+TimedEvent::TimedEvent(time_t timer) :
+Timer(timer)
 {
-	waiting = false;
+	pending = 0;
 }
 
-bool EventTimer::wait(void) 
+void TimedEvent::signal(void)
 {
-	bool result;
+	--pending;
+	cond.signal();
+}
+
+bool TimedEvent::wait(void) 
+{
+	bool result = false;
 	struct timespec ts;
 	timeout_t timeout;
 
-	Conditional::lock();		
 	timeout = get();
+	cond.gettimeout(timeout, &ts);
+	cond.lock();		
 
-	// only one thread can wait on a conditional timer...
-	if(waiting || !timeout) {
-		Conditional::unlock();
-		return false;
+	++pending;
+	while(pending != 0) {
+		timeout = get();
+		if(timeout)
+			result = cond.wait(&ts);
+		if(!result)
+			break;
 	}
-	waiting = true;
-	Conditional::gettimeout(timeout, &ts);
-	result = Conditional::wait(&ts);
-	waiting = false;
-	Conditional::unlock();
+	cond.unlock();
 	return result;
 }
 

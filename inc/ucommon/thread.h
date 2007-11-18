@@ -89,7 +89,7 @@ private:
 	pthread_mutex_t mutex;
 #endif
 
-protected:
+public:
 	/**
 	 * Convert a millisecond timeout into use for high resolution
 	 * conditional timers.
@@ -185,42 +185,64 @@ public:
 
 };
 
-#ifdef	_MSWINDOWS_
-class __EXPORT EventTimer : public Timer
+/**
+ * Event notification to manage scheduled realtime threads.  The timer
+ * is advanced to sleep threads which then wakeup either when the timer
+ * has expired or they are notified through the signal handler.  This
+ * might be used to schedule and signal I/O completion handlers.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT TimedEvent : public Timer
 {
 private:
+#ifdef _MSWINDOWS_
 	HANDLE event;
-
-public:
-	EventTimer(void);
-	EventTimer(timeout_t timeout);
-	EventTimer(time_t timer);
-	~EventTimer();
-
-	inline void signal(void)
-		{SetEvent(event);};
-
-	bool wait(void);
-};
-
 #else
-class __EXPORT EventTimer : public Timer, private Conditional
-{
-private:
-	bool waiting;
+	Conditional cond;
+#endif
+	volatile int pending;
 
 public:
-	EventTimer(void);
-	EventTimer(timeout_t timeout);
-	EventTimer(time_t timer);
+	/**
+	 * Create event handler and timer for timing of events.
+	 */
+	TimedEvent(void);
 
-	inline void signal(void)
-		{Conditional::signal();};
+	/**
+	 * Create event handler and timer set to trigger a timeout.
+	 * @param timeout in milliseconds.
+	 */
+	TimedEvent(timeout_t timeout);
 
+	/**
+	 * Create event handler and timer set to trigger a timeout.
+	 * @param timeout in seconds.
+	 */
+	TimedEvent(time_t timeout);
+
+	/**
+	 * Destroy timer and release pending events.
+	 */
+	~TimedEvent();
+
+	/**
+	 * Signal pending event.
+	 */
+	void signal(void);
+
+	/**
+	 * Wait to be signalled or until timer expires.
+	 * @return true if signaled, false if timeout.
+	 */
 	bool wait(void);
 };
-#endif
 
+/**
+ * Portable recursive exclusive lock.  This class is built from the
+ * conditional and hence does not require support for non-standard and 
+ * platform specific extensions to pthread mutex to support recrusive
+ * style mutex locking.
+ */
 class __EXPORT rexlock : private Conditional, public Exclusive
 {
 private:
@@ -281,7 +303,7 @@ public:
 		{lock.release();};
 };
 
-class __EXPORT ReusableAllocator : public Conditional
+class __EXPORT ReusableAllocator : protected Conditional
 {
 protected:
 	ReusableObject *freelist;
@@ -295,7 +317,7 @@ protected:
 	void release(ReusableObject *obj);
 };
 
-class __EXPORT ConditionalLock : public Conditional, public Shared
+class __EXPORT ConditionalLock : protected Conditional, public Shared
 {
 private:
 	unsigned pending, sharing, waiting;
@@ -508,7 +530,7 @@ public:
 		{sl.release();};
 };
 
-class __EXPORT ConditionalIndex : public OrderedIndex, public Conditional
+class __EXPORT ConditionalIndex : public OrderedIndex, protected Conditional
 {
 public:
 	ConditionalIndex();
@@ -558,7 +580,7 @@ public:
 	virtual ~SharedObject();
 };
 
-class __EXPORT SharedPointer : public ConditionalLock
+class __EXPORT SharedPointer : protected ConditionalLock
 {
 private:
 	friend class shared_release;
@@ -756,7 +778,7 @@ public:
 		{return stack.getCount();};
 };
 
-class __EXPORT Buffer : public Conditional
+class __EXPORT Buffer : protected Conditional
 {
 private:
 	size_t size, objsize;
@@ -950,7 +972,7 @@ inline void start(DetachedThread *th)
 
 typedef	StepLock steplock_t;
 typedef ConditionalLock condlock_t;
-typedef EventTimer timedevent_t;
+typedef TimedEvent timedevent_t;
 typedef	mutex mutex_t;
 typedef rwlock rwlock_t;
 typedef	rexlock rexlock_t;
