@@ -642,6 +642,23 @@ void TimedEvent::signal(void)
 	SetEvent(event);
 }
 
+bool TimedEvent::expire(void) 
+{
+	int result;
+	timeout_t timeout;
+
+	timeout = get();
+	if(!timeout)
+		return false;
+
+	LeaveCriticalSection(&mutex);
+	result = WaitForSingleObject(event, timeout);
+	EnterCriticalSection(&mutex);
+	if(result == WAIT_OBJECT_0)
+		return true;
+	return false;
+}
+
 bool TimedEvent::wait(bool locked) 
 {
 	int result;
@@ -651,13 +668,10 @@ bool TimedEvent::wait(bool locked)
 	if(!timeout)
 		return false;
 
-	if(locked)
-		LeaveCriticalSection(&mutex);
 	result = WaitForSingleObject(event, timeout);
-	if(locked)
-		EnterCriticalSection(&mutex);
-	if(result != WAIT_OBJECT_0)
-		return false;
+	if(result == WAIT_OBJECT_0)
+		return true;
+	return false;
 }
 
 void TimedEvent::lock(void)
@@ -692,27 +706,26 @@ void TimedEvent::signal(void)
 	cond.signal();
 }
 
-bool TimedEvent::wait(bool locked) 
+bool TimedEvent::expire(void) 
 {
 	bool result = true;
-	struct timespec ts;
-	timeout_t timeout;
+	timeout_t timeout = get();
 
-	if(!locked)
-		cond.lock();
-
-	timeout = get();
-	cond.gettimeout(timeout, &ts);
-
-	timeout = get();
 	if(!timeout)
 		result = false;
 	else
-		result = cond.wait(&ts);
+		result = cond.wait(timeout);
 
-	if(!locked)
-		cond.unlock();
+	return result;
+}
 
+bool TimedEvent::wait(void) 
+{
+	bool result;
+
+	cond.lock();
+	result = expire();
+	cond.unlock();
 	return result;
 }
 

@@ -203,6 +203,28 @@ private:
 	Conditional cond;
 #endif
 
+protected:
+	/**
+	 * Lock the object for wait or to manipulate derived data.  This is
+	 * relevant to manipulations in a derived class.
+	 */
+	void lock(void);
+
+	/**
+	 * Release the object lock after waiting.  This is relevent to
+	 * manipulations in a derived class.
+	 */
+	void release(void);
+
+	/**
+	 * Wait while locked.  This can be used in more complex derived
+	 * objects where we are concerned with synchronized access between
+	 * the signaling and event thread.  This can be used in place of
+	 * wait, but lock and release methods must be used around it.
+	 * @return true if time expired. 
+	 */
+	bool expire(void);
+
 public:
 	/**
 	 * Create event handler and timer for timing of events.
@@ -234,24 +256,11 @@ public:
 	void signal(void);
 
 	/**
-	 * Wait to be signalled or until timer expires.  Object can be locked
-	 * when wait is called.  This is so that any pre-conditions that need to 
-	 * be specified safely without interference by a signalling thread can be 
-	 * defined and tested for in synchronized access modes.         
-	 * @param locking true if object is locked.
+	 * Wait to be signalled or until timer expires.  This is for simple
+	 * completion events.
 	 * @return true if signaled, false if timeout.
 	 */
-	bool wait(bool locking = false);
-
-	/**
-	 * Lock the object for wait or to manipulate derived data.
-	 */
-	void lock(void);
-
-	/**
-	 * Release the object lock after waiting.
-	 */
-	void release(void);
+	bool wait(void);
 };
 
 /**
