@@ -610,6 +610,7 @@ TimedEvent::TimedEvent() :
 Timer()
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	InitializeCriticalSection(&mutex);
 }
 
 TimedEvent::~TimedEvent()
@@ -618,18 +619,21 @@ TimedEvent::~TimedEvent()
 		CloseHandle(event);
 		event = INVALID_HANDLE_VALUE;
 	}
+	DeleteCriticalSection(&mutex);
 }
 
 TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	InitializeCriticalSection(&mutex);
 }
 
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	InitializeCriticalSection(&mutex);
 }
 
 void TimedEvent::signal(void)
@@ -646,9 +650,21 @@ bool TimedEvent::wait(void)
 	if(!timeout)
 		return false;
 
+	LeaveCriticalSection(&mutex);
 	result = WaitForSingleObject(event, timeout);
+	EnterCriticalSection(&mutex);
 	if(result != WAIT_OBJECT_0)
 		return false;
+}
+
+void TimedEvent::lock(void)
+{
+	EnterCriticalSection(&mutex);
+}
+
+void TimedEvent::release(void)
+{
+	LeaveCriticalSection(&mutex);
 }
 
 #else
@@ -681,7 +697,6 @@ bool TimedEvent::wait(void)
 
 	timeout = get();
 	cond.gettimeout(timeout, &ts);
-	cond.lock();		
 
 	timeout = get();
 	if(!timeout)
@@ -689,8 +704,17 @@ bool TimedEvent::wait(void)
 	else
 		result = cond.wait(&ts);
 
-	cond.unlock();
 	return result;
+}
+
+void TimedEvent::lock(void)
+{
+	cond.lock();
+}
+
+void TimedEvent::release(void)
+{
+	cond.unlock();
 }
 
 #endif

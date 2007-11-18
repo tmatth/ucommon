@@ -198,6 +198,7 @@ class __EXPORT TimedEvent : public Timer
 private:
 #ifdef _MSWINDOWS_
 	HANDLE event;
+	CRITICAL_SECTION mutex;
 #else
 	Conditional cond;
 #endif
@@ -226,15 +227,30 @@ public:
 	~TimedEvent();
 
 	/**
-	 * Signal pending event.
+	 * Signal pending event.  Object may be locked or unlocked.  The
+	 * signalling thread may choose to lock and check a condition in
+	 * a derived class before signalling.
 	 */
 	void signal(void);
 
 	/**
-	 * Wait to be signalled or until timer expires.
+	 * Wait to be signalled or until timer expires.  Object is assumed
+	 * to be locked when wait is called.  This is so that any pre-conditions
+	 * that need to be specified safely without interference by a signalling
+	 * thread can be defined.         
 	 * @return true if signaled, false if timeout.
 	 */
 	bool wait(void);
+
+	/**
+	 * Lock the object for wait or to manipulate derived data.
+	 */
+	void lock(void);
+
+	/**
+	 * Release the object lock after waiting.
+	 */
+	void release(void);
 };
 
 /**
