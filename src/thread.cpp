@@ -760,7 +760,7 @@ void TimedEvent::signal(void)
 
 bool TimedEvent::wait(void) 
 {
-	bool result = false;
+	bool result = true;
 	struct timespec ts;
 	timeout_t timeout;
 
@@ -771,7 +771,9 @@ bool TimedEvent::wait(void)
 	++pending;
 	while(pending != 0) {
 		timeout = get();
-		if(timeout)
+		if(!timeout)
+			result = false;
+		else
 			result = cond.wait(&ts);
 		if(!result)
 			break;
