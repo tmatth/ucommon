@@ -188,8 +188,9 @@ public:
 /**
  * Event notification to manage scheduled realtime threads.  The timer
  * is advanced to sleep threads which then wakeup either when the timer
- * has expired or they are notified through the signal handler.  This
- * might be used to schedule and signal I/O completion handlers.
+ * has expired or they are notified through the signal handler.  This can
+ * be used to schedule and signal one-time completion handlers or for time
+ * synchronized events signaled by an asychrononous I/O or event source.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT TimedEvent : public Timer
@@ -200,7 +201,6 @@ private:
 #else
 	Conditional cond;
 #endif
-	volatile int pending;
 
 public:
 	/**
@@ -241,7 +241,8 @@ public:
  * Portable recursive exclusive lock.  This class is built from the
  * conditional and hence does not require support for non-standard and 
  * platform specific extensions to pthread mutex to support recrusive
- * style mutex locking.
+ * style mutex locking.  The exclusive protocol is implimented to support
+ * exclusive_lock referencing.
  */
 class __EXPORT rexlock : private Conditional, public Exclusive
 {
@@ -256,15 +257,39 @@ private:
 public:
 	rexlock();
 
+	/**
+	 * Acquire or increase locking.
+	 */
 	void lock(void);
+
+	/**
+	 * Release or decrease locking.
+	 */
 	void release(void);
 
+	/**
+	 * Get the number of recursive locking levels.
+	 * @return locking level.
+	 */
 	unsigned getLocking(void);
+
+	/**
+	 * Get the number of threads waiting on lock.
+	 * @return wating thread count.
+	 */
 	unsigned getWaiting(void);
 
+	/**
+	 * Convenience method to lock a recursive lock.
+	 * @param rex lock to lock.
+	 */
 	inline static void lock(rexlock &rex)
 		{rex.lock();};
 
+	/**
+	 * Convenience method to unlock a recursive lock.
+	 * @param rex lock to release.
+	 */
 	inline static void release(rexlock &rex)
 		{rex.release();};
 };
@@ -417,39 +442,6 @@ public:
 
 	inline static void release(semaphore &s)
 		{s.release();};
-};
-
-class __EXPORT Completion : private Conditional
-{
-private:
-	unsigned count;
-	bool signalled;
-
-public:
-	Completion();
-
-	unsigned request(void);
-	bool accepts(unsigned id);
-	bool wait(timeout_t timeout);
-	bool wait(void);
-
-	inline void release(void)
-		{unlock();};
-
-	inline static unsigned request(Completion &e)
-		{return e.request();};
-
-	inline static bool accepts(Completion &e, unsigned id)
-		{return e.accepts(id);};
-
-	inline static void release(Completion &e)
-		{e.unlock();};
-
-	inline static bool wait(Completion &e, timeout_t timeout)
-		{return e.wait(timeout);};
-
-	inline static bool wait(Completion &e)
-		{return e.wait();};
 };
 
 class __EXPORT mutex : public Exclusive

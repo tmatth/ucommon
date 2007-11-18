@@ -55,79 +55,6 @@ void ReusableAllocator::release(ReusableObject *obj)
 	unlock();
 }
 
-Completion::Completion() :
-Conditional()
-{
-	count = 0;
-	signalled = false;
-}
-
-unsigned Completion::request(void)
-{
-	unsigned id;
-	lock();
-	id = ++count;
-	signalled = false;
-	signal();
-	unlock();
-	return id;
-}
-
-bool Completion::accepts(unsigned id)
-{
-	lock();
-	if(id != count) {
-		unlock();
-		return false;
-	}
-
-	signal();
-	++signalled;
-	return true;
-}
-
-bool Completion::wait(timeout_t timeout)
-{
-	bool notimeout = true;
-	struct timespec ts;
-	unsigned last;
-
-	if(timeout && timeout != Timer::inf)
-		gettimeout(timeout, &ts);
-
-	lock();
-	last = count;
-	while(!signalled && count == last && notimeout) {
-		if(timeout == Timer::inf)
-			Conditional::wait();
-		else if(timeout)
-			notimeout = Conditional::wait(&ts);
-		else
-			notimeout = false;
-	}
-	if(last != count)
-		notimeout = false;
-	else
-		++count;
-	unlock();
-	return notimeout;
-}
-
-bool Completion::wait(void)
-{
-	bool rtn = true;
-	lock();
-	unsigned last = count;
-	while(!signalled && count == last)
-		Conditional::wait();
-	if(last != count)
-		rtn = false;
-	else
-		++count;
-	unlock();
-	return rtn;
-}
-
 void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 {
 #if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
@@ -683,7 +610,6 @@ TimedEvent::TimedEvent() :
 Timer()
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	pending = 0;
 }
 
 TimedEvent::~TimedEvent()
@@ -698,19 +624,16 @@ TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	pending = 0;
 }
 
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	pending = 0;
 }
 
 void TimedEvent::signal(void)
 {
-	--pending;
 	SetEvent(event);
 }
 
@@ -719,17 +642,13 @@ bool TimedEvent::wait(void)
 	int result;
 	timeout_t timeout;
 
-	++pending;
-	while(pending) {
-		timeout = get();
-		if(!timeout)
-			return false;
+	timeout = get();
+	if(!timeout)
+		return false;
 
-		result = WaitForSingleObject(event, timeout);
-		if(result != WAIT_OBJECT_0)
-			return false;
-	}
-	return true;
+	result = WaitForSingleObject(event, timeout);
+	if(result != WAIT_OBJECT_0)
+		return false;
 }
 
 #else
@@ -737,24 +656,20 @@ bool TimedEvent::wait(void)
 TimedEvent::TimedEvent() : 
 Timer()
 {
-	pending = 0;
 }
 
 TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
-	pending = 0;
 }
 
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
-	pending = 0;
 }
 
 void TimedEvent::signal(void)
 {
-	--pending;
 	cond.signal();
 }
 
@@ -768,16 +683,12 @@ bool TimedEvent::wait(void)
 	cond.gettimeout(timeout, &ts);
 	cond.lock();		
 
-	++pending;
-	while(pending != 0) {
-		timeout = get();
-		if(!timeout)
-			result = false;
-		else
-			result = cond.wait(&ts);
-		if(!result)
-			break;
-	}
+	timeout = get();
+	if(!timeout)
+		result = false;
+	else
+		result = cond.wait(&ts);
+
 	cond.unlock();
 	return result;
 }
