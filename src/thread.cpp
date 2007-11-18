@@ -611,6 +611,7 @@ Timer()
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	InitializeCriticalSection(&mutex);
+	locked = 0;
 }
 
 TimedEvent::~TimedEvent()
@@ -641,7 +642,7 @@ void TimedEvent::signal(void)
 	SetEvent(event);
 }
 
-bool TimedEvent::wait(void) 
+bool TimedEvent::wait(bool locked) 
 {
 	int result;
 	timeout_t timeout;
@@ -650,9 +651,11 @@ bool TimedEvent::wait(void)
 	if(!timeout)
 		return false;
 
-	LeaveCriticalSection(&mutex);
+	if(locked)
+		LeaveCriticalSection(&mutex);
 	result = WaitForSingleObject(event, timeout);
-	EnterCriticalSection(&mutex);
+	if(locked)
+		EnterCriticalSection(&mutex);
 	if(result != WAIT_OBJECT_0)
 		return false;
 }
@@ -689,11 +692,14 @@ void TimedEvent::signal(void)
 	cond.signal();
 }
 
-bool TimedEvent::wait(void) 
+bool TimedEvent::wait(bool locked) 
 {
 	bool result = true;
 	struct timespec ts;
 	timeout_t timeout;
+
+	if(!locked)
+		cond.lock();
 
 	timeout = get();
 	cond.gettimeout(timeout, &ts);
@@ -703,6 +709,9 @@ bool TimedEvent::wait(void)
 		result = false;
 	else
 		result = cond.wait(&ts);
+
+	if(!locked)
+		cond.unlock();
 
 	return result;
 }

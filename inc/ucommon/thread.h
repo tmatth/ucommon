@@ -234,13 +234,14 @@ public:
 	void signal(void);
 
 	/**
-	 * Wait to be signalled or until timer expires.  Object is assumed
-	 * to be locked when wait is called.  This is so that any pre-conditions
-	 * that need to be specified safely without interference by a signalling
-	 * thread can be defined.         
+	 * Wait to be signalled or until timer expires.  Object can be locked
+	 * when wait is called.  This is so that any pre-conditions that need to 
+	 * be specified safely without interference by a signalling thread can be 
+	 * defined and tested for in synchronized access modes.         
+	 * @param locking true if object is locked.
 	 * @return true if signaled, false if timeout.
 	 */
-	bool wait(void);
+	bool wait(bool locking = false);
 
 	/**
 	 * Lock the object for wait or to manipulate derived data.
