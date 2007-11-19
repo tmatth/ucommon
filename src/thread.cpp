@@ -611,7 +611,6 @@ Timer()
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	InitializeCriticalSection(&mutex);
-	locked = 0;
 }
 
 TimedEvent::~TimedEvent()
@@ -659,7 +658,7 @@ bool TimedEvent::expire(void)
 	return false;
 }
 
-bool TimedEvent::wait(bool locked) 
+bool TimedEvent::wait(void) 
 {
 	int result;
 	timeout_t timeout;
