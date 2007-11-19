@@ -89,7 +89,9 @@ private:
 	pthread_mutex_t mutex;
 #endif
 
-public:
+protected:
+	friend class TimedEvent;
+
 	/**
 	 * Convert a millisecond timeout into use for high resolution
 	 * conditional timers.
@@ -281,6 +283,9 @@ private:
 	__LOCAL void Unlock(void);
 
 public:
+	/**
+	 * Create rexlock.
+	 */
 	rexlock();
 
 	/**
@@ -320,6 +325,18 @@ public:
 		{rex.release();};
 };
 
+/**
+ * A generic and portable implimentation of Read/Write locking.  This
+ * class impliments classical read/write locking, including "timed" locks.
+ * Support for scheduling threads to avoid writer starvation is also provided
+ * for.  By building read/write locks from a conditional, we make them
+ * available on pthread implimetations and other platforms which do not
+ * normally include optional pthread rwlock's.  We also do not restrict
+ * the number of threads that may use the lock.  Finally, both the exclusive 
+ * and shared protocols are implimented to support exclusive_lock and
+ * shared_lock referencing.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT rwlock : private Conditional, public Exclusive, public Shared
 {
 private:
@@ -334,22 +351,70 @@ private:
 	__LOCAL void Unlock(void);
 
 public:
+	/**
+	 * Create an instance of a rwlock.
+	 */
 	rwlock();
 
+	/**
+	 * Request modify (write) access through the lock.
+	 * @param timeout in milliseconds to wait for lock.
+	 * @return true if locked, false if timeout.
+	 */
 	bool modify(timeout_t timeout = Timer::inf);
+
+	/**
+	 * Request shared (read) access through the lock.
+	 * @param timeout in milliseconds to wait for lock.
+	 * @return true if locked, false if timeout.
+	 */
 	bool access(timeout_t timeout = Timer::inf);
+
+	/**
+	 * Release the lock.
+	 */
 	void release(void);
 
+	/**
+	 * Get the number of threads in shared access mode.
+	 * @return number of accessing threads.
+	 */
 	unsigned getAccess(void);
+
+	/**
+	 * Get the number of threads waiting to modify the lock.
+	 * @return number of pending write threads.
+	 */
 	unsigned getModify(void);
+
+	/**
+	 * Get the number of threads waiting to access after writer completes.
+	 * @return number of waiting access threads.
+	 */
 	unsigned getWaiting(void);
 
+	/**
+	 * Convenience function to modify (write lock) a rwlock.
+	 * @param lock to modify.
+	 * @param timeout to wait for lock.
+	 * @return true if successful, false if timeout.
+	 */
 	inline static bool modify(rwlock &lock, timeout_t timeout = Timer::inf)
 		{return lock.modify(timeout);};
 
+	/**
+	 * Convenience function to access (read lock) a rwlock.
+	 * @param lock to access.
+	 * @param timeout to wait for lock.
+	 * @return true if successful, false if timeout.
+	 */
 	inline static bool access(rwlock &lock, timeout_t timeout = Timer::inf)
 		{return lock.access(timeout);};
 
+	/**
+	 * Convenience function to release a rwlock.
+	 * @param lock to release.
+	 */
 	inline static void release(rwlock &lock)
 		{lock.release();};
 };
