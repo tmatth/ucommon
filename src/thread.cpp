@@ -906,6 +906,26 @@ void barrier::set(unsigned limit)
 	unlock();
 }
 
+bool barrier::wait(timeout_t timeout)
+{
+	bool result;
+
+	Conditional::lock();
+	if(!count) {
+		Conditional::unlock();
+		return true;
+	}
+	if(++waits >= count) {
+		waits = 0;
+		Conditional::broadcast();
+		Conditional::unlock();
+		return true;
+	}
+	result = Conditional::wait(timeout);
+	Conditional::unlock();
+	return result;
+}
+
 void barrier::wait(void)
 {
 	Conditional::lock();

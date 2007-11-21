@@ -5,6 +5,7 @@ From ucommon 0.9.2 to 0.9.3
 - replaced NOSTDCPP with reversed & revised NEW_STDCPP flag unless OLD_STDCPP
 - classes documented and doxygenized.
 - expanded linked list support with head/tail and insert options.
+- barrier with timed wait.
 
 From ucommon 0.9.1 to 0.9.2
 - fix critical bug in Socket::equal tests...

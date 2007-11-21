@@ -419,20 +419,52 @@ public:
 		{lock.release();};
 };
 
+/**
+ * Class for resource bound memory pools between threads.  This is used to 
+ * support a memory pool allocation scheme where a pool of reusable objects 
+ * may be allocated, and the pool renewed by releasing objects or back.
+ * When the pool is used up, a pool consuming thread then must wait for
+ * a resource to be freed by another consumer (or timeout).  This class is
+ * not meant to be used directly, but rather to build the synchronizing
+ * control between consumers which might be forced to wait for a resource.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT ReusableAllocator : protected Conditional
 {
 protected:
 	ReusableObject *freelist;
 	unsigned waiting;
 
+	/**
+	 * Initialize reusable allocator through a conditional.  Zero free list.
+	 */
 	ReusableAllocator();
 
-	inline ReusableObject *next(ReusableObject *obj)
-		{return obj->getNext();};
+	/**
+	 * Get next reusable object in the pool.
+	 * @param object from list.
+	 * @return next object.
+	 */ 
+	inline ReusableObject *next(ReusableObject *object)
+		{return object->getNext();};
 	
-	void release(ReusableObject *obj);
+	/**
+	 * Release resuable object
+	 * @param object being released.
+	 */
+	void release(ReusableObject *object);
 };
 
+/**
+ * An optimized and convertable shared lock.  This is a form of read/write
+ * lock that has been optimized, particularly for shared access.  Support
+ * for scheduling access around writer starvation is also included.  The
+ * other benefits over traditional read/write locks is that the code is
+ * a little lighter, and read (shared) locks can be converted to exclusive
+ * (write) locks to perform brief modify operations and then returned to read
+ * locks, rather than having to release and re-aquire locks to change mode.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT ConditionalLock : protected Conditional, public Shared
 {
 private:
@@ -444,46 +476,127 @@ private:
 	__LOCAL void Share(void);
 
 protected:
+	/**
+	 * This is used in place of access when one is not concerned with writer
+	 * starvation.  It is faster, and may be safely used recursivily, such as
+	 * to protect a method call which might be called by a larger protected
+	 * method or might be exposed directly.
+	 */
 	void protect(void);
 
 public:
+	/**
+	 * Construct conditional lock.
+	 */
 	ConditionalLock();
 
+	/**
+	 * Acquire write (exclusive modify) lock.
+	 */
 	void modify(void);
+
+	/**
+	 * Commit changes / release a modify lock.
+	 */
 	void commit(void);
+
+	/**
+	 * Acquire access (shared read) lock.
+	 */
 	void access(void);
+
+	/**
+	 * Release a shared lock.
+	 */
 	void release(void);
+
+	/**
+	 * Convert read lock into exclusive (write/modify) access.  Schedule
+	 * when other readers sharing.
+	 */
 	void exclusive(void);
+
+	/**
+	 * Return an exclusive access lock back to share mode.
+	 */
 	void share(void);
 
+	/**
+	 * Get the number of threads reading (sharing) the lock.
+	 */
 	unsigned getReaders(void);
+
+	/**
+	 * Get the number of threads waiting to share the lock.
+	 */
 	unsigned getWaiters(void);
 
+	/**
+	 * Acquire/recursive read lock operator.
+	 */
 	inline void operator++()
-		{access();};
+		{protect();};
 
+	/**
+	 * Release read lock operator.
+	 */
 	inline void operator--()
 		{release();};
 
-	inline static void modify(ConditionalLock &s)
-		{s.modify();};
+	/**
+	 * Convenience function to modify lock.
+	 * @param lock to acquire in write exclusive mode.
+	 */
+	inline static void modify(ConditionalLock &lock)
+		{lock.modify();};
 
-	inline static void commit(ConditionalLock &s)
-		{s.commit();};
+	/**
+	 * Convenience function to commit a modify lock.
+	 * @param lock to commit.
+	 */
+	inline static void commit(ConditionalLock &lock)
+		{lock.commit();};
 
-	inline static void release(ConditionalLock &s)
-		{s.release();};
+	/**
+	 * Convenience function to release a shared lock.
+	 * @param lock to release.
+	 */
+	inline static void release(ConditionalLock &lock)
+		{lock.release();};
 
-	inline static void access(ConditionalLock &s)
-		{s.access();};
+	/**
+	 * Convenience function to aqcuire a shared lock.
+	 * @param lock to share.
+	 */
+	inline static void access(ConditionalLock &lock)
+		{lock.access();};
 
-	inline static void exclusive(ConditionalLock &s)
-		{s.exclusive();};
+	/**
+	 * Convenience function to convert lock to exclusive mode.
+	 * @param lock to convert.
+	 */
+	inline static void exclusive(ConditionalLock &lock)
+		{lock.exclusive();};
 
-	inline static void share(ConditionalLock &s)
-		{s.share();};
+	/**
+	 * Convenience function to convert lock to shared access.
+	 * @param lock to convert.
+	 */
+	inline static void share(ConditionalLock &lock)
+		{lock.share();};
 };	
-	
+
+/**
+ * A portable implimentation of "barrier" thread sychronization.  A barrier
+ * waits until a specified number of threads have all reached the barrier,
+ * and then releases all the threads together.  This implimentation works
+ * regardless of whether the thread library supports barriers since it is
+ * built from conditional.  It also differs in that the number of threads 
+ * required can be changed dynamically at runtime, unlike pthread barriers
+ * which, when supported, have a fixed limit defined at creation time.  Since
+ * we use conditionals, another feature we can add is optional support for a
+ * wait with timeout.
+ */
 class __EXPORT barrier : private Conditional 
 {
 private:
@@ -491,17 +604,61 @@ private:
 	unsigned waits;
 
 public:
+	/**
+	 * Construct a barrier with an initial size.
+	 * @param count of threads required.
+	 */
 	barrier(unsigned count);
+
+	/**
+	 * Destroy barrier and release pending threads.
+	 */
 	~barrier();
 
+	/**
+	 * Dynamically alter the number of threads required.  If the size is
+	 * set below the currently waiting threads, then the barrier releases.
+	 * @param count of threads required.
+	 */
 	void set(unsigned count);
+
+	/**
+	 * Wait at the barrier until the count of threads waiting is reached.
+	 */
 	void wait(void);
 
-	inline static void wait(barrier &b)
-		{b.wait();};
+	/**
+	 * Wait at the barrier until either the count of threads waiting is
+	 * reached or a timeout has occurred.
+	 * @param timeout to wait in milliseconds.
+	 * @return true if barrier reached, false if timer expired.
+	 */
+	bool wait(timeout_t timeout);
 
-	inline static void set(barrier &b, unsigned count)
-		{b.set(count);};
+	/**
+	 * Convenience function to wait at a barrier.
+	 * @param sync object to wait at.
+	 */
+	inline static void wait(barrier &sync)
+		{sync.wait();};
+
+	/**
+	 * Convenience function to wait at a barrier with a timeout.
+	 * @param sync object to wait at.
+	 * @param timeout to wait in milliseconds.
+	 * @return false if timer expired.
+	 */
+	inline static bool wait(barrier &sync, timeout_t timeout)
+		{return sync.wait(timeout);};
+
+
+	/**
+	 * Convenience function to set a barrier count.
+	 * @param sync object to set.
+	 * @param count of threads to set.
+	 */
+	inline static void set(barrier &sync, unsigned count)
+		{sync.set(count);};
 };
 
 class __EXPORT semaphore : public Shared, private Conditional
