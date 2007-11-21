@@ -113,32 +113,18 @@ unsigned semaphore::getCount(void)
 
 bool semaphore::wait(timeout_t timeout)
 {
-	return request(1, timeout);
-}
-
-bool semaphore::request(unsigned size, timeout_t timeout)
-{
 	bool result = true;
 	struct timespec ts;
-
-	if(timeout && timeout != Timer::inf)
-		gettimeout(timeout, &ts);
+	gettimeout(timeout, &ts);
 
 	lock();
-	if(used + size > count) {
+	while(used >= count && result) {
 		++waits;
-		while(used + size > count && result) {
-			if(timeout == Timer::inf)
-				Conditional::wait();
-			else if(timeout)
-				result = Conditional::wait(&ts);
-			else
-				result = false;
-		}
+		result = Conditional::wait(&ts);
 		--waits;
 	}
 	if(result)
-		used += size;
+		++used;
 	unlock();
 	return result;
 }
@@ -148,31 +134,11 @@ void semaphore::wait(void)
 	lock();
 	if(used >= count) {
 		++waits;
-		while(used >= count)
-			Conditional::wait();
+		Conditional::wait();
 		--waits;
 	}
 	++used;
 	unlock();
-}
-
-void semaphore::request(unsigned size)
-{
-	lock();
-	if(used + size > count) {
-		++waits;
-		while(used + size > count)
-			Conditional::wait();
-		--waits;
-	}
-	used += size;
-	unlock();
-}
-
-void semaphore::release(unsigned size)
-{
-	while(size--)
-		release();
 }
 
 void semaphore::release(void)

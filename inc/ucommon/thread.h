@@ -596,6 +596,7 @@ public:
  * which, when supported, have a fixed limit defined at creation time.  Since
  * we use conditionals, another feature we can add is optional support for a
  * wait with timeout.
+ * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT barrier : private Conditional 
 {
@@ -661,6 +662,14 @@ public:
 		{sync.set(count);};
 };
 
+/**
+ * A portable counting semaphore class.  A semaphore will allow threads
+ * to pass through it until the count is reached, and blocks further threads.
+ * Unlike pthread semaphore, our semaphore class supports it's count limit
+ * to be altered during runtime and the use of timed waits.  This class also
+ * implements the shared_lock protocol.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT semaphore : public Shared, private Conditional
 {
 private:
@@ -670,26 +679,83 @@ private:
 	__LOCAL void Unlock(void);
 
 public:
-	semaphore(unsigned limit = 0);
+	/**
+	 * Construct a semaphore with an initial count of threads to permit.
+	 */
+	semaphore(unsigned count = 0);
 
-	void request(unsigned size);
-	bool request(unsigned size, timeout_t timeout);
+	/**
+	 * Wait until the semphore usage count is less than the thread limit.
+	 * Increase used count for our thread when unblocked.
+	 */ 
 	void wait(void);
+
+	/**
+	 * Wait until the semphore usage count is less than the thread limit.
+	 * Increase used count for our thread when unblocked, or return without
+	 * changing if timed out.
+	 * @param timeout to wait in millseconds.
+	 * @return true if success, false if timeout.
+	 */
 	bool wait(timeout_t timeout);
+
+	/**
+	 * Get active semaphore limit.
+	 * @return count of maximum threads to pass.
+	 */
 	unsigned getCount(void);
+
+	/**
+	 * Get current semaphore usage.
+	 * @return number of active threads.
+	 */
 	unsigned getUsed(void);
-	void set(unsigned limit);
+
+	/**
+	 * Alter semaphore limit at runtime
+	 * @param count of threads to allow.
+	 */
+	void set(unsigned count);
+
+	/**
+	 * Release the semaphore after waiting for it.
+	 */
 	void release(void);
-	void release(unsigned size);
 
-	inline static void wait(semaphore &s)
-		{s.wait();};
+	/**
+	 * Convenience operator to wait on a counting semaphore.
+	 */
+	inline void operator++(void)
+		{wait();};
 
-	inline static bool wait(semaphore &s, timeout_t timeout)
-		{return s.wait(timeout);};
+	/**
+	 * Convenience operator to release a counting semaphore.
+	 */
+	inline void operator--(void)
+		{release();};
 
-	inline static void release(semaphore &s)
-		{s.release();};
+	/**
+	 * Convenience class to wait on a semaphore.
+	 * @param sync object to wait on.
+	 */
+	inline static void wait(semaphore &sync)
+		{sync.wait();};
+
+	/**
+	 * Convenience class to wait on a semaphore.
+	 * @param sync object to wait on.
+	 * @param timeout in milliseconds.
+	 * @return if success, false if timeout.
+	 */
+	inline static bool wait(semaphore &sync, timeout_t timeout)
+		{return sync.wait(timeout);};
+
+	/**
+	 * Convenience class to release a semaphore.
+	 * @param sync object to release.
+	 */
+	inline static void release(semaphore &sync)
+		{sync.release();};
 };
 
 class __EXPORT mutex : public Exclusive
