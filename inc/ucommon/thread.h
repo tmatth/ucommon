@@ -758,6 +758,11 @@ public:
 		{sync.release();};
 };
 
+/**
+ * Generic non-recursive exclusive lock class.  This class also impliments 
+ * the exclusive_lock protocol.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT mutex : public Exclusive
 {
 private:
@@ -767,46 +772,107 @@ private:
 	__LOCAL void Unlock(void);
 		
 public:
+	/**
+	 * Create a mutex lock.
+	 */
 	mutex();
+
+	/**
+	 * Destroy mutex lock, release waiting threads.
+	 */
 	~mutex();
 
+	/**
+	 * Acquire mutex lock.  This is a blocking operation.
+	 */
 	inline void acquire(void)
 		{pthread_mutex_lock(&mlock);};
 
+	/**
+	 * Acquire mutex lock.  This is a blocking operation.
+	 */
 	inline void lock(void)
 		{pthread_mutex_lock(&mlock);};
 
+	/**
+	 * Release acquired lock.
+	 */
 	inline void unlock(void)
 		{pthread_mutex_unlock(&mlock);};
 
+	/**
+	 * Release acquired lock.
+	 */
 	inline void release(void)
 		{pthread_mutex_unlock(&mlock);};
 
-	inline static void acquire(mutex &m)
-		{pthread_mutex_lock(&m.mlock);};
+	/**
+	 * Convenience function to acquire a mutex lock.
+	 * @param lock to acquire.
+	 */
+	inline static void acquire(mutex &lock)
+		{pthread_mutex_lock(&lock.mlock);};
 
-	inline static void lock(mutex &m)
-		{pthread_mutex_lock(&m.mlock);};
+	/**
+	 * Convenience function to acquire a mutex lock.
+	 * @param lock to acquire.
+	 */
+	inline static void lock(mutex &lock)
+		{pthread_mutex_lock(&lock.mlock);};
 
-	inline static void unlock(mutex &m)
-		{pthread_mutex_unlock(&m.mlock);};
+	/**
+	 * Convenience function to release an aquired mutex lock.
+	 * @param lock to acquire.
+	 */
+	inline static void unlock(mutex &lock)
+		{pthread_mutex_unlock(&lock.mlock);};
 
-	inline static void release(mutex &m)
-		{pthread_mutex_unlock(&m.mlock);};
+	/**
+	 * Convenience function to release an aquired mutex lock.
+	 * @param lock to acquire.
+	 */
+	inline static void release(mutex &lock)
+		{pthread_mutex_unlock(&lock.mlock);};
 
+	/**
+	 * Convenience function to acquire os native mutex lock directly.
+	 * @param lock to acquire.
+	 */
 	inline static void acquire(pthread_mutex_t *lock)
 		{pthread_mutex_lock(lock);};
 
+	/**
+	 * Convenience function to acquire os native mutex lock directly.
+	 * @param lock to acquire.
+	 */
 	inline static void lock(pthread_mutex_t *lock)
 		{pthread_mutex_lock(lock);};
 
+	/**
+	 * Convenience function to release os native mutex lock directly.
+	 * @param lock to release.
+	 */
 	inline static void unlock(pthread_mutex_t *lock)
 		{pthread_mutex_unlock(lock);};
 
+	/**
+	 * Convenience function to release os native mutex lock directly.
+	 * @param lock to release.
+	 */
 	inline static void release(pthread_mutex_t *lock)
 		{pthread_mutex_unlock(lock);};
 };
 
+/**
+ * Stepladder locking with mutexes.  Step-ladder locking is where a mutex
+ * lock is migrated from a broad lock that covers a large resource or
+ * container to a lock that only covers a contained cell or sub resource.
+ * The process of step-locking involves aquiring the new higher resolution'
+ * lock, and then releasing a more global one.  The step-lock is considered
+ * "exclusive" when the global resource is locked, and "shared" when the global
+ * resource is available to other threads.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT StepLock : public Exclusive, public Shared
 {
 private:
