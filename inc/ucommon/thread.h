@@ -1416,7 +1416,8 @@ public:
  * the queue and stack operate by managing lists of reference pointers to
  * objects of various mixed kind, the buffer holds physical copies of objects 
  * that being passed through it, and all must be the same size.  The buffer 
- * class can be used stand-alone or with the typed bufferof template.
+ * class can be used stand-alone or with the typed bufferof template.  The
+ * buffer is accessed in fifo order.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT Buffer : protected Conditional
@@ -1427,21 +1428,78 @@ private:
 	unsigned count, limit;
 
 public:
-	Buffer(size_t objsize, size_t count);
+	/**
+	 * Create a buffer to hold a series of objects.
+	 * @param size of each object in buffer.
+	 * @param count of objects in the buffer.
+	 */
+	Buffer(size_t size, size_t count);
+
+	/**
+	 * Deallocate buffer and unblock any waiting threads.
+	 */
 	virtual ~Buffer();
 
+	/**
+	 * Get the size of the buffer.
+	 * @return size of the buffer.
+	 */
 	unsigned getSize(void);
+
+	/**
+	 * Get the number of objects in the buffer currently.
+	 * @return number of objects buffered.
+	 */
 	unsigned getCount(void);
 
+	/**
+	 * Get the next object from the buffer.
+	 * @param timeout to wait when buffer is empty in milliseconds.
+	 * @return pointer to next object in the buffer or NULL if timed out.
+	 */
 	void *get(timeout_t timeout);
-	void *get(void);
-	void put(void *data);
-	bool put(void *data, timeout_t timeout);
-	void release(void);	// release lock from get
 
+	/**
+	 * Get the next object from the buffer.  This blocks until an object
+	 * becomes available.
+	 * @return pointer to next object from buffer.
+	 */
+	void *get(void);
+
+	/**
+	 * Put (copy) an object into the buffer.  This blocks while the buffer
+	 * is full.
+	 * @param data to copy into the buffer.
+	 */
+	void put(void *data);
+
+	/**
+	 * Put (copy) an object into the buffer.
+	 * @param data to copy into the buffer.
+	 * @param timeout to wait if buffer is full.
+	 * @return true if copied, false if timed out while full.
+	 */
+	bool put(void *data, timeout_t timeout);
+
+	/**
+	 * Release must be called when we get an object from the buffer.  This
+	 * is because the pointer we return is a physical pointer to memory
+	 * that is part of the buffer.  The object we get cannot be removed or
+	 * the memory modified while the object is being used.
+	 */
+	void release(void);
+
+	/**
+	 * Test if there is data waiting in the buffer.
+	 * @return true if buffer has data.
+	 */
 	operator bool();
 
-	virtual bool operator!();
+	/**
+	 * Test if the buffer is empty.
+	 * @return true if the buffer is empty.
+	 */
+	bool operator!();
 };
 
 class __EXPORT locked_release
