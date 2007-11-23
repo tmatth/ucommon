@@ -903,7 +903,8 @@ protected:
 	 * Replace existing object through assignment.
 	 * @param object to assign.
 	 */
-	LockedPointer &operator=(Object *object);
+	inline void operator=(Object *object)
+		{replace(object);};
 };
 
 /**
@@ -954,10 +955,10 @@ private:
 
 protected:
 	/**
-	 * Created shared locking for pointer.
+	 * Created shared locking for pointer.  Must be assigned by replace.
 	 */
 	SharedPointer();
-
+	
 	/**
 	 * Destroy lock and release any blocked threads.
 	 */
@@ -995,6 +996,7 @@ class __EXPORT Thread
 protected:
 	pthread_t tid;
 	size_t stack;
+	int priority;
 
 	/**
 	 * Create a thread object that will have a preset stack size.  If 0
@@ -1004,6 +1006,14 @@ protected:
 	Thread(size_t stack = 0);
 
 public:
+	/**
+	 * Set thread priority without disrupting scheduling if possible.
+	 * Based on scheduling policy.  It is recommended that the process
+	 * is set for realtime scheduling, and this method is actually for
+	 * internal use.
+	 */
+	void setPriority(void);
+
 	/**
 	 * Yield execution context of the current thread. This is a static
 	 * and may be used anywhere.
@@ -1035,45 +1045,6 @@ public:
 	 * Used to initialize threading library.  May be needed for some platforms.
 	 */
 	static void init(void);
-
-#if defined(_MSWINDOWS_)
-	/**
-	 * Lower thread priority to lowest priority background thread.
-	 */
-	static void lowerPriority(void);
-
-	/**
-	 * Raise thread priority above process scheduling priority.
-	 * @param priority to raise.  For Windows this is either "1" for 
-	 * "THREAD_PRIORITY_ABOVE_NORMAL", or >1 for highest priority.
-	 */
-	static void raisePriority(unsigned priority);
-#elif _POSIX_PRIORITY_SCHEDULING > 0
-	/**
-	 * Raise thread priority without disrupting scheduling if possible.
-	 * @param priority to raise.  Based on scheduling policy.  It is
-	 * recommended that the process is set for realtime scheduling to use
-	 * this.
-	 */
-	static void raisePriority(unsigned priority);
-
-	/**
-	 * Lowers thread priority to lowest possible for scheduling policy.  This 
-	 * is recommended for use with a realtime scheduling policy.
-	 */
-	static void lowerPriority(void);
-#else
-	/**
-	 * Lower thread priority.  Does nothing without posix scheduling support.
-	 */
-	inline static void lowerPriority(void) {};
-
-	/**
-	 * Raise thread priority.  Does nothing without posix scheduling support.
-	 * @param priority.
-	 */
-	inline static void raisePriority(unsigned priority) {};
-#endif
 
 	/**
 	 * Determine if two thread identifiers refer to the same thread.
@@ -1140,9 +1111,11 @@ public:
 	 * Start execution of child context.  This must be called after the
 	 * child object is created (perhaps with "new") and before it can be
 	 * joined.  This method actually begins the new thread context, which
-	 * then calls the object's run method.
+	 * then calls the object's run method.  Optionally raise the priority
+	 * of the thread when it starts.
+	 * @param priority of child thread.
 	 */
-	void start(void);
+	void start(int priority = 0);
 };
 
 /**
@@ -1178,8 +1151,9 @@ public:
 	 * Start execution of detached context.  This must be called after the
 	 * object is created (perhaps with "new"). This method actually begins 
 	 * the new thread context, which then calls the object's run method.
+	 * @param priority to start thread with.
 	 */
-	void start(void);
+	void start(int priority = 0);
 };
 	
 /**
@@ -1213,15 +1187,16 @@ public:
 	/**
 	 * Create a queue that uses a memory pager for internally managed
 	 * member objects for a specified maximum number of object pointers.
-	 * @param pager to use for internal member object.
-	 * @param number of pointers that can be in the queue.
+	 * @param pager to use for internal member object or NULL to use heap.
+	 * @param number of pointers that can be in the queue or 0 for unlimited.
+	 * size limit.
 	 */
-	queue(mempager *pager, size_t number);
+	queue(mempager *pager = NULL, size_t number = 0);
 
 	/**
 	 * Remove a specific object pointer for the queue.  This can remove
 	 * a member from any location in the queue, whether beginning, end, or
-	 * somewhere in the middle.
+	 * somewhere in the middle.  This also releases the object.
 	 * @param object to remove.
 	 * @return true if object was removed, false if not found.
 	 */
@@ -1230,7 +1205,7 @@ public:
 	/**
 	 * Post an object into the queue by it's pointer.  This can wait for
 	 * a specified timeout if the queue is full, for example, for another
-	 * thread to remove an object pointer.
+	 * thread to remove an object pointer.  This also retains the object.
 	 * @param object to post.
 	 * @param timeout to wait if queue is full in milliseconds.
 	 * @return true if object posted, false if queue full and timeout expired.
@@ -1239,7 +1214,8 @@ public:
 
 	/**
 	 * Get and remove last object posted to the queue.  This can wait for
-	 * a specified timeut of the queue is empty.
+	 * a specified timeout of the queue is empty.  The object is still
+	 * retained and must be released or deleted by the receiving function.
 	 * @param timeout to wait if empty in milliseconds.
 	 * @return object from queue or NULL if empty and timed out.
 	 */
@@ -1247,7 +1223,8 @@ public:
 
 	/**
 	 * Get and remove first object posted to the queue.  This can wait for
-	 * a specified timeut of the queue is empty.
+	 * a specified timeout of the queue is empty.  The object is still
+	 * retained and must be released or deleted by the receiving function.
 	 * @param timeout to wait if empty in milliseconds.
 	 * @return object from queue or NULL if empty and timed out.
 	 */
@@ -1336,15 +1313,15 @@ public:
 	/**
 	 * Create a stack that uses a memory pager for internally managed
 	 * member objects for a specified maximum number of object pointers.
-	 * @param pager to use for internal member object.
-	 * @param number of pointers that can be in the stack.
+	 * @param pager to use for internal member object or NULL to use heap.
+	 * @param number of pointers that can be in the stack or 0 if unlimited.
 	 */
-	stack(mempager *pager, size_t number);
+	stack(mempager *pager = NULL, size_t number = 0);
 
 	/**
 	 * Remove a specific object pointer for the queue.  This can remove
 	 * a member from any location in the queue, whether beginning, end, or
-	 * somewhere in the middle.
+	 * somewhere in the middle.  This also releases the object.
 	 * @param object to remove.
 	 * @return true if object was removed, false if not found.
 	 */
@@ -1353,7 +1330,7 @@ public:
 	/**
 	 * Push an object into the stack by it's pointer.  This can wait for
 	 * a specified timeout if the stack is full, for example, for another
-	 * thread to remove an object pointer.
+	 * thread to remove an object pointer.  This also retains the object.
 	 * @param object to push.
 	 * @param timeout to wait if stack is full in milliseconds.
 	 * @return true if object pushed, false if stack full and timeout expired.
@@ -1362,7 +1339,8 @@ public:
 
 	/**
 	 * Get and remove last object pushed on the stack.  This can wait for
-	 * a specified timeut of the stack is empty.
+	 * a specified timeout of the stack is empty.  The object is still
+	 * retained and must be released or deleted by the receiving function.
 	 * @param timeout to wait if empty in milliseconds.
 	 * @return object pulled from stack or NULL if empty and timed out.
 	 */
@@ -1490,6 +1468,21 @@ public:
 	void release(void);
 
 	/**
+	 * Copy the next object from the buffer.  This blocks until an object
+	 * becomes available.  Buffer is auto-released.
+	 * @param data pointer to copy into.
+	 */
+	void copy(void *data);
+
+	/**
+	 * Copy the next object from the buffer.  Buffer is auto-released.
+	 * @param data pointer to copy into.
+	 * @param timeout to wait when buffer is empty in milliseconds.
+	 * @return true if object copied, or false if timed out.
+	 */
+	bool copy(void *data, timeout_t timeout);
+
+	/**
 	 * Test if there is data waiting in the buffer.
 	 * @return true if buffer has data.
 	 */
@@ -1502,245 +1495,705 @@ public:
 	bool operator!();
 };
 
+/**
+ * Auto-pointer support class for locked objects.  This is used as a base
+ * class for the templated locked_instance class that uses the managed
+ * LockedPointer to assign a reference to an object.  When the locked
+ * instance falls out of scope, the object is derefenced.  Ideally the
+ * pointer typed object should be based on the reference counted object class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT locked_release
 {
 protected:
-	Object *object;
+	Object *object; /**< locked object protected by locked_release */
 
+	/**
+	 * Create an unassigned locked object pointer base.
+	 */
 	locked_release();
-	locked_release(const locked_release &copy);
+
+	/**
+	 * Construct a locked object instance base from an existing instance.  This 
+	 * will create a duplicate (retained) reference.
+	 * @param object to copy from.
+	 */
+	locked_release(const locked_release &object);
 
 public:
-	locked_release(LockedPointer &p);
+	/**
+	 * Construct a locked object instance base from a LockedPointer.  References
+	 * a retained instance of the underlying object from the LockedPointer.
+	 * @param pointer of locked pointer to assign from.
+	 */
+	locked_release(LockedPointer &pointer);
+
+	/**
+	 * Auto-release pointer to locked object instance.  This is used to release
+	 * a reference when the pointer template falls out of scope.
+	 */
 	~locked_release();
 
+	/**
+	 * Manually release the object reference.
+	 */
 	void release(void);
 
-	locked_release &operator=(LockedPointer &p);
+	/**
+	 * Assign a locked object pointer.  If an existing object is already
+	 * assigned, the existing pointer is released.
+	 * @param pointer reference through locked object.
+	 */
+	locked_release &operator=(LockedPointer &pointer);
 };
+
+/**
+ * Auto-pointer support class for shared singleton objects.  This is used as 
+ * a base class for the templated shared_instance class that uses shared
+ * access locking through the SharedPointer class.  When the shared instance
+ * falls out of scope, the SharedPointer lock is released.  The pointer
+ * typed object must be based on the SharedObject class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 
 class __EXPORT shared_release
 {
 protected:
-	SharedPointer *ptr;
+	SharedPointer *ptr;	/**< Shared lock for protected singleton */
 
+	/**
+	 * Create an unassigned shared singleton object pointer base.
+	 */
 	shared_release();
+
+	/**
+	 * Construct a shared object instance base from an existing instance.  This 
+	 * will assign an additional shared lock.
+	 * @param object to copy from.
+	 */
 	shared_release(const shared_release &copy);
 
 public:
+	/**
+	 * Access lock a shared singleton instance from a SharedPointer.  
+	 * @param pointer of shared pointer to assign from.
+	 */
 	shared_release(SharedPointer &p);
+
+	/**
+	 * Auto-unlock shared lock for singleton instance protected by shared
+	 * pointer.  This is used to unlock when the instance template falls out 
+	 * of scope.
+	 */
 	~shared_release();
 
+	/**
+	 * Manually release access to shared singleton object.
+	 */
 	void release(void);
 
+	/**
+	 * Get pointer to singleton object that we have shared lock for.
+	 * @return shared object singleton.
+	 */
 	SharedObject *get(void);
 
+	/**
+	 * Assign shared lock access to shared singleton.  If an existing
+	 * shared lock is held for another pointer, it is released.
+	 * @param pointer access for shared object.
+	 */
 	shared_release &operator=(SharedPointer &p);
 };
 
-template<class T, mempager *P = NULL, size_t L = 0>
+/**
+ * A templated typed class for thread-safe queue of object pointers.  This
+ * allows one to use the queue class in a typesafe manner for a specific
+ * object type derived from Object rather than generically for any derived
+ * object class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template<class T, mempager *P = NULL>
 class queueof : public queue
 {
 public:
-	inline queueof() : queue(P, L) {};
+	/**
+	 * Create templated queue of typed objects.
+	 * @param size of queue to construct.  Uses 0 if no size limit.
+	 */
+	inline queueof(size_t size = 0) : queue(P, size) {};
 
+	/**
+	 * Remove a specific typed object pointer for the queue.  This can remove
+	 * a member from any location in the queue, whether beginning, end, or
+	 * somewhere in the middle. This releases the object.
+	 * @param object to remove.
+	 * @return true if object was removed, false if not found.
+	 */
 	inline bool remove(T *obj)
 		{return queue::remove(obj);};	
 
+	/**
+	 * Post a typed object into the queue by it's pointer.  This can wait for
+	 * a specified timeout if the queue is full, for example, for another
+	 * thread to remove an object pointer.  This retains the object.
+	 * @param object to post.
+	 * @param timeout to wait if queue is full in milliseconds.
+	 * @return true if object posted, false if queue full and timeout expired.
+	 */
 	inline bool post(T *obj, timeout_t timeout = 0)
 		{return queue::post(obj);};
 
+	/**
+	 * Get and remove first typed object posted to the queue.  This can wait for
+	 * a specified timeut of the queue is empty.  The object is still retained
+	 * and must be released or deleted by the receiving function.
+	 * @param timeout to wait if empty in milliseconds.
+	 * @return object from queue or NULL if empty and timed out.
+	 */
 	inline T *fifo(timeout_t timeout = 0)
 		{return static_cast<T *>(queue::fifo(timeout));};
 
+	/**
+	 * Get and remove last typed object posted to the queue.  This can wait for
+	 * a specified timeout of the queue is empty.  The object is still retained
+	 * and must be released or deleted by the receiving function.
+	 * @param timeout to wait if empty in milliseconds.
+	 * @return object from queue or NULL if empty and timed out.
+	 */
     inline T *lifo(timeout_t timeout = 0)
         {return static_cast<T *>(queue::lifo(timeout));};
 };
 
-template<class T, mempager *P = NULL, size_t L = 0>
+/**
+ * A templated typed class for thread-safe stack of object pointers.  This
+ * allows one to use the stack class in a typesafe manner for a specific
+ * object type derived from Object rather than generically for any derived
+ * object class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template<class T, mempager *P = NULL>
 class stackof : public stack
 {
 public:
-	inline stackof() : stack(P, L) {};
+	/**
+	 * Create templated stack of typed objects.
+	 * @param size of stack to construct.  Uses 0 if no size limit.
+	 */
+	inline stackof(size_t size = 0) : stack(P, size) {};
 
+	/**
+	 * Remove a specific typed object pointer for the stack.  This can remove
+	 * a member from any location in the stack, whether beginning, end, or
+	 * somewhere in the middle.  This releases the object.
+	 * @param object to remove.
+	 * @return true if object was removed, false if not found.
+	 */
 	inline bool remove(T *obj)
 		{return stack::remove(obj);};	
 
+	/**
+	 * Push a typed object into the stack by it's pointer.  This can wait for
+	 * a specified timeout if the queue is full, for example, for another
+	 * thread to remove an object pointer.  This retains the object.
+	 * @param object to push.
+	 * @param timeout to wait if queue is full in milliseconds.
+	 * @return true if object pushed, false if queue full and timeout expired.
+	 */
 	inline bool push(T *obj, timeout_t timeout = 0)
 		{return stack::push(obj);};
 
+	/**
+	 * Get and remove last typed object posted to the stack.  This can wait for
+	 * a specified timeout of the stack is empty.  The object is still retained
+	 * and must be released or deleted by the receiving function.
+	 * @param timeout to wait if empty in milliseconds.
+	 * @return object from queue or NULL if empty and timed out.
+	 */
 	inline T *pull(timeout_t timeout = 0)
 		{return static_cast<T *>(stack::pull(timeout));};
 };
 
+/**
+ * A templated typed class for buffering of objects.  This operates as a
+ * fifo buffer of typed objects which are physically copied into the buffer.
+ * The objects that are buffered are accessed from allocated buffer space.
+ * As designed this may be used with multiple producer threads and one
+ * consumer thread.  To use multiple consumers, one can copy the typed object
+ * from the buffer through the get pointer and then call release.  The
+ * copied object can then be used safely.  This is what the copy method is
+ * used for.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
 template<class T>
 class bufferof : public Buffer
 {
 public:
+	/**
+	 * Create a buffer to hold a series of typed objects.
+	 * @param count of typed objects in the buffer.
+	 */
 	inline bufferof(unsigned count) :
 		Buffer(sizeof(T), count) {};
 
+	/**
+	 * Get the next typed object from the buffer.  This blocks until an object
+	 * becomes available.
+	 * @return pointer to next typed object from buffer.
+	 */
 	inline T *get(void)
 		{return static_cast<T*>(get());};
 
+	/**
+	 * Get the next typed object from the buffer.
+	 * @param timeout to wait when buffer is empty in milliseconds.
+	 * @return pointer to next typed object in the buffer or NULL if timed out.
+	 */
 	inline T *get(timeout_t timeout)
 		{return static_cast<T*>(get(timeout));};
 
-	inline void put(T *obj)
-		{put(obj);};
+	/**
+	 * Put (copy) a typed object into the buffer.  This blocks while the buffer
+	 * is full.
+	 * @param object to copy into the buffer.
+	 */
+	inline void put(T *object)
+		{put(object);};
 
-	inline bool put(T *obj, timeout_t timeout)
-		{return put(obj, timeout);};
+	/**
+	 * Put (copy) an object into the buffer.
+	 * @param object to copy into the buffer.
+	 * @param timeout to wait if buffer is full.
+	 * @return true if copied, false if timed out while full.
+	 */
+	inline bool put(T *object, timeout_t timeout)
+		{return put(object, timeout);};
+
+	/**
+	 * Copy the next typed object from the buffer.  This blocks until an object
+	 * becomes available.
+	 * @param object pointer to copy typed object into.
+	 */
+	inline void copy(T *object)
+		{copy(object);};
+
+	/**
+	 * Copy the next typed object from the buffer.
+	 * @param object pointer to copy typed object into.
+	 * @param timeout to wait when buffer is empty in milliseconds.
+	 * @return true if object copied, or false if timed out.
+	 */
+	inline bool get(T *object, timeout_t timeout)
+		{return copy(object, timeout);};
 };
- 
+
+/**
+ * Templated shared pointer for singleton shared objects of specific type.
+ * This is used as typed template for the SharedPointer object reference
+ * management class.  This is used to supply a typed singleton shared
+ * instance to the typed shared_instance template class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
 template<class T>
 class shared_pointer : public SharedPointer
 {
 public:
+	/**
+	 * Created shared locking for typed singleton pointer.
+	 */
 	inline shared_pointer() : SharedPointer() {};
 
-	inline shared_pointer(void *p) : SharedPointer(p) {};
-
+	/**
+	 * Acquire a shared (duplocate) reference to the typed singleton object.  
+	 * This is a form of shared access lock.  Derived classes and templates 
+	 * access conditionallock "release" when the shared pointer is no longer 
+	 * needed.
+	 * @return typed shared object.
+	 */
 	inline const T *dup(void)
 		{return static_cast<const T*>(SharedPointer::share());};
 
-	inline void replace(T *p)
-		{SharedPointer::replace(p);};
+	/**
+	 * Replace existing typed singleton instance with new one.  This happens
+	 * during exclusive locking, and the commit method of the typed object
+	 * will be called.
+	 * @param object being set.
+	 */
+	inline void replace(T *object)
+		{SharedPointer::replace(object);};
+	
+	/**
+	 * Replace existing typed singleton object through assignment.
+	 * @param object to assign.
+	 */
+	inline void operator=(T *object)
+		{replace(object);};
+
+	/**
+	 * Access shared lock typed singleton object by pointer reference.
+	 * @return typed shared object.
+	 */
+	inline T *operator*()
+		{return dup();};
 };	
 
+/**
+ * Templated locked pointer for referencing locked objects of specific type.
+ * This is used as typed template for the LockedPointer object reference
+ * management class.  This is used to supply a typed locked instances
+ * to the typed locked_instance template class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
 template<class T>
 class locked_pointer : public LockedPointer
 {
 public:
+	/**
+	 * Create an instance of a typed locked pointer.
+	 */
 	inline locked_pointer() : LockedPointer() {};
 
+	/**
+	 * Create a duplicate reference counted instance of the current typed 
+	 * object.
+	 * @return duplicate reference counted typed object.
+	 */
 	inline T* dup(void)
 		{return static_cast<T *>(LockedPointer::dup());};
 
-	inline void replace(T *p)
-		{LockedPointer::replace(p);};
+	/**
+	 * Replace existing typed object with a new one for next request.
+	 * @param object to register with pointer.
+	 */ 
+	inline void replace(T *object)
+		{LockedPointer::replace(object);};
 
-	inline locked_pointer<T>& operator=(T *obj)
-		{LockedPointer::operator=(obj); return *this;};
+	/**
+	 * Replace existing object through assignment.
+	 * @param object to assign.
+	 */
+	inline void operator=(T *object)
+		{replace(object);};
 
+	/**
+	 * Create a duplicate reference counted instance of the current typed 
+	 * object by pointer reference.
+	 * @return duplicate reference counted typed object.
+	 */
 	inline T *operator*()
 		{return dup();};
 };
 
+/**
+ * A templated smart pointer instance for lock protected objects.
+ * This is used to reference an instance of a typed locked_pointer.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<class T>
 class locked_instance : public locked_release
 {
 public:
+	/**
+	 * Construct empty locked instance of typed object.
+	 */
     inline locked_instance() : locked_release() {};
 
-    inline locked_instance(locked_pointer<T> &p) : locked_release(p) {};
+	/**
+	 * Construct locked instance of typed object from matching locked_pointer.
+	 * @param pointer to get instance from.
+	 */
+    inline locked_instance(locked_pointer<T> &pointer) : locked_release(pointer) {};
 
+	/**
+	 * Extract instance of locked typed object by pointer reference.
+	 * @return instance of typed object.
+	 */
     inline T& operator*() const
         {return *(static_cast<T *>(object));};
 
+	/**
+	 * Access member of instance of locked typed object by member reference.
+	 * @return instance of typed object.
+	 */
     inline T* operator->() const
         {return static_cast<T*>(object);};
 
+	/**
+	 * Get pointer to instance of locked typed object.
+	 * @return instance of typed object.
+	 */
     inline T* get(void) const
         {return static_cast<T*>(object);};
 };
 
+/**
+ * A templated smart pointer instance for shared singleton typed objects.
+ * This is used to access the shared lock instance of the singleton.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template<class T>
 class shared_instance : public shared_release
 {
 public:
+	/**
+	 * Construct empty instance to reference shared typed singleton.
+	 */
 	inline shared_instance() : shared_release() {};
 
-	inline shared_instance(shared_pointer<T> &p) : shared_release(p) {};
+	/**
+	 * Construct shared access instance of shared typed singleton from matching 
+	 * shared_pointer.
+	 * @param pointer to get instance from.
+	 */
+	inline shared_instance(shared_pointer<T> &pointer) : shared_release(pointer) {};
 
+	/**
+	 * Access shared typed singleton object this instance locks and references.
+	 */
 	inline const T& operator*() const
 		{return *(static_cast<const T *>(ptr->pointer));};
 
+	/**
+	 * Access member of shared typed singleton object this instance locks and 
+	 * references.
+	 */
 	inline const T* operator->() const
 		{return static_cast<const T*>(ptr->pointer);};
 
+	/**
+	 * Access pointer to typed singleton object this instance locks and 
+	 * references.
+	 */
 	inline const T* get(void) const
 		{return static_cast<const T*>(ptr->pointer);};
 };
 
-inline void start(JoinableThread *th)
-	{th->start();};
+/**
+ * Convenience function to start a joinable thread.
+ * @param thread to start.
+ * @param priority of thread.
+ */
+inline void start(JoinableThread *thread, int priority = 0)
+	{thread->start(priority);};
 
-inline void start(DetachedThread *th)
-    {th->start();};
+/**
+ * Convenience function to start a detached thread.
+ * @param thread to start.
+ * @param priority of thread.
+ */
+inline void start(DetachedThread *thread, int priority = 0)
+    {thread->start(priority);};
 
+/**
+ * Convenience type for using conditional locks.
+ */
 typedef ConditionalLock condlock_t;
+
+/**
+ * Convenience type for using timed events.
+ */
 typedef TimedEvent timedevent_t;
+
+/**
+ * Convenience type for using exclusive mutex locks.
+ */
 typedef	mutex mutex_t;
+
+/**
+ * Convenience type for using read/write locks.
+ */
 typedef rwlock rwlock_t;
+
+/**
+ * Convenience type for using recursive exclusive locks.
+ */
 typedef	rexlock rexlock_t;
+
+/**
+ * Convenience type for using counting semaphores.
+ */
 typedef semaphore semaphore_t;
+
+/**
+ * Convenience type for using thread barriers.
+ */
 typedef	barrier barrier_t;
+
+/**
+ * Convenience type for using thread-safe object stacks.
+ */
 typedef stack stack_t;
-typedef	queue queue_t;
 
-inline void wait(barrier_t &b)
-	{b.wait();};
+/**
+ * Convenience type for using thread-safe object fifo (queue).
+ */
+typedef	queue fifo_t;
 
-inline void wait(semaphore_t &s, timeout_t timeout = Timer::inf)
-	{s.wait(timeout);};
+/**
+ * Convenience function to wait on a barrier.
+ * @param barrier to wait.
+ */
+inline void wait(barrier_t &barrier)
+	{barrier.wait();};
 
-inline void acquire(mutex_t &ml)
-	{ml.lock();};
+/**
+ * Convenience function to wait on a semaphore.
+ * @param semaphore to wait on.
+ * @param timeout to wait for.
+ */
+inline void wait(semaphore_t &semaphore, timeout_t timeout = Timer::inf)
+	{semaphore.wait(timeout);};
 
-inline void release(mutex_t &ml)
-	{ml.release();};
+/**
+ * Convenience function to release a semaphore.
+ * @param semaphore to release.
+ */
+inline void release(semaphore_t &semaphore)
+	{semaphore.release();};
 
-inline void exclusive(condlock_t &cl)
-	{cl.exclusive();};
+/**
+ * Convenience function to acquire a mutex.
+ * @param mutex to acquire.
+ */
+inline void acquire(mutex_t &mutex)
+	{mutex.lock();};
 
-inline void share(condlock_t &cl)
-	{cl.share();};
+/**
+ * Convenience function to release a mutex.
+ * @param mutex to release.
+ */
+inline void release(mutex_t &mutex)
+	{mutex.release();};
 
-inline void modify(condlock_t &cl)
-	{cl.modify();};
+/**
+ * Convenience function to exclusively lock shared conditional lock.
+ * @param lock to make exclusive.
+ */
+inline void exclusive(condlock_t &lock)
+	{lock.exclusive();};
 
-inline void commit(condlock_t &cl)
-	{cl.commit();};
+/**
+ * Convenience function to restore shared access on a conditional lock.
+ * @param lock to make shared.
+ */
+inline void share(condlock_t &lock)
+	{lock.share();};
 
-inline void access(condlock_t &cl)
-	{cl.access();};
+/**
+ * Convenience function to exclusively aquire a conditional lock.
+ * @param lock to acquire for modify.
+ */
+inline void modify(condlock_t &lock)
+	{lock.modify();};
 
-inline void release(condlock_t &cl)
-	{cl.release();};
+/**
+ * Convenience function to commit and release an exclusively locked conditional
+ * lock.
+ * @param lock to commit.
+ */
+inline void commit(condlock_t &lock)
+	{lock.commit();};
 
-inline bool modify(rwlock_t &rw, timeout_t timeout = Timer::inf)
-	{return rw.modify(timeout);};
+/**
+ * Convenience function for shared access to a conditional lock.
+ * @param lock to access.
+ */
+inline void access(condlock_t &lock)
+	{lock.access();};
 
-inline bool access(rwlock_t &rw, timeout_t timeout = Timer::inf)
-	{return rw.access(timeout);};
+/**
+ * Convenience function to release shared access to a conditional lock.
+ * @param lock to release.
+ */
+inline void release(condlock_t &lock)
+	{lock.release();};
 
-inline void release(rwlock_t &rw)
-	{rw.release();};
+/**
+ * Convenience function for exclusive write access to a read/write lock.
+ * @param lock to write lock.
+ * @param timeout to wait for exclusive locking.
+ */
+inline bool exclusive(rwlock_t &lock, timeout_t timeout = Timer::inf)
+	{return lock.modify(timeout);};
 
-inline void lock(rexlock_t &rex)
-	{rex.lock();};
+/**
+ * Convenience function for shared read access to a read/write lock.
+ * @param lock to share read lock.
+ * @param timeout to wait for shared access.
+ */
+inline bool share(rwlock_t &lock, timeout_t timeout = Timer::inf)
+	{return lock.access(timeout);};
 
-inline void release(rexlock_t &rex)
-	{rex.release();};
+/**
+ * Convenience function to release a shared lock.
+ * @param lock to release.
+ */
+inline void release(rwlock_t &lock)
+	{lock.release();};
 
-inline void push(stack_t &s, Object *obj)
-	{s.push(obj);};
+/**
+ * Convenience function to lock a shared recursive mutex lock.
+ * @param lock to acquire.
+ */
+inline void lock(rexlock_t &lock)
+	{lock.lock();};
 
-inline Object *pull(stack_t &s, timeout_t timeout = Timer::inf)
-	{return s.pull(timeout);};
+/**
+ * Convenience function to release a shared recursive mutex lock.
+ * @param lock to release.
+ */
+inline void release(rexlock_t &lock)
+	{lock.release();};
 
-inline void remove(stack_t &s, Object *obj)
-	{s.remove(obj);};
+/**
+ * Convenience function to push an object onto a stack.
+ * @param stack to push into.
+ * @param object to push.
+ */
+inline void push(stack_t &stack, Object *object)
+	{stack.push(object);};
 
-inline void push(queue_t &s, Object *obj)
-	{s.post(obj);};
+/**
+ * Convenience function to pull an object from a stack.
+ * @param stack to pull from.
+ * @param timeout to wait to pull.
+ * @return object pulled.
+ */
+inline Object *pull(stack_t &stack, timeout_t timeout = Timer::inf)
+	{return stack.pull(timeout);};
 
-inline Object *pull(queue_t &s, timeout_t timeout = Timer::inf)
-	{return s.fifo(timeout);};
+/**
+ * Convenience function to remove an object from a stack.
+ * @param stack to remove from.
+ * @param object to remove.
+ */
+inline void remove(stack_t &stack, Object *object)
+	{stack.remove(object);};
 
-inline void remove(queue_t &s, Object *obj)
-	{s.remove(obj);};
+/**
+ * Convenience function to push an object onto a fifo.
+ * @param fifo to push into.
+ * @param object to push.
+ */
+inline void push(fifo_t &fifo, Object *object)
+	{fifo.post(object);};
+
+/**
+ * Convenience function to pull an object from a fifo.
+ * @param fifo to pull from.
+ * @param timeout to wait to pull.
+ * @return object pulled.
+ */
+inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
+	{return fifo.fifo(timeout);};
+
+/**
+ * Convenience function to remove an object from a fifo.
+ * @param fifo to remove from.
+ * @param object to remove.
+ */
+inline void remove(fifo_t &fifo, Object *object)
+	{fifo.remove(object);};
 
 END_NAMESPACE
 

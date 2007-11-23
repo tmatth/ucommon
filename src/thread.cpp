@@ -922,59 +922,42 @@ SharedObject *SharedPointer::share(void)
 Thread::Thread(size_t size)
 {
 	stack = size;
+	priority = 0;
 }
 
 #if defined(_MSWINDOWS_)
-void Thread::lowerPriority(void)
-{
-	HANDLE hThread = GetCurrentThread();
-	SetThreadPriority(hThread, THREAD_PRIORITY_LOWEST);
-}
 
-void Thread::raisePriority(unsigned adj)
+void Thread::setPriority(void)
 {
 	HANDLE hThread = GetCurrentThread();
-	if(adj == 0) {
-		SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
-	}
-	else if(adj == 1) {
+	if(priority < 0)
+		SetThreadPriority(hThread, THREAD_PRIORITY_LOWEST);
+	else if(priority == 1)
 		SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
-	}
-	else
+	else if(priority > 1)
 		SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
 }
 #elif _POSIX_PRIORITY_SCHEDULING > 0
 
-void Thread::lowerPriority(void)
-{
-	int policy;
-	struct sched_param sp;
-	pthread_t tid = pthread_self();
-
-	if(pthread_getschedparam(tid, &policy, &sp))
-		return;
-
-#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
-	pthread_setschedprio(tid, sched_get_priority_min(policy));
-#else
-	sp.sched_priority = sched_get_priority_min(policy);
-	pthread_setschedparam(tid, policy, &sp);
-#endif
-}
-
-void Thread::raisePriority(unsigned adj)
+void Thread::setPriority(void)
 {
 	int policy;
 	struct sched_param sp;
 	pthread_t tid = pthread_self();
 	int pri;
 
+	if(!priority)
+		return;
+
 	if(pthread_getschedparam(tid, &policy, &sp))
 		return;
 
-	pri = sp.sched_priority + adj;
-	if(pri > sched_get_priority_max(policy))
-		pri = sched_get_priority_max(policy);
+	if(priority > 0) {
+		pri = sp.sched_priority + priority;
+		if(pri > sched_get_priority_max(policy))
+			pri = sched_get_priority_max(policy);
+	} else if(priority < 0)
+		pri = sched_get_priority_min(policy);
 
 #ifdef	HAVE_PTHREAD_SETSCHEDPRIO
 	pthread_setschedprio(tid, pri);
@@ -983,7 +966,9 @@ void Thread::raisePriority(unsigned adj)
 	pthread_setschedparam(tid, policy, &sp);
 #endif
 }
-	
+
+#else
+void Thread::setPriority(void) {};
 #endif
 
 JoinableThread::JoinableThread(size_t size)
@@ -1053,6 +1038,7 @@ extern "C" {
 #ifdef	_MSWINDOWS_
 	static unsigned __stdcall exec_thread(void *obj) {
 		Thread *th = static_cast<Thread *>(obj);
+		th->setPriority();
 		th->run();
 		th->exit();
 		return 0;
@@ -1061,6 +1047,7 @@ extern "C" {
 	static void *exec_thread(void *obj)
 	{
 		Thread *th = static_cast<Thread *>(obj);
+		th->setPriority();
 		th->run();
 		th->exit();
 		return NULL;
@@ -1069,10 +1056,12 @@ extern "C" {
 }
 
 #ifdef	_MSWINDOWS_
-void JoinableThread::start(void)
+void JoinableThread::start(int adj)
 {
 	if(joining != INVALID_HANDLE_VALUE)
 		return;
+
+	priority = adj;
 
 	if(stack == 1)
 		stack = 1024;
@@ -1082,11 +1071,13 @@ void JoinableThread::start(void)
 		joining = INVALID_HANDLE_VALUE;
 }
 
-void DetachedThread::start(void)
+void DetachedThread::start(int adj)
 {
 	HANDLE hThread;
 	unsigned temp;
 	
+	priority = adj;
+
 	if(stack == 1)
 		stack = 1024;
 
@@ -1115,13 +1106,15 @@ void JoinableThread::join(void)
 
 #else
 
-void JoinableThread::start(void)
+void JoinableThread::start(int adj)
 {
 	int result;
-
 	pthread_attr_t attr;
+
 	if(running)
 		return;
+
+	priority = adj;
 
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
@@ -1142,9 +1135,11 @@ void JoinableThread::start(void)
 		running = true;
 }
 
-void DetachedThread::start(void)
+void DetachedThread::start(int adj)
 {
 	pthread_attr_t attr;
+
+	priority = adj;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
@@ -1526,6 +1521,24 @@ void *Buffer::get(void)
 	dbuf = head;
 	unlock();
 	return dbuf;
+}
+
+void Buffer::copy(void *data)
+{
+	void *ptr = get();
+	memcpy(data, ptr, objsize);
+	release();
+}
+
+bool Buffer::copy(void *data, timeout_t timeout)
+{
+	void *ptr = get(timeout);
+	if(!ptr)
+		return false;
+
+	memcpy(data, ptr, objsize);
+	release();
+	return true;
 }
 
 void *Buffer::get(timeout_t timeout)
