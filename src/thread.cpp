@@ -497,59 +497,6 @@ void rwlock::release(void)
 	unlock();
 }
 
-StepLock::StepLock(mutex *base)
-{
-	parent = base;
-	stepping = false;
-	crit(pthread_mutex_init(&mlock, NULL) == 0, "mutex init failed");
-}
-
-StepLock::~StepLock()
-{
-	pthread_mutex_destroy(&mlock);
-	if(stepping)
-		parent->unlock();
-}
-
-void StepLock::release(void)
-{
-	if(stepping) {
-		stepping = false;
-		parent->unlock();
-	}
-	else
-		pthread_mutex_unlock(&mlock);
-}
-
-void StepLock::lock(void)
-{
-	parent->lock();
-	stepping = true;
-}
-
-void StepLock::access(void)
-{
-	pthread_mutex_lock(&mlock);
-	if(stepping)
-		parent->unlock();
-	stepping = false;
-}
-
-void StepLock::Exlock(void)
-{
-	lock();
-}
-
-void StepLock::Shlock(void)
-{
-	access();
-}
-
-void StepLock::Unlock(void)
-{
-	release();
-}
-
 mutex::mutex()
 {
 	crit(pthread_mutex_init(&mlock, NULL) == 0, "mutex init failed");
@@ -908,37 +855,6 @@ void barrier::wait(void)
 	Conditional::wait();
 	Conditional::unlock();
 }
-
-ConditionalIndex::ConditionalIndex() :
-OrderedIndex(), Conditional()
-{
-}
-
-void ConditionalIndex::lock_index(void)
-{
-	Conditional::lock();
-}
-
-void ConditionalIndex::unlock_index(void)
-{
-	Conditional::unlock();
-}
-
-LockedIndex::LockedIndex() :
-OrderedIndex()
-{
-	pthread_mutex_init(&mutex, NULL);
-}
-
-void LockedIndex::lock_index(void)
-{
-	pthread_mutex_lock(&mutex);
-}
-
-void LockedIndex::unlock_index(void)
-{
-	pthread_mutex_unlock(&mutex);
-}
 	
 LockedPointer::LockedPointer()
 {
@@ -1029,19 +945,6 @@ void Thread::raisePriority(unsigned adj)
 }
 #elif _POSIX_PRIORITY_SCHEDULING > 0
 
-void Thread::resetPriority(struct sched_param *sparam)
-{	
-	pthread_t tid = pthread_self();
-#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
-	pthread_setschedprio(tid, sparam->sched_priority);
-#else
-	int policy;
-	struct sched_param lp;
-	pthread_getschedparam(tid, &policy, &lp);
-	pthread_setschedparam(tid, policy, sparam);
-#endif
-}
-
 void Thread::lowerPriority(void)
 {
 	int policy;
@@ -1059,30 +962,25 @@ void Thread::lowerPriority(void)
 #endif
 }
 
-void Thread::raisePriority(unsigned adj, struct sched_param *sparam)
+void Thread::raisePriority(unsigned adj)
 {
 	int policy;
-	struct sched_param lp;
+	struct sched_param sp;
 	pthread_t tid = pthread_self();
 	int pri;
 
-	if(!sparam)
-		sparam = &lp;
-
-	if(pthread_getschedparam(tid, &policy, sparam))
+	if(pthread_getschedparam(tid, &policy, &sp))
 		return;
 
-	pri = sparam->sched_priority + adj;
+	pri = sp.sched_priority + adj;
 	if(pri > sched_get_priority_max(policy))
 		pri = sched_get_priority_max(policy);
 
 #ifdef	HAVE_PTHREAD_SETSCHEDPRIO
 	pthread_setschedprio(tid, pri);
 #else
-	if(sparam != &lp)
-		memcpy(&lp, sparam, sizeof(lp));
-	lp.sched_priority = pri;
-	pthread_setschedparam(tid, policy, &lp);
+	sp.sched_priority = pri;
+	pthread_setschedparam(tid, policy, &sp);
 #endif
 }
 	

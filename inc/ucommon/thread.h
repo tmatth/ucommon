@@ -864,67 +864,16 @@ public:
 };
 
 /**
- * Stepladder locking with mutexes.  Step-ladder locking is where a mutex
- * lock is migrated from a broad lock that covers a large resource or
- * container to a lock that only covers a contained cell or sub resource.
- * The process of step-locking involves aquiring the new higher resolution'
- * lock, and then releasing a more global one.  The step-lock is considered
- * "exclusive" when the global resource is locked, and "shared" when the global
- * resource is available to other threads.
+ * An object pointer that uses mutex to assure thread-safe singleton use.
+ * This class is used to support a threadsafe replacable pointer to a object.
+ * This class is used to form and support the templated locked_pointer class
+ * and used with the locked_release class.  An example of where this might be 
+ * used is in config file parsers, where a seperate thread may process and 
+ * generate a new config object for new threads to refernce, while the old
+ * configuration continues to be used by a  reference counted instance that 
+ * goes away when it falls out of scope.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT StepLock : public Exclusive, public Shared
-{
-private:
-	pthread_mutex_t mlock;
-	mutex *parent;
-	bool stepping;
-
-	__LOCAL void Exlock(void);
-	__LOCAL void Shlock(void);
-	__LOCAL void Unlock(void);
-
-public:
-	StepLock(mutex *base);
-	~StepLock();
-
-	void lock(void);
-	void access(void);
-	void release(void);
-	
-	inline static void lock(StepLock &sl)
-		{sl.lock();};
-
-	inline static void access(StepLock &sl)
-		{sl.access();};
-
-	inline static void release(StepLock &sl)
-		{sl.release();};
-};
-
-class __EXPORT ConditionalIndex : public OrderedIndex, protected Conditional
-{
-public:
-	ConditionalIndex();
-
-protected:
-	void lock_index(void);
-	void unlock_index(void);
-};
-
-class __EXPORT LockedIndex : public OrderedIndex
-{
-public:
-	LockedIndex();
-
-private:
-	pthread_mutex_t mutex;
-
-protected:
-	void lock_index(void);
-	void unlock_index(void);
-};
-
 class __EXPORT LockedPointer
 {
 private:
@@ -933,25 +882,70 @@ private:
 	Object *pointer;
 
 protected:
+	/**
+	 * Create an instance of a locked pointer.
+	 */
 	LockedPointer();
 
-	void replace(Object *ptr);
+	/**
+	 * Replace existing object with a new one for next request.
+	 * @param object to register with pointer.
+	 */ 
+	void replace(Object *object);
+
+	/**
+	 * Create a duplicate reference counted instance of the current object.
+	 * @return duplicate reference counted object.
+	 */
 	Object *dup(void);
 
-	LockedPointer &operator=(Object *o);
+	/**
+	 * Replace existing object through assignment.
+	 * @param object to assign.
+	 */
+	LockedPointer &operator=(Object *object);
 };
 
+/**
+ * Shared singleton object.  A shared singleton object is a special kind of
+ * object that may be shared by multiple threads but which only one active
+ * instance is allowed to exist.  The shared object is managed by the
+ * templated shared pointer class, and is meant to be inherited as a base 
+ * class for the derived shared singleton type.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT SharedObject
 {
 protected:
 	friend class SharedPointer;
-	
+
+	/**
+	 * Commit is called when a shared singleton is accepted and replaces
+	 * a prior instance managed by a shared pointer.  Commit occurs
+	 * when replace is called on the shared pointer, and is assured to
+	 * happen only when no threads are accessing either the current
+	 * or the prior instance that was previously protected by the pointer.
+	 * @param pointer that now holds the object.
+	 */	
 	virtual void commit(SharedPointer *pointer);
 
 public:
+	/**
+	 * Allows inherited virtual.
+	 */
 	virtual ~SharedObject();
 };
 
+/**
+ * The shared pointer is used to manage a singleton instance of shared object.
+ * This class is used to support the templated shared_pointer class and the
+ * shared_release class, and is not meant to be used directly or as a base
+ * for anything else.  One or more threads may aquire a shared lock to the 
+ * singleton object through this pointer, and it can only be replaced with a 
+ * new singleton instance when no threads reference it.  The conditional lock 
+ * is used to manage shared access for use and exclusive access when modified.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT SharedPointer : protected ConditionalLock
 {
 private:
@@ -959,50 +953,148 @@ private:
 	SharedObject *pointer;
 
 protected:
+	/**
+	 * Created shared locking for pointer.
+	 */
 	SharedPointer();
+
+	/**
+	 * Destroy lock and release any blocked threads.
+	 */
 	~SharedPointer();
 
-	void replace(SharedObject *ptr);
+	/**
+	 * Replace existing singleton instance with new one.  This happens
+	 * during exclusive locking, and the commit method of the object
+	 * will be called.
+	 * @param object being set.
+	 */
+	void replace(SharedObject *object);
+
+	/**
+	 * Acquire a shared reference to the singleton object.  This is a
+	 * form of shared access lock.  Derived classes and templates access
+	 * conditionallock "release" when the shared pointer is no longer needed.
+	 * @return shared object.
+	 */
 	SharedObject *share(void);
 };
 
+/**
+ * An abstract class for defining classes that operate as a thread.  A derived
+ * thread class has a run method that is invoked with the newly created
+ * thread context, and can use the derived object to store all member data
+ * that needs to be associated with that context.  This means the derived
+ * object can safely hold thread-specific data that is managed with the life
+ * of the object, rather than having to use the clumsy thread-specific data
+ * management and access functions found in thread support libraries.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT Thread
 {
 protected:
 	pthread_t tid;
 	size_t stack;
 
+	/**
+	 * Create a thread object that will have a preset stack size.  If 0
+	 * is used, then the stack size is os defined/default.
+	 * @param stack size to use or 0 for default.
+	 */
 	Thread(size_t stack = 0);
 
 public:
+	/**
+	 * Yield execution context of the current thread. This is a static
+	 * and may be used anywhere.
+	 */
 	static void yield(void);
 
+	/**
+	 * Sleep current thread for a specified time period.
+	 * @param timeout to sleep for in milliseconds.
+	 */
 	static void sleep(timeout_t timeout);
 
+	/**
+	 * Abstract interface for thread context run method.
+	 */
 	virtual void run(void) = 0;
 	
+	/**
+	 * Destroy thread object, thread-specific data, and execution context.
+	 */
 	virtual ~Thread();
 
+	/**
+	 * Exit the thread context.
+	 */
 	virtual void exit(void);
 
+	/**
+	 * Used to initialize threading library.  May be needed for some platforms.
+	 */
 	static void init(void);
 
 #if defined(_MSWINDOWS_)
+	/**
+	 * Lower thread priority to lowest priority background thread.
+	 */
 	static void lowerPriority(void);
-	static void raisePriority(unsigned pri);
+
+	/**
+	 * Raise thread priority above process scheduling priority.
+	 * @param priority to raise.  For Windows this is either "1" for 
+	 * "THREAD_PRIORITY_ABOVE_NORMAL", or >1 for highest priority.
+	 */
+	static void raisePriority(unsigned priority);
 #elif _POSIX_PRIORITY_SCHEDULING > 0
-	static void raisePriority(unsigned pri, struct sched_param *sparam = NULL);
-	static void resetPriority(struct sched_param *sparam);
+	/**
+	 * Raise thread priority without disrupting scheduling if possible.
+	 * @param priority to raise.  Based on scheduling policy.  It is
+	 * recommended that the process is set for realtime scheduling to use
+	 * this.
+	 */
+	static void raisePriority(unsigned priority);
+
+	/**
+	 * Lowers thread priority to lowest possible for scheduling policy.  This 
+	 * is recommended for use with a realtime scheduling policy.
+	 */
 	static void lowerPriority(void);
 #else
+	/**
+	 * Lower thread priority.  Does nothing without posix scheduling support.
+	 */
 	inline static void lowerPriority(void) {};
-	inline static void raisePriority(unsigned pri) {};
+
+	/**
+	 * Raise thread priority.  Does nothing without posix scheduling support.
+	 * @param priority.
+	 */
+	inline static void raisePriority(unsigned priority) {};
 #endif
 
-	inline static bool equal(pthread_t t1, pthread_t t2)
-		{return pthread_equal(t1, t2);};
+	/**
+	 * Determine if two thread identifiers refer to the same thread.
+	 * @param thread1 to test.
+	 * @param thread2 to test.
+	 * @return true if both are the same context.
+	 */
+	inline static bool equal(pthread_t thread1, pthread_t thread2)
+		{return pthread_equal(thread1, thread2);};
 };
 
+/**
+ * A child thread object that may be joined by parent.  A child thread is
+ * a type of thread in which the parent thread (or process main thread) can 
+ * then wait for the child thread to complete and then delete the child object.
+ * The parent thread can wait for the child thread to complete either by
+ * calling join, or performing a "delete" of the derived child object.  In 
+ * either case the parent thread will suspend execution until the child thread
+ * exits.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT JoinableThread : protected Thread
 {
 private:
@@ -1013,8 +1105,22 @@ private:
 #endif
 
 protected:
-	JoinableThread(size_t size = 0);
+	/**
+	 * Create a joinable thread with a known context stack size.
+	 * @param stack size for thread context or 0 for default.
+	 */
+	JoinableThread(size_t stack = 0);
+
+	/**
+	 * Delete child thread.  Parent thread suspends until child thread
+	 * run method completes or child thread calls it's exit method.
+	 */
 	virtual ~JoinableThread();
+
+	/**
+	 * Join thread with parent.  If called by child thread context, the
+	 * thread exits as if calling "exit" method. 
+	 */
 	void join(void);
 
 public:
@@ -1022,32 +1128,58 @@ public:
 	inline bool isRunning(void)
 		{joining != INVALID_HANDLE_VALUE;};
 #else
+	/**
+	 * Test if thread is currently running.
+	 * @return true while thread is running.
+	 */
 	inline bool isRunning(void)
 		{return running;};
 #endif
 
-	inline bool isDetached(void)
-		{return false;};
-
+	/**
+	 * Start execution of child context.  This must be called after the
+	 * child object is created (perhaps with "new") and before it can be
+	 * joined.  This method actually begins the new thread context, which
+	 * then calls the object's run method.
+	 */
 	void start(void);
 };
 
+/**
+ * A detached thread object that is stand-alone.  This object has no
+ * relationship with any other running thread instance will be automatically
+ * deleted when the running thread instance exits, either by it's run method
+ * exiting, or explicity calling the exit member function.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT DetachedThread : protected Thread
 {
 protected:
+	/**
+	 * Create a detached thread with a known context stack size.
+	 * @param stack size for thread context or 0 for default.
+	 */
 	DetachedThread(size_t size = 0);
+
+	/**
+	 * Destroys object when thread context exits.  Never externally
+	 * deleted.  Derived object may also have destructor to clean up
+	 * thread-specific member data.
+	 */
 	~DetachedThread();
 
+	/**
+	 * Exit context of detached thread.  Object will be deleted.
+	 */
 	void exit(void);
 
 public:
+	/**
+	 * Start execution of detached context.  This must be called after the
+	 * object is created (perhaps with "new"). This method actually begins 
+	 * the new thread context, which then calls the object's run method.
+	 */
 	void start(void);
-
-	inline bool isDetached(void)
-		{return true;};
-
-	inline bool isRunning(void)
-		{return true;};
 };
 
 class __EXPORT PooledThread : public DetachedThread, protected Conditional
@@ -1342,7 +1474,6 @@ inline void start(JoinableThread *th)
 inline void start(DetachedThread *th)
     {th->start();};
 
-typedef	StepLock steplock_t;
 typedef ConditionalLock condlock_t;
 typedef TimedEvent timedevent_t;
 typedef	mutex mutex_t;
@@ -1364,15 +1495,6 @@ inline void acquire(mutex_t &ml)
 
 inline void release(mutex_t &ml)
 	{ml.release();};
-
-inline void lock(steplock_t &sl)
-	{sl.lock();};
-
-inline void access(steplock_t &sl)
-	{sl.access();};
-
-inline void release(steplock_t &sl)
-	{sl.release();};
 
 inline void exclusive(condlock_t &cl)
 	{cl.exclusive();};
