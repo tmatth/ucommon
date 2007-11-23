@@ -1030,82 +1030,10 @@ void Thread::yield(void)
 #endif
 }
 
-void PooledThread::exit(void)
-{
-	--poolused;
-	if(!poolused)
-		delete this;
-	pthread_exit(NULL);
-}
-
 void DetachedThread::exit(void)
 {
 	delete this;
 	pthread_exit(NULL);
-}
-
-void PooledThread::sync(void)
-{
-	lock();
-	if(poolused < 2) {
-		unlock();
-		return;
-	}
-	if(++waits == poolused) {
-		Conditional::broadcast();
-		waits = 0;
-	}
-	else
-		Conditional::wait();
-	unlock();
-}
-
-bool PooledThread::suspend(timeout_t timeout)
-{
-	bool result;
-	struct timespec ts;
-
-	gettimeout(timeout, &ts);
-
-    lock();
-    ++waits;
-	result = Conditional::wait(&ts);
-    --waits;
-    unlock();
-	return result;
-}
-
-void PooledThread::suspend(void)
-{
-	lock();
-	++waits;
-	Conditional::wait();
-	--waits;
-	unlock();
-}
-
-unsigned PooledThread::wakeup(unsigned limit)
-{
-	unsigned waiting = 0;
-
-	lock();
-	while(waits >= limit) {
-		++waiting;
-		Conditional::signal();
-		unlock();
-		yield();
-		lock();
-	}
-	unlock();
-	return waiting;
-}
-
-PooledThread::PooledThread(size_t size) :
-DetachedThread(size), Conditional()
-{
-	waits = 0;
-	poolsize = 0;
-	poolused = 0;
 }
 
 Thread::~Thread()
@@ -1138,26 +1066,6 @@ extern "C" {
 		return NULL;
 	};
 #endif
-}
-
-void PooledThread::start(void)
-{
-	lock();
-	++poolsize;
-	++poolused;
-	DetachedThread::start();
-	unlock();
-}
-
-void PooledThread::start(unsigned count)
-{
-	lock();
-	poolsize = count;
-	while(poolused < poolsize) {
-		DetachedThread::start();
-		++poolused;
-	}
-	unlock();
 }
 
 #ifdef	_MSWINDOWS_

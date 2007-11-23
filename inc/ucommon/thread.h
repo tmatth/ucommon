@@ -1181,25 +1181,17 @@ public:
 	 */
 	void start(void);
 };
-
-class __EXPORT PooledThread : public DetachedThread, protected Conditional
-{
-protected:
-	unsigned volatile poolsize, poolused, waits;
-
-	PooledThread(size_t stack = 0);
-	void suspend(void);
-	bool suspend(timeout_t timeout);
-	void sync(void);
 	
-	void exit(void);
-
-public:
-	unsigned wakeup(unsigned limit = 1);
-	void start(void);
-	void start(unsigned count);
-};
-	
+/**
+ * Manage a thread-safe queue of objects through reference pointers.  This 
+ * can be particularly interesting when used to enqueue/dequeue reference 
+ * counted managed objects.  Thread-safe access is managed through a 
+ * conditional.  Both lifo and fifo forms of queue access  may be used.  A 
+ * pool of self-managed member objects are used to operate the queue.  This 
+ * queue is optimized for fifo access; while lifo is supported, it will be 
+ * slow.  If you need primarily lifo, you should use stack instead.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT queue : protected OrderedIndex, protected Conditional
 {
 private:
@@ -1218,30 +1210,109 @@ protected:
 	size_t limit;
 
 public:
-	queue(mempager *mem, size_t size);
+	/**
+	 * Create a queue that uses a memory pager for internally managed
+	 * member objects for a specified maximum number of object pointers.
+	 * @param pager to use for internal member object.
+	 * @param number of pointers that can be in the queue.
+	 */
+	queue(mempager *pager, size_t number);
 
-	bool remove(Object *obj);
-	bool post(Object *obj, timeout_t timeout = 0);
+	/**
+	 * Remove a specific object pointer for the queue.  This can remove
+	 * a member from any location in the queue, whether beginning, end, or
+	 * somewhere in the middle.
+	 * @param object to remove.
+	 * @return true if object was removed, false if not found.
+	 */
+	bool remove(Object *object);
+
+	/**
+	 * Post an object into the queue by it's pointer.  This can wait for
+	 * a specified timeout if the queue is full, for example, for another
+	 * thread to remove an object pointer.
+	 * @param object to post.
+	 * @param timeout to wait if queue is full in milliseconds.
+	 * @return true if object posted, false if queue full and timeout expired.
+	 */
+	bool post(Object *object, timeout_t timeout = 0);
+
+	/**
+	 * Get and remove last object posted to the queue.  This can wait for
+	 * a specified timeut of the queue is empty.
+	 * @param timeout to wait if empty in milliseconds.
+	 * @return object from queue or NULL if empty and timed out.
+	 */
 	Object *fifo(timeout_t timeout = 0);
+
+	/**
+	 * Get and remove first object posted to the queue.  This can wait for
+	 * a specified timeut of the queue is empty.
+	 * @param timeout to wait if empty in milliseconds.
+	 * @return object from queue or NULL if empty and timed out.
+	 */
 	Object *lifo(timeout_t timeout = 0);
+
+	/**
+	 * Get number of object points currently in the queue.
+	 * @return number of objects in queue.
+	 */
 	size_t getCount(void);
 
-	static bool remove(queue &q, Object *obj)
-		{return q.remove(obj);};
+	/**
+	 * Convenience function to remove an object from the queue.
+	 * @param queue to remove object from.
+	 * @param object to remove.
+	 * @return true if removed, false if not found.
+	 */
+	static bool remove(queue &queue, Object *object)
+		{return queue.remove(object);};
 
-	static bool post(queue &q, Object *obj, timeout_t timeout = 0)
-		{return q.post(obj, timeout);};
+	/**
+	 * Convenience function to post object into the queue.
+	 * @param queue to post into.
+	 * @param object to post.
+	 * @param timeout to wait if full.
+	 * @return true if posted, false if timed out while full.
+	 */
+	static bool post(queue &queue, Object *object, timeout_t timeout = 0)
+		{return queue.post(object, timeout);};
 
-	static Object *fifo(queue &q, timeout_t timeout = 0)
-		{return q.fifo(timeout);};
+	/**
+	 * Convenience function get first object from the queue.
+	 * @param queue to get from.
+	 * @param timeout to wait if empty.
+	 * @return first object or NULL if timed out empty.
+	 */
+	static Object *fifo(queue &queue, timeout_t timeout = 0)
+		{return queue.fifo(timeout);};
 
-	static Object *lifo(queue &q, timeout_t timeout = 0)
-		{return q.lifo(timeout);};
+	/**
+	 * Convenience function get last object from the queue.
+	 * @param queue to get from.
+	 * @param timeout to wait if empty.
+	 * @return last object or NULL if timed out empty.
+	 */
+	static Object *lifo(queue &queue, timeout_t timeout = 0)
+		{return queue.lifo(timeout);};
 
-	static size_t count(queue &q)
-		{return q.getCount();};
+	/**
+	 * Convenience function to get count of objects in the queue.
+	 * @param queue to count.
+	 * @return number of objects in the queue.
+	 */
+	static size_t count(queue &queue)
+		{return queue.getCount();};
 };
 
+/**
+ * Manage a thread-safe stack of objects through reference pointers.  This 
+ * Thread-safe access is managed through a conditional.  This differs from
+ * the queue in lifo mode because delinking the last object is immediate,
+ * and because it has much less overhead.  A pool of self-managed
+ * member objects are used to operate the stack.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT stack : protected Conditional
 {
 private:
@@ -1262,26 +1333,92 @@ protected:
 	size_t limit;
 
 public:
-	stack(mempager *pager, size_t size);
+	/**
+	 * Create a stack that uses a memory pager for internally managed
+	 * member objects for a specified maximum number of object pointers.
+	 * @param pager to use for internal member object.
+	 * @param number of pointers that can be in the stack.
+	 */
+	stack(mempager *pager, size_t number);
 
-	bool remove(Object *obj);
-	bool push(Object *obj, timeout_t timeout = 0);
+	/**
+	 * Remove a specific object pointer for the queue.  This can remove
+	 * a member from any location in the queue, whether beginning, end, or
+	 * somewhere in the middle.
+	 * @param object to remove.
+	 * @return true if object was removed, false if not found.
+	 */
+	bool remove(Object *object);
+
+	/**
+	 * Push an object into the stack by it's pointer.  This can wait for
+	 * a specified timeout if the stack is full, for example, for another
+	 * thread to remove an object pointer.
+	 * @param object to push.
+	 * @param timeout to wait if stack is full in milliseconds.
+	 * @return true if object pushed, false if stack full and timeout expired.
+	 */
+	bool push(Object *object, timeout_t timeout = 0);
+
+	/**
+	 * Get and remove last object pushed on the stack.  This can wait for
+	 * a specified timeut of the stack is empty.
+	 * @param timeout to wait if empty in milliseconds.
+	 * @return object pulled from stack or NULL if empty and timed out.
+	 */
 	Object *pull(timeout_t timeout = 0);
+
+	/**
+	 * Get number of object points currently in the stack.
+	 * @return number of objects in stack.
+	 */
 	size_t getCount(void);
 
+	/**
+	 * Convenience function to remove an object from the stacl.
+	 * @param stack to remove object from.
+	 * @param object to remove.
+	 * @return true if removed, false if not found.
+	 */
 	static inline bool remove(stack &stack, Object *obj)
 		{return stack.remove(obj);};
 
+	/**
+	 * Convenience function to push object into the stack.
+	 * @param stack to push into.
+	 * @param object to push.
+	 * @param timeout to wait if full.
+	 * @return true if pusheded, false if timed out while full.
+	 */
 	static inline bool push(stack &stack, Object *obj, timeout_t timeout = 0)
 		{return stack.push(obj, timeout);};
 
+	/**
+	 * Convenience function pull last object from the stack.
+	 * @param stack to get from.
+	 * @param timeout to wait if empty.
+	 * @return last object or NULL if timed out empty.
+	 */
 	static inline Object *pull(stack &stack, timeout_t timeout = 0)
 		{return stack.pull(timeout);};  
 
+	/**
+	 * Convenience function to get count of objects in the stack.
+	 * @param stack to count.
+	 * @return number of objects in the stack.
+	 */
 	static inline size_t count(stack &stack)
 		{return stack.getCount();};
 };
 
+/**
+ * A thread-safe buffer for serializing and streaming class data.  While
+ * the queue and stack operate by managing lists of reference pointers to
+ * objects of various mixed kind, the buffer holds physical copies of objects 
+ * that being passed through it, and all must be the same size.  The buffer 
+ * class can be used stand-alone or with the typed bufferof template.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT Buffer : protected Conditional
 {
 private:
@@ -1548,21 +1685,6 @@ inline void remove(queue_t &s, Object *obj)
 	{s.remove(obj);};
 
 END_NAMESPACE
-
-#if _POSIX_PRIORITY_SCHEDULING > 0
-
-#define RAISE_PRIORITY(x) \
-	do { struct sched_param __sparam_; \
-		Thread::raisePriority(&__sparam__, x);
-
-#define	END_PRIORITY \
-		Thread::resetPriority(&__sparam); \
-	} while(0);
-
-#else
-#define	SET_PRIORITY(x)
-#define	END_PRIORITY
-#endif
 
 #define	ENTER_EXCLUSIVE	\
 	do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
