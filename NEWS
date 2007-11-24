@@ -1,4 +1,4 @@
-UCommon Library NEWS -- history of visible user changes. 2006-09-11
+UCommon Library NEWS -- history of visible user changes. Updated 2007-11-24.
 
 UCommon 0.4 codebase completed and ready for release with the introduction of
 the GNU GPL V3.  This is a complete rewrite of UCommon as a C++ library for
@@ -8,3 +8,6 @@ UCommon 0.7 codebase now has core documentation and basic library theory
 in header files.  This documentation can be generated with doxygen or by
 using "make doxy".
 
+UCommon 1.0 release has been simplified, fully documented, and modified in
+specific ways to simplify the migration and merge with GNU Common C++ to
+form GNU Common C++ 2.0.
