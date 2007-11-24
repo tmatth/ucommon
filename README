@@ -43,15 +43,16 @@ current version supports compiling with GCC, which is commonly found on
 GNU/Linux, OS/X, BSD based systems, and many other platforms; and the Sun
 Workshop compiler, which is offered as an example how to adapt UCommon for
 additional compilers. UCommon may also be built with GCC cross compiling for
-mingw32 for Microsoft Windows targets using the Redhat w32 pthread library.  
+mingw32 to build Microsoft Windows targets natively.  
 
 The minimum platform support for UCommon is a modern and working posix pthread
 threading library.  I use a subset of posix threads to assure wider portability
 by avoiding more specialized features like process shared synchronization
 objects, pthread rwlocks and pthread semaphores, as these are not implemented
-on all platforms that I have found.  I also elimate the practice and dependency
-on pthread automatic cancellation, which otherwise introduces much greater
-complexity and can lead to defective coding practices.
+on all platforms that I have found.  I also eliminate the practice and dependency
+on pthread automatic cancellation behavior, which otherwise introduces much 
+greater complexity to user applications and can often lead to defective 
+coding practices.
 
 The first three releases of UCommon were introduced in 1999-2000 as a pure "C"
 library for embedded targets, and had not seen an update in 7 years.  Hence I

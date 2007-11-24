@@ -66,7 +66,7 @@
  * GNU/Linux, OS/X, BSD based systems, and many other platforms; and the Sun
  * Workshop compiler, which is offered as an example how to adapt UCommon for
  * additional compilers. UCommon may also be built with GCC cross compiling for
- * mingw32 for Microsoft Windows targets using the Redhat w32 pthread library.
+ * mingw32 to build threaded applications for Microsoft Windows targets nativiely.
  *
  * The minimum platform support for UCommon is a modern and working posix 
  * pthread threading library.  I further use a subset of posix threads to assure 
