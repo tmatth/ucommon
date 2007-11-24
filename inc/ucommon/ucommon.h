@@ -31,6 +31,13 @@
  * applications with other pure C based libraries rather than using the overhead
  * of the standard C++ library and other class frameworks.
  *
+ * UCommon by default does build with support for the bloated ansi standard c++
+ * library unless this is changed at configure time with the --disable-stdcpp
+ * option.  This is to assure maximum portability and will be used to merge
+ * UCommon with GNU Common C++ to form GNU Common C++ 2.0.  Some specific
+ * features are tested for when stdc++ is enabled, and these will be used
+ * to add back in GNU Common C++ classes such as TCP Stream and serialization.
+ *
  * UCommon introduces some Objective-C based design patterns, such as reference
  * counted objects, memory pools, smart pointers, and offers dynamic typing
  * through very light use of inline templates for pure type translation that are
@@ -47,8 +54,7 @@
  * IPV6 addresses is directly supported.  Support for high resolution timing and
  * Posix realtime clocks are also used when available.
  *
- * concepts for handling of thread locking and synchronization.  UCommon also
- * builds all higher level thread synchronization objects directly from
+ * UCommon builds all higher level thread synchronization objects directly from
  * conditionals.  Hence, on platforms which for example do not have rwlocks,
  * barriers, or semaphores, these are still found in UCommon.  A common and
  * consistent call methodology is used for all locks, whether mutex, rw, or
@@ -62,14 +68,12 @@
  * additional compilers. UCommon may also be built with GCC cross compiling for
  * mingw32 for Microsoft Windows targets using the Redhat w32 pthread library.
  *
- * The minimum platform support for UCommon is a modern and working posix pthread
- * threading library.  UCommon does not support other non-posix threading models
- * such as Microsoft Windows threads or non-preemtive threading libraries like GNU
- * pth, so that we could optimize development efforts around Posix pthread
- * exclusively.  I further use a subset of posix threads to assure wider
- * portability by avoiding more specialized features like process shared
+ * The minimum platform support for UCommon is a modern and working posix 
+ * pthread threading library.  I further use a subset of posix threads to assure 
+ * wider portability by avoiding more specialized features like process shared
  * synchronization objects, pthread rwlocks and pthread semaphores, as these are
- * not implemented on all platforms that I have found.
+ * not implemented on all platforms that I have found.  Finally, I have 
+ * eliminated the use of posix thread cancellation.
  * @author David Sugar <dyfet@gnutelephony.org>
  * @license GNU GPL Version 3 or later
  * @mainpage UCommon
