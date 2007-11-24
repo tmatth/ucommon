@@ -98,6 +98,7 @@ protected:
 		 * The new operator would also need the size as an overdraft value.
 		 * The newly allocated string is filled with the fill value.
 		 * @param size of string.
+		 * @param fill character value to fill string with.
 		 */
 		cstring(strsize_t size, char fill);
 
@@ -462,10 +463,10 @@ public:
 
 	/**
 	 * Return character found at a specific position in the string.
-	 * @param string position, negative values computed from end.
+	 * @param position in string, negative values computed from end.
 	 * @return character code at specified position in string.
 	 */
-	char at(int ind) const;
+	char at(int position) const;
 
 	/**
 	 * Find last occurance of a character in the string.
@@ -758,7 +759,7 @@ public:
 	 * @param format string to print with.
 	 * @return number of bytes written into object.
 	 */
-	static strsize_t printf(string &s, const char *fmt, ...) __PRINTF(2, 3);
+	static strsize_t printf(string &object, const char *format, ...) __PRINTF(2, 3);
 
 	/**
 	 * Read arbitrary binary data from socket into a string object.  The 
@@ -818,7 +819,7 @@ public:
 	 * Write string as a line of text data to a socket.  A newline will be 
 	 * appended to the end.
 	 * @param socket to print to.
-	 * @param object to get line from.
+	 * @param object to get text line from.
 	 * @return true if successful.
 	 */
 	static bool putline(Socket &socket, string &object);
@@ -836,8 +837,8 @@ public:
 	/**
 	 * Write string as a line of text data to a file.  A newline will be 
 	 * appended to the end.
-	 * @param socket to print to.
-	 * @param object to get line from.
+	 * @param file to print to.
+	 * @param object to get text line to put into file.
 	 * @return true if successful.
 	 */
 	static bool putline(FILE *file, string &object);
@@ -924,7 +925,7 @@ public:
 	 * @param text to set in buffer.
 	 * @return pointer to text buffer.
 	 */
-	static char *set(char *text, size_t size, const char *text);
+	static char *set(char *buffer, size_t size, const char *text);
 	
     /**
      * Safely set a null terminated string buffer in memory.  If the text
@@ -1348,7 +1349,7 @@ public:
 	 * @param size of string.  Total size must include space for overhead.
 	 * @param fill character for fixed character fields.
 	 */
-	memstring(void *mem, strsize_t size, char fill = 0);
+	memstring(void *memory, strsize_t size, char fill = 0);
 
 	/**
 	 * Destroy memory string.

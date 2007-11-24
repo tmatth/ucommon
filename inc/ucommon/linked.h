@@ -367,7 +367,7 @@ public:
 	 * @param size of hash map table used.
 	 * @return array of named object pointers.
 	 */
-	static NamedObject **index(NamedObject **idx, unsigned max);
+	static NamedObject **index(NamedObject **hash, unsigned size);
 
 	/**
 	 * Count the total named objects in a hash table.
@@ -391,7 +391,7 @@ public:
 	 * @param name of object to find.
 	 * @param size of hash map table.
 	 */
-	static NamedObject *map(NamedObject **idx, const char *id, unsigned max);
+	static NamedObject *map(NamedObject **hash, const char *name, unsigned size);
 
 	/**
 	 * Iterate through a hash map table.
@@ -535,7 +535,7 @@ public:
 	 * @param name of child node to find.
 	 * @return tree node object of child or NULL.
 	 */
-	NamedTree *getChild(const char *tag) const;
+	NamedTree *getChild(const char *name) const;
 
 	/**
 	 * Find a direct leaf node on our node.  A leaf node is a node that has
@@ -543,7 +543,7 @@ public:
 	 * @param name of leaf child node to find.
 	 * @return tree node object of leaf or NULL.
 	 */
-	NamedTree *getLeaf(const char *tag) const;
+	NamedTree *getLeaf(const char *name) const;
 
 	/**
 	 * Get first child node in our ordered list of children.  This might
@@ -1257,7 +1257,7 @@ public:
  * A template for ordered index of typed name key mapped objects.
  * This is used to hold an iterable linked list of typed named objects
  * where we can find objects by their name as well as through iteration.
- * @David Sugar <dyfet@gnutelephony.org>
+ * @author David Sugar <dyfet@gnutelephony.org>
  */
 template <class T>
 class keylist : public OrderedIndex

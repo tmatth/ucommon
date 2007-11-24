@@ -1078,9 +1078,9 @@ private:
 protected:
 	/**
 	 * Create a joinable thread with a known context stack size.
-	 * @param stack size for thread context or 0 for default.
+	 * @param size of stack for thread context or 0 for default.
 	 */
-	JoinableThread(size_t stack = 0);
+	JoinableThread(size_t size = 0);
 
 	/**
 	 * Delete child thread.  Parent thread suspends until child thread
@@ -1130,7 +1130,7 @@ class __EXPORT DetachedThread : protected Thread
 protected:
 	/**
 	 * Create a detached thread with a known context stack size.
-	 * @param stack size for thread context or 0 for default.
+	 * @param size of stack for thread context or 0 for default.
 	 */
 	DetachedThread(size_t size = 0);
 
@@ -1358,8 +1358,8 @@ public:
 	 * @param object to remove.
 	 * @return true if removed, false if not found.
 	 */
-	static inline bool remove(stack &stack, Object *obj)
-		{return stack.remove(obj);};
+	static inline bool remove(stack &stack, Object *object)
+		{return stack.remove(object);};
 
 	/**
 	 * Convenience function to push object into the stack.
@@ -1368,8 +1368,8 @@ public:
 	 * @param timeout to wait if full.
 	 * @return true if pusheded, false if timed out while full.
 	 */
-	static inline bool push(stack &stack, Object *obj, timeout_t timeout = 0)
-		{return stack.push(obj, timeout);};
+	static inline bool push(stack &stack, Object *object, timeout_t timeout = 0)
+		{return stack.push(object, timeout);};
 
 	/**
 	 * Convenience function pull last object from the stack.
@@ -1571,14 +1571,14 @@ protected:
 	 * will assign an additional shared lock.
 	 * @param object to copy from.
 	 */
-	shared_release(const shared_release &copy);
+	shared_release(const shared_release &object);
 
 public:
 	/**
 	 * Access lock a shared singleton instance from a SharedPointer.  
 	 * @param pointer of shared pointer to assign from.
 	 */
-	shared_release(SharedPointer &p);
+	shared_release(SharedPointer &pointer);
 
 	/**
 	 * Auto-unlock shared lock for singleton instance protected by shared
@@ -1603,7 +1603,7 @@ public:
 	 * shared lock is held for another pointer, it is released.
 	 * @param pointer access for shared object.
 	 */
-	shared_release &operator=(SharedPointer &p);
+	shared_release &operator=(SharedPointer &pointer);
 };
 
 /**
@@ -1630,8 +1630,8 @@ public:
 	 * @param object to remove.
 	 * @return true if object was removed, false if not found.
 	 */
-	inline bool remove(T *obj)
-		{return queue::remove(obj);};	
+	inline bool remove(T *object)
+		{return queue::remove(object);};	
 
 	/**
 	 * Post a typed object into the queue by it's pointer.  This can wait for
@@ -1641,8 +1641,8 @@ public:
 	 * @param timeout to wait if queue is full in milliseconds.
 	 * @return true if object posted, false if queue full and timeout expired.
 	 */
-	inline bool post(T *obj, timeout_t timeout = 0)
-		{return queue::post(obj);};
+	inline bool post(T *object, timeout_t timeout = 0)
+		{return queue::post(object);};
 
 	/**
 	 * Get and remove first typed object posted to the queue.  This can wait for
@@ -1689,8 +1689,8 @@ public:
 	 * @param object to remove.
 	 * @return true if object was removed, false if not found.
 	 */
-	inline bool remove(T *obj)
-		{return stack::remove(obj);};	
+	inline bool remove(T *object)
+		{return stack::remove(object);};	
 
 	/**
 	 * Push a typed object into the stack by it's pointer.  This can wait for
@@ -1700,8 +1700,8 @@ public:
 	 * @param timeout to wait if queue is full in milliseconds.
 	 * @return true if object pushed, false if queue full and timeout expired.
 	 */
-	inline bool push(T *obj, timeout_t timeout = 0)
-		{return stack::push(obj);};
+	inline bool push(T *object, timeout_t timeout = 0)
+		{return stack::push(object);};
 
 	/**
 	 * Get and remove last typed object posted to the stack.  This can wait for

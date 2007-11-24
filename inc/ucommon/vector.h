@@ -370,7 +370,7 @@ public:
 	 * Drop last specified members from the vector.
 	 * @param count of members to drop.
 	 */
-	void operator-=(vectorsize_t vs);
+	void operator-=(vectorsize_t count);
 
 	/**
 	 * Compute the effective vector size of a list of object pointers.
@@ -675,16 +675,16 @@ public:
 	 * @param index of typed member to return, < 0 to use from end of list.
 	 * @return typed object pointer of member.
 	 */ 
-	inline T *get(int pos)
-		{return static_cast<T *>(Vector::get(pos));};
+	inline T *get(int index)
+		{return static_cast<T *>(Vector::get(index));};
 
 	/**
 	 * Retrieve a typed member of the fixed vector directly.
 	 * @param position to retrieve object from.
 	 * @return typed object pointer retrieved from vector.
 	 */
-    inline T *operator()(vectorsize_t pos)
-        {return static_cast<T *>(Vector::get(pos));};
+    inline T *operator()(vectorsize_t position)
+        {return static_cast<T *>(Vector::get(position));};
 
 	/**
 	 * Get the first typed object pointer contained in the fixed vector.

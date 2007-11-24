@@ -525,7 +525,7 @@ public:
 	 * Construct a pager and optionally assign a private pager heap.
 	 * @param pager heap to use.  If NULL, uses global heap.
 	 */
-	inline pager(mempager *P = NULL) : PagerPool(P) {};
+	inline pager(mempager *pager = NULL) : PagerPool(pager) {};
 
 	/**
 	 * Purge managed objects.

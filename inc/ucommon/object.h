@@ -238,14 +238,14 @@ public:
 	/**
 	 * test if the object being referenced is the same as the object we specify.
 	 * @param object we compare to.
-	 * @param true if this is the object our pointer references.
+	 * @return true if this is the object our pointer references.
 	 */
 	bool operator==(Object *object) const;
 
 	/**
 	 * test if the object being referenced is not the same as the object we specify.
 	 * @param object we compare to.
-	 * @param true if this is not the object our pointer references.
+	 * @return true if this is not the object our pointer references.
 	 */
 	bool operator!=(Object *object) const;
 

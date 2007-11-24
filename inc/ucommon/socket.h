@@ -409,13 +409,13 @@ public:
 
 	/**
 	 * Create a bound socket.
-	 * @param interface to bind or "*" for all
+	 * @param address to bind or "*" for all
 	 * @param port number of service to bind.
 	 * @param family to bind as.
 	 * @param type of socket to bind (stream, udp, etc).
 	 * @param protocol of socket to bind.
 	 */
-	Socket(const char *iface, const char *port, int family, int type, int protocol = 0);
+	Socket(const char *address, const char *port, int family, int type, int protocol = 0);
 
 	/**
 	 * Shutdown, close, and destroy socket.
@@ -547,8 +547,8 @@ public:
 	 * @param type of service value.
 	 * @return 0 on success or -1 on error.
 	 */
-	inline int tos(int t)
-		{return tos(so, t);};
+	inline int tos(int type)
+		{return tos(so, type);};
 
 	/**
 	 * Set packet priority, 0 to 6 unless privileged.  Should be set before
@@ -919,7 +919,7 @@ public:
 	
 	/**
 	 * Convert a socket address into a hash map index.
-	 * @param socket address to convert.
+	 * @param address to convert.
 	 * @param size of map index.
 	 * @return key index path.
 	 */
