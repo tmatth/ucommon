@@ -246,6 +246,7 @@ extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
  */
 extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t address, size_t known) __MALLOC;
 
+#ifndef	UCOMMON_EXTENDED
 /**
  * Our generic new operator.  Uses our heap memory allocator.
  * @param size of object being constructed.
@@ -261,6 +262,7 @@ inline void *operator new(size_t size)
  */
 inline void *operator new[](size_t size)
 	{return cpr_memalloc(size);};
+#endif
 
 /**
  * A placement new array operator where we assume the size of memory is good.
@@ -321,6 +323,7 @@ inline void *operator new(size_t size, caddr_t address)
 inline void *operator new(size_t size, caddr_t address, size_t known)
 	{return cpr_memassign(size, address, known);};
 
+#ifndef	UCOMMON_EXTENDED
 /**
  * Delete an object from the heap.
  * @param object to delete.
@@ -337,6 +340,7 @@ inline void operator delete[](void *array)
 
 #ifdef	__GNUC__
 extern "C" __EXPORT void __cxa_pure_virtual(void);
+#endif
 #endif
 
 #ifndef	DEBUG
