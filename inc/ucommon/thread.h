@@ -57,6 +57,13 @@ NAMESPACE_UCOMMON
 class SharedPointer;
 
 /**
+ * Specify a maximum sharing (concurrency) limit.  This can be used
+ * to detect locking errors, such as when aquiring locks that are
+ * not released.
+ */
+extern unsigned max_sharing;
+
+/**
  * The conditional is a common base for other thread synchronizing classes.
  * Many of the complex sychronization objects, including barriers, semaphores,
  * and various forms of read/write locks are all built from the conditional.
@@ -69,6 +76,8 @@ class SharedPointer;
 class __EXPORT Conditional 
 {
 private:
+	friend class ConditionalRW;
+
 #ifdef	_MSWINDOWS_
 	enum {SIGNAL = 0, BROADCAST = 1};
 	HANDLE events[2];
@@ -168,13 +177,6 @@ protected:
 	~Conditional();
 
 public:
-	/**
-	 * Specify a maximum sharing (concurrency) limit.  This can be used
-	 * to detect locking errors, such as when aquiring locks that are
-	 * not released.
-	 */
-	static unsigned max_sharing;
-
 #ifndef	_MSWINDOWS_
 	/**
 	 * Support function for getting conditional attributes for realtime
@@ -185,6 +187,126 @@ public:
 		{return &attr.attr;};
 #endif
 
+};
+
+/**
+ * The conditional rw seperates scheduling for optizming behavior or rw locks.
+ * This varient of conditonal seperates scheduling read (broadcast wakeup) and
+ * write (signal wakeup) based threads.  This is used to form generic rwlock's
+ * as well as the specialized condlock.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT ConditionalRW : private Conditional
+{
+private:
+#ifndef	_MSWINDOWS_
+	pthread_cond_t bcast;
+#endif
+
+protected:
+	/**
+	 * Conditional wait for signal on millisecond timeout.
+	 * @param timeout in milliseconds.
+	 * @return true if signalled, false if timer expired.
+	 */
+	bool waitSignal(timeout_t timeout);
+
+	/**
+	 * Conditional wait for broadcast on millisecond timeout.
+	 * @param timeout in milliseconds.
+	 * @return true if signalled, false if timer expired.
+	 */
+	bool waitBroadcast(timeout_t timeout);
+
+
+	/**
+	 * Conditional wait for signal on timespec timeout.
+	 * @param timeout as a high resolution timespec.
+	 * @return true if signalled, false if timer expired.
+	 */
+	bool waitSignal(struct timespec *timeout);
+
+	/**
+	 * Conditional wait for broadcast on timespec timeout.
+	 * @param timeout as a high resolution timespec.
+	 * @return true if signalled, false if timer expired.
+	 */
+	bool waitBroadcast(struct timespec *timeout);
+
+	/**
+	 * Convert a millisecond timeout into use for high resolution
+	 * conditional timers.
+	 * @param timeout to convert.
+	 * @param hires timespec representation to fill.
+	 */
+	inline static void gettimeout(timeout_t timeout, struct timespec *hires)
+		{Conditional::gettimeout(timeout, hires);};
+
+
+#ifdef	_MSWINDOWS_
+	inline void lock(void)
+		{EnterCriticalSection(&mutex);};
+
+	inline void unlock(void)
+		{LeaveCriticalSection(&mutex);};
+
+	void waitSignal(void);
+	void waitBroadcast(void);
+	
+	inline void signal(void)
+		{Conditional::signal();};
+
+	inline void broadcast(void)
+		{Conditional::broadcast();};
+
+#else
+	/**
+	 * Lock the conditional's supporting mutex.
+	 */
+	inline void lock(void)
+		{pthread_mutex_lock(&mutex);};
+
+	/**
+	 * Unlock the conditional's supporting mutex.
+	 */
+	inline void unlock(void)
+		{pthread_mutex_unlock(&mutex);};
+
+	/**
+	 * Wait (block) until signalled.
+	 */
+	inline void waitSignal(void)
+		{pthread_cond_wait(&cond, &mutex);};
+
+	/**
+	 * Wait (block) until broadcast.
+	 */
+	inline void waitBroadcast(void)
+		{pthread_cond_wait(&bcast, &mutex);};
+
+
+	/**
+	 * Signal the conditional to release one signalled thread.
+	 */
+	inline void signal(void)
+		{pthread_cond_signal(&cond);};
+
+	/**
+	 * Signal the conditional to release all broadcast threads.
+	 */
+	inline void broadcast(void)
+		{pthread_cond_broadcast(&bcast);};
+#endif
+
+	/**
+	 * Initialize and construct conditional.
+	 */
+	ConditionalRW();
+
+	/**
+	 * Destroy conditional, release any blocked threads.
+	 */
+	~ConditionalRW();
 };
 
 /**
@@ -337,7 +459,7 @@ public:
  * shared_lock referencing.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT rwlock : private Conditional, public Exclusive, public Shared
+class __EXPORT rwlock : private ConditionalRW, public Exclusive, public Shared
 {
 private:
 	unsigned waiting;
@@ -465,7 +587,7 @@ protected:
  * locks, rather than having to release and re-aquire locks to change mode.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT ConditionalLock : protected Conditional, public Shared
+class __EXPORT ConditionalLock : protected ConditionalRW, public Shared
 {
 private:
 	unsigned pending, sharing, waiting;

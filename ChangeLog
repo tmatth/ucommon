@@ -1,6 +1,7 @@
-From ucommon 1.0.0 to 1.0.1
+From ucommon 1.0.0 to 1.1.0
 - fixed spec file to support uses_stdcpp definition.
 - fixed new operator when using stdcpp.
+- conditionalrw locking scheme integrated for scheduling optimization.
 
 From ucommon 0.9.2 to 1.0.0
 - use std::runtime_exception instead of abort when using c++ runtime library
