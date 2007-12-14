@@ -308,7 +308,7 @@ bool Conditional::wait(struct timespec *ts)
 void ConditionalRW::waitSignal(void)
 {
 	LeaveCriticalSection(&mutex);
-	WaitForSingleObjects(&events[SIGNAL], INFINITE);
+	WaitForSingleObject(&events[SIGNAL], INFINITE);
 	EnterCriticalSection(&mutex);
 }
 
@@ -347,7 +347,7 @@ bool ConditionalRW::waitSignal(timeout_t timeout)
 		return false;
 
 	LeaveCriticalSection(&mutex);
-	result = WaitForMultipleObject(events[SIGNAL], timeout);
+	result = WaitForSingleObject(events[SIGNAL], timeout);
 	if(result == WAIT_OBJECT_0)
 		rtn = true;
 	EnterCriticalSection(&mutex);
