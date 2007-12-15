@@ -725,46 +725,51 @@ bool TimedEvent::wait(void)
 	return false;
 }
 
-void TimedEvent::lock(void)
-{
-	EnterCriticalSection(&mutex);
-}
-
-void TimedEvent::release(void)
-{
-	LeaveCriticalSection(&mutex);
-}
-
 #else
 
 TimedEvent::TimedEvent() : 
 Timer()
 {
+	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
+	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
 }
 
 TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
+	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
+	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
 }
 
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
+	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
+	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
+}
+
+TimedEvent::~TimedEvent()
+{
+	pthread_cond_destroy(&cond);
+	pthread_mutex_destroy(&mutex);
 }
 
 void TimedEvent::signal(void)
 {
-	cond.signal();
+	pthread_cond_signal(&cond);
 }
 
 bool TimedEvent::expire(void) 
 {
 	timeout_t timeout = get();
+	struct timespec ts;
 
 	if(!timeout)
-		return true;
+		return false;
 
-	if(cond.wait(timeout))
+	Conditional::gettimeout(timeout, &ts);
+
+	if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
 		return false;
 
 	return true;
@@ -772,31 +777,26 @@ bool TimedEvent::expire(void)
 
 bool TimedEvent::wait(void) 
 {
-	bool result;
-	timeout_t timeout = get();
+	bool result = true;
+	struct timespec ts;
 
-	cond.lock();
-	if(!timeout)
-		result = false;
-	else
-		result = cond.wait(timeout);
-
-	cond.unlock();
+	pthread_mutex_lock(&mutex);
+	result = expire();
+	pthread_mutex_unlock(&mutex);
 	return result;
 }
+#endif
 
 void TimedEvent::lock(void)
 {
-	cond.lock();
+	pthread_mutex_lock(&mutex);
 }
 
 void TimedEvent::release(void)
 {
-	cond.unlock();
+	pthread_mutex_unlock(&mutex);
 }
 
-#endif
-	
 ConditionalLock::ConditionalLock() :
 ConditionalRW()
 {

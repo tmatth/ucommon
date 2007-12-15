@@ -95,14 +95,6 @@ protected:
 	friend class TimedEvent;
 
 	/**
-	 * Convert a millisecond timeout into use for high resolution
-	 * conditional timers.
-	 * @param timeout to convert.
-	 * @param hires timespec representation to fill.
-	 */
-	static void gettimeout(timeout_t timeout, struct timespec *hires);
-
-	/**
 	 * Conditional wait for signal on millisecond timeout.
 	 * @param timeout in milliseconds.
 	 * @return true if signalled, false if timer expired.
@@ -180,6 +172,13 @@ public:
 		{return &attr.attr;};
 #endif
 
+	/**
+	 * Convert a millisecond timeout into use for high resolution
+	 * conditional timers.
+	 * @param timeout to convert.
+	 * @param hires timespec representation to fill.
+	 */
+	static void gettimeout(timeout_t timeout, struct timespec *hires);
 };
 
 /**
@@ -322,10 +321,10 @@ class __EXPORT TimedEvent : public Timer
 private:
 #ifdef _MSWINDOWS_
 	HANDLE event;
-	CRITICAL_SECTION mutex;
 #else
-	Conditional cond;
+	pthread_cond_t cond;
 #endif
+	pthread_mutex_t mutex;
 
 protected:
 	/**
@@ -380,8 +379,8 @@ public:
 	void signal(void);
 
 	/**
-	 * Wait to be signalled or until timer expires.  This is for simple
-	 * completion events.
+	 * Wait to be signalled or until timer expires.  This is a wrapper for 
+	 * expire for simple completion events.
 	 * @return true if signaled, false if timeout.
 	 */
 	bool wait(void);
