@@ -28,9 +28,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-namespace UCOMMON_NAMESPACE {
-	unsigned max_sharing = 0;
-};
+unsigned ConditionalRW::max_sharing = 0;
 
 #ifndef	_MSWINDOWS_
 Conditional::attribute Conditional::attr;

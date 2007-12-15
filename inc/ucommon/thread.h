@@ -57,13 +57,6 @@ NAMESPACE_UCOMMON
 class SharedPointer;
 
 /**
- * Specify a maximum sharing (concurrency) limit.  This can be used
- * to detect locking errors, such as when aquiring locks that are
- * not released.
- */
-extern unsigned max_sharing;
-
-/**
  * The conditional is a common base for other thread synchronizing classes.
  * Many of the complex sychronization objects, including barriers, semaphores,
  * and various forms of read/write locks are all built from the conditional.
@@ -307,6 +300,13 @@ protected:
 	 * Destroy conditional, release any blocked threads.
 	 */
 	~ConditionalRW();
+public:
+	/**
+	 * Specify a maximum sharing (concurrency) limit.  This can be used
+	 * to detect locking errors, such as when aquiring locks that are
+	 * not released.
+	 */
+	static unsigned max_sharing;
 };
 
 /**
