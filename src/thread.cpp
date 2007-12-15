@@ -693,7 +693,7 @@ void TimedEvent::signal(void)
 	SetEvent(event);
 }
 
-bool TimedEvent::expire(void) 
+bool TimedEvent::sync(void) 
 {
 	int result;
 	timeout_t timeout;
@@ -759,7 +759,7 @@ void TimedEvent::signal(void)
 	pthread_cond_signal(&cond);
 }
 
-bool TimedEvent::expire(void) 
+bool TimedEvent::sync(void) 
 {
 	timeout_t timeout = get();
 	struct timespec ts;
@@ -781,7 +781,7 @@ bool TimedEvent::wait(void)
 	struct timespec ts;
 
 	pthread_mutex_lock(&mutex);
-	result = expire();
+	result = sync();
 	pthread_mutex_unlock(&mutex);
 	return result;
 }

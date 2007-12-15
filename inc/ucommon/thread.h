@@ -346,7 +346,7 @@ protected:
 	 * wait, but lock and release methods must be used around it.
 	 * @return true if time expired. 
 	 */
-	bool expire(void);
+	bool sync(void);
 
 public:
 	/**
