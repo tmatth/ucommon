@@ -198,6 +198,13 @@ private:
 
 protected:
 	/**
+	 * Specify a maximum sharing (concurrency) limit.  This can be used
+	 * to detect locking errors, such as when aquiring locks that are
+	 * not released.
+	 */
+	static unsigned max_sharing;
+
+	/**
 	 * Conditional wait for signal on millisecond timeout.
 	 * @param timeout in milliseconds.
 	 * @return true if signalled, false if timer expired.
@@ -300,13 +307,6 @@ protected:
 	 * Destroy conditional, release any blocked threads.
 	 */
 	~ConditionalRW();
-public:
-	/**
-	 * Specify a maximum sharing (concurrency) limit.  This can be used
-	 * to detect locking errors, such as when aquiring locks that are
-	 * not released.
-	 */
-	static unsigned max_sharing;
 };
 
 /**
