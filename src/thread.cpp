@@ -1128,7 +1128,7 @@ void Thread::concurrency(int level)
 
 void Thread::policy(int polid)
 {
-#ifdef	_POSIX_PRIORITY_SCHEDULING > 0
+#if	_POSIX_PRIORITY_SCHEDULING > 0
 	realtime_policy = polid;
 #endif
 }
