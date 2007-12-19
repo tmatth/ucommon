@@ -1,3 +1,6 @@
+From ucommon 1.1.0 to 1.1.1
+- adjusted definition of priority scheduling and added realtime thread policies.
+
 From ucommon 1.0.0 to 1.1.0
 - fixed spec file to support uses_stdcpp definition.
 - fixed new operator when using stdcpp.

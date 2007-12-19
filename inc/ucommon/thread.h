@@ -1168,6 +1168,19 @@ public:
 	static void init(void);
 
 	/**
+	 * Used to specify scheduling policy for threads above priority "0".
+	 * Normally we apply static realtime policy SCHED_FIFO (default) or
+	 * SCHED_RR.  However, we could apply SCHED_OTHER, etc.
+	 */
+	static void policy(int polid);
+
+	/**
+	 * Set concurrency level of process.  This is essentially a portable
+	 * wrapper for pthread_setconcurrency.
+	 */
+	static void concurrency(int level);
+
+	/**
 	 * Determine if two thread identifiers refer to the same thread.
 	 * @param thread1 to test.
 	 * @param thread2 to test.
@@ -1233,10 +1246,17 @@ public:
 	 * child object is created (perhaps with "new") and before it can be
 	 * joined.  This method actually begins the new thread context, which
 	 * then calls the object's run method.  Optionally raise the priority
-	 * of the thread when it starts.
+	 * of the thread when it starts under realtime priority.
 	 * @param priority of child thread.
 	 */
 	void start(int priority = 0);
+
+	/**
+	 * Start execution of child context as background thread.  This is
+	 * assumed to be off main thread, with a priority lowered by one.
+	 */
+	inline void background(void)
+		{start(-1);};
 };
 
 /**

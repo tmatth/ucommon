@@ -26,6 +26,10 @@
 #include <sched.h>
 #endif
 
+#if _POSIX_PRIORITY_SCHEDULING > 0
+static int realtime_policy = SCHED_FIFO;
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 unsigned ConditionalRW::max_sharing = 0;
@@ -1069,12 +1073,13 @@ Thread::Thread(size_t size)
 void Thread::setPriority(void)
 {
 	HANDLE hThread = GetCurrentThread();
-	if(priority < 0)
-		SetThreadPriority(hThread, THREAD_PRIORITY_LOWEST);
-	else if(priority == 1)
-		SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
-	else if(priority > 1)
-		SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
+	priority += THREAD_PRIORITY_NORMAL;
+	if(priority < THREAD_PRIORITY_LOWEST)
+		priority = THREAD_PRIORITY_LOWEST;
+	else if(priority > THREAD_PRIORITY_HIGHEST)
+		priority = THREAD_PRIORITY_HIGHEST;
+
+	SetThreadPriority(hThread, priority);
 }
 #elif _POSIX_PRIORITY_SCHEDULING > 0
 
@@ -1092,23 +1097,41 @@ void Thread::setPriority(void)
 		return;
 
 	if(priority > 0) {
-		pri = sp.sched_priority + priority;
+		policy = realtime_policy;
+		if(realtime_policy == SCHED_OTHER)
+			pri = sp.sched_priority + priority;
+		else
+			pri = sched_get_priority_min(policy) + priority;
+		policy = realtime_policy;
 		if(pri > sched_get_priority_max(policy))
 			pri = sched_get_priority_max(policy);
-	} else if(priority < 0)
-		pri = sched_get_priority_min(policy);
+	} else if(priority < 0) {
+		pri = sp.sched_priority - priority;
+		if(pri < sched_get_priority_min(policy))
+			pri = sched_get_priority_min(policy);
+	}
 
-#ifdef	HAVE_PTHREAD_SETSCHEDPRIO
-	pthread_setschedprio(tid, pri);
-#else
 	sp.sched_priority = pri;
 	pthread_setschedparam(tid, policy, &sp);
-#endif
 }
 
 #else
 void Thread::setPriority(void) {};
 #endif
+
+void Thread::concurrency(int level)
+{
+#ifndef	_MSWINDOWS_
+	pthread_setconcurrency(level);
+#endif
+}
+
+void Thread::policy(int polid)
+{
+#ifdef	_POSIX_PRIORITY_SCHEDULING > 0
+	realtime_policy = polid;
+#endif
+}
 
 JoinableThread::JoinableThread(size_t size)
 {
