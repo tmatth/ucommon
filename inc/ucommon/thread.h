@@ -179,6 +179,14 @@ public:
 	 * @param hires timespec representation to fill.
 	 */
 	static void gettimeout(timeout_t timeout, struct timespec *hires);
+
+	/**
+	 * Specify a maximum sharing (access) limit.  This can be used
+	 * to detect locking errors, such as when aquiring locks that are
+	 * not released.
+	 * @param max sharing level.
+	 */
+	void sharing(unsigned max);
 };
 
 /**
@@ -196,13 +204,6 @@ private:
 #endif
 
 protected:
-	/**
-	 * Specify a maximum sharing (concurrency) limit.  This can be used
-	 * to detect locking errors, such as when aquiring locks that are
-	 * not released.
-	 */
-	static unsigned max_sharing;
-
 	/**
 	 * Conditional wait for signal on millisecond timeout.
 	 * @param timeout in milliseconds.
@@ -591,25 +592,33 @@ class __EXPORT ConditionalLock : protected ConditionalRW, public Shared
 private:
 	unsigned pending, sharing, waiting;
 
+	class Context : public LinkedObject
+	{
+	public:
+		inline Context(LinkedObject **root) : LinkedObject(root) {};
+
+		pthread_t thread;
+		unsigned count;
+	};
+
+	LinkedObject *contexts;
+
 	__LOCAL void Shlock(void);
 	__LOCAL void Unlock(void);
 	__LOCAL void Exclusive(void);
 	__LOCAL void Share(void);
-
-protected:
-	/**
-	 * This is used in place of access when one is not concerned with writer
-	 * starvation.  It is faster, and may be safely used recursivily, such as
-	 * to protect a method call which might be called by a larger protected
-	 * method or might be exposed directly.
-	 */
-	void protect(void);
+	__LOCAL Context *getContext(void);
 
 public:
 	/**
-	 * Construct conditional lock.
+	 * Construct conditional lock for default concurrency.
 	 */
 	ConditionalLock();
+
+	/**
+	 * Destroy conditional lock.
+	 */
+	~ConditionalLock();
 
 	/**
 	 * Acquire write (exclusive modify) lock.
@@ -651,18 +660,6 @@ public:
 	 * Get the number of threads waiting to share the lock.
 	 */
 	unsigned getWaiters(void);
-
-	/**
-	 * Acquire/recursive read lock operator.
-	 */
-	inline void operator++()
-		{protect();};
-
-	/**
-	 * Release read lock operator.
-	 */
-	inline void operator--()
-		{release();};
 
 	/**
 	 * Convenience function to modify lock.
@@ -1068,11 +1065,12 @@ public:
  * is used to manage shared access for use and exclusive access when modified.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT SharedPointer : protected ConditionalLock
+class __EXPORT SharedPointer : protected ConditionalRW
 {
 private:
 	friend class shared_release;
 	SharedObject *pointer;
+	unsigned sharing, pending, waiting;
 
 protected:
 	/**
@@ -1096,10 +1094,16 @@ protected:
 	/**
 	 * Acquire a shared reference to the singleton object.  This is a
 	 * form of shared access lock.  Derived classes and templates access
-	 * conditionallock "release" when the shared pointer is no longer needed.
+	 * "release" when the shared pointer is no longer needed.
 	 * @return shared object.
 	 */
 	SharedObject *share(void);
+
+protected:
+	/**
+     * Release an acquired shared lock.
+	 */
+	void release(void);
 };
 
 /**
@@ -1186,8 +1190,14 @@ public:
 	 * @param thread2 to test.
 	 * @return true if both are the same context.
 	 */
-	inline static bool equal(pthread_t thread1, pthread_t thread2)
-		{return pthread_equal(thread1, thread2);};
+	static bool equal(pthread_t thread1, pthread_t thread2);
+
+	/**
+	 * Get current thread id.
+	 * @return thread id.
+	 */
+	inline static pthread_t self(void)
+		{return pthread_self();};
 };
 
 /**

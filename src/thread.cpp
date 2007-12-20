@@ -30,9 +30,9 @@
 static int realtime_policy = SCHED_FIFO;
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+static unsigned max_sharing = 0;
 
-unsigned ConditionalRW::max_sharing = 0;
+using namespace UCOMMON_NAMESPACE;
 
 #ifndef	_MSWINDOWS_
 Conditional::attribute Conditional::attr;
@@ -57,6 +57,11 @@ void ReusableAllocator::release(ReusableObject *obj)
 	if(waiting)
 		signal();
 	unlock();
+}
+
+void Conditional::sharing(unsigned max)
+{
+	max_sharing = max;
 }
 
 void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
@@ -178,6 +183,11 @@ void semaphore::set(unsigned value)
 
 #ifdef	_MSWINDOWS_
 
+bool Thread::equal(pthread_t t1, pthread_t t2)
+{
+	return t1 == t2;
+}
+
 void Conditional::wait(void)
 {
 	int result;
@@ -262,6 +272,13 @@ bool Conditional::wait(struct timespec *ts)
 }
 
 #else
+
+#include <stdio.h>
+bool Thread::equal(pthread_t t1, pthread_t t2)
+{
+	return pthread_equal(t1, t2) != 0;
+}
+
 Conditional::attribute::attribute()
 {
 	Thread::init();
@@ -434,14 +451,7 @@ bool ConditionalRW::waitSignal(struct timespec *ts)
 	return true;
 }
 
-
-
 #endif
-
-
-
-
-
 
 rexlock::rexlock() :
 Conditional()
@@ -468,8 +478,6 @@ unsigned rexlock::getLocking(void)
 	return count;
 }
 
-
-
 void rexlock::Exlock(void)
 {
 	lock();
@@ -484,7 +492,7 @@ void rexlock::lock(void)
 {
 	Conditional::lock();
 	while(lockers) {
-		if(pthread_equal(locker, pthread_self()))
+		if(Thread::equal(locker, pthread_self()))
 			break;
 		++waiting;
 		Conditional::wait();
@@ -567,7 +575,7 @@ bool rwlock::modify(timeout_t timeout)
 	
 	lock();
 	while((writers || reading) && rtn) {
-		if(writers && pthread_equal(writer, pthread_self()))
+		if(writers && Thread::equal(writer, pthread_self()))
 			break;
 		++pending;
 		if(timeout == Timer::inf)
@@ -807,6 +815,38 @@ ConditionalRW()
 	waiting = 0;
 	pending = 0;
 	sharing = 0;
+	contexts = NULL;
+}
+
+ConditionalLock::~ConditionalLock()
+{
+	linked_pointer<Context> cp = contexts, next;
+	while(cp) {
+		next = cp->getNext();
+		delete *cp;
+		cp = next;
+	}
+}
+
+ConditionalLock::Context *ConditionalLock::getContext(void)
+{
+	Context *slot = NULL;
+	pthread_t tid = Thread::self();
+	linked_pointer<Context> cp = contexts;
+
+	while(cp) {
+		if(cp->count && Thread::equal(cp->thread, tid))
+			return *cp;
+		if(!cp->count)
+			slot = *cp;
+		cp.next();
+	}
+	if(!slot) {
+		slot = new Context(&this->contexts);
+		slot->count = 0;
+	}
+	slot->thread = tid;
+	return slot;
 }
 
 unsigned ConditionalLock::getReaders(void)
@@ -851,16 +891,23 @@ void ConditionalLock::Share(void)
 
 void ConditionalLock::modify(void)
 {
+	Context *context;
 	lock();
+	
 	while(sharing) {
 		++pending;
 		waitSignal();
 		--pending;
 	}
+	context = getContext();
+	++context->count;
 }
 
 void ConditionalLock::commit(void)
 {
+	Context *context = getContext();
+	--context->count;
+
 	if(pending)
 		signal();
 	else if(waiting)
@@ -870,9 +917,13 @@ void ConditionalLock::commit(void)
 
 void ConditionalLock::release(void)
 {
+	Context *context;
+
 	lock();
-	assert(sharing);
+	context = getContext();
+	assert(sharing && context && context->count > 0);
 	--sharing;
+	--context->count;
 	if(pending && !sharing)
 		signal();
 	else if(waiting && !pending)
@@ -880,32 +931,19 @@ void ConditionalLock::release(void)
 	unlock();
 }
 
-void ConditionalLock::protect(void)
-{
-	lock();
-	assert(!max_sharing || sharing < max_sharing);
-
-	// reschedule if pending exclusives to make sure modify threads are not
-	// starved.
-
-	while(pending && !sharing) {
-		++waiting;
-		waitBroadcast();
-		--waiting;
-	}
-	++sharing;
-	unlock();
-}
-
 void ConditionalLock::access(void)
 {
+	Context *context;
 	lock();
-	assert(!max_sharing || sharing < max_sharing);
+	context = getContext();
+	assert(context && !max_sharing || sharing < max_sharing);
 
 	// reschedule if pending exclusives to make sure modify threads are not
 	// starved.
 
-	while(pending) {
+	++context->count;
+
+	while(context->count < 2 && pending) {
 		++waiting;
 		waitBroadcast();
 		--waiting;
@@ -916,9 +954,12 @@ void ConditionalLock::access(void)
 
 void ConditionalLock::exclusive(void)
 {
+	Context *context;
+
 	lock();
-	assert(sharing);
-	--sharing;
+	context = getContext();
+	assert(sharing && context && context->count > 0);
+	sharing -= context->count;
 	while(sharing) {
 		++pending;
 		waitSignal();
@@ -928,8 +969,9 @@ void ConditionalLock::exclusive(void)
 
 void ConditionalLock::share(void)
 {
-	assert(!sharing);
-	++sharing;
+	Context *context = getContext();
+	assert(!sharing && context && context->count);
+	sharing += context->count;
 	unlock();
 }
 
@@ -1036,8 +1078,11 @@ SharedObject::~SharedObject()
 }
 
 SharedPointer::SharedPointer() :
-ConditionalLock()
+ConditionalRW()
 {
+	sharing = 0;
+	pending = 0;
+	waiting = 0;
 	pointer = NULL;
 }
 
@@ -1047,19 +1092,48 @@ SharedPointer::~SharedPointer()
 
 void SharedPointer::replace(SharedObject *ptr)
 {
-	ConditionalLock::modify();
+	lock();
+	while(sharing) {
+		++pending;
+		waitSignal();
+		--pending;
+	}
+		
 	if(pointer)
 		delete pointer;
 	pointer = ptr;
 	if(ptr)
 		ptr->commit(this);
-	ConditionalLock::commit();
+
+	if(pending)
+		signal();
+	else if(waiting)
+		broadcast();
+	unlock();
 }
 
 SharedObject *SharedPointer::share(void)
 {
-	ConditionalLock::access();
+	lock();
+	while(pending) {
+		++waiting;
+		waitBroadcast();
+		--waiting;
+	}
+	++sharing;
+	unlock();
 	return pointer;
+}
+
+void SharedPointer::release(void)
+{
+	lock();
+	--sharing;
+	if(pending && !sharing)
+		signal();
+	else if(waiting && !pending)
+		broadcast();
+	unlock();
 }
 
 Thread::Thread(size_t size)
@@ -1147,8 +1221,6 @@ DetachedThread::DetachedThread(size_t size)
 {
 	stack = size;
 }
-
-#include <stdio.h>
 
 void Thread::sleep(timeout_t timeout)
 {
@@ -1252,7 +1324,7 @@ void JoinableThread::join(void)
 	pthread_t self = pthread_self();
 	int rc;
 
-	if(joining && pthread_equal(tid, self))
+	if(joining && equal(tid, self))
 		Thread::exit();
 
 	// already joined, so we ignore...
@@ -1323,7 +1395,7 @@ void JoinableThread::join(void)
 {
 	pthread_t self = pthread_self();
 
-	if(running && pthread_equal(tid, self))
+	if(running && equal(tid, self))
 		Thread::exit();
 
 	// already joined, so we ignore...

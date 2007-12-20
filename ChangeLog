@@ -1,3 +1,9 @@
+From ucommon 1.1.1 to 1.2.0
+- adding conditional policies, ConditionalLock::concurrency() and
+  ConditionalRW::sharing().
+- Recursive support in conditional locking.
+- SharedPointer derived from ConditionalRW and optimized.
+
 From ucommon 1.1.1 to 1.1.2
 - fix for OS/X.
 
