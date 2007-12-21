@@ -324,14 +324,14 @@ bool Conditional::wait(struct timespec *ts)
 
 #ifdef	_MSWINDOWS_
 
-void ConditionalRW::waitSignal(void)
+void ConditionalAccess::waitSignal(void)
 {
 	LeaveCriticalSection(&mutex);
 	WaitForSingleObject(&events[SIGNAL], INFINITE);
 	EnterCriticalSection(&mutex);
 }
 
-void ConditionalRW::waitBroadcast(void)
+void ConditionalAccess::waitBroadcast(void)
 {
 	int result;
 
@@ -349,15 +349,16 @@ void ConditionalRW::waitBroadcast(void)
 	EnterCriticalSection(&mutex);
 }
 
-ConditionalRW::ConditionalRW() : Conditional()
+ConditionalAccess::ConditionalAccess() : Conditional()
+{
+	pending = waiting = pending = 0;
+}
+
+ConditionalAccess::~ConditionalAccess()
 {
 }
 
-ConditionalRW::~ConditionalRW()
-{
-}
-
-bool ConditionalRW::waitSignal(timeout_t timeout)
+bool ConditionalAccess::waitSignal(timeout_t timeout)
 {
 	int result;
 	bool rtn = true;
@@ -373,13 +374,13 @@ bool ConditionalRW::waitSignal(timeout_t timeout)
 	return rtn;
 }
 
-bool ConditionalRW::waitSignal(struct timespec *ts)
+bool ConditionalAccess::waitSignal(struct timespec *ts)
 {
 	return waitSignal(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
 }
 
 
-bool ConditionalRW::waitBroadcast(timeout_t timeout)
+bool ConditionalAccess::waitBroadcast(timeout_t timeout)
 {
 	int result;
 	bool rtn = true;
@@ -404,31 +405,32 @@ bool ConditionalRW::waitBroadcast(timeout_t timeout)
 	return rtn;
 }
 
-bool ConditionalRW::waitBroadcast(struct timespec *ts)
+bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 {
 	return waitBroadcast(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
 }
 
 #else
 
-ConditionalRW::ConditionalRW()
+ConditionalAccess::ConditionalAccess()
 {
+	waiting = pending = sharing = 0;
 	crit(pthread_cond_init(&bcast, &attr.attr) == 0, "conditional init failed");
 }
 
-ConditionalRW::~ConditionalRW()
+ConditionalAccess::~ConditionalAccess()
 {
 	pthread_cond_destroy(&bcast);
 }
 
-bool ConditionalRW::waitSignal(timeout_t timeout)
+bool ConditionalAccess::waitSignal(timeout_t timeout)
 {
 	struct timespec ts;
 	gettimeout(timeout, &ts);
 	return waitSignal(&ts);
 }
 
-bool ConditionalRW::waitBroadcast(struct timespec *ts)
+bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 {
 	if(pthread_cond_timedwait(&bcast, &mutex, ts) == ETIMEDOUT)
 		return false;
@@ -436,14 +438,14 @@ bool ConditionalRW::waitBroadcast(struct timespec *ts)
 	return true;
 }
 
-bool ConditionalRW::waitBroadcast(timeout_t timeout)
+bool ConditionalAccess::waitBroadcast(timeout_t timeout)
 {
 	struct timespec ts;
 	gettimeout(timeout, &ts);
 	return waitBroadcast(&ts);
 }
 
-bool ConditionalRW::waitSignal(struct timespec *ts)
+bool ConditionalAccess::waitSignal(struct timespec *ts)
 {
 	if(pthread_cond_timedwait(&cond, &mutex, ts) == ETIMEDOUT)
 		return false;
@@ -452,6 +454,48 @@ bool ConditionalRW::waitSignal(struct timespec *ts)
 }
 
 #endif
+
+void ConditionalAccess::modify(void)
+{
+	lock();
+	while(sharing) {
+		++pending;
+		waitSignal();
+		--pending;
+	}
+}
+
+void ConditionalAccess::commit(void)
+{
+	if(pending)
+		signal();
+	else if(waiting)
+		broadcast();
+	unlock();
+}
+
+void ConditionalAccess::access(void)
+{
+	lock();
+	while(pending) {
+		++waiting;
+		waitBroadcast();
+		--waiting;
+	}
+	++sharing;
+	unlock();
+}
+
+void ConditionalAccess::release(void)
+{
+   lock();
+    --sharing;
+    if(pending && !sharing)
+        signal();
+    else if(waiting && !pending)
+        broadcast();
+    unlock();
+}
 
 rexlock::rexlock() :
 Conditional()
@@ -515,19 +559,16 @@ void rexlock::release(void)
 }
 
 rwlock::rwlock() :
-ConditionalRW()
+ConditionalAccess()
 {
 	writers = 0;
-	reading = 0;
-	pending = 0;
-	waiting = 0;
 }
 
 unsigned rwlock::getAccess(void)
 {
 	unsigned count;
 	lock();
-	count = reading;
+	count = sharing;
 	unlock();
 	return count;
 }
@@ -574,7 +615,7 @@ bool rwlock::modify(timeout_t timeout)
 		gettimeout(timeout, &ts);
 	
 	lock();
-	while((writers || reading) && rtn) {
+	while((writers || sharing) && rtn) {
 		if(writers && Thread::equal(writer, pthread_self()))
 			break;
 		++pending;
@@ -615,9 +656,9 @@ bool rwlock::access(timeout_t timeout)
 			rtn = false;
 		--waiting;
 	}
-	assert(!max_sharing || reading < max_sharing);
+	assert(!max_sharing || sharing < max_sharing);
 	if(rtn)
-		++reading;
+		++sharing;
 	unlock();
 	return rtn;
 }
@@ -625,10 +666,10 @@ bool rwlock::access(timeout_t timeout)
 void rwlock::release(void)
 {
 	lock();
-	assert(reading || writers);
+	assert(sharing || writers);
 
 	if(writers) {
-		assert(!reading);
+		assert(!sharing);
 		--writers;
 		if(pending && !writers)
 			signal();
@@ -637,10 +678,10 @@ void rwlock::release(void)
 		unlock();
 		return;
 	}
-	if(reading) {
+	if(sharing) {
 		assert(!writers);
-		--reading;
-		if(pending && !reading)
+		--sharing;
+		if(pending && !sharing)
 			signal();
 		else if(waiting && !pending)
 			broadcast();
@@ -810,11 +851,8 @@ void TimedEvent::release(void)
 }
 
 ConditionalLock::ConditionalLock() :
-ConditionalRW()
+ConditionalAccess()
 {
-	waiting = 0;
-	pending = 0;
-	sharing = 0;
 	contexts = NULL;
 }
 
@@ -1078,11 +1116,8 @@ SharedObject::~SharedObject()
 }
 
 SharedPointer::SharedPointer() :
-ConditionalRW()
+ConditionalAccess()
 {
-	sharing = 0;
-	pending = 0;
-	waiting = 0;
 	pointer = NULL;
 }
 
@@ -1092,12 +1127,7 @@ SharedPointer::~SharedPointer()
 
 void SharedPointer::replace(SharedObject *ptr)
 {
-	lock();
-	while(sharing) {
-		++pending;
-		waitSignal();
-		--pending;
-	}
+	modify();
 		
 	if(pointer)
 		delete pointer;
@@ -1105,35 +1135,13 @@ void SharedPointer::replace(SharedObject *ptr)
 	if(ptr)
 		ptr->commit(this);
 
-	if(pending)
-		signal();
-	else if(waiting)
-		broadcast();
-	unlock();
+	commit();
 }
 
 SharedObject *SharedPointer::share(void)
 {
-	lock();
-	while(pending) {
-		++waiting;
-		waitBroadcast();
-		--waiting;
-	}
-	++sharing;
-	unlock();
+	access();
 	return pointer;
-}
-
-void SharedPointer::release(void)
-{
-	lock();
-	--sharing;
-	if(pending && !sharing)
-		signal();
-	else if(waiting && !pending)
-		broadcast();
-	unlock();
 }
 
 Thread::Thread(size_t size)

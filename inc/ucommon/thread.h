@@ -69,7 +69,7 @@ class SharedPointer;
 class __EXPORT Conditional 
 {
 private:
-	friend class ConditionalRW;
+	friend class ConditionalAccess;
 
 #ifdef	_MSWINDOWS_
 	enum {SIGNAL = 0, BROADCAST = 1};
@@ -196,7 +196,7 @@ public:
  * as well as the specialized condlock.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT ConditionalRW : private Conditional
+class __EXPORT ConditionalAccess : private Conditional
 {
 private:
 #ifndef	_MSWINDOWS_
@@ -204,6 +204,8 @@ private:
 #endif
 
 protected:
+	unsigned pending, waiting, sharing;
+
 	/**
 	 * Conditional wait for signal on millisecond timeout.
 	 * @param timeout in milliseconds.
@@ -297,16 +299,36 @@ protected:
 	inline void broadcast(void)
 		{pthread_cond_broadcast(&bcast);};
 #endif
-
+public:
 	/**
 	 * Initialize and construct conditional.
 	 */
-	ConditionalRW();
+	ConditionalAccess();
 
 	/**
 	 * Destroy conditional, release any blocked threads.
 	 */
-	~ConditionalRW();
+	~ConditionalAccess();
+
+	/**
+	 * Access mode shared thread scheduling.
+	 */
+	void access(void);
+
+	/**
+	 * Exclusive mode write thread scheduling.
+	 */
+	void modify(void);
+
+	/**
+	 * Release access mode read scheduling.
+	 */
+	void release(void);
+
+	/**
+	 * Complete exclusive mode write scheduling.
+	 */
+	void commit(void);
 };
 
 /**
@@ -459,12 +481,9 @@ public:
  * shared_lock referencing.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT rwlock : private ConditionalRW, public Exclusive, public Shared
+class __EXPORT rwlock : private ConditionalAccess, public Exclusive, public Shared
 {
 private:
-	unsigned waiting;
-	unsigned reading;
-	unsigned pending;
 	unsigned writers;
 	pthread_t writer;
 
@@ -587,11 +606,9 @@ protected:
  * locks, rather than having to release and re-aquire locks to change mode.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT ConditionalLock : protected ConditionalRW, public Shared
+class __EXPORT ConditionalLock : protected ConditionalAccess, public Shared
 {
 private:
-	unsigned pending, sharing, waiting;
-
 	class Context : public LinkedObject
 	{
 	public:
@@ -1065,12 +1082,11 @@ public:
  * is used to manage shared access for use and exclusive access when modified.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT SharedPointer : protected ConditionalRW
+class __EXPORT SharedPointer : protected ConditionalAccess
 {
 private:
 	friend class shared_release;
 	SharedObject *pointer;
-	unsigned sharing, pending, waiting;
 
 protected:
 	/**
@@ -1098,12 +1114,6 @@ protected:
 	 * @return shared object.
 	 */
 	SharedObject *share(void);
-
-protected:
-	/**
-     * Release an acquired shared lock.
-	 */
-	void release(void);
 };
 
 /**
@@ -2141,6 +2151,11 @@ inline void start(DetachedThread *thread, int priority = 0)
 typedef ConditionalLock condlock_t;
 
 /**
+ * Convenience type for scheduling access.
+ */
+typedef ConditionalAccess acslock_t;
+
+/**
  * Convenience type for using timed events.
  */
 typedef TimedEvent timedevent_t;
@@ -2215,6 +2230,35 @@ inline void acquire(mutex_t &mutex)
  */
 inline void release(mutex_t &mutex)
 	{mutex.release();};
+
+/**
+ * Convenience function to exclusively schedule conditional access.
+ * @param lock to make exclusive.
+ */
+inline void exclusive(acslock_t &lock)
+	{lock.modify();};
+
+/**
+ * Convenience function to shared read schedule conditional access.
+ * @param lock to access shared.
+ */
+inline void share(acslock_t &lock)
+	{lock.access();};
+
+/**
+ * Convenience function to release an access lock.
+ * @param lock to release.
+ */
+inline void release(acslock_t &lock)
+	{lock.release();};
+
+/**
+ * Convenience function to commit an exclusive access lock.
+ * lock.
+ * @param lock to commit.
+ */
+inline void commit(acslock_t &lock)
+	{lock.commit();};
 
 /**
  * Convenience function to exclusively lock shared conditional lock.
