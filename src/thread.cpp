@@ -59,7 +59,7 @@ void ReusableAllocator::release(ReusableObject *obj)
 	unlock();
 }
 
-void Conditional::sharing(unsigned max)
+void ConditionalAccess::limit_sharing(unsigned max)
 {
 	max_sharing = max;
 }
@@ -477,6 +477,7 @@ void ConditionalAccess::commit(void)
 void ConditionalAccess::access(void)
 {
 	lock();
+	assert(!max_sharing || sharing < max_sharing);
 	while(pending) {
 		++waiting;
 		waitBroadcast();
@@ -489,6 +490,9 @@ void ConditionalAccess::access(void)
 void ConditionalAccess::release(void)
 {
    lock();
+
+	assert(sharing);
+
     --sharing;
     if(pending && !sharing)
         signal();
@@ -930,13 +934,8 @@ void ConditionalLock::Share(void)
 void ConditionalLock::modify(void)
 {
 	Context *context;
-	lock();
-	
-	while(sharing) {
-		++pending;
-		waitSignal();
-		--pending;
-	}
+
+	ConditionalAccess::modify();
 	context = getContext();
 	++context->count;
 }
@@ -946,11 +945,7 @@ void ConditionalLock::commit(void)
 	Context *context = getContext();
 	--context->count;
 
-	if(pending)
-		signal();
-	else if(waiting)
-		broadcast();
-	unlock();
+	ConditionalAccess::commit();
 }
 
 void ConditionalLock::release(void)
@@ -974,7 +969,7 @@ void ConditionalLock::access(void)
 	Context *context;
 	lock();
 	context = getContext();
-	assert(context && !max_sharing || sharing < max_sharing);
+	assert(context && (!max_sharing || sharing < max_sharing));
 
 	// reschedule if pending exclusives to make sure modify threads are not
 	// starved.

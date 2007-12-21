@@ -179,14 +179,6 @@ public:
 	 * @param hires timespec representation to fill.
 	 */
 	static void gettimeout(timeout_t timeout, struct timespec *hires);
-
-	/**
-	 * Specify a maximum sharing (access) limit.  This can be used
-	 * to detect locking errors, such as when aquiring locks that are
-	 * not released.
-	 * @param max sharing level.
-	 */
-	void sharing(unsigned max);
 };
 
 /**
@@ -329,6 +321,14 @@ public:
 	 * Complete exclusive mode write scheduling.
 	 */
 	void commit(void);
+
+	/**
+	 * Specify a maximum sharing (access) limit.  This can be used
+	 * to detect locking errors, such as when aquiring locks that are
+	 * not released.
+	 * @param max sharing level.
+	 */
+	void limit_sharing(unsigned max);
 };
 
 /**
@@ -2235,14 +2235,14 @@ inline void release(mutex_t &mutex)
  * Convenience function to exclusively schedule conditional access.
  * @param lock to make exclusive.
  */
-inline void exclusive(acslock_t &lock)
+inline void modify(acslock_t &lock)
 	{lock.modify();};
 
 /**
  * Convenience function to shared read schedule conditional access.
  * @param lock to access shared.
  */
-inline void share(acslock_t &lock)
+inline void access(acslock_t &lock)
 	{lock.access();};
 
 /**
