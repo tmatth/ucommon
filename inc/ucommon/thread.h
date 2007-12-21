@@ -2153,7 +2153,7 @@ typedef ConditionalLock condlock_t;
 /**
  * Convenience type for scheduling access.
  */
-typedef ConditionalAccess acslock_t;
+typedef ConditionalAccess accesslock_t;
 
 /**
  * Convenience type for using timed events.
@@ -2235,21 +2235,21 @@ inline void release(mutex_t &mutex)
  * Convenience function to exclusively schedule conditional access.
  * @param lock to make exclusive.
  */
-inline void modify(acslock_t &lock)
+inline void modify(accesslock_t &lock)
 	{lock.modify();};
 
 /**
  * Convenience function to shared read schedule conditional access.
  * @param lock to access shared.
  */
-inline void access(acslock_t &lock)
+inline void access(accesslock_t &lock)
 	{lock.access();};
 
 /**
  * Convenience function to release an access lock.
  * @param lock to release.
  */
-inline void release(acslock_t &lock)
+inline void release(accesslock_t &lock)
 	{lock.release();};
 
 /**
@@ -2257,7 +2257,7 @@ inline void release(acslock_t &lock)
  * lock.
  * @param lock to commit.
  */
-inline void commit(acslock_t &lock)
+inline void commit(accesslock_t &lock)
 	{lock.commit();};
 
 /**
