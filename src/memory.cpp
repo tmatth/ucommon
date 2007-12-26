@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
+#include <stdio.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -75,6 +76,7 @@ mempager::mempager(size_t ps)
 	pagesize = ps;
 	count = 0;
 	limit = 0;
+	page = NULL;
 }
 
 mempager::~mempager()

@@ -457,7 +457,7 @@ void NamedTree::purge(void)
 	while(node) {
 		obj = *node;
 		obj->parent = NULL;	// save processing
-		node.next();
+		node = obj->getNext();
 		delete obj;
 	}
 
