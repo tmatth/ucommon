@@ -1,3 +1,6 @@
+From ucommon 1.2.0 to 1.2.1
+- conditional modify access can be asserted during active recursive share.
+
 From ucommon 1.1.1 to 1.2.0
 - adding conditional policies, ConditionalLock::concurrency() and
   ConditionalRW::sharing().

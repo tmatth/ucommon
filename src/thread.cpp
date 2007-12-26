@@ -935,8 +935,17 @@ void ConditionalLock::modify(void)
 {
 	Context *context;
 
-	ConditionalAccess::modify();
+	Lock();
 	context = getContext();
+
+	assert(context && sharing >= context->count);
+
+	sharing -= context->count;
+	while(sharing) {
+		++pending;
+		waitSignal();
+		--pending;
+	}
 	++context->count;
 }
 
