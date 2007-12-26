@@ -935,7 +935,7 @@ void ConditionalLock::modify(void)
 {
 	Context *context;
 
-	Lock();
+	lock();
 	context = getContext();
 
 	assert(context && sharing >= context->count);
