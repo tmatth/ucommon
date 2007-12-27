@@ -127,7 +127,6 @@
 #ifdef	_MSWINDOWS_
 
 #include <sys/stat.h>
-#include <malloc.h>
 
 typedef	DWORD pthread_t;
 typedef	CRITICAL_SECTION pthread_mutex_t;
