@@ -22,11 +22,8 @@
 #include <string.h>
 #include <stdarg.h>
 
-#ifndef	_MSWINDOWS_
-#include <sched.h>
-#endif
-
 #if _POSIX_PRIORITY_SCHEDULING > 0
+#include <sched.h>
 static int realtime_policy = SCHED_FIFO;
 #endif
 
