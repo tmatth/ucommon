@@ -1,3 +1,10 @@
+From ucommon 1.2.3 to 1.2.4
+- default initialization of socket address list to NULL required.
+
+From ucommon 1.2.2 to 1.2.3
+- small change in use of sched.h for portability.
+- unitialized mempager and reorg treemap purge.
+
 From ucommon 1.2.1 to 1.2.2
 - typo in exclusive conditional lock.
 

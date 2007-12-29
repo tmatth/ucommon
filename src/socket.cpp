@@ -420,6 +420,7 @@ proc:
 	hint.ai_family = family;
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
+	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
 
@@ -427,7 +428,7 @@ Socket::address::address(int family, const char *host, const char *svc)
 {
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = family;
-
+	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
 
@@ -443,6 +444,7 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	if(so != INVALID_SOCKET)
 		ah = gethint(so, &hint);
 
+	list = NULL;
 	getaddrinfo(host, svc, ah, &list);
 }
 
