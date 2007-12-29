@@ -951,7 +951,12 @@ void ConditionalLock::commit(void)
 	Context *context = getContext();
 	--context->count;
 
-	ConditionalAccess::commit();
+	if(context->count) {
+		sharing += context->count;
+		unlock();
+	}
+	else
+		ConditionalAccess::commit();
 }
 
 void ConditionalLock::release(void)

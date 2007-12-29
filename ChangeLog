@@ -1,3 +1,6 @@
+From ucommon 1.2.4 to 1.2.5
+- restore sharing level at ConditionalLock commit if recursive locked.
+
 From ucommon 1.2.3 to 1.2.4
 - default initialization of socket address list to NULL required.
 
