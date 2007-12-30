@@ -820,7 +820,7 @@ void mutex::protect(void *ptr)
 	}
 	entry->pointer = ptr;
 	++entry->count;
-	printf("ACQUIRE %p, POINTER %p, COUNT %d\n", entry, entry->pointer, entry->count);
+//	printf("ACQUIRE %p, THREAD %d, POINTER %p, COUNT %d\n", entry, Thread::self(), entry->pointer, entry->count);
 	index->release();
 	pthread_mutex_lock(&entry->mutex);
 }	
@@ -843,7 +843,7 @@ void mutex::release(void *ptr)
 
 	assert(entry);
 	if(entry) {
-		printf("RELEASE %p, POINTER %p COUNT %d\n", entry, entry->pointer, entry->count);
+//		printf("RELEASE %p, THREAD %d, POINTER %p COUNT %d\n", entry, Thread::self(), entry->pointer, entry->count);
 		pthread_mutex_unlock(&entry->mutex);
 		--entry->count;
 	}
