@@ -31,9 +31,55 @@ static unsigned max_sharing = 0;
 
 using namespace UCOMMON_NAMESPACE;
 
+struct mutex_entry
+{
+	pthread_mutex_t mutex;
+	struct mutex_entry *next;
+	void *pointer;
+	unsigned count;
+};
+	
+class __LOCAL mutex_index : public mutex
+{
+public:
+	struct mutex_entry *list;
+
+	mutex_index();
+};
+
+static mutex_index single_table;
+static mutex_index *mutex_table = &single_table;
+static unsigned mutex_indexing = 1;
+
+mutex_index::mutex_index() : mutex()
+{
+	list = NULL;
+}
+
 #ifndef	_MSWINDOWS_
 Conditional::attribute Conditional::attr;
 #endif
+
+static unsigned hash_address(void *ptr)
+{
+	unsigned key = 0;
+	unsigned count = 0;
+	unsigned char *addr = (unsigned char *)(&ptr);
+
+	if(mutex_indexing < 2)
+		return 0;
+
+	// skip lead zeros if little endian...
+	while(count < sizeof(void *) && *addr == 0) {
+		++count;
+		++addr;
+	}
+
+	while(count++ < sizeof(void *) && *addr)
+		key = (key << 1) ^ *(addr++);	
+
+	return key % mutex_indexing;
+}
 
 ReusableAllocator::ReusableAllocator() :
 Conditional()
@@ -690,6 +736,42 @@ void rwlock::release(void)
 	unlock();
 }
 
+auto_protect::auto_protect()
+{
+	object = NULL;
+}
+
+auto_protect::auto_protect(void *obj)
+{
+	object = obj;
+	if(object)
+		mutex::protect(obj);
+}
+
+auto_protect::~auto_protect()
+{
+	release();
+}
+
+void auto_protect::release()
+{
+	if(object) {
+		mutex::release(object);
+		object = NULL;
+	}
+}
+
+void auto_protect::operator=(void *obj)
+{
+	if(obj == object)
+		return;
+
+	release();
+	object = obj;
+	if(object)
+		mutex::protect(object);
+}
+
 mutex::mutex()
 {
 	crit(pthread_mutex_init(&mlock, NULL) == 0, "mutex init failed");
@@ -699,6 +781,74 @@ mutex::~mutex()
 {
 	pthread_mutex_destroy(&mlock);
 }
+
+void mutex::indexing(unsigned index)
+{
+	if(index > 1) {
+		mutex_table = new mutex_index[index];
+		mutex_indexing = index;
+	}
+}
+
+void mutex::protect(void *ptr)
+{
+	mutex_index *index = &mutex_table[hash_address(ptr)];
+	mutex_entry *entry, *empty = NULL;
+
+	if(!ptr)
+		return;
+
+	index->acquire();
+	entry = index->list;
+	while(entry) {
+		if(entry->count && entry->pointer == ptr)
+			break;
+		if(!entry->count)
+			empty = entry;
+		entry = entry->next;
+	}
+	if(!entry) {
+		if(empty)
+			entry = empty;
+		else {
+			entry = new struct mutex_entry;
+			entry->count = 0;
+			pthread_mutex_init(&entry->mutex, NULL);
+			entry->next = index->list;
+			index->list = entry;
+		}
+	}
+	entry->pointer = ptr;
+	++entry->count;
+	printf("ACQUIRE %p, POINTER %p, COUNT %d\n", entry, entry->pointer, entry->count);
+	index->release();
+	pthread_mutex_lock(&entry->mutex);
+}	
+
+void mutex::release(void *ptr)
+{
+	mutex_index *index = &mutex_table[hash_address(ptr)];
+	mutex_entry *entry;
+
+	if(!ptr)
+		return;
+
+	index->acquire();
+	entry = index->list;
+	while(entry) {
+		if(entry->count && entry->pointer == ptr)
+			break;
+		entry = entry->next;
+	}
+
+	assert(entry);
+	if(entry) {
+		printf("RELEASE %p, POINTER %p COUNT %d\n", entry, entry->pointer, entry->count);
+		pthread_mutex_unlock(&entry->mutex);
+		--entry->count;
+	}
+	index->release();
+}	
 
 void mutex::Exlock(void)
 {

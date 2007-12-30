@@ -895,7 +895,15 @@ public:
 
 /**
  * Generic non-recursive exclusive lock class.  This class also impliments 
- * the exclusive_lock protocol.
+ * the exclusive_lock protocol.  In addition, an interface is offered to
+ * support dynamically managed mutexes which are internally pooled.  These
+ * can be used to protect and serialize arbitrary access to memory and
+ * objects on demand.  This offers an advantage over embedding mutexes to
+ * serialize access to individual objects since the maximum number of
+ * mutexes will never be greater than the number of actually running threads
+ * rather than the number of objects being potentially protected.  The
+ * ability to hash the pointer address into an indexed table further optimizes
+ * access by reducing the chance for collisions on the primary index mutex.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT mutex : public Exclusive
@@ -996,7 +1004,88 @@ public:
 	 */
 	inline static void release(pthread_mutex_t *lock)
 		{pthread_mutex_unlock(lock);};
+
+	/**
+	 * Specify hash table size for gaurd protection.  The default is 1.
+	 * This should be called at initialization time from the main thread
+	 * of the application before any other threads are created.
+	 * @param hash table size for gaurding.
+	 */
+	static void indexing(unsigned size);
+
+	/**
+	 * Specify pointer/object/resource to gaurd protect.  This uses a
+	 * dynamically managed mutex.
+	 * @param pointer to protect.
+	 */
+	static void protect(void *pointer);
+
+	/**
+	 * Specify a pointer/object/resource to release.
+	 * @param pointer to release.
+	 */
+	static void release(void *pointer);
 };
+
+/**
+ * A mutex locked object smart pointer helper class.  This is particularly
+ * useful in referencing objects which will be protected by the mutex
+ * protect function.  When the pointer falls out of scope, the protecting
+ * mutex is also released.  This is meant to be used by the typed
+ * mutex_pointer template.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT auto_protect
+{
+private:
+	// cannot copy...
+	inline auto_protect(const auto_pointer &pointer) {};
+
+protected:
+	void *object;
+	
+	auto_protect();
+
+public:
+	/**
+	 * Construct a protected pointer referencing an existing object.
+	 * @param object we point to.
+	 */
+	auto_protect(void *object);
+	
+	/**
+	 * Delete protected pointer.  When it falls out of scope the associated
+	 * mutex is released.
+	 */
+	~auto_protect();
+
+	/**
+	 * Manually release the pointer.  This releases the mutex.
+	 */
+	void release(void);
+
+	/**
+	 * Test if the pointer is not set.
+	 * @return true if the pointer is not referencing anything.
+	 */
+	inline bool operator!() const
+		{return object == NULL;};
+
+	/**
+	 * Test if the pointer is referencing an object.
+	 * @return true if the pointer is currently referencing an object.
+	 */
+	inline operator bool() const
+		{return object != NULL;};
+
+	/**
+	 * Set our pointer to a specific object.  If the pointer currently
+	 * references another object, the associated mutex is released.  The 
+	 * pointer references our new object and that new object is locked.
+	 * @param object to assign to.
+	 */
+	void operator=(void *object);
+};	
 
 /**
  * An object pointer that uses mutex to assure thread-safe singleton use.
@@ -2127,6 +2216,49 @@ public:
 	 */
 	inline const T* get(void) const
 		{return static_cast<const T*>(ptr->pointer);};
+};
+
+/**
+ * Typed smart locked pointer class.  This is used to manage references to
+ * objects which are protected by an auto-generated mutex.  The mutex is
+ * released when the pointer falls out of scope. 
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class mutex_pointer : public auto_protect
+{
+public:
+	/**
+	 * Create a pointer with no reference.
+	 */
+	inline mutex_pointer() : auto_protect() {};
+
+	/**
+	 * Create a pointer with a reference to a heap object.
+	 * @param object we are referencing.
+	 */
+	inline mutex_pointer(T* object) : auto_protect(object) {};
+
+	/**
+	 * Reference object we are pointing to through pointer indirection.
+	 * @return object we are pointing to.
+	 */
+	inline T& operator*() const
+		{return *(static_cast<T*>(auto_protect::object));};
+
+	/**
+	 * Reference member of object we are pointing to.
+	 * @return reference to member of pointed object.
+	 */
+	inline T* operator->() const
+		{return static_cast<T*>(auto_protect::object);};
+
+	/**
+	 * Get pointer to object.
+	 * @return pointer or NULL if we are not referencing an object.
+	 */
+	inline T* get(void) const
+		{return static_cast<T*>(auto_protect::object);};
 };
 
 /**
