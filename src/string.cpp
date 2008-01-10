@@ -154,6 +154,8 @@ void string::cstring::add(char ch)
 
 void string::cstring::set(strsize_t offset, const char *str, strsize_t size)
 {
+	assert(str != NULL);
+
 	if(offset >= max || offset > len)
 		return;
 
@@ -202,6 +204,8 @@ strsize_t string::len(void)
 
 void string::cstring::set(const char *str)
 {
+	assert(str != NULL);
+
 	strsize_t size = strlen(str);
 	if(size > max)
 		size = max;
@@ -269,6 +273,8 @@ string::string(strsize_t size, char fill)
 
 string::string(strsize_t size, const char *format, ...)
 {
+	assert(format != NULL);
+
 	va_list args;
 	va_start(args, format);
 
@@ -389,6 +395,8 @@ const char *string::end(void) const
 
 const char *string::chr(char ch) const
 {
+	assert(ch != 0);
+
 	if(!str)
 		return NULL;
 
@@ -397,6 +405,8 @@ const char *string::chr(char ch) const
 
 const char *string::rchr(char ch) const
 {
+	assert(ch != 0);
+
     if(!str)
         return NULL;
 
@@ -529,6 +539,8 @@ const char *string::find(const char *clist, strsize_t offset) const
 
 bool string::unquote(const char *clist)
 {
+	assert(clist != NULL);
+
 	char *s;
 
 	if(!str)
@@ -588,6 +600,8 @@ strsize_t string::ccount(const char *clist) const
 
 strsize_t string::printf(const char *format, ...)
 {
+	assert(format != NULL);
+
 	va_list args;
 	va_start(args, format);
 	if(str) {
@@ -601,6 +615,8 @@ strsize_t string::printf(const char *format, ...)
 
 strsize_t string::vprintf(const char *format, va_list args)
 {
+	assert(format != NULL);
+
 	if(str) {
 		vsnprintf(str->text, str->max + 1, format, args);
 		str->len = strlen(str->text);
@@ -611,6 +627,8 @@ strsize_t string::vprintf(const char *format, va_list args)
 
 int string::vscanf(const char *format, va_list args)
 {
+	assert(format != NULL);
+
 	if(str)
 		return vsscanf(str->text, format, args);
 	return -1;
@@ -618,6 +636,8 @@ int string::vscanf(const char *format, va_list args)
 
 int string::scanf(const char *format, ...)
 {
+	assert(format != NULL);
+
 	va_list args;
 	int rtn = -1;
 
@@ -882,8 +902,6 @@ const char *string::operator()(int offset) const
 	return str->text + str->len + offset;
 }
 
-
-
 const char string::operator[](int offset) const
 {
 	if(!str)
@@ -1052,6 +1070,9 @@ string &string::operator+(const char *s)
 
 memstring::memstring(void *mem, strsize_t size, char fill)
 {
+	assert(mem != NULL);
+	assert(size > 0);
+
 	str = new((caddr_t)mem) cstring(size, fill);
 	str->set("");
 }
@@ -1063,12 +1084,16 @@ memstring::~memstring()
 
 memstring *memstring::create(strsize_t size, char fill)
 {
+	assert(size > 0);
+
 	caddr_t mem = (caddr_t)cpr_memalloc(size + sizeof(memstring) + sizeof(cstring));
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
 
 memstring *memstring::create(mempager *pager, strsize_t size, char fill)
 {
+	assert(size > 0);
+
 	caddr_t mem = (caddr_t)pager->alloc(size + sizeof(memstring) + sizeof(cstring));
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
@@ -1163,6 +1188,8 @@ void string::fix(string &s)
 
 int string::scanf(string &s, const char *fmt, ...)
 {
+	assert(fmt != NULL);
+
 	int rtn;
 	va_list args;
 
@@ -1174,6 +1201,8 @@ int string::scanf(string &s, const char *fmt, ...)
 	
 strsize_t string::printf(string &s, const char *fmt, ...)
 {
+	assert(fmt != NULL);
+
 	va_list args;
 	va_start(args, fmt);
 	s.vprintf(fmt, args);
@@ -1232,6 +1261,8 @@ int string::read(FILE *fp, string &s)
 
 int string::write(FILE *fp, string &s)
 {
+	assert(fp != NULL);
+
 	if(!mem(s))
 		return 0;
 
@@ -1251,6 +1282,8 @@ bool string::putline(Socket &so, string &s)
 
 bool string::putline(FILE *fp, string &s)
 {
+	assert(fp != NULL);
+
 	if(s[-1] != '\n')
 		s.add("\n");
 		
@@ -1281,6 +1314,8 @@ bool string::getline(Socket &so, string &s)
 
 int string::read(DIR *dir, string &s)
 {
+	assert(dir != NULL);
+
 	struct dirent *dno = ::readdir(dir);
 
 	if(!dno) {
@@ -1294,6 +1329,8 @@ int string::read(DIR *dir, string &s)
 
 bool string::getline(FILE *fp, string &s)
 {
+	assert(fp != NULL);
+
 	if(!mem(s))
 		return true;
 
@@ -1702,6 +1739,8 @@ int string::icompare(const char *s1, const char *s2, size_t s)
 
 char *string::unquote(char *str, const char *clist)
 {
+	assert(clist != NULL);
+
 	size_t len = count(str);
 	if(!len || !str)
 		return NULL;

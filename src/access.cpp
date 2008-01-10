@@ -37,14 +37,15 @@ void Shared::Share(void)
 
 shared_lock::shared_lock(Shared *obj)
 {
+	assert(obj != NULL);
 	lock = obj;
 	modify = false;
 	lock->Shlock();
-
 };
 
 exclusive_lock::exclusive_lock(Exclusive *obj)
 {
+	assert(obj != NULL);
 	lock = obj;
 	lock->Exlock();
 }

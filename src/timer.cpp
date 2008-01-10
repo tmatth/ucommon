@@ -35,6 +35,8 @@ static time_t difftime(time_t ref)
 #if _POSIX_TIMERS > 0
 static void adj(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	if(ts->tv_nsec >= 1000000000l)
 		ts->tv_sec += (ts->tv_nsec / 1000000000l);
 	ts->tv_nsec %= 1000000000l;
@@ -44,6 +46,8 @@ static void adj(struct timespec *ts)
 #else
 static void adj(struct timeval *ts)
 {
+	assert(ts != NULL);
+
     if(ts->tv_usec >= 1000000l)
         ts->tv_sec += (ts->tv_usec / 1000000l);
     ts->tv_usec %= 1000000l;
@@ -56,6 +60,8 @@ static void adj(struct timeval *ts)
 #ifdef	_WIN32_WCE
 extern "C" int gettimeofday(struct timeval *tv_,  void *tz_)
 {
+	assert(tv_ != NULL);
+
 	// We could use _ftime(), but it is not available on WinCE.
 	// (WinCE also lacks time.h)
 	// Note also that the average error of _ftime is around 20 ms :)
@@ -71,6 +77,8 @@ extern "C" int gettimeofday(struct timeval *tv_,  void *tz_)
 
 extern "C" int gettimeofday(struct timeval *tv_, void *tz_)
 {
+	assert(tv_ != NULL);
+
 #if defined(_MSC_VER) && _MSC_VER >= 1300 
 	struct __timeb64 tb;
 	_ftime64(&tb);

@@ -36,6 +36,8 @@ bitmap::bitmap(size_t count)
 
 bitmap::bitmap(void *ptr, size_t count, bus_t access)
 {
+	assert(ptr != NULL);
+	assert(access >= BMIN && access <= BMAX);
 	addr.a = ptr;
 	bus = access;
 }

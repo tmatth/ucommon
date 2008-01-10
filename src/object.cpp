@@ -83,6 +83,8 @@ auto_delete::~auto_delete()
 
 auto_pointer::auto_pointer(Object *o)
 {
+	assert(o != NULL);
+
 	o->retain();
 	object = o;
 }
@@ -123,16 +125,19 @@ auto_pointer::operator bool() const
 
 bool auto_pointer::operator==(Object *o) const
 {
+	assert(o != NULL);
 	return object == o;
 }
 
 bool auto_pointer::operator!=(Object *o) const
 {
+	assert(o != NULL);
 	return object != o;
 }
 
 auto_pointer &auto_pointer::operator=(Object *o)
 {
+	assert(o != NULL);
 	if(object == o)
 		return *this;
 
@@ -146,6 +151,7 @@ auto_pointer &auto_pointer::operator=(Object *o)
 
 sparse_array::sparse_array(unsigned m)
 {
+	assert(m > 0);
 	max = m;
 	vector = new Object*[m];
 	memset(vector, 0, sizeof(Object *) * m);

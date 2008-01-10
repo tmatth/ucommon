@@ -76,18 +76,26 @@ typedef unsigned char   bit_t;
 
 static void bitmask(bit_t *bits, bit_t *mask, unsigned len)
 {
+	assert(bits != NULL);
+	assert(mask != NULL);
+
     while(len--)
         *(bits++) &= *(mask++);
 }
 
 static void bitimask(bit_t *bits, bit_t *mask, unsigned len)
 {
+	assert(bits != NULL);
+	assert(mask != NULL);
+
     while(len--)
         *(bits++) |= ~(*(mask++));
 }
 
 static void bitset(bit_t *bits, unsigned blen)
 {
+	assert(bits != NULL);
+
     bit_t mask;
 
     while(blen) {
@@ -103,6 +111,8 @@ static void bitset(bit_t *bits, unsigned blen)
 
 static unsigned bitcount(bit_t *bits, unsigned len)
 {
+	assert(bits != NULL);
+
     unsigned count = 0;
     bit_t mask, test;
 
@@ -132,6 +142,7 @@ LinkedObject()
 cidr::cidr(const char *cp) :
 LinkedObject()
 {
+	assert(cp != NULL && *cp != 0);
 	set(cp);
 	name[0] = 0;
 }
@@ -139,6 +150,9 @@ LinkedObject()
 cidr::cidr(policy **policy, const char *cp) :
 LinkedObject(policy)
 {
+	assert(policy != NULL);
+	assert(cp != NULL && *cp != 0);
+
 	set(cp);
 	name[0] = 0;
 }
@@ -146,6 +160,10 @@ LinkedObject(policy)
 cidr::cidr(policy **policy, const char *cp, const char *id) :
 LinkedObject(policy)
 {
+	assert(policy != NULL);
+	assert(cp != NULL && *cp != 0);
+	assert(id != NULL && *id != 0);
+
 	set(cp);
 	string::set(name, sizeof(name), id);
 }
@@ -177,6 +195,9 @@ unsigned cidr::getMask(void) const
 
 cidr *cidr::find(policy *policy, const struct sockaddr *s)
 {
+	assert(policy != NULL);
+	assert(s != NULL);
+
 	cidr *member = NULL;
 	unsigned top = 0;
 
@@ -195,6 +216,8 @@ cidr *cidr::find(policy *policy, const struct sockaddr *s)
 
 bool cidr::isMember(const struct sockaddr *s) const
 {
+	assert(s != NULL);
+
 	inethostaddr_t host;
 	inetsockaddr_t *addr = (inetsockaddr_t *)s;
 
@@ -244,6 +267,8 @@ inethostaddr_t cidr::getBroadcast(void) const
 
 unsigned cidr::getMask(const char *cp) const
 {
+	assert(cp != NULL && *cp != 0);
+
 	unsigned count = 0, rcount = 0, dcount = 0;
 	const char *sp = strchr(cp, '/');
 	bool flag = false;
@@ -315,6 +340,8 @@ unsigned cidr::getMask(const char *cp) const
 
 void cidr::set(const char *cp)
 {
+	assert(cp != NULL && *cp != 0);
+
 	char cbuf[128];
 	char *ep;
 	unsigned dots = 0;
@@ -384,6 +411,8 @@ void cidr::set(const char *cp)
 
 Socket::address::address(const char *a, int family, int type, int protocol)
 {
+	assert(a != NULL && *a != 0);
+
 	char *addr = strdup(a);
 	char *host = strchr(addr, '@');
 	char *ep;
@@ -426,6 +455,9 @@ proc:
 
 Socket::address::address(int family, const char *host, const char *svc)
 {
+	assert(host != NULL && *host != 0);
+	assert(svc != NULL && *svc != 0);
+
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = family;
 	list = NULL;
@@ -434,11 +466,17 @@ Socket::address::address(int family, const char *host, const char *svc)
 
 Socket::address::address(Socket &s, const char *host, const char *svc)
 {
+	assert(host != NULL && *host != 0);
+	assert(svc != NULL && *svc != 0);
+
 	address(host, svc, (int)s);
 }
 
 Socket::address::address(const char *host, const char *svc, SOCKET so)
 {
+	assert(host != NULL && *host != 0);
+	assert(svc != NULL && *svc != 0);
+
 	struct addrinfo *ah = NULL;
 
 	if(so != INVALID_SOCKET)
@@ -466,6 +504,8 @@ struct sockaddr *Socket::address::getAddr(void)
 
 void Socket::address::add(struct sockaddr *addr)
 {
+	assert(addr != NULL);
+
 	char buffer[80];
 	char svc[8];
 
@@ -476,6 +516,9 @@ void Socket::address::add(struct sockaddr *addr)
 
 void Socket::address::add(const char *host, const char *svc, int family)
 {
+	assert(host != NULL && *host != 0);
+	assert(svc != NULL && *svc != 0);
+
 	struct addrinfo *join, *last = NULL;
 
 	if(family) {
@@ -500,6 +543,8 @@ void Socket::address::add(const char *host, const char *svc, int family)
 
 struct sockaddr *Socket::address::find(struct sockaddr *addr)
 {
+	assert(addr != NULL);
+
 	struct addrinfo *node = list;
 
 	while(node) {
@@ -537,6 +582,8 @@ Socket::Socket(SOCKET s)
 
 Socket::Socket(struct addrinfo *addr)
 {
+	assert(addr != NULL);
+
 	while(addr) {
 		so = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 		if(so != INVALID_SOCKET) {
@@ -555,6 +602,9 @@ Socket::Socket(int family, int type, int protocol)
 
 Socket::Socket(const char *iface, const char *port, int family, int type, int protocol)
 {
+	assert(iface != NULL && *iface != 0);
+	assert(port != NULL && *port != 0);
+
 	so = ::socket(family, type, protocol);
 	if(so != INVALID_SOCKET)
 		if(bindaddr(so, iface, port))
@@ -615,6 +665,9 @@ Socket &Socket::operator=(SOCKET s)
 
 size_t Socket::peek(void *data, size_t len) const
 {
+	assert(data != NULL);
+	assert(len > 0);
+
 	ssize_t rtn = ::recv(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK);
 	if(rtn < 1)
 		return 0;
@@ -623,12 +676,18 @@ size_t Socket::peek(void *data, size_t len) const
 
 ssize_t Socket::get(void *data, size_t len, sockaddr *from)
 {
+	assert(data != NULL);
+	assert(len > 0);
+
 	socklen_t slen = 0;
 	return ::recvfrom(so, (caddr_t)data, len, 0, from, &slen);
 }
 
 ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
 {
+	assert(data != NULL);
+	assert(len > 0);
+
 	socklen_t slen = 0;
 	if(dest)
 		slen = getlen(dest);
@@ -641,11 +700,17 @@ ssize_t Socket::puts(const char *str)
 	if(!str)
 		return 0;
 
+	if(!*str)
+		return 0;
+
 	return put(str, strlen(str));
 }
 
 ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 {
+	assert(data != NULL);
+	assert(max > 0);
+
 	bool crlf = false;
 	bool nl = false;
 	int nleft = max - 1;		// leave space for null byte
@@ -874,6 +939,8 @@ int Socket::disconnect(SOCKET so)
 
 int Socket::join(SOCKET so, struct addrinfo *node)
 {
+	assert(node != NULL);
+
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
 	socklen_t len = sizeof(addr);
@@ -913,6 +980,8 @@ int Socket::join(SOCKET so, struct addrinfo *node)
 
 int Socket::drop(SOCKET so, struct addrinfo *node)
 {
+	assert(node != NULL);
+
 	inetmulticast_t mcast;
 	inetsockaddr_t addr;
 	socklen_t len = sizeof(addr);
@@ -954,6 +1023,8 @@ int Socket::drop(SOCKET so, struct addrinfo *node)
 	
 int Socket::connect(SOCKET so, struct addrinfo *node)
 {
+	assert(node != NULL);
+
 	int rtn = -1;
 	int family;
 	
@@ -982,6 +1053,8 @@ exit:
 
 int Socket::error(SOCKET so)
 {
+	assert(so != INVALID_SOCKET);
+
 	int opt;
 	socklen_t slen = sizeof(opt);
 
@@ -993,6 +1066,8 @@ int Socket::error(SOCKET so)
 
 int Socket::sendsize(SOCKET so, unsigned size)
 {
+	assert(so != INVALID_SOCKET);
+
 #ifdef	SO_SNDBUF
 	return setsockopt(so, SOL_SOCKET, SO_SNDBUF, (caddr_t)&size, sizeof(size));
 #else
@@ -1168,6 +1243,10 @@ bool Socket::waitSending(timeout_t timeout) const
 ListenSocket::ListenSocket(const char *iface, const char *svc, unsigned backlog) :
 Socket()
 {
+	assert(iface != NULL && *iface != 0);
+	assert(svc != NULL && *svc != 0);
+	assert(backlog > 0);
+
 	int family = AF_INET;
 	if(strchr(iface, '/'))
 		family = AF_UNIX;
@@ -1210,6 +1289,9 @@ SOCKET ListenSocket::accept(struct sockaddr *addr)
 
 static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 {
+	assert(addr != NULL);
+	assert(path != NULL && *path != 0);
+
 	socklen_t len;
 	unsigned slen = strlen(path);
 
@@ -1234,6 +1316,8 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 
 struct addrinfo *Socket::gethint(SOCKET so, struct addrinfo *hint)
 {
+	assert(hint != NULL);
+
 	struct sockaddr_storage st;
 	struct sockaddr *sa = (struct sockaddr *)&st;
 	socklen_t slen;
@@ -1250,6 +1334,10 @@ struct addrinfo *Socket::gethint(SOCKET so, struct addrinfo *hint)
 
 char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
 {
+	assert(sa != NULL);
+	assert(buf != NULL);
+	assert(max > 0);
+
 	socklen_t sl;
 
 #ifdef	AF_UNIX
@@ -1285,6 +1373,10 @@ char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
 
 socklen_t Socket::getaddr(SOCKET so, struct sockaddr_storage *sa, const char *host, const char *svc)
 {
+	assert(sa != NULL);
+	assert(host != NULL && *host != 0);
+	assert(svc != NULL && *svc != 0);
+
 	socklen_t len = 0;
 	struct addrinfo hint, *res = NULL;
 
@@ -1310,6 +1402,10 @@ exit:
 
 int Socket::bindaddr(SOCKET so, const char *host, const char *svc)
 {
+	assert(so != INVALID_SOCKET);
+	assert(host != NULL && *host != 0);
+	assert(svc != NULL && *svc != 0);
+
 	int rtn = -1;
 	int reuse = 1;
 
@@ -1357,6 +1453,9 @@ exit:
 
 unsigned Socket::keyindex(struct sockaddr *addr, unsigned keysize)
 {
+	assert(addr != NULL);
+	assert(keysize > 0);
+
 	unsigned key = 0;
 	caddr_t cp = NULL;
 	unsigned len;
@@ -1385,6 +1484,8 @@ switch(addr->sa_family) {
 
 short Socket::getservice(struct sockaddr *addr)
 {
+	assert(addr != NULL);
+
 	switch(addr->sa_family) {
 #ifdef	AF_INET6
 	case AF_INET6:
@@ -1398,6 +1499,9 @@ short Socket::getservice(struct sockaddr *addr)
 
 char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 {
+	assert(addr != NULL);
+	assert(name != NULL);
+
 	*name = 0;
 	if(!addr)
 		return NULL;
@@ -1440,6 +1544,9 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 
 void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 {
+	assert(iface != NULL);
+	assert(dest != NULL);
+
 	int so = INVALID_SOCKET;
 	socklen_t len = getlen(dest);
 	memset(iface, 0, len);
@@ -1482,6 +1589,8 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 
 bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
 {
+	assert(s1 != NULL && s2 != NULL);
+
 	unsigned char *a1, *a2;
 	if(s1->sa_family != s2->sa_family)
 		return false;
@@ -1512,12 +1621,16 @@ bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
 
 void Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
 {
+	assert(s1 != NULL && s2 != NULL);
+
 	socklen_t len = getlen(s1);
 	memcpy(s2, s1, len);
 }
 
 bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 {
+	assert(s1 != NULL && s2 != NULL);
+
 	if(s1->sa_family != s2->sa_family)
 		return false;
 
@@ -1574,6 +1687,8 @@ socklen_t Socket::getlen(struct sockaddr *sa)
 
 int Socket::getfamily(SOCKET so)
 {
+	assert(so != INVALID_SOCKET);
+
 	struct sockaddr_storage saddr;
 	socklen_t len = sizeof(saddr);
 	struct sockaddr *addr = (struct sockaddr *)&saddr;

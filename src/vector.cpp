@@ -26,6 +26,8 @@ const vectorsize_t Vector::npos = (vectorsize_t)(-1);
 
 Vector::array::array(vectorsize_t size)
 {
+	assert(size > 0);
+
 	max = size;
 	len = 0;
 	list[0] = 0;
@@ -85,12 +87,16 @@ void Vector::array::inc(vectorsize_t offset)
 
 void Vector::array::set(Object **items)
 {
+	assert(items != NULL);
+
 	purge();
 	add(items);
 }
 
 void Vector::array::add(Object **items)
 {
+	assert(items != NULL);
+
 	vectorsize_t size = Vector::size((void **)(items));
 
 	if(!size)
@@ -111,8 +117,7 @@ void Vector::array::add(Object **items)
 
 void Vector::array::add(Object *obj)
 {
-	if(!obj)
-		return;
+	assert(obj);
 
 	if(len == max)
 		return;
@@ -145,10 +150,7 @@ Vector::Vector()
 
 Vector::Vector(Object **items, vectorsize_t limit)
 {
-	if(!items) {
-		data = NULL;
-		return;
-	}
+	assert(items);
 
 	if(!limit)
 		limit = size((void **)items);
@@ -160,6 +162,8 @@ Vector::Vector(Object **items, vectorsize_t limit)
 
 Vector::Vector(vectorsize_t size) 
 {
+	assert(size > 0);
+
 	data = create(size);
 	data->retain();
 };
@@ -201,6 +205,8 @@ Object *Vector::get(int offset) const
 
 vectorsize_t Vector::get(void **target, vectorsize_t limit) const
 {
+	assert(target != NULL && limit > 0);
+
 	vectorsize_t pos;
 	if(!data) {
 		target[0] = 0;
@@ -215,6 +221,8 @@ vectorsize_t Vector::get(void **target, vectorsize_t limit) const
 
 Vector::array *Vector::create(vectorsize_t size) const
 {
+	assert(size > 0);
+
 	return new((size_t)size) array(size);
 }
 
@@ -243,6 +251,8 @@ Object *Vector::end(void) const
 
 vectorsize_t Vector::find(Object *obj, vectorsize_t pos) const
 {
+	assert(obj != NULL);
+
 	if(!data)
 		return npos;
 
@@ -286,6 +296,8 @@ void Vector::rsplit(vectorsize_t pos)
 
 void Vector::set(Object **list)
 {
+	assert(list);
+
 	if(!data && list) {
 		data = create(size((void **)list));
 		data->retain();
@@ -296,6 +308,8 @@ void Vector::set(Object **list)
 
 void Vector::set(vectorsize_t pos, Object *obj)
 {
+	assert(obj != NULL);
+
 	if(!data || pos > data->len)
 		return;
 
@@ -312,12 +326,16 @@ void Vector::set(vectorsize_t pos, Object *obj)
 
 void Vector::add(Object **list)
 {
+	assert(list);
+
 	if(data && list)
 		data->add(list);
 }
 
 void Vector::add(Object *obj)
 {
+	assert(obj);
+
 	if(data && obj)
 		data->add(obj);
 }
@@ -418,6 +436,9 @@ void Vector::operator-=(vectorsize_t dec)
 
 MemVector::MemVector(void *mem, vectorsize_t size)
 {
+	assert(mem != NULL);
+	assert(size > 0);
+
 	data = new((caddr_t)mem) array(size);
 }
 
@@ -450,11 +471,13 @@ Vector::array *MemVector::copy(void) const
 ArrayReuse::ArrayReuse(size_t size, unsigned c) :
 ReusableAllocator()
 {
+	assert(c > 0 && size > 0);
+
 	objsize = size;
 	count = 0;
 	limit = c;
 	used = 0;
-	mem = (caddr_t)malloc(size * count);
+	mem = (caddr_t)malloc(size * c);
 	crit(mem != NULL, "vector reuse alloc failed");
 }
 
@@ -541,6 +564,8 @@ ReusableObject *ArrayReuse::request(void)
 
 vectorsize_t Vector::size(void **list)
 {
+	assert(list != NULL);
+
 	vectorsize_t pos = 0;
 	while(list[pos])
 		++pos;
@@ -550,6 +575,8 @@ vectorsize_t Vector::size(void **list)
 PagerReuse::PagerReuse(mempager *p, size_t objsize, unsigned c) :
 ReusableAllocator()
 {
+	assert(objsize > 0 && c > 0);
+
 	pager = p;
 	limit = c;
 	count = 0;

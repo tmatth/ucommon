@@ -39,6 +39,7 @@ static size_t cpr_pagesize(void)
 
 mempager::mempager(size_t ps)
 {
+	assert(ps > 0);
 #ifdef	HAVE_SYSCONF
 	size_t paging = sysconf(_SC_PAGESIZE);
 #elif defined(PAGESIZE)
@@ -152,6 +153,8 @@ void mempager::dealloc(void *mem)
 
 void *mempager::alloc_locked(size_t size)
 {
+	assert(size > 0);
+
 	caddr_t mem;
 	page_t *p = page;
 
@@ -175,6 +178,8 @@ void *mempager::alloc_locked(size_t size)
 
 void *mempager::alloc(size_t size)
 {
+	assert(size > 0);
+
 	void *mem;
 
 	crit(size <= (pagesize - sizeof(page_t)), "mempager page size exceeded");
@@ -208,8 +213,9 @@ char *mempager::dup_locked(const char *str)
 
 char *mempager::dup_locked(void *obj, size_t size)
 {
-    if(!obj)
-        return NULL;
+	assert(obj != NULL);
+	assert(size > 0);
+
     char *mem = static_cast<char *>(alloc_locked(size));
 	memcpy(mem, obj, size);
     return mem;
@@ -217,6 +223,9 @@ char *mempager::dup_locked(void *obj, size_t size)
 
 void *mempager::dup(void *obj, size_t size)
 {
+	assert(obj != NULL);
+	assert(size > 0);
+
 	void *mem = alloc(size);
 	memcpy(mem, obj, size);
 	return mem;
@@ -245,6 +254,8 @@ void autorelease::release()
 
 void autorelease::operator+=(LinkedObject *obj)
 {
+	assert(obj != NULL);
+
 	obj->enlist(&pool);
 }
 
@@ -277,6 +288,8 @@ PagerPool::~PagerPool()
 
 void PagerPool::put(PagerObject *ptr)
 {
+	assert(ptr != NULL);
+
     pthread_mutex_lock(&mutex);
 	ptr->enlist(&freelist);
     pthread_mutex_unlock(&mutex);
@@ -284,6 +297,8 @@ void PagerPool::put(PagerObject *ptr)
 
 PagerObject *PagerPool::get(size_t size)
 {
+	assert(size > 0);
+
 	PagerObject *ptr;
 	pthread_mutex_lock(&mutex);
 	ptr = static_cast<PagerObject *>(freelist);
@@ -304,6 +319,10 @@ PagerObject *PagerPool::get(size_t size)
 keyassoc::keydata::keydata(keyassoc *assoc, char *id, unsigned max) :
 NamedObject(assoc->root, id, max)
 {
+	assert(assoc != NULL);
+	assert(id != NULL && *id != 0);
+	assert(max > 1);
+
 	strcpy(text, id);
 	data = NULL;
 	id = text;
@@ -312,6 +331,10 @@ NamedObject(assoc->root, id, max)
 keyassoc::keyassoc(unsigned pathmax, size_t strmax, size_t ps) :
 mempager(ps)
 {
+	assert(pathmax > 1);
+	assert(strmax > 1);
+	assert(ps > 1);
+
 	paths = pathmax;
 	keysize = strmax;
 	count = 0;
@@ -340,6 +363,8 @@ void keyassoc::purge(void)
 
 void *keyassoc::locate(const char *id)
 {
+	assert(id != NULL && *id != 0);
+
 	keydata *kd;
 
 	lock();
@@ -353,6 +378,8 @@ void *keyassoc::locate(const char *id)
 
 void *keyassoc::remove(const char *id)
 {
+	assert(id != NULL && *id != 0);
+
 	keydata *kd;
 	LinkedObject *obj;
 	void *data;
@@ -379,6 +406,9 @@ void *keyassoc::remove(const char *id)
 
 bool keyassoc::create(char *id, void *data)
 {
+	assert(id != NULL && *id != 0);
+	assert(data != NULL);
+
     keydata *kd;
 	LinkedObject *obj;
 	unsigned size = strlen(id);
@@ -410,6 +440,9 @@ bool keyassoc::create(char *id, void *data)
 
 bool keyassoc::assign(char *id, void *data)
 {
+	assert(id != NULL && *id != 0);
+	assert(data != NULL);
+
     keydata *kd;
 	LinkedObject *obj;
 	unsigned size = strlen(id);

@@ -72,7 +72,9 @@ public:
 		B8,			/**< Accessing a bitmap on 8 bit bus device */
 		B16,		/**< Accessing a bitmap on a 16 bit device */
 		B32,		/**< Accessing a bitmap on a 32 bit device */
-		B64			/**< Accessing a bitmap on a 64 bit device */
+		B64,		/**< Accessing a bitmap on a 64 bit device */
+		BMIN = BMALLOC,
+		BMAX = B64
 	} bus_t;
 
 protected:

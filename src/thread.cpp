@@ -62,6 +62,8 @@ Conditional::attribute Conditional::attr;
 
 static unsigned hash_address(void *ptr)
 {
+	assert(ptr != NULL);
+
 	unsigned key = 0;
 	unsigned count = 0;
 	unsigned char *addr = (unsigned char *)(&ptr);
@@ -90,6 +92,8 @@ Conditional()
 
 void ReusableAllocator::release(ReusableObject *obj)
 {
+	assert(obj != NULL);
+
 	LinkedObject **ru = (LinkedObject **)freelist;
 
 	obj->retain();
@@ -109,6 +113,8 @@ void ConditionalAccess::limit_sharing(unsigned max)
 
 void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 {
+	assert(ts != NULL);
+
 #if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
 	clock_gettime(CLOCK_MONOTONIC, ts);
 #elif _POSIX_TIMERS > 0
@@ -130,6 +136,8 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 semaphore::semaphore(unsigned limit) : 
 Conditional()
 {
+	assert(limit > 0);
+
 	count = limit;
 	waits = 0;
 	used = 0;
@@ -205,6 +213,8 @@ void semaphore::release(void)
 
 void semaphore::set(unsigned value)
 {
+	assert(value > 0);
+
 	unsigned diff;
 
 	lock();
@@ -311,6 +321,8 @@ bool Conditional::wait(timeout_t timeout)
 
 bool Conditional::wait(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	return wait(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
 }
 
@@ -356,6 +368,8 @@ bool Conditional::wait(timeout_t timeout)
 
 bool Conditional::wait(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	if(pthread_cond_timedwait(&cond, &mutex, ts) == ETIMEDOUT)
 		return false;
 
@@ -419,6 +433,8 @@ bool ConditionalAccess::waitSignal(timeout_t timeout)
 
 bool ConditionalAccess::waitSignal(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	return waitSignal(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
 }
 
@@ -450,6 +466,8 @@ bool ConditionalAccess::waitBroadcast(timeout_t timeout)
 
 bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	return waitBroadcast(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
 }
 
@@ -475,6 +493,8 @@ bool ConditionalAccess::waitSignal(timeout_t timeout)
 
 bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	if(pthread_cond_timedwait(&bcast, &mutex, ts) == ETIMEDOUT)
 		return false;
 
@@ -490,6 +510,8 @@ bool ConditionalAccess::waitBroadcast(timeout_t timeout)
 
 bool ConditionalAccess::waitSignal(struct timespec *ts)
 {
+	assert(ts != NULL);
+
 	if(pthread_cond_timedwait(&cond, &mutex, ts) == ETIMEDOUT)
 		return false;
 
@@ -533,7 +555,6 @@ void ConditionalAccess::access(void)
 void ConditionalAccess::release(void)
 {
    lock();
-
 	assert(sharing);
 
     --sharing;
@@ -1189,6 +1210,8 @@ barrier::~barrier()
 
 void barrier::set(unsigned limit)
 {
+	assert(limit > 0);
+
 	lock();
 	count = limit;
 	if(count <= waits) {
@@ -1248,6 +1271,8 @@ LockedPointer::LockedPointer()
 
 void LockedPointer::replace(Object *obj)
 {
+	assert(obj != NULL);
+
 	pthread_mutex_lock(&mutex);
 	obj->retain();
 	if(pointer)
@@ -1435,6 +1460,8 @@ DetachedThread::~DetachedThread()
 extern "C" {
 #ifdef	_MSWINDOWS_
 	static unsigned __stdcall exec_thread(void *obj) {
+		assert(obj != NULL);
+
 		Thread *th = static_cast<Thread *>(obj);
 		th->setPriority();
 		th->run();
@@ -1444,6 +1471,8 @@ extern "C" {
 #else
 	static void *exec_thread(void *obj)
 	{
+		assert(obj != NULL);
+
 		Thread *th = static_cast<Thread *>(obj);
 		th->setPriority();
 		th->run();
@@ -1580,6 +1609,8 @@ void Thread::exit(void)
 queue::member::member(queue *q, Object *o) :
 OrderedObject(q)
 {
+	assert(o != NULL);
+	
 	o->retain();
 	object = o;
 }
@@ -1587,6 +1618,8 @@ OrderedObject(q)
 queue::queue(mempager *p, size_t size) :
 OrderedIndex(), Conditional()
 {
+	assert(size > 0);
+
 	pager = p;
 	freelist = NULL;
 	used = 0;
@@ -1595,6 +1628,8 @@ OrderedIndex(), Conditional()
 
 bool queue::remove(Object *o)
 {
+	assert(o != NULL);
+
 	bool rtn = false;
 	linked_pointer<member> node;
 	lock();
@@ -1684,6 +1719,8 @@ Object *queue::fifo(timeout_t timeout)
 
 bool queue::post(Object *object, timeout_t timeout)
 {
+	assert(object != NULL);
+
 	bool rtn = true;
 	struct timespec ts;
 	member *node;
@@ -1740,6 +1777,8 @@ size_t queue::getCount(void)
 stack::member::member(stack *S, Object *o) :
 LinkedObject((&S->usedlist))
 {
+	assert(o != NULL);
+
 	o->retain();
 	object = o;
 }
@@ -1747,6 +1786,8 @@ LinkedObject((&S->usedlist))
 stack::stack(mempager *p, size_t size) :
 Conditional()
 {
+	assert(size > 0);
+
 	pager = p;
 	freelist = usedlist = NULL;
 	limit = size;
@@ -1755,6 +1796,8 @@ Conditional()
 
 bool stack::remove(Object *o)
 {
+	assert(o != NULL);
+
 	bool rtn = false;
 	linked_pointer<member> node;
 	lock();
@@ -1812,6 +1855,8 @@ Object *stack::pull(timeout_t timeout)
 
 bool stack::push(Object *object, timeout_t timeout)
 {
+	assert(object != NULL);
+
 	bool rtn = true;
 	struct timespec ts;
 	member *node;
@@ -1869,7 +1914,9 @@ size_t stack::getCount(void)
 Buffer::Buffer(size_t osize, size_t c) : 
 Conditional()
 {
-	size = osize * count;
+	assert(osize > 0 && c > 0);
+
+	size = osize * c;
 	objsize = osize;
 	count = 0;
 	limit = c;
@@ -1923,6 +1970,8 @@ void *Buffer::get(void)
 
 void Buffer::copy(void *data)
 {
+	assert(data != NULL);
+
 	void *ptr = get();
 	memcpy(data, ptr, objsize);
 	release();
@@ -1930,6 +1979,8 @@ void Buffer::copy(void *data)
 
 bool Buffer::copy(void *data, timeout_t timeout)
 {
+	assert(data != NULL);
+
 	void *ptr = get(timeout);
 	if(!ptr)
 		return false;
@@ -1976,6 +2027,8 @@ void Buffer::release(void)
 
 void Buffer::put(void *dbuf)
 {
+	assert(dbuf != NULL);
+
 	lock();
 	while(count == limit)
 		wait();
@@ -1990,6 +2043,8 @@ void Buffer::put(void *dbuf)
 
 bool Buffer::put(void *dbuf, timeout_t timeout)
 {
+	assert(dbuf != NULL);
+
 	bool rtn = true;
 	struct timespec ts;
 

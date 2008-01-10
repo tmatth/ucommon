@@ -28,6 +28,7 @@ counter::counter()
 
 counter::counter(unsigned max)
 {
+	assert(max > 0);
 	cycle = max;
 	value = 0;
 }
@@ -49,6 +50,9 @@ unsigned counter::get(void)
 SeqCounter::SeqCounter(void *base, size_t size, unsigned limit) :
 counter(limit)
 {
+	assert(base != NULL);
+	assert(size > 0);
+	assert(limit > 0);
 	item = base;
 	offset = size;
 }
