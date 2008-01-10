@@ -1,3 +1,6 @@
+From ucommon 1.3.1 to 1.3.2
+- clarified assertions for argument preconditions for correctness.
+
 From ucommon 1.3.0 to 1.3.1
 - many testing asserts added to library for function argument preconditions.
 
