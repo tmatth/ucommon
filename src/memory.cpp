@@ -39,7 +39,6 @@ static size_t cpr_pagesize(void)
 
 mempager::mempager(size_t ps)
 {
-	assert(ps > 0);
 #ifdef	HAVE_SYSCONF
 	size_t paging = sysconf(_SC_PAGESIZE);
 #elif defined(PAGESIZE)
