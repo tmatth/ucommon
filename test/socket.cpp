@@ -31,6 +31,7 @@ extern "C" int main()
 	struct sockaddr_internet addr;
 
 	char addrbuf[65];
+	addrbuf[0] = 0;
 	Socket::getaddress(localhost.getAddr(), addrbuf, sizeof(addrbuf));
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
 	Socket::getinterface((struct sockaddr *)&addr, localhost.getAddr());

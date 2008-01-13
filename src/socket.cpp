@@ -419,6 +419,11 @@ Socket::address::address(const char *a, int family, int type, int protocol)
 	char *svc = NULL;
 
 	memset(&hint, 0, sizeof(hint));
+#ifdef	PF_UNSPEC
+	hint.ai_family = PF_UNSPEC;
+	hint.ai_socktype = SOCK_STREAM;
+	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+#endif
 
 	if(!host)
 		host = addr;
@@ -477,11 +482,19 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
+	memset(&hint, 0, sizeof(hint));
+#ifdef	PF_UNSPEC
+	hint.ai_family = PF_UNSPEC;
+	hint.ai_socktype = SOCK_STREAM;
+	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+	struct addrinfo *ah = &hint;
+#else
 	struct addrinfo *ah = NULL;
+#endif
 
 	if(so != INVALID_SOCKET)
 		ah = gethint(so, &hint);
-
+	
 	list = NULL;
 	getaddrinfo(host, svc, ah, &list);
 }
