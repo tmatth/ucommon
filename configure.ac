@@ -168,6 +168,10 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_CHECK_LIB($tlib,pthread_condattr_setclock,[
 			AC_DEFINE(HAVE_PTHREAD_CONDATTR_SETCLOCK, [1], ["pthread clocking"])
 		])
+		AC_CHECK_LIB($tlib,pthread_setconcurrency,[
+			AC_DEFINE(HAVE_PTHREAD_SETCONCURRENCY, [1], ["pthread concurrency"])
+		])
+
 		AC_CHECK_LIB($tlib,pthread_yield,[
 			AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"])
 		])
@@ -186,7 +190,7 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_MSG_ERROR("pthread support required")])
 ])
 
-for func in nanosleep clock_gettime localtime_r ; do
+for func in nanosleep clock_nanosleep clock_gettime localtime_r ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -207,6 +211,9 @@ for func in nanosleep clock_gettime localtime_r ; do
 		;;
 	nanosleep)
 		AC_DEFINE(HAVE_NANOSLEEP, [1], [has nanosleep])
+		;;
+	clock_nanosleep)
+		AC_DEFINE(HAVE_CLOCK_NANOSLEEP, [1], [has clocked nanosleep])
 		;;
 	clock_gettime)		
 		AC_DEFINE(HAVE_POSIXTIME, [1], [has posix clock functions])

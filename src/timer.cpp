@@ -340,9 +340,9 @@ void Timer::operator=(time_t abs)
 
 void Timer::sync(Timer &t)
 {
-#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
+#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP)
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t.timer, NULL);
-#elif _POSIX_TIMERS > 0
+#elif _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP)
 	clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &t.timer, NULL);
 #elif defined(_MSWINDOWS_)
 	SleepEx(t.get(), FALSE);

@@ -1384,7 +1384,7 @@ void Thread::setPriority(void) {};
 
 void Thread::concurrency(int level)
 {
-#ifndef	_MSWINDOWS_
+#if defined(HAVE_PTHREAD_SETCONCURRENCY) && !defined(_MSWINDOWS_)
 	pthread_setconcurrency(level);
 #endif
 }
