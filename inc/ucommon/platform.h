@@ -53,7 +53,7 @@
 #define	_POSIX_PTHREAD_SEMANTICS
 #endif
 
-#ifdef	__GNUC__
+#if __GNUC__ > 3 || (__GNUC__ == 3 && (__GNU_MINOR__ > 3))
 #define	__PRINTF(x,y)	__attribute__ ((format (printf, x, y)))
 #define	__SCANF(x, y) __attribute__ ((format (scanf, x, y)))
 #define	__MALLOC	  __attribute__ ((malloc))
