@@ -101,6 +101,9 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
 	AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
 ],[
+	AC_CHECK_LIB(gcc, __modsi3, [
+		UCOMMON_LIBC="$UCOMMON_LIBC -lgcc"
+	])
 	AC_CHECK_LIB($clib, socketpair, [
 		AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])
 	],[
