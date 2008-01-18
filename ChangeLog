@@ -2,6 +2,7 @@ From ucommon 1.3.2 to 1.3.3
 - initialization of socket hinting for BSD stack.
 - further clarify asserts.
 - fixes for NetBSD 4; clock_nanosleep and pthread_setconcurrency support.
+- fixes for gcc < 3.4 (such as openbsd...)
 
 From ucommon 1.3.1 to 1.3.2
 - clarified assertions for argument preconditions for correctness.

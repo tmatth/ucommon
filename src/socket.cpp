@@ -483,7 +483,7 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	assert(svc != NULL && *svc != 0);
 
 	memset(&hint, 0, sizeof(hint));
-#ifdef	PF_UNSPEC
+#if	defined(PF_UNSPEC) && !defined(__linux__)
 	hint.ai_family = PF_UNSPEC;
 	hint.ai_socktype = SOCK_STREAM;
 	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
@@ -494,7 +494,7 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 
 	if(so != INVALID_SOCKET)
 		ah = gethint(so, &hint);
-	
+
 	list = NULL;
 	getaddrinfo(host, svc, ah, &list);
 }
