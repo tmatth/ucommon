@@ -33,7 +33,7 @@ public:
 
 	void run(void) {
 		++count;
-		sleep(1000);
+		::sleep(2);
 	};
 };
 

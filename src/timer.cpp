@@ -351,6 +351,7 @@ void Timer::sync(Timer &t)
 #endif
 }
 
+
 timeout_t TQEvent::timeout(void)
 {
 	timeout_t timeout = get();
