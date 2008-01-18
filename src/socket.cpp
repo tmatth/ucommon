@@ -485,7 +485,7 @@ Socket::address::address(const char *host, const char *svc, SOCKET so)
 	memset(&hint, 0, sizeof(hint));
 #if	defined(PF_UNSPEC)
 	hint.ai_family = PF_UNSPEC;
-//	hint.ai_socktype = SOCK_STREAM;
+	hint.ai_socktype = SOCK_STREAM;
 	hint.ai_flags = AI_PASSIVE;
 	struct addrinfo *ah = &hint;
 #else
