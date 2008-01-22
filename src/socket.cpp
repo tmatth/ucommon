@@ -467,13 +467,13 @@ Socket::address::address(const char *host, unsigned port, int family)
 
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = family;
+	hint.ai_socktype = SOCK_STREAM;		// BSD requires valid type...
 
 	if(port) {
 		snprintf(buf, sizeof(buf), "%u", port);
 		svc = buf;
 #ifdef	AI_NUMERICSERV
 		hint.ai_flags |= AI_NUMERICSERV;
-		hint.ai_socktype = SOCK_STREAM;	// BSD requires valid type even if numeric
 #endif
 	}
 

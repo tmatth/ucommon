@@ -53,6 +53,10 @@
 #define	_POSIX_PTHREAD_SEMANTICS
 #endif
 
+#if defined(__GNUC__) && (__GNUC < 3) && !defined(_GNU_SOURCE)
+#define	_GNU_SOURCE
+#endif
+
 #if __GNUC__ > 3 || (__GNUC__ == 3 && (__GNU_MINOR__ > 3))
 #define	__PRINTF(x,y)	__attribute__ ((format (printf, x, y)))
 #define	__SCANF(x, y) __attribute__ ((format (scanf, x, y)))
