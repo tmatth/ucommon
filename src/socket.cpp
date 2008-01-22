@@ -471,7 +471,9 @@ Socket::address::address(const char *host, unsigned port, int family)
 	if(port) {
 		snprintf(buf, sizeof(buf), "%u", port);
 		svc = buf;
+#ifdef	AI_NUMERICSERV
 		hint.ai_flags |= AI_NUMERICSERV;
+#endif
 	}
 
 	list = NULL;
