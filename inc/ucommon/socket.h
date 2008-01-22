@@ -54,6 +54,12 @@ struct addrinfo;
 #define IPTOS_MINCOST       0x02
 #endif
 
+#ifdef	AF_UNSPEC
+#define	DEFAULT_FAMILY	AF_UNSPEC
+#else
+#define	DEFAULT_FAMILY	AF_INET
+#endif
+
 /**
  * An object that can hold a ipv4 or ipv6 socket address.  This would be
  * used for tcpip socket connections.  We do not use sockaddr_storage
@@ -282,7 +288,7 @@ public:
 		 * @param type of socket (stream, dgram, etc).
 		 * @param protocol number of socket.
 		 */
-		address(const char *address, int family = 0, int type = SOCK_STREAM, int protocol = 0);
+		address(int family, const char *address, int type = SOCK_STREAM, int protocol = 0);
 
 		/**
 		 * Construct a socket address for an existing socket.
@@ -294,19 +300,19 @@ public:
 
 		/**
 		 * Construct a socket address for a socket descriptor.
+		 * @param socket descriptor to use for family.
 		 * @param hostname or address to use.
 		 * @param service port or name we are referencing or NULL.
-		 * @param socket descriptor to use for family.
 		 */
-		address(const char *hostname, const char *service = NULL, SOCKET socket = INVALID_SOCKET);
+		address(SOCKET so, const char *hostname, const char *service = NULL);
 
 		/**
 		 * Construct a socket address from host and service.
-		 * @param family of socket address.
 		 * @param hostname or address to use.
-		 * @param service port or name we are referencing or NULL.
+		 * @param service port or 0.
+		 * @param family of socket address.
 		 */
-		address(int family, const char *hostname, const char *service = NULL);
+		address(const char *hostname, unsigned service = 0, int family = DEFAULT_FAMILY);
 
 		/**
 		 * Construct an empty address.

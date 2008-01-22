@@ -409,7 +409,7 @@ void cidr::set(const char *cp)
 	}
 }
 
-Socket::address::address(const char *a, int family, int type, int protocol)
+Socket::address::address(int family, const char *a, int type, int protocol)
 {
 	assert(a != NULL && *a != 0);
 
@@ -458,13 +458,22 @@ proc:
 	getaddrinfo(host, svc, &hint, &list);
 }
 
-Socket::address::address(int family, const char *host, const char *svc)
+Socket::address::address(const char *host, unsigned port, int family)
 {
 	assert(host != NULL && *host != 0);
-	assert(svc != NULL && *svc != 0);
+	
+	char buf[16];
+	char *svc = NULL;
 
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = family;
+
+	if(port) {
+		snprintf(buf, sizeof(buf), "%u", port);
+		svc = buf;
+		hint.ai_flags |= AI_NUMERICSERV;
+	}
+
 	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
@@ -474,28 +483,21 @@ Socket::address::address(Socket &s, const char *host, const char *svc)
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
-	address(host, svc, (int)s);
+	address(s.so, host, svc);
 }
 
-Socket::address::address(const char *host, const char *svc, SOCKET so)
+Socket::address::address(SOCKET so, const char *host, const char *svc)
 {
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
-	memset(&hint, 0, sizeof(hint));
-#if	defined(PF_UNSPEC)
-	hint.ai_family = PF_UNSPEC;
-	hint.ai_socktype = SOCK_STREAM;
-	hint.ai_flags = AI_PASSIVE;
-	struct addrinfo *ah = &hint;
-#else
-	struct addrinfo *ah = NULL;
-#endif
-
-	if(so != INVALID_SOCKET)
-		ah = gethint(so, &hint);
+	struct addrinfo *ah;
 
 	list = NULL;
+	if(so == INVALID_SOCKET)
+			return;
+
+	ah = gethint(so, &hint);
 	getaddrinfo(host, svc, ah, &list);
 }
 

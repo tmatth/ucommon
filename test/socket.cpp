@@ -24,7 +24,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-static Socket::address localhost("127.0.0.1", "4444");
+static Socket::address localhost("127.0.0.1", 4444);
 
 extern "C" int main()
 {
