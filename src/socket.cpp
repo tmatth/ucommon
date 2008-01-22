@@ -473,6 +473,7 @@ Socket::address::address(const char *host, unsigned port, int family)
 		svc = buf;
 #ifdef	AI_NUMERICSERV
 		hint.ai_flags |= AI_NUMERICSERV;
+		hint.ai_socktype = SOCK_STREAM;	// BSD requires valid type even if numeric
 #endif
 	}
 
