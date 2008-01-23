@@ -1,7 +1,8 @@
 From ucommon 1.3.3 to 1.4.0
-- socket address constructors reorganized
+- socket::address constructors reorganized
 - added mapped (shared memory) to ucommon library
 - improved mingw32 support
+- support for gcc < 3.0 (gcc 2.96 rhel-2.1 for example)
 
 From ucommon 1.3.2 to 1.3.3
 - initialization of socket hinting for BSD stack.
