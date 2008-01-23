@@ -89,6 +89,7 @@
 #include <ucommon/timers.h>
 #include <ucommon/access.h>
 #include <ucommon/memory.h>
+#include <ucommon/mapped.h>
 #include <ucommon/string.h>
 #include <ucommon/bitmap.h>
 #include <ucommon/socket.h>

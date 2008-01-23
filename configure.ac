@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="1.3.3"
-LT_RELEASE="1.3"
-LT_VERSION="0:3"
+VERSION="1.4.0"
+LT_RELEASE="1.4"
+LT_VERSION="0:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -93,7 +93,7 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/poll.h sys/timeb.h endian.h mach/clock.h sys/filio.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/poll.h sys/timeb.h endian.h mach/clock.h sys/filio.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
@@ -193,7 +193,7 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_MSG_ERROR("pthread support required")])
 ])
 
-for func in nanosleep clock_nanosleep clock_gettime localtime_r ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -205,10 +205,20 @@ for func in nanosleep clock_nanosleep clock_gettime localtime_r ; do
 			AC_CHECK_LIB(rt, $func, [
 				found=$func
 				rt_lib="-lrt"
+			],[
+				AC_CHECK_LIB($tlib, $func, [
+					found=$func
+				])
 			])
 		])
 	])
 	case $found in
+	shm_open)
+		AC_DEFINE(HAVE_SHM_OPEN, [1], [shared memory open])
+		;;
+	ftok)
+		AC_DEFINE(HAVE_FTOK, [1], [has ftok])
+		;;
 	localtime_r)
 		AC_DEFINE(HAVE_LOCALTIME_R, [1], [has localtime_r])
 		;;
