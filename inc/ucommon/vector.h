@@ -438,13 +438,6 @@ public:
 	inline vectorof(vectorsize_t size) : Vector(size) {};
 
 	/**
-	 * Cast vector of type to Vector base class.
-	 * @return Vector base object.
-	 */
-	inline operator Vector()
-		{return static_cast<Vector>(*this);};
-
-	/**
 	 * Get object pointer of specified type from vector.
 	 * @param index of typed member to return, < 0 to use from end of list.
 	 * @return typed object pointer of member.
@@ -662,13 +655,6 @@ public:
 	 * Construct fixed sized vector object in heap or stack.
 	 */
 	inline vectorbuf() : MemVector(buffer, S) {};
-
-	/**
-	 * Recast object to generic vector.
-	 * @return generic vector object.
-	 */
-	inline operator Vector()
-		{return static_cast<Vector>(*this);};
 
 	/**
 	 * Get object pointer of specified type from fixed vector.
