@@ -130,7 +130,10 @@
 
 #ifdef	_MSWINDOWS_
 
+#define	_UWIN
+
 #include <sys/stat.h>
+#include <io.h>
 
 typedef	DWORD pthread_t;
 typedef	CRITICAL_SECTION pthread_mutex_t;
@@ -143,6 +146,15 @@ typedef	struct timespec {
 } timespec_t;
 
 extern "C" {
+
+int cpr_mkdir(const char *path, int mode);
+int cpr_setenv(const char *s, const char *v, int p);
+
+inline int setenv(const char *s, const char *v, int overwrite)
+	{return cpr_setenv(s, v, overwrite);};
+
+inline void sleep(int seconds)
+	{_sleep(seconds);};
 
 inline void pthread_exit(void *p)
 	{_endthreadex((DWORD)p);};
@@ -174,6 +186,23 @@ inline int strnicmp(const char *s1, const char *s2, size_t l)
 inline int stat(const char *path, struct stat *buf)
 	{return _stat(path, (struct _stat *)(buf));};
 
+inline int mkdir(const char *path, int mode)
+	{return cpr_mkdir(path, mode);};
+
+inline int chdir(const char *dir)
+	{return _chdir(dir);};
+
+inline int rmdir(const char *dir)
+	{return _rmdir(dir);};
+
+inline int chmod(const char *path, int mode)
+	{return _chmod(path, mode);};
+
+inline char *getcwd(char *path, int size)
+	{return _getcwd(path, size);};
+
+inline int access(const char *path, int mode)
+	{return _access(path, mode);};
 };
 
 #else

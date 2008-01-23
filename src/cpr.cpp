@@ -32,6 +32,32 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+#ifdef	_MSWINDOWS_
+int cpr_mkdir(const char *path, int mode)
+{
+	if(!CreateDirectory(path, NULL))
+		return -1;
+
+	return chmod(path, mode);
+}
+
+int cpr_setenv(const char *sym, const char *val, int flag)
+{	
+	char buf[128];
+
+	if(!flag) {
+		if(GetEnvironmentVariable(sym, buf, sizeof(buf)) > 0)
+			return 0;
+		if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+			return -1;
+	}
+	if(SetEnvironmentVariable(sym, val) == 0)
+		return -1;
+	return 0;
+}
+
+#endif
+
 void cpr_runtime_error(const char *str)
 {
 	assert(str != NULL);
