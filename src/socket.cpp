@@ -1777,37 +1777,24 @@ int Socket::getfamily(SOCKET so)
 
 #ifdef	_MSWINDOWS_
 
-FILE *Socket::file(SOCKET so)
+FILE *Socket::open(SOCKET so, bool mode)
 {
 	FILE *fp = (FILE *)malloc(sizeof(FILE));
 
 	if(!fp)
 		return NULL;
 
-	memset(fp, 0, sizeof(FILE));
-	fp->_file = so;
-	fp->_flag = _IOREAD;
+	emset(fp, 0, sizeof(FILE));
+
+	if(mode) {
+		fp->_file = so;
+		fp->_flag = _IOWRT;
+	}
+	else {
+		fp->_file = so;
+		fp->_flag = _IOREAD;
+	}
 	return fp;
-}
-
-FILE *Socket::rewrite(SOCKET so)
-{
-	FILE *fp = (FILE *)malloc(sizeof(FILE));
-
-	if(!fp)
-		return NULL;
-
-	memset(fp, 0, sizeof(FILE));
-	fp->_file = so;
-	fp->_flag = _IOWRT;
-	return fp;
-}
-
-FILE *Socket::rewrite(FILE *fp)
-{
-	assert(fp != NULL);
-
-	return rewrite((SOCKET)fp->_file);
 }
 
 void Socket::close(FILE *fp)
@@ -1828,19 +1815,12 @@ void Socket::close(FILE *fp)
 	fclose(fp);
 }
 
-FILE *Socket::file(SOCKET so)
+FILE *Socket::open(SOCKET so, bool mode)
 {
-	return fdopen(so, "r");
-}
+	if(mode)
+		return fdopen(so, "w");
 
-FILE *Socket::rewrite(SOCKET so)
-{
-	return fdopen(dup(so), "w");
-}
-
-FILE *Socket::rewrite(FILE *fp)
-{
-	return fdopen(dup(fileno(fp)), "w");
+	return fdopen(dup(so), "r");
 }
 
 #endif 

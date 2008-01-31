@@ -941,39 +941,18 @@ public:
 	/**
 	 * Convert socket into FILE handle for reading.
 	 * @param descriptor to convert.
+	 * @param true for write mode.
 	 * @return file handle to use.
 	 */
-	static FILE *file(SOCKET descriptor);
-
-	/**
-	 * Convert socket into FILE handle for writing.  This uses a duplicate
-	 * instance of the descriptor.
-	 * @param descriptor to convert.
-	 * @return file handle to use.
-	 */
-	static FILE *rewrite(SOCKET descriptor);
-
-	/**
-	 * Get a FILE handle for writing.
-	 * @param file handle used for reading.
-	 * @return file handle for writing.
-	 */
-	static FILE *rewrite(FILE *fp);
+	static FILE *open(SOCKET descriptor, bool mode = false);
 
 	/**
 	 * Get file handle for reading from a socket object.
+	 * @param true for write mode.
 	 * @return file handle.
 	 */
-	inline FILE *file(void)
-		{return file(so);};
-
-	/**
-	 * Get file handle for writing to a socket object.  This uses a
-	 * duplicate descriptor.
-	 * @return file handle.
-	 */
-	inline FILE *rewrite(void)
-		{return rewrite(so);};
+	inline FILE *open(bool mode = false)
+		{return open(so, mode);};
 
 	/**
 	 * Cleanly close a connected socket descriptor mapped to a file handle.
