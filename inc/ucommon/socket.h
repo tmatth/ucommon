@@ -946,6 +946,14 @@ public:
 	static FILE *file(SOCKET descriptor);
 
 	/**
+	 * Convert socket into FILE handle for writing.  This uses a duplicate
+	 * instance of the descriptor.
+	 * @param descriptor to convert.
+	 * @return file handle to use.
+	 */
+	static FILE *rewrite(SOCKET descriptor);
+
+	/**
 	 * Get a FILE handle for writing.
 	 * @param file handle used for reading.
 	 * @return file handle for writing.
@@ -958,6 +966,14 @@ public:
 	 */
 	inline FILE *file(void)
 		{return file(so);};
+
+	/**
+	 * Get file handle for writing to a socket object.  This uses a
+	 * duplicate descriptor.
+	 * @return file handle.
+	 */
+	inline FILE *rewrite(void)
+		{return rewrite(so);};
 
 	/**
 	 * Cleanly close a connected socket descriptor mapped to a file handle.

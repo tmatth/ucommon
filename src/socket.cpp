@@ -1785,22 +1785,39 @@ FILE *Socket::file(SOCKET so)
 		return NULL;
 
 	memset(fp, 0, sizeof(FILE));
-	fp->_file = fd;
+	fp->_file = so;
 	fp->_flag = _IOREAD;
+	return fp;
+}
+
+FILE *Socket::rewrite(SOCKET so)
+{
+	FILE *fp = (FILE *)malloc(sizeof(FILE));
+
+	if(!fp)
+		return NULL;
+
+	memset(fp, 0, sizeof(FILE));
+	fp->_file = so;
+	fp->_flag = _IOWRT;
 	return fp;
 }
 
 FILE *Socket::rewrite(FILE *fp)
 {
-	return fdopen(dup(fp->_file), "wb");
+	assert(fp != NULL);
+
+	return rewrite((SOCKET)fp->_file);
 }
 
 void Socket::close(FILE *fp)
 {
 	assert(fp != NULL);
 
-	::shutdown(fp->_file, SHUT_RDWR);
-	closesocket(fp->_file);
+	if(fp->_flag == _IOREAD) {
+		::shutdown(fp->_file, SHUT_RDWR);
+		closesocket(fp->_file);
+	}
 	free(fp);
 }	
 
@@ -1808,13 +1825,17 @@ void Socket::close(FILE *fp)
 
 void Socket::close(FILE *fp)
 {
-	::shutdown(fileno(fp), SHUT_RDWR);
 	fclose(fp);
 }
 
 FILE *Socket::file(SOCKET so)
 {
 	return fdopen(so, "r");
+}
+
+FILE *Socket::rewrite(SOCKET so)
+{
+	return fdopen(dup(so), "w");
 }
 
 FILE *Socket::rewrite(FILE *fp)

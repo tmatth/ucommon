@@ -206,12 +206,6 @@ inline int access(const char *path, int mode)
 
 inline int dup(int fd)
 	{return _dup(fd);};
-
-inline int dup2(int fd)
-	{return _dup2(fd);};
-
-inline FILE *fp = fdopen(int fd, const char *mode)
-	{return _fdopen(fd, mode);};
 };
 
 #else
