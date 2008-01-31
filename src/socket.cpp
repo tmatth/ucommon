@@ -1774,3 +1774,52 @@ int Socket::getfamily(SOCKET so)
 
 	return addr->sa_family;
 }
+
+#ifdef	_MSWINDOWS_
+
+FILE *Socket::file(SOCKET so)
+{
+	FILE *fp = (FILE *)malloc(sizeof(FILE));
+
+	if(!fp)
+		return NULL;
+
+	memset(fp, 0, sizeof(FILE));
+	fp->_file = fd;
+	fp->_flag = _IOREAD;
+	return fp;
+}
+
+FILE *Socket::rewrite(FILE *fp)
+{
+	return fdopen(dup(fp->_file), "wb");
+}
+
+void Socket::close(FILE *fp)
+{
+	assert(fp != NULL);
+
+	::shutdown(fp->_file, SHUT_RDWR);
+	closesocket(fp->_file);
+	free(fp);
+}	
+
+#else
+
+void Socket::close(FILE *fp)
+{
+	::shutdown(fileno(fp), SHUT_RDWR);
+	fclose(fp);
+}
+
+FILE *Socket::file(SOCKET so)
+{
+	return fdopen(so, "r");
+}
+
+FILE *Socket::rewrite(FILE *fp)
+{
+	return fdopen(dup(fileno(fp)), "w");
+}
+
+#endif 

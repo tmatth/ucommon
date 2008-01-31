@@ -47,6 +47,8 @@ struct addrinfo;
 #include <netdb.h>
 #endif
 
+#include <stdio.h>
+
 #ifndef IPTOS_LOWDELAY
 #define IPTOS_LOWDELAY      0x10
 #define IPTOS_THROUGHPUT    0x08
@@ -935,6 +937,33 @@ public:
 	 * Initialize socket subsystem.
 	 */
 	static void init(void);
+
+	/**
+	 * Convert socket into FILE handle for reading.
+	 * @param descriptor to convert.
+	 * @return file handle to use.
+	 */
+	static FILE *file(SOCKET descriptor);
+
+	/**
+	 * Get a FILE handle for writing.
+	 * @param file handle used for reading.
+	 * @return file handle for writing.
+	 */
+	static FILE *rewrite(FILE *fp);
+
+	/**
+	 * Get file handle for reading from a socket object.
+	 * @return file handle.
+	 */
+	inline FILE *file(void)
+		{return file(so);};
+
+	/**
+	 * Cleanly close a connected socket descriptor mapped to a file handle.
+	 * @param file handle to close.
+	 */
+	static void close(FILE *fp);
 };
 
 /**
