@@ -133,7 +133,7 @@ static unsigned bitcount(bit_t *bits, unsigned len)
 
 static bool _started = false;
 
-static extern "c" void _socketcleanup(void)
+static void _socketcleanup(void)
 {
 	if(_started)
 		WSACleanup();
