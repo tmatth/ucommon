@@ -129,6 +129,38 @@ static unsigned bitcount(bit_t *bits, unsigned len)
     return count;
 }
 
+#ifdef	_MSWINDOWS_
+
+static bool _started = false;
+
+static extern "c" void _socketcleanup(void)
+{
+	if(_started)
+		WSACleanup();
+}
+
+void Socket::init(void)
+{
+	static bool initialized = false;
+	unsigned short version;
+	WSADATA status;
+
+	if(initialized)
+		return;
+
+	initialized = true;
+	version = 0x2;
+	status.wVersion = 0;
+	WSAStartup(version, &status);
+	crit(status.wVersion == version, "socket init failure");
+	atexit(_socketcleanup);
+	_started = true;
+};	
+#else
+void Socket::init(void)
+{
+}
+#endif
 
 cidr::cidr() :
 LinkedObject()
@@ -418,6 +450,10 @@ Socket::address::address(int family, const char *a, int type, int protocol)
 	char *ep;
 	char *svc = NULL;
 
+#ifdef	_MSWINDOWS_
+	Socket::init();
+#endif
+
 	memset(&hint, 0, sizeof(hint));
 #ifdef	PF_UNSPEC
 	hint.ai_family = PF_UNSPEC;
@@ -465,6 +501,10 @@ Socket::address::address(const char *host, unsigned port, int family)
 	char buf[16];
 	char *svc = NULL;
 
+#ifdef	_MSWINDOWS_
+	Socket::init();
+#endif
+
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = family;
 	hint.ai_socktype = SOCK_STREAM;		// BSD requires valid type...
@@ -486,6 +526,10 @@ Socket::address::address(Socket &s, const char *host, const char *svc)
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
+#ifdef	_MSWINDOWS_
+	Socket::init();
+#endif
+
 	address(s.so, host, svc);
 }
 
@@ -495,6 +539,10 @@ Socket::address::address(SOCKET so, const char *host, const char *svc)
 	assert(svc != NULL && *svc != 0);
 
 	struct addrinfo *ah;
+
+#ifdef	_MSWINDOWS_
+	Socket::init();
+#endif
 
 	list = NULL;
 	if(so == INVALID_SOCKET)
@@ -579,6 +627,7 @@ Socket::Socket(const Socket &s)
 	HANDLE pidH = GetCurrentProcess();
 	HANDLE dupH;
 
+	init();
 	if(DuplicateHandle(pidH, reinterpret_cast<HANDLE>(s.so), pidH, &dupH, 0, FALSE, DUPLICATE_SAME_ACCESS))
 		so = reinterpret_cast<SOCKET>(dupH);
 	else
@@ -600,6 +649,9 @@ Socket::Socket(SOCKET s)
 
 Socket::Socket(struct addrinfo *addr)
 {
+#ifdef	_MSWINDOWS_
+	init();
+#endif
 	assert(addr != NULL);
 
 	while(addr) {
@@ -615,6 +667,9 @@ Socket::Socket(struct addrinfo *addr)
 
 Socket::Socket(int family, int type, int protocol)
 {
+#ifdef	_MSWINDOWS_
+	init();
+#endif
 	so = ::socket(family, type, protocol);
 }
 
@@ -623,6 +678,9 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 	assert(iface != NULL && *iface != 0);
 	assert(port != NULL && *port != 0);
 
+#ifdef	_MSWINDOWS_
+	init();
+#endif
 	so = ::socket(family, type, protocol);
 	if(so != INVALID_SOCKET)
 		if(bindaddr(so, iface, port))

@@ -930,6 +930,11 @@ public:
 	 * @return key index path.
 	 */
 	static unsigned keyindex(struct sockaddr *address, unsigned size);
+
+	/**
+	 * Initialize socket subsystem.
+	 */
+	static void init(void);
 };
 
 /**
