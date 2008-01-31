@@ -1814,7 +1814,7 @@ void Socket::close(FILE *fp)
 {
 	assert(fp != NULL);
 
-	if(fp->_flag == _IOREAD) {
+	if((fp->_flag & (_IOREAD | _IOWRT))== _IOREAD) {
 		::shutdown(fp->_file, SHUT_RDWR);
 		closesocket(fp->_file);
 	}
