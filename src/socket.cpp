@@ -1784,7 +1784,7 @@ FILE *Socket::open(SOCKET so, bool mode)
 	if(!fp)
 		return NULL;
 
-	emset(fp, 0, sizeof(FILE));
+	memset(fp, 0, sizeof(FILE));
 
 	if(mode) {
 		fp->_file = so;
