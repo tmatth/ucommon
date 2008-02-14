@@ -155,7 +155,7 @@ static int getnameinfo(const struct sockaddr *addr, socklen_t len, char *host, s
 		}
 		else {
 			hostmutex.lock();
-			hp = gethostbyaddr(addr, len, addr->sa_family);
+			hp = gethostbyaddr((caddr_t)addr, len, addr->sa_family);
 			if(hp != NULL && hp->h_name != NULL) {
 				if(flags & NI_NOFQDN) {
 					cp = strchr(hp->h_name, '.');
@@ -335,7 +335,7 @@ static int getaddrinfo(const char *hostname, const char *servname, const struct 
 			aip->ai_family = AF_INET6;	
 			ipv6 = (struct sockaddr_in6 *)malloc(sizeof(struct sockaddr_in6));
 			memset(ipv6, 0, sizeof(struct sockaddr_in6));
-			inet_pton(AF_INET6, *np, &ipv6->sin6_addr);
+			memcpy(&ipv6->sin6_addr, *np, sizeof(&ipv6->sin6_addr));
 			ipv6->sin6_family = AF_INET6;
 			ipv6->sin6_port = port;
 			aip->ai_addr = (struct sockaddr *)ipv6;
@@ -347,7 +347,7 @@ static int getaddrinfo(const char *hostname, const char *servname, const struct 
 		memset(ipv4, 0, sizeof(struct sockaddr_in));
 		ipv4->sin_family = AF_INET;
 		ipv4->sin_port = port;
-		inet_pton(AF_INET, *np, &ipv4->sin_addr);
+		memcpy(&ipv4->sin_addr, *np, sizeof(&ipv4->sin_addr));
 		aip->ai_addr = (struct sockaddr *)ipv4;
 	}
 
@@ -1338,7 +1338,7 @@ int Socket::join(SOCKET so, struct addrinfo *node)
 		case AF_INET:
 			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
-			rtn = ::setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+			rtn = ::setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv4));
 #endif
 		default:
 			rtn = -1;
@@ -1381,7 +1381,7 @@ int Socket::drop(SOCKET so, struct addrinfo *node)
 		case AF_INET:
 			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
-			rtn = ::setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
+			rtn = ::setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv4));
 #endif
 		default:
 			rtn = -1;
@@ -1619,8 +1619,10 @@ Socket()
 	int family = AF_INET;
 	if(strchr(iface, '/'))
 		family = AF_UNIX;
+#ifdef	AF_INET6
 	else if(strchr(iface, ':'))
 		family = AF_INET6;
+#endif
 
 retry:
 	so = ::socket(family, SOCK_STREAM, 0);
@@ -1629,10 +1631,12 @@ retry:
 		
 	if(bindaddr(so, iface, svc)) {
 		release();
+#ifdef	AF_INET6
 		if(family == AF_INET && !strchr(iface, '.')) {
 			family = AF_INET6;
 			goto retry;
 		}
+#endif
 		return;
 	}
 	if(::listen(so, backlog))
@@ -1727,9 +1731,11 @@ char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
 	case AF_INET:
 		sl = sizeof(struct sockaddr_in);
 		break;
+#ifdef	AF_INET6
 	case AF_INET6:
 		sl = sizeof(struct sockaddr_in6);
 		break;
+#endif
 	default:
 		return NULL;
 	}
@@ -2047,8 +2053,10 @@ socklen_t Socket::getlen(struct sockaddr *sa)
 	{
 	case AF_INET:
 		return sizeof(sockaddr_in);
+#ifdef	AF_INET6
 	case AF_INET6:
 		return sizeof(sockaddr_in6);
+#endif
 	default:
 		return sizeof(sockaddr_storage);
 	}

@@ -1324,7 +1324,11 @@ int string::read(DIR *dir, string &s)
 	}
 
 	s.set(dno->d_name);
+#ifdef	__CYGWIN__
+	return strlen(dno->d_name);
+#else
 	return dno->d_reclen;
+#endif
 }
 
 bool string::getline(FILE *fp, string &s)
