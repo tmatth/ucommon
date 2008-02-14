@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="1.4.0"
+VERSION="1.4.1"
 LT_RELEASE="1.4"
-LT_VERSION="0:0"
+LT_VERSION="1:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -100,6 +100,7 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	UCOMMON_LIBS="$UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
 	AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
+	AC_DEFINE(HAVE_GETADDRINFO, [1], [have getaddrinfo])
 ],[
 	AC_CHECK_LIB(gcc, __modsi3, [
 		UCOMMON_LIBC="$UCOMMON_LIBC -lgcc"
@@ -109,6 +110,19 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	],[
 			AC_CHECK_LIB(socket, socketpair, [AC_DEFINE(HAVE_SOCKETPAIR, [1], [have socketpair])])
 	])
+	AC_CHECK_LIB($clib, getaddrinfo, [
+		AC_DEFINE(HAVE_GETADDRINFO, [1], [have getaddrinfo])
+	],[
+			AC_CHECK_LIB(socket, getaddrinfo, [AC_DEFINE(HAVE_GETADDRINFO, [1], [have getaddrinfo])])
+	])
+	AC_CHECK_LIB($clib, gethostbyname2, [
+		AC_DEFINE(HAVE_GETHOSTBYNAME2, [1], [have gethostbyname2])
+	],[
+			AC_CHECK_LIB(socket, gethostbyname2, [AC_DEFINE(HAVE_GETHOSTBYNAME2, [1], [have gethostbyname2])])
+	])
+
+
+
 	AC_CHECK_LIB($clib, inet_ntop, [
 		AC_DEFINE(HAVE_INET_NTOP, [1], [have inet ntop])
 	],[

@@ -85,13 +85,16 @@ typedef	struct
 	};
 }	inethostaddr_t;
 
-#ifdef	AF_INET6
+#if defined(AF_INET6) || defined(__CYGWIN__)
 struct sockaddr_internet
 {
 	union {
 		unsigned short sa_family;
+#ifdef	AF_INET6
 		struct sockaddr_in6 ipv6;
+#endif
 		struct sockaddr_in ipv4;
+		struct sockaddr	address;
 	};
 };
 #else
@@ -100,6 +103,7 @@ struct sockaddr_internet
 	union {
 		unsigned short sa_family;
 		struct sockaddr_in ipv4;
+		struct sockaddr address;
 	};
 };
 
@@ -280,7 +284,7 @@ public:
 	class __EXPORT address
 	{
 	protected:
-		struct addrinfo *list, hint;
+		struct addrinfo *list;
 
 	public:
 		/**
@@ -379,7 +383,7 @@ public:
 		 * @param service name or port number, or NULL if not used.
 		 * @param family of hostname.
 		 */
-		void add(const char *hostname, const char *service = NULL, int family = 0);
+		void add(const char *hostname, const char *service = NULL, int family = 0, int socktype = SOCK_STREAM);
 
 		/**
 		 * Add an individual socket address to our address list.

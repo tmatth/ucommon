@@ -70,9 +70,293 @@ typedef struct
 	};
 }	inetmulticast_t;
 
+#ifndef	HAVE_GETADDRINFO
+
+struct addrinfo {
+	int ai_flags;
+	int ai_family;
+	int ai_socktype;
+	int ai_protocol;
+	size_t ai_addrlen;
+	char *ai_canonname;
+	struct sockaddr *ai_addr;
+	struct addrinfo *ai_next;
+};
+
+#define	NI_NUMERICHOST	0x0001
+#define	NI_NUMERICSERV	0x0002
+#define	NI_NAMEREQD		0x0004
+#define NI_NOFQDN		0x0008
+#define	NI_DGRAM		0x0010
+
+#define	AI_PASSIVE		0x0100
+#define	AI_CANONNAME	0x0200
+#define	AI_NUMERICHOST	0x0400
+#define	AI_NUMERICSERV	0x0800
+
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 typedef unsigned char   bit_t;
+
+#ifndef	HAVE_GETADDRINFO
+
+static mutex servmutex, hostmutex;
+
+static void freeaddrinfo(struct addrinfo *aip) 
+{
+	while(aip != NULL) {
+		struct addrinfo *next = aip->ai_next;
+		if(aip->ai_canonname != NULL)
+			free(aip->ai_canonname);
+		if(aip->ai_addr != NULL)
+			free(aip->ai_addr);
+		free(aip);
+		aip = next;
+	}
+}
+
+static int getnameinfo(const struct sockaddr *addr, socklen_t len, char *host, size_t hostlen, char *service, size_t servlen, int flags)
+{
+	char *cp;
+	struct hostent *hp;
+	struct servent *sp;
+	assert(addr != NULL);
+	assert(host != NULL || hostlen == 0);
+	assert(service != NULL || servlen == 0);
+
+	short port = 0;
+
+	switch(addr->sa_family) {
+#ifdef	AF_UNIX
+	case AF_UNIX:
+		if(hostlen > 0)
+			snprintf(host, hostlen, "%s", ((struct sockaddr_un *)addr)->sun_path);
+		if(servlen > 0)
+			snprintf(service, servlen, "%s", ((struct sockaddr_un *)addr)->sun_path);
+		return 0;
+#endif
+#ifdef	AF_INET6
+	case AF_INET6:
+		port = ((struct sockaddr_in6 *)addr)->sin6_port;
+		break;	
+#endif
+	case AF_INET:
+		port = ((struct sockaddr_in *)addr)->sin_port;
+		break;
+	default:
+		return -1;
+	}
+	if(hostlen > 0) {
+		if(flags & NI_NUMERICHOST) {
+			if(inet_ntop(addr->sa_family, addr, host, hostlen) == NULL)
+				return -1;
+		}
+		else {
+			hostmutex.lock();
+			hp = gethostbyaddr(addr, len, addr->sa_family);
+			if(hp != NULL && hp->h_name != NULL) {
+				if(flags & NI_NOFQDN) {
+					cp = strchr(hp->h_name, '.');
+					if(cp)
+						*cp = 0;
+				}
+				snprintf(host, hostlen, "%s", hp->h_name);
+				hostmutex.unlock();
+			}
+			else {
+				hostmutex.unlock();
+				if(flags & NI_NAMEREQD)
+					return -1;
+				if(inet_ntop(addr->sa_family, addr, host, hostlen) != NULL)
+					return -1;
+			}	
+		}	
+	}
+	if(servlen > 0) {
+		if(flags & NI_NUMERICSERV)
+			snprintf(service, servlen, "%d", ntohs(port)); 
+		else {
+			servmutex.lock();
+			sp = getservbyport(port, (flags & NI_DGRAM) ? "udp" : NULL);
+			if(sp && sp->s_name)
+				snprintf(service, servlen, "%s", sp->s_name);
+			else
+				snprintf(service, servlen, "%d", ntohs(port));
+			servmutex.unlock();
+		}
+	}
+	return 0;				
+}
+
+static int getaddrinfo(const char *hostname, const char *servname, const struct addrinfo *hintsp, struct addrinfo **res)
+{
+	int family;
+	const char *servtype = "tcp";
+	struct hostent *hp;
+	struct servent *sp;
+	char **np;
+	struct addrinfo hints;
+	struct addrinfo *aip = NULL, *prior = NULL;
+	socklen_t len;
+	short port = 0;
+	struct sockaddr_in *ipv4;
+#ifdef	AF_INET6
+	struct sockaddr_in6 *ipv6;
+#endif
+	if(hintsp == NULL) {
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_UNSPEC;
+	}
+	else
+		memcpy(&hints, hintsp, sizeof(hints));
+
+	*res = NULL;
+
+#ifdef	AF_UNIX
+	if(hints.ai_family == AF_UNIX || (hints.ai_family == AF_UNSPEC && hostname && *hostname == '/')) {
+		if(hints.ai_socktype == 0)
+			hints.ai_socktype = SOCK_STREAM;
+
+		aip = (struct addrinfo *)malloc(sizeof(struct addrinfo));
+		memset(aip, 0, sizeof(struct addrinfo));
+		aip->ai_next = NULL;
+		aip->ai_canonname = NULL;
+		aip->ai_protocol = hints.ai_protocol;
+		struct sockaddr_un *unp;
+		if(strlen(hostname) >= sizeof(unp->sun_path))
+			return -1;
+		unp = (struct sockaddr_un *)malloc(sizeof(struct sockaddr_un));
+		memset(unp, 0, sizeof(struct sockaddr_un));
+		unp->sun_family = AF_UNIX;
+		strcpy(unp->sun_path, hostname);
+#ifdef	__SUN_LEN
+		len = sizeof(unp->sun_len) + strlen(unp->sun_path) + 
+			sizeof(unp->sun_family) + 1;
+		unp->sun_len = len;
+#else
+		len = strlen(unp->sun_path) + sizeof(unp->sun_family) + 1;
+#endif
+		if(hints.ai_flags & AI_PASSIVE)
+			unlink(unp->sun_path);
+		aip->ai_addr = (struct sockaddr *)unp;
+		aip->ai_addrlen = len;
+		*res = aip;
+		return 0;
+	}
+#endif
+
+	if(servname && *servname) {
+		if(servname[0] >= '0' && servname[0] <= '9') {
+			port = htons(atoi(servname));
+		}
+		else {
+			if(hints.ai_socktype == SOCK_DGRAM)
+				servtype = "udp";
+			servmutex.lock();
+			sp = getservbyname(servname, servtype);
+			if(!sp) {
+				servmutex.unlock();
+				return -1;
+			}
+			port = sp->s_port;
+			servmutex.unlock();
+		}
+	}
+
+	if((!hostname || !*hostname)) {
+		aip = (struct addrinfo *)malloc(sizeof(struct addrinfo));
+		memset(aip, 0, sizeof(struct addrinfo));
+		aip->ai_canonname = NULL;
+		aip->ai_socktype = hints.ai_socktype;
+		aip->ai_protocol = hints.ai_protocol;
+		aip->ai_next = NULL;
+
+#ifdef	AF_INET6
+		if(hints.ai_family == AF_INET6) {
+			aip->ai_family = AF_INET6;	
+			ipv6 = (struct sockaddr_in6 *)malloc(sizeof(struct sockaddr_in6));
+			memset(ipv6, 0, sizeof(struct sockaddr_in6));
+			if(!(hints.ai_flags & AI_PASSIVE))
+				inet_pton(AF_INET6, "::1", &ipv6->sin6_addr);
+			ipv6->sin6_family = AF_INET6;
+			ipv6->sin6_port = port;
+			aip->ai_addr = (struct sockaddr *)ipv6;
+			*res = aip;
+			return 0;
+		}
+#endif
+		aip->ai_family = AF_INET;
+		ipv4 = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+		memset(ipv4, 0, sizeof(struct sockaddr_in));
+		ipv4->sin_family = AF_INET;
+		ipv4->sin_port = port;
+		if(!(hints.ai_flags & AI_PASSIVE))
+			inet_pton(AF_INET, "127.0.0.1", &ipv4->sin_addr);
+		aip->ai_addr = (struct sockaddr *)ipv4;
+		*res = aip;
+		return 0;
+	}
+	family = hints.ai_family;
+#ifdef	AF_UNSPEC
+	if(family == AF_UNSPEC)
+		family = AF_INET;
+#endif
+	hostmutex.lock();
+#ifdef	HAVE_GETHOSTBYNAME2
+	hp = gethostbyname2(hostname, family);
+#else
+	hp = gethostbyname(hostname);
+#endif
+	if(!hp) {
+		hostmutex.unlock();
+		return -1;
+	}
+	
+	for(np = hp->h_addr_list; *np != NULL; np++) {
+		aip = (struct addrinfo *)malloc(sizeof(struct addrinfo));
+		memset(aip, 0, sizeof(struct addrinfo));
+		if(hints.ai_flags & AI_CANONNAME)
+			aip->ai_canonname = strdup(hp->h_name);
+		else
+			aip->ai_canonname = NULL;
+		aip->ai_socktype = hints.ai_socktype;
+		aip->ai_protocol = hints.ai_protocol;
+		aip->ai_next = NULL;
+		if(prior)
+			prior->ai_next = aip;
+		else
+			*res = aip;
+		prior = aip;
+
+#ifdef	AF_INET6
+		if(hints.ai_family == AF_INET6) {
+			aip->ai_family = AF_INET6;	
+			ipv6 = (struct sockaddr_in6 *)malloc(sizeof(struct sockaddr_in6));
+			memset(ipv6, 0, sizeof(struct sockaddr_in6));
+			inet_pton(AF_INET6, *np, &ipv6->sin6_addr);
+			ipv6->sin6_family = AF_INET6;
+			ipv6->sin6_port = port;
+			aip->ai_addr = (struct sockaddr *)ipv6;
+			continue;
+		}
+#endif
+		aip->ai_family = AF_INET;
+		ipv4 = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+		memset(ipv4, 0, sizeof(struct sockaddr_in));
+		ipv4->sin_family = AF_INET;
+		ipv4->sin_port = port;
+		inet_pton(AF_INET, *np, &ipv4->sin_addr);
+		aip->ai_addr = (struct sockaddr *)ipv4;
+	}
+
+	hostmutex.unlock();
+	if(*res)
+		return 0;
+	else return -1;
+}
+#endif
 
 static void bitmask(bit_t *bits, bit_t *mask, unsigned len)
 {
@@ -449,6 +733,7 @@ Socket::address::address(int family, const char *a, int type, int protocol)
 	char *host = strchr(addr, '@');
 	char *ep;
 	char *svc = NULL;
+	struct addrinfo hint;
 
 #ifdef	_MSWINDOWS_
 	Socket::init();
@@ -498,6 +783,7 @@ Socket::address::address(const char *host, unsigned port, int family)
 {
 	assert(host != NULL && *host != 0);
 	
+	struct addrinfo hint;
 	char buf[16];
 	char *svc = NULL;
 
@@ -538,6 +824,7 @@ Socket::address::address(SOCKET so, const char *host, const char *svc)
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
+	struct addrinfo hint;
 	struct addrinfo *ah;
 
 #ifdef	_MSWINDOWS_
@@ -580,17 +867,23 @@ void Socket::address::add(struct sockaddr *addr)
 	add(buffer, svc, addr->sa_family);
 }
 
-void Socket::address::add(const char *host, const char *svc, int family)
+void Socket::address::add(const char *host, const char *svc, int family, int socktype)
 {
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
-	struct addrinfo *join, *last = NULL;
+	struct addrinfo *join, *last = NULL, hint;
 
-	if(family) {
-		memset(&hint, 0, sizeof(hint));
+	memset(&hint, 0, sizeof(hint));
+#ifdef	PF_UNSPEC
+	hint.ai_family = PF_UNSPEC;
+	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+#endif
+
+	hint.ai_socktype = socktype;
+
+	if(family)
 		hint.ai_family = family;
-	}
 
 	getaddrinfo(host, svc, &hint, &join);
 
