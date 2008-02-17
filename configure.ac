@@ -139,7 +139,7 @@ AC_CHECK_LIB(msvcrt, fopen, [
 
 if test "$GCC" != "yes" ; then
 	AC_CHECK_LIB(Crun, _ex_register, [
-		UCOMMON_LIBC="-lCrun $UCOMMON_LIBC"
+		UCOMMON_LIBC="-L/opt/SUNWspro/lib -lCrun $UCOMMON_LIBC"
 	])
 fi
 

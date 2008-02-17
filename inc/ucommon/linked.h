@@ -748,10 +748,10 @@ public:
 
 	/**
 	 * Assign embedded value from related type.
-	 * @param value to assign.
+	 * @param typed_value to assign.
 	 */
-	inline void operator=(T value)
-		{set(value);};
+	inline void operator=(T typed_value)
+		{set(typed_value);};
 
 	/**
 	 * Find embedded object in chain by name.
@@ -797,25 +797,25 @@ public:
 	/**
 	 * Assign embedded value from related type and link to list.
 	 * @param root node or pointer for list.
-	 * @param value to assign.
+	 * @param typed_value to assign.
 	 */
-	inline linked_value(LinkedObject **root, T value) 
-		{LinkedObject::enlist(root); set(value);};
+	inline linked_value(LinkedObject **root, T typed_value) 
+		{LinkedObject::enlist(root); set(typed_value);};
 
 	/**
 	 * Assign embedded value from related type and add to list.
 	 * @param index to list our object on.
-	 * @param value to assign.
+	 * @param typed_value to assign.
 	 */
-	inline linked_value(OrderedIndex *index, T value)
- 		{O::enlist(index); set(value);};
+	inline linked_value(OrderedIndex *index, T typed_value)
+ 		{O::enlist(index); set(typed_value);};
 
 	/**
 	 * Assign embedded value from related type.
-	 * @param value to assign.
+	 * @param typed_value to assign.
 	 */
-	inline void operator=(T value)
-		{set(value);};
+	inline void operator=(T typed_value)
+		{set(typed_value);};
 };	
 
 /**

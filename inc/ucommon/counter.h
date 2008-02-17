@@ -112,10 +112,10 @@ protected:
 public:
 	/**
 	 * Used to directly assign sequence position in template.
-	 * @param offset in sequence to reset sequencing to.
+	 * @param inc_offset in sequence to reset sequencing to.
 	 */
-	inline void operator=(unsigned offset)
-		{counter::operator=(offset);};
+	inline void operator=(unsigned inc_offset)
+		{counter::operator=(inc_offset);};
 };
 	
 /**

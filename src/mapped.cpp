@@ -23,7 +23,10 @@
 #include <unistd.h>
 
 #ifdef HAVE_SYS_MMAN_H
+#define	__EXTENSIONS__
+#define	_POSIX_C_SOURCE 200112L
 #include <sys/mman.h>
+#undef	_POSIX_C_SOURCE
 #include <sys/types.h>
 #endif
 

@@ -1909,7 +1909,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 	case AF_INET:
 		ENTER_EXCLUSIVE
 		string::set(name, size, inet_ntoa(((struct sockaddr_in *)(addr))->sin_addr));
-		EXIT_EXCLUSIVE
+		LEAVE_EXCLUSIVE
 		return name;
 #endif
 #endif
