@@ -23,7 +23,7 @@ using namespace UCOMMON_NAMESPACE;
 const LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
 const LinkedObject *LinkedObject::inv = (LinkedObject *)-1;
 
-MultiMap::MultiMap(unsigned count)
+MultiMap::MultiMap(unsigned count) : ReusableObject()
 {
 	assert(count > 0);
 

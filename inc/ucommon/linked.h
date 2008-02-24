@@ -732,7 +732,7 @@ public:
  * lists.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT MultiMap
+class __EXPORT MultiMap : public ReusableObject
 {
 private:
 	typedef struct {
@@ -1096,7 +1096,7 @@ public:
 	/**
 	 * Construct a multimap node.
 	 */
-	inline multimap() : MultiMap(P), T() {};
+	inline multimap() : MultiMap(P) {};
 
 	/**
 	 * Destroy a multimap object.
