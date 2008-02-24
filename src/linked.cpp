@@ -23,6 +23,147 @@ using namespace UCOMMON_NAMESPACE;
 const LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
 const LinkedObject *LinkedObject::inv = (LinkedObject *)-1;
 
+MultiMap::MultiMap(unsigned count)
+{
+	assert(count > 0);
+
+	paths = count;
+	links = new link_t[count];
+	memset(links, 0, sizeof(link_t) * count);
+}
+
+MultiMap::~MultiMap()
+{
+	unsigned path = 0;
+
+	while(path < paths)
+		delist(path++);
+
+	delete[] links;
+}
+
+MultiMap *MultiMap::next(unsigned path)
+{
+	assert(path < paths);
+
+	return links[path].next;
+}
+
+void MultiMap::delist(unsigned path)
+{
+	assert(path < paths);
+
+	if(!links[path].root)
+		return;
+
+	while(links[path].root) {
+		if(*links[path].root == this) {
+			*links[path].root = next(path);
+			break;
+		}
+		links[path].root = &((*links[path].root)->links[path].next);
+	}
+	links[path].root = NULL;
+	links[path].next = NULL;
+}
+
+void MultiMap::enlist(unsigned path, MultiMap **root)
+{
+	assert(path < paths);
+	assert(root != NULL);
+
+	delist(path);
+	links[path].next = *root;
+	links[path].root = root;
+	links[path].key = NULL;
+	links[path].keysize = 0;
+	*root = this;
+}
+
+void MultiMap::enlist(unsigned path, MultiMap **root, caddr_t key, unsigned max, size_t keysize)
+{
+	assert(path < paths);
+	assert(root != NULL);
+	assert(key != NULL);
+	assert(max > 0);
+
+	unsigned value = 0;
+
+	delist(path);
+	while(keysize && !key[0]) {
+		++key;
+		--keysize;
+	}
+
+	while(keysize--)
+		value = (value << 1) ^ (*key++);
+
+	enlist(path, &root[keyindex(key, max, keysize)]);
+
+	if(!keysize)
+		keysize = strlen(key);
+
+	links[path].keysize = keysize;
+	links[path].key = key;
+}
+
+bool MultiMap::compare(unsigned path, caddr_t key, size_t keysize)
+{
+	assert(path < paths);
+	assert(key != NULL);
+	
+	if(!keysize)
+		keysize = strlen(key);
+
+	if(links[path].keysize != keysize)
+		return false;
+
+	if(memcmp(key, links[path].key, links[path].keysize) == 0)
+		return true;
+
+	return false;
+}
+
+unsigned MultiMap::keyindex(caddr_t key, unsigned max, size_t keysize)
+{
+	assert(key != NULL);
+	assert(max > 0);
+
+	unsigned value = 0;
+
+	if(!keysize)
+		return NamedObject::keyindex(key, max);
+
+	while(keysize && !key[0]) {
+		++key;
+		--keysize;
+	}
+
+	while(keysize--)
+		value = (value << 1) ^ (*key++);
+
+	return value % max;
+}
+	
+MultiMap *MultiMap::find(unsigned path, MultiMap **root, caddr_t key, unsigned max, size_t keysize)
+{
+	assert(key != NULL);
+	assert(max > 0);
+
+	MultiMap *node;
+
+	if(keysize == 0)
+		node = root[NamedObject::keyindex(key, max)];
+
+	while(node) {
+		if(node->compare(path, key, keysize))
+			break;
+		node = node->next(path);
+	}
+
+	return node;
+}
+
 LinkedObject::LinkedObject(LinkedObject **root)
 {
 	assert(root != NULL);

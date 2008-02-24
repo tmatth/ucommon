@@ -337,6 +337,13 @@ public:
 		struct sockaddr *getAddr(void);
 
 		/**
+		 * Get the first socket address of specified family from our list.
+		 * @param family to seek.
+		 * @return first socket address of family or NULL if none.
+		 */
+		struct sockaddr *get(int family);
+
+		/**
 		 * Find a specific socket address in our address list.
 		 * @return matching address from list or NULL if not found.
 		 */

@@ -32,11 +32,11 @@ extern "C" int main()
 
 	char addrbuf[65];
 	addrbuf[0] = 0;
-	Socket::getaddress(localhost.getAddr(), addrbuf, sizeof(addrbuf));
+	Socket::getaddress(localhost.get(AF_INET), addrbuf, sizeof(addrbuf));
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
-	Socket::getinterface((struct sockaddr *)&addr, localhost.getAddr());
+	Socket::getinterface((struct sockaddr *)&addr, localhost.get(AF_INET));
 	Socket::getaddress((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
-	assert(Socket::equal((struct sockaddr *)&addr, localhost.getAddr()));
-	assert(Socket::subnet((struct sockaddr *)&addr, localhost.getAddr()));
+	assert(Socket::equal((struct sockaddr *)&addr, localhost.get(AF_INET)));
+	assert(Socket::subnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
 };

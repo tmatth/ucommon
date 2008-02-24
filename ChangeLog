@@ -1,3 +1,7 @@
+From ucommon 1.4.1 to 1.4.2
+- get address entry by family from list.
+- MultiMap/multimap multiply pathed lists/associated key objects.
+
 From ucommon 1.4.0 to 1.4.1
 - internalized getaddrinfo substituted on targets without addrinfo support.
 - small correction to socket::address::add to pass socket type.

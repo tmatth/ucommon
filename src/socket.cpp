@@ -855,6 +855,22 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
+struct sockaddr *Socket::address::get(int family)
+{
+	struct sockaddr *ap;
+	struct addrinfo *lp;
+
+	lp = list;
+
+	while(lp) {
+		ap = list->ai_addr;
+		if(ap && ap->sa_family == family)
+			return ap;
+		lp = lp->ai_next;
+	}
+	return NULL;
+}
+
 void Socket::address::add(struct sockaddr *addr)
 {
 	assert(addr != NULL);
