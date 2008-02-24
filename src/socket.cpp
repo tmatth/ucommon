@@ -354,7 +354,8 @@ static int getaddrinfo(const char *hostname, const char *servname, const struct 
 	hostmutex.unlock();
 	if(*res)
 		return 0;
-	else return -1;
+	else 
+		return -1;
 }
 #endif
 
