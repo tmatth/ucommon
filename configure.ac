@@ -69,6 +69,7 @@ AC_ARG_ENABLE(stdcpp,
 	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime overhead]))
 if test "$enable_stdcpp" = "no" ; then
 	UCOMMON_MODEL="CC"
+	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}"
 fi
 
 AC_ARG_WITH(libc, 
@@ -257,6 +258,8 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 		UCOMMON_LIBC="$UCOMMON_LIBC -lgcc"
 	])
 fi
+
+AM_CONDITIONAL(C_MODEL, test "$UCOMMON_MODEL" = "CC")
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
