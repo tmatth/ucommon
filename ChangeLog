@@ -4,6 +4,7 @@ From ucommon 1.4.1 to 1.4.2
 - remove complex automake rules; use new cmodel.sh to reset libtool when
   building pure c mode link for c++ objects for deep embedding without
   libstdc++.
+- changes to support QNX target builds.
 
 From ucommon 1.4.0 to 1.4.1
 - internalized getaddrinfo substituted on targets without addrinfo support.
