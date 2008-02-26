@@ -1510,7 +1510,7 @@ public:
 		{set(object.c_str());};	
 };
 
-#ifndef _MSWINDOWS_
+#if !defined(_MSWINDOWS_) && !defined(__QNX__)
 
 /**
  * Convenience function for case insensitive null terminated string compare.

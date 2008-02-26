@@ -399,6 +399,8 @@ public:
 		void add(struct sockaddr *address);
 	};
 
+	friend class address;
+
 	/**
 	 * Create socket as duped handle of existing socket.
 	 * @param existing socket to dup.

@@ -1820,7 +1820,7 @@ int Socket::bindaddr(SOCKET so, const char *host, const char *svc)
 	if(host && !strcmp(host, "*"))
 		host = NULL;
 
-#ifdef	SO_BINDTODEVICE
+#if defined(SO_BINDTODEVICE) && !defined(__QNX__)
 	if(host && !strchr(host, '.') && !strchr(host, ':')) {
 		struct ifreq ifr;
 		memset(&ifr, 0, sizeof(ifr));

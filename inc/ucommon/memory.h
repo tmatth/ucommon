@@ -348,6 +348,8 @@ private:
 		keydata(keyassoc *assoc, char *id, unsigned max);
 	};
 
+	friend class keydata;
+
 	unsigned count;
 	unsigned paths;
 	size_t keysize;

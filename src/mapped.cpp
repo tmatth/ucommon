@@ -32,7 +32,9 @@
 
 #ifdef HAVE_FTOK
 #include <sys/ipc.h>
+#ifdef HAVE_SYS_SHM_H
 #include <sys/shm.h>
+#endif
 #endif
 
 #include <ctype.h>

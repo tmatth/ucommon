@@ -1430,6 +1430,8 @@ private:
 		Object *object;
 	};
 
+	friend class member;
+
 protected:
 	size_t limit;
 
