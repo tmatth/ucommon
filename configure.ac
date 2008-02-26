@@ -40,7 +40,6 @@ UCOMMON_MODEL="CXX"
 UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
-LIBTOOL_TAG='--tag=$(MODEL)'
 
 CHECK="test"
 POSIX=false
@@ -68,27 +67,10 @@ AC_DEFUN([AC_SUBST_DIR], [
 
 AC_ARG_ENABLE(stdcpp, 
 	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime overhead]))
-
-AC_PATH_PROG(libtool, libtool, none)
-
-if test "$libtool" != "none" ; then
-	libtool_version=`$libtool --version | grep "libtool) " | cut -f4 -d " "`
-fi
-if test -z "$libtool_version" ; then
-	lt_version="1.5.x" 
+if test "$enable_stdcpp" = "no" ; then
+	UCOMMON_MODEL="CC"
 fi
 
-case "$libtool_version" in
-1.4.*)
-	LIBTOOL_TAG=""
-	;;
-*)
-	if test "$enable_stdcpp" = "no" ; then
-		UCOMMON_MODEL="CC"
-	fi
-	;;
-esac
- 
 AC_ARG_WITH(libc, 
 	AC_HELP_STRING([--with-libc=path],[specify path to alternate libc]),[
 	if test x$with_libc != x ; then
@@ -436,7 +418,6 @@ AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
 AC_SUBST(CHECK)
 AC_SUBST(CXXFLAGS)
-AC_SUBST(LIBTOOL_TAG)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LINKED)
 AC_SUBST(UCOMMON_MODEL)
