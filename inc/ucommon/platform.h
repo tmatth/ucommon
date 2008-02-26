@@ -408,7 +408,7 @@ extern "C" {
 
 };
 
-#ifdef	DEBUG
+#if defined(DEBUG) && (!defined(__GNUC__) || __GNUC__ != 2)
 #define cpr_debug(fmt, ...)	fprintf(stderr, fmt, ...)
 #else
 #define	cpr_debug(fmt, ...)
