@@ -84,7 +84,7 @@
 // see if we are building for or using extended stdc++ runtime library support
 
 #if defined(NEW_STDCPP) || defined(OLD_STDCPP)
-#define	UCOMMON_EXTENDED
+#define	_UCOMMON_EXTENDED_
 #endif
 
 // see if targetting legacy microsoft windows platform 
@@ -278,7 +278,7 @@ extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
  */
 extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t address, size_t known) __MALLOC;
 
-#ifndef	UCOMMON_EXTENDED
+#ifndef	_UCOMMON_EXTENDED_
 /**
  * Our generic new operator.  Uses our heap memory allocator.
  * @param size of object being constructed.
@@ -355,7 +355,7 @@ inline void *operator new(size_t size, caddr_t address)
 inline void *operator new(size_t size, caddr_t address, size_t known)
 	{return cpr_memassign(size, address, known);};
 
-#ifndef	UCOMMON_EXTENDED
+#ifndef	_UCOMMON_EXTENDED_
 /**
  * Delete an object from the heap.
  * @param object to delete.

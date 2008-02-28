@@ -1450,6 +1450,17 @@ int Socket::error(SOCKET so)
 	return opt;
 }
 
+int Socket::sendwait(SOCKET so, unsigned size)
+{
+	assert(so != INVALID_SOCKET);
+
+#ifdef	SO_SNDLOWAT
+	return setsockopt(so, SOL_SOCKET, SO_SNDLOWAT, (caddr_t)&size, sizeof(size));
+#else
+	return -1;
+#endif
+}
+
 int Socket::sendsize(SOCKET so, unsigned size)
 {
 	assert(so != INVALID_SOCKET);

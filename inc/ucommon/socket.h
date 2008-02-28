@@ -553,6 +553,15 @@ public:
 		{return sendsize(so, size);};
 
 	/**
+	 * Set the size to wait before sending.
+	 * @param size of send wait buffer to set.
+	 * @return 0 on success, -1 on error.
+	 */
+	inline int sendwait(unsigned size)
+		{return sendwait(so, size);};
+
+
+	/**
 	 * Set the size of the socket receive buffer.
 	 * @param size of recv buffer to set.
 	 * @return 0 on success, -1 on error.
@@ -724,6 +733,14 @@ public:
 	 * @return 0 on success, -1 on error.
 	 */
 	static int sendsize(SOCKET socket, unsigned size);
+
+	/**
+	 * Set the size to wait before sending.
+	 * @param socket descriptor.
+	 * @param size of send wait buffer to set.
+	 * @return 0 on success, -1 on error.
+	 */
+	static int sendwait(SOCKET socket, unsigned size);
 
 	/**
 	 * Set the receive size of a socket descriptor.
