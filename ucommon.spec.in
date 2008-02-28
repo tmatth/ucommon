@@ -1,7 +1,7 @@
 %{!?release: %define release 0}
 %{!?epoch: %define epoch 0}
 %{!?version: %define version @VERSION@}
-%{!?uses_stdcpp: %define uses_stdcpp 0}
+%{!?uses_stdcpp: %define uses_stdcpp 1}
 
 Name: ucommon
 Summary: "ucommon" - portable embedded runtime
