@@ -45,7 +45,7 @@ NAMESPACE_UCOMMON
  * @author David Sugar <dyfet@gnutelephony.org>
  * @short streamable tcp socket connection.
  */
-class __EXPORT tcpstream : protected std::streambuf, public Socket, public std::iostream
+class __EXPORT tcpstream : protected std::streambuf, protected Socket, public std::iostream
 {
 private:
 	__LOCAL void allocate(unsigned size);
@@ -55,6 +55,38 @@ protected:
 	size_t bufsize;
 	char *gbuf, *pbuf;
 
+	/**
+	 * Release the tcp stream and destroy the underlying socket.
+	 */
+	void release(void);
+
+    /**
+     * This streambuf method is used to load the input buffer
+     * through the established tcp socket connection.
+     *
+     * @return char from get buffer, EOF if not connected.
+     */
+    int underflow();
+
+    /**
+     * This streambuf method is used for doing unbuffered reads
+     * through the establish tcp socket connection when in interactive mode.
+     * Also this method will handle proper use of buffers if not in
+     * interative mode.
+     *
+     * @return char from tcp socket connection, EOF if not connected.
+     */
+    int uflow();
+
+    /**
+     * This streambuf method is used to write the output
+     * buffer through the established tcp connection.
+     *
+     * @param ch char to push through.
+     * @return char pushed through.
+     */
+    int overflow(int ch);
+
 public:
 	/**
 	 * Create a stream from an existing tcp listener.
@@ -62,7 +94,24 @@ public:
 	 * @param segsize for tcp segments and buffering.
 	 * @param timeout for socket i/o operations.
 	 */
-	tcpstream(ListenSocket& listener, size_t segsize = 536, timeout_t timeout = 0);
+	tcpstream(ListenSocket& listener, unsigned segsize = 536, timeout_t timeout = 0);
+
+	/**
+	 * Create an unconnected tcp stream object that is idle until opened.
+	 * @param family of protocol to create.
+	 * @param timeout for socket i/o operations.
+	 */
+	tcpstream(int family = PF_INET, timeout_t timeout = 0);
+
+	/**
+	 * A convenience constructor that creates a connected tcp stream directly
+	 * from an address.  The socket is constructed to match the type of the
+	 * the address family in the socket address that is passed.
+	 * @param service to connect to.
+	 * @param segsize for tcp segments and buffering.
+	 * @param timeout for socket i/o operations.
+	 */
+	tcpstream(Socket::address *service, unsigned segsize = 536, timeout_t timeout = 0);
 
 	/**
 	 * Destroy a tcp stream.
@@ -70,7 +119,29 @@ public:
 	virtual ~tcpstream();
 
 	/**
-	 * Close an open stream connection.
+	 * See if stream connection is active.
+	 * @return true if stream is active.
+	 */
+	inline operator bool()
+		{return so != INVALID_SOCKET && bufsize > 0;};
+
+	/**
+	 * See if stream is disconnected.
+	 * @return true if stream disconnected.
+	 */
+	inline bool operator!()
+		{return so == INVALID_SOCKET || bufsize == 0;};
+
+	/**
+	 * Open a stream connection to a tcp service.
+	 * @param address of service to access.
+	 * @param buffering segment size to use.
+	 */
+	void open(Socket::address *address, unsigned mss = 536);
+
+	/**
+	 * Close an active stream connection.  This does not release the
+	 * socket but is a disconnect.
 	 */
 	void close(void);
 

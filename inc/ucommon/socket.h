@@ -344,6 +344,12 @@ public:
 		struct sockaddr *get(int family);
 
 		/**
+		 * Get the family of a socket address by first entry.
+		 * @return family of first socket address or 0 if none.
+		 */
+		int family(void);
+
+		/**
 		 * Find a specific socket address in our address list.
 		 * @return matching address from list or NULL if not found.
 		 */

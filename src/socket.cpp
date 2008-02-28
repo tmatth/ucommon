@@ -856,6 +856,19 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
+int Socket::address::family(void)
+{
+	struct sockaddr *ap;
+	if(!list)
+		return 0;
+
+	ap = list->ai_addr;
+	if(!ap)
+		return 0;
+
+	return ap->sa_family;
+}
+
 struct sockaddr *Socket::address::get(int family)
 {
 	struct sockaddr *ap;

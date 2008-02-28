@@ -24,7 +24,42 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace std;
 
-tcpstream::tcpstream(ListenSocket &listener, size_t segsize, timeout_t tv) :
+tcpstream::tcpstream(int family, timeout_t tv) :
+	streambuf(), Socket(family, SOCK_STREAM, IPPROTO_TCP),
+#ifdef OLD_STDCPP
+	iostream()
+#else
+	iostream((streambuf *)this)
+#endif
+{
+	bufsize = 0;
+	gbuf = pbuf = NULL;
+
+#ifdef OLD_STDCPP
+	init((streambuf *)this);
+#endif
+	timeout = tv;
+}
+
+tcpstream::tcpstream(Socket::address *list, unsigned segsize, timeout_t tv) :
+	streambuf(), Socket(list->family(), SOCK_STREAM, IPPROTO_TCP),
+#ifdef OLD_STDCPP
+	iostream()
+#else
+	iostream((streambuf *)this)
+#endif
+{
+	bufsize = 0;
+	gbuf = pbuf = NULL;
+
+#ifdef OLD_STDCPP
+	init((streambuf *)this);
+#endif
+	timeout = tv;
+	open(list);
+}
+
+tcpstream::tcpstream(ListenSocket &listener, unsigned segsize, timeout_t tv) :
 	streambuf(), Socket(listener.accept()),
 #ifdef OLD_STDCPP
 	iostream()
@@ -35,7 +70,7 @@ tcpstream::tcpstream(ListenSocket &listener, size_t segsize, timeout_t tv) :
 	bufsize = 0;
 	gbuf = pbuf = NULL;
 
-#ifdef	OLD_STDCPP
+#ifdef OLD_STDCPP
 	init((streambuf *)this);
 #endif
 	timeout = tv;
@@ -48,8 +83,137 @@ tcpstream::tcpstream(ListenSocket &listener, size_t segsize, timeout_t tv) :
 
 tcpstream::~tcpstream()
 {
-	close();
+	tcpstream::release();
 }
+
+void tcpstream::release(void)
+{
+	if(gbuf)
+		delete[] gbuf;
+
+	if(pbuf)
+		delete[] pbuf;
+
+	clear();
+	Socket::release();
+}
+
+int tcpstream::uflow()
+{
+    int ret = underflow();
+
+    if (ret == EOF)
+        return EOF;
+
+    if (bufsize != 1)
+        gbump(1);
+
+    return ret;
+}
+
+int tcpstream::underflow()
+{
+	ssize_t rlen = 1;
+	unsigned char ch;
+
+	if(bufsize == 1) {
+        if(timeout && !Socket::waitPending(timeout)) {
+            clear(ios::failbit | rdstate());
+            return EOF;
+        }
+        else
+            rlen = Socket::get(&ch, 1);
+        if(rlen < 1) {
+            if(rlen < 0)
+				close();
+            return EOF;
+        }
+        return ch;
+    }
+
+    if(!gptr())
+        return EOF;
+
+    if(gptr() < egptr())
+        return (unsigned char)*gptr();
+
+    rlen = (ssize_t)((gbuf + bufsize) - eback());
+    if(timeout && !Socket::waitPending(timeout)) {
+        clear(ios::failbit | rdstate());
+        return EOF;
+    }
+    else
+        rlen = Socket::get(eback(), rlen);
+    if(rlen < 1) {
+//      clear(ios::failbit | rdstate());
+        if(rlen < 0)
+			close();
+        else
+            clear(ios::failbit | rdstate());
+        return EOF;
+    }
+
+    setg(eback(), eback(), eback() + rlen);
+    return (unsigned char) *gptr();
+}
+
+int tcpstream::overflow(int c)
+{
+    unsigned char ch;
+    ssize_t rlen, req;
+
+    if(bufsize == 1) {
+        if(c == EOF)
+            return 0;
+
+		ch = (unsigned char)(c);
+        rlen = Socket::put(&ch, 1);
+        if(rlen < 1) {
+            if(rlen < 0) 
+				close();
+            return EOF;
+        }
+        else
+            return c;
+    }
+
+    if(!pbase())
+        return EOF;
+
+    req = (ssize_t)(pptr() - pbase());
+    if(req) {
+        rlen = Socket::put(pbase(), req);
+        if(rlen < 1) {
+            if(rlen < 0) 
+				close();
+            return EOF;
+        }
+        req -= rlen;
+    }
+    // if write "partial", rebuffer remainder
+
+    if(req)
+//      memmove(pbuf, pptr() + rlen, req);
+        memmove(pbuf, pbuf + rlen, req);
+    setp(pbuf, pbuf + bufsize);
+    pbump(req);
+
+    if(c != EOF) {
+        *pptr() = (unsigned char)c;
+        pbump(1);
+    }
+    return c;
+}
+
+void tcpstream::open(Socket::address *list, unsigned mss)
+{
+	close();	// close if existing is open...
+
+	if(Socket::connect(*list))
+		return;
+
+	allocate(mss);
+}	
 
 void tcpstream::close(void)
 {
@@ -65,7 +229,7 @@ void tcpstream::close(void)
 	gbuf = pbuf = NULL;
 	bufsize = 0;
 	clear();
-	Socket::release();
+	Socket::disconnect();
 }
 
 void tcpstream::allocate(unsigned mss)
