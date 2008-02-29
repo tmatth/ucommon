@@ -94,6 +94,7 @@
 #include <ucommon/bitmap.h>
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
+#include <ucommon/xml.h>
 
 #ifdef	_UCOMMON_EXTENDED_
 #include <ucommon/stream.h>

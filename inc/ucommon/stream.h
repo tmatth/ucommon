@@ -43,7 +43,6 @@ NAMESPACE_UCOMMON
  * be manipulated using the << and >> operators.
  *
  * @author David Sugar <dyfet@gnutelephony.org>
- * @short streamable tcp socket connection.
  */
 class __EXPORT tcpstream : protected std::streambuf, protected Socket, public std::iostream
 {
@@ -89,6 +88,12 @@ protected:
 
 public:
 	/**
+	 * Copy constructor...
+	 * @param copy for object.
+	 */
+	tcpstream(const tcpstream &copy);
+
+	/**
 	 * Create a stream from an existing tcp listener.
 	 * @param listener to accept connection from.
 	 * @param segsize for tcp segments and buffering.
@@ -133,6 +138,13 @@ public:
 		{return so == INVALID_SOCKET || bufsize == 0;};
 
 	/**
+	 * Print to a socket.
+	 * @param format to print.
+	 * @return number of bytes sent.
+	 */
+	ssize_t printf(const char *fmt, ...) __PRINTF(2, 3);
+
+	/**
 	 * Open a stream connection to a tcp service.
 	 * @param address of service to access.
 	 * @param buffering segment size to use.
@@ -151,7 +163,7 @@ public:
 	 */
 	int sync(void);
 };
-
+	
 END_NAMESPACE
 
 #endif

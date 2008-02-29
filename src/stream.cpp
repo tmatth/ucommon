@@ -19,10 +19,29 @@
 #include <config.h>
 #include <ucommon/thread.h>
 #include <ucommon/socket.h>
+#include <ucommon/string.h>
 #include <ucommon/stream.h>
+#include <stdarg.h>
 
 using namespace UCOMMON_NAMESPACE;
 using namespace std;
+
+tcpstream::tcpstream(const tcpstream &copy) :
+	streambuf(), Socket(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP),
+#ifdef OLD_STDCPP
+	iostream()
+#else
+	iostream((streambuf *)this)
+#endif
+{
+	bufsize = 0;
+	gbuf = pbuf = NULL;
+
+#ifdef OLD_STDCPP
+	init((streambuf *)this);
+#endif
+	timeout = copy.timeout;
+}
 
 tcpstream::tcpstream(int family, timeout_t tv) :
 	streambuf(), Socket(family, SOCK_STREAM, IPPROTO_TCP),
@@ -203,6 +222,26 @@ int tcpstream::overflow(int c)
         pbump(1);
     }
     return c;
+}
+
+ssize_t tcpstream::printf(const char *format, ...)
+{
+	va_list args;
+	size_t len;
+	char *buf;
+
+	if(!bufsize)
+		return 0;
+
+	va_start(args, format);
+	overflow(EOF);
+	len = pptr() - pbase();
+	buf = pptr();
+	vsnprintf(buf, len, format, args);
+	va_end(args);
+
+	len = strlen(buf);
+		return Socket::put(buf, len);
 }
 
 void tcpstream::open(Socket::address *list, unsigned mss)
