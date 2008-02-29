@@ -1,5 +1,7 @@
 From ucommon 1.4.2 to 1.5.0
 - added gnu common c++ based tcp streaming class to ucommon.
+- added gnu common c++ based xml sax parser to ucommon with better support for
+  parsing embedded xml data structures.
 
 From ucommon 1.4.1 to 1.4.2
 - get address entry by family from list.
