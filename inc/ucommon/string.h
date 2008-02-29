@@ -1538,6 +1538,13 @@ extern "C" inline int strnicmp(const char *string1, const char *string2, size_t 
  */
 typedef	string string_t;
 
+/**
+ * A convenience type when mixing std::string in old compilers that are bad
+ * with namespaces...
+ */
+typedef string String;
+
+
 END_NAMESPACE
 
 #endif
