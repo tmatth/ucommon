@@ -20,7 +20,7 @@
  * @file ucommon/stream.h
  */
 
-#ifdef	_UCOMMON_EXTENDED_
+#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 #ifndef	_UCOMMON_STREAM_H_
 #define	_UCOMMON_STREAM_H_
 

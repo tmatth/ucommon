@@ -15,5 +15,5 @@ AM_CXXFLAGS = $(UCOMMON_FLAGS)
 pkgincludedir = $(includedir)/ucommon
 pkginclude_HEADERS = object.h linked.h string.h counter.h vector.h \
 	bitmap.h timers.h socket.h access.h export.h thread.h mapped.h \
-	memory.h platform.h ucommon.h stream.h xml.h
+	memory.h platform.h xml.h ucommon.h stream.h persist.h
 

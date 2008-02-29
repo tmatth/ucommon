@@ -98,6 +98,7 @@
 
 #ifdef	_UCOMMON_EXTENDED_
 #include <ucommon/stream.h>
+#include <ucommon/persist.h>
 #endif
 
 #endif
