@@ -138,12 +138,6 @@ AC_CHECK_LIB(msvcrt, fopen, [
 	])
 ])
 
-if test "$GCC" != "yes" ; then
-	AC_CHECK_LIB(Crun, _ex_register, [
-		UCOMMON_LIBC="-L/opt/SUNWspro/lib -lCrun $UCOMMON_LIBC"
-	])
-fi
-
 AC_CHECK_LIB($clib, stricmp, [
 	AC_DEFINE(HAVE_STRICMP, [1], [string icmp])
 ])
@@ -257,9 +251,12 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 		UCOMMON_CLINK="$UCOMMON_CLINK -lSystemstubs"
 		UCOMMON_LIBC="$UCOMMON_LIBC -lgcc"
 	])
+	if test "$GCC" != "yes" ; then
+		AC_CHECK_LIB(Crun, _ex_register, [
+			UCOMMON_LIBC="-L/opt/SUNWspro/lib -lCrun $UCOMMON_LIBC"
+		])
+	fi
 fi
-
-AM_CONDITIONAL(C_MODEL, test "$UCOMMON_MODEL" = "CC")
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS

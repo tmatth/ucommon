@@ -2524,6 +2524,9 @@ inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
 inline void remove(fifo_t &fifo, Object *object)
 	{fifo.remove(object);};
 
+typedef	mutex mutex_t;
+typedef	mutex Mutex;
+
 END_NAMESPACE
 
 #define	ENTER_EXCLUSIVE	\
