@@ -2300,6 +2300,12 @@ typedef TimedEvent timedevent_t;
 typedef	mutex mutex_t;
 
 /**
+ * Convenience type for using exclusive mutex on systems which define
+ * "mutex" (solaris) already to avoid type confusion.
+ */
+typedef mutex Mutex;
+
+/**
  * Convenience type for using read/write locks.
  */
 typedef rwlock rwlock_t;
@@ -2523,9 +2529,6 @@ inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
  */
 inline void remove(fifo_t &fifo, Object *object)
 	{fifo.remove(object);};
-
-typedef	mutex mutex_t;
-typedef	mutex Mutex;
 
 END_NAMESPACE
 

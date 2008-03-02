@@ -1,0 +1,10 @@
+Project Indiana/OpenSolaris:
+
+You need to install SUNWhea or configure will fail on the preprocessor.  You
+can use the Sun Studio 12 compiler as well as gcc.  When building without Sun
+std c++ support (Cstd), Crun is added alone.
+
+To make autogen.sh work (or svn checkout) requires a bunch of packages and
+setting the AUTOMAKE_SUFFIX="-1.10".  You need SUNWgnome-common-devel,
+SUNWgm4, SUNWgmake, SUNWaconf, SUNWautomake-1.10, and SUNWlibtool.
+
