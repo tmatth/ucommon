@@ -576,7 +576,7 @@ inline bool isnull(T& object)
  * @return true if object points to NULL.
  */
 template<class T>
-inline bool isnull(T *object)
+inline bool isnullp(T *object)
 	{return (bool)(object->operator*() == NULL);};
 
 /**
