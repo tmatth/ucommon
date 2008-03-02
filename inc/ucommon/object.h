@@ -570,6 +570,16 @@ inline bool isnull(T& object)
 	{return (bool)(object.operator*() == NULL);};
 
 /**
+ * Convenience function to test pointer-pointer object.  This solves issues 
+ * where some compilers get confused between bool and pointer operators.
+ * @param object we are testing.
+ * @return true if object points to NULL.
+ */
+template<class T>
+inline bool isnull(T *object)
+	{return (bool)(object->operator*() == NULL);};
+
+/**
  * Convenience function to swap objects.
  * @param o1 to swap.
  * @param o2 to swap.

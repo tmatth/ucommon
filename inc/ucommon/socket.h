@@ -370,6 +370,13 @@ public:
 			{return list;};
 
 		/**
+		 * Return the full socket address list by pointer reference.
+		 * @return addrinfo list we resolved or NULL if none.
+		 */
+		inline struct addrinfo *operator*()
+			{return list;};
+
+		/**
 		 * Test if the address list is valid.
 		 * @return true if we have an address list.
 		 */
