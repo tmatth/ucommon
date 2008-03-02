@@ -1,5 +1,6 @@
 From ucommon 1.5.0 to 1.5.1
 - some small cleanups for opensolaris builds.
+- additional is() and isnull() template operators, template swap.
 
 From ucommon 1.4.2 to 1.5.0
 - added gnu common c++ based tcp streaming class to ucommon.

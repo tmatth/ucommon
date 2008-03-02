@@ -549,6 +549,59 @@ inline void release(Object *object)
 inline Object *copy(Object *object)
 	{return object->copy();};
 
+/**
+ * Convenience function to validate object.  This solves issues where
+ * some compilers get confused between bool and pointer operators.
+ * @param object we are testing.
+ * @return true if object valid.
+ */
+template<class T>
+inline bool is(T& object)
+	{return object.operator bool();};
+
+/**
+ * Convenience function to test pointer object.  This solves issues where
+ * some compilers get confused between bool and pointer operators.
+ * @param object we are testing.
+ * @return true if object points to NULL.
+ */
+template<class T>
+inline bool isnull(T& object)
+	{return (bool)(object.operator*() == NULL);};
+
+/**
+ * Convenience function to swap objects.
+ * @param o1 to swap.
+ * @param o2 to swap.
+ */
+template<class T>
+inline void swap(T& o1, T& o2)
+	{T tmp; tmp = o1; o1 = o2; o2 = tmp;};
+
+/**
+ * Convenience function to return max of two objects.
+ * @param o1 to check.
+ * @param o2 to check.
+ * @return max object.
+ */
+template<class T>
+inline T max(T& o1, T& o2)
+{
+	return o1 > o2 ? o1 : o2;
+} 
+
+/**
+ * Convenience function to return min of two objects.
+ * @param o1 to check.
+ * @param o2 to check.
+ * @return min object.
+ */
+template<class T>
+inline T min(T& o1, T& o2)
+{
+	return o1 < o2 ? o1 : o2;
+} 
+
 END_NAMESPACE
 
 #endif
