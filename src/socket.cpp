@@ -96,6 +96,26 @@ struct addrinfo {
 
 #endif
 
+#ifdef	__PTH__
+#define	_send_(so, buf, bytes, flag) pth_send(so, buf, bytes, flag)
+#define	_recv_(so, buf, bytes, flag) pth_recv(so, buf, bytes, flag)
+#define	_sendto_(so, buf, bytes, flag, to, tolen) pth_sendto(so, buf, bytes, flag, to, tolen)
+#define	_recvfrom_(so, buf, bytes, flag, from, fromlen) pth_recvfrom(so, buf, bytes, flag, from, fromlen)
+#define	_connect_(so, addr, addrlen) pth_connect(so, addr, addrlen)
+#define	_accept_(so, addr, addrlen) pth_accept(so, addr, addrlen)
+#define	_select_(cnt, rfd, wfd, efd, timeout) pth_select(cnt, rfd, wfd, efd, timeout)
+#define	_poll_(fds, cnt, timeout) pth_poll(fds, cnt, timeout)
+#else
+#define	_send_(so, buf, bytes, flag) ::send(so, buf, bytes, flag)
+#define	_recv_(so, buf, bytes, flag) ::recv(so, buf, bytes, flag)
+#define	_sendto_(so, buf, bytes, flag, to, tolen) ::sendto(so, buf, bytes, flag, to, tolen)
+#define	_recvfrom_(so, buf, bytes, flag, from, fromlen) ::recvfrom(so, buf, bytes, flag, from, fromlen)
+#define	_connect_(so, addr, addrlen) ::connect(so, addr, addrlen)
+#define	_accept_(so, addr, addrlen) ::accept(so, addr, addrlen)
+#define	_select_(cnt, rfd, wfd, efd, timeout) ::select(cnt, rfd, wfd, efd, timeout)
+#define	_poll_(fds, cnt, timeout) ::poll(fds, cnt, timeout)
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 typedef unsigned char   bit_t;
@@ -980,7 +1000,7 @@ Socket::Socket(struct addrinfo *addr)
 	while(addr) {
 		so = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 		if(so != INVALID_SOCKET) {
-			if(!::connect(so, addr->ai_addr, addr->ai_addrlen))
+			if(!_connect_(so, addr->ai_addr, addr->ai_addrlen))
 				return;
 		}
 		addr = addr->ai_next;
@@ -1067,7 +1087,7 @@ size_t Socket::peek(void *data, size_t len) const
 	assert(data != NULL);
 	assert(len > 0);
 
-	ssize_t rtn = ::recv(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK);
+	ssize_t rtn = _recv_(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK);
 	if(rtn < 1)
 		return 0;
 	return (size_t)rtn;
@@ -1079,7 +1099,7 @@ ssize_t Socket::get(void *data, size_t len, sockaddr *from)
 	assert(len > 0);
 
 	socklen_t slen = 0;
-	return ::recvfrom(so, (caddr_t)data, len, 0, from, &slen);
+	return _recvfrom_(so, (caddr_t)data, len, 0, from, &slen);
 }
 
 ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
@@ -1091,7 +1111,7 @@ ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
 	if(dest)
 		slen = getlen(dest);
 	
-	return ::sendto(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
+	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
 }
 
 ssize_t Socket::puts(const char *str)
@@ -1124,7 +1144,7 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 			if(!waitPending(timeout))
 				return -1;
 		}
-		nstat = ::recv(so, data, nleft, MSG_PEEK);
+		nstat = _recv_(so, data, nleft, MSG_PEEK);
 		if(nstat <= 0)
 			return -1;
 		
@@ -1137,7 +1157,7 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 				break;
 			}
 		}
-		nstat = ::recv(so, (caddr_t)data, c, 0);
+		nstat = _recv_(so, (caddr_t)data, c, 0);
 		if(nstat < 0)
 			break;
 			
@@ -1333,7 +1353,7 @@ int Socket::disconnect(SOCKET so)
 #endif
 	if(len > sizeof(saddr))
 		len = sizeof(saddr);
-	return ::connect(so, addr, len);
+	return _connect_(so, addr, len);
 }
 
 int Socket::join(SOCKET so, struct addrinfo *node)
@@ -1434,7 +1454,7 @@ int Socket::connect(SOCKET so, struct addrinfo *node)
 
 	while(node) {
 		if(node->ai_family == family) {
-			if(!::connect(so, node->ai_addr, node->ai_addrlen)) {
+			if(!_connect_(so, node->ai_addr, node->ai_addrlen)) {
 				rtn = 0;
 				goto exit;
 			}
@@ -1504,7 +1524,7 @@ bool Socket::isConnected(void) const
 	if(!waitPending())
 		return true;
 
-	if(::recv(so, &buf, 1, MSG_DONTWAIT | MSG_PEEK) < 1)
+	if(_recv_(so, &buf, 1, MSG_DONTWAIT | MSG_PEEK) < 1)
 		return false;
 
 	return true;
@@ -1560,9 +1580,9 @@ bool Socket::waitPending(timeout_t timeout) const
 	status = 0;
 	while(status < 1) {
 		if(timeout == Timer::inf)
-			status = ::poll(&pfd, 1, -1);
+			status = _poll_(&pfd, 1, -1);
 		else
-			status = ::poll(&pfd, 1, timeout);
+			status = _poll_(&pfd, 1, timeout);
 		if(status == -1 && errno == EINTR)
 			continue;
 		if(status < 0)
@@ -1588,7 +1608,7 @@ bool Socket::waitPending(timeout_t timeout) const
 
 	FD_ZERO(&grp);
 	FD_SET(so, &grp);
-	status = ::select((int)(so + 1), &grp, NULL, NULL, tvp);
+	status = _select_((int)(so + 1), &grp, NULL, NULL, tvp);
 	if(status < 1)
 		return false;
 	if(FD_ISSET(so, &grp))
@@ -1613,9 +1633,9 @@ bool Socket::waitSending(timeout_t timeout) const
 	status = 0;
 	while(status < 1) {
 		if(timeout == Timer::inf)
-			status = ::poll(&pfd, 1, -1);
+			status = _poll_(&pfd, 1, -1);
 		else
-			status = ::poll(&pfd, 1, timeout);
+			status = _poll_(&pfd, 1, timeout);
 		if(status == -1 && errno == EINTR)
 			continue;
 		if(status < 0)
@@ -1641,7 +1661,7 @@ bool Socket::waitSending(timeout_t timeout) const
 
 	FD_ZERO(&grp);
 	FD_SET(so, &grp);
-	status = ::select((int)(so + 1), NULL, &grp, NULL, tvp);
+	status = _select_((int)(so + 1), NULL, &grp, NULL, tvp);
 	if(status < 1)
 		return false;
 	if(FD_ISSET(so, &grp))
@@ -1689,10 +1709,10 @@ SOCKET ListenSocket::accept(struct sockaddr *addr)
 	socklen_t len = 0;
 	if(addr) {
 		len = getlen(addr);		
-		return ::accept(so, addr, &len);
+		return _accept_(so, addr, &len);
 	}
 	else
-		return ::accept(so, NULL, NULL);
+		return _accept_(so, NULL, NULL);
 }
 
 #ifdef	_MSWINDOWS_
@@ -1975,7 +1995,7 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 		so = ::socket(dest->sa_family, SOCK_DGRAM, 0);
 		if(so == INVALID_SOCKET)
 			return;
-		if(!::connect(so, dest, len))
+		if(!_connect_(so, dest, len))
 			getsockname(so, iface, &len);
 		break;
 	default:

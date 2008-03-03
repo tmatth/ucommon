@@ -213,6 +213,7 @@ inline int dup(int fd)
 #elif defined(__PTH__)
 
 #include <pth.h>
+#include <sys/wait.h>
 
 typedef int SOCKET;
 typedef int fd_t;
@@ -224,11 +225,14 @@ typedef	pth_mutex_t	pthread_mutex_t;
 typedef	pth_cond_t pthread_cond_t;
 typedef	pth_t	pthread_t;
 
-inline void sleep(int seconds)
-	{pth_nap(seconds * 1000000);};
+inline int pthread_sigmask(int how, const sigset_t *set, setset_t *oset)
+	{return pth_sigmask(how, set, oset);};
 
 inline void pthread_exit(void *p)
 	{pth_exit(p);};
+
+inline void pthread_kill(pthread_t tid, int sig)
+	{pth_raise(tid, sig);};
 
 inline pthread_t pthread_self(void)
 	{return pth_self();};
