@@ -78,8 +78,8 @@ public:
 		{return fd;};
 	
 	void	setPosition(size_t pos);
-	ssize_t read(void *buf, size_t count);
-	ssize_t write(const void *buf, size_t count);
+	ssize_t read(void *buf, size_t count, size_t offset = end);
+	ssize_t write(const void *buf, size_t count, size_t offset = end);
 	int stat(struct stat *buf);
 
 	static int setPrefix(const char *path);
@@ -93,12 +93,12 @@ public:
 	static int change(const char *path, unsigned mode);
 	static fd_t open(const char *path, access_t type, unsigned mode = 0666);
 	static int close(fd_t fd);
-	static ssize_t read(fd_t fd, void *buf, size_t count);
-	static ssize_t write(fd_t fd, const void *buf, size_t count);
+	static ssize_t read(fd_t fd, void *buf, size_t count, size_t offset = end);
+	static ssize_t write(fd_t fd, const void *buf, size_t count, size_t offset = end);
 	static int access(const char *path, unsigned mode);
 
-	inline static ssize_t read(fsys& fd, void *buf, size_t count)
-		{return fd.read(buf, count);};
+	inline static ssize_t read(fsys& fd, void *buf, size_t count, size_t offset = end)
+		{return fd.read(buf, count, offset);};
 
 	inline static ssize_t write(fsys& fd, const void *buf, size_t count)
 		{return fd.write(buf, count);};

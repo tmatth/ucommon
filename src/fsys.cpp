@@ -374,37 +374,54 @@ inline int remapError(void)
 
 #ifdef	__PTH__
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len)
+ssize_t fsys::read(fd_t fd, void *buf, size_t len, size_t offset)
 {
+	if(offset != end)
+		return pth_pread(fd, buf, len, offset);
+
 	return pth_read(fd, buf, len);
 }
 
-ssize_t fsys::read(void *buf, size_t len)
+ssize_t fsys::read(void *buf, size_t len, size_t offset)
 {
+	int rtn;
+
 	if(fd == INVALID_HANDLE_VALUE) {
 		error = EBADF;
 		return -1;
 	}
 
-	int rtn = pth_read(fd, buf, len);
+	if(offset != end)
+		rtn = pth_pread(fd, buf, len, offset);
+	else
+		rtn = pth_read(fd, buf, len);
+
 	if(rtn <= 0)
 		error = remapError();
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
+ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
 {
+	if(offset != end)
+		return pth_pwrite(fd, buf, len, offset);
+
 	return pth_write(fd, buf, len);
 }
 
-ssize_t fsys::write(const void *buf, size_t len)
+ssize_t fsys::write(const void *buf, size_t len, size_t offset)
 {
+	int rtn;
+
 	if(fd == INVALID_HANDLE_VALUE) {
 		error = EBADF;
 		return -1;
 	}
 
-	int rtn = pth_write(fd, buf, len);
+	if(offset != end)
+		rtn = pth_pwrite(fd, buf, len, offset);
+	else
+		rtn = pth_write(fd, buf, len);
 	if(rtn <= 0)
 		error = remapError();
 	return rtn;
@@ -412,37 +429,87 @@ ssize_t fsys::write(const void *buf, size_t len)
 
 #else
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len)
+ssize_t fsys::read(fd_t fd, void *buf, size_t len, size_t offset)
 {
-	return ::read(fd, buf, len);
+	if(offset == end)
+		return ::read(fd, buf, len);
+
+#ifdef	HAVE_PREAD
+	return ::pread(fd, buf, len, offset);
+#else
+	fd = dup(fd);
+	setPosition(fd, offset);
+	int rtn = ::read(fd, buf, len);
+	::close(fd);
+	return rtn;
+#endif
 }
 
-ssize_t fsys::read(void *buf, size_t len)
+ssize_t fsys::read(void *buf, size_t len, size_t offset)
 {
+	int rtn;
+
 	if(fd == INVALID_HANDLE_VALUE) {
 		error = EBADF;
 		return -1;
 	}
 
-	int rtn = ::read(fd, buf, len);
+	if(offset == end)
+		rtn = ::read(fd, buf, len);
+	else {
+#ifdef	HAVE_PREAD
+		rtn = ::pread(fd, buf, len, offset);
+#else
+		int nfd = dup(fd);
+		setPosition(nfd, offset);
+		rtn = ::read(nfd, buf, len);
+		::close(nfd);
+#endif		
+	}
+
 	if(rtn <= 0)
 		error = remapError();
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
+ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
 {
-	return ::write(fd, buf, len);
+	if(offset == end)
+		return ::write(fd, buf, len);
+
+#ifdef	HAVE_PREAD
+	return ::pwrite(fd, buf, len, offset);
+#else
+	fd = dup(fd);
+	setPosition(fd, offset);
+	int rtn = ::write(fd, buf, len);
+	::close(fd);
+	return rtn;
+#endif
 }
 
-ssize_t fsys::write(const void *buf, size_t len)
+ssize_t fsys::write(const void *buf, size_t len, size_t offset)
 {
+	int rtn;
+
 	if(fd == INVALID_HANDLE_VALUE) {
 		error = EBADF;
 		return -1;
 	}
 
-	int rtn = ::write(fd, buf, len);
+	if(offset == end)
+		rtn = ::write(fd, buf, len);
+	else {
+#ifdef	HAVE_PREAD
+		rtn = ::pwrite(fd, buf, len, offset);
+#else
+		int nfd = dup(fd);
+		setPosition(nfd, offset);
+		rtn = ::write(nfd, buf, len);
+		::close(nfd);
+#endif		
+	}
+
 	if(rtn <= 0)
 		error = remapError();
 	return rtn;
