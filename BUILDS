@@ -1,10 +1,48 @@
-Project Indiana/OpenSolaris:
+Generic & Embedded Targets:
+
+By default, UCommon compiles with full support of C++ and the C++ ansi
+library.  For deeply embedded targets, the stdc++ library (libstdc++ for
+gcc) can be disabled, along with exception handling and other C++ features
+that may add to runtime overhead.  This is done using the --disable-stdcpp
+configure option.  Any modern C++ compiler and posix platform with basic
+pthread support should be able to build UCommon successfully.
+
+When using only static linking, the --disable-stdcpp is also set by
+default.  This is to prevent bloat from static linkage of the ansi C++
+library and static linkage is most common on embedded targets.  The 
+--enable-stdcpp option can be used to re-enable the full ansi c++ library.
+
+Project Indiana/OpenSolaris specific notes:
 
 You need to install SUNWhea or configure will fail on the preprocessor.  You
 can use the Sun Studio 12 compiler as well as gcc.  When building without Sun
-std c++ support (Cstd), Crun is added alone.
+std c++ support (--disable-stdcpp), -lCrun is added alone without -lCstd.
 
 To make autogen.sh work (or svn checkout) requires a bunch of packages and
 setting the AUTOMAKE_SUFFIX="-1.10".  You need SUNWgnome-common-devel,
 SUNWgm4, SUNWgmake, SUNWaconf, SUNWautomake-1.10, and SUNWlibtool.
 
+Microsoft Windows & MingW32 specific notes:
+
+For Microsoft Windows targets, we primarily focus on using debian hosted
+mingw32 cross-builds.  Since libstdc++ is statically linked, we use the c model
+and build the ucommon subset by default, as otherwise software that uses
+plugins would be hugely bloated.  Full libstdc++ support can always be
+re-enabled explicitly using --enable-stdcpp.
+
+It should be possible to build ucommon using Microsoft native compilers, and
+if people wish to submit patches based on doing this, they will be accepted.
+
+Support for older GCC (<3.x):
+
+UCommon, like GNU Common C++, is meant to compile anywhere a C++ compiler
+exists.  However, there are specific limitations in gcc < 3, particularly
+in relation to namespace support.  For this reason, we disable libstdc++
+support by default, although again it can be enabled using --enable-stdcpp.
+
+Support for Minix:
+
+Minix 3 has recent versions of gcc.  We prefer to use the default mini-build
+of ucommon keeping with the spirit of minix as low overhead.  Again, using
+--enable-stdcpp can bring full libstdc++ support back.
+ 

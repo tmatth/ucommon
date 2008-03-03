@@ -1,7 +1,6 @@
 %{!?release: %define release 0}
 %{!?epoch: %define epoch 0}
 %{!?version: %define version @VERSION@}
-%{!?uses_stdcpp: %define uses_stdcpp 1}
 
 Name: ucommon
 Summary: "ucommon" - portable embedded runtime
@@ -26,12 +25,6 @@ Summary: Headers and static link library for ucommon
 %prep
 %setup
 %build
-
-%if %uses_stdcpp
-%define	_config_stdcpp --enable-stdcpp
-%else
-%define _config_stdcpp --disable-stdcpp
-%endif
 
 %configure %{_config_stdcpp} CXXFLAGS="$RPM_OPT_FLAGS"
 make %{?_smp_mflags} LDFLAGS="-s"

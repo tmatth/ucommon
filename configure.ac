@@ -65,6 +65,28 @@ AC_DEFUN([AC_SUBST_DIR], [
         AC_SUBST($1)
 ])
 
+# for very old gcc and for minix we disable full ucommon build by default
+# we also disable for mingw32 or when no "shared" library support because 
+# libstdc++ is not dll and really bloats in linkage of plugins.  Any case, 
+# you can always override with --enable-stdcpp...
+
+if test -z "$enable_stdcpp" ; then
+	if test "x$GCC" = "xyes" ; then
+		gccver=`$CC -dumpversion | sed "s/^.*[.]//"`
+	fi
+	if $gccver -lt "3" ; then
+		enable_stdcpp="no"
+	fi
+	if "x$enable_shared" = "xno" ; then
+		enable_stdcpp="no"
+	fi
+	case "$target_os" in
+	*minix*|mingw*)
+		enable_stdcpp="no"
+		;;
+	esac
+fi
+		
 AC_ARG_ENABLE(stdcpp, 
 	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime overhead]))
 if test "$enable_stdcpp" = "no" ; then
