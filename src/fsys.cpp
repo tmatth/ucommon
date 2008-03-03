@@ -271,6 +271,7 @@ fd_t fsys::open(const char *path, access_t access, unsigned mode)
 	bool append = false;
 	DWORD amode;
 	DWORD cmode;
+	DWORD smode = 0;
 	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
 	unsigned flags = 0;
 	switch(access)
@@ -278,6 +279,7 @@ fd_t fsys::open(const char *path, access_t access, unsigned mode)
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		cmode = OPEN_EXISTING;
+		smode = FILE_SHARE_READ;
 		break;
 	case ACCESS_WRONLY:
 		amode = GENERIC_WRITE;
@@ -287,18 +289,24 @@ fd_t fsys::open(const char *path, access_t access, unsigned mode)
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		cmode = OPEN_ALWAYS;
+		smode = FILE_SHARE_READ;
 		break;
 	case ACCESS_CREATE:
 		amode = GENERIC_READ | GENERIC_WRITE;
-		cmode = CREATE_NEW;		
+		cmode = CREATE_NEW;	
+		smode = FILE_SHARE_READ;	
 		break;
 	case ACCESS_APPEND:
 		amode = GENERIC_WRITE;
 		cmode = OPEN_ALWAYS;
 		append = true;
 		break;
+	case ACCESS_SHARED:
+		amode = GENERIC_READ | GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
 	}
-	HANDLE fd = CreateFile(path, amode, 0, NULL, cmode, attr, NULL);
+	HANDLE fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
 		setPosition(fd, end);
 	if(fd != INVALID_HANDLE_VALUE)
@@ -311,6 +319,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	bool append = false;
 	DWORD amode;
 	DWORD cmode;
+	DWORD smode = 0;
 	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
 	unsigned flags = 0;
 	switch(access)
@@ -318,6 +327,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		cmode = OPEN_EXISTING;
+		smode = FILE_SHARE_READ;
 		break;
 	case ACCESS_WRONLY:
 		amode = GENERIC_WRITE;
@@ -327,10 +337,17 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		cmode = OPEN_ALWAYS;
+		smode = FILE_SHARE_READ;
 		break;
 	case ACCESS_CREATE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		cmode = CREATE_NEW;		
+		smode = FILE_SHARE_READ;
+		break;
+	case ACCESS_SHARED:
+		amode = GENERIC_READ | GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
 		break;
 	case ACCESS_APPEND:
 		amode = GENERIC_WRITE;
@@ -343,7 +360,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	if(fs.fd != INVALID_HANDLE_VALUE)
 		return;
 
-	fs.fd = CreateFile(path, amode, 0, NULL, cmode, attr, NULL);
+	fs.fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
 	if(fs.fd != INVALID_HANDLE_VALUE && append)
 		fs.setPosition(end);
 	else
@@ -605,6 +622,7 @@ fd_t fsys::open(const char *path, access_t access, unsigned mode)
 	case ACCESS_WRONLY:
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
 		break;
+	case ACCESS_SHARED:
 	case ACCESS_REWRITE:
 		flags = O_RDWR | O_CREAT;
 		break;
@@ -630,6 +648,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	case ACCESS_WRONLY:
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
 		break;
+	case ACCESS_SHARED:
 	case ACCESS_REWRITE:
 		flags = O_RDWR | O_CREAT;
 		break;

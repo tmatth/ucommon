@@ -51,7 +51,8 @@ protected:
 		ACCESS_RDONLY,
 		ACCESS_WRONLY,
 		ACCESS_REWRITE,
-		ACCESS_APPEND
+		ACCESS_APPEND,
+		ACCESS_SHARED
 	} access_t;
 
 public:
