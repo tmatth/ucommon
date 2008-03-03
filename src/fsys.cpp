@@ -17,10 +17,12 @@
 #include <config.h>
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
+#include <ucommon/string.h>
 #include <stdio.h>
-
-#ifndef	_MSWINDOWS_
 #include <fcntl.h>
+
+#ifdef	HAVE_DIRENT_H
+#include <dirent.h>
 #endif
 
 using namespace UCOMMON_NAMESPACE;
@@ -28,6 +30,74 @@ using namespace UCOMMON_NAMESPACE;
 const size_t fsys::end = (size_t)(-1);
 
 #ifdef	_MSWINDOWS_
+
+int remapError(void)
+{
+	DWORD err = GetLastError();
+
+	switch(err)
+	{
+	case ERROR_FILE_NOT_FOUND:
+	case ERROR_PATH_NOT_FOUND:
+	case ERROR_INVALID_NAME:
+	case ERROR_BAD_PATHNAME:
+		return ENOENT;
+	case ERROR_TOO_MANY_OPEN_FILES:
+		return EMFILE;
+	case ERROR_ACCESS_DENIED:
+	case ERROR_WRITE_PROTECT:
+	case ERROR_SHARING_VIOLATION:
+	case ERROR_LOCK_VIOLATION:
+		return EACCES;
+	case ERROR_INVALID_HANDLE:
+		return EBADF;
+	case ERROR_NOT_ENOUGH_MEMORY:
+	case ERROR_OUTOFMEMORY:
+		return ENOMEM;
+	case ERROR_INVALID_DRIVE:
+	case ERROR_BAD_UNIT:
+	case ERROR_BAD_DEVICE:
+		return ENODEV;
+	case ERROR_NOT_SAME_DEVICE:
+		return EXDEV;
+	case ERROR_NOT_SUPPORTED:
+	case ERROR_CALL_NOT_IMPLEMENTED:
+		return ENOSYS;
+	case ERROR_END_OF_MEDIA:
+	case ERROR_EOM_OVERFLOW:
+	case ERROR_HANDLE_DISK_FULL:
+	case ERROR_DISK_FULL:
+		return ENOSPC;
+	case ERROR_BAD_NETPATH:
+	case ERROR_BAD_NET_NAME:
+		return EACCES;
+	case ERROR_FILE_EXISTS:
+	case ERROR_ALREADY_EXISTS:
+		return EEXIST;
+	case ERROR_CANNOT_MAKE:
+	case ERROR_NOT_OWNER:
+		return EPERM;
+	case ERROR_NO_PROC_SLOTS:
+		return EAGAIN;
+	case ERROR_BROKEN_PIPE:
+	case ERROR_NO_DATA:
+		return EPIPE;
+	case ERROR_OPEN_FAILED:
+		return EIO;
+	case ERROR_NOACCESS:
+		return EFAULT;
+	case ERROR_IO_DEVICE:
+	case ERROR_CRC:
+	case ERROR_NO_SIGNAL_SENT:
+		return EIO;
+	case ERROR_CHILD_NOT_COMPLETE:
+	case ERROR_SIGNAL_PENDING:
+	case ERROR_BUSY:
+		return EBUSY;
+	default:
+		return EINVAL;
+	}
+}
 
 int fsys::removeDir(const char *path)
 {
@@ -49,7 +119,7 @@ int fsys::stat(const char *path, struct stat *buf)
 
 int fsys::stat(struct stat *buf)
 {
-	int fn = _open_osfhandle(fs.fd, _O_RDONLY);
+	int fn = _open_osfhandle((long int)(fd), _O_RDONLY);
 	
 	int rtn = _fstat(fn, (struct _stat *)(buf));
 	_close(fn);
@@ -68,7 +138,7 @@ char *fsys::getPrefix(char *path, size_t len)
 	return _getcwd(path, len);
 }
 
-int fsys::chmode(const char *path, unsigned mode)
+int fsys::change(const char *path, unsigned mode)
 {
 	return _chmod(path, mode);
 }
@@ -76,6 +146,231 @@ int fsys::chmode(const char *path, unsigned mode)
 int fsys::access(const char *path, unsigned mode)
 {
 	return _access(path, mode);
+}
+
+int fsys::close(fd_t fd)
+{
+	if(CloseHandle(fd))
+		return 0;
+	errno = remapError();
+	return -1;
+}
+
+void fsys::close(fsys &fs)
+{
+	if(fs.fd == INVALID_HANDLE_VALUE)
+		return;
+
+	if(CloseHandle(fs.fd)) {
+		fs.fd = INVALID_HANDLE_VALUE;
+		fs.error = 0;
+	}
+	else
+		fs.error = errno = remapError();
+}
+
+ssize_t fsys::read(fd_t fd, void *buf, size_t len)
+{
+	DWORD count;
+	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
+		return (ssize_t)(count);
+	
+	errno = remapError();
+	return -1;
+}
+
+ssize_t fsys::read(void *buf, size_t len)
+{
+	DWORD count;
+	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
+		return (ssize_t)(count);
+	
+	error = errno = remapError();
+	return -1;
+}
+
+ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
+{
+	DWORD count;
+	if(WriteFile(fd, (LPCVOID) buf, (DWORD)len, &count, NULL))
+		return (ssize_t)(count);
+	
+	errno = remapError();
+	return -1;
+}
+
+ssize_t fsys::write(const void *buf, size_t len)
+{
+	DWORD count;
+	if(WriteFile(fd, (LPCVOID) buf, (DWORD)len, &count, NULL))
+		return (ssize_t)(count);
+	
+	error = errno = remapError();
+	return -1;
+}
+
+fd_t fsys::open(const char *path, access_t access, unsigned mode)
+{
+	bool append = false;
+	DWORD amode;
+	DWORD cmode;
+	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
+	unsigned flags = 0;
+	switch(access)
+	{
+	case ACCESS_RDONLY:
+		amode = GENERIC_READ;
+		cmode = OPEN_EXISTING;
+		break;
+	case ACCESS_WRONLY:
+		amode = GENERIC_WRITE;
+		cmode = CREATE_ALWAYS; 
+		flags = O_WRONLY | O_CREAT | O_TRUNC;
+		break;
+	case ACCESS_REWRITE:
+		amode = GENERIC_READ | GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		break;
+	case ACCESS_CREATE:
+		amode = GENERIC_READ | GENERIC_WRITE;
+		cmode = CREATE_NEW;		
+		break;
+	case ACCESS_APPEND:
+		amode = GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		append = true;
+		break;
+	}
+	HANDLE fd = CreateFile(path, amode, 0, NULL, cmode, attr, NULL);
+	if(fd != INVALID_HANDLE_VALUE && append)
+		setPosition(fd, end);
+	else
+		errno = remapError();
+	if(fd != INVALID_HANDLE_VALUE)
+		change(path, mode);
+	return fd;	
+}
+
+void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
+{
+	bool append = false;
+	DWORD amode;
+	DWORD cmode;
+	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
+	unsigned flags = 0;
+	switch(access)
+	{
+	case ACCESS_RDONLY:
+		amode = GENERIC_READ;
+		cmode = OPEN_EXISTING;
+		break;
+	case ACCESS_WRONLY:
+		amode = GENERIC_WRITE;
+		cmode = CREATE_ALWAYS; 
+		flags = O_WRONLY | O_CREAT | O_TRUNC;
+		break;
+	case ACCESS_REWRITE:
+		amode = GENERIC_READ | GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		break;
+	case ACCESS_CREATE:
+		amode = GENERIC_READ | GENERIC_WRITE;
+		cmode = CREATE_NEW;		
+		break;
+	case ACCESS_APPEND:
+		amode = GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		append = true;
+		break;
+	}
+
+	close(fs);
+	if(fs.fd != INVALID_HANDLE_VALUE)
+		return;
+
+	fs.fd = CreateFile(path, amode, 0, NULL, cmode, attr, NULL);
+	if(fs.fd != INVALID_HANDLE_VALUE && append)
+		fs.setPosition(end);
+	else
+		errno = fs.error = remapError();
+	if(fs.fd != INVALID_HANDLE_VALUE)
+		change(path, mode);
+}
+
+fsys::fsys(const fsys& copy)
+{
+	HANDLE pHandle = GetCurrentProcess();
+	if(DuplicateHandle(pHandle, copy.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS))
+		error = 0;
+	else {
+		fd = INVALID_HANDLE_VALUE;
+		error = errno = remapError();
+	}
+}
+
+void fsys::operator=(fd_t from)
+{
+	HANDLE pHandle = GetCurrentProcess();
+
+	if(fd != INVALID_HANDLE_VALUE) {
+		if(!CloseHandle(fd)) {
+			errno = error = remapError();
+			return;
+		}
+	}
+	if(DuplicateHandle(pHandle, from, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS))
+		error = 0;
+	else {
+		fd = INVALID_HANDLE_VALUE;
+		error = errno = remapError();
+	}
+}
+
+void fsys::operator=(fsys &from)
+{
+	HANDLE pHandle = GetCurrentProcess();
+
+	if(fd != INVALID_HANDLE_VALUE) {
+		if(!CloseHandle(fd)) {
+			errno = error = remapError();
+			return;
+		}
+	}
+	if(DuplicateHandle(pHandle, from.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS))
+		error = 0;
+	else {
+		fd = INVALID_HANDLE_VALUE;
+		error = errno = remapError();
+	}
+}
+
+void fsys::setPosition(size_t pos)
+{
+	DWORD rpos = pos;
+	int mode = FILE_BEGIN;
+
+	if(rpos == end) {
+		rpos = 0;
+		mode = FILE_END;
+	}
+	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER)
+		error = errno = remapError();
+}
+
+int fsys::setPosition(fd_t fd, size_t pos)
+{
+	DWORD rpos = pos;
+	int mode = FILE_BEGIN;
+
+	if(rpos == end) {
+		rpos = 0;
+		mode = FILE_END;
+	}
+	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER) {
+		errno = remapError();
+		return -1;
+	}
+	return 0;
 }
 
 #else
@@ -263,7 +558,7 @@ char *fsys::getPrefix(char *path, size_t len)
 	return ::getcwd(path, len);
 }
 
-int fsys::chmode(const char *path, unsigned mode)
+int fsys::change(const char *path, unsigned mode)
 {
 	return ::chmod(path, mode);
 }
@@ -279,10 +574,10 @@ fsys::fsys(const fsys& copy)
 	error = 0;
 }
 
-void fsys::operator=(fd_t fd)
+void fsys::operator=(fd_t from)
 {
 	if(fsys::close(fd) == 0) {
-		fd = dup(fd);
+		fd = dup(from);
 		error = 0;
 	}
 	else
@@ -352,4 +647,89 @@ int fsys::remove(const char *path)
 	return ::remove(path);
 }
 
+int fsys::rename(const char *oldpath, const char *newpath)
+{
+	return ::rename(oldpath, newpath);
+}
 
+#if	defined(_MSWINDOWS_)
+
+typedef struct
+{
+	HANDLE dir;
+	WIN32_FIND_DATA entry;
+}	dnode_t;
+
+dir_t fsys::openDir(const char *path)
+{
+	char tpath[256];
+	DWORD attr = GetFileAttributes(path);
+	dnode_t *node;
+
+	if((attr == (DWORD)~0l) || !(attr & FILE_ATTRIBUTE_DIRECTORY))
+		return NULL;
+	
+	snprintf(tpath, sizeof(tpath), "%s%s", path, "\\*");
+	node = new dnode_t;
+	node->dir = FindFirstFile(tpath, &node->entry);
+	if(node->dir == INVALID_HANDLE_VALUE) {
+		delete node;
+		return NULL;
+	}
+	return node;
+}	
+
+void fsys::closeDir(dir_t d)
+{
+	dnode_t *node = (dnode_t *)d;
+
+	if(!node)
+		return;
+
+	if(node->dir != INVALID_HANDLE_VALUE)
+		FindClose(node->dir);
+	
+	delete node;
+}
+
+char *fsys::readDir(dir_t d, char *buf, size_t len)
+{
+	dnode_t *node = (dnode_t *)d;
+	*buf = 0;
+
+	if(!node || node->dir == INVALID_HANDLE_VALUE)
+		return NULL;
+
+	snprintf(buf, len, node->entry.cFileName);
+	if(!FindNextFile(node->dir, &node->entry)) {
+		FindClose(node->dir);
+		node->dir = INVALID_HANDLE_VALUE;
+	}
+	return buf;
+}
+
+#elif defined(HAVE_DIRENT_H)
+
+dir_t fsys::openDir(const char *path)
+{
+	return (dir_t)::opendir(path);
+}
+
+void fsys::closeDir(dir_t dir)
+{
+	::closedir((DIR *)dir);
+}
+
+char *fsys::readDir(dir_t dir, char *buf, size_t len)
+{
+	dirent *entry = ::readdir((DIR *)dir);	
+	
+	*buf = 0;
+	if(!entry)
+		return NULL;
+	
+	String::set(buf, len, entry->d_name);
+	return buf;
+}
+
+#endif

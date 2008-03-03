@@ -38,6 +38,8 @@
 
 NAMESPACE_UCOMMON
 
+typedef	void *dir_t;
+
 class __EXPORT fsys
 {
 protected:
@@ -87,7 +89,8 @@ public:
 	static int createDir(const char *path, unsigned mode);
 	static int removeDir(const char *path);
 	static int remove(const char *path);
-	static int chmode(const char *path, unsigned mode);
+	static int rename(const char *oldpath, const char *newpath);
+	static int change(const char *path, unsigned mode);
 	static fd_t open(const char *path, access_t type, unsigned mode = 0666);
 	static int close(fd_t fd);
 	static ssize_t read(fd_t fd, void *buf, size_t count);
@@ -106,6 +109,10 @@ public:
 	static int setPosition(fd_t fd, size_t pos);	
 	static void open(fsys& fd, const char *path, access_t access, unsigned mode);
 	static void close(fsys& fd);
+
+	static dir_t openDir(const char *path);
+	static char *readDir(dir_t dir, char *buf, size_t len);
+	static void closeDir(dir_t dir);
 };
 
 END_NAMESPACE
