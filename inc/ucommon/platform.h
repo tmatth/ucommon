@@ -45,12 +45,14 @@
 #define _REENTRANT 1
 #endif
 
+#ifndef	__PTH__
 #ifndef	_THREADSAFE
 #define	_THREADSAFE 1
 #endif
 
 #ifndef	_POSIX_PTHREAD_SEMANTICS
 #define	_POSIX_PTHREAD_SEMANTICS
+#endif
 #endif
 
 #if defined(__GNUC__) && (__GNUC < 3) && !defined(_GNU_SOURCE)
@@ -208,6 +210,41 @@ inline int dup(int fd)
 	{return _dup(fd);};
 };
 
+#elif defined(__PTH__)
+
+#include <pth.h>
+
+typedef int SOCKET;
+typedef int fd_t;
+#define	INVALID_SOCKET -1
+#define	INVALID_HANDLE_VALUE -1
+#include <signal.h>
+
+typedef	pth_mutex_t	pthread_mutex_t;
+typedef	pth_cond_t pthread_cond_t;
+typedef	pth_t	pthread_t;
+
+inline void sleep(int seconds)
+	{pth_nap(seconds * 1000000);};
+
+inline void pthread_exit(void *p)
+	{pth_exit(p);};
+
+inline pthread_t pthread_self(void)
+	{return pth_self();};
+
+inline int pthread_mutex_init(pthread_mutex_t *mutex, void *x)
+	{return pth_mutex_init(mutex);};
+
+inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
+	{};
+
+inline void pthread_mutex_lock(pthread_mutex_t *mutex)
+	{pth_mutex_acquire(mutex);};
+
+inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
+	{pth_mutex_release(mutex);};
+
 #else
 
 #include <pthread.h>
@@ -216,7 +253,6 @@ typedef	int SOCKET;
 typedef	int fd_t;
 #define	INVALID_SOCKET -1
 #define	INVALID_HANDLE_VALUE -1
-#include <dlfcn.h>
 #include <signal.h>
 
 #endif
