@@ -65,6 +65,8 @@ AC_DEFUN([AC_SUBST_DIR], [
         AC_SUBST($1)
 ])
 
+AC_MSG_CHECKING([full c++ support and linking model])
+
 # for very old gcc and for minix we disable full ucommon build by default
 # we also disable for mingw32 or when no "shared" library support because 
 # libstdc++ is not dll and really bloats in linkage of plugins.  Any case, 
@@ -89,9 +91,13 @@ fi
 		
 AC_ARG_ENABLE(stdcpp, 
 	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime overhead]))
-if test "$enable_stdcpp" = "no" ; then
+
+if test "x$enable_stdcpp" = "xno" ; then
 	UCOMMON_MODEL="CC"
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}"
+	AC_MSG_RESULT(no)
+else
+	AC_MSG_RESULT(yes)
 fi
 
 AC_ARG_WITH(libc, 
