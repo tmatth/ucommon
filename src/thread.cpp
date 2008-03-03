@@ -1431,6 +1431,8 @@ void Thread::yield(void)
 {
 #if defined(_MSWINDOWS_)
 	SwitchToThread();
+#elif defined(HAVE_PTHREAD_YIELD_NP)
+	pthread_yield_np();
 #elif defined(HAVE_PTHREAD_YIELD)
 	pthread_yield();
 #else

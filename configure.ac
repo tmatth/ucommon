@@ -216,8 +216,13 @@ AC_CHECK_HEADER(pthread.h, [
 		])
 
 		AC_CHECK_LIB($tlib,pthread_yield,[
-			AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"])
+			AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"],[
+				AC_CHECK_LIB($tlib,pthread_yield_np,[
+					AC_DEFINE(HAVE_PTHREAD_YIELD_NP, [1], ["pthread yield np"])
+				])
+			])
 		])
+
 		AC_CHECK_LIB($tlib,pthread_delay,[
 			AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
 		])
