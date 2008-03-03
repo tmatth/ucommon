@@ -48,6 +48,7 @@ class __EXPORT tcpstream : protected std::streambuf, protected Socket, public st
 {
 private:
 	__LOCAL void allocate(unsigned size);
+	__LOCAL	void reset(void);
 
 protected:
 	timeout_t timeout;
@@ -112,11 +113,11 @@ public:
 	 * A convenience constructor that creates a connected tcp stream directly
 	 * from an address.  The socket is constructed to match the type of the
 	 * the address family in the socket address that is passed.
-	 * @param service to connect to.
+	 * @param address of service to connect to.
 	 * @param segsize for tcp segments and buffering.
 	 * @param timeout for socket i/o operations.
 	 */
-	tcpstream(Socket::address *service, unsigned segsize = 536, timeout_t timeout = 0);
+	tcpstream(Socket::address& address, unsigned segsize = 536, timeout_t timeout = 0);
 
 	/**
 	 * Destroy a tcp stream.
@@ -149,7 +150,7 @@ public:
 	 * @param address of service to access.
 	 * @param buffering segment size to use.
 	 */
-	void open(Socket::address *address, unsigned mss = 536);
+	void open(Socket::address& address, unsigned mss = 536);
 
 	/**
 	 * Close an active stream connection.  This does not release the

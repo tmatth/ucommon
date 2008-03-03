@@ -1187,7 +1187,7 @@ int Socket::loopback(SOCKET so, bool enable)
 	if(so == INVALID_SOCKET)
 		return -1;
 
-	getsockname(so, (struct sockaddr *)&addr, &len);
+	getsockname(so, addr, &len);
 	family = addr->sa_family;
 	switch(family) {
 	case AF_INET:
@@ -1210,7 +1210,7 @@ int Socket::ttl(SOCKET so, unsigned char t)
 	if(so == INVALID_SOCKET)
 		return -1;
 
-	getsockname(so, (struct sockaddr *)&addr, &len);
+	getsockname(so, addr, &len);
 	family = addr->sa_family;
 	switch(family) {
 	case AF_INET:
@@ -1341,9 +1341,9 @@ int Socket::disconnect(SOCKET so)
 	struct sockaddr_storage saddr;
 	struct sockaddr *addr = (struct sockaddr *)&saddr;
 	int family;
-	socklen_t len = sizeof(addr);
+	socklen_t len = sizeof(saddr);
 
-	getsockname(so, (struct sockaddr *)&addr, &len);
+	getsockname(so, addr, &len);
 	family = addr->sa_family;
 	memset(addr, 0, sizeof(saddr));
 #if defined(_MSWINDOWS_)
@@ -1756,8 +1756,8 @@ struct addrinfo *Socket::gethint(SOCKET so, struct addrinfo *hint)
 	struct sockaddr *sa = (struct sockaddr *)&st;
 	socklen_t slen;
 
-	memset(hint, 0 , sizeof(struct addrinfo));
-	memset(&sa, 0, sizeof(sa));
+	memset(hint, 0, sizeof(struct addrinfo));
+	memset(sa, 0, sizeof(st));
 	if(getsockname(so, sa, &slen))
 		return NULL;
 	hint->ai_family = sa->sa_family;

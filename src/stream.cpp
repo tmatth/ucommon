@@ -60,8 +60,8 @@ tcpstream::tcpstream(int family, timeout_t tv) :
 	timeout = tv;
 }
 
-tcpstream::tcpstream(Socket::address *list, unsigned segsize, timeout_t tv) :
-	streambuf(), Socket(list->family(), SOCK_STREAM, IPPROTO_TCP),
+tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
+	streambuf(), Socket(list.family(), SOCK_STREAM, IPPROTO_TCP),
 #ifdef OLD_STDCPP
 	iostream()
 #else
@@ -78,7 +78,7 @@ tcpstream::tcpstream(Socket::address *list, unsigned segsize, timeout_t tv) :
 	open(list);
 }
 
-tcpstream::tcpstream(ListenSocket &listener, unsigned segsize, timeout_t tv) :
+tcpstream::tcpstream(ListenSocket& listener, unsigned segsize, timeout_t tv) :
 	streambuf(), Socket(listener.accept()),
 #ifdef OLD_STDCPP
 	iostream()
@@ -144,7 +144,7 @@ int tcpstream::underflow()
             rlen = Socket::get(&ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
-				close();
+				reset();
             return EOF;
         }
         return ch;
@@ -161,12 +161,13 @@ int tcpstream::underflow()
         clear(ios::failbit | rdstate());
         return EOF;
     }
-    else
+    else {
         rlen = Socket::get(eback(), rlen);
+	}
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
         if(rlen < 0)
-			close();
+			reset();
         else
             clear(ios::failbit | rdstate());
         return EOF;
@@ -189,7 +190,7 @@ int tcpstream::overflow(int c)
         rlen = Socket::put(&ch, 1);
         if(rlen < 1) {
             if(rlen < 0) 
-				close();
+				reset();
             return EOF;
         }
         else
@@ -204,7 +205,7 @@ int tcpstream::overflow(int c)
         rlen = Socket::put(pbase(), req);
         if(rlen < 1) {
             if(rlen < 0) 
-				close();
+				reset();
             return EOF;
         }
         req -= rlen;
@@ -230,7 +231,7 @@ ssize_t tcpstream::printf(const char *format, ...)
 	size_t len;
 	char *buf;
 
-	if(!bufsize)
+	if(!bufsize || !gbuf ||!pbuf)
 		return 0;
 
 	va_start(args, format);
@@ -241,12 +242,13 @@ ssize_t tcpstream::printf(const char *format, ...)
 	va_end(args);
 
 	len = strlen(buf);
-		return Socket::put(buf, len);
+	return Socket::put(buf, len);
 }
 
-void tcpstream::open(Socket::address *list, unsigned mss)
+void tcpstream::open(Socket::address& list, unsigned mss)
 {
-	close();	// close if existing is open...
+	if(bufsize)
+		close();	// close if existing is open...
 
 	if(Socket::connect(*list))
 		return;
@@ -254,10 +256,29 @@ void tcpstream::open(Socket::address *list, unsigned mss)
 	allocate(mss);
 }	
 
+void tcpstream::reset(void)
+{
+	if(!bufsize)
+		return;
+
+	if(gbuf)
+		delete[] gbuf;
+
+	if(pbuf)
+		delete[] pbuf;
+
+	gbuf = pbuf = NULL;
+	bufsize = 0;
+	clear();
+	Socket::disconnect();
+}
+
 void tcpstream::close(void)
 {
-	if(bufsize)
-		sync();
+	if(!bufsize)
+		return;
+
+	sync();
 
 	if(gbuf)
 		delete[] gbuf;
@@ -275,7 +296,6 @@ void tcpstream::allocate(unsigned mss)
 {
 	unsigned size = mss;
 	unsigned max = 0;
-	unsigned bufsize;
 	socklen_t alen = sizeof(max);
 	
 	if(mss == 1)
@@ -346,6 +366,9 @@ allocate:
 
 int tcpstream::sync(void)
 {
+	if(!bufsize)
+		return 0;
+
 	overflow(EOF);
 	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
 	return 0;

@@ -13,13 +13,14 @@ AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS)
 LDADD = ../src/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = stdcpp.cpp
 
-TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads
+TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads ucommonStream
 check_PROGRAMS = $(TESTS)
 
 ucommonThreads_SOURCES = thread.cpp
 ucommonStrings_SOURCES = string.cpp
 ucommonLinked_SOURCES = linked.cpp
 ucommonSocket_SOURCES = socket.cpp
+ucommonStream_SOURCES = stream.cpp
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp

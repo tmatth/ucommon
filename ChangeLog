@@ -1,10 +1,12 @@
-From ucommon 1.5.0 to 1.5.1
+From ucommon 1.5.0 to 1.6.0
 - some small cleanups for opensolaris builds.
 - additional is() and isnull() template operators, template swap.
 - automatic rules for default selection with/without ansi C++ library (see
   BUILDS).
 - new fsys wrapper class for threaded portable i/o operations.
 - cmodel.sh support for broken libtool versions.
+- lots of tcpstream/socket bug fixes and new tcpstream unit test added.
+- changes in tcpstream abi to use address objects by reference.
 
 From ucommon 1.4.2 to 1.5.0
 - added gnu common c++ based tcp streaming class to ucommon.
