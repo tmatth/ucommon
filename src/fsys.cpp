@@ -881,18 +881,18 @@ char *fsys::readDir(dir_t dir, char *buf, size_t len)
 
 void *fsys::load(const char *path)
 {
-	return LoadLibary(path);
+	return LoadLibrary(path);
 }
 
 void fsys::unload(void *addr)
 {
 	if(addr)
-		FreeLibrary(addr);
+		FreeLibrary((HINSTANCE)addr);
 }
 
 void *fsys::find(void *addr, const char *sym)
 {
-	return GetProcAddress(addr, sym);
+	return (void *)GetProcAddress((HINSTANCE)addr, sym);
 }
 
 #elif defined(HAVE_DLFCN_H) 
