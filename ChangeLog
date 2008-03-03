@@ -3,6 +3,7 @@ From ucommon 1.5.0 to 1.5.1
 - additional is() and isnull() template operators, template swap.
 - automatic rules for default selection with/without ansi C++ library (see
   BUILDS).
+- new fsys wrapper class for threaded portable i/o operations.
 - cmodel.sh support for broken libtool versions.
 
 From ucommon 1.4.2 to 1.5.0
