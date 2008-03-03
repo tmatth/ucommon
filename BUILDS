@@ -7,7 +7,14 @@ that may add to runtime overhead.  This is done using the --disable-stdcpp
 configure option.  Any modern C++ compiler and posix platform with basic
 pthread support should be able to build UCommon successfully.
 
-When using only static linking, the --disable-stdcpp is also set by
+Whether UCommon is compiled with or without c++ ansi library support, it 
+should still be possible to mix and match UCommon code with software that 
+is built with standard C++ runtimes.  However, note that when std c++ is 
+disabled, in addition to stripping out some library routines which depend 
+on the C++ ansi library, exception handling and rtti is also disabled for 
+the ucommon library.
+
+When using only static linking, the c++ ansi libraries are also disabled by
 default.  This is to prevent bloat from static linkage of the ansi C++
 library and static linkage is most common on embedded targets.  The 
 --enable-stdcpp option can be used to re-enable the full ansi c++ library.
@@ -31,7 +38,12 @@ plugins would be hugely bloated.  Full libstdc++ support can always be
 re-enabled explicitly using --enable-stdcpp.
 
 It should be possible to build ucommon using Microsoft native compilers, and
-if people wish to submit patches based on doing this, they will be accepted.
+if people wish to submit patches for code changes based on using native
+Microsoft compilers, they will be accepted so long as they do not break other
+build environments.  We do not recommend or even suggest the use of 
+proprietary compilers on proprietary operating systems, and we will continue 
+to work to make the debian hosted mingw build environment as effective for 
+building our packages as we can.
 
 Support for older GCC (<3.x):
 
@@ -39,4 +51,22 @@ UCommon, like GNU Common C++, is meant to compile anywhere a C++ compiler
 exists.  However, there are specific limitations in gcc < 3, particularly
 in relation to namespace support.  For this reason, we disable libstdc++
 support by default, although again it can be enabled using --enable-stdcpp.
+
+QNX (Neutrino) Hosts & Targets:
+
+QNX distributes and uses both gcc 2.95.3 and 3.3.1, but the latter is only
+with the latest 6.3.x series release.  The userland build tools are old and
+broken for svn checkout to automake build, including libtool 1.4.x.  Nontheless
+we are able to support direct hosting and builds of ucommon on QNX.  Those
+using tarballs from official distributions should not have these problems.
+
+Since gcc 2.95 is the default, the default builds without stdc++.  Even worse,
+if you enable libstdc++ (--enable-stdcpp), the resulting executables will
+compile and link, but will fail at runtime with symbol link errors.  However, 
+executables built and linked with ucommon with stdcpp disabled do link and run 
+fine (and the "make check" tests will pass).  Strange.
+
+Minix and other non-pthread posix targets:
+
+Some work is being started on supporting GNU pth for these platforms....
  
