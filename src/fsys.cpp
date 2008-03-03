@@ -20,6 +20,7 @@
 #include <ucommon/string.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #ifdef	HAVE_DIRENT_H
 #include <dirent.h>
@@ -124,7 +125,7 @@ int fsys::stat(struct stat *buf)
 	int rtn = _fstat(fn, (struct _stat *)(buf));
 	_close(fn);
 	if(rtn)
-		error = errno;
+		error = remapError();
 	return rtn;
 }	 
 
@@ -152,7 +153,6 @@ int fsys::close(fd_t fd)
 {
 	if(CloseHandle(fd))
 		return 0;
-	errno = remapError();
 	return -1;
 }
 
@@ -166,7 +166,7 @@ void fsys::close(fsys &fs)
 		fs.error = 0;
 	}
 	else
-		fs.error = errno = remapError();
+		fs.error = remapError();
 }
 
 ssize_t fsys::read(fd_t fd, void *buf, size_t len)
@@ -175,7 +175,6 @@ ssize_t fsys::read(fd_t fd, void *buf, size_t len)
 	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		return (ssize_t)(count);
 	
-	errno = remapError();
 	return -1;
 }
 
@@ -185,7 +184,7 @@ ssize_t fsys::read(void *buf, size_t len)
 	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		return (ssize_t)(count);
 	
-	error = errno = remapError();
+	error = remapError();
 	return -1;
 }
 
@@ -195,7 +194,6 @@ ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
 	if(WriteFile(fd, (LPCVOID) buf, (DWORD)len, &count, NULL))
 		return (ssize_t)(count);
 	
-	errno = remapError();
 	return -1;
 }
 
@@ -205,7 +203,7 @@ ssize_t fsys::write(const void *buf, size_t len)
 	if(WriteFile(fd, (LPCVOID) buf, (DWORD)len, &count, NULL))
 		return (ssize_t)(count);
 	
-	error = errno = remapError();
+	error = remapError();
 	return -1;
 }
 
@@ -244,8 +242,6 @@ fd_t fsys::open(const char *path, access_t access, unsigned mode)
 	HANDLE fd = CreateFile(path, amode, 0, NULL, cmode, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
 		setPosition(fd, end);
-	else
-		errno = remapError();
 	if(fd != INVALID_HANDLE_VALUE)
 		change(path, mode);
 	return fd;	
@@ -292,7 +288,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	if(fs.fd != INVALID_HANDLE_VALUE && append)
 		fs.setPosition(end);
 	else
-		errno = fs.error = remapError();
+		fs.error = remapError();
 	if(fs.fd != INVALID_HANDLE_VALUE)
 		change(path, mode);
 }
@@ -304,7 +300,7 @@ fsys::fsys(const fsys& copy)
 		error = 0;
 	else {
 		fd = INVALID_HANDLE_VALUE;
-		error = errno = remapError();
+		error = remapError();
 	}
 }
 
@@ -314,7 +310,7 @@ void fsys::operator=(fd_t from)
 
 	if(fd != INVALID_HANDLE_VALUE) {
 		if(!CloseHandle(fd)) {
-			errno = error = remapError();
+			error = remapError();
 			return;
 		}
 	}
@@ -322,7 +318,7 @@ void fsys::operator=(fd_t from)
 		error = 0;
 	else {
 		fd = INVALID_HANDLE_VALUE;
-		error = errno = remapError();
+		error = remapError();
 	}
 }
 
@@ -332,7 +328,7 @@ void fsys::operator=(fsys &from)
 
 	if(fd != INVALID_HANDLE_VALUE) {
 		if(!CloseHandle(fd)) {
-			errno = error = remapError();
+			error = remapError();
 			return;
 		}
 	}
@@ -340,7 +336,7 @@ void fsys::operator=(fsys &from)
 		error = 0;
 	else {
 		fd = INVALID_HANDLE_VALUE;
-		error = errno = remapError();
+		error = remapError();
 	}
 }
 
@@ -354,7 +350,7 @@ void fsys::setPosition(size_t pos)
 		mode = FILE_END;
 	}
 	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER)
-		error = errno = remapError();
+		error = remapError();
 }
 
 int fsys::setPosition(fd_t fd, size_t pos)
@@ -366,14 +362,16 @@ int fsys::setPosition(fd_t fd, size_t pos)
 		rpos = 0;
 		mode = FILE_END;
 	}
-	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER) {
-		errno = remapError();
+	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER) 
 		return -1;
-	}
 	return 0;
 }
 
 #else
+
+inline int remapError(void)
+	{return errno;};
+
 #ifdef	__PTH__
 
 ssize_t fsys::read(fd_t fd, void *buf, size_t len)
@@ -390,7 +388,7 @@ ssize_t fsys::read(void *buf, size_t len)
 
 	int rtn = pth_read(fd, buf, len);
 	if(rtn <= 0)
-		error = errno;
+		error = remapError();
 	return rtn;
 }
 
@@ -408,7 +406,7 @@ ssize_t fsys::write(const void *buf, size_t len)
 
 	int rtn = pth_write(fd, buf, len);
 	if(rtn <= 0)
-		error = errno;
+		error = remapError();
 	return rtn;
 }
 
@@ -428,7 +426,7 @@ ssize_t fsys::read(void *buf, size_t len)
 
 	int rtn = ::read(fd, buf, len);
 	if(rtn <= 0)
-		error = errno;
+		error = remapError();
 	return rtn;
 }
 
@@ -446,7 +444,7 @@ ssize_t fsys::write(const void *buf, size_t len)
 
 	int rtn = ::write(fd, buf, len);
 	if(rtn <= 0)
-		error = errno;
+		error = remapError();
 	return rtn;
 }
 
@@ -467,7 +465,7 @@ void fsys::close(fsys &fs)
 		fs.error = 0;
 	}
 	else
-		fs.error = errno;
+		fs.error = remapError();
 }
 
 fd_t fsys::open(const char *path, access_t access, unsigned mode)
@@ -522,7 +520,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 
 	fs.fd = ::open(path, flags, mode);
 	if(fs.fd == INVALID_HANDLE_VALUE)
-		fs.error = errno;
+		fs.error = remapError();
 }
 
 int fsys::stat(const char *path, struct stat *ino)
@@ -534,7 +532,7 @@ int fsys::stat(struct stat *ino)
 {
 	int rtn = ::fstat(fd, ino);
 	if(rtn)
-		error = errno;
+		error = remapError();
 	return rtn;
 }
 
@@ -581,7 +579,7 @@ void fsys::operator=(fd_t from)
 		error = 0;
 	}
 	else
-		error = errno;
+		error = remapError();
 }
 
 void fsys::operator=(fsys &from)
@@ -591,7 +589,7 @@ void fsys::operator=(fsys &from)
 		error = 0;
 	}
 	else
-		error = errno;
+		error = remapError();
 }
 
 void fsys::setPosition(size_t pos)
@@ -604,7 +602,7 @@ void fsys::setPosition(size_t pos)
 		mode = SEEK_END;
 	}
 	if(lseek(fd, mode, rpos))
-		error = errno;
+		error = remapError();
 }
 
 int fsys::setPosition(fd_t fd, size_t pos)
@@ -639,7 +637,7 @@ fsys::~fsys()
 		error = 0;
 	}
 	else
-		error = errno;
+		error = remapError();
 }
 
 int fsys::remove(const char *path)

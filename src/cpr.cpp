@@ -33,14 +33,6 @@
 using namespace UCOMMON_NAMESPACE;
 
 #ifdef	_MSWINDOWS_
-int cpr_mkdir(const char *path, int mode)
-{
-	if(!CreateDirectory(path, NULL))
-		return -1;
-
-	return chmod(path, mode);
-}
-
 int cpr_setenv(const char *sym, const char *val, int flag)
 {	
 	char buf[128];

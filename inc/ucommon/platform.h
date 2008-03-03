@@ -149,7 +149,6 @@ typedef	struct timespec {
 
 extern "C" {
 
-int cpr_mkdir(const char *path, int mode);
 int cpr_setenv(const char *s, const char *v, int p);
 
 inline int setenv(const char *s, const char *v, int overwrite)
@@ -184,30 +183,6 @@ inline int stricmp(const char *s1, const char *s2)
 
 inline int strnicmp(const char *s1, const char *s2, size_t l)
 	{return _strnicmp(s1, s2, l);};
-
-inline int stat(const char *path, struct stat *buf)
-	{return _stat(path, (struct _stat *)(buf));};
-
-inline int mkdir(const char *path, int mode)
-	{return cpr_mkdir(path, mode);};
-
-inline int chdir(const char *dir)
-	{return _chdir(dir);};
-
-inline int rmdir(const char *dir)
-	{return _rmdir(dir);};
-
-inline int chmod(const char *path, int mode)
-	{return _chmod(path, mode);};
-
-inline char *getcwd(char *path, int size)
-	{return _getcwd(path, size);};
-
-inline int access(const char *path, int mode)
-	{return _access(path, mode);};
-
-inline int dup(int fd)
-	{return _dup(fd);};
 };
 
 #elif defined(__PTH__)
