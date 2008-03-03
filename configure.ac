@@ -74,12 +74,15 @@ AC_MSG_CHECKING([full c++ support and linking model])
 
 if test -z "$enable_stdcpp" ; then
 	if test "x$GCC" = "xyes" ; then
-		gccver=`$CC -dumpversion | sed "s/^.*[.]//"`
+		gccver=`$CC -dumpversion | cut -f1 -d.`
 	fi
-	if $gccver -lt "3" ; then
+	if test -z "$gccver" ; then
+		gccver="3"
+	fi
+	if test "$gccver" -lt "3" ; then
 		enable_stdcpp="no"
 	fi
-	if "x$enable_shared" = "xno" ; then
+	if test "x$enable_shared" = "xno" ; then
 		enable_stdcpp="no"
 	fi
 	case "$target_os" in
