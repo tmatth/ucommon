@@ -876,3 +876,140 @@ char *fsys::readDir(dir_t dir, char *buf, size_t len)
 }
 
 #endif
+
+#ifdef	_MSWINDOWS_
+
+void *fsys::load(const char *path)
+{
+	return LoadLibary(path);
+}
+
+void fsys::unload(void *addr)
+{
+	if(addr)
+		FreeLibrary(addr);
+}
+
+void *fsys::find(void *addr, const char *sym)
+{
+	return GetProcAddress(addr, sym);
+}
+
+#elif defined(HAVE_DLFCN_H) 
+#include <dlfcn.h>
+
+#ifndef	RTLD_GLOBAL
+#define	RTLD_GLOBAL	0
+#endif
+
+void *fsys::load(const char *path)
+{
+	return dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+}
+
+void fsys::unload(void *addr)
+{
+	if(addr)
+		dlclose(addr);
+}
+
+void *fsys::find(void *addr, const char *sym)
+{
+	if(!addr)
+		return NULL;
+
+	return dlsym(addr, (char *)sym);
+}
+
+#elif HAVE_MACH_O_DYLD_H
+#include <mach-o/dyld.h>
+
+void *fsys::load(const char *path)
+{
+	NSObjectFileImage oImage;
+	NSSymbol sym = NULL;
+	NSModule mod;
+	void (*init)(void);
+
+	if(NSCreateObjectFileImageFromFile(path, &oImage) != NSObjectFileImageSuccess)
+		return NULL;
+
+	mod = NSLinkModule(oImage, path, NSLINKMODULE_OPTION_BINDNOW | NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+	NSDestroyObjectFileImage(oImage);
+	if(mod == NULL)
+		return NULL;
+
+	sym = NSLookupSymbolInModule(mod, "__init");
+	if(sym) {
+		init = (void (*)(void))NSAddressOfSymbol(sym);
+		init();
+	}
+
+	return (void *)mod;
+}
+
+void fsys::unload(void *addr)
+{
+	NSModule mod = (NSModule)addr;
+	NSSymbol sym;
+	void (*fini)(void);
+
+	if(mod == NULL)
+		return;
+
+	sym = NSLookupSymbolInModule(mod, "__fini");
+	if(sym != NULL) {
+		fini = (void (*)(void))NSAddressOfSymbol(sym);
+		fini();
+	}
+	NSUnlinkModule(mod, NSUNLINKMODULE_OPTION_NONE);
+}
+
+void *fsys::find(void *addr, const char *sym)
+{
+	NSModule mod = (NSModule)addr;
+	NSSymbol sym;
+
+	if(mod == NULL)
+		return NULL;
+
+	sym = NSLookupSymbolInModule(mod, sym);
+	if(sym != NULL) {
+		return NSAddressOfSymbol(sym);
+	
+	return NULL;
+}
+
+#elif HAVE_SHL_LOAD
+#include <dl.h>
+
+void *fsys::load(const char *path)
+{
+	if(flag)
+		return shl_load(path, BIND_IMMEDIATE, 0l);
+	else
+		return shl_load(path, BIND_DEFERRED, 0l);
+}
+
+void *fsys::find(void *addr, const char *sym)
+{
+	shl_t image = (shl_t)addr;
+
+	if(shl_findsym(&image, sym, 0, &value) == 0)
+		return (void *)value;
+
+	return NULL;
+}
+
+void fsys::unload(void *addr)
+{
+	shl_t image = (shl_t)addr;
+	if(addr)
+		shl_unload(image);
+}
+
+void *fsys::find(void *addr, const char *sym)
+{
+
+
+#endif

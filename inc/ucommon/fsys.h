@@ -114,6 +114,10 @@ public:
 	static dir_t openDir(const char *path);
 	static char *readDir(dir_t dir, char *buf, size_t len);
 	static void closeDir(dir_t dir);
+
+	static void *load(const char *path);
+	static void unload(void *addr);
+	static void *find(void *addr, const char *sym);
 };
 
 END_NAMESPACE

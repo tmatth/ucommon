@@ -125,7 +125,8 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h mach/clock.h sys/filio.h dirent.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h)
+AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
@@ -184,6 +185,15 @@ AC_CHECK_LIB($clib, sysconf, [
 AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])
+
+AC_CHECK_LIB(dl, dlopen, [UCOMMON_LIBS="$UCOMMON_LIBS -ldl"],[
+	AC_CHECK_LIB(compat, dlopen, [UCOMMON_LIBS="$UCOMMON_LIBS -lcompat"])
+	AC_CHECK_LIB(dld, shl_load,[
+		AC_DEFINE(HAVE_SHL_LOAD, [1], [alternate dyn loader])
+		UCOMMON_LIBS="$UCOMMON_LIBS -ldld"
+	])
+])
+
 
 PTHREAD_FLAGS=""
 
