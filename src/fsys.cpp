@@ -169,42 +169,101 @@ void fsys::close(fsys &fs)
 		fs.error = remapError();
 }
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len)
+ssize_t fsys::read(fd_t fd, void *buf, size_t len, size_t offset)
 {
 	DWORD count;
+	ssize_t rtn = -1;
+	HANDLE dup;
+
+	if(offset != end) {
+		HANDLE pHandle = GetCurrentProcess();
+		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS))
+			return -1;
+		setPosition(fd, offset);
+		fd = dup;
+	}
+
+
 	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
-		return (ssize_t)(count);
+		rtn = (ssize_t)count;
+
+	if(offset != end)
+		CloseHandle(dup);
 	
-	return -1;
+	return rtn;
 }
 
-ssize_t fsys::read(void *buf, size_t len)
+ssize_t fsys::read(void *buf, size_t len, size_t offset)
 {
+	ssize_t rtn = -1;
 	DWORD count;
-	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
-		return (ssize_t)(count);
-	
-	error = remapError();
-	return -1;
+	HANDLE dup = fd;
+
+	if(offset != end) {
+		HANDLE pHandle = GetCurrentProcess();
+		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+			error = remapError();
+			return -1;
+		}
+		setPosition(offset);
+	}
+
+	if(ReadFile(dup, (LPVOID) buf, (DWORD)len, &count, NULL))
+		rtn = count;
+	else		
+		error = remapError();
+
+	if(offset != end)
+		CloseHandle(dup);
+	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
+ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
 {
 	DWORD count;
-	if(WriteFile(fd, (LPCVOID) buf, (DWORD)len, &count, NULL))
-		return (ssize_t)(count);
+	ssize_t rtn = -1;
+	HANDLE dup;
+
+	if(offset != end) {
+		HANDLE pHandle = GetCurrentProcess();
+		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) 
+			return -1;
+		setPosition(fd, offset);
+		fd = dup;
+	}
+
+	if(WriteFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
+		rtn = (ssize_t)count;
+
+	if(offset != end)
+		CloseHandle(dup);
 	
-	return -1;
+	return rtn;
 }
 
-ssize_t fsys::write(const void *buf, size_t len)
+ssize_t fsys::write(const void *buf, size_t len, size_t offset)
 {
+	ssize_t rtn = -1;
 	DWORD count;
-	if(WriteFile(fd, (LPCVOID) buf, (DWORD)len, &count, NULL))
-		return (ssize_t)(count);
-	
-	error = remapError();
-	return -1;
+	HANDLE dup = fd;
+
+	if(offset != end) {
+		HANDLE pHandle = GetCurrentProcess();
+		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+			error = remapError();
+			return -1;
+		}
+		setPosition(offset);
+	}
+
+	if(WriteFile(dup, (LPVOID) buf, (DWORD)len, &count, NULL))
+		rtn = count;
+	else		
+		error = remapError();
+
+	if(offset != end)
+		CloseHandle(dup);
+	return rtn;
 }
 
 fd_t fsys::open(const char *path, access_t access, unsigned mode)
