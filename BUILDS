@@ -39,10 +39,4 @@ UCommon, like GNU Common C++, is meant to compile anywhere a C++ compiler
 exists.  However, there are specific limitations in gcc < 3, particularly
 in relation to namespace support.  For this reason, we disable libstdc++
 support by default, although again it can be enabled using --enable-stdcpp.
-
-Support for Minix:
-
-Minix 3 has recent versions of gcc.  We prefer to use the default mini-build
-of ucommon keeping with the spirit of minix as low overhead.  Again, using
---enable-stdcpp can bring full libstdc++ support back.
  
