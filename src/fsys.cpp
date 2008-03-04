@@ -193,7 +193,7 @@ ssize_t fsys::read(void *buf, size_t len)
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
+ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
 {
 	DWORD count;
 	ssize_t rtn = -1;
@@ -204,7 +204,7 @@ ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
 	return rtn;
 }
 
-ssize_t fsys::write(const void *buf, size_t len, size_t offset)
+ssize_t fsys::write(const void *buf, size_t len)
 {
 	ssize_t rtn = -1;
 	DWORD count;
