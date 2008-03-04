@@ -1350,13 +1350,13 @@ void Thread::setPriority(void)
 {
 	int policy;
 	struct sched_param sp;
-	pthread_t tid = pthread_self();
+	pthread_t ptid = pthread_self();
 	int pri;
 
 	if(!priority)
 		return;
 
-	if(pthread_getschedparam(tid, &policy, &sp))
+	if(pthread_getschedparam(ptid, &policy, &sp))
 		return;
 
 	if(priority > 0) {
@@ -1375,7 +1375,7 @@ void Thread::setPriority(void)
 	}
 
 	sp.sched_priority = pri;
-	pthread_setschedparam(tid, policy, &sp);
+	pthread_setschedparam(ptid, policy, &sp);
 }
 
 #else
