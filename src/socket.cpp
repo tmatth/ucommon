@@ -761,28 +761,11 @@ Socket::address::address(const char *host, unsigned port, int family)
 {
 	assert(host != NULL && *host != 0);
 	
-	struct addrinfo hint;
-	char buf[16];
-	char *svc = NULL;
-
+	list = NULL;
 #ifdef	_MSWINDOWS_
 	Socket::init();
 #endif
-
-	memset(&hint, 0, sizeof(hint));
-	hint.ai_family = family;
-	hint.ai_socktype = SOCK_STREAM;		// BSD requires valid type...
-
-	if(port) {
-		snprintf(buf, sizeof(buf), "%u", port);
-		svc = buf;
-#ifdef	AI_NUMERICSERV
-		hint.ai_flags |= AI_NUMERICSERV;
-#endif
-	}
-
-	list = NULL;
-	getaddrinfo(host, svc, &hint, &list);
+	set(host, port, family);
 }
 
 Socket::address::address(Socket &s, const char *host, const char *svc)
@@ -833,6 +816,31 @@ void Socket::address::clear(void)
 		freeaddrinfo(list);
 		list = NULL;
 	}
+}
+
+void Socket::address::set(const char *host, unsigned port, int family)
+{
+	assert(host != NULL && *host != 0);
+	
+	struct addrinfo hint;
+	char buf[16];
+	char *svc = NULL;
+
+	clear();
+	memset(&hint, 0, sizeof(hint));
+	hint.ai_family = family;
+	hint.ai_socktype = SOCK_STREAM;		// BSD requires valid type...
+
+	if(port) {
+		snprintf(buf, sizeof(buf), "%u", port);
+		svc = buf;
+#ifdef	AI_NUMERICSERV
+		hint.ai_flags |= AI_NUMERICSERV;
+#endif
+	}
+
+	list = NULL;
+	getaddrinfo(host, svc, &hint, &list);
 }
 
 void Socket::address::set(int family, const char *a, int type, int protocol)

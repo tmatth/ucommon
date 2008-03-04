@@ -438,6 +438,14 @@ public:
 		 * @param address to add.
 		 */
 		void set(struct sockaddr *address);
+
+		/**
+		 * Set a socket address from host and service.
+		 * @param hostname or address to use.
+		 * @param service port or 0.
+		 * @param family of socket address.
+		 */
+		void set(const char *hostname, unsigned service = 0, int family = DEFAULT_FAMILY);
 	};
 
 	friend class address;
