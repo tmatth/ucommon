@@ -924,6 +924,12 @@ struct sockaddr *Socket::address::get(int family)
 	return NULL;
 }
 
+void Socket::address::set(struct sockaddr *addr)
+{
+	clear();
+	add(addr);
+}
+
 void Socket::address::add(struct sockaddr *addr)
 {
 	assert(addr != NULL);
@@ -934,6 +940,12 @@ void Socket::address::add(struct sockaddr *addr)
 	Socket::getaddress(addr, buffer, sizeof(buffer));
 	snprintf(svc, sizeof(svc), "%d", Socket::getservice(addr));
 	add(buffer, svc, addr->sa_family);
+}
+
+void Socket::address::set(const char *host, const char *svc, int family, int socktype)
+{
+	clear();
+	add(host, svc, family, socktype);
 }
 
 void Socket::address::add(const char *host, const char *svc, int family, int socktype)

@@ -403,6 +403,14 @@ public:
 		void clear(void);
 
 		/**
+		 * Set the host addresses to form a new list.
+		 * @param hostname or address to resolve.
+		 * @param service name or port number, or NULL if not used.
+		 * @param family of hostname.
+		 */
+		void set(const char *hostname, const char *service = NULL, int family = 0, int socktype = SOCK_STREAM);
+
+		/**
 		 * Append additional host addresses to our list.
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
@@ -424,6 +432,12 @@ public:
 		 * @param address to add.
 		 */
 		void add(struct sockaddr *address);
+
+		/**
+		 * Set an individual socket address for our address list.
+		 * @param address to add.
+		 */
+		void set(struct sockaddr *address);
 	};
 
 	friend class address;

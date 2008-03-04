@@ -1,5 +1,6 @@
 From ucommon 1.6.1 to 1.6.2
-- support for using Socket::address as referenced type.
+- improved support for using Socket::address as referenced type.  New set &
+  add methods.
 
 From ucommon 1.6.0 to 1.6.1
 - fix for loader.
