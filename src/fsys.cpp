@@ -169,52 +169,27 @@ void fsys::close(fsys &fs)
 		fs.error = remapError();
 }
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len, size_t offset)
+ssize_t fsys::read(fd_t fd, void *buf, size_t len)
 {
 	DWORD count;
 	ssize_t rtn = -1;
-	HANDLE dup;
-
-	if(offset != end) {
-		HANDLE pHandle = GetCurrentProcess();
-		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS))
-			return -1;
-		setPosition(fd, offset);
-		fd = dup;
-	}
-
 
 	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		rtn = (ssize_t)count;
 
-	if(offset != end)
-		CloseHandle(dup);
-	
 	return rtn;
 }
 
-ssize_t fsys::read(void *buf, size_t len, size_t offset)
+ssize_t fsys::read(void *buf, size_t len)
 {
 	ssize_t rtn = -1;
 	DWORD count;
-	HANDLE dup = fd;
 
-	if(offset != end) {
-		HANDLE pHandle = GetCurrentProcess();
-		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-			error = remapError();
-			return -1;
-		}
-		setPosition(offset);
-	}
-
-	if(ReadFile(dup, (LPVOID) buf, (DWORD)len, &count, NULL))
+	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		rtn = count;
 	else		
 		error = remapError();
-
-	if(offset != end)
-		CloseHandle(dup);
+	
 	return rtn;
 }
 
@@ -222,22 +197,10 @@ ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
 {
 	DWORD count;
 	ssize_t rtn = -1;
-	HANDLE dup;
-
-	if(offset != end) {
-		HANDLE pHandle = GetCurrentProcess();
-		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) 
-			return -1;
-		setPosition(fd, offset);
-		fd = dup;
-	}
 
 	if(WriteFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		rtn = (ssize_t)count;
 
-	if(offset != end)
-		CloseHandle(dup);
-	
 	return rtn;
 }
 
@@ -245,24 +208,12 @@ ssize_t fsys::write(const void *buf, size_t len, size_t offset)
 {
 	ssize_t rtn = -1;
 	DWORD count;
-	HANDLE dup = fd;
 
-	if(offset != end) {
-		HANDLE pHandle = GetCurrentProcess();
-		if(!DuplicateHandle(pHandle, fd, pHandle, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-			error = remapError();
-			return -1;
-		}
-		setPosition(offset);
-	}
-
-	if(WriteFile(dup, (LPVOID) buf, (DWORD)len, &count, NULL))
+	if(WriteFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		rtn = count;
 	else		
 		error = remapError();
 
-	if(offset != end)
-		CloseHandle(dup);
 	return rtn;
 }
 
@@ -450,143 +401,63 @@ inline int remapError(void)
 
 #ifdef	__PTH__
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len, size_t offset)
+ssize_t fsys::read(fd_t fd, void *buf, size_t len)
 {
-	if(offset != end)
-		return pth_pread(fd, buf, len, offset);
-
 	return pth_read(fd, buf, len);
 }
 
-ssize_t fsys::read(void *buf, size_t len, size_t offset)
+ssize_t fsys::read(void *buf, size_t len)
 {
 	int rtn;
 
-	if(fd == INVALID_HANDLE_VALUE) {
-		error = EBADF;
-		return -1;
-	}
+	rtn = pth_read(fd, buf, len);
 
-	if(offset != end)
-		rtn = pth_pread(fd, buf, len, offset);
-	else
-		rtn = pth_read(fd, buf, len);
-
-	if(rtn <= 0)
+	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
+ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
 {
-	if(offset != end)
-		return pth_pwrite(fd, buf, len, offset);
-
 	return pth_write(fd, buf, len);
 }
 
-ssize_t fsys::write(const void *buf, size_t len, size_t offset)
+ssize_t fsys::write(const void *buf, size_t len)
 {
 	int rtn;
 
-	if(fd == INVALID_HANDLE_VALUE) {
-		error = EBADF;
-		return -1;
-	}
-
-	if(offset != end)
-		rtn = pth_pwrite(fd, buf, len, offset);
-	else
-		rtn = pth_write(fd, buf, len);
-	if(rtn <= 0)
+	rtn = pth_write(fd, buf, len);
+	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
 
 #else
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len, size_t offset)
+ssize_t fsys::read(fd_t fdes, void *buf, size_t len)
 {
-	if(offset == end)
-		return ::read(fd, buf, len);
+	return ::read(fdes, buf, len);
+}
 
-#ifdef	HAVE_PREAD
-	return ::pread(fd, buf, len, offset);
-#else
-	fd = dup(fd);
-	setPosition(fd, offset);
+ssize_t fsys::read(void *buf, size_t len)
+{
 	int rtn = ::read(fd, buf, len);
-	::close(fd);
-	return rtn;
-#endif
-}
 
-ssize_t fsys::read(void *buf, size_t len, size_t offset)
-{
-	int rtn;
-
-	if(fd == INVALID_HANDLE_VALUE) {
-		error = EBADF;
-		return -1;
-	}
-
-	if(offset == end)
-		rtn = ::read(fd, buf, len);
-	else {
-#ifdef	HAVE_PREAD
-		rtn = ::pread(fd, buf, len, offset);
-#else
-		int nfd = dup(fd);
-		setPosition(nfd, offset);
-		rtn = ::read(nfd, buf, len);
-		::close(nfd);
-#endif		
-	}
-
-	if(rtn <= 0)
+	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len, size_t offset)
+ssize_t fsys::write(fd_t fdes, const void *buf, size_t len)
 {
-	if(offset == end)
-		return ::write(fd, buf, len);
-
-#ifdef	HAVE_PREAD
-	return ::pwrite(fd, buf, len, offset);
-#else
-	fd = dup(fd);
-	setPosition(fd, offset);
-	int rtn = ::write(fd, buf, len);
-	::close(fd);
-	return rtn;
-#endif
+	return ::write(fdes, buf, len);
 }
 
-ssize_t fsys::write(const void *buf, size_t len, size_t offset)
+ssize_t fsys::write(const void *buf, size_t len)
 {
-	int rtn;
+	int rtn = ::write(fd, buf, len);
 
-	if(fd == INVALID_HANDLE_VALUE) {
-		error = EBADF;
-		return -1;
-	}
-
-	if(offset == end)
-		rtn = ::write(fd, buf, len);
-	else {
-#ifdef	HAVE_PREAD
-		rtn = ::pwrite(fd, buf, len, offset);
-#else
-		int nfd = dup(fd);
-		setPosition(nfd, offset);
-		rtn = ::write(nfd, buf, len);
-		::close(nfd);
-#endif		
-	}
-
-	if(rtn <= 0)
+	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
@@ -879,18 +750,18 @@ char *fsys::readDir(dir_t dir, char *buf, size_t len)
 
 #ifdef	_MSWINDOWS_
 
-void *fsys::load(const char *path)
+mem_t fsys::load(const char *path)
 {
-	return LoadLibrary(path);
+	return (mem_t)LoadLibrary(path);
 }
 
-void fsys::unload(void *addr)
+void fsys::unload(mem_t addr)
 {
 	if(addr)
 		FreeLibrary((HINSTANCE)addr);
 }
 
-void *fsys::find(void *addr, const char *sym)
+void *fsys::find(mem_t addr, const char *sym)
 {
 	return (void *)GetProcAddress((HINSTANCE)addr, sym);
 }
@@ -902,18 +773,18 @@ void *fsys::find(void *addr, const char *sym)
 #define	RTLD_GLOBAL	0
 #endif
 
-void *fsys::load(const char *path)
+mem_t fsys::load(const char *path)
 {
-	return dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+	return (mem_t)dlopen(path, RTLD_NOW | RTLD_GLOBAL);
 }
 
-void fsys::unload(void *addr)
+void fsys::unload(mem_t addr)
 {
 	if(addr)
 		dlclose(addr);
 }
 
-void *fsys::find(void *addr, const char *sym)
+void *fsys::find(mem_t addr, const char *sym)
 {
 	if(!addr)
 		return NULL;
@@ -924,7 +795,7 @@ void *fsys::find(void *addr, const char *sym)
 #elif HAVE_MACH_O_DYLD_H
 #include <mach-o/dyld.h>
 
-void *fsys::load(const char *path)
+mem_t fsys::load(const char *path)
 {
 	NSObjectFileImage oImage;
 	NSSymbol sym = NULL;
@@ -945,10 +816,10 @@ void *fsys::load(const char *path)
 		init();
 	}
 
-	return (void *)mod;
+	return (mem_t)mod;
 }
 
-void fsys::unload(void *addr)
+void fsys::unload(mem_t addr)
 {
 	NSModule mod = (NSModule)addr;
 	NSSymbol sym;
@@ -965,7 +836,7 @@ void fsys::unload(void *addr)
 	NSUnlinkModule(mod, NSUNLINKMODULE_OPTION_NONE);
 }
 
-void *fsys::find(void *addr, const char *sym)
+void *fsys::find(mem_t addr, const char *sym)
 {
 	NSModule mod = (NSModule)addr;
 	NSSymbol sym;
@@ -983,15 +854,15 @@ void *fsys::find(void *addr, const char *sym)
 #elif HAVE_SHL_LOAD
 #include <dl.h>
 
-void *fsys::load(const char *path)
+mem_t fsys::load(const char *path)
 {
 	if(flag)
-		return shl_load(path, BIND_IMMEDIATE, 0l);
+		return (mem_t)shl_load(path, BIND_IMMEDIATE, 0l);
 	else
-		return shl_load(path, BIND_DEFERRED, 0l);
+		return (mem_t)shl_load(path, BIND_DEFERRED, 0l);
 }
 
-void *fsys::find(void *addr, const char *sym)
+void *fsys::find(mem_t addr, const char *sym)
 {
 	shl_t image = (shl_t)addr;
 
@@ -1001,15 +872,27 @@ void *fsys::find(void *addr, const char *sym)
 	return NULL;
 }
 
-void fsys::unload(void *addr)
+void fsys::unload(mem_t addr)
 {
 	shl_t image = (shl_t)addr;
 	if(addr)
 		shl_unload(image);
 }
 
-void *fsys::find(void *addr, const char *sym)
-{
+#else
 
+mem_t fsys::load(const char *path)
+{
+	return NULL;
+}
+
+void fsys::unload(mem_t addr)
+{
+}
+
+void *fsys::find(mem_t addr, const char *sym)
+{
+	return NULL;
+}
 
 #endif

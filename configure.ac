@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="1.6.0"
+VERSION="1.6.1"
 LT_RELEASE="1.6"
-LT_VERSION="0:0"
+LT_VERSION="0:1"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -248,7 +248,7 @@ AC_CHECK_HEADER(pthread.h, [
 		AC_MSG_ERROR("pthread support required")])
 ])
 
-for func in ftok shm_open pread nanosleep clock_nanosleep clock_gettime localtime_r ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -285,9 +285,6 @@ for func in ftok shm_open pread nanosleep clock_nanosleep clock_gettime localtim
 		;;
 	clock_gettime)		
 		AC_DEFINE(HAVE_POSIXTIME, [1], [has posix clock functions])
-		;;
-	pread)
-		AC_DEFINE(HAVE_PREAD, [1], [has posix read])
 		;;
 	esac
 done
