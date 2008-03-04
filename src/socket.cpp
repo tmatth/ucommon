@@ -750,54 +750,11 @@ Socket::address::address(int family, const char *a, int type, int protocol)
 {
 	assert(a != NULL && *a != 0);
 
-	char *addr = strdup(a);
-	char *host = strchr(addr, '@');
-	char *ep;
-	char *svc = NULL;
-	struct addrinfo hint;
-
+	list = NULL;
 #ifdef	_MSWINDOWS_
 	Socket::init();
 #endif
-
-	memset(&hint, 0, sizeof(hint));
-#ifdef	PF_UNSPEC
-	hint.ai_family = PF_UNSPEC;
-	hint.ai_socktype = SOCK_STREAM;
-	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-#endif
-
-	if(!host)
-		host = addr;
-	else
-		++host;
-
-	if(*host != '[') {
-		ep = strchr(host, ':');
-		if(ep) {
-			*(ep++) = 0;
-			svc = ep;
-		}
-		goto proc;
-	}
-#ifdef	AF_INET6
-	if(*host == '[') {
-		family = AF_INET6;
-		++host;
-		ep = strchr(host, ']');
-		if(ep) {
-			*(ep++) = 0;
-			if(*ep == ':')
-				svc = ++ep;
-		}
-	}
-#endif
-proc:
-	hint.ai_family = family;
-	hint.ai_socktype = type;
-	hint.ai_protocol = protocol;
-	list = NULL;
-	getaddrinfo(host, svc, &hint, &list);
+	set(family, a, type, protocol);
 }
 
 Socket::address::address(const char *host, unsigned port, int family)
@@ -860,12 +817,74 @@ Socket::address::address(SOCKET so, const char *host, const char *svc)
 	getaddrinfo(host, svc, ah, &list);
 }
 
+Socket::address::address()
+{
+	list = NULL;
+}
+
 Socket::address::~address()
+{
+	clear();
+}
+
+void Socket::address::clear(void)
 {
 	if(list) {
 		freeaddrinfo(list);
 		list = NULL;
 	}
+}
+
+void Socket::address::set(int family, const char *a, int type, int protocol)
+{
+	assert(a != NULL && *a != 0);
+
+	char *addr = strdup(a);
+	char *host = strchr(addr, '@');
+	char *ep;
+	char *svc = NULL;
+	struct addrinfo hint;
+
+	clear();
+
+	memset(&hint, 0, sizeof(hint));
+#ifdef	PF_UNSPEC
+	hint.ai_family = PF_UNSPEC;
+	hint.ai_socktype = SOCK_STREAM;
+	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+#endif
+
+	if(!host)
+		host = addr;
+	else
+		++host;
+
+	if(*host != '[') {
+		ep = strchr(host, ':');
+		if(ep) {
+			*(ep++) = 0;
+			svc = ep;
+		}
+		goto proc;
+	}
+#ifdef	AF_INET6
+	if(*host == '[') {
+		family = AF_INET6;
+		++host;
+		ep = strchr(host, ']');
+		if(ep) {
+			*(ep++) = 0;
+			if(*ep == ':')
+				svc = ++ep;
+		}
+	}
+#endif
+proc:
+	hint.ai_family = family;
+	hint.ai_socktype = type;
+	hint.ai_protocol = protocol;
+	list = NULL;
+	getaddrinfo(host, svc, &hint, &list);
 }
 
 struct sockaddr *Socket::address::getAddr(void)

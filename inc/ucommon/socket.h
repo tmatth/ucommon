@@ -398,12 +398,26 @@ public:
 			{return getAddr();};
 
 		/**
+		 * Clear current object.
+		 */
+		void clear(void);
+
+		/**
 		 * Append additional host addresses to our list.
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
 		 * @param family of hostname.
 		 */
 		void add(const char *hostname, const char *service = NULL, int family = 0, int socktype = SOCK_STREAM);
+
+		/**
+		 * Set an entry for host binding.
+		 * @param address or hostname.
+		 * @param family of socket address.  Needed when hostnames are used.
+		 * @param type of socket (stream, dgram, etc).
+		 * @param protocol number of socket.
+		 */
+		void set(int family, const char *address, int type = SOCK_STREAM, int protocol = 0);
 
 		/**
 		 * Add an individual socket address to our address list.
