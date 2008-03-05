@@ -60,7 +60,12 @@ class __EXPORT fsys
 {
 protected:
 	fd_t	fd;
+#ifdef	_MSWINDOWS_
+	WIN32_FIND_DATA *ptr;
+	HINSTANCE	mem;
+#else
 	void	*ptr;
+#endif
 	int		error;
 
 public:

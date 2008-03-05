@@ -134,9 +134,7 @@ int fsys::setPrefix(const char *path)
 
 char *fsys::getPrefix(char *path, size_t len)
 {
-	if(_getcwd(path, len))
-		return remapError();
-	return 0;
+	return _getcwd(path, len);
 }
 
 int fsys::change(const char *path, unsigned mode)
@@ -179,6 +177,14 @@ ssize_t fsys::read(void *buf, size_t len)
 	ssize_t rtn = -1;
 	DWORD count;
 
+	if(ptr) {
+		snprintf((char *)buf, len, ptr->cFileName);
+		rtn = strlen(ptr->cFileName);
+		if(!FindNextFile(fd, ptr))
+			close();
+		return rtn;		
+	}
+
 	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
 		rtn = count;
 	else		
@@ -200,55 +206,62 @@ ssize_t fsys::write(const void *buf, size_t len)
 	return rtn;
 }
 
-fd_t fsys::open(const char *path, access_t access)
+void fsys::open(const char *path, access_t access)
 {
 	bool append = false;
 	DWORD amode;
-	DWORD cmode;
 	DWORD smode = 0;
 	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
-	unsigned flags = 0;
+
+	close();
+
 	switch(access)
 	{
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
-		cmode = OPEN_EXISTING;
 		smode = FILE_SHARE_READ;
 		break;
 	case ACCESS_WRONLY:
 		amode = GENERIC_WRITE;
-		cmode = CREATE_ALWAYS; 
-		flags = O_WRONLY | O_CREAT | O_TRUNC;
 		break;
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
-		cmode = OPEN_ALWAYS;
 		smode = FILE_SHARE_READ;
-		break;
-	case ACCESS_CREATE:
-		amode = GENERIC_READ | GENERIC_WRITE;
-		cmode = CREATE_NEW;	
-		smode = FILE_SHARE_READ;	
 		break;
 	case ACCESS_APPEND:
 		amode = GENERIC_WRITE;
-		cmode = OPEN_ALWAYS;
 		append = true;
 		break;
 	case ACCESS_SHARED:
 		amode = GENERIC_READ | GENERIC_WRITE;
-		cmode = OPEN_ALWAYS;
 		smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+		break;
+	case ACCESS_DIRECTORY:
+		char tpath[256];
+		DWORD attr = GetFileAttributes(path);
+
+		if((attr == (DWORD)~0l) || !(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+			error = ENOTDIR;
+			return;
+		}
+	
+		snprintf(tpath, sizeof(tpath), "%s%s", path, "\\*");
+		ptr = new WIN32_FIND_DATA;
+		fd = FindFirstFile(tpath, ptr);
+		if(fd == INVALID_HANDLE_VALUE) {
+			delete ptr;
+			ptr = NULL;
+			error = remapError();
+		}
+		return;
 	}
-	HANDLE fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
+
+	fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
-		setPosition(fd, end);
-	if(fd != INVALID_HANDLE_VALUE)
-		change(path, mode);
-	return fd;	
+		setPosition(end);
 }
 
-void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
+void fsys::create(const char *path, access_t access, unsigned mode)
 {
 	bool append = false;
 	DWORD amode;
@@ -260,7 +273,7 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 	{
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
-		cmode = OPEN_EXISTING;
+		cmode = OPEN_ALWAYS;
 		smode = FILE_SHARE_READ;
 		break;
 	case ACCESS_WRONLY:
@@ -273,33 +286,25 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 		cmode = OPEN_ALWAYS;
 		smode = FILE_SHARE_READ;
 		break;
-	case ACCESS_CREATE:
-		amode = GENERIC_READ | GENERIC_WRITE;
-		cmode = CREATE_NEW;		
-		smode = FILE_SHARE_READ;
+	case ACCESS_APPEND:
+		amode = GENERIC_WRITE;
+		cmode = OPEN_ALWAYS;
+		append = true;
 		break;
 	case ACCESS_SHARED:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		cmode = OPEN_ALWAYS;
 		smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
 		break;
-	case ACCESS_APPEND:
-		amode = GENERIC_WRITE;
-		cmode = OPEN_ALWAYS;
-		append = true;
-		break;
-	}
-
-	close(fs);
-	if(fs.fd != INVALID_HANDLE_VALUE)
+	case ACCESS_DIRECTORY:
+		createPrefix(path, mode);
+		open(path, access);
 		return;
-
-	fs.fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
-	if(fs.fd != INVALID_HANDLE_VALUE && append)
-		fs.setPosition(end);
-	else
-		fs.error = remapError();
-	if(fs.fd != INVALID_HANDLE_VALUE)
+	}
+	fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
+	if(fd != INVALID_HANDLE_VALUE && append)
+		setPosition(end);
+	if(fd != INVALID_HANDLE_VALUE)
 		change(path, mode);
 }
 
@@ -313,7 +318,7 @@ fsys::fsys(const fsys& copy)
 		return;
 
 	HANDLE pHandle = GetCurrentProcess();
-	if(!DuplicateHandle(pHandle, copy.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS))
+	if(!DuplicateHandle(pHandle, copy.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
 		fd = INVALID_HANDLE_VALUE;
 		error = remapError();
 	}
@@ -665,60 +670,23 @@ int fsys::rename(const char *oldpath, const char *newpath)
 	return 0;
 }
 
-#if	defined(_MSWINDOWS_)
-
-typedef struct
-{
-	HANDLE dir;
-	WIN32_FIND_DATA entry;
-}	dnode_t;
-
-dir_t fsys::openDir(const char *path)
-{
-	char tpath[256];
-	DWORD attr = GetFileAttributes(path);
-	dnode_t *node;
-
-	if((attr == (DWORD)~0l) || !(attr & FILE_ATTRIBUTE_DIRECTORY))
-		return NULL;
-	
-	snprintf(tpath, sizeof(tpath), "%s%s", path, "\\*");
-	node = new dnode_t;
-	node->dir = FindFirstFile(tpath, &node->entry);
-	if(node->dir == INVALID_HANDLE_VALUE) {
-		delete node;
-		return NULL;
-	}
-	return node;
-}	
-
-char *fsys::readDir(dir_t d, char *buf, size_t len)
-{
-	dnode_t *node = (dnode_t *)d;
-	*buf = 0;
-
-	if(!node || node->dir == INVALID_HANDLE_VALUE)
-		return NULL;
-
-	snprintf(buf, len, node->entry.cFileName);
-	if(!FindNextFile(node->dir, &node->entry)) {
-		FindClose(node->dir);
-		node->dir = INVALID_HANDLE_VALUE;
-	}
-	return buf;
-}
-#endif
-
 int fsys::load(const char *path)
 {
 	fsys module;
 	int rtn;
 
 	load(module, path);
+#ifdef	_MSWINDOWS_
+	if(module.mem) {
+		module.mem = 0;
+		return 0;
+	}
+#else
 	if(module.ptr) {
 		module.ptr = 0;
 		return 0;
 	}
+#endif
 	return remapError();
 }
 
@@ -727,21 +695,21 @@ int fsys::load(const char *path)
 void fsys::load(fsys& module, const char *path)
 {
 	module.error = 0;
-	module.ptr = (void *)LoadLibrary(path);
-	if(!module.ptr)
-		fsys.error = remapError();
+	module.mem = LoadLibrary(path);
+	if(!module.mem)
+		module.error = remapError();
 }
 
 void fsys::unload(fsys& module)
 {
-	if(module.ptr)
-		FreeLibrary((HINSTANCE)module.ptr);
-	module.ptr = NULL;
+	if(module.mem)
+		FreeLibrary(module.mem);
+	module.mem = 0;
 }
 
 void *fsys::find(fsys& module, const char *sym)
 {
-	return (void *)GetProcAddress((HINSTANCE)module.ptr, sym);
+	return (void *)GetProcAddress(module.mem, sym);
 }
 
 #elif defined(HAVE_DLFCN_H) 
