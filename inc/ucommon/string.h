@@ -798,14 +798,6 @@ public:
 	static int write(FILE *file, string &object); 
 
 	/**
-	 * Read a directory entry filename into a string.
-	 * @param directory to read from.
-	 * @param object to save read data.
-	 * @return number of bytes read.
-	 */
-	static int read(DIR *directory, string &object);
-
-	/**
 	 * Read a line of text input from a socket into the object.  The 
 	 * maximum number of bytes that may be read is based on the currently
 	 * allocated size of the object.
