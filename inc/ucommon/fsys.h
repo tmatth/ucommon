@@ -60,6 +60,7 @@ class __EXPORT fsys
 {
 protected:
 	fd_t	fd;
+	void	*ptr;
 	int		error;
 
 public:
@@ -67,12 +68,12 @@ public:
 	 * Enumerated file access modes.
 	 */
 	typedef enum {
-		ACCESS_CREATE,
 		ACCESS_RDONLY,
 		ACCESS_WRONLY,
 		ACCESS_REWRITE,
 		ACCESS_APPEND,
-		ACCESS_SHARED
+		ACCESS_SHARED,
+		ACCESS_DIRECTORY
 	} access_t;
 
 	/**
@@ -92,11 +93,18 @@ public:
 	fsys(const fsys& descriptor);
 
 	/**
-	 * Create a fsys descriptor by opening a file.
+	 * Create a fsys descriptor by opening an existing file or directory.
 	 * @param type of file access.
 	 * @param mode of file.
 	 */
-	fsys(const char *path, access_t type, unsigned mode = 0666);
+	fsys(const char *path, access_t type);
+
+	/**
+	 * Create a fsys descriptor by creating a file.
+	 * @param type of file access.
+	 * @param mode of file.
+	 */
+	fsys(const char *path, access_t type, unsigned mode);
 
 	/**
 	 * Close and release a file descriptor.
@@ -108,14 +116,14 @@ public:
 	 * @return true if open.
 	 */
 	inline operator bool()
-		{return fd != INVALID_HANDLE_VALUE;};
+		{return fd != INVALID_HANDLE_VALUE || ptr != NULL;};
 
 	/**
 	 * Test if file descriptor is closed.
 	 * @return true if closed.
 	 */
 	inline bool operator!()
-		{return fd == INVALID_HANDLE_VALUE;};
+		{return fd == INVALID_HANDLE_VALUE && ptr == NULL;};
 
 	/**
 	 * Assign file descriptor by duplicating another descriptor.
@@ -151,7 +159,7 @@ public:
 	void	setPosition(size_t offset);
 
 	/**
-	 * Read data from descriptor.
+	 * Read data from descriptor or scan directory.
 	 * @param buffer to read into.
 	 * @param count of bytes to read.
 	 * @return bytes transferred, -1 if error.
@@ -193,29 +201,14 @@ public:
 	 * Stat a file.
 	 * @param path of file to stat.
 	 * @param buffer to save stat info.	
-	 * @return 0 on success, -1 on error.
+	 * @return 0 on success, errno on error.
 	 */
 	static int stat(const char *path, struct stat *buffer);
 	
 	/**
-	 * Create a directory.
-	 * @param path of directory.
-	 * @param mode of directory.
-	 * @return 0 on success, -1 on error.
-	 */
-	static int createDir(const char *path, unsigned mode = 0660);
-
-	/**
-	 * Remove a directory.  Only if empty.
-	 * @param path of directory.
-	 * @return 0 on success, -1 on error.
-	 */
-	static int removeDir(const char *path);
-
-	/**
 	 * Remove a file.
 	 * @param path of file.
-	 * @return 0 on success, -1 on error.
+	 * @return 0 on success, errno on error.
 	 */
 	static int remove(const char *path);
 
@@ -223,7 +216,7 @@ public:
 	 * Rename a file.
 	 * @param oldpath to rename from.
 	 * @param newpath to rename to.
-	 * @return 0 on success, -1 on error.
+	 * @return 0 on success, errno on error.
 	 */
 	static int rename(const char *oldpath, const char *newpath);
 
@@ -231,41 +224,9 @@ public:
 	 * Change file access mode.
 	 * @param path to change.
 	 * @param mode to assign.
+	 * @return 0 on success, errno on error.
 	 */
 	static int change(const char *path, unsigned mode);
-	
-	/**
-	 * Open a native file descriptor directly.
-	 * @param path of file to open.
-	 * @param access mode of descriptor.
-	 * @param mode of file if created.
-	 * @return native file descriptor.
-	 */
-	static fd_t open(const char *path, access_t type, unsigned mode = 0666);
-
-	/**
-	 * Close a native file descriptor.
-	 * @param descriptor to close.
-	 */
-	static int close(fd_t descriptor);
-
-	/**
-	 * Read data from native descriptor.
-	 * @param descriptor to read from.
-	 * @param buffer to read into.
-	 * @param count of bytes to read.
-	 * @return bytes transferred, -1 if error.
-	 */
-	static ssize_t read(fd_t descriptor, void *buffer, size_t count);
-	
-	/**
-	 * write data to native descriptor.
-	 * @param descriptor to write to.
-	 * @param buffer to write from.
-	 * @param count of bytes to write.
-	 * @return bytes transferred, -1 if error.
-	 */
-	static ssize_t write(fd_t descriptor, const void *buffer, size_t count);
 	
 	/**
 	 * Test path access.
@@ -276,7 +237,7 @@ public:
 	static int access(const char *path, unsigned mode);
 
 	/**
-	 * Read data from file descriptor.
+	 * Read data from file descriptor or directory.
 	 * @param descriptor to read from.
 	 * @param buffer to read into.
 	 * @param count of bytes to read.
@@ -304,69 +265,85 @@ public:
 		{descriptor.setPosition(offset);};
 
 	/**
-	 * Set the position of a native file descriptor.
-	 * @param descriptor to set.
-	 * @param offset from start of file or "end" to append.
-	 * @return 0 if successful, -1 on error.
+	 * Open a file or directory.
+	 * @param path of file to open.
+	 * @param access mode of descriptor.
 	 */
-	static int setPosition(fd_t descriptor, size_t pos);	
+	void open(const char *path, access_t access);
 
 	/**
 	 * Open a file descriptor directly.
-	 * @param path of file to open.
+	 * @param path of file to create.
 	 * @param access mode of descriptor.
 	 * @param mode of file if created.
 	 */
-	static void open(fsys& descriptor, const char *path, access_t access, unsigned mode);
+	void create(const char *path, access_t access, unsigned mode);
 
 	/**
-	 * Close a file descriptor directly.
+	 * Simple direct method to create a directory.
+	 * @param path of directory to create.
+	 * @param mode of directory.
+	 * @return 0 if success, else errno.
+	 */
+	static int createPrefix(const char *path, unsigned mode); 
+
+	/**
+	 * Close a file descriptor or directory directly.
 	 * @param descriptor to close.
 	 */
-	static void close(fsys& descriptor);
+	inline static void close(fsys& descriptor)
+		{descriptor.close();};
 
 	/**
-	 * Open a directory for scanning.
-	 * @param path to open.
-	 * @return directory handle or NULL on error.
+	 * Close a fsys resource.
 	 */
-	static dir_t openDir(const char *path);
+	void close(void);
 
 	/**
-	 * Read a directory entry from the handle.
-	 * @param directory handle to read from.
-	 * @param buffer to save filename into.
-	 * @param size of buffer.
-	 * @return filename found or NULL if end of directory.
+	 * Open a file or directory.
+	 * @param descriptor to open.
+	 * @param path of file to open.
+	 * @param access mode of descriptor.
 	 */
-	static char *readDir(dir_t directory, char *buffer, size_t size);
+	inline static void open(fsys& descriptor, const char *path, access_t access)
+		{descriptor.open(path, access);};
 
 	/**
-	 * Close a directory handle.
-	 * @param directory handle to close.
+	 * create a file descriptor or directory directly.
+	 * @param path of file to create.
+	 * @param access mode of descriptor.
+	 * @param mode of file if created.
 	 */
-	static void closeDir(dir_t directory);
+	inline static void create(fsys& descriptor, const char *path, access_t access, unsigned mode)
+		{descriptor.create(path, access, mode);};
+
+	/**
+	 * Load an unmaged plugin directly.
+	 * @param path to plugin.
+	 * @return 0 if success, else errno associated with failure.
+	 */
+	static int load(const char *path);
 
 	/**
 	 * Load a plugin into memory.
+	 * @param module for management.
 	 * @param path to plugin.
-	 * @return module handle or NULL if not loaded.
 	 */
-	static mem_t load(const char *path);
+	static void load(fsys& module, const char *path);
 
 	/**
-	 * Unload a plugin from memory.
-	 * @param module to unload.
+	 * unload a specific plugin.
+	 * @param module to unload
 	 */
-	static void unload(mem_t module);
-
+	static void unload(fsys& module);
+	
 	/**
 	 * Find symbol in loaded module.
 	 * @param module to search.
 	 * @param symbol to search for.
 	 * @return address of symbol or NULL if not found.
 	 */
-	static void *find(mem_t module, const char *symbol);
+	static void *find(fsys& module, const char *symbol);
 };
 
 END_NAMESPACE

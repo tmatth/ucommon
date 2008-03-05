@@ -100,22 +100,18 @@ int remapError(void)
 	}
 }
 
-int fsys::removeDir(const char *path)
-{
-	return _rmdir(path);
-}
-
-int fsys::createDir(const char *path, unsigned mode)
+int fsys::createPrefix(const char *path, unsigned mode)
 {
 	if(!CreateDirectory(path, NULL))
-		return -1;
+		return remapError();
 	
-	return _chmod(path, mode);
+	return change(path, mode);
 }
 
 int fsys::stat(const char *path, struct stat *buf)
 {
-	return _stat(path, (struct _stat *)(buf));
+	if(_stat(path, (struct _stat *)(buf)))
+		return remapError();
 }
 
 int fsys::stat(struct stat *buf)
@@ -131,53 +127,51 @@ int fsys::stat(struct stat *buf)
 
 int fsys::setPrefix(const char *path)
 {
-	return _chdir(path);
+	if(_chdir(path))
+		return remapError();
+	return 0;
 }
 
 char *fsys::getPrefix(char *path, size_t len)
 {
-	return _getcwd(path, len);
+	if(_getcwd(path, len))
+		return remapError();
+	return 0;
 }
 
 int fsys::change(const char *path, unsigned mode)
 {
-	return _chmod(path, mode);
+	if(_chmod(path, mode))
+		return remapError();
+	return 0;
 }
 
 int fsys::access(const char *path, unsigned mode)
 {
-	return _access(path, mode);
+	if(_access(path, mode))
+		return remapError();
+	return 0;
 }
 
-int fsys::close(fd_t fd)
+void fsys::close(void)
 {
-	if(CloseHandle(fd))
-		return 0;
-	return -1;
-}
-
-void fsys::close(fsys &fs)
-{
-	if(fs.fd == INVALID_HANDLE_VALUE)
+	error = 0;
+	if(fd == INVALID_HANDLE_VALUE)
 		return;
 
-	if(CloseHandle(fs.fd)) {
-		fs.fd = INVALID_HANDLE_VALUE;
-		fs.error = 0;
+	if(ptr) {
+		if(::FindClose(fd)) {
+			delete ptr;
+			ptr = NULL;
+			fd = INVALID_HANDLE_VALUE;
+		}
+		else
+			error = remapError();
 	}
+	else if(::CloseHandle(fd))
+		fd = INVALID_HANDLE_VALUE;
 	else
-		fs.error = remapError();
-}
-
-ssize_t fsys::read(fd_t fd, void *buf, size_t len)
-{
-	DWORD count;
-	ssize_t rtn = -1;
-
-	if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
-		rtn = (ssize_t)count;
-
-	return rtn;
+		error = remapError();
 }
 
 ssize_t fsys::read(void *buf, size_t len)
@@ -190,17 +184,6 @@ ssize_t fsys::read(void *buf, size_t len)
 	else		
 		error = remapError();
 	
-	return rtn;
-}
-
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
-{
-	DWORD count;
-	ssize_t rtn = -1;
-
-	if(WriteFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
-		rtn = (ssize_t)count;
-
 	return rtn;
 }
 
@@ -217,7 +200,7 @@ ssize_t fsys::write(const void *buf, size_t len)
 	return rtn;
 }
 
-fd_t fsys::open(const char *path, access_t access, unsigned mode)
+fd_t fsys::open(const char *path, access_t access)
 {
 	bool append = false;
 	DWORD amode;
@@ -322,10 +305,15 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 
 fsys::fsys(const fsys& copy)
 {
+	error = 0;
+	fd = INVALID_HANDLE_VALUE;
+	ptr = NULL;
+
+	if(copy.fd == INVALID_HANDLE_VALUE)
+		return;
+
 	HANDLE pHandle = GetCurrentProcess();
-	if(DuplicateHandle(pHandle, copy.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS))
-		error = 0;
-	else {
+	if(!DuplicateHandle(pHandle, copy.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS))
 		fd = INVALID_HANDLE_VALUE;
 		error = remapError();
 	}
@@ -380,20 +368,6 @@ void fsys::setPosition(size_t pos)
 		error = remapError();
 }
 
-int fsys::setPosition(fd_t fd, size_t pos)
-{
-	DWORD rpos = pos;
-	int mode = FILE_BEGIN;
-
-	if(rpos == end) {
-		rpos = 0;
-		mode = FILE_END;
-	}
-	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER) 
-		return -1;
-	return 0;
-}
-
 #else
 
 inline int remapError(void)
@@ -401,32 +375,34 @@ inline int remapError(void)
 
 #ifdef	__PTH__
 
-ssize_t fsys::read(fd_t fd, void *buf, size_t len)
-{
-	return pth_read(fd, buf, len);
-}
-
 ssize_t fsys::read(void *buf, size_t len)
 {
-	int rtn;
+	if(ptr) {
+		dirent *entry = ::readdir((DIR *)dir);	
+	
+		*buf = 0;
+		if(!entry)
+			return 0;
+	
+		String::set(buf, len, entry->d_name);
+		return strlen(buf);
+	}
 
-	rtn = pth_read(fd, buf, len);
+	int rtn = pth_read(fd, buf, len);
 
 	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fd, const void *buf, size_t len)
-{
-	return pth_write(fd, buf, len);
-}
-
 ssize_t fsys::write(const void *buf, size_t len)
 {
-	int rtn;
+	if(ptr) {
+		error = EBADF;
+		return -1;
+	}
 
-	rtn = pth_write(fd, buf, len);
+	int rtn = pth_write(fd, buf, len);
 	if(rtn < 0)
 		error = remapError();
 	return rtn;
@@ -434,27 +410,33 @@ ssize_t fsys::write(const void *buf, size_t len)
 
 #else
 
-ssize_t fsys::read(fd_t fdes, void *buf, size_t len)
-{
-	return ::read(fdes, buf, len);
-}
-
 ssize_t fsys::read(void *buf, size_t len)
 {
+	if(ptr) {
+		dirent *entry = ::readdir((DIR *)ptr);	
+	
+		if(!entry)
+			return 0;
+	
+		String::set((char *)buf, len, entry->d_name);
+		return strlen(entry->d_name);
+	}
+
 	int rtn = ::read(fd, buf, len);
+
 
 	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
 
-ssize_t fsys::write(fd_t fdes, const void *buf, size_t len)
-{
-	return ::write(fdes, buf, len);
-}
-
 ssize_t fsys::write(const void *buf, size_t len)
 {
+	if(ptr) {
+		error = EBADF;
+		return -1;
+	}
+
 	int rtn = ::write(fd, buf, len);
 
 	if(rtn < 0)
@@ -464,31 +446,33 @@ ssize_t fsys::write(const void *buf, size_t len)
 
 #endif
 
-int fsys::close(fd_t fd)
+void fsys::close(void)
 {
-	return ::close(fd);
-}
-
-void fsys::close(fsys &fs)
-{
-	if(fs.fd == INVALID_HANDLE_VALUE)
-		return;
-
-	if(::close(fs.fd) == 0) {
-		fs.fd = INVALID_HANDLE_VALUE;
-		fs.error = 0;
+	error = 0;
+	if(ptr) {
+		if(::closedir((DIR *)ptr))
+			error = remapError();
+		ptr = NULL;
+	} 
+	else if(fd != INVALID_HANDLE_VALUE) {
+		if(::close(fd) == 0)
+			fd = INVALID_HANDLE_VALUE;
+		else
+			error = remapError();
 	}
-	else
-		fs.error = remapError();
 }
 
-fd_t fsys::open(const char *path, access_t access, unsigned mode)
+void fsys::create(const char *path, access_t access, unsigned mode)
 {
 	unsigned flags = 0;
+	int rtn;
+
+	close();
+
 	switch(access)
 	{
 	case ACCESS_RDONLY:
-		flags = O_RDONLY;
+		flags = O_RDONLY | O_CREAT;
 		break;
 	case ACCESS_WRONLY:
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
@@ -497,19 +481,32 @@ fd_t fsys::open(const char *path, access_t access, unsigned mode)
 	case ACCESS_REWRITE:
 		flags = O_RDWR | O_CREAT;
 		break;
-	case ACCESS_CREATE:
-		flags = O_RDWR | O_TRUNC | O_CREAT | O_EXCL;
-		break;
 	case ACCESS_APPEND:
-		flags = O_RDWR | O_CREAT | O_APPEND;
+		flags = O_RDWR | O_APPEND | O_CREAT;
 		break;
+	case ACCESS_DIRECTORY:
+		::mkdir(path, mode);
+		open(path, access);
+		return; 
 	}
-	return ::open(path, flags, mode);
+	fd = ::open(path, flags, mode);
+	if(fd == INVALID_HANDLE_VALUE)
+		error = remapError();
 }
 
-void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
+int fsys::createPrefix(const char *path, unsigned mode)
+{
+	if(::mkdir(path, mode))
+		return remapError();
+	return 0;
+}
+
+void fsys::open(const char *path, access_t access)
 {
 	unsigned flags = 0;
+	int rtn;
+
+	close();
 
 	switch(access)
 	{
@@ -517,26 +514,24 @@ void fsys::open(fsys &fs, const char *path, access_t access, unsigned mode)
 		flags = O_RDONLY;
 		break;
 	case ACCESS_WRONLY:
-		flags = O_WRONLY | O_CREAT | O_TRUNC;
+		flags = O_WRONLY;
 		break;
 	case ACCESS_SHARED:
 	case ACCESS_REWRITE:
-		flags = O_RDWR | O_CREAT;
-		break;
-	case ACCESS_CREATE:
-		flags = O_RDWR | O_TRUNC | O_CREAT | O_EXCL;
+		flags = O_RDWR;
 		break;
 	case ACCESS_APPEND:
-		flags = O_RDWR | O_CREAT | O_APPEND;
+		flags = O_RDWR | O_APPEND;
 		break;
+	case ACCESS_DIRECTORY:
+		ptr = opendir(path);
+		if(!ptr)
+			error = remapError();
+		return; 
 	}
-	close(fs);
-	if(fs.fd != INVALID_HANDLE_VALUE)
-		return;
-
-	fs.fd = ::open(path, flags, mode);
-	if(fs.fd == INVALID_HANDLE_VALUE)
-		fs.error = remapError();
+	fd = ::open(path, flags);
+	if(fd == INVALID_HANDLE_VALUE)
+		error = remapError();
 }
 
 int fsys::stat(const char *path, struct stat *ino)
@@ -552,19 +547,11 @@ int fsys::stat(struct stat *ino)
 	return rtn;
 }
 
-int fsys::createDir(const char *path, unsigned mode)
-{
-	return ::mkdir(path, mode);
-}
-
-int fsys::removeDir(const char *path)
-{
-	return ::rmdir(path);
-}
-
 int fsys::setPrefix(const char *path)
 {
-	return ::chdir(path);
+	if(::chdir(path))
+		return remapError();
+	return 0;
 }
 
 char *fsys::getPrefix(char *path, size_t len)
@@ -574,38 +561,50 @@ char *fsys::getPrefix(char *path, size_t len)
 
 int fsys::change(const char *path, unsigned mode)
 {
-	return ::chmod(path, mode);
+	if(::chmod(path, mode))
+		return remapError();
+	return 0;
 }
 
 int fsys::access(const char *path, unsigned mode)
 {
-	return ::access(path, mode);
+	if(::access(path, mode))
+		return remapError();
+	return 0;
 }
 
 fsys::fsys(const fsys& copy)
 {
-	fd = dup(copy.fd);
+	fd = INVALID_HANDLE_VALUE;
+	ptr = NULL;
 	error = 0;
+
+	if(copy.fd != INVALID_HANDLE_VALUE)
+		fd = dup(copy.fd);
+	else
+		fd = INVALID_HANDLE_VALUE;
+	error = 0;
+	ptr = NULL;
 }
 
 void fsys::operator=(fd_t from)
 {
-	if(fsys::close(fd) == 0) {
+	close();
+	if(fd == INVALID_HANDLE_VALUE && from != INVALID_HANDLE_VALUE) {
 		fd = dup(from);
-		error = 0;
+		if(fd == INVALID_HANDLE_VALUE)
+			error = remapError();
 	}
-	else
-		error = remapError();
 }
 
 void fsys::operator=(fsys &from)
 {
-	if(fsys::close(fd) == 0) {
+	close();
+	if(fd == INVALID_HANDLE_VALUE && from.fd != INVALID_HANDLE_VALUE) {
 		fd = dup(from.fd);
-		error = 0;
+		if(fd == INVALID_HANDLE_VALUE)
+			error = remapError();
 	}
-	else
-		error = remapError();
 }
 
 void fsys::setPosition(size_t pos)
@@ -621,49 +620,49 @@ void fsys::setPosition(size_t pos)
 		error = remapError();
 }
 
-int fsys::setPosition(fd_t fd, size_t pos)
-{
-	unsigned long rpos = pos;
-	int mode = SEEK_SET;
-
-	if(rpos == end) {
-		rpos = 0;
-		mode = SEEK_END;
-	}
-	return lseek(fd, mode, rpos);
-}
-
 #endif
 
 fsys::fsys()
 {
 	fd = INVALID_HANDLE_VALUE;
+	ptr = NULL;
 	error = 0;
 }
 
+fsys::fsys(const char *path, access_t access)
+{
+	fd = INVALID_HANDLE_VALUE;
+	ptr = NULL;
+	error = 0;
+	open(path, access);
+}
+
+
 fsys::fsys(const char *path, access_t access, unsigned mode)
 {
-	fd = fsys::open(path, access, mode);
+	fd = INVALID_HANDLE_VALUE;
+	ptr = NULL;
+	error = 0;
+	create(path, access, mode);
 }
 
 fsys::~fsys()
 {
-	if(fsys::close(fd) == 0) {
-		fd = INVALID_HANDLE_VALUE;
-		error = 0;
-	}
-	else
-		error = remapError();
+	close();
 }
 
 int fsys::remove(const char *path)
 {
-	return ::remove(path);
+	if(::remove(path))
+		return remapError();
+	return 0;
 }
 
 int fsys::rename(const char *oldpath, const char *newpath)
 {
-	return ::rename(oldpath, newpath);
+	if(::rename(oldpath, newpath))
+		return remapError();
+	return 0;
 }
 
 #if	defined(_MSWINDOWS_)
@@ -693,19 +692,6 @@ dir_t fsys::openDir(const char *path)
 	return node;
 }	
 
-void fsys::closeDir(dir_t d)
-{
-	dnode_t *node = (dnode_t *)d;
-
-	if(!node)
-		return;
-
-	if(node->dir != INVALID_HANDLE_VALUE)
-		FindClose(node->dir);
-	
-	delete node;
-}
-
 char *fsys::readDir(dir_t d, char *buf, size_t len)
 {
 	dnode_t *node = (dnode_t *)d;
@@ -721,49 +707,41 @@ char *fsys::readDir(dir_t d, char *buf, size_t len)
 	}
 	return buf;
 }
-
-#elif defined(HAVE_DIRENT_H)
-
-dir_t fsys::openDir(const char *path)
-{
-	return (dir_t)::opendir(path);
-}
-
-void fsys::closeDir(dir_t dir)
-{
-	::closedir((DIR *)dir);
-}
-
-char *fsys::readDir(dir_t dir, char *buf, size_t len)
-{
-	dirent *entry = ::readdir((DIR *)dir);	
-	
-	*buf = 0;
-	if(!entry)
-		return NULL;
-	
-	String::set(buf, len, entry->d_name);
-	return buf;
-}
-
 #endif
+
+int fsys::load(const char *path)
+{
+	fsys module;
+	int rtn;
+
+	load(module, path);
+	if(module.ptr) {
+		module.ptr = 0;
+		return 0;
+	}
+	return remapError();
+}
 
 #ifdef	_MSWINDOWS_
 
-mem_t fsys::load(const char *path)
+void fsys::load(fsys& module, const char *path)
 {
-	return (mem_t)LoadLibrary(path);
+	module.error = 0;
+	module.ptr = (void *)LoadLibrary(path);
+	if(!module.ptr)
+		fsys.error = remapError();
 }
 
-void fsys::unload(mem_t addr)
+void fsys::unload(fsys& module)
 {
-	if(addr)
-		FreeLibrary((HINSTANCE)addr);
+	if(module.ptr)
+		FreeLibrary((HINSTANCE)module.ptr);
+	module.ptr = NULL;
 }
 
-void *fsys::find(mem_t addr, const char *sym)
+void *fsys::find(fsys& module, const char *sym)
 {
-	return (void *)GetProcAddress((HINSTANCE)addr, sym);
+	return (void *)GetProcAddress((HINSTANCE)module.ptr, sym);
 }
 
 #elif defined(HAVE_DLFCN_H) 
@@ -773,60 +751,71 @@ void *fsys::find(mem_t addr, const char *sym)
 #define	RTLD_GLOBAL	0
 #endif
 
-mem_t fsys::load(const char *path)
+void fsys::load(fsys& module, const char *path)
 {
-	return (mem_t)dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+	module.error = 0;
+	module.ptr = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+	if(module.ptr)
+		module.error = remapError();
 }
 
-void fsys::unload(mem_t addr)
+void fsys::unload(fsys& module)
 {
-	if(addr)
-		dlclose(addr);
+	if(module.ptr)
+		dlclose(module.ptr);
+	module.ptr = NULL;
 }
 
-void *fsys::find(mem_t addr, const char *sym)
+void *fsys::find(fsys& module, const char *sym)
 {
-	if(!addr)
+	if(!module.ptr)
 		return NULL;
 
-	return dlsym(addr, (char *)sym);
+	return dlsym(module.ptr, (char *)sym);
 }
 
 #elif HAVE_MACH_O_DYLD_H
 #include <mach-o/dyld.h>
 
-mem_t fsys::load(const char *path)
+void fsys::load(fsys& module, const char *path)
 {
 	NSObjectFileImage oImage;
 	NSSymbol sym = NULL;
 	NSModule mod;
 	void (*init)(void);
 
-	if(NSCreateObjectFileImageFromFile(path, &oImage) != NSObjectFileImageSuccess)
-		return NULL;
+	module.ptr = NULL;
+	module.error = 0;
+
+	if(NSCreateObjectFileImageFromFile(path, &oImage) != NSObjectFileImageSuccess) {
+		module.error = remapError();
+		return;
+	}
 
 	mod = NSLinkModule(oImage, path, NSLINKMODULE_OPTION_BINDNOW | NSLINKMODULE_OPTION_RETURN_ON_ERROR);
 	NSDestroyObjectFileImage(oImage);
-	if(mod == NULL)
-		return NULL;
+	if(mod == NULL) {
+		module.error = remapError();
+		return;
+	}
 
 	sym = NSLookupSymbolInModule(mod, "__init");
 	if(sym) {
 		init = (void (*)(void))NSAddressOfSymbol(sym);
 		init();
 	}
-
-	return (mem_t)mod;
+	module.ptr = (void *)mod;
 }
 
-void fsys::unload(mem_t addr)
+void fsys::unload(fsys& module)
 {
-	NSModule mod = (NSModule)addr;
+	if(!module.ptr)
+		return;
+
+	NSModule mod = (NSModule)module.ptr;
 	NSSymbol sym;
 	void (*fini)(void);
-
-	if(mod == NULL)
-		return;
+	module.ptr = NULL;
 
 	sym = NSLookupSymbolInModule(mod, "__fini");
 	if(sym != NULL) {
@@ -836,13 +825,13 @@ void fsys::unload(mem_t addr)
 	NSUnlinkModule(mod, NSUNLINKMODULE_OPTION_NONE);
 }
 
-void *fsys::find(mem_t addr, const char *sym)
+void *fsys::find(fsys& module, const char *sym)
 {
-	NSModule mod = (NSModule)addr;
-	NSSymbol sym;
-
-	if(mod == NULL)
+	if(!module.ptr)
 		return NULL;
+
+	NSModule mod = (NSModule)module.ptr;
+	NSSymbol sym;
 
 	sym = NSLookupSymbolInModule(mod, sym);
 	if(sym != NULL) {
@@ -854,17 +843,17 @@ void *fsys::find(mem_t addr, const char *sym)
 #elif HAVE_SHL_LOAD
 #include <dl.h>
 
-mem_t fsys::load(const char *path)
+void fsys::load(fsys& module, const char *path)
 {
-	if(flag)
-		return (mem_t)shl_load(path, BIND_IMMEDIATE, 0l);
-	else
-		return (mem_t)shl_load(path, BIND_DEFERRED, 0l);
+	module.error = 0;
+	module.ptr = (void *))shl_load(path, BIND_IMMEDIATE, 0l);
+	if(!module.ptr)
+		module.error = remapError();
 }
 
-void *fsys::find(mem_t addr, const char *sym)
+void *fsys::find(fsys& module, const char *sym)
 {
-	shl_t image = (shl_t)addr;
+	shl_t image = (shl_t)module.ptr;
 
 	if(shl_findsym(&image, sym, 0, &value) == 0)
 		return (void *)value;
@@ -872,11 +861,12 @@ void *fsys::find(mem_t addr, const char *sym)
 	return NULL;
 }
 
-void fsys::unload(mem_t addr)
+void fsys::unload(fsys& module)
 {
-	shl_t image = (shl_t)addr;
+	shl_t image = (shl_t)module.ptr;
 	if(addr)
 		shl_unload(image);
+	module.ptr = NULL;
 }
 
 #else
