@@ -982,8 +982,9 @@ public:
 	 * Accept a socket connection from a remote host.
 	 * @param socket descriptor to accept from.
 	 * @param address of socket accepting.
+	 * @return new socket accepted.
 	 */
-	static int acceptfrom(SOCKET socket, struct sockaddr_storage *addr = NULL);
+	static SOCKET acceptfrom(SOCKET socket, struct sockaddr_storage *addr = NULL);
 
 	/**
 	 * Create a socket object unbound.
