@@ -268,8 +268,6 @@ public:
 class __EXPORT Socket 
 {
 protected:
-	Socket();
-
 	SOCKET so;
 
 public:
@@ -451,6 +449,11 @@ public:
 	friend class address;
 
 	/**
+	 * Create a socket object for use.
+	 */
+	Socket();
+
+	/**
 	 * Create socket as duped handle of existing socket.
 	 * @param existing socket to dup.
 	 */
@@ -491,6 +494,22 @@ public:
 	 * Shutdown, close, and destroy socket.
 	 */
 	virtual ~Socket();
+
+	/**
+	 * Create a bound socket.
+	 * @param address to bind or "*" for all
+	 * @param port number of service to bind.
+	 * @return 0 on success, -1 on error.
+	 */
+	void create(const char *address, const char *port, int family, int type, int protocol = 0);
+
+	/**
+	 * Create an unbound socket of a specific type.
+	 * @param family of our new socket.
+	 * @param type (stream, udp, etc) of our new socket.
+	 * @param protocol number of our new socket.'
+	 */
+	void create(int family, int type, int protocol = 0);
 
 	/**
 	 * Cancel pending i/o by shutting down the socket.
@@ -653,14 +672,6 @@ public:
 	 */
 	inline int connect(struct addrinfo *list)
 		{return connect(so, list);};
-
-	/**
-	 * Close and re-create the socket.
-	 * @param family of socket.
-	 * @param type of socket (stream, udp, etc).
-	 * @param protocol number of socket.
-	 */
-	bool create(int family, int type, int protocol = 0);
 	
 	/**
 	 * Disconnect a connected socket.  Depending on the implimentation, this
@@ -915,7 +926,7 @@ public:
 	 * @param address to bind to or "*" for all.
 	 * @param service port to bind.
 	 */
-	static int bindaddr(SOCKET socket, const char *address, const char *service);
+	static int bindto(SOCKET socket, const char *address, const char *service);
 
 	/**
 	 * Lookup and return the host name associated with a socket address.
@@ -1083,7 +1094,7 @@ public:
 	 * @return socket descriptor.
 	 */
     inline SOCKET operator*() const
-        {return so;};
+        {return so;};	
 };
 
 /**

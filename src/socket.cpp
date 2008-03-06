@@ -1052,7 +1052,8 @@ Socket::Socket(int family, int type, int protocol)
 #ifdef	_MSWINDOWS_
 	init();
 #endif
-	so = ::socket(family, type, protocol);
+	so = INVALID_SOCKET;
+	create(family, type, protocol);
 }
 
 Socket::Socket(const char *iface, const char *port, int family, int type, int protocol)
@@ -1063,22 +1064,31 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 #ifdef	_MSWINDOWS_
 	init();
 #endif
-	so = ::socket(family, type, protocol);
+	so = INVALID_SOCKET;
+	create(iface, port, family, type, protocol);
+}
+
+void Socket::create(const char *iface, const char *port, int family, int type, int protocol)
+{
+	assert(iface != NULL && *iface != 0);
+	assert(port != NULL && *port != 0);
+
+	create(family, type, protocol);
 	if(so != INVALID_SOCKET)
-		if(bindaddr(so, iface, port))
+		if(bindto(so, iface, port))
 			release();
 }
+
 
 Socket::~Socket()
 {
 	release();
 }
 
-bool Socket::create(int family, int type, int protocol)
+void Socket::create(int family, int type, int protocol)
 {
 	release();
 	so = ::socket(family, type, protocol);
-	return so != INVALID_SOCKET;
 }
 
 void Socket::cancel(void)
@@ -1729,7 +1739,7 @@ retry:
 	if(so == INVALID_SOCKET)
 		return;
 		
-	if(bindaddr(so, iface, svc)) {
+	if(bindto(so, iface, svc)) {
 		release();
 #ifdef	AF_INET6
 		if(family == AF_INET && !strchr(iface, '.')) {
@@ -1875,7 +1885,7 @@ exit:
 	return len;
 }
 
-int Socket::bindaddr(SOCKET so, const char *host, const char *svc)
+int Socket::bindto(SOCKET so, const char *host, const char *svc)
 {
 	assert(so != INVALID_SOCKET);
 	assert(host != NULL && *host != 0);
