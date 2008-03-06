@@ -32,9 +32,14 @@ extern "C" int main()
 {
 	linked_pointer<ints> ptr;
 	unsigned count = 0;
-	ints v1(&list, 3);
+	// Since value templates pass by reference, we must have referencable
+	// objects or variables.  This avoids passing values by duplicating
+	// objects onto the stack frame, though it causes problems for built-in
+	// types...
+	int xv = 3, xn = 5;
+	ints v1(&list, xv);
 	ints v2(&list);
-	v2 = 5;
+	v2 = xn;
 
 	ptr = &list;
 	while(ptr) {

@@ -756,7 +756,7 @@ public:
 	 * @param timeout to wait for a complete input line.
 	 * @return number of bytes read, 0 if none, -1 if error.
 	 */
-	static ssize_t getline(SOCKET so, char *data, size_t size, timeout_t timeout = Timer::inf);
+	static ssize_t readline(SOCKET so, char *data, size_t size, timeout_t timeout = Timer::inf);
 
 	/**
 	 * Write a null terminated string to the socket.

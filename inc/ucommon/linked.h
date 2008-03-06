@@ -840,7 +840,7 @@ public:
 	 * Assign embedded value from related type.
 	 * @param typed_value to assign.
 	 */
-	inline void operator=(T typed_value)
+	inline void operator=(T& typed_value)
 		{set(typed_value);};
 
 	/**
@@ -889,7 +889,7 @@ public:
 	 * @param root node or pointer for list.
 	 * @param typed_value to assign.
 	 */
-	inline linked_value(LinkedObject **root, T typed_value) 
+	inline linked_value(LinkedObject **root, T& typed_value) 
 		{LinkedObject::enlist(root); set(typed_value);};
 
 	/**
@@ -897,14 +897,14 @@ public:
 	 * @param index to list our object on.
 	 * @param typed_value to assign.
 	 */
-	inline linked_value(OrderedIndex *index, T typed_value)
+	inline linked_value(OrderedIndex *index, T& typed_value)
  		{O::enlist(index); set(typed_value);};
 
 	/**
 	 * Assign embedded value from related type.
 	 * @param typed_value to assign.
 	 */
-	inline void operator=(T typed_value)
+	inline void operator=(T& typed_value)
 		{set(typed_value);};
 };	
 
@@ -1203,21 +1203,21 @@ public:
 	 * @param name of this node.
 	 * @param reference to value to assign to this node.
 	 */
-	inline treemap(treemap *parent, char *name, T &reference) :
+	inline treemap(treemap *parent, char *name, T& reference) :
 		NamedTree(parent, name) {value = reference;};
 
 	/**
 	 * Return the typed value of this node.
 	 * @return reference to value of node.
 	 */
-	inline T &get(void) const
+	inline T& get(void) const
 		{return value;};
 
 	/**
 	 * Return typed value of this node by pointer reference.
 	 * @return value of node.
 	 */
-	inline T operator*() const
+	inline T& operator*() const
 		{return value;};
 
 	/**
@@ -1246,7 +1246,7 @@ public:
 	 * Get the data value of a data based value tree.
 	 * @return data value of node.
 	 */
-	inline T getData(void) const
+	inline T& getData(void) const
 		{return value;};
 
 	/**
@@ -1260,14 +1260,14 @@ public:
 	 * Set the value of a data based value tree.
 	 * @param reference to value to copy into node.
 	 */
-	inline void set(const T &reference)
+	inline void set(const T& reference)
 		{value = reference;};
 
 	/**
 	 * Assign the value of our node.
 	 * @param data value to assign.
 	 */
-	inline void operator=(const T &data)
+	inline void operator=(const T& data)
 		{value = data;};
 
 	/**

@@ -411,7 +411,7 @@ protected:
 	 * Assign our value from a typed data object.  This is a helper method.
 	 * @param object to assign our value from.
 	 */
-	inline void set(T &object)
+	inline void set(T& object)
 		{value = object;};
 
 public:
@@ -426,7 +426,7 @@ public:
 	 * Construct composite value object and assign from existing data value.
 	 * @param existing typed value to assign.
 	 */
-	inline object_value(T existing) : O() 
+	inline object_value(T& existing) : O() 
 		{value = existing;};
 
 	/**
@@ -440,7 +440,7 @@ public:
 	 * Assign embedded data value.
 	 * @param data value to assign.
 	 */
-	inline void operator=(T data)
+	inline void operator=(T& data)
 		{value = data;};
 
 	/**
@@ -454,14 +454,14 @@ public:
 	 * Retrieve data value by expression reference.
 	 * @return embedded value.
 	 */
-	inline T &operator()()
+	inline T& operator()()
 		{return value;};
 
 	/**
 	 * Set data value by expression reference.
 	 * @param data value to assign.
 	 */
-	inline void operator()(T data)
+	inline void operator()(T& data)
 		{value = data;};
 };
 
@@ -595,7 +595,7 @@ inline void swap(T& o1, T& o2)
  * @return max object.
  */
 template<class T>
-inline T (max)(T& o1, T& o2)
+inline T& (max)(T& o1, T& o2)
 {
 	return o1 > o2 ? o1 : o2;
 } 
@@ -607,7 +607,7 @@ inline T (max)(T& o1, T& o2)
  * @return min object.
  */
 template<class T>
-inline T (min)(T& o1, T& o2)
+inline T& (min)(T& o1, T& o2)
 {
 	return o1 < o2 ? o1 : o2;
 } 

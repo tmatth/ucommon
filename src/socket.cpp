@@ -1220,10 +1220,10 @@ ssize_t Socket::puts(const char *str)
 
 ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 {
-	return Socket::getline(so, data, max, timeout);
+	return Socket::readline(so, data, max, timeout);
 }
 
-ssize_t Socket::getline(SOCKET so, char *data, size_t max, timeout_t timeout)
+ssize_t Socket::readline(SOCKET so, char *data, size_t max, timeout_t timeout)
 {
 	assert(data != NULL);
 	assert(max > 0);
