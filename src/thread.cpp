@@ -919,6 +919,12 @@ void TimedEvent::signal(void)
 	SetEvent(event);
 }
 
+void TimedEvent::reset(void)
+{
+	set();
+	ResetEvent(event);
+}
+
 bool TimedEvent::sync(void) 
 {
 	int result;
@@ -959,6 +965,7 @@ bool TimedEvent::wait(timeout_t timer)
 TimedEvent::TimedEvent() : 
 Timer()
 {
+	signalled = false;
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
 	set();
@@ -967,6 +974,7 @@ Timer()
 TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
+	signalled = false;
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
 }
@@ -974,6 +982,7 @@ Timer(timeout)
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
+	signalled = false;
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
 }
@@ -984,15 +993,31 @@ TimedEvent::~TimedEvent()
 	pthread_mutex_destroy(&mutex);
 }
 
+void TimedEvent::reset(void)
+{
+	pthread_mutex_lock(&mutex);
+	signalled = false;
+	set();
+	pthread_mutex_unlock(&mutex);
+}
+
 void TimedEvent::signal(void)
 {
+	pthread_mutex_lock(&mutex);
+	signalled = true;
 	pthread_cond_signal(&cond);
+	pthread_mutex_unlock(&mutex);
 }
 
 bool TimedEvent::sync(void) 
 {
 	timeout_t timeout = get();
 	struct timespec ts;
+
+	if(signalled) {
+		signalled = false;
+		return true;
+	}
 
 	if(!timeout)
 		return false;
@@ -1002,18 +1027,17 @@ bool TimedEvent::sync(void)
 	if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
 		return false;
 
+	signalled = false;
 	return true;
 }
 
-bool TimedEvent::wait(timeout_t timer) 
+bool TimedEvent::wait(timeout_t timeout) 
 {
 	bool result = true;
 	struct timespec ts;
 
-	if(timer)
-		operator+=(timer);
-
 	pthread_mutex_lock(&mutex);
+	operator+=(timeout);
 	result = sync();
 	pthread_mutex_unlock(&mutex);
 	return result;

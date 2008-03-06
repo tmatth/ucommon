@@ -346,6 +346,7 @@ private:
 	HANDLE event;
 #else
 	pthread_cond_t cond;
+	bool signalled;
 #endif
 	pthread_mutex_t mutex;
 
@@ -404,10 +405,15 @@ public:
 	/**
 	 * Wait to be signalled or until timer expires.  This is a wrapper for 
 	 * expire for simple completion events.
-	 * @param waiting time to add to timeout.
+	 * @param timeout to wait from last reset.
 	 * @return true if signaled, false if timeout.
 	 */
-	bool wait(timeout_t waiting = 0);
+	bool wait(timeout_t timeout);
+
+	/**
+	 * Reset triggered conditional.
+	 */
+	void reset(void);
 
 	/**
 	 * Event function for external type.
@@ -417,13 +423,20 @@ public:
 		{timed.signal();};
 
 	/**
+	 * Event function to reset timer for external type.
+	 * @param timed event object to reset.
+	 */
+	inline static void reset(TimedEvent& timed)
+		{timed.reset();};
+
+	/**
 	 * Event function for external type for waiting.
 	 * @param timed event object to wait on.
-	 * @param waiting time to add to timeout.
+	 * @param timeout to wait from last reset.
 	 * @return true if signalled, false if timeout.
 	 */
-	inline static bool wait(TimedEvent& timed, timeout_t waiting = 0)
-		{return timed.wait(waiting);};
+	inline static bool wait(TimedEvent& timed, timeout_t timeout)
+		{return timed.wait(timeout);};
 };
 
 /**

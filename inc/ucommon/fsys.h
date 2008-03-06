@@ -161,7 +161,7 @@ public:
 	 * Set the position of a file descriptor.
 	 * @param offset from start of file or "end" to append.
 	 */
-	void	setPosition(size_t offset);
+	void	seek(size_t offset);
 
 	/**
 	 * Read data from descriptor or scan directory.
@@ -266,8 +266,8 @@ public:
 	 * @param descriptor to set.
 	 * @param offset from start of file or "end" to append.
 	 */
-	inline static void setPosition(fsys& descriptor, size_t offset)
-		{descriptor.setPosition(offset);};
+	inline static void seek(fsys& descriptor, size_t offset)
+		{descriptor.seek(offset);};
 
 	/**
 	 * Open a file or directory.

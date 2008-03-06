@@ -265,7 +265,7 @@ void fsys::open(const char *path, access_t access)
 
 	fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
-		setPosition(end);
+		seek(end);
 }
 
 void fsys::create(const char *path, access_t access, unsigned mode)
@@ -310,7 +310,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 	}
 	fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
-		setPosition(end);
+		seek(end);
 	if(fd != INVALID_HANDLE_VALUE)
 		change(path, mode);
 }
@@ -367,7 +367,7 @@ void fsys::operator=(fsys &from)
 	}
 }
 
-void fsys::setPosition(size_t pos)
+void fsys::seek(size_t pos)
 {
 	DWORD rpos = pos;
 	int mode = FILE_BEGIN;
@@ -626,7 +626,7 @@ void fsys::operator=(fsys &from)
 	}
 }
 
-void fsys::setPosition(size_t pos)
+void fsys::seek(size_t pos)
 {
 	unsigned long rpos = pos;
 	int mode = SEEK_SET;
