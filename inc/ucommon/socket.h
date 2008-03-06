@@ -759,6 +759,14 @@ public:
 	static ssize_t readline(socket_t so, char *data, size_t size, timeout_t timeout = Timer::inf);
 
 	/**
+	 * Print formatted string to socket.
+	 * @param socket to write to.
+	 * @param format string.
+	 * @return number of bytes sent, -1 if error.
+	 */
+	static ssize_t printf(socket_t so, const char *format, ...) __PRINTF(2,3);
+
+	/**
 	 * Write a null terminated string to the socket.
 	 * @param string to write.
 	 * @return number of bytes sent, 0 if none, -1 if error.

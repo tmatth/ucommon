@@ -2219,6 +2219,20 @@ bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 	return false;
 }
 
+ssize_t Socket::printf(socket_t so, const char *format, ...)
+{
+	assert(format != NULL);
+	
+	char buf[536];
+	va_list args;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	return send(so, buf, strlen(buf), NULL);
+}
+
 socklen_t Socket::getlen(struct sockaddr *sa)
 {
 	if(!sa)
