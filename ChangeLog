@@ -1,6 +1,7 @@
 From ucommon 1.6.2 to 1.7.0
 - updated abi for fsys, rebuilt to unify file handling and to use a common
   type and functions for files, directory access, and loader.
+- simplified TimedEvent completion port handling and new static members.
 
 From ucommon 1.6.1 to 1.6.2
 - improved support for using Socket::address as referenced type.  New set &

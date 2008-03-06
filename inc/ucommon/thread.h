@@ -404,9 +404,26 @@ public:
 	/**
 	 * Wait to be signalled or until timer expires.  This is a wrapper for 
 	 * expire for simple completion events.
+	 * @param waiting time to add to timeout.
 	 * @return true if signaled, false if timeout.
 	 */
-	bool wait(void);
+	bool wait(timeout_t waiting = 0);
+
+	/**
+	 * Event function for external type.
+	 * @param timed event object to signal.
+	 */
+	inline static void signal(TimedEvent& timed)
+		{timed.signal();};
+
+	/**
+	 * Event function for external type for waiting.
+	 * @param timed event object to wait on.
+	 * @param waiting time to add to timeout.
+	 * @return true if signalled, false if timeout.
+	 */
+	inline static bool wait(TimedEvent& timed, timeout_t waiting = 0)
+		{return timed.wait(waiting);};
 };
 
 /**

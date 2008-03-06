@@ -888,6 +888,7 @@ Timer()
 {
 	event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	InitializeCriticalSection(&mutex);
+	set();
 }
 
 TimedEvent::~TimedEvent()
@@ -935,10 +936,13 @@ bool TimedEvent::sync(void)
 	return false;
 }
 
-bool TimedEvent::wait(void) 
+bool TimedEvent::wait(timeout_t timer) 
 {
 	int result;
 	timeout_t timeout;
+
+	if(timer)
+		operator+=(timer);
 
 	timeout = get();
 	if(!timeout)
@@ -957,6 +961,7 @@ Timer()
 {
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
+	set();
 }
 
 TimedEvent::TimedEvent(timeout_t timeout) :
@@ -1000,10 +1005,13 @@ bool TimedEvent::sync(void)
 	return true;
 }
 
-bool TimedEvent::wait(void) 
+bool TimedEvent::wait(timeout_t timer) 
 {
 	bool result = true;
 	struct timespec ts;
+
+	if(timer)
+		operator+=(timer);
 
 	pthread_mutex_lock(&mutex);
 	result = sync();
