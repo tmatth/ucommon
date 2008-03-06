@@ -1153,7 +1153,7 @@ public:
 	 * @param address to save peer connecting.  
 	 * @return socket descriptor of connected socket.
 	 */
-	socket_t accept(struct sockaddr *address = NULL);
+	socket_t accept(struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Wait for a pending connection.

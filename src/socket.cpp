@@ -1663,11 +1663,9 @@ unsigned Socket::pending(socket_t so)
 
 socket_t Socket::acceptfrom(socket_t so, struct sockaddr_storage *addr)
 {
-	socklen_t len = 0;
-	if(addr) {
-		len = sizeof(struct sockaddr_storage);	
+	socklen_t len = sizeof(struct sockaddr_storage);
+	if(addr)
 		return _accept_(so, (struct sockaddr *)addr, &len);
-	}
 	else
 		return _accept_(so, NULL, NULL);
 }
@@ -1818,13 +1816,11 @@ retry:
 		release();
 }
 
-socket_t ListenSocket::accept(struct sockaddr *addr)
+socket_t ListenSocket::accept(struct sockaddr_storage *addr)
 {
-	socklen_t len = 0;
-	if(addr) {
-		len = getlen(addr);		
-		return _accept_(so, addr, &len);
-	}
+	socklen_t len = sizeof(struct sockaddr_storage);
+	if(addr)
+		return _accept_(so, (struct sockaddr *)addr, &len);
 	else
 		return _accept_(so, NULL, NULL);
 }
