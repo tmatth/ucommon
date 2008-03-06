@@ -1543,15 +1543,15 @@ int Socket::connect(socket_t so, struct addrinfo *node)
 	assert(node != NULL);
 
 	int rtn = -1;
-	int family;
+	int socket_family;
 	
 	if(so == INVALID_SOCKET)
 		return -1;
 
-	family = getfamily(so);
+	socket_family = family(so);
 
 	while(node) {
-		if(node->ai_family == family) {
+		if(node->ai_family == socket_family) {
 			if(!_connect_(so, node->ai_addr, node->ai_addrlen)) {
 				rtn = 0;
 				goto exit;
@@ -2247,7 +2247,7 @@ socklen_t Socket::getlen(struct sockaddr *sa)
 	}
 }
 
-int Socket::getfamily(socket_t so)
+int Socket::family(socket_t so)
 {
 	assert(so != INVALID_SOCKET);
 

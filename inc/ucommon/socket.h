@@ -89,7 +89,6 @@ typedef	struct
 struct sockaddr_internet
 {
 	union {
-		unsigned short sa_family;
 #ifdef	AF_INET6
 		struct sockaddr_in6 ipv6;
 #endif
@@ -101,7 +100,6 @@ struct sockaddr_internet
 struct sockaddr_internet
 {
 	union {
-		unsigned short sa_family;
 		struct sockaddr_in ipv4;
 		struct sockaddr address;
 	};
@@ -109,11 +107,10 @@ struct sockaddr_internet
 
 struct sockaddr_storage
 {
-	unsigned short sa_family;
 #ifdef	AF_UNIX
-	char sa_data[104];
+	char sa_data[128];
 #else
-	char sa_data[sizeof(struct sockaddr_in) - 2];
+	char sa_data[sizeof(struct sockaddr_in)];
 #endif
 };
 #endif
@@ -946,7 +943,23 @@ public:
 	 * Get the address family of the socket descriptor.
 	 * @return address family.
 	 */
-	static int getfamily(socket_t socket);
+	static int family(socket_t socket);
+
+        /**
+         * Get the address family of a socket address object.
+         * @param address to examine.
+         * @return address family.
+         */
+        inline static int family(struct sockaddr_storage& address)
+            {return ((struct sockaddr *)&address)->sa_family;};
+
+        /**
+         * Get the address family of an internet socket address object.
+         * @param address to examine.
+         * @return address family.
+         */
+        inline static int family(struct sockaddr_internet& address)
+            {return address.address.sa_family;};
 
 	/**
 	 * Peak data waiting in receive queue.
