@@ -24,9 +24,13 @@
 
 #ifdef HAVE_SYS_MMAN_H
 #define	__EXTENSIONS__
+#ifndef _POSIX_C_SOURCE
 #define	_POSIX_C_SOURCE 200112L
 #include <sys/mman.h>
 #undef	_POSIX_C_SOURCE
+#else
+#include <sys/mman.h>
+#endif
 #include <sys/types.h>
 #endif
 
