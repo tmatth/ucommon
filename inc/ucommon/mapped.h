@@ -309,7 +309,7 @@ public:
 	 * @param member to access.
 	 * @return typed reference.
 	 */
-	inline T &operator[](unsigned member)
+	inline T& operator[](unsigned member)
 		{return *(operator()(member));};
 
 	/**

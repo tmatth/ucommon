@@ -577,7 +577,7 @@ inline bool isnull(T& object)
  */
 template<class T>
 inline bool isnullp(T *object)
-	{return (bool)(object->operator*() == NULL);};
+    {return (bool)(object->operator*() == NULL);};
 
 /**
  * Convenience function to swap objects.
@@ -586,7 +586,7 @@ inline bool isnullp(T *object)
  */
 template<class T>
 inline void swap(T& o1, T& o2)
-	{T tmp; tmp = o1; o1 = o2; o2 = tmp;};
+    {void cpr_memswap(&o1, &o2, sizeof(T));};
 
 /**
  * Convenience function to return max of two objects.
@@ -597,7 +597,7 @@ inline void swap(T& o1, T& o2)
 template<class T>
 inline T& (max)(T& o1, T& o2)
 {
-	return o1 > o2 ? o1 : o2;
+    return o1 > o2 ? o1 : o2;
 } 
 
 /**

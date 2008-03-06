@@ -294,6 +294,9 @@ extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
  */
 extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t address, size_t known) __MALLOC;
 
+/**
+ *
+
 #ifndef	_UCOMMON_EXTENDED_
 /**
  * Our generic new operator.  Uses our heap memory allocator.

@@ -116,6 +116,13 @@ extern "C" void msb_setling(uint8_t *b, uint32_t v)
 	b[0] = (v / 16777216l) & 0xff;
 }
 
+extern "C" void cpr_memswap(void *s1, void *s2, size_t size)
+{
+    char *buf = new char[size];
+    memcpy(buf, s1, size);
+    memcpy(s1, s2, size);
+    memcpy(s2, buf, size);
+}
 
 extern "C" void *cpr_memalloc(size_t size)
 {
