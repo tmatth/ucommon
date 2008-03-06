@@ -192,7 +192,7 @@ public:
 	 * @param path to change to.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int setPrefix(const char *path);
+	static int changeDir(const char *path);
 
 	/**
 	 * Get current directory prefix (pwd).
@@ -290,7 +290,14 @@ public:
 	 * @param mode of directory.
 	 * @return 0 if success, else errno.
 	 */
-	static int createPrefix(const char *path, unsigned mode); 
+	static int createDir(const char *path, unsigned mode); 
+
+	/**
+	 * Simple direct method to remove a directory.
+	 * @param pth to remove.
+	 * @return 0 if success, else errno.
+	 */
+	static int removeDir(const char *path);
 
 	/**
 	 * Close a file descriptor or directory directly.
@@ -350,6 +357,11 @@ public:
 	 */
 	static void *find(fsys& module, const char *symbol);
 };
+
+/**
+ * Convience type for fsys.
+ */
+typedef	fsys fsys_t;
 
 END_NAMESPACE
 

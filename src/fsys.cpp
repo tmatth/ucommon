@@ -100,12 +100,19 @@ int remapError(void)
 	}
 }
 
-int fsys::createPrefix(const char *path, unsigned mode)
+int fsys::createDir(const char *path, unsigned mode)
 {
 	if(!CreateDirectory(path, NULL))
 		return remapError();
 	
 	return change(path, mode);
+}
+
+int fsys::removeDir(const char *path)
+{
+	if(_rmdir(path))
+		return remapError();
+	return 0;
 }
 
 int fsys::stat(const char *path, struct stat *buf)
@@ -125,7 +132,7 @@ int fsys::stat(struct stat *buf)
 	return rtn;
 }	 
 
-int fsys::setPrefix(const char *path)
+int fsys::changeDir(const char *path)
 {
 	if(_chdir(path))
 		return remapError();
@@ -297,7 +304,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 		smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
 		break;
 	case ACCESS_DIRECTORY:
-		createPrefix(path, mode);
+		createDir(path, mode);
 		open(path, access);
 		return;
 	}
@@ -499,9 +506,16 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 		error = remapError();
 }
 
-int fsys::createPrefix(const char *path, unsigned mode)
+int fsys::createDir(const char *path, unsigned mode)
 {
 	if(::mkdir(path, mode))
+		return remapError();
+	return 0;
+}
+
+int fsys::removeDir(const char *path)
+{
+	if(::rmdir(path))
 		return remapError();
 	return 0;
 }
@@ -552,7 +566,7 @@ int fsys::stat(struct stat *ino)
 	return rtn;
 }
 
-int fsys::setPrefix(const char *path)
+int fsys::changeDir(const char *path)
 {
 	if(::chdir(path))
 		return remapError();

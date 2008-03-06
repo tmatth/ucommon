@@ -458,14 +458,14 @@ public:
 	 * Convenience method to lock a recursive lock.
 	 * @param rex lock to lock.
 	 */
-	inline static void lock(rexlock &rex)
+	inline static void lock(rexlock& rex)
 		{rex.lock();};
 
 	/**
 	 * Convenience method to unlock a recursive lock.
 	 * @param rex lock to release.
 	 */
-	inline static void release(rexlock &rex)
+	inline static void release(rexlock& rex)
 		{rex.release();};
 };
 
@@ -540,7 +540,7 @@ public:
 	 * @param timeout to wait for lock.
 	 * @return true if successful, false if timeout.
 	 */
-	inline static bool modify(rwlock &lock, timeout_t timeout = Timer::inf)
+	inline static bool modify(rwlock& lock, timeout_t timeout = Timer::inf)
 		{return lock.modify(timeout);};
 
 	/**
@@ -549,14 +549,14 @@ public:
 	 * @param timeout to wait for lock.
 	 * @return true if successful, false if timeout.
 	 */
-	inline static bool access(rwlock &lock, timeout_t timeout = Timer::inf)
+	inline static bool access(rwlock& lock, timeout_t timeout = Timer::inf)
 		{return lock.access(timeout);};
 
 	/**
 	 * Convenience function to release a rwlock.
 	 * @param lock to release.
 	 */
-	inline static void release(rwlock &lock)
+	inline static void release(rwlock& lock)
 		{lock.release();};
 };
 
@@ -682,42 +682,42 @@ public:
 	 * Convenience function to modify lock.
 	 * @param lock to acquire in write exclusive mode.
 	 */
-	inline static void modify(ConditionalLock &lock)
+	inline static void modify(ConditionalLock& lock)
 		{lock.modify();};
 
 	/**
 	 * Convenience function to commit a modify lock.
 	 * @param lock to commit.
 	 */
-	inline static void commit(ConditionalLock &lock)
+	inline static void commit(ConditionalLock& lock)
 		{lock.commit();};
 
 	/**
 	 * Convenience function to release a shared lock.
 	 * @param lock to release.
 	 */
-	inline static void release(ConditionalLock &lock)
+	inline static void release(ConditionalLock& lock)
 		{lock.release();};
 
 	/**
 	 * Convenience function to aqcuire a shared lock.
 	 * @param lock to share.
 	 */
-	inline static void access(ConditionalLock &lock)
+	inline static void access(ConditionalLock& lock)
 		{lock.access();};
 
 	/**
 	 * Convenience function to convert lock to exclusive mode.
 	 * @param lock to convert.
 	 */
-	inline static void exclusive(ConditionalLock &lock)
+	inline static void exclusive(ConditionalLock& lock)
 		{lock.exclusive();};
 
 	/**
 	 * Convenience function to convert lock to shared access.
 	 * @param lock to convert.
 	 */
-	inline static void share(ConditionalLock &lock)
+	inline static void share(ConditionalLock& lock)
 		{lock.share();};
 };	
 
@@ -775,7 +775,7 @@ public:
 	 * Convenience function to wait at a barrier.
 	 * @param sync object to wait at.
 	 */
-	inline static void wait(barrier &sync)
+	inline static void wait(barrier& sync)
 		{sync.wait();};
 
 	/**
@@ -784,7 +784,7 @@ public:
 	 * @param timeout to wait in milliseconds.
 	 * @return false if timer expired.
 	 */
-	inline static bool wait(barrier &sync, timeout_t timeout)
+	inline static bool wait(barrier& sync, timeout_t timeout)
 		{return sync.wait(timeout);};
 
 
@@ -793,7 +793,7 @@ public:
 	 * @param sync object to set.
 	 * @param count of threads to set.
 	 */
-	inline static void set(barrier &sync, unsigned count)
+	inline static void set(barrier& sync, unsigned count)
 		{sync.set(count);};
 };
 
@@ -873,7 +873,7 @@ public:
 	 * Convenience class to wait on a semaphore.
 	 * @param sync object to wait on.
 	 */
-	inline static void wait(semaphore &sync)
+	inline static void wait(semaphore& sync)
 		{sync.wait();};
 
 	/**
@@ -882,14 +882,14 @@ public:
 	 * @param timeout in milliseconds.
 	 * @return if success, false if timeout.
 	 */
-	inline static bool wait(semaphore &sync, timeout_t timeout)
+	inline static bool wait(semaphore& sync, timeout_t timeout)
 		{return sync.wait(timeout);};
 
 	/**
 	 * Convenience class to release a semaphore.
 	 * @param sync object to release.
 	 */
-	inline static void release(semaphore &sync)
+	inline static void release(semaphore& sync)
 		{sync.release();};
 };
 
@@ -953,28 +953,28 @@ public:
 	 * Convenience function to acquire a mutex lock.
 	 * @param lock to acquire.
 	 */
-	inline static void acquire(mutex &lock)
+	inline static void acquire(mutex& lock)
 		{pthread_mutex_lock(&lock.mlock);};
 
 	/**
 	 * Convenience function to acquire a mutex lock.
 	 * @param lock to acquire.
 	 */
-	inline static void lock(mutex &lock)
+	inline static void lock(mutex& lock)
 		{pthread_mutex_lock(&lock.mlock);};
 
 	/**
 	 * Convenience function to release an aquired mutex lock.
 	 * @param lock to acquire.
 	 */
-	inline static void unlock(mutex &lock)
+	inline static void unlock(mutex& lock)
 		{pthread_mutex_unlock(&lock.mlock);};
 
 	/**
 	 * Convenience function to release an aquired mutex lock.
 	 * @param lock to acquire.
 	 */
-	inline static void release(mutex &lock)
+	inline static void release(mutex& lock)
 		{pthread_mutex_unlock(&lock.mlock);};
 
 	/**
@@ -1494,7 +1494,7 @@ public:
 	 * @param object to remove.
 	 * @return true if removed, false if not found.
 	 */
-	static bool remove(queue &queue, Object *object)
+	static bool remove(queue& queue, Object *object)
 		{return queue.remove(object);};
 
 	/**
@@ -1504,7 +1504,7 @@ public:
 	 * @param timeout to wait if full.
 	 * @return true if posted, false if timed out while full.
 	 */
-	static bool post(queue &queue, Object *object, timeout_t timeout = 0)
+	static bool post(queue& queue, Object *object, timeout_t timeout = 0)
 		{return queue.post(object, timeout);};
 
 	/**
@@ -1513,7 +1513,7 @@ public:
 	 * @param timeout to wait if empty.
 	 * @return first object or NULL if timed out empty.
 	 */
-	static Object *fifo(queue &queue, timeout_t timeout = 0)
+	static Object *fifo(queue& queue, timeout_t timeout = 0)
 		{return queue.fifo(timeout);};
 
 	/**
@@ -1522,7 +1522,7 @@ public:
 	 * @param timeout to wait if empty.
 	 * @return last object or NULL if timed out empty.
 	 */
-	static Object *lifo(queue &queue, timeout_t timeout = 0)
+	static Object *lifo(queue& queue, timeout_t timeout = 0)
 		{return queue.lifo(timeout);};
 
 	/**
@@ -1530,7 +1530,7 @@ public:
 	 * @param queue to count.
 	 * @return number of objects in the queue.
 	 */
-	static size_t count(queue &queue)
+	static size_t count(queue& queue)
 		{return queue.getCount();};
 };
 
@@ -1610,7 +1610,7 @@ public:
 	 * @param object to remove.
 	 * @return true if removed, false if not found.
 	 */
-	static inline bool remove(stack &stack, Object *object)
+	static inline bool remove(stack& stack, Object *object)
 		{return stack.remove(object);};
 
 	/**
@@ -1620,7 +1620,7 @@ public:
 	 * @param timeout to wait if full.
 	 * @return true if pusheded, false if timed out while full.
 	 */
-	static inline bool push(stack &stack, Object *object, timeout_t timeout = 0)
+	static inline bool push(stack& stack, Object *object, timeout_t timeout = 0)
 		{return stack.push(object, timeout);};
 
 	/**
@@ -1629,7 +1629,7 @@ public:
 	 * @param timeout to wait if empty.
 	 * @return last object or NULL if timed out empty.
 	 */
-	static inline Object *pull(stack &stack, timeout_t timeout = 0)
+	static inline Object *pull(stack& stack, timeout_t timeout = 0)
 		{return stack.pull(timeout);};  
 
 	/**
@@ -1637,7 +1637,7 @@ public:
 	 * @param stack to count.
 	 * @return number of objects in the stack.
 	 */
-	static inline size_t count(stack &stack)
+	static inline size_t count(stack& stack)
 		{return stack.getCount();};
 };
 

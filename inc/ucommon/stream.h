@@ -92,7 +92,7 @@ public:
 	 * Copy constructor...
 	 * @param copy for object.
 	 */
-	tcpstream(const tcpstream &copy);
+	tcpstream(const tcpstream& copy);
 
 	/**
 	 * Create a stream from an existing tcp listener.
@@ -162,7 +162,7 @@ public:
 	 * Flush the stream input and output buffers, writes pending output.
 	 * @return 0 on success, or error code.
 	 */
-	int sync(void);
+	int sync(void);	
 };
 	
 END_NAMESPACE

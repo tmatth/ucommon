@@ -267,7 +267,7 @@ public:
 	 * reference counted instance of cstring as in the original.
 	 * @param existing string to copy from.
 	 */
-	string(const string &existing);
+	string(const string& existing);
 
 	/**
 	 * Destroy string.  De-reference cstring.  If last reference to cstring, 
@@ -643,21 +643,21 @@ public:
 	 * @param object to assign from.
 	 * @return our object for expression use.
 	 */
-	string &operator^=(const string &object);
+	string& operator^=(const string& object);
 
 	/**
 	 * Create new cow instance and assign value from null terminated text.
 	 * @param text to assign from.
 	 * @return our object for expression use.
 	 */
-	string &operator^=(const char *text);
+	string& operator^=(const char *text);
 
 	/**
 	 * Concatenate null terminated text to our object.  This creates a new
 	 * copy-on-write instance to hold the concatenated string.
 	 * @param text to concatenate.
 	 */
-	string &operator+(const char *text);
+	string& operator+(const char *text);
 
 	/**
 	 * Concatenate null terminated text to our object.  This directly
@@ -665,7 +665,7 @@ public:
 	 * object if the existing cstring allocation space is fully used.
 	 * @param text to concatenate.
 	 */
-	string &operator&(const char *text);
+	string& operator&(const char *text);
 
 	/**
 	 * Assign our string with the cstring of another object.  If we had
@@ -673,35 +673,35 @@ public:
 	 * a duplicate reference to the cstring of the other object.
 	 * @param object to assign from.
 	 */
-	string &operator=(const string &object);
+	string& operator=(const string& object);
 
 	/**
 	 * Assign text to our existing buffer.  This performs a set method.
 	 * @param text to assign from.
 	 */
-	string &operator=(const char *text);
+	string& operator=(const char *text);
 
 	/**
 	 * Delete first character from string.
 	 */
-	string &operator++(void);
+	string& operator++(void);
 
 	/**
 	 * Delete a specified number of characters from start of string.
 	 * @param number of characters to delete.
 	 */
-	string &operator+=(strsize_t number);
+	string& operator+=(strsize_t number);
 
 	/**
 	 * Delete last character from string.
 	 */
-	string &operator--(void);
+	string& operator--(void);
 
 	/**
 	 * Delete a specified number of characters from end of string.
 	 * @param number of characters to delete.
 	 */
-	string &operator-=(strsize_t number);
+	string& operator-=(strsize_t number);
 
 	/**
 	 * Compare our object with null terminated text.
@@ -751,7 +751,7 @@ public:
 	 * @param format string of input to scan.
 	 * @return number of items scanned.
 	 */
-	static int scanf(string &object, const char *format, ...) __SCANF(2, 3);
+	static int scanf(string& object, const char *format, ...) __SCANF(2, 3);
 
 	/**
 	 * Print formatted items into a string object.
@@ -759,7 +759,7 @@ public:
 	 * @param format string to print with.
 	 * @return number of bytes written into object.
 	 */
-	static strsize_t printf(string &object, const char *format, ...) __PRINTF(2, 3);
+	static strsize_t printf(string& object, const char *format, ...) __PRINTF(2, 3);
 
 	/**
 	 * Read arbitrary binary data from socket into a string object.  The 
@@ -769,7 +769,7 @@ public:
 	 * @param object to save read data.
 	 * @return number of bytes read.
 	 */
-	static int read(Socket &socket, string &object);
+	static int read(Socket& socket, string& object);
 	
 	/**
 	 * Write the string object to a socket.
@@ -777,7 +777,7 @@ public:
 	 * @param object to get data from.
 	 * @return number of bytes written.
 	 */
-	static int write(Socket &socket, string &object);
+	static int write(Socket& socket, string& object);
 
 	/**
 	 * Read arbitrary binary data from a file into a string object.  The 
@@ -787,7 +787,7 @@ public:
 	 * @param object to save read data.
 	 * @return number of bytes read.
 	 */
-	static int read(FILE *file, string &object);
+	static int read(FILE *file, string& object);
 
 	/**
 	 * Write the string object to a file.
@@ -795,7 +795,7 @@ public:
 	 * @param object to get data from.
 	 * @return number of bytes written.
 	 */
-	static int write(FILE *file, string &object); 
+	static int write(FILE *file, string& object); 
 
 	/**
 	 * Read a line of text input from a socket into the object.  The 
@@ -805,7 +805,7 @@ public:
 	 * @param object to save read data.
 	 * @return false if end of file.
 	 */
-	static bool getline(Socket &socket, string &object);
+	static bool getline(Socket& socket, string& object);
 
 	/**
 	 * Write string as a line of text data to a socket.  A newline will be 
@@ -814,7 +814,7 @@ public:
 	 * @param object to get text line from.
 	 * @return true if successful.
 	 */
-	static bool putline(Socket &socket, string &object);
+	static bool putline(Socket& socket, string& object);
 
 	/**
 	 * Read a line of text input from a file into the object.  The 
@@ -824,7 +824,7 @@ public:
 	 * @param object to save read data.
 	 * @return false if end of file.
 	 */
-	static bool getline(FILE *file, string &object);
+	static bool getline(FILE *file, string& object);
 
 	/**
 	 * Write string as a line of text data to a file.  A newline will be 
@@ -833,20 +833,20 @@ public:
 	 * @param object to get text line to put into file.
 	 * @return true if successful.
 	 */
-	static bool putline(FILE *file, string &object);
+	static bool putline(FILE *file, string& object);
 
 	/**
 	 * Swap the cstring references between two strings.
 	 * @param object1 to swap.
 	 * @param object2 to swap.
 	 */
-	static void swap(string &object1, string &object2);
+	static void swap(string& object1, string& object2);
 	
 	/**
 	 * Fix and reset string object filler.
 	 * @param object to fix.
 	 */
-	static void fix(string &object);
+	static void fix(string& object);
 
 	/**
 	 * Convert null terminated text to lower case.
@@ -1109,7 +1109,7 @@ public:
 	 * @param end of line marker characters or NULL if not used.
 	 * @return token extracted from string or NULL if no more tokens found.
 	 */
-	inline static const char *token(string &object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
+	inline static const char *token(string& object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
 		{return token(object.c_mem(), last, list, quote, end);};
 
 	/**
@@ -1119,7 +1119,7 @@ public:
 	 * @param args list to scan into.
 	 * @return number of items scanned.
 	 */
-	inline static int vscanf(string &object, const char *format, va_list args)
+	inline static int vscanf(string& object, const char *format, va_list args)
 		{return object.vscanf(format, args);} __SCANF(2, 0);
 
 	/**
@@ -1129,7 +1129,7 @@ public:
 	 * @param args list to print.
 	 * @return number of bytes written to string.
 	 */
-	inline static strsize_t vprintf(string &object, const char *format, va_list args)
+	inline static strsize_t vprintf(string& object, const char *format, va_list args)
 		{return object.vprintf(format, args);} __PRINTF(2, 0);
 
 	/**
@@ -1137,7 +1137,7 @@ public:
 	 * @param object to count.
 	 * @return count of characters.
 	 */
-	inline static strsize_t len(string &object)
+	inline static strsize_t len(string& object)
 		{return object.len();};
 
 	/**
@@ -1145,7 +1145,7 @@ public:
 	 * @param object to get string buffer from.
 	 * @return writable string buffer.
 	 */
-	inline static char *mem(string &object)
+	inline static char *mem(string& object)
 		{return object.c_mem();};
 
 	/**
@@ -1153,14 +1153,14 @@ public:
 	 * @param object to examine.
 	 * @return size allocated for text.
 	 */
-	inline static strsize_t size(string &object)
+	inline static strsize_t size(string& object)
 		{return object.size();};
 
 	/**
 	 * Clear a string object.
 	 * @param object to clear.
 	 */
-	inline static void clear(string &object)
+	inline static void clear(string& object)
 		{object.clear();};
 
 	/**
@@ -1169,7 +1169,7 @@ public:
 	 * @param list of characters to find.
 	 * @return count of instances of characters.
 	 */
-	inline static unsigned ccount(string &object, const char *list)
+	inline static unsigned ccount(string& object, const char *list)
 		{return object.ccount(list);};
 
 	/**
@@ -1177,21 +1177,21 @@ public:
 	 * @param object to count.
 	 * @return count of characters.
 	 */
-	inline static size_t count(string &object)
+	inline static size_t count(string& object)
 		{return object.count();};
 
 	/**
 	 * Convert string object to upper case.
 	 * @param object to modify.
 	 */
-	inline static void upper(string &object)
+	inline static void upper(string& object)
 		{object.upper();};
 
 	/**
 	 * Convert string object to lower case.
 	 * @param object to modify.
 	 */
-	inline static void lower(string &object)
+	inline static void lower(string& object)
 		{object.lower();};
 
 	/**
@@ -1200,7 +1200,7 @@ public:
 	 * @param quote pairs of characters for open and close quote.
 	 * @return true if string was quoted.
 	 */
-	inline static bool unquote(string &object, const char *quote)
+	inline static bool unquote(string& object, const char *quote)
 		{return object.unquote(quote);};
 
 	/**
@@ -1208,7 +1208,7 @@ public:
 	 * @param object to trim.
 	 * @param list of characters to remove.
 	 */
-	inline static void trim(string &object, const char *list)
+	inline static void trim(string& object, const char *list)
 		{return object.trim(list);};
 
 	/**
@@ -1216,7 +1216,7 @@ public:
 	 * @param object to chop.
 	 * @param list of characters to remove.
 	 */
-	inline static void chop(string &object, const char *list)
+	inline static void chop(string& object, const char *list)
 		{return object.trim(list);};
 
 	/**
@@ -1224,7 +1224,7 @@ public:
 	 * @param object to strip.
 	 * @param list of characters to remove.
 	 */
-	inline static void strip(string &object, const char *list)
+	inline static void strip(string& object, const char *list)
 		{return object.trim(list);};
 
 	/**
@@ -1233,7 +1233,7 @@ public:
 	 * @param list of characters to search for.
 	 * @return pointer to first occurance of character.
 	 */
-	inline static const char *find(string &object, const char *list)
+	inline static const char *find(string& object, const char *list)
 		{return object.find(list);};
 
 	/**
@@ -1242,7 +1242,7 @@ public:
 	 * @param list of characters to search for.
 	 * @return pointer to last occurance of character.
 	 */
-	inline static const char *rfind(string &object, const char *list)
+	inline static const char *rfind(string& object, const char *list)
 		{return object.rfind(list);};
 
 	/**
@@ -1251,7 +1251,7 @@ public:
 	 * @param list of characters.
 	 * @return first character pointer past list.
 	 */
-	inline static const char *first(string &object, const char *list)
+	inline static const char *first(string& object, const char *list)
 		{return object.first(list);};
 
 	/**
@@ -1260,7 +1260,7 @@ public:
 	 * @param list of characters.
 	 * @return last character pointer before list.
 	 */
-	inline static const char *last(string &object, const char *list)
+	inline static const char *last(string& object, const char *list)
 		{return object.last(list);};
 
 	/**
@@ -1269,7 +1269,7 @@ public:
 	 * @param pointer to update with end of parsed value.
 	 * @return double value of object.
 	 */
-	inline static double tod(string &object, char **pointer = NULL)
+	inline static double tod(string& object, char **pointer = NULL)
 		{return strtod(mem(object), pointer);};
 
 	/**
@@ -1278,7 +1278,7 @@ public:
 	 * @param pointer to update with end of parsed value.
 	 * @return long value of object.
 	 */
-	inline static long tol(string &object, char **pointer = NULL)
+	inline static long tol(string& object, char **pointer = NULL)
 		{return strtol(mem(object), pointer, 0);};
 
 	/**
@@ -1325,7 +1325,7 @@ public:
 	 * Assign the text of a string to our object.
 	 * @param object to copy text from.
 	 */
-	inline void operator=(string &object)
+	inline void operator=(string& object)
 		{set(object.c_str());};
 
 	/**
@@ -1498,7 +1498,7 @@ public:
 	 * Assign a string buffer from another string object.
 	 * @param object to assign from.
 	 */
-	inline void operator=(string &object)
+	inline void operator=(string& object)
 		{set(object.c_str());};	
 };
 

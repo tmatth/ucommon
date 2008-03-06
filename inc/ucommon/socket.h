@@ -175,7 +175,7 @@ public:
 	 * Construct a copy of an existing cidr.
 	 * @param existing cidr we copy from.
 	 */
-	cidr(const cidr &existing);
+	cidr(const cidr& existing);
 
 	/**
 	 * Find the smallest cidr entry in a list that matches the socket address.
@@ -302,7 +302,7 @@ public:
 		 * @param hostname or ip address.  The socket family is used for hostnames.
 		 * @param service port or name we are referencing or NULL.
 		 */
-		address(Socket &socket, const char *hostname, const char *service = NULL);
+		address(Socket& socket, const char *hostname, const char *service = NULL);
 
 		/**
 		 * Construct a socket address for a socket descriptor.
@@ -454,7 +454,7 @@ public:
 	 * Create socket as duped handle of existing socket.
 	 * @param existing socket to dup.
 	 */
-	Socket(const Socket &existing);
+	Socket(const Socket& existing);
 
 	/**
 	 * Create socket from existing socket descriptor.
@@ -751,7 +751,7 @@ public:
 	 * one present.
 	 * @param socket descriptor to assign to object.
 	 */
-	Socket &operator=(SOCKET socket);
+	Socket& operator=(SOCKET socket);
 
 	/**
 	 * Get the socket descriptor by casting.
@@ -1101,7 +1101,7 @@ typedef	Socket socket;
  * @param address list object.
  * @return addrinfo list or NULL if empty.
  */
-inline struct addrinfo *addrinfo(socket::address &address)
+inline struct addrinfo *addrinfo(socket::address& address)
 	{return address.getList();};
 
 /**
@@ -1110,7 +1110,7 @@ inline struct addrinfo *addrinfo(socket::address &address)
  * @param address list object.
  * @return first socket address in list or NULL if empty.
  */
-inline struct sockaddr *addr(socket::address &address)
+inline struct sockaddr *addr(socket::address& address)
 	{return address.getAddr();};
 
 END_NAMESPACE
