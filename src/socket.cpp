@@ -1095,6 +1095,22 @@ void Socket::cancel(void)
 		::shutdown(so, SHUT_RDWR);
 }
 
+void Socket::cancel(SOCKET so)
+{
+	if(so != INVALID_SOCKET)
+		::shutdown(so, SHUT_RDWR);
+}
+
+void Socket::release(SOCKET so)
+{
+#ifdef	_MSWINDOWS_
+	::closesocket(so);
+#else
+	if(!::shutdown(so, SHUT_RDWR))
+		::close(so);
+#endif
+}
+
 void Socket::release(void)
 {
 	if(so != INVALID_SOCKET) {
@@ -1129,6 +1145,15 @@ Socket &Socket::operator=(SOCKET s)
 	return *this;
 }	
 
+ssize_t Socket::peek(SOCKET so, void *data, size_t len, struct sockaddr_storage *address)
+{
+	assert(data != NULL);
+	assert(len > 0);
+	socklen_t slen = sizeof(struct sockaddr_storage);
+
+	return _recvfrom_(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK, (struct sockaddr *)address, &slen);
+}
+
 size_t Socket::peek(void *data, size_t len) const
 {
 	assert(data != NULL);
@@ -1140,7 +1165,16 @@ size_t Socket::peek(void *data, size_t len) const
 	return (size_t)rtn;
 }
 
-ssize_t Socket::get(void *data, size_t len, sockaddr *from)
+ssize_t Socket::recv(SOCKET so, void *data, size_t len, struct sockaddr_storage *addr)
+{
+	assert(data != NULL);
+	assert(len > 0);
+
+	socklen_t slen = sizeof(struct sockaddr_storage);
+	return _recvfrom_(so, (caddr_t)data, len, 0, (struct sockaddr *)addr, &slen);
+}
+
+ssize_t Socket::get(void *data, size_t len, struct sockaddr *from)
 {
 	assert(data != NULL);
 	assert(len > 0);
@@ -1149,7 +1183,19 @@ ssize_t Socket::get(void *data, size_t len, sockaddr *from)
 	return _recvfrom_(so, (caddr_t)data, len, 0, from, &slen);
 }
 
-ssize_t Socket::put(const void *data, size_t len, sockaddr *dest)
+ssize_t Socket::put(const void *data, size_t len, struct sockaddr *dest)
+{
+	assert(data != NULL);
+	assert(len > 0);
+
+	socklen_t slen = 0;
+	if(dest)
+		slen = getlen(dest);
+	
+	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
+}
+
+ssize_t Socket::send(SOCKET so, const void *data, size_t len, struct sockaddr *dest)
 {
 	assert(data != NULL);
 	assert(len > 0);
@@ -1174,6 +1220,11 @@ ssize_t Socket::puts(const char *str)
 
 ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 {
+	return Socket::getline(so, data, max, timeout);
+}
+
+ssize_t Socket::getline(SOCKET so, char *data, size_t max, timeout_t timeout)
+{
 	assert(data != NULL);
 	assert(max > 0);
 
@@ -1188,7 +1239,7 @@ ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
 	data[0] = 0;
 	while(nleft && !nl) {
 		if(timeout) {
-			if(!waitPending(timeout))
+			if(!wait(so, timeout))
 				return -1;
 		}
 		nstat = _recv_(so, data, nleft, MSG_PEEK);
@@ -1622,6 +1673,11 @@ SOCKET Socket::acceptfrom(SOCKET so, struct sockaddr_storage *addr)
 }
 
 bool Socket::waitPending(timeout_t timeout) const
+{
+	return wait(so, timeout);
+}
+
+bool Socket::wait(SOCKET so, timeout_t timeout)
 {
 	int status;
 

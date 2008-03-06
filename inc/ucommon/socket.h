@@ -504,17 +504,15 @@ public:
 	void create(const char *address, const char *port, int family, int type, int protocol = 0);
 
 	/**
-	 * Create an unbound socket of a specific type.
-	 * @param family of our new socket.
-	 * @param type (stream, udp, etc) of our new socket.
-	 * @param protocol number of our new socket.'
-	 */
-	void create(int family, int type, int protocol = 0);
-
-	/**
 	 * Cancel pending i/o by shutting down the socket.
 	 */
 	void cancel(void);
+
+	/**
+	 * Cancel pending i/o by shutting down the socket.
+	 * @param socket to shutdown.
+	 */
+	static void cancel(SOCKET so);
 
 	/**
 	 * Shutdown and close the socket.
@@ -541,6 +539,15 @@ public:
 	 * @return true if input data waiting.
 	 */
 	bool waitPending(timeout_t timeout = 0) const;
+
+	/**
+	 * Test for pending input data.  This function can wait up to a specified
+	 * timeout for data to appear.
+	 * @param socket to test.
+	 * @param timeout or 0 if none.
+	 * @return true if input data waiting.
+	 */
+	static bool wait(SOCKET so, timeout_t timeout = 0);
 
 	/**
 	 * Test for output data sent.  This function can wait up to a specified
@@ -739,6 +746,19 @@ public:
 	virtual ssize_t gets(char *data, size_t size, timeout_t timeout = Timer::inf);
 
 	/**
+	 * Read a newline of text data from the socket and save in NULL terminated
+	 * string.  This uses an optimized I/O method that takes advantage of
+	 * socket peeking.  As such, it has to be rewritten to be used in a ssl
+	 * layer socket.
+	 * @param socket to read from.
+	 * @param data to save input line.
+	 * @param size of input line buffer.
+	 * @param timeout to wait for a complete input line.
+	 * @return number of bytes read, 0 if none, -1 if error.
+	 */
+	static ssize_t getline(SOCKET so, char *data, size_t size, timeout_t timeout = Timer::inf);
+
+	/**
 	 * Write a null terminated string to the socket.
 	 * @param string to write.
 	 * @return number of bytes sent, 0 if none, -1 if error.
@@ -921,12 +941,64 @@ public:
 	static int getfamily(SOCKET socket);
 
 	/**
+	 * Peak data waiting in receive queue.
+	 * @param socket to peek.
+	 * @param buffer to save.
+	 * @param size of data buffer to request.
+	 * @param address of source.
+	 * @return number of bytes found, -1 if error.
+	 */
+	static ssize_t peek(SOCKET so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
+
+	/**
+	 * Get data waiting in receive queue.
+	 * @param socket to get from.
+	 * @param buffer to save.
+	 * @param size of data buffer to request.
+	 * @param address of source.
+	 * @return number of bytes received, -1 if error.
+	 */
+	static ssize_t recv(SOCKET so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
+
+	/**
+	 * Send data on socket.
+	 * @param socket to send to.
+	 * @param buffer to send.
+	 * @param size of data buffer to send.
+	 * @param address of destination, NULL if connected.
+	 * @return number of bytes sent, -1 if error.
+	 */
+	static ssize_t send(SOCKET so, const void *buffer, size_t size, struct sockaddr *address = NULL);
+
+	/**
 	 * Bind the socket descriptor to a known interface and service port.
 	 * @param socket descriptor to bind.
 	 * @param address to bind to or "*" for all.
 	 * @param service port to bind.
 	 */
 	static int bindto(SOCKET socket, const char *address, const char *service);
+
+	/**
+	 * Accept a socket connection from a remote host.
+	 * @param socket descriptor to accept from.
+	 * @param address of socket accepting.
+	 */
+	static int acceptfrom(SOCKET socket, struct sockaddr_storage *addr = NULL);
+
+	/**
+	 * Create a socket object unbound.
+	 * @param socket family.
+	 * @param socket type.
+	 * @param socket protocol.
+	 * @return socket.
+	 */
+	static SOCKET create(int family, int type, int protocol);
+
+	/**
+	 * Release (close) a socket.
+	 * @param socket to close.
+	 */
+	static void release(SOCKET so);
 
 	/**
 	 * Lookup and return the host name associated with a socket address.
@@ -1100,7 +1172,7 @@ public:
 /**
  * A convenience class for socket.
  */
-typedef	Socket socket_t;
+typedef	SOCKET socket_t;
 
 /**
  * A convenience class for socket.
