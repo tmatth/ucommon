@@ -44,13 +44,14 @@ NAMESPACE_UCOMMON
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT tcpstream : protected std::streambuf, protected Socket, public std::iostream
+class __EXPORT tcpstream : protected std::streambuf, public std::iostream
 {
 private:
 	__LOCAL void allocate(unsigned size);
 	__LOCAL	void reset(void);
 
 protected:
+	socket_t so;
 	timeout_t timeout;
 	size_t bufsize;
 	char *gbuf, *pbuf;
