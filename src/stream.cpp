@@ -36,7 +36,7 @@ tcpstream::tcpstream(const tcpstream &copy) :
 {
 	bufsize = 0;
 	gbuf = pbuf = NULL;
-	so = Socket::create(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP);
+	so = Socket::create(Socket::family(copy.so), SOCK_STREAM, IPPROTO_TCP);
 
 #ifdef OLD_STDCPP
 	init((streambuf *)this);
