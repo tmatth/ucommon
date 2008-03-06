@@ -16,6 +16,8 @@ EXTRA_DIST = stdcpp.cpp
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads ucommonStream
 check_PROGRAMS = $(TESTS)
 
+testing:  $(TESTS)
+
 ucommonThreads_SOURCES = thread.cpp
 ucommonStrings_SOURCES = string.cpp
 ucommonLinked_SOURCES = linked.cpp
