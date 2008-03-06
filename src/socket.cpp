@@ -1052,8 +1052,7 @@ Socket::Socket(int family, int type, int protocol)
 #ifdef	_MSWINDOWS_
 	init();
 #endif
-	so = INVALID_SOCKET;
-	create(family, type, protocol);
+	so = create(family, type, protocol);
 }
 
 Socket::Socket(const char *iface, const char *port, int family, int type, int protocol)
@@ -1073,22 +1072,21 @@ void Socket::create(const char *iface, const char *port, int family, int type, i
 	assert(iface != NULL && *iface != 0);
 	assert(port != NULL && *port != 0);
 
-	create(family, type, protocol);
+	release();
+	so = create(family, type, protocol);
 	if(so != INVALID_SOCKET)
 		if(bindto(so, iface, port))
 			release();
 }
-
 
 Socket::~Socket()
 {
 	release();
 }
 
-void Socket::create(int family, int type, int protocol)
+SOCKET Socket::create(int family, int type, int protocol)
 {
-	release();
-	so = ::socket(family, type, protocol);
+	return ::socket(family, type, protocol);
 }
 
 void Socket::cancel(void)
@@ -1611,6 +1609,17 @@ unsigned Socket::pending(SOCKET so)
 }
 
 #endif
+
+SOCKET Socket::acceptfrom(SOCKET so, struct sockaddr_storage *addr)
+{
+	socklen_t len = 0;
+	if(addr) {
+		len = sizeof(struct sockaddr_storage);	
+		return _accept_(so, (struct sockaddr *)addr, &len);
+	}
+	else
+		return _accept_(so, NULL, NULL);
+}
 
 bool Socket::waitPending(timeout_t timeout) const
 {
