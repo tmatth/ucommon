@@ -586,7 +586,7 @@ inline bool isnullp(T *object)
  */
 template<class T>
 inline void swap(T& o1, T& o2)
-    {void cpr_memswap(&o1, &o2, sizeof(T));};
+    {cpr_memswap(&o1, &o2, sizeof(T));};
 
 /**
  * Convenience function to return max of two objects.

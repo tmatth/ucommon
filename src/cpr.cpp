@@ -118,10 +118,15 @@ extern "C" void msb_setling(uint8_t *b, uint32_t v)
 
 extern "C" void cpr_memswap(void *s1, void *s2, size_t size)
 {
+    assert(s1 != NULL);
+    assert(s2 != NULL);
+    assert(size > 0);
+
     char *buf = new char[size];
     memcpy(buf, s1, size);
     memcpy(s1, s2, size);
     memcpy(s2, buf, size);
+    delete[] buf;
 }
 
 extern "C" void *cpr_memalloc(size_t size)

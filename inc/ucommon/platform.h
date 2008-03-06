@@ -295,7 +295,12 @@ extern "C" __EXPORT void *cpr_memalloc(size_t size) __MALLOC;
 extern "C" __EXPORT void *cpr_memassign(size_t size, caddr_t address, size_t known) __MALLOC;
 
 /**
- *
+ * Portable swap code.
+ * @param mem1 to swap.
+ * @param mem2 to swap.
+ * @param size of swap area.
+ */
+extern "C" __EXPORT void cpr_memswap(void *mem1, void *mem2, size_t size);
 
 #ifndef	_UCOMMON_EXTENDED_
 /**
