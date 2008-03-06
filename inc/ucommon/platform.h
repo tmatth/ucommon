@@ -141,6 +141,7 @@ typedef	DWORD pthread_t;
 typedef	CRITICAL_SECTION pthread_mutex_t;
 typedef char *caddr_t;
 typedef	HANDLE fd_t;
+typedef	SOCKET socket_t;
 
 typedef	struct timespec {
 	time_t tv_sec;
@@ -190,7 +191,7 @@ inline int strnicmp(const char *s1, const char *s2, size_t l)
 #include <pth.h>
 #include <sys/wait.h>
 
-typedef int SOCKET;
+typedef int socket_t;
 typedef int fd_t;
 #define	INVALID_SOCKET -1
 #define	INVALID_HANDLE_VALUE -1
@@ -228,7 +229,7 @@ inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
 
 #include <pthread.h>
 
-typedef	int SOCKET;
+typedef	int socket_t;
 typedef	int fd_t;
 #define	INVALID_SOCKET -1
 #define	INVALID_HANDLE_VALUE -1

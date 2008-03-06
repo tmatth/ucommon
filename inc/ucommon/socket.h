@@ -268,7 +268,7 @@ public:
 class __EXPORT Socket 
 {
 protected:
-	SOCKET so;
+	socket_t so;
 
 public:
 	/**
@@ -308,7 +308,7 @@ public:
 		 * @param hostname or address to use.
 		 * @param service port or name we are referencing or NULL.
 		 */
-		address(SOCKET so, const char *hostname, const char *service = NULL);
+		address(socket_t so, const char *hostname, const char *service = NULL);
 
 		/**
 		 * Construct a socket address from host and service.
@@ -463,7 +463,7 @@ public:
 	 * Create socket from existing socket descriptor.
 	 * @param socket descriptor to use.
 	 */
-	Socket(SOCKET socket);
+	Socket(socket_t socket);
 
 	/**
 	 * Create and connect a socket to an address from an address list.  The
@@ -512,7 +512,7 @@ public:
 	 * Cancel pending i/o by shutting down the socket.
 	 * @param socket to shutdown.
 	 */
-	static void cancel(SOCKET so);
+	static void cancel(socket_t so);
 
 	/**
 	 * Shutdown and close the socket.
@@ -547,7 +547,7 @@ public:
 	 * @param timeout or 0 if none.
 	 * @return true if input data waiting.
 	 */
-	static bool wait(SOCKET so, timeout_t timeout = 0);
+	static bool wait(socket_t so, timeout_t timeout = 0);
 
 	/**
 	 * Test for output data sent.  This function can wait up to a specified
@@ -756,7 +756,7 @@ public:
 	 * @param timeout to wait for a complete input line.
 	 * @return number of bytes read, 0 if none, -1 if error.
 	 */
-	static ssize_t readline(SOCKET so, char *data, size_t size, timeout_t timeout = Timer::inf);
+	static ssize_t readline(socket_t so, char *data, size_t size, timeout_t timeout = Timer::inf);
 
 	/**
 	 * Write a null terminated string to the socket.
@@ -782,20 +782,20 @@ public:
 	 * one present.
 	 * @param socket descriptor to assign to object.
 	 */
-	Socket& operator=(SOCKET socket);
+	Socket& operator=(socket_t socket);
 
 	/**
 	 * Get the socket descriptor by casting.
 	 * @return socket descriptor of object.
 	 */
-	inline operator SOCKET() const
+	inline operator socket_t() const
 		{return so;};
 
 	/**
 	 * Get the socket descriptor by pointer reference.
 	 * @return socket descriptor of object.
 	 */
-	inline SOCKET operator*() const
+	inline socket_t operator*() const
 		{return so;};
 
 	/**
@@ -804,7 +804,7 @@ public:
 	 * @param socket descriptor.
 	 * @return number of pending bytes.
 	 */
-	static unsigned pending(SOCKET socket);
+	static unsigned pending(socket_t socket);
 
 	/**
 	 * Set the send size of a socket descriptor.
@@ -812,7 +812,7 @@ public:
 	 * @param size of send buffer to set.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int sendsize(SOCKET socket, unsigned size);
+	static int sendsize(socket_t socket, unsigned size);
 
 	/**
 	 * Set the size to wait before sending.
@@ -820,7 +820,7 @@ public:
 	 * @param size of send wait buffer to set.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int sendwait(SOCKET socket, unsigned size);
+	static int sendwait(socket_t socket, unsigned size);
 
 	/**
 	 * Set the receive size of a socket descriptor.
@@ -828,7 +828,7 @@ public:
 	 * @param size of receive buffer to set.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int recvsize(SOCKET socket, unsigned size);
+	static int recvsize(socket_t socket, unsigned size);
 
 	/**
 	 * Connect socket descriptor to a remote host from an address list.
@@ -838,14 +838,14 @@ public:
 	 * @param list of addresses to connect to.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int connect(SOCKET socket, struct addrinfo *list);
+	static int connect(socket_t socket, struct addrinfo *list);
 
 	/**
 	 * Disconnect a connected socket descriptor.
 	 * @param socket descriptor.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int disconnect(SOCKET socket);
+	static int disconnect(socket_t socket);
 
 	/**
 	 * Drop socket descriptor from multicast group.
@@ -853,7 +853,7 @@ public:
 	 * @param list of groups to drop.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int drop(SOCKET socket, struct addrinfo *list);
+	static int drop(socket_t socket, struct addrinfo *list);
 
 	/**
 	 * Join socket descriptor to multicast group.
@@ -861,14 +861,14 @@ public:
 	 * @param list of groups to join.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int join(SOCKET socket, struct addrinfo *list);
+	static int join(socket_t socket, struct addrinfo *list);
 
 	/**
 	 * Get socket error code of socket descriptor.
 	 * @param socket descriptor.
 	 * @return socket error code.
 	 */
-	static int error(SOCKET socket);
+	static int error(socket_t socket);
 
 	/**
 	 * Set multicast mode and multicast broadcast range for socket descriptor.
@@ -876,7 +876,7 @@ public:
 	 * @param ttl to set for multicast socket or 0 to disable multicast.
 	 * @return 0 if success, -1 if error.
 	 */
-	static int multicast(SOCKET socket, unsigned ttl = 1);
+	static int multicast(socket_t socket, unsigned ttl = 1);
 
 	/**
 	 * Set loopback to read multicast packets socket descriptor broadcasts.
@@ -884,7 +884,7 @@ public:
 	 * @param enable true to loopback, false to ignore.
 	 * @return 0 if success, -1 if error.
 	 */
-	static int loopback(SOCKET socket, bool enable);
+	static int loopback(socket_t socket, bool enable);
 
 	/**
 	 * Set socket blocking I/O mode of socket descriptor.
@@ -892,7 +892,7 @@ public:
 	 * @param enable true for blocking I/O.
 	 * @return 0 if success, -1 if error.
 	 */ 
-	static int blocking(SOCKET socket, bool enable);
+	static int blocking(socket_t socket, bool enable);
 
 	/**
 	 * Set socket for keepalive packets for socket descriptor.
@@ -900,7 +900,7 @@ public:
 	 * @param enable keep-alive if true.
 	 * @return 0 if success, -1 if error.
 	 */
-	static int keepalive(SOCKET socket, bool enable);
+	static int keepalive(socket_t socket, bool enable);
 
 	/**
 	 * Set socket for unicast mode broadcasts on socket descriptor.
@@ -908,7 +908,7 @@ public:
 	 * @param enable broadcasting if true.
 	 * @return 0 if success, -1 if error.
 	 */
-	static int broadcast(SOCKET socket, bool enable);
+	static int broadcast(socket_t socket, bool enable);
 
 	/**
 	 * Set packet priority of socket descriptor.
@@ -916,7 +916,7 @@ public:
 	 * @param scheduling priority for packet scheduling.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int priority(SOCKET socket, int scheduling);
+	static int priority(socket_t socket, int scheduling);
 
 	/**
 	 * Set type of service of socket descriptor.
@@ -924,7 +924,7 @@ public:
 	 * @param type of service.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int tos(SOCKET socket, int type);
+	static int tos(socket_t socket, int type);
 
 	/**
 	 * Set the time to live for the socket descriptor.
@@ -932,13 +932,13 @@ public:
 	 * @param time to live to set.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int ttl(SOCKET socket, unsigned char time);
+	static int ttl(socket_t socket, unsigned char time);
 	
 	/**
 	 * Get the address family of the socket descriptor.
 	 * @return address family.
 	 */
-	static int getfamily(SOCKET socket);
+	static int getfamily(socket_t socket);
 
 	/**
 	 * Peak data waiting in receive queue.
@@ -948,7 +948,7 @@ public:
 	 * @param address of source.
 	 * @return number of bytes found, -1 if error.
 	 */
-	static ssize_t peek(SOCKET so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
+	static ssize_t peek(socket_t so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Get data waiting in receive queue.
@@ -958,7 +958,7 @@ public:
 	 * @param address of source.
 	 * @return number of bytes received, -1 if error.
 	 */
-	static ssize_t recv(SOCKET so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
+	static ssize_t recv(socket_t so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Send data on socket.
@@ -968,7 +968,7 @@ public:
 	 * @param address of destination, NULL if connected.
 	 * @return number of bytes sent, -1 if error.
 	 */
-	static ssize_t send(SOCKET so, const void *buffer, size_t size, struct sockaddr *address = NULL);
+	static ssize_t send(socket_t so, const void *buffer, size_t size, struct sockaddr *address = NULL);
 
 	/**
 	 * Bind the socket descriptor to a known interface and service port.
@@ -976,7 +976,7 @@ public:
 	 * @param address to bind to or "*" for all.
 	 * @param service port to bind.
 	 */
-	static int bindto(SOCKET socket, const char *address, const char *service);
+	static int bindto(socket_t socket, const char *address, const char *service);
 
 	/**
 	 * Accept a socket connection from a remote host.
@@ -984,7 +984,7 @@ public:
 	 * @param address of socket accepting.
 	 * @return new socket accepted.
 	 */
-	static SOCKET acceptfrom(SOCKET socket, struct sockaddr_storage *addr = NULL);
+	static socket_t acceptfrom(socket_t socket, struct sockaddr_storage *addr = NULL);
 
 	/**
 	 * Create a socket object unbound.
@@ -993,13 +993,13 @@ public:
 	 * @param socket protocol.
 	 * @return socket.
 	 */
-	static SOCKET create(int family, int type, int protocol);
+	static socket_t create(int family, int type, int protocol);
 
 	/**
 	 * Release (close) a socket.
 	 * @param socket to close.
 	 */
-	static void release(SOCKET so);
+	static void release(socket_t so);
 
 	/**
 	 * Lookup and return the host name associated with a socket address.
@@ -1017,7 +1017,7 @@ public:
 	 * @param hint buffer.
 	 * @return hint buffer.
 	 */
-	static struct addrinfo *gethint(SOCKET socket, struct addrinfo *hint);
+	static struct addrinfo *gethint(socket_t socket, struct addrinfo *hint);
 
 	/**
 	 * Lookup a host name and service address based on the addressing family
@@ -1029,7 +1029,7 @@ public:
 	 * @param service port.
 	 * @return socket address size.
 	 */
-	static socklen_t getaddr(SOCKET socket, struct sockaddr_storage *address, const char *hostname, const char *service);
+	static socklen_t getaddr(socket_t socket, struct sockaddr_storage *address, const char *hostname, const char *service);
 
 	/**
 	 * Get the size of a socket address.
@@ -1107,7 +1107,7 @@ public:
 	 * @param true for write mode.
 	 * @return file handle to use.
 	 */
-	static FILE *open(SOCKET descriptor, bool mode = false);
+	static FILE *open(socket_t descriptor, bool mode = false);
 
 	/**
 	 * Get file handle for reading from a socket object.
@@ -1145,7 +1145,7 @@ public:
 	 * @param address to save peer connecting.  
 	 * @return socket descriptor of connected socket.
 	 */
-	SOCKET accept(struct sockaddr *address = NULL);
+	socket_t accept(struct sockaddr *address = NULL);
 
 	/**
 	 * Wait for a pending connection.
@@ -1159,21 +1159,16 @@ public:
 	 * Get the socket descriptor of the listener.
 	 * @return socket descriptor.
 	 */
-    inline operator SOCKET() const
+    inline operator socket_t() const
         {return so;};
 
 	/**
 	 * Get the socket descriptor of the listener by pointer reference.
 	 * @return socket descriptor.
 	 */
-    inline SOCKET operator*() const
+    inline socket_t operator*() const
         {return so;};	
 };
-
-/**
- * A convenience class for socket.
- */
-typedef	SOCKET socket_t;
 
 /**
  * A convenience class for socket.
