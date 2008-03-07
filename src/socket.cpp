@@ -1078,9 +1078,6 @@ Socket::Socket(struct addrinfo *addr)
 
 Socket::Socket(int family, int type, int protocol)
 {
-#ifdef	_MSWINDOWS_
-	init();
-#endif
 	so = create(family, type, protocol);
 }
 
@@ -1121,6 +1118,10 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	struct addrinfo hint, *res;
 	socket_t so;
 	int reuse = 1;
+
+#ifdef	_MSWINDOWS_
+	Socket::init();
+#endif
 
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
@@ -1184,6 +1185,9 @@ Socket::~Socket()
 
 socket_t Socket::create(int family, int type, int protocol)
 {
+#ifdef	_MSWINDOWS_
+	init();
+#endif
 	return ::socket(family, type, protocol);
 }
 
