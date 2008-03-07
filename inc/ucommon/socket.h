@@ -1005,7 +1005,7 @@ public:
 	 * @param address to bind to or "*" for all.
 	 * @param service port to bind.
 	 */
-	static int bindto(socket_t socket, const char *address, const char *service);
+	static int bindto(socket_t socket, const char *address, const char *service, int protocol = 0);
 
 	/**
 	 * Bind the socket descriptor to a known interface listen on service port.
@@ -1202,7 +1202,7 @@ public:
 	 * @param service port to bind listener.
 	 * @param backlog size for buffering pending connections.
 	 */
-	ListenSocket(const char *address, const char *service, unsigned backlog = 5);
+	ListenSocket(const char *address, const char *service, unsigned backlog = 5, int protocol = 0);
 
 	/**
 	 * Accept a socket connection.
