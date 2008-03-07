@@ -379,7 +379,7 @@ static int getaddrinfo(const char *hostname, const char *servname, const struct 
 }
 #endif
 
-#ifdef	AF_UNIX
+#if defined(AF_UNIX) && !defined(_MSWINDOWS_)
 
 static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 {
@@ -407,8 +407,6 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 }
 
 #endif
-
-
 
 static void bitmask(bit_t *bits, bit_t *mask, unsigned len)
 {
@@ -1130,7 +1128,7 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
 
-#ifdef AF_UNIX
+#if defined(AF_UNIX) && !defined(_MSWINDOWS_) 
 	if(strchr(iface, '/')) {
 		struct sockaddr_un uaddr;
 		socklen_t len = unixaddr(&uaddr, iface);
@@ -1890,6 +1888,7 @@ Socket()
 	assert(backlog > 0);
 
 	int family = AF_INET;
+
 	if(strchr(iface, '/'))
 		family = AF_UNIX;
 #ifdef	AF_INET6

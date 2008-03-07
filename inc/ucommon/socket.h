@@ -1044,13 +1044,13 @@ public:
 
 	/**
 	 * Create a bound socket for a service.
-	 * @param interface to bind.
+	 * @param iface to bind.
 	 * @param service port to bind.
 	 * @param family to select or AF_UNSPEC
 	 * @param backlog for listener.
 	 * @return socket desciptor.
 	 */
-	static socket_t create(const char *interface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
+	static socket_t create(const char *iface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
 
 	/**
 	 * Create a connected socket for a service.
