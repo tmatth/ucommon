@@ -399,11 +399,121 @@ pipestream::~pipestream()
 	close();
 }
 
+#ifdef	_MSWINDOWS_
+void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
+{
+	PROCESS_INFORMATION pi;
+	STARTUPINFO si;
+	SECURITY_ATTRIBUTES sa;
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = true;
+	HANDLE inputWriteTmp, inputRead,inputWrite;
+	HANDLE outputReadTmp, outputRead, outputWrite;
+	HANDLE errorWrite;
+	char buf[256];
+	unsigned len;
+
+	if(mode == WRONLY || mode == RDWR) {
+		CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
+		DuplicateHandle(GetCurrentProcess(),inputWriteTmp,
+            GetCurrentProcess(), &inputWrite, 0,FALSE, DUPLICATE_SAME_ACCESS);
+		CloseHandle(&inputReadTmp);
+	}
+	if(mode == RDONLY || mode == RDWR) {
+		CreatePipe(&outputReadTmp, &outputWrite,&sa,0);
+		DuplicateHandle(GetCurrentProcess(),outputWrite,
+            GetCurrentProcess(),&errorWrite,0, TRUE,DUPLICATE_SAME_ACCESS);
+		DuplicateHandle(GetCurrentProcess(),outputReadTmp,
+            GetCurrentProcess(), &outputRead, 0,FALSE, DUPLICATE_SAME_ACCESS);
+		CloseHandle(&outputReadTmp);
+	}
+
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(STARTUPINFO);
+	si.dwFlags = STARTF_USESDHANDLES;
+	
+	if(mode == RDONLY || mode == RDWR) {
+		si.StdOutput = outputWrite;
+		si.Stderror = errorWrite;
+	}
+
+	if(mode == WRONLY || mode == RDWR)
+		si.StdInput = inputRead;
+
+	snprintf(buf, sizeof(buf), "%s", cmd);
+	len = strlen(buf);
+	if(argv && *argv)
+		++argv;
+	while(argv && len < (sizeof(buf) - 2) && *argv) {
+		snprintf(buf + len, sizeof(buf) - len, " %s", *argv);
+		len = strlen(buf);
+	}
+
+	if(!CreateProcess(cmd, buf, NULL, NULL, TRUE,
+		CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
+		size = 0;
+	else
+		pid = pi.dwProcessId;
+
+	if(mode == WRONLY || mode == RDWR) {
+		fsys::assign(wr, &inputWrite);
+		CloseHandle(inputRead);
+	}
+	if(mode == RDONLY || mode == RDWR) {
+		fsys::assign(rd, &outputRead);
+		CloseHandle(outputWrite);
+		CloseHandle(errorWrite);
+	}
+	if(size)
+		allocate(size, mode);
+	else {
+		fsys::close(rd);
+		fsys::close(wr);
+	}
+}
+
+void pipestream::terminate(void)
+{
+	HANDLE hProc;
+	if(bufsize) {
+		hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
+		if(hProc != NULL) {
+			TerminateProcess(hProc,0);
+			CloseHandle(hProc);
+		}
+		release();
+	}
+}
+
+void pipestream::close(void)
+{
+	HANDLE hProc;
+	if(bufsize) {
+		release();
+		hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
+		if(hProc != NULL) {
+			WaitForSingleObject(hProc, INFINITE);
+			CloseHandle(hProc);
+		}
+	}
+}
+
+#else
+
 void pipestream::terminate(void)
 {
 	if(bufsize) {
 		kill(pid, SIGTERM);
 		close();
+	}
+}
+
+void pipestream::close(void)
+{
+	if(bufsize) {
+		release();
+		waitpid(pid, NULL, 0);
 	}
 }
 
@@ -448,6 +558,8 @@ void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
 	exit(-1);
 }
 
+#endif
+
 void pipestream::release(void)
 {
 	if(!bufsize)
@@ -468,14 +580,6 @@ void pipestream::release(void)
 	gbuf = pbuf = NULL;
 	bufsize = 0;
 	clear();
-}
-
-void pipestream::close(void)
-{
-	if(bufsize) {
-		release();
-		waitpid(pid, NULL, 0);
-	}
 }
 
 void pipestream::allocate(size_t size, access_t mode)
