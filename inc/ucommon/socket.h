@@ -1186,6 +1186,11 @@ public:
 	 * @param file handle to close.
 	 */
 	static void close(FILE *fp);
+
+	/**
+	 * Return error code of last socket operation,
+	 */
+	static int error(void);
 };
 
 /**
