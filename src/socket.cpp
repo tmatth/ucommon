@@ -1099,6 +1099,9 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
 
+	if(iface && !strcmp(iface, "*"))
+		iface = NULL;
+
 	getaddrinfo(iface, port, &hint, &res);
 	if(res == NULL)
 		return INVALID_SOCKET;
@@ -1827,7 +1830,7 @@ bool Socket::waitSending(timeout_t timeout) const
 #endif
 }
 
-ListenSocket::ListenSocket(const char *iface, const char *svc, unsigned backlog) :
+ListenSocket::ListenSocket(const char *iface, const char *svc, unsigned backlog, int protocol) :
 Socket()
 {
 	assert(iface != NULL && *iface != 0);
@@ -1843,7 +1846,7 @@ Socket()
 #endif
 
 retry:
-	so = ::socket(family, SOCK_STREAM, 0);
+	so = ::socket(family, SOCK_STREAM, protocol);
 	if(so == INVALID_SOCKET)
 		return;
 		
@@ -2014,7 +2017,7 @@ int Socket::listento(socket_t so, struct sockaddr *iface, int backlog)
 	return ::listen(so, backlog);
 }
 
-int Socket::bindto(socket_t so, const char *host, const char *svc)
+int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
 {
 	assert(so != INVALID_SOCKET);
 	assert(host != NULL && *host != 0);
@@ -2039,6 +2042,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc)
     if(!gethint(so, &hint) || !svc)
         return -1;
 
+	hint.ai_protocol = protocol;
 	if(host && !strcmp(host, "*"))
 		host = NULL;
 
