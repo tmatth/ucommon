@@ -156,7 +156,7 @@ public:
 	 */
 	inline fd_t getHandle(void)
 		{return fd;};
-	
+
 	/**
 	 * Set the position of a file descriptor.
 	 * @param offset from start of file or "end" to append.

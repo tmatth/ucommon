@@ -266,6 +266,8 @@ void fsys::open(const char *path, access_t access)
 	fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
 		seek(end);
+	else
+		error = remapError();
 }
 
 void fsys::create(const char *path, access_t access, unsigned mode)
@@ -311,6 +313,8 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 	fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
 		seek(end);
+	else
+		error = remapError();
 	if(fd != INVALID_HANDLE_VALUE)
 		change(path, mode);
 }
