@@ -1234,7 +1234,7 @@ int Socket::error(void)
 #else
 int Socket::error(void)
 {
-	return errno();
+	return errno;
 }
 #endif
 

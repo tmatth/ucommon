@@ -47,6 +47,7 @@ struct addrinfo;
 #include <netdb.h>
 #endif
 
+#include <errno.h>
 #include <stdio.h>
 
 #ifndef IPTOS_LOWDELAY
