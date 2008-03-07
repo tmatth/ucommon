@@ -379,6 +379,37 @@ static int getaddrinfo(const char *hostname, const char *servname, const struct 
 }
 #endif
 
+#ifdef	AF_UNIX
+
+static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
+{
+	assert(addr != NULL);
+	assert(path != NULL && *path != 0);
+
+	socklen_t len;
+	unsigned slen = strlen(path);
+
+    if(slen > sizeof(struct sockaddr_storage) - 8)
+        slen = sizeof(struct sockaddr_storage) - 8;
+
+    memset(addr, 0, sizeof(struct sockaddr_storage));
+    addr->sun_family = AF_UNIX;
+    memcpy(addr->sun_path, path, slen);
+
+#ifdef	__SUN_LEN
+	len = sizeof(addr->sun_len) + strlen(addr->sun_path) + 
+		sizeof(addr->sun_family) + 1;
+	addr->sun_len = len;
+#else
+    len = strlen(addr->sun_path) + sizeof(addr->sun_family) + 1;
+#endif
+	return len;
+}
+
+#endif
+
+
+
 static void bitmask(bit_t *bits, bit_t *mask, unsigned len)
 {
 	assert(bits != NULL);
@@ -1098,6 +1129,27 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	hint.ai_family = family;
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
+
+#ifdef AF_UNIX
+	if(strchr(iface, '/')) {
+		struct sockaddr_un uaddr;
+		socklen_t len = unixaddr(&uaddr, iface);
+		if(!type)
+			type = SOCK_STREAM;
+		so = create(AF_UNIX, type, 0);
+		if(so == INVALID_SOCKET)
+			return INVALID_SOCKET;
+		if(::bind(so, (struct sockaddr *)&uaddr, len)) {
+			release(so);
+			return INVALID_SOCKET;
+		}
+		if(type == SOCK_STREAM && listen(so, backlog)) {
+			release(so);
+			return INVALID_SOCKET;
+		}
+		return so;	
+	};
+#endif
 
 	if(iface && !strcmp(iface, "*"))
 		iface = NULL;
@@ -1850,7 +1902,7 @@ retry:
 	if(so == INVALID_SOCKET)
 		return;
 		
-	if(bindto(so, iface, svc)) {
+	if(bindto(so, iface, svc, protocol)) {
 		release();
 #ifdef	AF_INET6
 		if(family == AF_INET && !strchr(iface, '.')) {
@@ -1875,35 +1927,6 @@ socket_t ListenSocket::accept(struct sockaddr_storage *addr)
 
 #ifdef	_MSWINDOWS_
 #undef	AF_UNIX
-#endif
-
-#ifdef	AF_UNIX
-
-static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
-{
-	assert(addr != NULL);
-	assert(path != NULL && *path != 0);
-
-	socklen_t len;
-	unsigned slen = strlen(path);
-
-    if(slen > sizeof(struct sockaddr_storage) - 8)
-        slen = sizeof(struct sockaddr_storage) - 8;
-
-    memset(addr, 0, sizeof(struct sockaddr_storage));
-    addr->sun_family = AF_UNIX;
-    memcpy(addr->sun_path, path, slen);
-
-#ifdef	__SUN_LEN
-	len = sizeof(addr->sun_len) + strlen(addr->sun_path) + 
-		sizeof(addr->sun_family) + 1;
-	addr->sun_len = len;
-#else
-    len = strlen(addr->sun_path) + sizeof(addr->sun_family) + 1;
-#endif
-	return len;
-}
-
 #endif
 
 struct addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
