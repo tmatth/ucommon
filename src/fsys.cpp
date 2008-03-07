@@ -28,7 +28,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-const size_t fsys::end = (size_t)(-1);
+const fsys::offset_t fsys::end = (size_t)(-1);
 
 #ifdef	_MSWINDOWS_
 
@@ -353,7 +353,7 @@ void fsys::operator=(fd_t from)
 	}
 }
 
-void fsys::operator=(fsys &from)
+void fsys::operator=(const fsys& from)
 {
 	HANDLE pHandle = GetCurrentProcess();
 
@@ -371,7 +371,7 @@ void fsys::operator=(fsys &from)
 	}
 }
 
-void fsys::seek(size_t pos)
+void fsys::seek(offset_t pos)
 {
 	DWORD rpos = pos;
 	int mode = FILE_BEGIN;
@@ -620,7 +620,7 @@ void fsys::operator=(fd_t from)
 	}
 }
 
-void fsys::operator=(fsys &from)
+void fsys::operator=(const fsys& from)
 {
 	close();
 	if(fd == INVALID_HANDLE_VALUE && from.fd != INVALID_HANDLE_VALUE) {
@@ -630,7 +630,7 @@ void fsys::operator=(fsys &from)
 	}
 }
 
-void fsys::seek(size_t pos)
+void fsys::seek(offset_t pos)
 {
 	unsigned long rpos = pos;
 	int mode = SEEK_SET;

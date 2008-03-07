@@ -76,15 +76,21 @@ public:
 		ACCESS_RDONLY,
 		ACCESS_WRONLY,
 		ACCESS_REWRITE,
+		ACCESS_RDWR = ACCESS_REWRITE,
 		ACCESS_APPEND,
 		ACCESS_SHARED,
 		ACCESS_DIRECTORY
 	} access_t;
 
 	/**
+	 * File offset type.
+	 */
+	typedef long offset_t;
+
+	/**
 	 * Used to mark "append" in set position operations.
 	 */
-	static const size_t end;
+	static const offset_t end;
 
 	/**
 	 * Construct an unattached fsys descriptor.
@@ -134,13 +140,13 @@ public:
 	 * Assign file descriptor by duplicating another descriptor.
 	 * @param descriptor to dup from.
 	 */
-	inline void operator=(fsys& descriptor);
+	void operator=(const fsys& descriptor);
 
 	/**
 	 * Assing file descriptor from system descriptor.
 	 * @param descriptor to dup from.
 	 */
-	inline void operator=(fd_t descriptor);
+	void operator=(fd_t descriptor);
 
 	/**
 	 * Get the error number (errno) associated with the descriptor from
@@ -161,7 +167,7 @@ public:
 	 * Set the position of a file descriptor.
 	 * @param offset from start of file or "end" to append.
 	 */
-	void	seek(size_t offset);
+	void	seek(offset_t offset);
 
 	/**
 	 * Read data from descriptor or scan directory.
@@ -275,6 +281,21 @@ public:
 	 * @param access mode of descriptor.
 	 */
 	void open(const char *path, access_t access);
+
+	/**
+	 * Assign descriptor directly.
+	 * @param descriptor to assign.
+	 */
+	inline void assign(fd_t descriptor)
+		{close(); fd = descriptor;};
+
+	/**
+	 * Assign a descriptor directly.
+	 * @param fsys to assign to.
+	 * @param descriptor to assign.
+	 */
+	inline static void assign(fsys& fs, fd_t descriptor)
+		{fs.close(); fs.fd = descriptor;};
 
 	/**
 	 * Open a file descriptor directly.

@@ -840,7 +840,7 @@ public:
 	 * Assign embedded value from related type.
 	 * @param typed_value to assign.
 	 */
-	inline void operator=(T& typed_value)
+	inline void operator=(const T& typed_value)
 		{set(typed_value);};
 
 	/**
@@ -889,7 +889,7 @@ public:
 	 * @param root node or pointer for list.
 	 * @param typed_value to assign.
 	 */
-	inline linked_value(LinkedObject **root, T& typed_value) 
+	inline linked_value(LinkedObject **root, const T& typed_value) 
 		{LinkedObject::enlist(root); set(typed_value);};
 
 	/**
@@ -897,14 +897,14 @@ public:
 	 * @param index to list our object on.
 	 * @param typed_value to assign.
 	 */
-	inline linked_value(OrderedIndex *index, T& typed_value)
+	inline linked_value(OrderedIndex *index, const T& typed_value)
  		{O::enlist(index); set(typed_value);};
 
 	/**
 	 * Assign embedded value from related type.
 	 * @param typed_value to assign.
 	 */
-	inline void operator=(T& typed_value)
+	inline void operator=(const T& typed_value)
 		{set(typed_value);};
 };	
 
@@ -1143,7 +1143,7 @@ public:
 	 * Assign the value of our node.
 	 * @param data value to assign.
 	 */
-	inline void operator=(const T &data)
+	inline void operator=(const T& data)
 		{value = data;};
 
 	/**

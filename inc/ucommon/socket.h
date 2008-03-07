@@ -485,20 +485,12 @@ public:
 	 * @param type of socket to bind (stream, udp, etc).
 	 * @param protocol of socket to bind.
 	 */
-	Socket(const char *address, const char *port, int family, int type, int protocol = 0);
+	Socket(const char *address, const char *port, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
 
 	/**
 	 * Shutdown, close, and destroy socket.
 	 */
 	virtual ~Socket();
-
-	/**
-	 * Create a bound socket.
-	 * @param address to bind or "*" for all
-	 * @param port number of service to bind.
-	 * @return 0 on success, -1 on error.
-	 */
-	void create(const char *address, const char *port, int family, int type, int protocol = 0);
 
 	/**
 	 * Cancel pending i/o by shutting down the socket.
@@ -640,6 +632,22 @@ public:
 	 */
 	inline int recvsize(unsigned size)
 		{return recvsize(so, size);};
+
+	/**
+	 * Get the type of a socket.
+	 * @param socket descriptor.
+	 * @return socket type.
+	 */
+	static int socktype(socket_t so);
+
+	/**
+	 * Get the type of a socket.
+	 * @return socket type.
+	 */
+	inline int socktype(void)
+		{return socktype(so);};
+
+
 
 	/**
 	 * Set the type of service field of outgoing packets.  Some useful
@@ -1000,6 +1008,24 @@ public:
 	static int bindto(socket_t socket, const char *address, const char *service);
 
 	/**
+	 * Bind the socket descriptor to a known interface listen on service port.
+	 * @param socket descriptor to bind.
+	 * @param address to bind to.
+	 * @param service port to bind.
+	 * @param backlog for service.
+	 */
+	static int listento(socket_t socket, struct sockaddr *address, int backlog = 5);
+
+	/**
+	 * Bind the socket descriptor to a known interface.
+	 * @param socket descriptor to bind.
+	 * @param address to bind to.
+	 * @param service port to bind.
+	 */
+	static int bindto(socket_t socket, struct sockaddr *address);
+
+
+	/**
 	 * Accept a socket connection from a remote host.
 	 * @param socket descriptor to accept from.
 	 * @param address of socket accepting.
@@ -1015,6 +1041,23 @@ public:
 	 * @return socket.
 	 */
 	static socket_t create(int family, int type, int protocol);
+
+	/**
+	 * Create a bound socket for a service.
+	 * @param interface to bind.
+	 * @param service port to bind.
+	 * @param family to select or AF_UNSPEC
+	 * @param backlog for listener.
+	 * @return socket desciptor.
+	 */
+	static socket_t create(const char *interface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
+
+	/**
+	 * Create a connected socket for a service.
+	 * @param address of service for connect.
+	 * @return socket desciptor.
+	 */
+	static socket_t create(Socket::address &address);
 
 	/**
 	 * Release (close) a socket.

@@ -1055,7 +1055,7 @@ Socket::Socket(int family, int type, int protocol)
 	so = create(family, type, protocol);
 }
 
-Socket::Socket(const char *iface, const char *port, int family, int type, int protocol)
+Socket::Socket(const char *iface, const char *port, int family, int type, int protocol, int backlog)
 {
 	assert(iface != NULL && *iface != 0);
 	assert(port != NULL && *port != 0);
@@ -1063,20 +1063,65 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 #ifdef	_MSWINDOWS_
 	init();
 #endif
-	so = INVALID_SOCKET;
-	create(iface, port, family, type, protocol);
+	so = create(iface, port, family, type, protocol, 0);
 }
 
-void Socket::create(const char *iface, const char *port, int family, int type, int protocol)
+socket_t Socket::create(Socket::address &address)
+{
+	socket_t so;
+	struct addrinfo *res = *address;
+	if(!res)
+		return INVALID_SOCKET;
+
+	so = create(res->ai_family, res->ai_socktype, res->ai_protocol);
+	if(so == INVALID_SOCKET)
+		return INVALID_SOCKET;
+	
+	if(connect(so, res)) {
+		release(so);
+		return INVALID_SOCKET;
+	}
+	return so;
+}
+
+socket_t Socket::create(const char *iface, const char *port, int family, int type, int protocol, int backlog)
 {
 	assert(iface != NULL && *iface != 0);
 	assert(port != NULL && *port != 0);
+	
+	struct addrinfo hint, *res;
+	socket_t so;
+	int reuse = 1;
 
-	release();
-	so = create(family, type, protocol);
-	if(so != INVALID_SOCKET)
-		if(bindto(so, iface, port))
-			release();
+	memset(&hint, 0, sizeof(hint));
+	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+	hint.ai_family = family;
+	hint.ai_socktype = type;
+	hint.ai_protocol = protocol;
+
+	getaddrinfo(iface, port, &hint, &res);
+	if(res == NULL)
+		return INVALID_SOCKET;
+	so = create(res->ai_family, res->ai_socktype, res->ai_protocol);
+	if(so == INVALID_SOCKET) {
+		freeaddrinfo(res);
+		return INVALID_SOCKET;
+	}
+	setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (caddr_t)&reuse, sizeof(reuse));
+	if(res->ai_addr) {
+		if(::bind(so, res->ai_addr, res->ai_addrlen)) {
+			release(so);
+			so = INVALID_SOCKET;
+		}
+		else if(res->ai_socktype == SOCK_STREAM) {
+			if(::listen(so, backlog)) {
+				release(so);
+				so = INVALID_SOCKET;
+			}
+		}
+	}
+	freeaddrinfo(res);
+	return so;
 }
 
 Socket::~Socket()
@@ -1876,6 +1921,15 @@ struct addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
 	return hint;
 }
 
+int Socket::socktype(socket_t so)
+{
+	int sotype;
+	socklen_t slen = sizeof(sotype);
+	if(getsockopt(so, SOL_SOCKET, SO_TYPE, (caddr_t)&sotype, &slen))
+		return 0;
+	return sotype;
+}
+
 char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
 {
 	assert(sa != NULL);
@@ -1944,6 +1998,20 @@ exit:
 	if(res)
 		freeaddrinfo(res);
 	return len;
+}
+
+int Socket::bindto(socket_t so, struct sockaddr *iface)
+{
+	return bind(so, iface, getlen(iface));
+}
+
+int Socket::listento(socket_t so, struct sockaddr *iface, int backlog)
+{
+	int rtn;
+
+	if(::bind(so, iface, getlen(iface)))
+		return -1;
+	return ::listen(so, backlog);
 }
 
 int Socket::bindto(socket_t so, const char *host, const char *svc)

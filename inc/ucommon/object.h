@@ -411,7 +411,7 @@ protected:
 	 * Assign our value from a typed data object.  This is a helper method.
 	 * @param object to assign our value from.
 	 */
-	inline void set(T& object)
+	inline void set(const T& object)
 		{value = object;};
 
 public:
@@ -440,7 +440,7 @@ public:
 	 * Assign embedded data value.
 	 * @param data value to assign.
 	 */
-	inline void operator=(T& data)
+	inline void operator=(const T& data)
 		{value = data;};
 
 	/**
