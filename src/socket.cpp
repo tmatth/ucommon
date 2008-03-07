@@ -1226,6 +1226,18 @@ void Socket::release(void)
 	}
 }
 
+#ifdef	_MSWINDOWS_
+int Socket::error(void)
+{
+	return WSAGetLastError();
+}
+#else
+int Socket::error(void)
+{
+	return errno();
+}
+#endif
+
 Socket::operator bool()
 {
 	if(so == INVALID_SOCKET)
