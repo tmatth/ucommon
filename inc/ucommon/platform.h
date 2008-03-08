@@ -266,6 +266,94 @@ typedef	void (*sighandler_t)(int);	/**< Convenient typedef for signal handlers. 
 typedef	unsigned long timeout_t;	/**< Typedef for millisecond timer values. */
 
 #include <stdlib.h>
+#include <errno.h>
+
+#ifdef	_MSWINDOWS_
+#ifndef	ENETDOWN
+#define	ENETDOWN		((int)(WSAENETDOWN))
+#endif
+#ifndef	EINPROGRESS
+#define	EINPROGRESS		((int)(WSAEINPROGRESS))
+#endif
+#ifndef	ENOPROTOOPT
+#define	ENOPROTOOPT		((int)(WSAENOPROTOOPT))
+#endif
+#ifndef	EADDRINUSE
+#define	EADDRINUSE		((int)(WSAEADDRINUSE))
+#endif
+#ifndef	EADDRNOTAVAIL
+#define	EADDRNOTAVAIL	((int)(WSAEADDRNOTAVAIL))
+#endif
+#ifndef	ENETUNREACH
+#define	ENETUNREACH		((int)(WSAENETUNREACH))
+#endif
+#ifndef	EHOSTUNREACH
+#define	EHOSTUNREACH	((int)(WSAEHOSTUNREACH))
+#endif
+#ifndef	EHOSTDOWN
+#define	EHOSTDOWN		((int)(WSAEHOSTDOWN))
+#endif
+#ifndef	ENETRESET
+#define	ENETRESET		((int)(WSAENETRESET))
+#endif
+#ifndef	ECONNABORTED
+#define	ECONNABORTED	((int)(WSAECONNABORTED))
+#endif
+#ifndef	ECONNRESET
+#define	ECONNRESET		((int)(WSAECONNRESET))
+#endif
+#ifndef	EISCONN
+#define	EISCONN			((int)(WSAEISCONN))
+#endif
+#ifndef	ENOTCONN		
+#define	ENOTCONN		((int)(WSAENOTCONN))
+#endif
+#ifndef	ESHUTDOWN
+#define	ESHUTDOWN		((int)(WSAESHUTDOWN))
+#endif
+#ifndef	ETIMEDOUT
+#define	ETIMEDOUT		((int)(WSAETIMEDOUT))
+#endif
+#ifndef	ECONNREFUSED
+#define	ECONNREFUSED	((int)(WSAECONNREFUSED))
+#endif
+#endif
+
+#ifndef	ESHUTDOWN
+#define	ESHUTDOWN	EPIPE
+#endif
+
+#ifndef	EWOULDBLOCK
+#define	EWOULDBLOCK	EAGAIN
+#endif
+
+#ifndef	ENOPROTOOPT
+#define	ENOPROTOOPT	EINVAL
+#endif
+
+#ifndef	EADDRINUSE
+#define	EADDRINUSE	EINVAL
+#endif
+
+#ifndef	EADDRNOTAVAIL
+#define	EADDRNOTAVAIL	EINVAL
+#endif
+
+#ifndef	ENETUNREACH
+#define	ENETUNREACH		EINVAL
+#endif
+
+#ifndef	ENETRESET
+#define	ENETRESET		EINTR
+#endif
+
+#ifndef	ECONNABORTED
+#define	ENETRESET		EINTR
+#endif
+
+#ifndef	ECONNRESET
+#define	ENETRESET		EINTR
+#endif
 
 /**
  * Function to handle runtime errors.  When using the standard C library,

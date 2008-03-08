@@ -1229,7 +1229,71 @@ void Socket::release(void)
 #ifdef	_MSWINDOWS_
 int Socket::error(void)
 {
-	return WSAGetLastError();
+	switch(WSAGetLastError())
+	{
+	case WSANOTINITIALISED:
+	case WSAENETDOWN:
+	case WSASYSNOTREADY:
+		return ENETDOWN;
+	case WSAEFAULT:
+		return EFAULT;
+	case WSAEINTR:
+	case WSAECANCELLED:
+	case WSA_OPERATION_ABORTED:
+	case WSA_IO_INCOMPLETE:
+	case WSASYSCALLFAILURE:
+	case WSA_E_CANCELLED:
+		return EINTR;
+	case WSA_IO_PENDING:
+	case WSAEINPROGRESS:
+		return EINPROGRESS;
+	case WSAEINVAL:
+		return EINVAL;
+	case WSAEMFILE:
+		return EMFILE;
+	case WSAENETUNREACH:
+		return ENETUNREACH;
+	case WSAENOBUFS:
+	case WSAETOOMANYREFS:
+	case WSA_NOT_ENOUGH_MEMORY:
+		return ENOMEM;
+	case WSAEACCES:
+		return EACCES;
+	case WSAEBADF:
+	case WSAENOTSOCK:
+	case WSA_INVALID_HANDLE:
+		return EBADF;
+	case WSAEOPNOTSUPP:
+		return ENOSYS;
+	case WSAEWOULDBLOCK:
+	case WSAEALREADY:
+		return EAGAIN;
+	case WSAENOPROTOOPT:
+		return ENOPROTOOPT;
+	case WSAEADDRINUSE:
+		return EADDRINUSE;
+	case WSAENETRESET:
+		return ENETRESET;
+	case WSAECONNABORTED:
+		return ECONNABORTED;
+	case WSAECONNRESET:
+		return ECONNRESET;
+	case WSAEISCONN:
+		return EISCONN;
+	case WSAENOTCONN:
+		return ENOTCONN;
+	case WSAESHUTDOWN:
+		return ESHUTDOWN;
+	case WSAETIMEDOUT:
+		return ETIMEDOUT;
+	case WSAECONNREFUSED:
+		return ECONNREFUSED;
+	case WSAEHOSTDOWN:
+		return EHOSTDOWN;
+	case WSAEHOSTUNREACH:
+		return EHOSTUNREACH;
+	}
+	return EINVAL;
 }
 #else
 int Socket::error(void)
