@@ -2241,7 +2241,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 	case AF_INET6:
 		struct sockaddr_in6 saddr6;
 		memcpy(&saddr6, addr, sizeof(saddr6));
-		saddr.sin6_port = 0;
+		saddr6.sin6_port = 0;
 		WSAAddressToString((struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
 		return name;
 #endif
