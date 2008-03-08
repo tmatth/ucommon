@@ -2222,6 +2222,10 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 	assert(addr != NULL);
 	assert(name != NULL);
 
+#ifdef	_MSWINDOWS_
+	DWORD slen = size;
+#endif	
+
 	*name = 0;
 	if(!addr)
 		return NULL;
@@ -2235,15 +2239,13 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #ifdef	_MSWINDOWS_
 #ifdef	AF_INET6
 	case AF_INET6:
-		DWORD slen = size;
-		struct sockaddr_in6 saddr;
-		memcpy(&saddr, addr, sizeof(saddr));
+		struct sockaddr_in6 saddr6;
+		memcpy(&saddr6, addr, sizeof(saddr6));
 		saddr.sin6_port = 0;
-		WSAAddressToString((struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
+		WSAAddressToString((struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
 		return name;
 #endif
 	case AF_INET:
-		DWORD slen = size;
 		struct sockaddr_in saddr;
 		memcpy(&saddr, addr, sizeof(saddr));
 		saddr.sin_port = 0;
