@@ -408,6 +408,29 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 
 #endif
 
+int setfamily(int family, const char *host)
+{
+	const char *hc = host;
+	if(!host)
+		return  family;
+
+	if(!family || family == AF_UNSPEC) {
+#ifdef	AF_INET6
+		if(strchr(host, ':'))
+			family = AF_INET6;
+#endif
+#ifdef	AF_UNIX
+		if(*host == '/')
+			family = AF_UNIX;
+#endif
+		while((*hc >= '0' && *hc <= '9') || *hc == '.') 
+			++hc;
+		if(!*hc)
+			family = AF_INET;
+	}
+	return family;
+}
+
 static void bitmask(bit_t *bits, bit_t *mask, unsigned len)
 {
 	assert(bits != NULL);
@@ -790,6 +813,7 @@ Socket::address::address(const char *host, unsigned port, int family)
 {
 	assert(host != NULL && *host != 0);
 	
+	family = setfamily(family, host);
 	list = NULL;
 #ifdef	_MSWINDOWS_
 	Socket::init();
@@ -854,6 +878,8 @@ void Socket::address::set(const char *host, unsigned port, int family)
 	struct addrinfo hint;
 	char buf[16];
 	char *svc = NULL;
+
+	family = setfamily(family, host);
 
 	clear();
 	memset(&hint, 0, sizeof(hint));
@@ -981,6 +1007,8 @@ void Socket::address::add(struct sockaddr *addr)
 
 void Socket::address::set(const char *host, const char *svc, int family, int socktype)
 {
+	family = setfamily(family, host);
+
 	clear();
 	add(host, svc, family, socktype);
 }
@@ -1000,7 +1028,8 @@ void Socket::address::add(const char *host, const char *svc, int family, int soc
 
 	hint.ai_socktype = socktype;
 
-	if(family)
+	family = setfamily(family, host);
+	if(family && family != AF_UNSPEC)
 		hint.ai_family = family;
 
 	getaddrinfo(host, svc, &hint, &join);
@@ -1089,6 +1118,7 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 #ifdef	_MSWINDOWS_
 	init();
 #endif
+	family = setfamily(family, iface);
 	so = create(iface, port, family, type, protocol, 0);
 }
 
@@ -1125,7 +1155,7 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 
 	memset(&hint, 0, sizeof(hint));
 	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-	hint.ai_family = family;
+	hint.ai_family = setfamily(family, iface);
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
 

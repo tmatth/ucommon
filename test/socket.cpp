@@ -26,7 +26,7 @@ using namespace UCOMMON_NAMESPACE;
 
 static Socket::address localhost("127.0.0.1", 4444);
 #ifdef	AF_INET6
-static Socket::address localhost6("::1", 4444, AF_INET6);
+static Socket::address localhost6("::1", 4444);
 #endif
 
 extern "C" int main()
