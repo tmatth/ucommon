@@ -2269,14 +2269,36 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #ifdef	_MSWINDOWS_
 #ifdef	AF_INET6
 	case AF_INET6:
-		struct sockaddr_in6 saddr6;
 		struct sockaddr_in6 *paddr6 = (struct sockaddr_in6 *)addr;
-		memset(&saddr6, 0, sizeof(saddr6));
-		saddr6.sin6_family = AF_INET6;
-		memcpy(saddr6.sin6_addr, &(paddr6->sin6_addr), sizeof(saddr6.sin6_addr));
-		::printf("RESULT %d\n", getnameinfo((struct sockaddr *)&saddr6, sizeof(saddr6), name, size, NULL, 0, NI_NUMERICHOST));
-		::printf("NAME <%s>\n", name);
-		return name;
+		const unsigned char *cp = (const unsigned char *)&(paddr6->sin6_addr);
+		unsigned alen = 0;
+		unsigned uint16_t val;
+		const char *save = name;
+		while(alen < 16) {
+			val = cp[alen] * 256 + cp[alen + 1];
+			if(val)
+				break;
+			if(*name == 0) {					
+				*(name++) = ':';
+				--size;
+			}
+			alen += 2;
+		}
+		while(alen < 8 && size > 10) {
+			val = cp[alen] * 256 + cp[alen + 1];
+			if(val == 0) {
+				*(name++) = ':';
+				--size;
+			}
+			else {
+				snprintf(name, 10, ":%4x", val);
+				size -= strlen(name);
+				name += strlen(name);
+			}
+			alen += 2;
+		}
+		*name = 0;	
+		return save;
 #endif
 	case AF_INET:
 		struct sockaddr_in saddr;
