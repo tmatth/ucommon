@@ -181,7 +181,7 @@ public:
 	} access_t;
 
 private:
-	__LOCAL void allocate(unsigned size, access_t mode);
+	__LOCAL void allocate(size_t size, access_t mode);
 
 protected:
 	fsys_t rd, wr;
@@ -303,7 +303,7 @@ public:
 	} access_t;
 
 private:
-	__LOCAL void allocate(unsigned size, fsys::access_t mode);
+	__LOCAL void allocate(size_t size, fsys::access_t mode);
 
 protected:
 	fsys_t fd;

@@ -1,3 +1,7 @@
+From ucommon 1.7.1 to 1.7.2
+- small fix in type mismatch in stream allocate methods.
+- do not remap undefined error codes, as can break switch blocks.
+
 From ucommon 1.7.0 to 1.7.1
 - extended errno mapping for sockets.
 
