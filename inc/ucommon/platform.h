@@ -156,7 +156,7 @@ inline int setenv(const char *s, const char *v, int overwrite)
 	{return cpr_setenv(s, v, overwrite);};
 
 inline void sleep(int seconds)
-	{_sleep(seconds);};
+	{::Sleep((seconds * 1000l));};
 
 inline void pthread_exit(void *p)
 	{_endthreadex((DWORD)p);};
