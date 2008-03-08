@@ -44,13 +44,15 @@ extern "C" int main()
 	assert(Socket::equal((struct sockaddr *)&addr, localhost.get(AF_INET)));
 	assert(Socket::subnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
 #ifdef	AF_INET6
-	Socket::getaddress(testing6.get(AF_INET6), addrbuf, sizeof(addrbuf));
-	assert(0 == strcmp(addrbuf, "44:22:66::1"));
-	Socket::getaddress(localhost6.get(AF_INET6), addrbuf, sizeof(addrbuf));
-	assert(0 == strcmp(addrbuf, "::1"));
-	Socket::getinterface((struct sockaddr *)&addr, localhost6.get(AF_INET6));
-	Socket::getaddress((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
-	assert(0 == strcmp(addrbuf, "::1"));
-	assert(Socket::equal((struct sockaddr *)&addr, localhost6.get(AF_INET6)));
+	// we can only test if interface/ipv6 support is actually running
+	// so we use getinterface to find out first.  it will return -1 for
+	// localhost interface if ipv6 is down...
+	if(!Socket::getinterface((struct sockaddr *)&addr, localhost6.get(AF_INET6))) {
+		Socket::getaddress((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
+		assert(0 == strcmp(addrbuf, "::1"));
+		assert(Socket::equal((struct sockaddr *)&addr, localhost6.get(AF_INET6)));
+		Socket::getaddress(testing6.get(AF_INET6), addrbuf, sizeof(addrbuf));
+		assert(0 == strcmp(addrbuf, "44:22:66::1"));
+	}
 #endif
 };

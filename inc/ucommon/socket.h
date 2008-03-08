@@ -1181,8 +1181,9 @@ public:
 	 * address.
 	 * @param address of interface found.
 	 * @param destination address.
+	 * @return 0 on success, -1 on error.
 	 */
-	static void getinterface(struct sockaddr *address, struct sockaddr *destination);
+	static int getinterface(struct sockaddr *address, struct sockaddr *destination);
 
 	/**
 	 * Get the hostname of a socket address.
@@ -1209,9 +1210,10 @@ public:
 	static unsigned keyindex(struct sockaddr *address, unsigned size);
 
 	/**
-	 * Initialize socket subsystem.
+	 * Initialize socket subsystem.  Optionally set default family for
+	 * all socket operations.
 	 */
-	static void init(void);
+	static void init(int family = 0);
 
 	/**
 	 * Convert socket into FILE handle for reading.

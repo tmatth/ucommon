@@ -1,3 +1,6 @@
+From ucommon 1.7.2 to 1.7.3
+- support for forced ipv4/ipv6 in init.  ipv6 unit testing.
+
 From ucommon 1.7.1 to 1.7.2
 - small fix in type mismatch in stream allocate methods.
 - do not remap undefined error codes, as can break switch blocks.

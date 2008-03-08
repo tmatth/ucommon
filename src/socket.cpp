@@ -120,6 +120,8 @@ using namespace UCOMMON_NAMESPACE;
 
 typedef unsigned char   bit_t;
 
+static int initfamily = 0;
+
 #ifndef	HAVE_GETADDRINFO
 
 static mutex servmutex, hostmutex;
@@ -408,11 +410,18 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 
 #endif
 
+#ifndef	AF_UNSPEC
+#define	AF_UNSPEC	0
+#endif
+
 int setfamily(int family, const char *host)
 {
 	const char *hc = host;
 	if(!host)
 		return  family;
+
+	if(!family || family == AF_UNSPEC)
+		family = initfamily;
 
 	if(!family || family == AF_UNSPEC) {
 #ifdef	AF_INET6
@@ -496,11 +505,14 @@ static void _socketcleanup(void)
 		WSACleanup();
 }
 
-void Socket::init(void)
+void Socket::init(int family)
 {
 	static bool initialized = false;
 	unsigned short version;
 	WSADATA status;
+
+	if(family)
+		initfamily = family;
 
 	if(initialized)
 		return;
@@ -514,8 +526,10 @@ void Socket::init(void)
 	_started = true;
 };	
 #else
-void Socket::init(void)
+void Socket::init(int family)
 {
+	if(family)
+		initfamily = family;
 }
 #endif
 
@@ -2269,57 +2283,11 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #ifdef	_MSWINDOWS_
 #ifdef	AF_INET6
 	case AF_INET6:
-		struct sockaddr_in6 *paddr6 = (struct sockaddr_in6 *)addr;
-		const unsigned char *cp = (const unsigned char *)&(paddr6->sin6_addr);
-		unsigned alen;
-		uint16_t val;
-		char *save = name;
-		bool skip;
-		skip = false;
-		alen = 0;
-		char *sp;
-		while(alen < 16) {
-			val = cp[alen] * 256 + cp[alen + 1];
-			if(val)
-				break;
-			if(*name == 0) {					
-				*(name++) = ':';
-				--size;
-			}
-			alen += 2;
-		}
-		if(!alen) {
-			val = cp[alen] * 256 + cp[alen + 1];
-			snprintf(name, 10, "%-4x", val);
-			sp = strchr(name, ' ');
-			if(sp)
-				*sp = 0;
-			size -= strlen(name);
-			name += strlen(name);
-			alen = 2;
-		}
-		while(alen < 16 && size > 10) {
-			val = cp[alen] * 256 + cp[alen + 1];
-			if(val == 0) {
-				if(!skip) {
-					*(name++) = ':';
-					--size;
-					skip = true;
-				}
-			}
-			else {
-				skip = false;
-				snprintf(name, 10, ":%-4x", val);
-				sp = strchr(name, ' ');
-				if(sp)
-					*sp = 0;
-				size -= strlen(name);
-				name += strlen(name);
-			}
-			alen += 2;
-		}
-		*name = 0;	
-		return save;
+		struct sockaddr_in6 saddr;
+		memcpy(&saddr6, addr, sizeof(saddr6));
+		saddr6.sin6_port = 0;
+		WSAAddressToString((struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
+		return name;
 #endif
 	case AF_INET:
 		struct sockaddr_in saddr;
@@ -2349,11 +2317,12 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 	return NULL;
 }
 
-void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
+int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 {
 	assert(iface != NULL);
 	assert(dest != NULL);
 
+	int rtn = -1;
 	int so = INVALID_SOCKET;
 	socklen_t len = getlen(dest);
 	memset(iface, 0, len);
@@ -2365,12 +2334,12 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 	case AF_INET:
 		so = ::socket(dest->sa_family, SOCK_DGRAM, 0);
 		if(so == INVALID_SOCKET)
-			return;
+			return -1;
 		if(!_connect_(so, dest, len))
-			getsockname(so, iface, &len);
+			rtn = getsockname(so, iface, &len);
 		break;
 	default:
-		return;
+		return -1;
 	}
 	switch(iface->sa_family) {
 	case AF_INET:
@@ -2392,6 +2361,7 @@ void Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 #endif
 		so = INVALID_SOCKET;
 	}
+	return rtn;
 }
 
 bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
