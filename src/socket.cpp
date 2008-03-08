@@ -120,7 +120,7 @@ using namespace UCOMMON_NAMESPACE;
 
 typedef unsigned char   bit_t;
 
-static int initfamily = 0;
+static int query_family = 0;
 
 #ifndef	HAVE_GETADDRINFO
 
@@ -436,7 +436,7 @@ int setfamily(int family, const char *host)
 	}
 
 	if(!family || family == AF_UNSPEC)
-		family = initfamily;
+		family = query_family;
 
 	return family;
 }
@@ -506,14 +506,11 @@ static void _socketcleanup(void)
 		WSACleanup();
 }
 
-void Socket::init(int family)
+void Socket::init(void)
 {
 	static bool initialized = false;
 	unsigned short version;
 	WSADATA status;
-
-	if(family)
-		initfamily = family;
 
 	if(initialized)
 		return;
@@ -527,12 +524,15 @@ void Socket::init(int family)
 	_started = true;
 };	
 #else
-void Socket::init(int family)
+void Socket::init(void)
 {
-	if(family)
-		initfamily = family;
 }
 #endif
+
+void Socket::family(int query)
+{
+	query_family = query;
+}
 
 cidr::cidr() :
 LinkedObject()
@@ -973,7 +973,7 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
-int Socket::address::family(void)
+int Socket::address::getfamily(void)
 {
 	struct sockaddr *ap;
 	if(!list)
@@ -1771,7 +1771,7 @@ int Socket::connect(socket_t so, struct addrinfo *node)
 	if(so == INVALID_SOCKET)
 		return -1;
 
-	socket_family = family(so);
+	socket_family = getfamily(so);
 
 	while(node) {
 		if(node->ai_family == socket_family) {
@@ -2071,7 +2071,7 @@ struct addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
 	return hint;
 }
 
-int Socket::socktype(socket_t so)
+int Socket::gettype(socket_t so)
 {
 	int sotype;
 	socklen_t slen = sizeof(sotype);
@@ -2479,7 +2479,7 @@ socklen_t Socket::getlen(struct sockaddr *sa)
 	}
 }
 
-int Socket::family(socket_t so)
+int Socket::getfamily(socket_t so)
 {
 	assert(so != INVALID_SOCKET);
 

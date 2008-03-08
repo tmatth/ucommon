@@ -343,7 +343,7 @@ public:
 		 * Get the family of a socket address by first entry.
 		 * @return family of first socket address or 0 if none.
 		 */
-		int family(void);
+		int getfamily(void);
 
 		/**
 		 * Find a specific socket address in our address list.
@@ -640,14 +640,14 @@ public:
 	 * @param socket descriptor.
 	 * @return socket type.
 	 */
-	static int socktype(socket_t so);
+	static int gettype(socket_t so);
 
 	/**
 	 * Get the type of a socket.
 	 * @return socket type.
 	 */
-	inline int socktype(void)
-		{return socktype(so);};
+	inline int gettype(void)
+		{return gettype(so);};
 
 
 
@@ -953,23 +953,23 @@ public:
 	 * Get the address family of the socket descriptor.
 	 * @return address family.
 	 */
-	static int family(socket_t socket);
+	static int getfamily(socket_t socket);
 
-        /**
-         * Get the address family of a socket address object.
-         * @param address to examine.
-         * @return address family.
-         */
-        inline static int family(struct sockaddr_storage& address)
-            {return ((struct sockaddr *)&address)->sa_family;};
+	/**
+	 * Get the address family of a socket address object.
+	 * @param address to examine.
+	 * @return address family.
+	 */
+	inline static int getfamily(struct sockaddr_storage& address)
+		{return ((struct sockaddr *)&address)->sa_family;};
 
-        /**
-         * Get the address family of an internet socket address object.
-         * @param address to examine.
-         * @return address family.
-         */
-        inline static int family(struct sockaddr_internet& address)
-            {return address.address.sa_family;};
+	/**
+	 * Get the address family of an internet socket address object.
+	 * @param address to examine.
+	 * @return address family.
+	 */
+	inline static int getfamily(struct sockaddr_internet& address)
+		{return address.address.sa_family;};
 
 	/**
 	 * Peak data waiting in receive queue.
@@ -1210,10 +1210,16 @@ public:
 	static unsigned keyindex(struct sockaddr *address, unsigned size);
 
 	/**
-	 * Initialize socket subsystem.  Optionally set default family for
-	 * all socket operations.
+	 * Initialize socket subsystem.
 	 */
-	static void init(int family = 0);
+	static void init(void);
+
+	/**
+	 * Set default socket family preference for query options when the
+	 * socket type is otherwise not specified.
+	 * @param query family to select.
+	 */
+	static void family(int query);
 
 	/**
 	 * Convert socket into FILE handle for reading.

@@ -1,5 +1,6 @@
 From ucommon 1.7.2 to 1.7.3
 - support for forced ipv4/ipv6 in init.  ipv6 unit testing.
+- new family method for query default.  getfamily/gettype changes in socket.
 
 From ucommon 1.7.1 to 1.7.2
 - small fix in type mismatch in stream allocate methods.
