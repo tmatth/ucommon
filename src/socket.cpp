@@ -2235,6 +2235,12 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #ifdef	_MSWINDOWS_
 #ifdef	AF_INET6
 	case AF_INET6:
+		DWORD slen = size;
+		struct sockaddr_in6 saddr;
+		memcpy(&saddr, addr, sizeof(saddr));
+		saddr.sin6_port = 0;
+		WSAAddressToString((struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
+		return name;
 #endif
 	case AF_INET:
 		DWORD slen = size;
@@ -2242,10 +2248,6 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		memcpy(&saddr, addr, sizeof(saddr));
 		saddr.sin_port = 0;
 		WSAAddressToString((struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
-		printf("CONVERSION ADDRESS %s\n", name);
-		char *cp = strrchr(name, ":");
-		if(cp)
-			*cp = 0;
 		return name;
 #else
 #ifdef	HAVE_INET_NTOP
