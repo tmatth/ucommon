@@ -420,9 +420,6 @@ int setfamily(int family, const char *host)
 	if(!host)
 		return  family;
 
-	if(!family || family == AF_UNSPEC)
-		family = initfamily;
-
 	if(!family || family == AF_UNSPEC) {
 #ifdef	AF_INET6
 		if(strchr(host, ':'))
@@ -437,6 +434,10 @@ int setfamily(int family, const char *host)
 		if(!*hc)
 			family = AF_INET;
 	}
+
+	if(!family || family == AF_UNSPEC)
+		family = initfamily;
+
 	return family;
 }
 
