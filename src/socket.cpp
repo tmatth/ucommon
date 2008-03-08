@@ -2270,9 +2270,12 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #ifdef	AF_INET6
 	case AF_INET6:
 		struct sockaddr_in6 saddr6;
-		memcpy(&saddr6, addr, sizeof(saddr6));
-		saddr6.sin6_port = 0;
-		getnameinfo((struct sockaddr *)&saddr6, sizeof(saddr6), name, size, NULL, 0, NI_NUMERICHOST);
+		struct sockaddr_in6 *paddr6 = (struct sockaddr_in6 *)addr;
+		memset(&saddr6, 0, sizeof(saddr6));
+		saddr6.sin6_family = AF_INET6;
+		memcpy(saddr6.sin6_addr, &(paddr6->sin6_addr), sizeof(saddr6.sin6_addr));
+		::printf("RESULT %d\n", getnameinfo((struct sockaddr *)&saddr6, sizeof(saddr6), name, size, NULL, 0, NI_NUMERICHOST));
+		::printf("NAME <%s>\n", name);
 		return name;
 #endif
 	case AF_INET:
