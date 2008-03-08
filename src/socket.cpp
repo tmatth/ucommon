@@ -518,7 +518,7 @@ void Socket::init(int family)
 		return;
 
 	initialized = true;
-	version = 0x2;
+	version = MAKEWORD(2,2);
 	status.wVersion = 0;
 	WSAStartup(version, &status);
 	crit(status.wVersion == version, "socket init failure");
