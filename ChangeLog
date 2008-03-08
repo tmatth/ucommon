@@ -2,9 +2,11 @@ From ucommon 1.6.2 to 1.7.0
 - updated abi for fsys, rebuilt to unify file handling and to use a common
   type and functions for files, directory access, and loader.
 - simplified TimedEvent completion port handling and new static members.
-- refactored socket abi around supporting use of native socket_t.
+- refactored socket api around supporting use of native socket_t.  Minimal
+  api for abstract socket class used for protocol building.
 - refactored containers to use references in assignment to avoid stack frame   
   constructions.
+- added stream classes for fsys (threaded i/o) and piping.
 
 From ucommon 1.6.1 to 1.6.2
 - improved support for using Socket::address as referenced type.  New set &
