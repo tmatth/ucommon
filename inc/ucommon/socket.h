@@ -786,6 +786,13 @@ public:
 	operator bool();
 
 	/**
+	 * Conversion type casting.
+	 * @return socket type.
+	 */
+	inline operator socket_t()
+		{return so;};
+
+	/**
 	 * Test if socket is invalid.
 	 * @return true if socket is invalid.
 	 */
