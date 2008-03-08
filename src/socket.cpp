@@ -2274,7 +2274,11 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		unsigned alen;
 		uint16_t val;
 		char *save = name;
+		bool skip;
+		skip = false;
 		alen = 0;
+		WSAAddressToString((struct sockaddr *)paddr6, sizeof(struct sockaddr_in6), NULL, name, &slen);
+		::printf("CONVERTED <%s>\n", name);
 		while(alen < 16) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			if(val)
@@ -2288,14 +2292,21 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		if(!alen) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			snprintf(name, 10, "%-4x", val);
+			size -= strlen(name);
+			name += strlen(name);
+			alen = 2;
 		}
 		while(alen < 16 && size > 10) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			if(val == 0) {
-				*(name++) = ':';
-				--size;
+				if(!skip) {
+					*(name++) = ':';
+					--size;
+					skip = true;
+				}
 			}
 			else {
+				skip = false;
 				snprintf(name, 10, ":%-4x", val);
 				size -= strlen(name);
 				name += strlen(name);
