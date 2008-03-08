@@ -25,12 +25,15 @@
 using namespace UCOMMON_NAMESPACE;
 
 static Socket::address localhost("127.0.0.1", 4444);
+#ifdef	AF_INET6
+static Socket::address localhost6("::1", 4444);
+#endif
 
 extern "C" int main()
 {
 	struct sockaddr_internet addr;
 
-	char addrbuf[65];
+	char addrbuf[128];
 	addrbuf[0] = 0;
 	Socket::getaddress(localhost.get(AF_INET), addrbuf, sizeof(addrbuf));
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
@@ -39,4 +42,9 @@ extern "C" int main()
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
 	assert(Socket::equal((struct sockaddr *)&addr, localhost.get(AF_INET)));
 	assert(Socket::subnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
+
+#ifdef	AF_INET6
+	Socket::getaddress(localhost6.get(AF_INET6), addrbuf, sizeof(addrbuf));
+	printf("IPV6 %s\n", addrbuf);
+#endif
 };
