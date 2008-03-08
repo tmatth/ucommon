@@ -2238,7 +2238,14 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #endif
 	case AF_INET:
 		DWORD slen = size;
-		WSAAddressToString(addr, getlen(addr), NULL, name, &slen);
+		struct sockaddr_in saddr;
+		memcpy(&saddr, addr, sizeof(saddr));
+		saddr.sin_port = 0;
+		WSAAddressToString((struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
+		printf("CONVERSION ADDRESS %s\n", name);
+		char *cp = strrchr(name, ":");
+		if(cp)
+			*cp = 0;
 		return name;
 #else
 #ifdef	HAVE_INET_NTOP
