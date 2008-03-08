@@ -2277,8 +2277,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		bool skip;
 		skip = false;
 		alen = 0;
-		WSAAddressToString((struct sockaddr *)paddr6, sizeof(struct sockaddr_in6), NULL, name, &slen);
-		::printf("CONVERTED <%s>\n", name);
+		char *sp;
 		while(alen < 16) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			if(val)
@@ -2292,6 +2291,9 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 		if(!alen) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			snprintf(name, 10, "%-4x", val);
+			sp = strchr(name, ' ');
+			if(sp)
+				*sp = 0;
 			size -= strlen(name);
 			name += strlen(name);
 			alen = 2;
@@ -2308,6 +2310,9 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 			else {
 				skip = false;
 				snprintf(name, 10, ":%-4x", val);
+				sp = strchr(name, ' ');
+				if(sp)
+					*sp = 0;
 				size -= strlen(name);
 				name += strlen(name);
 			}
