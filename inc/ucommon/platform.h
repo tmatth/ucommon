@@ -319,42 +319,6 @@ typedef	unsigned long timeout_t;	/**< Typedef for millisecond timer values. */
 #endif
 #endif
 
-#ifndef	ESHUTDOWN
-#define	ESHUTDOWN	EPIPE
-#endif
-
-#ifndef	EWOULDBLOCK
-#define	EWOULDBLOCK	EAGAIN
-#endif
-
-#ifndef	ENOPROTOOPT
-#define	ENOPROTOOPT	EINVAL
-#endif
-
-#ifndef	EADDRINUSE
-#define	EADDRINUSE	EINVAL
-#endif
-
-#ifndef	EADDRNOTAVAIL
-#define	EADDRNOTAVAIL	EINVAL
-#endif
-
-#ifndef	ENETUNREACH
-#define	ENETUNREACH		EINVAL
-#endif
-
-#ifndef	ENETRESET
-#define	ENETRESET		EINTR
-#endif
-
-#ifndef	ECONNABORTED
-#define	ENETRESET		EINTR
-#endif
-
-#ifndef	ECONNRESET
-#define	ENETRESET		EINTR
-#endif
-
 /**
  * Function to handle runtime errors.  When using the standard C library,
  * runtime errors are handled by a simple abort.  When using the stdc++
