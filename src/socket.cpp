@@ -2271,9 +2271,10 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 	case AF_INET6:
 		struct sockaddr_in6 *paddr6 = (struct sockaddr_in6 *)addr;
 		const unsigned char *cp = (const unsigned char *)&(paddr6->sin6_addr);
-		unsigned alen = 0;
-		unsigned uint16_t val;
-		const char *save = name;
+		unsigned alen;
+		uint16_t val;
+		char *save = name;
+		alen = 0;
 		while(alen < 16) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			if(val)
@@ -2284,14 +2285,18 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 			}
 			alen += 2;
 		}
-		while(alen < 8 && size > 10) {
+		if(!alen) {
+			val = cp[alen] * 256 + cp[alen + 1];
+			snprintf(name, 10, "%-4x", val);
+		}
+		while(alen < 16 && size > 10) {
 			val = cp[alen] * 256 + cp[alen + 1];
 			if(val == 0) {
 				*(name++) = ':';
 				--size;
 			}
 			else {
-				snprintf(name, 10, ":%4x", val);
+				snprintf(name, 10, ":%-4x", val);
 				size -= strlen(name);
 				name += strlen(name);
 			}
