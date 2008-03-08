@@ -1288,13 +1288,13 @@ ssize_t Socket::recv(socket_t so, void *data, size_t len, struct sockaddr_storag
 	return _recvfrom_(so, (caddr_t)data, len, 0, (struct sockaddr *)addr, &slen);
 }
 
-ssize_t Socket::get(void *data, size_t len, struct sockaddr *from)
+ssize_t Socket::get(void *data, size_t len, struct sockaddr_storage *from)
 {
 	assert(data != NULL);
 	assert(len > 0);
 
-	socklen_t slen = 0;
-	return _recvfrom_(so, (caddr_t)data, len, 0, from, &slen);
+	socklen_t slen = sizeof(struct sockaddr_storage);
+	return _recvfrom_(so, (caddr_t)data, len, 0, (struct sockaddr *)from, &slen);
 }
 
 ssize_t Socket::put(const void *data, size_t len, struct sockaddr *dest)

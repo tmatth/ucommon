@@ -485,6 +485,7 @@ public:
 	 * @param family to bind as.
 	 * @param type of socket to bind (stream, udp, etc).
 	 * @param protocol of socket to bind.
+	 * @param backlog for listening socket.
 	 */
 	Socket(const char *address, const char *port, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
 
@@ -727,7 +728,7 @@ public:
 	 * @param address of peer data was received from.
 	 * @return number of bytes actually read, 0 if none, -1 if error.
 	 */
-	virtual ssize_t get(void *data, size_t number, struct sockaddr *address = NULL);
+	virtual ssize_t get(void *data, size_t number, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Write data to the socket send buffer.  This is a virtual so that the ssl
@@ -1065,6 +1066,52 @@ public:
 	 * @param socket to close.
 	 */
 	static void release(socket_t so);
+
+	/**
+	 * Send to socket object.
+	 * @param socket object to send thru.
+	 * @param buffer to send.
+	 * @param size of buffer to send.
+	 * @param address to send to or NULL if connected.
+	 * @return number of bytes send, -1 if error.
+	 */
+	inline static ssize_t sendto(Socket& so, const char *buffer, size_t size, struct sockaddr *address)
+		{return so.put(buffer, size, address);};
+	
+	/**
+	 * receive from socket object.
+	 * @param socket object to recv from.
+	 * @param buffer to recv.
+	 * @param size of buffer to recv.
+	 * @param address receving from or NULL if connected.
+	 * @return number of bytes received, -1 if error.
+	 */
+	inline static ssize_t recvfrom(Socket& so, char *buffer, size_t size, struct sockaddr_storage *address)
+		{return so.get(buffer, size, address);};
+
+	/**
+	 * Connect a socket.
+	 * @param socket object to connect.
+	 * @param address to connect to.
+	 */
+	inline static void connect(Socket& so, Socket::address &address)
+		{so.connect(so, address);};
+
+	/**
+	 * Disconnect a connected socket.
+	 * @param socket object to disconnect.
+	 */
+	inline static void disconnect(Socket& so)
+		{so.disconnect();};
+
+	/**
+	 * Accept connection through socket.
+	 * @param socket object to accept from.
+	 * @param address accepting.
+	 * @return socket accepted.
+	 */
+	inline static Socket acceptfrom(Socket& so, struct sockaddr_storage *address)
+		{return Socket(acceptfrom(so.so, address));};
 
 	/**
 	 * Lookup and return the host name associated with a socket address.
