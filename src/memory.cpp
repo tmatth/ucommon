@@ -17,6 +17,7 @@
 #include <config.h>
 #include <ucommon/memory.h>
 #include <ucommon/thread.h>
+#include <ucommon/string.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
@@ -196,8 +197,9 @@ char *mempager::dup(const char *str)
 {
 	if(!str)
 		return NULL;
-	char *mem = static_cast<char *>(alloc(strlen(str) + 1));
-	strcpy(mem, str);
+	size_t len = strlen(str) + 1;
+	char *mem = static_cast<char *>(alloc(len));
+	String::set(mem, len, str);
 	return mem;
 }
 
@@ -205,8 +207,9 @@ char *mempager::dup_locked(const char *str)
 {
     if(!str)
         return NULL;
-    char *mem = static_cast<char *>(alloc_locked(strlen(str) + 1));
-    strcpy(mem, str);
+	size_t len = strlen(str) + 1;
+    char *mem = static_cast<char *>(alloc_locked(len));
+    String::set(mem, len, str);
     return mem;
 }
 
@@ -315,14 +318,14 @@ PagerObject *PagerPool::get(size_t size)
 	return ptr;
 }
 
-keyassoc::keydata::keydata(keyassoc *assoc, char *id, unsigned max) :
+keyassoc::keydata::keydata(keyassoc *assoc, char *id, unsigned max, unsigned bufsize) :
 NamedObject(assoc->root, id, max)
 {
 	assert(assoc != NULL);
 	assert(id != NULL && *id != 0);
 	assert(max > 1);
 
-	strcpy(text, id);
+	String::set(text, bufsize, id);
 	data = NULL;
 	id = text;
 }
@@ -430,7 +433,7 @@ bool keyassoc::create(char *id, void *data)
 	}
 	if(ptr == NULL)
 		ptr = (caddr_t)alloc_locked(sizeof(keydata) + size * 8);
-	kd = new(ptr) keydata(this, id, paths);					
+	kd = new(ptr) keydata(this, id, paths, 8 + size * 8);					
 	kd->data = data;
 	++count;
 	unlock();
@@ -461,7 +464,7 @@ bool keyassoc::assign(char *id, void *data)
 		}
 		if(ptr == NULL)
 			ptr = (caddr_t)alloc_locked(sizeof(keydata) + size * 8);
-		kd = new(ptr) keydata(this, id, paths);				
+		kd = new(ptr) keydata(this, id, paths, 8 + size * 8);				
 		++count;	
 	}
 	kd->data = data;

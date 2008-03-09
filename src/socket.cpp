@@ -252,7 +252,7 @@ static int getaddrinfo(const char *hostname, const char *servname, const struct 
 		unp = (struct sockaddr_un *)malloc(sizeof(struct sockaddr_un));
 		memset(unp, 0, sizeof(struct sockaddr_un));
 		unp->sun_family = AF_UNIX;
-		strcpy(unp->sun_path, hostname);
+		String::set(unp->sun_path, sizeof(unp->sun_path), hostname);
 #ifdef	__SUN_LEN
 		len = sizeof(unp->sun_len) + strlen(unp->sun_path) + 
 			sizeof(unp->sun_family) + 1;

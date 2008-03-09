@@ -345,7 +345,7 @@ private:
 		void *data;
 		char text[8];
 
-		keydata(keyassoc *assoc, char *id, unsigned max);
+		keydata(keyassoc *assoc, char *id, unsigned max, unsigned bufsize);
 	};
 
 	friend class keydata;

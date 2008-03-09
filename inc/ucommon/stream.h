@@ -221,9 +221,6 @@ protected:
      */
     int overflow(int ch);
 
-private:
-	pipestream(const pipestream& copy) {};
-
 public:
 	/**
 	 * Create an unopened pipe stream.

@@ -836,7 +836,7 @@ void string::cow(strsize_t size)
 	if(!str || !str->max || str->isCopied() || size > str->max) {
 		cstring *s = create(size);
 		s->len = str->len;
-		strcpy(s->text, str->text);
+		string::set(s->text, s->max + 1, str->text);
 		s->retain();
 		str->release();
 		str = s;
@@ -1340,9 +1340,10 @@ char *string::dup(const char *cp)
 	if(!cp)
 		return NULL;
 
-	mem = (char *)malloc(strlen(cp) + 1);
+	size_t len = strlen(cp) + 1;
+	mem = (char *)malloc(len);
 	crit(mem != NULL, "string dup allocation error");
-	strcpy(mem, cp);
+	string::set(mem, len, cp);
 	return mem;
 }	
 
