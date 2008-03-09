@@ -684,8 +684,8 @@ public:
 	 * @param list of addresses to connect to.
 	 * @return 0 on success, -1 on error.
 	 */
-	inline int connect(struct addrinfo *list)
-		{return connect(so, list);};
+	inline int connectto(struct addrinfo *list)
+		{return connectto(so, list);};
 	
 	/**
 	 * Disconnect a connected socket.  Depending on the implimentation, this
@@ -853,7 +853,7 @@ public:
 	 * @param list of addresses to connect to.
 	 * @return 0 on success, -1 on error.
 	 */
-	static int connect(socket_t socket, struct addrinfo *list);
+	static int connectto(socket_t socket, struct addrinfo *list);
 
 	/**
 	 * Disconnect a connected socket descriptor.
@@ -1084,8 +1084,8 @@ public:
 	 * @param socket object to connect.
 	 * @param address to connect to.
 	 */
-	inline static void connect(Socket& so, Socket::address &address)
-		{so.connect(so, address);};
+	inline static void connectto(Socket& so, Socket::address &address)
+		{so.connectto(so, address);};
 
 	/**
 	 * Disconnect a connected socket.

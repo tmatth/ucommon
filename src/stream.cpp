@@ -239,7 +239,7 @@ void tcpstream::open(Socket::address& list, unsigned mss)
 	if(bufsize)
 		close();	// close if existing is open...
 
-	if(Socket::connect(so, *list))
+	if(Socket::connectto(so, *list))
 		return;
 
 	allocate(mss);

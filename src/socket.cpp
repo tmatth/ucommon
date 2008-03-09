@@ -1148,7 +1148,7 @@ socket_t Socket::create(Socket::address &address)
 	if(so == INVALID_SOCKET)
 		return INVALID_SOCKET;
 	
-	if(connect(so, res)) {
+	if(connectto(so, res)) {
 		release(so);
 		return INVALID_SOCKET;
 	}
@@ -1752,7 +1752,7 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 	return rtn;
 }
 	
-int Socket::connect(socket_t so, struct addrinfo *node)
+int Socket::connectto(socket_t so, struct addrinfo *node)
 {
 	assert(node != NULL);
 
