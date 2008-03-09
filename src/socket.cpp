@@ -1368,15 +1368,6 @@ Socket &Socket::operator=(socket_t s)
 	return *this;
 }	
 
-ssize_t Socket::peek(socket_t so, void *data, size_t len, struct sockaddr_storage *address)
-{
-	assert(data != NULL);
-	assert(len > 0);
-	socklen_t slen = sizeof(struct sockaddr_storage);
-
-	return _recvfrom_(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK, (struct sockaddr *)address, &slen);
-}
-
 size_t Socket::peek(void *data, size_t len) const
 {
 	assert(data != NULL);
@@ -1388,13 +1379,13 @@ size_t Socket::peek(void *data, size_t len) const
 	return (size_t)rtn;
 }
 
-ssize_t Socket::recv(socket_t so, void *data, size_t len, struct sockaddr_storage *addr)
+ssize_t Socket::recvfrom(socket_t so, void *data, size_t len, int flags, struct sockaddr_storage *addr)
 {
 	assert(data != NULL);
 	assert(len > 0);
 
 	socklen_t slen = sizeof(struct sockaddr_storage);
-	return _recvfrom_(so, (caddr_t)data, len, 0, (struct sockaddr *)addr, &slen);
+	return _recvfrom_(so, (caddr_t)data, len, flags, (struct sockaddr *)addr, &slen);
 }
 
 ssize_t Socket::get(void *data, size_t len, struct sockaddr_storage *from)
@@ -1418,7 +1409,7 @@ ssize_t Socket::put(const void *data, size_t len, struct sockaddr *dest)
 	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
 }
 
-ssize_t Socket::send(socket_t so, const void *data, size_t len, struct sockaddr *dest)
+ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, struct sockaddr *dest)
 {
 	assert(data != NULL);
 	assert(len > 0);
@@ -1427,7 +1418,7 @@ ssize_t Socket::send(socket_t so, const void *data, size_t len, struct sockaddr 
 	if(dest)
 		slen = getlen(dest);
 	
-	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
+	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL | flags, dest, slen);
 }
 
 ssize_t Socket::puts(const char *str)
@@ -2458,7 +2449,7 @@ ssize_t Socket::printf(socket_t so, const char *format, ...)
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
-	return send(so, buf, strlen(buf), NULL);
+	return sendto(so, buf, strlen(buf), 0, NULL);
 }
 
 socklen_t Socket::getlen(struct sockaddr *sa)

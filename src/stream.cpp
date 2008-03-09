@@ -150,7 +150,7 @@ int tcpstream::underflow()
             return EOF;
         }
         else
-            rlen = Socket::recv(so, &ch, 1);
+            rlen = Socket::recvfrom(so, &ch, 1, MSG_WAITALL);
         if(rlen < 1) {
             if(rlen < 0)
 				reset();
@@ -171,7 +171,7 @@ int tcpstream::underflow()
         return EOF;
     }
     else {
-        rlen = Socket::recv(so, eback(), rlen);
+        rlen = Socket::recvfrom(so, eback(), rlen, MSG_WAITALL);
 	}
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
@@ -196,7 +196,7 @@ int tcpstream::overflow(int c)
             return 0;
 
 		ch = (unsigned char)(c);
-        rlen = Socket::send(so, &ch, 1);
+        rlen = Socket::sendto(so, &ch, 1);
         if(rlen < 1) {
             if(rlen < 0) 
 				reset();
@@ -211,7 +211,7 @@ int tcpstream::overflow(int c)
 
     req = (ssize_t)(pptr() - pbase());
     if(req) {
-        rlen = Socket::send(so, pbase(), req);
+        rlen = Socket::sendto(so, pbase(), req);
         if(rlen < 1) {
             if(rlen < 0) 
 				reset();

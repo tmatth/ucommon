@@ -972,16 +972,6 @@ public:
 		{return address.address.sa_family;};
 
 	/**
-	 * Peak data waiting in receive queue.
-	 * @param socket to peek.
-	 * @param buffer to save.
-	 * @param size of data buffer to request.
-	 * @param address of source.
-	 * @return number of bytes found, -1 if error.
-	 */
-	static ssize_t peek(socket_t so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
-
-	/**
 	 * Get data waiting in receive queue.
 	 * @param socket to get from.
 	 * @param buffer to save.
@@ -989,7 +979,7 @@ public:
 	 * @param address of source.
 	 * @return number of bytes received, -1 if error.
 	 */
-	static ssize_t recv(socket_t so, void *buffer, size_t size, struct sockaddr_storage *address = NULL);
+	static ssize_t recvfrom(socket_t so, void *buffer, size_t size, int flags = 0, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Send data on socket.
@@ -999,7 +989,7 @@ public:
 	 * @param address of destination, NULL if connected.
 	 * @return number of bytes sent, -1 if error.
 	 */
-	static ssize_t send(socket_t so, const void *buffer, size_t size, struct sockaddr *address = NULL);
+	static ssize_t sendto(socket_t so, const void *buffer, size_t size, int flags = 0, struct sockaddr *address = NULL);
 
 	/**
 	 * Bind the socket descriptor to a known interface and service port.
