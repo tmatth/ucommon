@@ -1720,8 +1720,13 @@ void JoinableThread::join(void)
 	if(!running)
 		return;
 
+#ifdef	__PTH__
 	if(pth_join(tid, NULL))
 		running = false;
+#else
+	if(!pthread_join(tid, NULL))
+		running = false;
+#endif
 }
 
 #endif

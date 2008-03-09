@@ -389,8 +389,6 @@ void fsys::seek(offset_t pos)
 inline int remapError(void)
 	{return errno;};
 
-#ifdef	__PTH__
-
 ssize_t fsys::read(void *buf, size_t len)
 {
 	if(ptr) {
@@ -403,27 +401,16 @@ ssize_t fsys::read(void *buf, size_t len)
 		return strlen(entry->d_name);
 	}
 
+#ifdef	__PTH__
 	int rtn = ::pth_read(fd, buf, len);
-
-	if(rtn < 0)
-		error = remapError();
-	return rtn;
-}
-
-ssize_t fsys::write(const void *buf, size_t len)
-{
-	if(ptr) {
-		error = EBADF;
-		return -1;
-	}
-
-	int rtn = pth_write(fd, buf, len);
-	if(rtn < 0)
-		error = remapError();
-	return rtn;
-}
-
 #else
+	int rtn = ::read(fd, buf, len);
+#endif
+
+	if(rtn < 0)
+		error = remapError();
+	return rtn;
+}
 
 ssize_t fsys::write(const void *buf, size_t len)
 {
@@ -432,14 +419,16 @@ ssize_t fsys::write(const void *buf, size_t len)
 		return -1;
 	}
 
+#ifdef	__PTH__
+	int rtn = pth_write(fd, buf, len);
+#else
 	int rtn = ::write(fd, buf, len);
+#endif
 
 	if(rtn < 0)
 		error = remapError();
 	return rtn;
 }
-
-#endif
 
 void fsys::close(void)
 {
