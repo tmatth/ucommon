@@ -78,6 +78,7 @@ private:
 	CRITICAL_SECTION mlock;
 	CRITICAL_SECTION mutex;
 #else
+#ifndef	__PTH__
 	class __LOCAL attribute
 	{
 	public:
@@ -86,6 +87,7 @@ private:
 	};
 
 	__LOCAL static attribute attr;
+#endif
 
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
@@ -162,7 +164,7 @@ protected:
 	~Conditional();
 
 public:
-#ifndef	_MSWINDOWS_
+#if !defined(_MSWINDOWS_) && !defined(__PTH__)
 	/**
 	 * Support function for getting conditional attributes for realtime
 	 * scheduling.
@@ -1325,8 +1327,13 @@ public:
 	 * Get current thread id.
 	 * @return thread id.
 	 */
+#ifdef	__PTH__
+	inline static pthread_t self(void)
+		{return pth_self();};
+#else
 	inline static pthread_t self(void)
 		{return pthread_self();};
+#endif
 };
 
 /**

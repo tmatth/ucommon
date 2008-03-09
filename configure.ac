@@ -257,6 +257,7 @@ if test "$enable_pth" != "yes" ; then
 	],[
 		AC_CHECK_HEADER(windows.h,, [
 			AC_CHECK_HEADER(pth.h,[
+				UCOMMON_LIBS="$UCOMMON_LIBS -lpth"
 				UCOMMON_FLAGS="$UCOMMON_FLAGS -D__PTH__"
 			],[
 				AC_MSG_ERROR("pthread or GNU pth support required")
@@ -265,6 +266,7 @@ if test "$enable_pth" != "yes" ; then
 	])
 else
 	AC_CHECK_HEADER(pth.h,[
+		UCOMMON_LIBS="$UCOMMON_LIBS -lpth"
 		UCOMMON_FLAGS="$UCOMMON_FLAGS -D__PTH__"
 	],[
 		AC_MSG_ERROR("GNU pth required")

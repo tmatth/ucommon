@@ -197,11 +197,11 @@ typedef int fd_t;
 #define	INVALID_HANDLE_VALUE -1
 #include <signal.h>
 
-typedef	pth_mutex_t	pthread_mutex_t;
-typedef	pth_cond_t pthread_cond_t;
-typedef	pth_t	pthread_t;
+#define	pthread_mutex_t pth_mutex_t
+#define	pthread_cond_t pth_cond_t
+#define	pthread_t pth_t
 
-inline int pthread_sigmask(int how, const sigset_t *set, setset_t *oset)
+inline int pthread_sigmask(int how, const sigset_t *set, sigset_t *oset)
 	{return pth_sigmask(how, set, oset);};
 
 inline void pthread_exit(void *p)
@@ -210,20 +210,26 @@ inline void pthread_exit(void *p)
 inline void pthread_kill(pthread_t tid, int sig)
 	{pth_raise(tid, sig);};
 
-inline pthread_t pthread_self(void)
-	{return pth_self();};
-
 inline int pthread_mutex_init(pthread_mutex_t *mutex, void *x)
-	{return pth_mutex_init(mutex);};
+	{return pth_mutex_init(mutex) != 0;};
 
 inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
 	{};
 
 inline void pthread_mutex_lock(pthread_mutex_t *mutex)
-	{pth_mutex_acquire(mutex);};
+	{pth_mutex_acquire(mutex, 0, NULL);};
 
 inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
 	{pth_mutex_release(mutex);};
+
+inline void pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
+	{pth_cond_await(cond, mutex, NULL);};
+
+inline void pthread_cond_signal(pthread_cond_t *cond)
+	{pth_cond_notify(cond, FALSE);};
+
+inline void pthread_cond_broadcast(pthread_cond_t *cond)
+	{pth_cond_notify(cond, TRUE);};
 
 #else
 

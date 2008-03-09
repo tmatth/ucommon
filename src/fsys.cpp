@@ -394,17 +394,16 @@ inline int remapError(void)
 ssize_t fsys::read(void *buf, size_t len)
 {
 	if(ptr) {
-		dirent *entry = ::readdir((DIR *)dir);	
+		dirent *entry = ::readdir((DIR *)ptr);	
 	
-		*buf = 0;
 		if(!entry)
 			return 0;
 	
-		String::set(buf, len, entry->d_name);
-		return strlen(buf);
+		String::set((char *)buf, len, entry->d_name);
+		return strlen(entry->d_name);
 	}
 
-	int rtn = pth_read(fd, buf, len);
+	int rtn = ::pth_read(fd, buf, len);
 
 	if(rtn < 0)
 		error = remapError();
@@ -425,26 +424,6 @@ ssize_t fsys::write(const void *buf, size_t len)
 }
 
 #else
-
-ssize_t fsys::read(void *buf, size_t len)
-{
-	if(ptr) {
-		dirent *entry = ::readdir((DIR *)ptr);	
-	
-		if(!entry)
-			return 0;
-	
-		String::set((char *)buf, len, entry->d_name);
-		return strlen(entry->d_name);
-	}
-
-	int rtn = ::read(fd, buf, len);
-
-
-	if(rtn < 0)
-		error = remapError();
-	return rtn;
-}
 
 ssize_t fsys::write(const void *buf, size_t len)
 {

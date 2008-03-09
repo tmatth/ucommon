@@ -56,8 +56,31 @@ mutex_index::mutex_index() : mutex()
 	list = NULL;
 }
 
-#ifndef	_MSWINDOWS_
+#if !defined(_MSWINDOWS_) && !defined(__PTH__)
 Conditional::attribute Conditional::attr;
+#endif
+
+#ifdef	__PTH__
+
+static int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *abstime)
+{
+	static pth_key_t ev_key = PTH_KEY_INIT;
+	pth_event_t ev = pth_event(PTH_EVENT_TIME|PTH_MODE_STATIC, &ev_key,
+		pth_time(abstime->tv_sec, (abstime->tv_nsec) / 1000));
+	
+	if(!pth_cond_await(cond, mutex, ev))
+		return errno;
+	return 0;
+}
+
+static void pthread_shutdown(void)
+{
+	pth_kill();
+}
+
+inline pthread_t pthread_self(void)
+	{return pth_self();};
+
 #endif
 
 static unsigned hash_address(void *ptr)
@@ -331,9 +354,14 @@ bool Conditional::wait(struct timespec *ts)
 #include <stdio.h>
 bool Thread::equal(pthread_t t1, pthread_t t2)
 {
+#ifdef	__PTH__
+	return (t1 == t2);
+#else
 	return pthread_equal(t1, t2) != 0;
+#endif
 }
 
+#ifndef	__PTH__
 Conditional::attribute::attribute()
 {
 	Thread::init();
@@ -346,17 +374,26 @@ Conditional::attribute::attribute()
 #endif
 #endif
 }
+#endif
 
 Conditional::Conditional()
 {
+#ifdef	__PTH__
+	Thread::init();
+	pth_cond_init(&cond);
+	pth_mutex_init(&mutex);
+#else
 	crit(pthread_cond_init(&cond, &attr.attr) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
+#endif
 }
 
 Conditional::~Conditional()
 {
+#ifndef	__PTH__
 	pthread_cond_destroy(&cond);
 	pthread_mutex_destroy(&mutex);
+#endif
 }
 
 bool Conditional::wait(timeout_t timeout)
@@ -476,12 +513,18 @@ bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 ConditionalAccess::ConditionalAccess()
 {
 	waiting = pending = sharing = 0;
+#ifdef	__PTH__
+	pth_cond_init(&bcast);
+#else
 	crit(pthread_cond_init(&bcast, &attr.attr) == 0, "conditional init failed");
+#endif
 }
 
 ConditionalAccess::~ConditionalAccess()
 {
+#ifndef	__PTH__
 	pthread_cond_destroy(&bcast);
+#endif
 }
 
 bool ConditionalAccess::waitSignal(timeout_t timeout)
@@ -795,7 +838,11 @@ void auto_protect::operator=(void *obj)
 
 mutex::mutex()
 {
+#ifdef	__PTH__
+	pth_mutex_init(&mlock);
+#else
 	crit(pthread_mutex_init(&mlock, NULL) == 0, "mutex init failed");
+#endif
 }
 
 mutex::~mutex()
@@ -966,8 +1013,14 @@ TimedEvent::TimedEvent() :
 Timer()
 {
 	signalled = false;
+#ifdef	__PTH__
+	Thread::init();
+	pth_cond_init(&cond);
+	pth_mutex_init(&mutex);
+#else
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
+#endif
 	set();
 }
 
@@ -975,22 +1028,36 @@ TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
 	signalled = false;
+#ifdef	__PTH__
+	Thread::init();
+	pth_cond_init(&cond);
+	pth_mutex_init(&mutex);
+#else
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
+#endif
 }
 
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
 	signalled = false;
+#ifdef	__PTH__
+	Thread::init();
+	pth_cond_init(&cond);
+	pth_mutex_init(&mutex);
+#else
 	crit(pthread_cond_init(&cond, Conditional::initializer()) == 0, "conditional init failed");
 	crit(pthread_mutex_init(&mutex, NULL) == 0, "mutex init failed");
+#endif
 }
 
 TimedEvent::~TimedEvent()
 {
+#ifndef	__PTH__
 	pthread_cond_destroy(&cond);
 	pthread_mutex_destroy(&mutex);
+#endif
 }
 
 void TimedEvent::reset(void)
@@ -1295,7 +1362,11 @@ LockedPointer::LockedPointer()
 #ifdef	_MSWINDOWS_
 	InitializeCriticalSection(&mutex);
 #else
+#ifdef	__PTH__
+	static pthread_mutex_t lock = PTH_MUTEX_INIT;
+#else
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 	memcpy(&mutex, &lock, sizeof(mutex));
 #endif
 	pointer = NULL;
@@ -1361,6 +1432,7 @@ Thread::Thread(size_t size)
 {
 	stack = size;
 	priority = 0;
+	init();
 }
 
 #if defined(_MSWINDOWS_)
@@ -1380,6 +1452,7 @@ void Thread::setPriority(void)
 
 void Thread::setPriority(void)
 {
+#ifndef	__PTH__
 	int policy;
 	struct sched_param sp;
 	pthread_t ptid = pthread_self();
@@ -1408,6 +1481,7 @@ void Thread::setPriority(void)
 
 	sp.sched_priority = pri;
 	pthread_setschedparam(ptid, policy, &sp);
+#endif
 }
 
 #else
@@ -1448,7 +1522,9 @@ void Thread::sleep(timeout_t timeout)
 	timespec ts;
 	ts.tv_sec = timeout / 1000l;
 	ts.tv_nsec = (timeout % 1000l) * 1000000l;
-#if defined(HAVE_PTHREAD_DELAY)
+#if defined(__PTH__)
+	pth_usleep(timeout * 1000);
+#elif defined(HAVE_PTHREAD_DELAY)
 	pthread_delay(&ts);
 #elif defined(HAVE_PTHREAD_DELAY_NP)
 	pthread_delay_np(&ts);
@@ -1463,6 +1539,8 @@ void Thread::yield(void)
 {
 #if defined(_MSWINDOWS_)
 	SwitchToThread();
+#elif defined(__PTH__)
+	pth_yield(NULL);
 #elif defined(HAVE_PTHREAD_YIELD_NP)
 	pthread_yield_np();
 #elif defined(HAVE_PTHREAD_YIELD)
@@ -1570,16 +1648,18 @@ void JoinableThread::join(void)
 void JoinableThread::start(int adj)
 {
 	int result;
-	pthread_attr_t attr;
-
+	
 	if(running)
 		return;
 
 	priority = adj;
 
+#ifndef	__PTH__
+	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
 	pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+#endif
 // we typically use "stack 1" for min stack...
 #ifdef	PTHREAD_STACK_MIN
 	if(stack && stack < PTHREAD_STACK_MIN)
@@ -1588,22 +1668,29 @@ void JoinableThread::start(int adj)
 	if(stack && stack < 2)
 		stack = 0;
 #endif
+#ifdef	__PTH__
+	pth_attr_t attr = PTH_ATTR_DEFAULT;
+	pth_attr_set(attr, PTH_ATTR_JOINABLE);
+	tid = pth_spawn(attr, &exec_thread, this);
+#else
 	if(stack)
 		pthread_attr_setstacksize(&attr, stack);
 	result = pthread_create(&tid, &attr, &exec_thread, this);
 	pthread_attr_destroy(&attr);
 	if(!result)
 		running = true;
+#endif
 }
 
 void DetachedThread::start(int adj)
 {
-	pthread_attr_t attr;
-
 	priority = adj;
+#ifndef	__PTH__
+	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+#endif
 // we typically use "stack 1" for min stack...
 #ifdef	PTHREAD_STACK_MIN
 	if(stack && stack < PTHREAD_STACK_MIN)
@@ -1612,10 +1699,14 @@ void DetachedThread::start(int adj)
 	if(stack && stack < 2)
 		stack = 0;
 #endif
+#ifdef	__PTH__
+	tid = pth_spawn(PTH_ATTR_DEFAULT, &exec_thread, this);
+#else
 	if(stack)
 		pthread_attr_setstacksize(&attr, stack);
 	pthread_create(&tid, &attr, &exec_thread, this);
 	pthread_attr_destroy(&attr);
+#endif
 }
 
 void JoinableThread::join(void)
@@ -1629,7 +1720,7 @@ void JoinableThread::join(void)
 	if(!running)
 		return;
 
-	if(!pthread_join(tid, NULL))
+	if(pth_join(tid, NULL))
 		running = false;
 }
 
@@ -2213,6 +2304,15 @@ shared_release &shared_release::operator=(SharedPointer &p)
 
 void Thread::init(void)
 {
+#ifdef	__PTH__
+	static bool initialized = false;
+
+	if(!initialized) {
+		pth_init();
+		atexit(pthread_shutdown);
+		initialized = true;
+	}
+#endif
 }
 
 
