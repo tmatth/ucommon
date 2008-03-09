@@ -181,10 +181,9 @@ public:
 	 * Write data to descriptor.
 	 * @param buffer to write from.
 	 * @param count of bytes to write.
-	 * @param offset from start of file or "end" for current position.
 	 * @return bytes transferred, -1 if error.
 	 */
-	ssize_t write(const void *buffer, size_t);
+	ssize_t write(const void *buffer, size_t count);
 
 	/**
 	 * Get status of open descriptor.
