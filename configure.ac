@@ -168,6 +168,10 @@ AC_CHECK_LIB(msvcrt, fopen, [
 		])
 		socket_lib="-lsocket"
 	])
+	AC_CHECK_LIB(nsl,inet_ntop,[
+		AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
+		socket_lib="$socket_lib -lnsl"
+	])
 ])
 
 AC_CHECK_LIB($clib, stricmp, [
