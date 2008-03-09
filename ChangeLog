@@ -1,6 +1,7 @@
 From ucommon 1.8.0 to 1.8.1
 - use entirely safe string operations everywhere.
 - keyassoc keydata constructor changed to pass size of string buffer.
+- GNU pth support option.
 
 From ucommon 1.7.2 to 1.8.0
 - support for forced ipv4/ipv6 in init.  ipv6 unit testing.
