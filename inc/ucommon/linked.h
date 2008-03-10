@@ -764,7 +764,7 @@ protected:
 	 * @param size of key to check or 0 if NULL terminated string.
 	 * @return true if matches key.
 	 */
-	virtual bool compare(unsigned path, caddr_t key, size_t keysize);
+	virtual bool compare(unsigned path, caddr_t key, size_t size);
 	
 public:
 	/**
@@ -799,11 +799,11 @@ public:
 	/**
 	 * Compute binary key index.
 	 * @param key memory to compute.
-	 * @param size of memory or 0 if NULL terminated string.
 	 * @param max size of index.
+	 * @param size of key or 0 if NULL terminated string.
 	 * @return associated hash value.
 	 */
-	static unsigned keyindex(caddr_t key, unsigned max, size_t keysize = 0);
+	static unsigned keyindex(caddr_t key, unsigned max, size_t size = 0);
 
 	/**
 	 * Find a multikey node.
@@ -814,7 +814,7 @@ public:
 	 * @param max size of index.
 	 * @param size of key or 0 if NULL terminated string.
 	 */
-	static MultiMap *find(unsigned path, MultiMap **index, caddr_t key, unsigned max, size_t keysize = 0);
+	static MultiMap *find(unsigned path, MultiMap **index, caddr_t key, unsigned max, size_t size = 0);
 };
 	
 /**

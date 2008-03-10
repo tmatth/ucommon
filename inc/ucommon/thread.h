@@ -1041,7 +1041,7 @@ public:
 	 * Specify hash table size for gaurd protection.  The default is 1.
 	 * This should be called at initialization time from the main thread
 	 * of the application before any other threads are created.
-	 * @param hash table size for gaurding.
+	 * @param size of hash table used for gaurding.
 	 */
 	static void indexing(unsigned size);
 

@@ -104,7 +104,7 @@ protected:
 	 * @param address of data to parse.
 	 * @param size of data to parse.
 	 */
-	bool parse(const char *chunk, size_t len);
+	bool parse(const char *address, size_t size);
 };
 		
 END_NAMESPACE

@@ -20,7 +20,7 @@
  * behavior.  This is used in particular to wrap posix calls internally
  * to pth, and to create portable code between MSWINDOWS and Posix low-level
  * file I/O operations.
- * @file ucommon/file.h
+ * @file ucommon/fsys.h
  */
 
 #ifndef	_UCOMMON_FILE_H_
@@ -105,17 +105,18 @@ public:
 
 	/**
 	 * Create a fsys descriptor by opening an existing file or directory.
-	 * @param type of file access.
-	 * @param mode of file.
+	 * @param path of file to open for created descriptor.
+	 * @param access mode of file.
 	 */
-	fsys(const char *path, access_t type);
+	fsys(const char *path, access_t access);
 
 	/**
 	 * Create a fsys descriptor by creating a file.
-	 * @param type of file access.
-	 * @param mode of file.
+	 * @param path of file to create for descriptor.
+	 * @param access mode of file access.
+	 * @param permission mode of file.
 	 */
-	fsys(const char *path, access_t type, unsigned mode);
+	fsys(const char *path, access_t access, unsigned permission);
 
 	/**
 	 * Close and release a file descriptor.
@@ -290,11 +291,11 @@ public:
 
 	/**
 	 * Assign a descriptor directly.
-	 * @param fsys to assign to.
+	 * @param object to assign descriptor to.
 	 * @param descriptor to assign.
 	 */
-	inline static void assign(fsys& fs, fd_t descriptor)
-		{fs.close(); fs.fd = descriptor;};
+	inline static void assign(fsys& object, fd_t descriptor)
+		{object.close(); object.fd = descriptor;};
 
 	/**
 	 * Open a file descriptor directly.
@@ -314,7 +315,7 @@ public:
 
 	/**
 	 * Simple direct method to remove a directory.
-	 * @param pth to remove.
+	 * @param path to remove.
 	 * @return 0 if success, else errno.
 	 */
 	static int removeDir(const char *path);
@@ -333,21 +334,22 @@ public:
 
 	/**
 	 * Open a file or directory.
-	 * @param descriptor to open.
+	 * @param object to assign descriptor for opened file.
 	 * @param path of file to open.
 	 * @param access mode of descriptor.
 	 */
-	inline static void open(fsys& descriptor, const char *path, access_t access)
-		{descriptor.open(path, access);};
+	inline static void open(fsys& object, const char *path, access_t access)
+		{object.open(path, access);};
 
 	/**
 	 * create a file descriptor or directory directly.
+	 * @param object to assign descriptor for created file.
 	 * @param path of file to create.
 	 * @param access mode of descriptor.
 	 * @param mode of file if created.
 	 */
-	inline static void create(fsys& descriptor, const char *path, access_t access, unsigned mode)
-		{descriptor.create(path, access, mode);};
+	inline static void create(fsys& object, const char *path, access_t access, unsigned mode)
+		{object.create(path, access, mode);};
 
 	/**
 	 * Load an unmaged plugin directly.

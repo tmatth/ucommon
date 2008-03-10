@@ -306,7 +306,7 @@ public:
 		 * @param hostname or address to use.
 		 * @param service port or name we are referencing or NULL.
 		 */
-		address(socket_t so, const char *hostname, const char *service = NULL);
+		address(socket_t socket, const char *hostname, const char *service = NULL);
 
 		/**
 		 * Construct a socket address from host and service.
@@ -403,16 +403,18 @@ public:
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
 		 * @param family of hostname.
+		 * @param type of socket.
 		 */
-		void set(const char *hostname, const char *service = NULL, int family = 0, int socktype = SOCK_STREAM);
+		void set(const char *hostname, const char *service = NULL, int family = 0, int type = SOCK_STREAM);
 
 		/**
 		 * Append additional host addresses to our list.
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
 		 * @param family of hostname.
+		 * @param type of socket.
 		 */
-		void add(const char *hostname, const char *service = NULL, int family = 0, int socktype = SOCK_STREAM);
+		void add(const char *hostname, const char *service = NULL, int family = 0, int type = SOCK_STREAM);
 
 		/**
 		 * Set an entry for host binding.
@@ -503,7 +505,7 @@ public:
 	 * Cancel pending i/o by shutting down the socket.
 	 * @param socket to shutdown.
 	 */
-	static void cancel(socket_t so);
+	static void cancel(socket_t socket);
 
 	/**
 	 * Shutdown and close the socket.
@@ -538,7 +540,7 @@ public:
 	 * @param timeout or 0 if none.
 	 * @return true if input data waiting.
 	 */
-	static bool wait(socket_t so, timeout_t timeout = 0);
+	static bool wait(socket_t socket, timeout_t timeout = 0);
 
 	/**
 	 * Test for output data sent.  This function can wait up to a specified
@@ -640,7 +642,7 @@ public:
 	 * @param socket descriptor.
 	 * @return socket type.
 	 */
-	static int gettype(socket_t so);
+	static int gettype(socket_t socket);
 
 	/**
 	 * Get the type of a socket.
@@ -763,7 +765,7 @@ public:
 	 * @param timeout to wait for a complete input line.
 	 * @return number of bytes read, 0 if none, -1 if error.
 	 */
-	static ssize_t readline(socket_t so, char *data, size_t size, timeout_t timeout = Timer::inf);
+	static ssize_t readline(socket_t socket, char *data, size_t size, timeout_t timeout = Timer::inf);
 
 	/**
 	 * Print formatted string to socket.
@@ -771,7 +773,7 @@ public:
 	 * @param format string.
 	 * @return number of bytes sent, -1 if error.
 	 */
-	static ssize_t printf(socket_t so, const char *format, ...) __PRINTF(2,3);
+	static ssize_t printf(socket_t socket, const char *format, ...) __PRINTF(2,3);
 
 	/**
 	 * Write a null terminated string to the socket.
@@ -976,46 +978,49 @@ public:
 	 * @param socket to get from.
 	 * @param buffer to save.
 	 * @param size of data buffer to request.
+	 * @param flags for i/o operation (MSG_OOB, MSG_PEEK, etc).
 	 * @param address of source.
 	 * @return number of bytes received, -1 if error.
 	 */
-	static ssize_t recvfrom(socket_t so, void *buffer, size_t size, int flags = 0, struct sockaddr_storage *address = NULL);
+	static ssize_t recvfrom(socket_t socket, void *buffer, size_t size, int flags = 0, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Send data on socket.
 	 * @param socket to send to.
 	 * @param buffer to send.
 	 * @param size of data buffer to send.
+	 * @param flags for i/o operation (MSG_OOB, MSG_PEEK, etc).
 	 * @param address of destination, NULL if connected.
 	 * @return number of bytes sent, -1 if error.
 	 */
-	static ssize_t sendto(socket_t so, const void *buffer, size_t size, int flags = 0, struct sockaddr *address = NULL);
+	static ssize_t sendto(socket_t socket, const void *buffer, size_t size, int flags = 0, struct sockaddr *address = NULL);
 
 	/**
 	 * Bind the socket descriptor to a known interface and service port.
 	 * @param socket descriptor to bind.
 	 * @param address to bind to or "*" for all.
 	 * @param service port to bind.
+	 * @param protocol to use or 0 if default.
+	 * @return 0 on success, -1 if error.
 	 */
 	static int bindto(socket_t socket, const char *address, const char *service, int protocol = 0);
 
 	/**
 	 * Bind the socket descriptor to a known interface listen on service port.
 	 * @param socket descriptor to bind.
-	 * @param address to bind to.
-	 * @param service port to bind.
+	 * @param address of interface to bind to.
 	 * @param backlog for service.
+	 * @return 0 on success, -1 if error.
 	 */
 	static int listento(socket_t socket, struct sockaddr *address, int backlog = 5);
 
 	/**
 	 * Bind the socket descriptor to a known interface.
 	 * @param socket descriptor to bind.
-	 * @param address to bind to.
-	 * @param service port to bind.
+	 * @param address of interface to bind to.
+	 * @return 0 on success, -1 if error.
 	 */
 	static int bindto(socket_t socket, struct sockaddr *address);
-
 
 	/**
 	 * Accept a socket connection from a remote host.
@@ -1023,14 +1028,14 @@ public:
 	 * @param address of socket accepting.
 	 * @return new socket accepted.
 	 */
-	static socket_t acceptfrom(socket_t socket, struct sockaddr_storage *addr = NULL);
+	static socket_t acceptfrom(socket_t socket, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Create a socket object unbound.
-	 * @param socket family.
-	 * @param socket type.
-	 * @param socket protocol.
-	 * @return socket.
+	 * @param family of socket.
+	 * @param type of socket.
+	 * @param protocol of socket.
+	 * @return socket descriptor created or INVALID_SOCKET.
 	 */
 	static socket_t create(int family, int type, int protocol);
 
@@ -1039,8 +1044,10 @@ public:
 	 * @param iface to bind.
 	 * @param service port to bind.
 	 * @param family to select or AF_UNSPEC
+	 * @param type of socket to create.
+	 * @param protocol of socket to create.
 	 * @param backlog for listener.
-	 * @return socket desciptor.
+	 * @return socket desciptor created or INVALID_SOCKET.
 	 */
 	static socket_t create(const char *iface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
 
@@ -1055,7 +1062,7 @@ public:
 	 * Release (close) a socket.
 	 * @param socket to close.
 	 */
-	static void release(socket_t so);
+	static void release(socket_t socket);
 
 	/**
 	 * Send to socket object.
@@ -1065,8 +1072,8 @@ public:
 	 * @param address to send to or NULL if connected.
 	 * @return number of bytes send, -1 if error.
 	 */
-	inline static ssize_t sendto(Socket& so, const char *buffer, size_t size, struct sockaddr *address)
-		{return so.put(buffer, size, address);};
+	inline static ssize_t sendto(Socket& socket, const char *buffer, size_t size, struct sockaddr *address)
+		{return socket.put(buffer, size, address);};
 	
 	/**
 	 * receive from socket object.
@@ -1076,32 +1083,32 @@ public:
 	 * @param address receving from or NULL if connected.
 	 * @return number of bytes received, -1 if error.
 	 */
-	inline static ssize_t recvfrom(Socket& so, char *buffer, size_t size, struct sockaddr_storage *address)
-		{return so.get(buffer, size, address);};
+	inline static ssize_t recvfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
+		{return socket.get(buffer, size, address);};
 
 	/**
 	 * Connect a socket.
 	 * @param socket object to connect.
-	 * @param address to connect to.
+	 * @param address list to connect to.
 	 */
-	inline static void connectto(Socket& so, Socket::address &address)
-		{so.connectto(so, address);};
+	inline static void connectto(Socket& socket, Socket::address &address)
+		{socket.connectto(socket, address);};
 
 	/**
 	 * Disconnect a connected socket.
 	 * @param socket object to disconnect.
 	 */
-	inline static void disconnect(Socket& so)
-		{so.disconnect();};
+	inline static void disconnect(Socket& socket)
+		{socket.disconnect();};
 
 	/**
 	 * Accept connection through socket.
 	 * @param socket object to accept from.
-	 * @param address accepting.
+	 * @param address accepting from.
 	 * @return socket accepted.
 	 */
-	inline static Socket acceptfrom(Socket& so, struct sockaddr_storage *address)
-		{return Socket(acceptfrom(so.so, address));};
+	inline static Socket acceptfrom(Socket& socket, struct sockaddr_storage *address)
+		{return Socket(acceptfrom(socket.so, address));};
 
 	/**
 	 * Lookup and return the host name associated with a socket address.
@@ -1213,15 +1220,15 @@ public:
 
 	/**
 	 * Convert socket into FILE handle for reading.
-	 * @param descriptor to convert.
-	 * @param true for write mode.
+	 * @param socket descriptor to convert.
+	 * @param mode of access, true for write mode.
 	 * @return file handle to use.
 	 */
-	static FILE *open(socket_t descriptor, bool mode = false);
+	static FILE *open(socket_t socket, bool mode = false);
 
 	/**
 	 * Get file handle for reading from a socket object.
-	 * @param true for write mode.
+	 * @param mode of access, true for write mode.
 	 * @return file handle.
 	 */
 	inline FILE *open(bool mode = false)
@@ -1231,10 +1238,11 @@ public:
 	 * Cleanly close a connected socket descriptor mapped to a file handle.
 	 * @param file handle to close.
 	 */
-	static void close(FILE *fp);
+	static void close(FILE *file);
 
 	/**
 	 * Return error code of last socket operation,
+	 * @return errno style error code.
 	 */
 	static int error(void);
 };
@@ -1252,6 +1260,7 @@ public:
 	 * @param address to bind on or "*" for all.
 	 * @param service port to bind listener.
 	 * @param backlog size for buffering pending connections.
+	 * @param protocol for socket if not TCPIP.
 	 */
 	ListenSocket(const char *address, const char *service, unsigned backlog = 5, int protocol = 0);
 
