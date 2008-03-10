@@ -426,8 +426,15 @@ fi
 
 export CXXFLAGS
 
-for flag in -fno-check-new -finline -fvisibility-inlines-hidden
-do
+# libstdc++ on some targets broken badly if inlines hidden.  Might be
+# deeper issue with ansi c++ library model...
+if test "$UCOMMON_MODEL" = "CC" ; then
+	flags="-fno-check-new -finline -fvisibility-inlines-hidden"
+else
+	flags="-fno-check-new -finline"
+fi
+
+for flag in "$flags" ; do
     AC_MSG_CHECKING([whether ${CXX} supports $flag])
     echo 'void f(){}' >conftest.cpp
     if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
