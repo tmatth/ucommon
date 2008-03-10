@@ -146,9 +146,9 @@ public:
 	/**
 	 * Open a stream connection to a tcp service.
 	 * @param address of service to access.
-	 * @param buffering segment size to use.
+	 * @param segment buffering size to use.
 	 */
-	void open(Socket::address& address, unsigned mss = 536);
+	void open(Socket::address& address, unsigned segment = 536);
 
 	/**
 	 * Close an active stream connection.  This does not release the
