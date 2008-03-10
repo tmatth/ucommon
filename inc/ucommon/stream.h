@@ -230,11 +230,11 @@ public:
 	/**
 	 * Create child process and start pipe.
 	 * @param command to pass.
-	 * @param shell arguments of child process.
+	 * @param arguments of child process.
 	 * @param access mode of pipe stream.
 	 * @param size of buffer.
 	 */
-	pipestream(const char *command, char **argv, access_t access, size_t bufsize = 512);
+	pipestream(const char *command, char **arguments, access_t access, size_t size = 512);
 
 	/**
 	 * Destroy a pipe stream.
@@ -258,11 +258,11 @@ public:
 	/**
 	 * Open a stream connection to a tcp service.
 	 * @param command to execute.
-	 * @param argv to pass.
+	 * @param arguments to pass.
 	 * @param access mode of stream.
 	 * @param buffering size to use.
 	 */
-	void open(const char *cmd, char **argv, access_t access, size_t buffering = 512);
+	void open(const char *command, char **arguments, access_t access, size_t buffering = 512);
 
 	/**
 	 * Close an active stream connection.  This waits for the child to

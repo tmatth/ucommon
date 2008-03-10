@@ -19,6 +19,10 @@
  * @file ucommon/xml.h
  */
 
+#ifndef	_UCOMMON_STRING_H_
+#include <ucommon/string.h>
+#endif
+
 #ifndef	_UCOMMON_XML_H_
 #define	_UCOMMON_XML_H_
 
