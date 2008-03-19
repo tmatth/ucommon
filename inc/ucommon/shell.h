@@ -41,11 +41,12 @@ NAMESPACE_UCOMMON
  */
 class __EXPORT shell : public mempager
 {
-protected:
+private:
 	char **_argv;
 	int _argc;
+	char *argv0;
 
-	class args
+	class __LOCAL args
 	{
 	public:
 		args *next;
@@ -62,7 +63,53 @@ protected:
 	 */
 	void collapse(void);
 
+	/**
+	 * Set argv0
+	 */
+	void set0(void);
+
 public:
+	/**
+	 * A base class used to create parsable shell options.  The virtual
+	 * is invoked when the shell option is detected.  Both short and long
+	 * forms of argument parsing are supported.  An instance of a derived
+	 * class is created to perform the argument parsing.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT Option
+	{
+	private:
+		friend class shell;
+
+		static Option *root;
+
+		Option *next;
+
+	protected:
+		char short_option;
+		const char *long_option;
+		bool uses_value;
+		const char *help_string;
+
+	public:
+		/**
+		 * Construct a shell parser option.
+		 * @param shortoption for single character code.
+		 * @param longoption for extended string.
+		 * @param value flag if -x value or -long=yyy.
+		 * @param help string, future use.
+		 */
+		Option(char shortoption = 0, const char *longoption = NULL, bool value = false, const char *help = NULL);
+
+	protected:
+		/**
+		 * Used to send option into derived receiver.
+		 * @param option that was received.
+		 * @return NULL or error string to use.
+		 */
+		virtual const char *assign(const char *value) = 0;
+	};
+
 	/**
 	 * Construct a shell argument list by parsing a simple command string.
 	 * This seperates a string into a list of command line arguments which
@@ -119,6 +166,14 @@ public:
 	 * @return new argc.  argv also overridden.
 	 */
 	int expand(int *argc, char ***argv);
+
+	/**
+	 * Parse the command line arguments using the option table.
+	 * @param argc from main.
+	 * @param argv from main.
+	 * @return start of file arguments. -1 if error.
+	 */
+	static int parse(int argc, char **argv);
 
 	/**
 	 * Fetch arguments list.
