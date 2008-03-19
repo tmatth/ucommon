@@ -19,7 +19,7 @@
  * @file ucommon/shell.h
  */
 
-#if defined(_UCOMMON_EXTENDED_) || defined(_MSWINDOWS_)
+#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 
 #ifndef	_UCOMMON_STRING_H_
 #include <ucommon/string.h>

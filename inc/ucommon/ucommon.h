@@ -97,11 +97,8 @@
 #include <ucommon/fsys.h>
 #include <ucommon/xml.h>
 
-#if defined(_UCOMMON_EXTENDED_) || defined(_MSWINDOWS_)
-#include <ucommon/shell.h>
-#endif
-
 #ifdef	_UCOMMON_EXTENDED_
+#include <ucommon/shell.h>
 #include <ucommon/stream.h>
 #include <ucommon/persist.h>
 #endif
