@@ -96,20 +96,20 @@ skip:
 		if(len == 0)
 			dirname[0] = 0;
 		else
-			string::set(dirname, ++len, *_argv);	
+			String::set(dirname, ++len, *_argv);	
 		len = strlen(dirname);
 		if(len)
-			string::set(dirname + len, sizeof(dirname) - len, fn);
+			String::set(dirname + len, sizeof(dirname) - len, fn);
 		else
-			string::set(dirname, sizeof(dirname), fn);
+			String::set(dirname, sizeof(dirname), fn);
 		dir = FindFirstFile(dirname, &entry);
 		if(dir == INVALID_HANDLE_VALUE)
 			goto skip;
 		do {
 			if(len)
-				string::set(dirname + len, sizeof(dirname) - len, fn);
+				String::set(dirname + len, sizeof(dirname) - len, fn);
 			else
-				string::set(dirname, sizeof(dirname), fn);
+				String::set(dirname, sizeof(dirname), fn);
 			arg = (args *)mempager::alloc(sizeof(args));
 			arg->item = mempager::dup(dirname);
 			arg->next = NULL;
@@ -249,19 +249,36 @@ int shell::expand(int *argc, char ***argv)
 
 #ifdef _MSWINDOWS_
 
-int shell::system(const char *cmd)
+int shell::system(const char *cmd, const char **envp)
 {
 	char cmdspec[128];
 	DWORD code;
 	PROCESS_INFORMATION pi;
-	
+	char *ep = NULL;
+	unsigned len = 0;
+
+	if(envp)
+		ep = new char[4096];
+
+	while(envp && *envp && len < 4090) {
+		String::set(ep + len, 4094 - len, *envp);
+		len += strlen(*(envp++)) + 1;
+	}
+
+	if(ep)
+		ep[len] = 0;
+
 	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
 	
-	if(!CreateProcess((CHAR *)cmdspec, (CHAR *)cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, NULL, &pi))
+	if(!CreateProcess((CHAR *)cmdspec, (CHAR *)cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, ep, NULL, NULL, &pi)) {
+		delete[] ep;
 		return 127;
+	}
+	delete[] ep;
 	
-	if(WaitForSingleObject(pi.hProcess, INFINITE) == WAIT_FAILED)
+	if(WaitForSingleObject(pi.hProcess, INFINITE) == WAIT_FAILED) {
 		return -1;
+	}
 
 	GetExitCodeProcess(pi.hProcess, &code);
 	return (int)code;
@@ -269,10 +286,13 @@ int shell::system(const char *cmd)
 
 #else
 
-int shell::system(const char *cmd)
+int shell::system(const char *cmd, const char **envp)
 {
 	assert(cmd != NULL);
 	
+	char symname[129];
+	const char *cp;
+	char *ep;
 	int status;
 	int max = sizeof(fd_set) * 8;
 
@@ -294,6 +314,19 @@ int shell::system(const char *cmd)
 	}
 	for(int fd = 3; fd < max; ++fd)
 		::close(fd);
+
+	while(envp && *envp) {
+		String::set(symname, sizeof(symname), *envp);
+		ep = strchr(symname, '=');
+		if(ep)
+			*ep = 0;
+		cp = strchr(*envp, '=');
+		if(cp)
+			++cp;
+		::setenv(symname, cp, 1);
+		++envp;
+	}
+
 	::signal(SIGQUIT, SIG_DFL);
 	::signal(SIGINT, SIG_DFL);
 	::signal(SIGCHLD, SIG_DFL);
