@@ -91,6 +91,15 @@ public:
 		bool uses_value;
 		const char *help_string;
 
+		static char *errmsg[];
+
+		enum {
+			ERR_NO_VALUE = 0,
+			ERR_IMPROPER_USAGE = 1,
+			ERR_VALUE_MISSING = 2,
+			ERR_INVALID_OPTION = 3
+		};
+
 	public:
 		/**
 		 * Construct a shell parser option.

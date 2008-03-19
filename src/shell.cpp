@@ -37,6 +37,8 @@ using namespace UCOMMON_NAMESPACE;
 
 shell::Option *shell::Option::root = NULL;
 
+char *shell::Option::errmsg[] = {"has no value", "improper usage", "value missing", "unknown option"};
+
 shell::Option::Option(char shortopt, const char *longopt, bool value, const char *help)
 {
 	short_option = shortopt;
@@ -322,7 +324,7 @@ int shell::parse(int argc, char **argv)
 			if(!strncmp(node->long_option, arg, len)) {
 				++argp;
 				if(arg[len] == '=' && !node->uses_value) { 			
-					fprintf(stderr, "*** %s: %s has no values to assign\n", argv0, node->long_option);
+					fprintf(stderr, "*** %s: %s: %s\n", argv0, node->long_option, Option::errmsg[Option::ERR_NO_VALUE]);
 					exit(1);
 				}
 				if(arg[len] == '=') {
@@ -354,11 +356,11 @@ int shell::parse(int argc, char **argv)
 					node = node->next;
 				}
 				if(!node) {
-					fprintf(stderr, "*** %s: -%c: unknown option\n", argv0, *arg);
+					fprintf(stderr, "*** %s: -%c: %s\n", argv0, *arg, Option::errmsg[Option::ERR_INVALID_OPTION]);
 					exit(1);
 				}
 				if(node->uses_value) {
-					fprintf(stderr, "*** %s: -%c: improper usage\n", argv0, *arg);
+					fprintf(stderr, "*** %s: -%c: %s\n", argv0, *arg, Option::errmsg[Option::ERR_IMPROPER_USAGE]);
 					exit(1);
 				}
 				err = node->assign(NULL);
@@ -375,14 +377,14 @@ int shell::parse(int argc, char **argv)
 			continue;
 		}
 		if(!node && (*arg == '-' || *arg == '+')) {
-			fprintf(stderr, "*** %s: %s: unknown option\n", argv0, arg);
+			fprintf(stderr, "*** %s: %s: %s\n", argv0, arg, Option::errmsg[Option::ERR_INVALID_OPTION]);
 			exit(1);
 		}
 		if(!node)
 			return argp;
 
 		if(node->uses_value && !value) {
-			fprintf(stderr, "*** %s: %s: value missing\n", argv0, opt);
+			fprintf(stderr, "*** %s: %s: %s\n", argv0, opt, Option::errmsg[Option::ERR_VALUE_MISSING]);
 			exit(1);
 		}
 		err = node->assign(value);
