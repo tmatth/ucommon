@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="1.8.2"
-LT_RELEASE="1.8"
-LT_VERSION="0:2"
+VERSION="1.9.0"
+LT_RELEASE="1.9"
+LT_VERSION="0:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -125,7 +125,7 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h)
 AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [

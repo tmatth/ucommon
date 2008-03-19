@@ -37,7 +37,7 @@ NAMESPACE_UCOMMON
  * parse xml content in memory buffers easily.  This parser is only concerned
  * with well-formedness, and does not perform validation.
  *
- * @author David Sugar <dyfet@ostel.com>
+ * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT XMLParser
 {

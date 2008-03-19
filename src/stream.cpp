@@ -28,6 +28,11 @@
 #include <fcntl.h>
 #endif
 
+#ifdef	HAVE_SYS_RESOURCE_H
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 using namespace std;
 
@@ -378,7 +383,7 @@ streambuf(),
 #endif
 }
 
-pipestream::pipestream(const char *cmd, char **argv, access_t access, size_t size) :
+pipestream::pipestream(const char *cmd, access_t access, size_t size) :
 streambuf(),
 #ifdef OLD_STDCPP
 	iostream()
@@ -391,7 +396,7 @@ bufsize = 0;
 #ifdef OLD_STDCPP
 	init((streambuf *)this);
 #endif
-	open(cmd, argv, access, size);
+	open(cmd, access, size);
 }
 
 pipestream::~pipestream()
@@ -400,7 +405,7 @@ pipestream::~pipestream()
 }
 
 #ifdef	_MSWINDOWS_
-void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
+void pipestream::open(const char *cmd, access_t mode, size_t size)
 {
 	PROCESS_INFORMATION pi;
 	STARTUPINFO si;
@@ -411,8 +416,7 @@ void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
 	HANDLE inputWriteTmp, inputRead,inputWrite;
 	HANDLE outputReadTmp, outputRead, outputWrite;
 	HANDLE errorWrite;
-	char buf[256];
-	unsigned len;
+	const char *cmdspec = GetEnvironment("ComSpec");
 
 	if(mode == WRONLY || mode == RDWR) {
 		CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
@@ -441,16 +445,7 @@ void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
 	if(mode == WRONLY || mode == RDWR)
 		si.StdInput = inputRead;
 
-	snprintf(buf, sizeof(buf), "%s", cmd);
-	len = strlen(buf);
-	if(argv && *argv)
-		++argv;
-	while(argv && len < (sizeof(buf) - 2) && *argv) {
-		snprintf(buf + len, sizeof(buf) - len, " %s", *argv);
-		len = strlen(buf);
-	}
-
-	if(!CreateProcess(cmd, buf, NULL, NULL, TRUE,
+	if(!CreateProcess(cmdspec, cmd, NULL, NULL, TRUE,
 		CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
 		size = 0;
 	else
@@ -517,10 +512,19 @@ void pipestream::close(void)
 	}
 }
 
-void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
+void pipestream::open(const char *cmd, access_t mode, size_t size)
 {
 	int input[2], output[2];
-	int max = 20;
+	int max = sizeof(fd_set) * 8;
+
+#ifdef	RLIMIT_NOFILE
+	struct rlimit rlim;
+
+	if(!getrlimit(RLIMIT_NOFILE, &rlim))
+		max = rlim.rlim_max;
+#endif
+
+	close();
 	
 	if(mode == RDONLY || mode == RDWR) {
 		pipe(input);
@@ -554,8 +558,12 @@ void pipestream::open(const char *cmd, char **argv, access_t mode, size_t size)
 	dup2(output[0], 0);
 	for(int fd = 3; fd < max; ++fd)
 		::close(fd);
-	execvp(cmd, argv);
-	exit(-1);
+	::signal(SIGQUIT, SIG_DFL);
+	::signal(SIGINT, SIG_DFL);
+	::signal(SIGCHLD, SIG_DFL);
+	::signal(SIGPIPE, SIG_DFL);
+	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
+	exit(127);
 }
 
 #endif

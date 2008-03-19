@@ -94,6 +94,7 @@
 #include <ucommon/bitmap.h>
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
+#include <ucommon/shell.h>
 #include <ucommon/fsys.h>
 #include <ucommon/xml.h>
 
