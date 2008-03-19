@@ -140,11 +140,13 @@ int shell::systemf(const char *format, ...)
 
 int shell::system(const char *cmd)
 {
+	char cmdspec[128];
 	DWORD code;
 	PROCESS_INFORMATION pi;
-	const char *cmdspec = GetEnvironment("ComSpec");
 	
-	if(!CreateProcess(cmdspec, cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, NULL, &pi))
+	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
+	
+	if(!CreateProcess((CHAR *)cmdspec, (CHAR *)cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, NULL, &pi))
 		return 127;
 	
 	if(WaitForSingleObject(pi.hProcess, INFINITE) == WAIT_FAILED)

@@ -416,7 +416,9 @@ void pipestream::open(const char *cmd, access_t mode, size_t size)
 	HANDLE inputWriteTmp, inputRead,inputWrite;
 	HANDLE outputReadTmp, outputRead, outputWrite;
 	HANDLE errorWrite;
-	const char *cmdspec = GetEnvironment("ComSpec");
+	char cmdspec[128];
+
+	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
 
 	if(mode == WRONLY || mode == RDWR) {
 		CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
