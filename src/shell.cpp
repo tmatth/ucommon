@@ -39,12 +39,96 @@ using namespace UCOMMON_NAMESPACE;
 
 void shell::expand(void)
 {
+	first = last = NULL;
 }
 
 #else
 
 void shell::expand(void)
 {
+	const char *fn;
+	char dirname[128];
+	WIN32_FIND_DATA entry;
+	bool skipped = false, flagged = true;
+	args *arg;
+	int len;
+	fd_t dir;
+
+	first = last = NULL;
+
+	while(_argv && *_argv) {
+		if(skipped) {
+skip:
+			arg = (args *)mempager::alloc(sizeof(args));
+			arg->item = *(_argv++);
+			arg->next = NULL;
+			if(last) {
+				last->next = arg;	
+				last = arg;
+			}
+			else
+				last = first = arg;
+			continue;
+		}
+		if(!strncmp(*_argv, "-*", 2)) {
+			++_argv;
+			skipped = true;
+			continue;
+		}
+		if(!strcmp(*_argv, "--")) {
+			flagged = false;
+			goto skip;
+		}
+		if(**_argv == '-' && flagged) 
+			goto skip;
+		fn = strrchr(*_argv, '/');
+		if(!fn)
+			fn = strrchr(*_argv, '\\');
+		if(!fn)
+			fn = strrchr(*_argv, ':');
+		if(fn)
+			++fn;
+		else
+			fn = *_argv;
+		if(!*fn)
+			goto skip;
+		if(*fn != '*' && fn[strlen(fn) - 1] != '*' && !strchr(fn, '?'))
+			goto skip;
+		if(!strcmp(fn, "*"))
+			fn = "*.*";
+		len = fn - *_argv;
+		if(len >= sizeof(dirname))
+			len = sizeof(dirname) - 1;
+		if(len == 0)
+			dirname[0] = 0;
+		else
+			string::set(dirname, ++len, *_argv);	
+		len = strlen(dirname);
+		if(len)
+			string::set(dirname + len, sizeof(dirname) - len, fn);
+		else
+			string::set(dirname, sizeof(dirname), fn);
+		dir = FindFirstFile(dirname, &entry);
+		if(dir == INVALID_HANDLE_VALUE)
+			goto skip;
+		do {
+			if(len)
+				string::set(dirname + len, sizeof(dirname) - len, fn);
+			else
+				string::set(dirname, sizeof(dirname), fn);
+			arg = (args *)mempager::alloc(sizeof(args));
+			arg->item = mempager::dup(dirname);
+			arg->next = NULL;
+			if(last) {
+				last->next = arg;	
+				last = arg;
+			}
+			else
+				last = first = arg;
+		} while(FindNextFile(dir, &entry));
+		CloseHandle(dir);
+		++*_argv;
+	}
 }
 
 #endif
