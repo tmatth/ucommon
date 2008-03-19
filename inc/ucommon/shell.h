@@ -91,10 +91,10 @@ public:
 	 * A shell system call.  This uses the native system shell to invoke the 
 	 * command.
 	 * @param command string..
-	 * @param environ array to optionally use.
+	 * @param env array to optionally use.
 	 * @return error code of child process.
 	 */
-	static int system(const char *command, const char **environ = NULL);
+	static int system(const char *command, const char **env = NULL);
 
 	/**
 	 * A shell system call that can be issued using a formatted string.  This
