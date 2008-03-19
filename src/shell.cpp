@@ -14,6 +14,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#if defined(_UCOMMON_EXTENDED_) || defined(_MSWINDOWS_)
+
 #include <config.h>
 #include <ucommon/string.h>
 #include <ucommon/memory.h>
@@ -486,5 +488,7 @@ int shell::system(const char *cmd, const char **envp)
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
 	exit(127);
 }
+
+#endif
 
 #endif

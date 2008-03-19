@@ -19,6 +19,8 @@
  * @file ucommon/shell.h
  */
 
+#if defined(_UCOMMON_EXTENDED_) || defined(_MSWINDOWS_)
+
 #ifndef	_UCOMMON_STRING_H_
 #include <ucommon/string.h>
 #endif
@@ -213,5 +215,7 @@ public:
 };
 		
 END_NAMESPACE
+
+#endif
 
 #endif
