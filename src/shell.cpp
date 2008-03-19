@@ -312,6 +312,7 @@ int shell::system(const char *cmd, const char **envp)
 			status = -1;
 		return status;
 	}
+
 	for(int fd = 3; fd < max; ++fd)
 		::close(fd);
 
