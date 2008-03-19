@@ -117,7 +117,7 @@ public:
 	 * @param argv from main.
 	 * @return new argc.  argv also overridden.
 	 */
-	int parse(int argc, char **argv);
+	int expand(int *argc, char ***argv);
 
 	/**
 	 * Fetch arguments list.
@@ -143,8 +143,8 @@ public:
 	 * @param argv from main, replaced.
 	 * @return argument count.
 	 */
-	inline static int parse(shell &args, int argc, char **argv)
-		{return args.parse(argc, argv);};
+	inline static int expand(shell &args, int *argc, char ***argv)
+		{return args.expand(argc, argv);};
 
 };
 		

@@ -37,6 +37,10 @@ using namespace UCOMMON_NAMESPACE;
 
 #ifdef _MSWINDOWS_
 
+void shell::expand(void)
+{
+}
+
 #else
 
 void shell::expand(void)
@@ -66,6 +70,13 @@ shell::shell(const char *string, size_t pagesize) :
 mempager(pagesize)
 {
 	parse(string);
+}
+
+shell::shell(char **argv, size_t pagesize) :
+mempager(pagesize)
+{
+	int tmp;
+	expand(&tmp, &argv);
 }
 
 char **shell::parse(const char *string)
@@ -134,6 +145,20 @@ int shell::systemf(const char *format, ...)
 	va_end(args);
 
 	return system(buffer);
+}
+
+int shell::expand(int *argc, char ***argv)
+{
+	_argc = *argc;
+	_argv = *argv;
+
+	expand();
+	if(first) {
+		collapse();
+		*argv = _argv;
+		*argc = _argc;
+	}
+	return _argc;
 }
 
 #ifdef _MSWINDOWS_
