@@ -271,10 +271,12 @@ int shell::system(const char *cmd, const char **envp)
 	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
 	
 	if(!CreateProcess((CHAR *)cmdspec, (CHAR *)cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, ep, NULL, NULL, &pi)) {
-		delete[] ep;
+		if(ep)
+			delete[] ep;
 		return 127;
 	}
-	delete[] ep;
+	if(ep)
+		delete[] ep;
 	
 	if(WaitForSingleObject(pi.hProcess, INFINITE) == WAIT_FAILED) {
 		return -1;

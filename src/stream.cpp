@@ -383,7 +383,7 @@ streambuf(),
 #endif
 }
 
-pipestream::pipestream(const char *cmd, access_t access, size_t size) :
+pipestream::pipestream(const char *cmd, access_t access, const char **envp, size_t size) :
 streambuf(),
 #ifdef OLD_STDCPP
 	iostream()
@@ -396,7 +396,7 @@ bufsize = 0;
 #ifdef OLD_STDCPP
 	init((streambuf *)this);
 #endif
-	open(cmd, access, size);
+	open(cmd, access, envp, size);
 }
 
 pipestream::~pipestream()
@@ -405,7 +405,7 @@ pipestream::~pipestream()
 }
 
 #ifdef	_MSWINDOWS_
-void pipestream::open(const char *cmd, access_t mode, size_t size)
+void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t size)
 {
 	PROCESS_INFORMATION pi;
 	STARTUPINFO si;
@@ -417,6 +417,19 @@ void pipestream::open(const char *cmd, access_t mode, size_t size)
 	HANDLE outputReadTmp, outputRead, outputWrite;
 	HANDLE errorWrite;
 	char cmdspec[128];
+	char *ep = NULL;
+	unsigned len = 0;
+
+	if(envp)
+		ep = new char[4096];
+
+	while(envp && *envp && len < 4090) {
+		String::set(ep + len, 4094 - len, *envp);
+		len += strlen(*(envp++)) + 1;
+	}
+
+	if(ep)
+		ep[len] = 0;
 
 	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
 
@@ -448,10 +461,13 @@ void pipestream::open(const char *cmd, access_t mode, size_t size)
 		si.StdInput = inputRead;
 
 	if(!CreateProcess(cmdspec, cmd, NULL, NULL, TRUE,
-		CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
+		CREATE_NEW_CONSOLE, ep, NULL, &si, &pi))
 		size = 0;
 	else
 		pid = pi.dwProcessId;
+
+	if(ep)
+		delete[] ep;
 
 	if(mode == WRONLY || mode == RDWR) {
 		fsys::assign(wr, &inputWrite);
@@ -514,10 +530,13 @@ void pipestream::close(void)
 	}
 }
 
-void pipestream::open(const char *cmd, access_t mode, size_t size)
+void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t size)
 {
 	int input[2], output[2];
 	int max = sizeof(fd_set) * 8;
+	char symname[129];
+	const char *cp;
+	char *ep;
 
 #ifdef	RLIMIT_NOFILE
 	struct rlimit rlim;
@@ -560,6 +579,19 @@ void pipestream::open(const char *cmd, access_t mode, size_t size)
 	dup2(output[0], 0);
 	for(int fd = 3; fd < max; ++fd)
 		::close(fd);
+
+	while(envp && *envp) {
+		String::set(symname, sizeof(symname), *envp);
+		ep = strchr(symname, '=');
+		if(ep)
+			*ep = 0;
+		cp = strchr(*envp, '=');
+		if(cp)
+			++cp;
+		::setenv(symname, cp, 1);
+		++envp;
+	}
+
 	::signal(SIGQUIT, SIG_DFL);
 	::signal(SIGINT, SIG_DFL);
 	::signal(SIGCHLD, SIG_DFL);
