@@ -40,12 +40,6 @@ using namespace UCOMMON_NAMESPACE;
 void shell::expand(void)
 {
 	first = last = NULL;
-}
-
-#else
-
-void shell::expand(void)
-{
 	const char *fn;
 	char dirname[128];
 	WIN32_FIND_DATA entry;
@@ -131,6 +125,13 @@ skip:
 	}
 }
 
+#else
+
+void shell::expand(void)
+{
+	first = last = NULL;
+}
+
 #endif
 
 void shell::collapse(void)
@@ -141,6 +142,7 @@ void shell::collapse(void)
 		first = first->next;
 	}
 	*argv = NULL;
+	first = last = NULL;
 }
 
 shell::shell(size_t pagesize) :

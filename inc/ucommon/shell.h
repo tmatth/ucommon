@@ -145,7 +145,6 @@ public:
 	 */
 	inline static int expand(shell &args, int *argc, char ***argv)
 		{return args.expand(argc, argv);};
-
 };
 		
 END_NAMESPACE
