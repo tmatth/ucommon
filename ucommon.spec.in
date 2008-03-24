@@ -39,7 +39,7 @@ rm -fr %{buildroot}
 
 %files 
 %defattr(-,root,root,-)
-%doc 
+%doc README COPYING INSTALL NEWS BUILDS
 %{_libdir}/*.so.*
 
 %files devel
