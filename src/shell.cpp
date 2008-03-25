@@ -250,6 +250,7 @@ argument:
 	}
 	collapse();
 	set0();
+	return _argv;
 }
 
 int shell::systemf(const char *format, ...)

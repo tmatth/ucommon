@@ -318,14 +318,14 @@ PagerObject *PagerPool::get(size_t size)
 	return ptr;
 }
 
-keyassoc::keydata::keydata(keyassoc *assoc, char *id, unsigned max, unsigned bufsize) :
-NamedObject(assoc->root, id, max)
+keyassoc::keydata::keydata(keyassoc *assoc, char *kid, unsigned max, unsigned bufsize) :
+NamedObject(assoc->root, kid, max)
 {
 	assert(assoc != NULL);
-	assert(id != NULL && *id != 0);
+	assert(kid != NULL && *kid != 0);
 	assert(max > 1);
 
-	String::set(text, bufsize, id);
+	String::set(text, bufsize, kid);
 	data = NULL;
 	id = text;
 }
