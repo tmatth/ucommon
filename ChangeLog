@@ -1,6 +1,7 @@
 From ucommon 1.8.2 to 1.9.0
 - pipestream interface normalized for shell execution.
 - new "shell" class for generic parsing and argument expansion.
+- use ipv4 to ipv6 mapping on v6 address lookup.
 
 From ucommon 1.8.1 to 1.8.2
 - doxygen updates.

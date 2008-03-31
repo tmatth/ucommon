@@ -909,6 +909,11 @@ void Socket::address::set(const char *host, unsigned port, int family)
 #endif
 	}
 
+#if defined(AF_INET6) && defined(AI_V4MAPPED)
+	if(hint.ai_family == AF_INET6)
+		hint.ai_flags |= AI_V4MAPPED;
+#endif
+
 	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
@@ -961,6 +966,12 @@ proc:
 	hint.ai_family = family;
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
+
+#if defined(AF_INET6) && defined(AI_V4MAPPED)
+	if(hint.ai_family == AF_INET6)
+		hint.ai_flags |= AI_V4MAPPED;
+#endif
+
 	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
@@ -1046,6 +1057,11 @@ void Socket::address::add(const char *host, const char *svc, int family, int soc
 	family = setfamily(family, host);
 	if(family && family != AF_UNSPEC)
 		hint.ai_family = family;
+
+#if defined(AF_INET6) && defined(AI_V4MAPPED)
+	if(hint.ai_family == AF_INET6)
+		hint.ai_flags |= AI_V4MAPPED;
+#endif
 
 	getaddrinfo(host, svc, &hint, &join);
 
@@ -1173,6 +1189,11 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	hint.ai_family = setfamily(family, iface);
 	hint.ai_socktype = type;
 	hint.ai_protocol = protocol;
+
+#if defined(AF_INET6) && defined(AI_V4MAPPED)
+	if(hint.ai_family == AF_INET6)
+		hint.ai_flags |= AI_V4MAPPED;
+#endif
 
 #if defined(AF_UNIX) && !defined(_MSWINDOWS_) 
 	if(strchr(iface, '/')) {
@@ -2195,6 +2216,11 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
 #endif	
 
 	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+
+#if defined(AF_INET6) && defined(AI_V4MAPPED)
+	if(hint.ai_family == AF_INET6)
+		hint.ai_flags |= AI_V4MAPPED;
+#endif
 
 	rtn = getaddrinfo(host, svc, &hint, &res);
 	if(rtn)
