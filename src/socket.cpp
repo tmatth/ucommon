@@ -121,6 +121,19 @@ using namespace UCOMMON_NAMESPACE;
 typedef unsigned char   bit_t;
 
 static int query_family = 0;
+static int v6only = 0;
+
+static void socket_mapping(int family, socket_t so)
+{
+	if(so == INVALID_SOCKET)
+		return;
+
+#ifdef	IPV6_V6ONLY
+	if(family == AF_INET6) 
+		setsockopt (so, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &v6only, sizeof (v6only));
+#endif
+}
+
 
 #ifndef	HAVE_GETADDRINFO
 
@@ -529,6 +542,14 @@ void Socket::init(void)
 }
 #endif
 
+void Socket::v4mapping(bool enable)
+{
+	if(enable)
+		v6only = 0;
+	else
+		v6only = 1;
+}
+
 void Socket::family(int query)
 {
 	query_family = query;
@@ -910,7 +931,7 @@ void Socket::address::set(const char *host, unsigned port, int family)
 	}
 
 #if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6)
+	if(hint.ai_family == AF_INET6 && !v6only)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
@@ -968,7 +989,7 @@ proc:
 	hint.ai_protocol = protocol;
 
 #if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6)
+	if(hint.ai_family == AF_INET6 && !v6only)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
@@ -1059,7 +1080,7 @@ void Socket::address::add(const char *host, const char *svc, int family, int soc
 		hint.ai_family = family;
 
 #if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6)
+	if(hint.ai_family == AF_INET6 && !v6only)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
@@ -1127,6 +1148,7 @@ Socket::Socket(struct addrinfo *addr)
 
 	while(addr) {
 		so = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+		socket_mapping(addr->ai_family, so);
 		if(so != INVALID_SOCKET) {
 			if(!_connect_(so, addr->ai_addr, addr->ai_addrlen))
 				return;
@@ -1191,7 +1213,7 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	hint.ai_protocol = protocol;
 
 #if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6)
+	if(hint.ai_family == AF_INET6 && !v6only)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
@@ -1251,10 +1273,13 @@ Socket::~Socket()
 
 socket_t Socket::create(int family, int type, int protocol)
 {
+	socket_t so;
 #ifdef	_MSWINDOWS_
 	init();
 #endif
-	return ::socket(family, type, protocol);
+	so = ::socket(family, type, protocol);
+	socket_mapping(family, so);
+	return so;
 }
 
 void Socket::cancel(void)
@@ -2038,6 +2063,7 @@ retry:
 	if(so == INVALID_SOCKET)
 		return;
 		
+	socket_mapping(family, so);
 	if(bindto(so, iface, svc, protocol)) {
 		release();
 #ifdef	AF_INET6
@@ -2218,7 +2244,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
 	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
 
 #if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6)
+	if(hint.ai_family == AF_INET6 && !v6only)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
@@ -2353,6 +2379,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 		so = ::socket(dest->sa_family, SOCK_DGRAM, 0);
 		if(so == INVALID_SOCKET)
 			return -1;
+		socket_mapping(dest->sa_family, so);
 		if(!_connect_(so, dest, len))
 			rtn = getsockname(so, iface, &len);
 		break;

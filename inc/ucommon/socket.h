@@ -651,8 +651,6 @@ public:
 	inline int gettype(void)
 		{return gettype(so);};
 
-
-
 	/**
 	 * Set the type of service field of outgoing packets.  Some useful
 	 * values include IPTOS_LOWDELAY to minimize delay for interactive 
@@ -1217,6 +1215,14 @@ public:
 	 * @param query family to select.
 	 */
 	static void family(int query);
+
+	/**
+	 * Set the default socket behavior for v6-v4 mapping.  This also
+	 * effects v6 address lookup as to whether v4 remapped addresses
+	 * can be used if no v6 address is found.
+	 * @param enable true to set mapping.  This is default.
+	 */
+	static void v4mapping(bool enable);
 
 	/**
 	 * Convert socket into FILE handle for reading.
