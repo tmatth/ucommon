@@ -248,6 +248,21 @@ public:
 	static int access(const char *path, unsigned mode);
 
 	/**
+	 * Test if path is a file.
+	 * @param path to test.
+	 * @return true if exists and is file.
+	 */
+	static bool isfile(const char *path);
+
+	/**
+	 * Test if path is a directory.
+	 * @param path to test.
+	 * @return true if exists and is directory.
+	 */
+	static bool isdir(const char *path);
+
+
+	/**
 	 * Read data from file descriptor or directory.
 	 * @param descriptor to read from.
 	 * @param buffer to read into.
