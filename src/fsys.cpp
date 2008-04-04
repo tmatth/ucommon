@@ -121,56 +121,6 @@ int fsys::stat(const char *path, struct stat *buf)
 		return remapError();
 }
 
-bool fsys::isfile(const char *path)
-{
-#ifdef _MSWINDOWS_
-	DWORD attr = GetFileAttributes(path);
-	if(attr == (DWORD)~0l)
-		return false;
-
-	if(attr & FILE_ATTRIBUTE_DIRECTORY)
-		return false;
-
-	return true;
-
-#else
-	struct stat ino;
-
-	if(stat(path, &ino))
-		return false;
-
-	if(S_ISREG(ino.st_mode))
-		return true;
-
-	return false;
-#endif 
-}
-
-bool fsys::isdir(const char *path)
-{
-#ifdef _MSWINDOWS_
-	DWORD attr = GetFileAttributes(path);
-	if(attr == (DWORD)~0l)
-		return false;
-
-	if(attr & FILE_ATTRIBUTE_DIRECTORY)
-		return true;
-
-	return false;
-
-#else
-	struct stat ino;
-
-	if(stat(path, &ino))
-		return false;
-
-	if(S_ISDIR(ino.st_mode))
-		return true;
-
-	return false;
-#endif
-}
-
 int fsys::stat(struct stat *buf)
 {
 	int fn = _open_osfhandle((long int)(fd), _O_RDONLY);
@@ -724,6 +674,56 @@ int fsys::load(const char *path)
 	}
 #endif
 	return remapError();
+}
+
+bool fsys::isfile(const char *path)
+{
+#ifdef _MSWINDOWS_
+	DWORD attr = GetFileAttributes(path);
+	if(attr == (DWORD)~0l)
+		return false;
+
+	if(attr & FILE_ATTRIBUTE_DIRECTORY)
+		return false;
+
+	return true;
+
+#else
+	struct stat ino;
+
+	if(stat(path, &ino))
+		return false;
+
+	if(S_ISREG(ino.st_mode))
+		return true;
+
+	return false;
+#endif 
+}
+
+bool fsys::isdir(const char *path)
+{
+#ifdef _MSWINDOWS_
+	DWORD attr = GetFileAttributes(path);
+	if(attr == (DWORD)~0l)
+		return false;
+
+	if(attr & FILE_ATTRIBUTE_DIRECTORY)
+		return true;
+
+	return false;
+
+#else
+	struct stat ino;
+
+	if(stat(path, &ino))
+		return false;
+
+	if(S_ISDIR(ino.st_mode))
+		return true;
+
+	return false;
+#endif
 }
 
 #ifdef	_MSWINDOWS_
