@@ -39,20 +39,53 @@ struct mutex_entry
 	unsigned count;
 };
 	
-class __LOCAL mutex_index : public mutex
+class __LOCAL mutex_index
 {
+private:
+#ifndef	__PTH__
+#if	_POSIX_SPIN_LOCKS > 1
+	pthread_spinlock_t spin;
+#else
+	pthread_mutex_t mutex;
+#endif
+#endif
+
 public:
 	struct mutex_entry *list;
 
 	mutex_index();
+
+#if defined(__PTH__)
+	inline void acquire(void) {};
+	inline void release(void) {};
+#elif _POSIX_SPIN_LOCKS > 1
+	inline void acquire(void)
+		{pthread_spin_lock(&spin);};
+	
+	inline void release(void)
+		{pthread_spin_unlock(&spin);};
+#else
+	inline void acquire(void)
+		{pthread_mutex_lock(&mutex);};
+	
+	inline void release(void)
+		{pthread_mutex_unlock(&mutex);};
+#endif
 };
 
 static mutex_index single_table;
 static mutex_index *mutex_table = &single_table;
 static unsigned mutex_indexing = 1;
 
-mutex_index::mutex_index() : mutex()
+mutex_index::mutex_index()
 {
+#ifdef	__PTH__
+#if _POSIX_SPIN_LOCKS > 1
+	pthread_spin_init(&mutex);
+#else
+	pthread_mutex_init(&mutex);
+#endif
+#endif
 	list = NULL;
 }
 
