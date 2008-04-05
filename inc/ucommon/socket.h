@@ -1163,6 +1163,16 @@ public:
 	static bool equal(struct sockaddr *address1, struct sockaddr *address2);
 
 	/**
+	 * Compare socket host addresses.  Test if the host addressmatches
+	 * or if there is no service, then just the host address values.
+	 * @param address1 to compare.
+	 * @param address2 to compare.
+	 * @return true if same family and equal.
+	 */
+	static bool equalhost(struct sockaddr *address1, struct sockaddr *address2);
+
+
+	/**
 	 * See if both addresses are in the same subnet.  This is only relevent
 	 * to IPV4 and class domain routing.
 	 * @param address1 to test.

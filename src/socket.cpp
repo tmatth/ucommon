@@ -955,7 +955,7 @@ void Socket::address::set(int family, const char *a, int type, int protocol)
 #ifdef	PF_UNSPEC
 	hint.ai_family = PF_UNSPEC;
 	hint.ai_socktype = SOCK_STREAM;
-	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+	hint.ai_flags = AI_PASSIVE;
 #endif
 
 	if(!host)
@@ -1065,12 +1065,12 @@ void Socket::address::add(const char *host, const char *svc, int family, int soc
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
-	struct addrinfo *join, *last = NULL, hint;
+	struct addrinfo *join = NULL, *last = NULL, hint;
 
 	memset(&hint, 0, sizeof(hint));
 #ifdef	PF_UNSPEC
 	hint.ai_family = PF_UNSPEC;
-	hint.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+	hint.ai_flags = AI_PASSIVE;
 #endif
 
 	hint.ai_socktype = socktype;
@@ -2448,6 +2448,37 @@ void Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
 	socklen_t len = getlen(s1);
 	memcpy(s2, s1, len);
 }
+
+bool Socket::equalhost(struct sockaddr *s1, struct sockaddr *s2)
+{
+	assert(s1 != NULL && s2 != NULL);
+
+	if(s1->sa_family != s2->sa_family)
+		return false;
+
+	switch(s1->sa_family) {
+	case AF_INET:
+		if(memcmp(&(((struct sockaddr_in *)s1)->sin_addr), 
+			&(((struct sockaddr_in *)s2)->sin_addr), 4))
+				return false;
+
+		return true;
+#ifdef	AF_INET6
+	case AF_INET6:
+		if(memcmp(&(((struct sockaddr_in6 *)s1)->sin6_addr), 
+			&(((struct sockaddr_in6 *)s2)->sin6_addr), 4))
+				return false;
+
+		return true;
+#endif		
+	default:
+		if(memcmp(s1, s2, getlen(s1)))
+			return false;
+		return true;
+	}
+	return false;
+}
+
 
 bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 {
