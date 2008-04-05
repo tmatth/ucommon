@@ -3,7 +3,6 @@ From ucommon 1.8.2 to 1.9.0
 - new "shell" class for generic parsing and argument expansion.
 - v4mapped() added to enable/disable ipv4 to ipv6 mapping support.
 - fsys::isfile/isdir added.
-- improved efficiency of protect/gaurd objects
 
 From ucommon 1.8.1 to 1.8.2
 - doxygen updates.
