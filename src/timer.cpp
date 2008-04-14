@@ -166,14 +166,22 @@ void TimerQueue::event::attach(TimerQueue *tq)
 
 void TimerQueue::event::arm(timeout_t timeout)
 {
+	TimerQueue *tq = getQueue();
+	if(tq)
+		tq->modify();
 	set(timeout);
-	update();
+	if(tq)
+		tq->update();
 }
 
 void TimerQueue::event::disarm(void)
 {
+	TimerQueue *tq = getQueue();
+	if(tq)
+		tq->modify();
 	clear();
-	update();
+	if(tq)
+		tq->update();
 }
 
 void TimerQueue::event::update(void)
