@@ -164,6 +164,18 @@ void TimerQueue::event::attach(TimerQueue *tq)
 	tq->update();
 }
 
+void TimerQueue::event::arm(timeout_t timeout)
+{
+	set(timeout);
+	update();
+}
+
+void TimerQueue::event::disarm(void)
+{
+	clear();
+	update();
+}
+
 void TimerQueue::event::update(void)
 {
 	TimerQueue *tq = getQueue();

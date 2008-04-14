@@ -249,14 +249,12 @@ public:
 		 * Arm event to trigger at specified timeout.
 		 * @param timeout to expire and trigger.
 		 */
-        inline void arm(timeout_t timeout)
-			{set(timeout);};
+        void arm(timeout_t timeout);
 
 		/**
 		 * Disarm event.
 		 */
-		inline void disarm(void)
-			{clear();};
+		void disarm(void);
 
 		/**
 		 * Test if event has expired.
