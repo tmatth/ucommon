@@ -177,10 +177,12 @@ void TimerQueue::event::arm(timeout_t timeout)
 void TimerQueue::event::disarm(void)
 {
 	TimerQueue *tq = getQueue();
-	if(tq)
+	bool flag = isExpired();
+
+	if(tq && !flag)
 		tq->modify();
 	clear();
-	if(tq)
+	if(tq && !flag)
 		tq->update();
 }
 
@@ -198,8 +200,8 @@ void TimerQueue::event::detach(void)
 	TimerQueue *tq = getQueue();
 	if(tq) {
 		tq->modify();
+		clear();
 		delist();
-		isUpdated();
 		tq->update();
 	}
 }
