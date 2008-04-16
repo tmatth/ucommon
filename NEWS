@@ -1,21 +1,22 @@
-UCommon Library NEWS -- history of visible user changes. Updated 2008-03-01.
+uCommon Library NEWS -- history of visible user changes. Updated 2008-04-15.
 
-UCommon 0.4 codebase completed and ready for release with the introduction of
+uCommon 0.4 codebase completed and ready for release with the introduction of
 the GNU GPL V3.  This is a complete rewrite of UCommon as a C++ library for
 threading and design patterns suitable for deeply embedded targets.
 
-UCommon 0.7 codebase now has core documentation and basic library theory
+uCommon 0.7 codebase now has core documentation and basic library theory
 in header files.  This documentation can be generated with doxygen or by
 using "make doxy".
 
-UCommon 1.0 release has been simplified, fully documented, and modified in
+uCommon 1.0 release has been simplified, fully documented, and modified in
 specific ways to simplify the migration and merge with GNU Common C++ to
 form GNU Common C++ 2.0.
 
-UCommon 1.5 release begins the process of migrating GNU Common C++ into the
+uCommon 1.5 release begins the process of migrating GNU Common C++ into the
 core UCommon codebase. Some GNU Common C++ classes, including tcp streaming,
 xml parser, and persist, have been revised and integrated for the 1.5.0 release
 itself.  Other GNU Common C++ classes will be integrated as requested and
 needed.  The 1.5/1.x series will actually be the last UCommon release sets, as
 UCommon 2.0 will instead be released as GNU Common C++ 2 2.0.
 
+uCommon 1.9 first release candidate for use as GNU Common C++ 2 2.0.

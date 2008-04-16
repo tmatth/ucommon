@@ -84,3 +84,15 @@ even if there is a local library that simulates pthread functionality.
 The reason is that uCommon also wraps and schedules I/O operations 
 through the pth I/O functions.
 
+Recent Platforms and Versions Tested:
+
+GNU/Linux gcc 4.2	1.9.0	i386
+GNU/Linux gcc 2.95	1.9.0	i386		can only build without stdcpp?
+OpenBSD4			1.9.0	x86_64
+FreeBSD6			1.9.0	i386		issues with ipv4tov6 mapping in lookup
+OpenSolaris sunwpro	1.9.0	i386
+OS/X				1.9.0	ppc
+QNX (gcc 2.95)		1.8.1	i386
+MingW32/cross		1.9.0	i386		can unit tests run in wine?
+Cygwin				1.8.0	i386
+
