@@ -49,6 +49,12 @@
 #define	MSG_NOSIGNAL 0
 #endif
 
+#ifdef	__FreeBSD__
+#ifdef	AI_V4MAPPED
+#undef	AI_V4MAPPED
+#endif
+#endif
+
 typedef struct
 {
 	union {
@@ -427,7 +433,7 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
 #define	AF_UNSPEC	0
 #endif
 
-int setfamily(int family, const char *host)
+static int setfamily(int family, const char *host)
 {
 	const char *hc = host;
 	if(!host)
@@ -1026,7 +1032,7 @@ struct sockaddr *Socket::address::get(int family)
 	lp = list;
 
 	while(lp) {
-		ap = list->ai_addr;
+		ap = lp->ai_addr;
 		if(ap && ap->sa_family == family)
 			return ap;
 		lp = lp->ai_next;

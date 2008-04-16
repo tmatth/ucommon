@@ -36,6 +36,7 @@ extern "C" int main()
 
 	char addrbuf[128];
 	addrbuf[0] = 0;
+	assert(localhost.get(AF_INET) != NULL);
 	Socket::getaddress(localhost.get(AF_INET), addrbuf, sizeof(addrbuf));
 	assert(0 == strcmp(addrbuf, "127.0.0.1"));
 	Socket::getinterface((struct sockaddr *)&addr, localhost.get(AF_INET));
@@ -47,6 +48,7 @@ extern "C" int main()
 	// we can only test if interface/ipv6 support is actually running
 	// so we use getinterface to find out first.  it will return -1 for
 	// localhost interface if ipv6 is down...
+	assert(localhost6.get(AF_INET6) != NULL);
 	if(!Socket::getinterface((struct sockaddr *)&addr, localhost6.get(AF_INET6))) {
 		Socket::getaddress((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
 		assert(0 == strcmp(addrbuf, "::1"));
