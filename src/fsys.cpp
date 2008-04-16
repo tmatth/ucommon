@@ -691,7 +691,7 @@ bool fsys::isfile(const char *path)
 #else
 	struct stat ino;
 
-	if(stat(path, &ino))
+	if(::stat(path, &ino))
 		return false;
 
 	if(S_ISREG(ino.st_mode))
@@ -716,7 +716,7 @@ bool fsys::isdir(const char *path)
 #else
 	struct stat ino;
 
-	if(stat(path, &ino))
+	if(::stat(path, &ino))
 		return false;
 
 	if(S_ISDIR(ino.st_mode))

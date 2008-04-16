@@ -1040,7 +1040,7 @@ public:
 	static char *strip(char *text, const char *list);
 
 	/**
-	 * Fill a section of memory will a fixed text character.  Adds a null
+	 * Fill a section of memory with a fixed text character.  Adds a null
 	 * byte at the end.
 	 * @param text buffer to fill.
 	 * @param size of text buffer with null terminated byte.

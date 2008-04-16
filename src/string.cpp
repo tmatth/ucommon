@@ -1741,7 +1741,7 @@ char *string::unquote(char *str, const char *clist)
 	return NULL;
 }
 
-char *string::fill(char *str, size_t size, const char fill)
+char *string::fill(char *str, size_t size, char fill)
 {
 	if(!str)
 		return NULL;

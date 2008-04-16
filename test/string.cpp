@@ -29,6 +29,7 @@ static string_t testing("second test");
 extern "C" int main()
 {
 	char buff[33];
+
 	String::fill(buff, 32, ' ');
 	stringbuf<128> mystr;
 	mystr = (string_t)"hello" + (string_t)" this is a test";
