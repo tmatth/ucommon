@@ -1157,16 +1157,20 @@ const char *string::token(char *text, char **token, const char *clist, const cha
 		*token = strchr(result, *quote);
 		if(!*token)
 			*token = result + strlen(result);
-		else
-			*(*token++) = 0;
+		else {
+			**token = 0;
+			++(*token);
+		}
 		return result;
 	}
 
 	while(**token && !strchr(clist, **token))
 		++(*token);
 
-	if(**token)
-		*(*(token++)) = 0; 	
+	if(**token) {
+		**token = 0;
+		++(*token);
+	}
 
 	return result;
 }
