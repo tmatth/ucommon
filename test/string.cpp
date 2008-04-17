@@ -29,6 +29,10 @@ static string_t testing("second test");
 extern "C" int main()
 {
 	char buff[33];
+	char *tokens = NULL;
+	unsigned count = 0;
+	const char *tp;
+	const char *array[5];
 
 	String::fill(buff, 32, ' ');
 	stringbuf<128> mystr;
@@ -38,4 +42,10 @@ extern "C" int main()
 	assert(!stricmp(" is a test", mystr(-10)));
 	mystr = "  abc 123 \n  ";
 	assert(!stricmp("abc 123", String::strip(mystr.c_mem(), " \n")));
+	String::set(buff, sizeof(buff), "this is \"a test\"");
+	while(NULL != (tp = String::token(buff, &tokens, " ", "\"\"")) && count < 4)
+		array[count++] = tp;
+	assert(count == 3);
+	assert(!stricmp(array[1], "is"));
+	assert(!stricmp(array[2], "a test"));
 };

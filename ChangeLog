@@ -1,5 +1,6 @@
 From ucommon 1.9.0 to 1.9.1
 - bug in string::token parsing fixed.
+- unit test to validate string::token fix.
 
 From ucommon 1.8.2 to 1.9.0
 - pipestream interface normalized for shell execution.
