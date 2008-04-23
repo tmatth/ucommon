@@ -1742,7 +1742,7 @@ char *string::unquote(char *str, const char *clist)
 		}
 		clist += 2;
 	}
-	return NULL;
+	return str;
 }
 
 char *string::fill(char *str, size_t size, char fill)
