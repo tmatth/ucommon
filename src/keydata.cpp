@@ -45,11 +45,13 @@ OrderedObject(&file->index), index()
 	assert(id != NULL);
 
 	name = file->dup(id);
+	root = file;
 }
 
-keydata::keydata() :
+keydata::keydata(keyfile *file) :
 OrderedObject(), index()
 {
+	root = file;
 	name = "-";
 }
 
@@ -66,6 +68,40 @@ const char *keydata::get(const char *key)
 	}
 	return NULL;
 } 
+
+void keydata::clear(const char *key)
+{
+	assert(key != NULL);
+
+	iterator keys = begin();
+
+	while(is(keys)) {
+		if(!stricmp(key, keys->id)) {
+			keys->delist(&index);
+			return;
+		}
+		keys.next();
+	}
+} 
+
+void keydata::set(const char *key, const char *value)
+{
+	assert(key != NULL);
+	assert(value != NULL);
+
+	caddr_t mem = (caddr_t)root->alloc(sizeof(keydata::keyvalue));
+	keydata::iterator keys = begin();
+
+	while(is(keys)) {
+		if(!stricmp(key, keys->id)) {
+			keys->delist(&index);
+			break;
+		}
+		keys.next();
+	}
+	new(mem) keydata::keyvalue(root, this, key, value);
+}
+
 
 keyfile::keyfile(size_t pagesize) :
 mempager(pagesize), index()
@@ -106,25 +142,6 @@ keydata *keyfile::create(const char *id)
 	
 	return new(mem) keydata(this, id);
 }
-
-void keyfile::create(keydata *section, const char *key, const char *value)
-{
-	assert(section != NULL);
-	assert(key != NULL);
-	assert(value != NULL);
-
-	caddr_t mem = (caddr_t)alloc(sizeof(keydata::keyvalue));
-	keydata::iterator keys = section->begin();
-
-	while(is(keys)) {
-		if(!stricmp(key, keys->id)) {
-			keys->delist(&section->index);
-			break;
-		}
-		keys.next();
-	}
-	new(mem) keydata::keyvalue(this, section, key, value);
-}
 	
 void keyfile::load(const char *path)
 {
@@ -144,7 +161,7 @@ void keyfile::load(const char *path)
 
 	if(!defaults) {
 		caddr_t mem = (caddr_t)alloc(sizeof(keydata));
-		defaults = new(mem) keydata();
+		defaults = new(mem) keydata(this);
 	}
 
 	for(;;) {
@@ -184,9 +201,9 @@ next:
 		value = String::strip(++ep, " \t\r\n");
 		value = String::unquote(value, "\"\"\'\'{}()");
 		if(section)
-			create(section, key, value);
+			section->set(key, value);
 		else
-			create(defaults, key, value); 
+			defaults->set(key, value); 
 		lp = linebuf;
 		size = sizeof(linebuf);
 	}

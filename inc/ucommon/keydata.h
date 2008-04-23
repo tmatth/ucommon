@@ -50,9 +50,10 @@ private:
 
 	friend class keyfile;
 	OrderedIndex index;
-	keydata();
+	keydata(keyfile *file);
 	keydata(keyfile *file, const char *id);
 	const char *name;
+	keyfile *root;
 
 public:
 	/**
@@ -86,6 +87,22 @@ public:
 	inline const char *operator()(const char *id)
 		{return get(id);};
 
+	/**
+	 * Set a keyword and value in the keydata structure.  If the keyword
+	 * already exists, it is replaced.  Removed items still use pager
+	 * allocated memory.
+	 * @param id to set.
+	 * @param value for the id.
+	 */
+	void set(const char *id, const char *value);
+
+	/**
+	 * Remove a keyword id from the keydata structure.  Removed items
+	 * still use pager allocated memory.
+	 * @param id to remove.
+	 */
+	void clear(const char *id);
+	
 	/**
 	 * Get the name of this section.  Useful in iterative examinations.
 	 * @return name of keydata section.
@@ -127,7 +144,6 @@ private:
 	keydata *defaults;
 
 	keydata *create(const char *section);
-	void create(keydata *keydata, const char *id, const char *value);
 
 public:
 	/**
