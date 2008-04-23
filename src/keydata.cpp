@@ -184,6 +184,9 @@ void keyfile::load(const char *path)
 		while(isspace(*lp))
 			++lp;
 
+		if(!*lp)
+			goto next;
+
 		if(*lp == '[') {
 			ep = strchr(lp, ']');
 			if(!ep)
@@ -194,7 +197,7 @@ void keyfile::load(const char *path)
 		}
 		else if(!isalnum(*lp) || !strchr(lp, '='))
 			goto next;
-next:
+
 		ep = strchr(lp, '=');
 		*ep = 0;
 		key = String::strip(lp, " \t");
@@ -204,6 +207,7 @@ next:
 			section->set(key, value);
 		else
 			defaults->set(key, value); 
+next:
 		lp = linebuf;
 		size = sizeof(linebuf);
 	}
