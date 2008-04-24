@@ -93,7 +93,7 @@ public:
 		bool uses_value;
 		const char *help_string;
 
-		static char *errmsg[];
+		static const char *errmsg[];
 
 		enum {
 			ERR_NO_VALUE = 0,

@@ -39,7 +39,7 @@ using namespace UCOMMON_NAMESPACE;
 
 shell::Option *shell::Option::root = NULL;
 
-char *shell::Option::errmsg[] = {"has no value", "improper usage", "value missing", "unknown option"};
+const char *shell::Option::errmsg[] = {"has no value", "improper usage", "value missing", "unknown option"};
 
 shell::Option::Option(char shortopt, const char *longopt, bool value, const char *help)
 {
