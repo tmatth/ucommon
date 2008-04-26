@@ -2622,4 +2622,34 @@ FILE *Socket::open(socket_t so, bool mode)
 	return fdopen(dup(so), "r");
 }
 
+bool Socket::isNull(const char *str)
+{
+	assert(str != NULL);
+
+	while(*str && strchr("0:.", *str) != NULL)
+		++str;
+	
+	if(*str)
+		return false;
+
+	return true;
+}
+
+bool Socket::isNumeric(const char *str)
+{
+	assert(str != NULL);
+
+	// if raw ipv6, then we can just exit, no chance to confuse with names
+	if(strchr(str, ':'))
+		return true;
+
+	while(*str && strchr("0123456789.", *str) != NULL)
+		++str;
+	
+	if(*str)
+		return false;
+
+	return true;
+}
+
 #endif 

@@ -1261,6 +1261,25 @@ public:
 	 * @return errno style error code.
 	 */
 	static int error(void);
+
+	/**
+	 * Simple function to validate that a given IP address string is a "zero"
+	 * address.  Such address strings are used for example in SIP to indicate
+	 * "hold" by re-inviting peers to a null address.  Supports IPV4 and
+	 * IPV6 addresses.
+	 * @param address string to check.
+	 * @return true if zero/null address.
+	 */
+	static bool isNull(const char *string);
+
+	/**
+	 * Simple function to validate that a given IP address string is a numeric
+	 * address.  This can be used to verify an address is not a "host" name.
+	 * Supports IPV4 and IPV6 address strings.
+	 * @param address string to check.
+	 * @return true if zero/null address.
+	 */
+	static bool isNumeric(const char *string);
 };
 
 /**
