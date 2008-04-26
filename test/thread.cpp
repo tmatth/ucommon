@@ -50,5 +50,6 @@ extern "C" int main()
 	assert(count == 1);
 	time(&later);
 	assert(later >= now + 1);
+	return 0;
 };
 

@@ -57,4 +57,5 @@ extern "C" int main()
 		assert(0 == strcmp(addrbuf, "44:22:66::1"));
 	}
 #endif
+	return 0;
 };

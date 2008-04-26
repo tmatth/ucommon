@@ -54,4 +54,5 @@ extern "C" int main()
 		++ptr;
 	}
 	assert(count == 2);
+	return 0;
 };

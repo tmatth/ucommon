@@ -39,4 +39,5 @@ extern "C" int main()
 	keys = myfile["section2"];
 	assert(keys != NULL);
 	assert(stricmp(keys->get("key1"), "replaced value") == 0);
+	return 0;
 };
