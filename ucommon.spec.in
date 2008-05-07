@@ -3,28 +3,9 @@
 %{!?version: %define version @VERSION@}
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
-%{!?uses_openssl: %define uses_openssl 1}
-%{!?uses_gcrypt:  %define uses_gcrypt 0}
-
-%if %uses_openssl
-	%define	_depend_requires openssl
-	%define _devel_requires openssl-devel
-	%define	_build_requires gcc-c++ openssl-devel
-	%define	_config_crypto --with-crypto=openssl
-%else
-%if %uses_gcrypt
-	%define	_depend_requires libgcrypt
-	%define _devel_requires libgcrypt-devel
-	%define	_build_requires gcc-c++ libgcrypt-devel
-	%define _config_crypto --with-crypto=gcrypt
-%else
-	%define	_build_requires gcc-c++
-	%define _config_crypto --with-crypto=none
-%endif
-%endif
 
 %if ! %uses_stdcpp
-	%define	_config_stdcpp --disable-stdcpp
+%define	_config_stdcpp --disable-stdcpp
 %endif
 
 Name: ucommon
@@ -36,19 +17,12 @@ License: LGPL
 Group: Development/Libraries
 Source0: ucommon-%{PACKAGE_VERSION}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: %{_build_requires}
-%if %{uses_gcrypt} || %{uses_openssl}
-Requires: %{_depend_requires}
-%endif
+BuildRequires: gcc-g++
 
 %package devel
 Requires: ucommon = %{epoch}:%{version}-%{release}
 Group: Development/Libraries
 Summary: Headers and static link library for ucommon
-%if %{uses_gcrypt} || %{uses_openssl}
-Requires: %{_devel_requires}
-%endif
-
 
 %description
 
@@ -58,7 +32,7 @@ Requires: %{_devel_requires}
 %setup
 %build
 
-%configure %{?_config_stdcpp} %{_config_crypto} CXXFLAGS="$RPM_OPT_FLAGS" %{?_build_environ_}
+%configure %{?_config_stdcpp} CXXFLAGS="$RPM_OPT_FLAGS" 
 make %{?_smp_mflags} LDFLAGS="-s"
 
 %install
