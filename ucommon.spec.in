@@ -35,7 +35,9 @@ Group: Development/Libraries
 Source0: ucommon-%{PACKAGE_VERSION}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: %{_build_requires}
+%if %{uses_gcrypt} || %{uses_openssl}
 Requires: %{_depend_requires}
+%endif
 
 %package devel
 Requires: ucommon = %{epoch}:%{version}-%{release}

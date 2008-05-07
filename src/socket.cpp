@@ -868,6 +868,8 @@ Socket::address::address(Socket &s, const char *host, const char *svc)
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
+	list = NULL;
+
 #ifdef	_MSWINDOWS_
 	Socket::init();
 #endif
@@ -941,7 +943,6 @@ void Socket::address::set(const char *host, unsigned port, int family)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
-	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
 
@@ -999,7 +1000,6 @@ proc:
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
 
-	list = NULL;
 	getaddrinfo(host, svc, &hint, &list);
 }
 
