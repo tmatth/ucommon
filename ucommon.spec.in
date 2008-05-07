@@ -1,6 +1,29 @@
 %{!?release: %define release 0}
-%{!?epoch: %define epoch 0}
+%{!?epoch:   %define epoch 0}
 %{!?version: %define version @VERSION@}
+
+%{!?uses_stdcpp:  %define uses_stdcpp 1}
+%{!?uses_openssl: %define uses_openssl 1}
+%{!?uses_gcrypt:  %define uses_gcrypt 0}
+
+%if %uses_openssl
+	%define	_depend_requires openssl
+	%define	_build_requires gcc-c++ openssl-devel
+	%define	_config_crypto --with-crypto=openssl
+%else
+%if %uses_gcrypt
+	%define	_depend_requires libgcrypt
+	%define	_build_requires gcc-c++ libgcrypt-devel
+	%define _config_crypto --with-crypto=gcrypt
+%else
+	%define	_build_requires gcc-c++
+	%define _config_crypto --with-crypto=none
+%endif
+%endif
+
+%if ! %uses_stdcpp
+	%define	_config_stdcpp --disable-stdcpp
+%endif
 
 Name: ucommon
 Summary: "ucommon" - portable embedded runtime
@@ -11,7 +34,8 @@ License: LGPL
 Group: Development/Libraries
 Source0: ucommon-%{PACKAGE_VERSION}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: gcc-c++
+BuildRequires: %{_build_requires}
+Requires: %{_depend_requires}
 
 %package devel
 Requires: ucommon = %{epoch}:%{version}-%{release}
@@ -26,7 +50,7 @@ Summary: Headers and static link library for ucommon
 %setup
 %build
 
-%configure %{_config_stdcpp} CXXFLAGS="$RPM_OPT_FLAGS"
+%configure %{?_config_stdcpp} %{_config_crypto} CXXFLAGS="$RPM_OPT_FLAGS" %{?_build_environ_}
 make %{?_smp_mflags} LDFLAGS="-s"
 
 %install
