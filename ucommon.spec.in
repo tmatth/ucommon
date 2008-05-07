@@ -8,11 +8,13 @@
 
 %if %uses_openssl
 	%define	_depend_requires openssl
+	%define _devel_requires openssl-devel
 	%define	_build_requires gcc-c++ openssl-devel
 	%define	_config_crypto --with-crypto=openssl
 %else
 %if %uses_gcrypt
 	%define	_depend_requires libgcrypt
+	%define _devel_requires libgcrypt-devel
 	%define	_build_requires gcc-c++ libgcrypt-devel
 	%define _config_crypto --with-crypto=gcrypt
 %else
@@ -43,6 +45,10 @@ Requires: %{_depend_requires}
 Requires: ucommon = %{epoch}:%{version}-%{release}
 Group: Development/Libraries
 Summary: Headers and static link library for ucommon
+%if %{uses_gcrypt} || %{uses_openssl}
+Requires: %{_devel_requires}
+%endif
+
 
 %description
 
