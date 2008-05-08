@@ -1207,12 +1207,21 @@ public:
 	static short getservice(struct sockaddr *address);
 	
 	/**
-	 * Convert a socket address into a hash map index.
+	 * Convert a socket address and service into a hash map index.
 	 * @param address to convert.
 	 * @param size of map index.
 	 * @return key index path.
 	 */
 	static unsigned keyindex(struct sockaddr *address, unsigned size);
+
+	/**
+	 * Convert a socket host address into a hash map index.
+	 * @param address to convert.
+	 * @param size of map index.
+	 * @return key index path.
+	 */
+	static unsigned keyhost(struct sockaddr *address, unsigned size);
+
 
 	/**
 	 * Initialize socket subsystem.
