@@ -2103,7 +2103,7 @@ struct addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
 
 	struct sockaddr_storage st;
 	struct sockaddr *sa = (struct sockaddr *)&st;
-	socklen_t slen;
+	socklen_t slen = sizeof(st);
 
 	memset(hint, 0, sizeof(struct addrinfo));
 	memset(sa, 0, sizeof(st));
