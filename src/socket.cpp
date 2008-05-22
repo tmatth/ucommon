@@ -781,6 +781,7 @@ void cidr::set(const char *cp)
 	int slen;
 	struct sockaddr_in6 *paddr;
 	int ok;
+	DWORD addr = (DWORD)inet_addr(cbuf);
 #endif
 
 #ifdef	AF_INET6
@@ -809,7 +810,6 @@ void cidr::set(const char *cp)
 			string::add(cbuf, sizeof(cbuf), ".0");
 
 #ifdef	_MSWINDOWS_
-		DWORD addr = (DWORD)inet_addr(cbuf);
 		memcpy(&network.ipv4, &addr, sizeof(network.ipv4));
 #else
 		inet_aton(cbuf, &network.ipv4);
