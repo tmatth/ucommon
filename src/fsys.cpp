@@ -667,13 +667,14 @@ int fsys::load(const char *path)
 		module.mem = 0;
 		return 0;
 	}
+	return remapError();
 #else
 	if(module.ptr) {
 		module.ptr = 0;
 		return 0;
 	}
+	return module.error;
 #endif
-	return remapError();
 }
 
 bool fsys::isfile(const char *path)
@@ -733,7 +734,7 @@ void fsys::load(fsys& module, const char *path)
 	module.error = 0;
 	module.mem = LoadLibrary(path);
 	if(!module.mem)
-		module.error = remapError();
+		module.error = -1;
 }
 
 void fsys::unload(fsys& module)
@@ -759,8 +760,8 @@ void fsys::load(fsys& module, const char *path)
 {
 	module.error = 0;
 	module.ptr = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
-	if(module.ptr)
-		module.error = remapError();
+	if(module.ptr == NULL)
+		module.error = -1;
 }
 
 void fsys::unload(fsys& module)
@@ -792,14 +793,14 @@ void fsys::load(fsys& module, const char *path)
 	module.error = 0;
 
 	if(NSCreateObjectFileImageFromFile(path, &oImage) != NSObjectFileImageSuccess) {
-		module.error = remapError();
+		module.error = -1;
 		return;
 	}
 
 	mod = NSLinkModule(oImage, path, NSLINKMODULE_OPTION_BINDNOW | NSLINKMODULE_OPTION_RETURN_ON_ERROR);
 	NSDestroyObjectFileImage(oImage);
 	if(mod == NULL) {
-		module.error = remapError();
+		module.error = -1;
 		return;
 	}
 
@@ -852,7 +853,7 @@ void fsys::load(fsys& module, const char *path)
 	module.error = 0;
 	module.ptr = (void *))shl_load(path, BIND_IMMEDIATE, 0l);
 	if(!module.ptr)
-		module.error = remapError();
+		module.error = -1;
 }
 
 void *fsys::find(fsys& module, const char *sym)

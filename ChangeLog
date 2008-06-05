@@ -1,5 +1,6 @@
 From ucommon 1.9.2 to 1.9.3
 - fixed join/drop issue in multicast reported by Michael Freedman.
+- module loader error handling.
 
 From ucommon 1.9.1 to 1.9.2
 - added Socket::isNull and Socket::isNumeric checks.
