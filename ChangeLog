@@ -1,3 +1,7 @@
+From ucommon 1.9.3 to 1.9.4
+- string equality tests.
+- Socket isNull/isNumeric can parse inside a field...
+
 From ucommon 1.9.2 to 1.9.3
 - fixed join/drop issue in multicast reported by Michael Freedman.
 - module loader error handling.

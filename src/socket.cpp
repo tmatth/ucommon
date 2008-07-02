@@ -2663,7 +2663,11 @@ bool Socket::isNull(const char *str)
 
 	while(*str && strchr("0:.", *str) != NULL)
 		++str;
-	
+
+	// allow field separation...	
+	if(*str <= ' ')
+		return true;
+
 	if(*str)
 		return false;
 
@@ -2680,7 +2684,11 @@ bool Socket::isNumeric(const char *str)
 
 	while(*str && strchr("0123456789.", *str) != NULL)
 		++str;
-	
+
+	// allow field separators	
+	if(*str <= ' ')
+		return true;
+
 	if(*str)
 		return false;
 

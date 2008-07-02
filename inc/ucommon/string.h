@@ -183,6 +183,13 @@ protected:
 	virtual int compare(const char *string) const;
 
 	/**
+	* Test if two string values are equal.
+	* @param string to compare with.
+	* @return true if equal.
+	*/
+	bool equal(const char *string) const;
+
+	/**
 	 * Increase retention of our reference counted cstring.  May be overriden
 	 * for memstring which has fixed cstring object.
 	 */
@@ -987,6 +994,14 @@ public:
 	static int compare(const char *text1, const char *text2);
 
 	/**
+	 * Simple equal test for strings.
+	 * @param text1 to test.
+	 * @param text2 to test.
+	 * @return true if equal and case is same.
+	 */
+	static bool equalcase(const char *text1, const char *text2);
+
+	/**
 	 * Safe string comparison function.
 	 * @param text1 to compare.
 	 * @param text2 to compare.
@@ -994,6 +1009,15 @@ public:
 	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
 	 */
 	static int compare(const char *text1, const char *text2, size_t size);
+
+	/**
+	 * Simple equal test for strings.
+	 * @param text1 to test.
+	 * @param text2 to test.
+	 * @param size limit of strings to compare.
+	 * @return true if equal and case is same.
+	 */
+	static bool equalcase(const char *text1, const char *text2, size_t size);
 
 	/**
 	 * Safe case insensitive string comparison function.
@@ -1004,6 +1028,14 @@ public:
 	static int icompare(const char *text1, const char *text2);
 
 	/**
+	 * Simple case insensitive equal test for strings.
+	 * @param text1 to test.
+	 * @param text2 to test.
+	 * @return true if equal.
+	 */
+	static bool equal(const char *text1, const char *text2);
+
+	/**
 	 * Safe case insensitive string comparison function.
 	 * @param text1 to compare.
 	 * @param text2 to compare.
@@ -1011,6 +1043,15 @@ public:
 	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
 	 */
 	static int icompare(const char *text1, const char *text2, size_t size);
+
+	/**
+	 * Simple case insenstive equal test for strings.
+	 * @param text1 to test.
+	 * @param text2 to test.
+	 * @param size limit of strings to compare.
+	 * @return true if equal.
+	 */
+	static bool equal(const char *text1, const char *text2, size_t size);
 
 	/**
 	 * Return start of string after characters to trim from beginning.

@@ -348,6 +348,11 @@ const char *string::c_str(void) const
 	return str->text;
 }
 
+bool string::equal(const char *s) const
+{
+	return compare(s) == 0;
+}
+
 int string::compare(const char *s) const
 {
 	const char *mystr = "";
@@ -1675,6 +1680,26 @@ char *string::first(char *str, const char *clist)
 	if(!*fp)
 		fp = NULL;
     return fp;
+}
+
+bool string::equal(const char *s1, const char *s2)
+{
+	return icompare(s1, s2) == 0;
+}
+
+bool string::equalcase(const char *s1, const char *s2)
+{
+	return compare(s1, s2) == 0;
+}
+
+bool string::equal(const char *s1, const char *s2, size_t size)
+{
+	return icompare(s1, s2, size) == 0;
+}
+
+bool string::equalcase(const char *s1, const char *s2, size_t size)
+{
+	return compare(s1, s2, size) == 0;
 }
 
 int string::compare(const char *s1, const char *s2)
