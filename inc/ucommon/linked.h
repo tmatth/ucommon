@@ -347,9 +347,15 @@ protected:
 	 * we may use them in reusable pools or we may initialize a list that we
 	 * keep permenantly.  If we do invoke delete for something based on
 	 * NamedObject, then be aware the object id is assumed to be formed from 
-	 * a dup'd string which will also be freed.
+	 * a dup'd string which will also be freed unless clearId is overriden.
 	 */
 	~NamedObject();
+
+	/**
+	 * The behavior of clearing id's can be overriden if they are not
+	 * assigned as strdup's from the heap...
+	 */
+	virtual void clearId(void);
 
 public:
 	/**
@@ -601,6 +607,13 @@ public:
 	 */
 	inline bool isLeaf(void) const
 		{return (child.begin() == NULL);};
+
+	/**
+	 * Test if node is root node.
+	 * @return true if node is root node.
+	 */
+	inline bool isRoot(void) const
+		{return (parent == NULL);};
 };
 
 /**

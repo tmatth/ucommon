@@ -309,14 +309,20 @@ OrderedObject()
 	id = nid;
 }
 
-NamedObject::~NamedObject()
+void NamedObject::clearId(void)
 {
-	// this assumes the id is a malloc'd or strdup'd string.
-
 	if(id) {
 		free(id);
 		id = NULL;
 	}
+}
+
+NamedObject::~NamedObject()
+{
+	// this assumes the id is a malloc'd or strdup'd string.
+	// maybe overriden if virtual...
+
+	clearId();
 }
 
 // Linked objects are assumed to be freeable if they are released.  The retain
@@ -629,7 +635,7 @@ void NamedTree::setId(char *nid)
 	assert(nid != NULL && *nid != 0);
 
 	if(id)
-		free(id);
+		clearId();
 
 	id = nid;
 }
@@ -661,11 +667,8 @@ void NamedTree::purge(void)
 	}
 
 	// this assumes the object id is a malloc'd/strdup string.
-
-	if(id) {
-		free(id);
-		id = NULL;
-	}
+	// may be overriden if virtual...
+	clearId();
 }
 
 LinkedObject::LinkedObject()
