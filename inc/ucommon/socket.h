@@ -184,6 +184,15 @@ public:
 	static cidr *find(policy *policy, const struct sockaddr *address);
 
 	/**
+	 * Get the largest container cidr entry in a list that matches the
+	 * socket address.
+	 * @param policy chain to search.
+	 * @param address to search for.
+	 * @return largest cidr or NULL if none match.
+	 */
+	static cidr *container(policy *policy, const struct sockaddr *address);
+
+	/**
 	 * Get the saved name of our cidr.  This is typically used with find
 	 * when the same policy name might be associated with multiple non-
 	 * overlapping cidr blocks.  A typical use might to have a cidr

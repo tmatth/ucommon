@@ -645,6 +645,28 @@ cidr *cidr::find(policy *policy, const struct sockaddr *s)
 	return member;
 }
 
+cidr *cidr::container(policy *policy, const struct sockaddr *s)
+{
+	assert(policy != NULL);
+	assert(s != NULL);
+
+	cidr *member = NULL;
+	unsigned top = 128;
+
+	linked_pointer<cidr> p = policy;
+	while(p) {
+		if(p->isMember(s)) {
+			if(p->getMask() < top) {
+				top = p->getMask();
+				member = *p;
+			}
+		}
+		p.next();
+	}
+	return member;
+}
+
+
 bool cidr::isMember(const struct sockaddr *s) const
 {
 	assert(s != NULL);
