@@ -634,9 +634,7 @@ void NamedTree::setId(char *nid)
 {
 	assert(nid != NULL && *nid != 0);
 
-	if(id)
-		clearId();
-
+	clearId();
 	id = nid;
 }
 
