@@ -140,7 +140,6 @@ static void socket_mapping(int family, socket_t so)
 #endif
 }
 
-
 #ifndef	HAVE_GETADDRINFO
 
 static mutex servmutex, hostmutex;
@@ -2683,7 +2682,7 @@ bool Socket::isNull(const char *str)
 {
 	assert(str != NULL);
 
-	while(*str && strchr("0:.", *str) != NULL)
+	while(*str && strchr("0:.*", *str) != NULL)
 		++str;
 
 	// allow field separation...	
