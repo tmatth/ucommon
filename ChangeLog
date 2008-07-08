@@ -3,6 +3,7 @@ From ucommon 1.9.3 to 1.9.4
 - Socket isNull/isNumeric can parse inside a field...
 - container policies for cidr's
 - behavior of ID reset for named objects can now be overriden by virtual.
+- string format conversion base class for use in string classes and operators.
 
 From ucommon 1.9.2 to 1.9.3
 - fixed join/drop issue in multicast reported by Michael Freedman.

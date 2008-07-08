@@ -33,12 +33,12 @@
 #include <ucommon/memory.h>
 #endif
 
-#ifndef	_UCOMMON_SOCKET_H_
-#include <ucommon/socket.h>
-#endif
-
 #ifndef	_UCOMMON_TIMERS_H_
 #include <ucommon/timers.h>
+#endif
+
+#ifndef	_UCOMMON_SOCKET_H_
+#include <ucommon/socket.h>
 #endif
 
 #include <stdio.h>
@@ -53,6 +53,8 @@ NAMESPACE_UCOMMON
  */
 typedef	unsigned short strsize_t;
 
+class StringFormat;
+
 /**
  * A copy-on-write string class that operates by reference count.  This string
  * class anchors a counted object that is managed as a copy-on-write
@@ -66,6 +68,8 @@ typedef	unsigned short strsize_t;
 class __EXPORT string : public Object
 {
 protected:
+	friend class StringFormat;
+
 	/**
 	 * This is an internal class which contains the actual string data
 	 * along with some control fields.  The string can be either NULL
@@ -120,6 +124,12 @@ protected:
 		void set(strsize_t offset, const char *text, strsize_t size);
 
 		/**
+		 * Set our string from a string formatting object.
+		 * @param format object to set from.
+		 */
+		void set(const StringFormat& format);
+
+		/**
 		 * Set our string from null terminated text up to our allocated size.
 		 * @param text to set from.
 		 */
@@ -130,6 +140,12 @@ protected:
 		 * @param text to append.
 		 */
 		void add(const char *text);
+
+		/**
+		 * Append text to string buffer from formatting object.
+		 * @param formatting object to add from.
+		 */
+		void add(const StringFormat &format);
 
 		/**
 		 * Append a single character to our string buffer.
@@ -215,6 +231,8 @@ protected:
 	 */
 	virtual void cow(strsize_t size = 0);
 
+	strsize_t getStringSize(void);
+
 public:
 	/**
 	 * A constant for an invalid position value.
@@ -225,6 +243,12 @@ public:
 	 * Create a new empty string object.
 	 */
 	string();
+
+	/**
+	 * Create a string from a formatting object.
+	 * @param format object to use in creating string.
+	 */
+	string(const StringFormat& format);
 
 	/**
 	 * Create an empty string with a buffer pre-allocated to a specified size.
@@ -344,7 +368,13 @@ public:
 	 * @param text string to set.
 	 */
 	void set(const char *text);
-	
+
+	/**
+	 * Set string object to text of a formatted object.
+	 * @param format object to use.
+	 */
+	void set(const StringFormat& format);
+
 	/**
 	 * Set a portion of the string object at a specified offset to a text
 	 * string.
@@ -371,6 +401,13 @@ public:
 	 * @param size of part of buffer to set with text and overflow.
 	 */
 	void rset(const char *text, char overflow, strsize_t offset, strsize_t size = 0);
+
+	/**
+	 * Append formatted object to our string buffer.
+	 * @param format object to append.
+	 */
+	void add(const StringFormat& format);
+
 
 	/**
 	 * Append null terminated text to our string buffer.
@@ -653,6 +690,13 @@ public:
 	string& operator^=(const string& object);
 
 	/**
+	 * Create new cow instance and assign value from formatted string object.
+	 * @param format object to assign from.
+	 * @return our object for expression use.
+	 */
+	string& operator^=(const StringFormat& format);
+
+	/**
 	 * Create new cow instance and assign value from null terminated text.
 	 * @param text to assign from.
 	 * @return our object for expression use.
@@ -667,6 +711,13 @@ public:
 	string& operator+(const char *text);
 
 	/**
+	 * Concatenate string formatted object to our object.  This creates a new
+	 * copy-on-write instance to hold the concatenated string.
+	 * @param format object to concatenate.
+	 */
+	string& operator+(const StringFormat& format);
+
+	/**
 	 * Concatenate null terminated text to our object.  This directly
 	 * appends the text to the string buffer and does not resize the
 	 * object if the existing cstring allocation space is fully used.
@@ -675,12 +726,26 @@ public:
 	string& operator&(const char *text);
 
 	/**
+	 * Concatenate formatted string object to our object.  This directly
+	 * appends the text to the string buffer and does not resize the
+	 * object if the existing cstring allocation space is fully used.
+	 * @param format object to concatenate.
+	 */
+	string& operator&(const StringFormat& format);
+
+	/**
 	 * Assign our string with the cstring of another object.  If we had
 	 * an active string reference, it is released.  The object now has
 	 * a duplicate reference to the cstring of the other object.
 	 * @param object to assign from.
 	 */
 	string& operator=(const string& object);
+
+	/**
+	 * Assign our string from a string formatting object.
+	 * @param format object to assign from.
+	 */
+	string& operator=(const StringFormat& format);
 
 	/**
 	 * Assign text to our existing buffer.  This performs a set method.
@@ -1404,6 +1469,33 @@ public:
 	 */
 	static memstring *create(mempager *pager, strsize_t size, char fill = 0);
 };
+
+/**
+ * A string conversion class for use as a base class in objects which can
+ * transform themselves into string representations.  This can be used
+ * together with the string class for automatic conversions.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT StringFormat
+{
+protected:
+	friend class string;
+	friend class string::cstring;
+	/**
+	 * Convert derived object into a string buffer.  This may be a public
+	 * method in a derived class.
+	 * @param buffer to save representation in.
+	 * @param size of buffer to use.
+	 */
+	virtual void put(char *buffer, size_t size) const = 0;
+
+	/**
+	 * Get maximum space that might be needed for string representation.
+	 * @return space needed.
+	 */
+	virtual strsize_t getStringSize(void) const = 0;
+};
+
 
 /**
  * A template to create a character array that can be manipulated as a string.

@@ -2319,8 +2319,6 @@ switch(addr->sa_family) {
 	return key % keysize;	
 }
 
-
-
 unsigned Socket::keyindex(struct sockaddr *addr, unsigned keysize)
 {
 	assert(addr != NULL);
