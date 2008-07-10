@@ -20,28 +20,40 @@ URL http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: gcc-c++ %{?_devel_requires}
+BuildRequires: %{?_devel_requires}
+BuildRequires: gcc-c++ 
 
 %package devel
-Requires: ucommon = %{epoch}:%{version}-%{release}, %{?_devel_requires}
+Requires: %{?_devel_requires}
+Requires: ucommon = %{epoch}:%{version}-%{release}
 Group: Development/Libraries
-Summary: Headers and static link library for ucommon
+Summary: Headers and static link library
 
 %description
+uCommon is a lightweight C++ library to facilitate using C++ design patterns
+even for very deeply embedded applications, such as for systems using uClibc
+along with POSIX threading support. For this reason, UCommon disables language
+features that consume memory or introduce runtime overhead. UCommon introduces
+some design patterns from Objective-C, such as reference counted objects,
+memory pools, and smart pointers. UCommon introduces some new concepts for
+handling of thread locking and synchronization.
 
 %description devel
+Static link and header files for building applications that use uCommon.
 
 %prep
 %setup
 %build
 
-%configure %{?_config_stdcpp} CXXFLAGS="$RPM_OPT_FLAGS" 
-make %{?_smp_mflags} LDFLAGS="-s"
+%configure %{?_config_stdcpp} --enable-debug CXXFLAGS="$RPM_OPT_FLAGS" 
+%{__make} %{?_smp_mflags} 
 
 %install
 
 %makeinstall
-rm -rf %{buildroot}/%{_infodir}
+%{__rm} -rf %{buildroot}/%{_infodir}
+%{__chmod} +x %{buildroot}/%{_bindir}/ucommon-config
+%{__strip} %{buildroot}/%{_libdir}/libucommon-*.so.*.*
 
 %clean
 rm -fr %{buildroot}
