@@ -4,7 +4,9 @@
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
 
-%if ! %uses_stdcpp
+%if %uses_stdcpp
+%define _devel_requires libstdc++-devel
+%else
 %define	_config_stdcpp --disable-stdcpp
 %endif
 
@@ -18,10 +20,10 @@ URL http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-# BuildRequires: gcc-g++
+BuildRequires: gcc-c++ %{?_devel_requires}
 
 %package devel
-Requires: ucommon = %{epoch}:%{version}-%{release}
+Requires: ucommon = %{epoch}:%{version}-%{release} %{?_devel_requires}
 Group: Development/Libraries
 Summary: Headers and static link library for ucommon
 
