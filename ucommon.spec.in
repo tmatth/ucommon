@@ -13,11 +13,12 @@ Summary: "ucommon" - portable embedded runtime
 Version: %{version}
 Release: %{release}%{?dist}
 Epoch: %{epoch}
-License: LGPL
+License: GPL
+URL http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
-Source0: ucommon-%{PACKAGE_VERSION}.tar.gz
+Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: gcc-g++
+# BuildRequires: gcc-g++
 
 %package devel
 Requires: ucommon = %{epoch}:%{version}-%{release}
