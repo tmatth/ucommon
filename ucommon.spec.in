@@ -16,7 +16,7 @@ Version: %{version}
 Release: %{release}%{?dist}
 Epoch: %{epoch}
 License: GPL
-URL http://www.gnu.org/software/commoncpp
+URL: http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -40,6 +40,8 @@ handling of thread locking and synchronization.
 
 %description devel
 Static link and header files for building applications that use uCommon.
+
+%changelog
 
 %prep
 %setup
