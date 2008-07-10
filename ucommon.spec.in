@@ -23,7 +23,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gcc-c++ %{?_devel_requires}
 
 %package devel
-Requires: ucommon = %{epoch}:%{version}-%{release} %{?_devel_requires}
+Requires: ucommon = %{epoch}:%{version}-%{release}, %{?_devel_requires}
 Group: Development/Libraries
 Summary: Headers and static link library for ucommon
 
