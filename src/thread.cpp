@@ -40,6 +40,15 @@ struct mutex_entry
 	void *pointer;
 	unsigned count;
 };
+
+class __LOCAL rwlock_entry : public rwlock
+{
+public:
+	rwlock_entry();
+	struct rwlock_entry *next;
+	void *object;
+	unsigned count;
+};
 	
 class __LOCAL mutex_index : public mutex
 {
@@ -49,6 +58,16 @@ public:
 	mutex_index();
 };
 
+class __LOCAL rwlock_index : public mutex
+{
+public:
+	struct rwlock_entry *list;
+
+	rwlock_index();
+};
+
+static rwlock_index single_rwlock;
+static rwlock_index *rwlock_table = &single_rwlock;
 static mutex_index single_table;
 static mutex_index *mutex_table = &single_table;
 static unsigned mutex_indexing = 1;
@@ -56,6 +75,16 @@ static unsigned mutex_indexing = 1;
 mutex_index::mutex_index() : mutex()
 {
 	list = NULL;
+}
+
+rwlock_index::rwlock_index() : mutex()
+{
+	list = NULL;
+}
+
+rwlock_entry::rwlock_entry() : rwlock()
+{
+	count = 0;
 }
 
 #if !defined(_MSWINDOWS_) && !defined(__PTH__)
@@ -889,9 +918,84 @@ void mutex::indexing(unsigned index)
 {
 	if(index > 1) {
 		mutex_table = new mutex_index[index];
+		rwlock_table = new rwlock_index[index];
 		mutex_indexing = index;
 	}
 }
+
+bool rwlock::share(void *ptr, timeout_t timeout)
+{
+	rwlock_index *index = &rwlock_table[hash_address(ptr)];
+	rwlock_entry *entry, *empty = NULL;
+
+	if(!ptr)
+		return false;
+
+	index->acquire();
+	entry = index->list;
+	while(entry) {
+		if(entry->count && entry->object == ptr)
+			break;
+		if(!entry->count)
+			empty = entry;
+		entry = entry->next;
+	}
+	if(!entry) {
+		if(empty)
+			entry = empty;
+		else {
+			entry = new struct rwlock_entry;
+			entry->next = index->list;
+			index->list = entry;
+		}
+	}
+	entry->object = ptr;
+	++entry->count;
+	index->release();
+	if(entry->access(timeout))
+		return true;
+	index->acquire();
+	--entry->count;
+	index->release();
+	return false;
+}			
+
+bool rwlock::exclusive(void *ptr, timeout_t timeout)
+{
+	rwlock_index *index = &rwlock_table[hash_address(ptr)];
+	rwlock_entry *entry, *empty = NULL;
+
+	if(!ptr)
+		return false;
+
+	index->acquire();
+	entry = index->list;
+	while(entry) {
+		if(entry->count && entry->object == ptr)
+			break;
+		if(!entry->count)
+			empty = entry;
+		entry = entry->next;
+	}
+	if(!entry) {
+		if(empty)
+			entry = empty;
+		else {
+			entry = new struct rwlock_entry;
+			entry->next = index->list;
+			index->list = entry;
+		}
+	}
+	entry->object = ptr;
+	++entry->count;
+	index->release();
+	if(entry->modify(timeout))
+		return true;
+	index->acquire();
+	--entry->count;
+	index->release();
+	return false;
+}			
 
 void mutex::protect(void *ptr)
 {
@@ -926,6 +1030,30 @@ void mutex::protect(void *ptr)
 //	printf("ACQUIRE %p, THREAD %d, POINTER %p, COUNT %d\n", entry, Thread::self(), entry->pointer, entry->count);
 	index->release();
 	pthread_mutex_lock(&entry->mutex);
+}	
+
+void rwlock::release(void *ptr)
+{
+	rwlock_index *index = &rwlock_table[hash_address(ptr)];
+	rwlock_entry *entry;
+
+	if(!ptr)
+		return;
+
+	index->acquire();
+	entry = index->list;
+	while(entry) {
+		if(entry->count && entry->object == ptr)
+			break;
+		entry = entry->next;
+	}
+
+	assert(entry);
+	if(entry) {
+		entry->release();
+		--entry->count;
+	}
+	index->release();
 }	
 
 void mutex::release(void *ptr)

@@ -544,6 +544,30 @@ public:
 	bool access(timeout_t timeout = Timer::inf);
 
 	/**
+	  * Write protect access to an arbitrary object.  This is like the
+	  * protect function of mutex.
+	  * @param object to protect.
+	  * @param timeout in milliseconds to wait for lock.
+	  * @param return true if locked, false if timeout.
+	  */
+	bool exclusive(void *object, timeout_t timeout = Timer::inf);
+
+	/**
+	 * Shared access to an arbitrary object.  This is based on the protect
+	 * function of mutex.
+	 * @param object to share.
+	 * @param timeout in milliseconds to wait for lock.
+	 * @param return true if shared, false if timeout.
+	 */
+	bool share(void *object, timeout_t timeout = Timer::inf);
+
+	/**
+	 * Release an arbitrary object that has been protected by a rwlock.
+	 * @param object to release.
+	 */
+	void release(void *object);
+
+	/**
 	 * Release the lock.
 	 */
 	void release(void);
@@ -947,6 +971,58 @@ private:
 	__LOCAL void Unlock(void);
 		
 public:
+	/**
+	 * Gaurd class to apply scope based mutex locking to objects.  The mutex
+	 * is located from the mutex pool rather than contained in the target
+	 * object, and the lock is released when the gaurd object falls out of 
+	 * scope.  This is essentially an automation mechanism for mutex::protect.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT gaurd 
+	{
+	private:
+		void *object;
+	
+	public:
+		/**
+		  * Create an unitialized instance of gaurd.  Usually used with a
+		  * gaurd = operator.
+		  */
+		gaurd();
+
+		/**
+	     * Construct a gaurd for a specific object.
+		 * @param object to gaurd.
+	     */
+		gaurd(void *object);
+
+		/**
+		 * Release mutex when gaurd falls out of scope.
+		 */
+		~gaurd();
+		
+		/**
+	     * Set gaurd to mutex lock a new object.  If a lock is currently
+		 * held, it is released.
+		 * @param object to gaurd.
+		 */
+		void set(void *object);
+
+		/**
+		 * Prematurely release a gaurd.
+		 */
+		void release(void);
+
+		/**
+	     * Set gaurd to mutex lock a new object.  If a lock is currently
+		 * held, it is released.
+		 * @param object to gaurd.
+		 */
+		inline void operator=(void *object)
+			{set(object);};
+	};
+
+
 	/**
 	 * Create a mutex lock.
 	 */
