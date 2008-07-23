@@ -838,6 +838,39 @@ void auto_protect::operator=(void *obj)
 		mutex::protect(object);
 }
 
+mutex::gaurd::gaurd()
+{
+	object = NULL;
+}
+
+mutex::gaurd::gaurd(void *obj)
+{
+	object = obj;
+	if(obj)
+		mutex::protect(object);
+}
+
+mutex::gaurd::~gaurd()
+{
+	release();
+}
+
+void mutex::gaurd::set(void *obj)
+{
+	release();
+	object = obj;
+	if(obj)
+		mutex::protect(object);
+}
+
+void mutex::gaurd::release(void)
+{
+	if(object) {
+		mutex::release(object);
+		object = NULL;
+	}
+}
+
 mutex::mutex()
 {
 #ifdef	__PTH__
