@@ -1,7 +1,7 @@
 Source: ucommon
 Priority: extra
 Maintainer: David Sugar <dyfet@gnutelephony.org>
-Build-Depends: debhelper (>= 5), autotools-dev
+Build-Depends: debhelper (>= 5), autotools-dev, doxygen, graphviz, libgd-tools
 Standards-Version: 3.7.2
 Section: libs
 
