@@ -544,6 +544,14 @@ public:
 	bool access(timeout_t timeout = Timer::inf);
 
 	/**
+	 * Specify hash table size for gaurd protection.  The default is 1.
+	 * This should be called at initialization time from the main thread
+	 * of the application before any other threads are created.
+	 * @param size of hash table used for gaurding.
+	 */
+	static void indexing(unsigned size);
+
+	/**
 	  * Write protect access to an arbitrary object.  This is like the
 	  * protect function of mutex.
 	  * @param object to protect.
@@ -559,7 +567,7 @@ public:
 	 * @param timeout in milliseconds to wait for lock.
 	 * @param return true if shared, false if timeout.
 	 */
-	bool share(void *object, timeout_t timeout = Timer::inf);
+	bool shared(void *object, timeout_t timeout = Timer::inf);
 
 	/**
 	 * Release an arbitrary object that has been protected by a rwlock.

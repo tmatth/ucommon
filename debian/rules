@@ -73,7 +73,9 @@ install: build
 
 	# Add here commands to install the package into debian/tmp
 	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
-
+	$(MAKE) doxy
+	mkdir -p $(CURDIR)/debian/tmp/usr/share/doc/ucommon-dev
+	cp doc/html/* $(CURDIR)/debian/tmp/usr/share/doc/ucommon-dev
 
 # Build architecture-independent files here.
 binary-indep: build install

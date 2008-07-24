@@ -11,7 +11,7 @@
 %endif
 
 Name: ucommon
-Summary: "ucommon" - portable embedded runtime
+Summary: "ucommon" - Portable C++ runtime for threads and sockets
 Version: %{version}
 Release: %{release}%{?dist}
 Epoch: %{epoch}

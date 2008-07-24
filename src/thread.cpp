@@ -71,6 +71,7 @@ static rwlock_index *rwlock_table = &single_rwlock;
 static mutex_index single_table;
 static mutex_index *mutex_table = &single_table;
 static unsigned mutex_indexing = 1;
+static unsigned rwlock_indexing = 1;
 
 mutex_index::mutex_index() : mutex()
 {
@@ -114,7 +115,7 @@ inline pthread_t pthread_self(void)
 
 #endif
 
-static unsigned hash_address(void *ptr)
+static unsigned hash_address(void *ptr, unsigned indexing)
 {
 	assert(ptr != NULL);
 
@@ -122,7 +123,7 @@ static unsigned hash_address(void *ptr)
 	unsigned count = 0;
 	unsigned char *addr = (unsigned char *)(&ptr);
 
-	if(mutex_indexing < 2)
+	if(indexing < 2)
 		return 0;
 
 	// skip lead zeros if little endian...
@@ -134,7 +135,7 @@ static unsigned hash_address(void *ptr)
 	while(count++ < sizeof(void *) && *addr)
 		key = (key << 1) ^ *(addr++);	
 
-	return key % mutex_indexing;
+	return key % indexing;
 }
 
 ReusableAllocator::ReusableAllocator() :
@@ -918,14 +919,21 @@ void mutex::indexing(unsigned index)
 {
 	if(index > 1) {
 		mutex_table = new mutex_index[index];
-		rwlock_table = new rwlock_index[index];
 		mutex_indexing = index;
 	}
 }
 
-bool rwlock::share(void *ptr, timeout_t timeout)
+void rwlock::indexing(unsigned index)
 {
-	rwlock_index *index = &rwlock_table[hash_address(ptr)];
+	if(index > 1) {
+		rwlock_table = new rwlock_index[index];
+		rwlock_indexing = index;
+	}
+}
+
+bool rwlock::shared(void *ptr, timeout_t timeout)
+{
+	rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
 	rwlock_entry *entry, *empty = NULL;
 
 	if(!ptr)
@@ -962,7 +970,7 @@ bool rwlock::share(void *ptr, timeout_t timeout)
 
 bool rwlock::exclusive(void *ptr, timeout_t timeout)
 {
-	rwlock_index *index = &rwlock_table[hash_address(ptr)];
+	rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
 	rwlock_entry *entry, *empty = NULL;
 
 	if(!ptr)
@@ -999,7 +1007,7 @@ bool rwlock::exclusive(void *ptr, timeout_t timeout)
 
 void mutex::protect(void *ptr)
 {
-	mutex_index *index = &mutex_table[hash_address(ptr)];
+	mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
 	mutex_entry *entry, *empty = NULL;
 
 	if(!ptr)
@@ -1034,7 +1042,7 @@ void mutex::protect(void *ptr)
 
 void rwlock::release(void *ptr)
 {
-	rwlock_index *index = &rwlock_table[hash_address(ptr)];
+	rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
 	rwlock_entry *entry;
 
 	if(!ptr)
@@ -1058,7 +1066,7 @@ void rwlock::release(void *ptr)
 
 void mutex::release(void *ptr)
 {
-	mutex_index *index = &mutex_table[hash_address(ptr)];
+	mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
 	mutex_entry *entry;
 
 	if(!ptr)
