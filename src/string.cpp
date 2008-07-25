@@ -829,7 +829,7 @@ void string::cut(strsize_t offset, strsize_t size)
 
 bool string::resize(strsize_t size)
 {
-	char fill;
+	char fill = 0;
 
 	if(!size) {
 		release();
