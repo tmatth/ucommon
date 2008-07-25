@@ -3,22 +3,17 @@
 %{!?version: %define version @VERSION@}
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
+%{!?_package_gd: %define _package_gd gd-progs}
 
-%if %uses_stdcpp
-%define _devel_requires libstdc++-devel
-%else
-%define	_config_stdcpp --disable-stdcpp
+%define is_mandriva %(test -e /etc/mandriva-release && echo 1 || echo 0)
+
+%define _libarch    lib
+%ifarch x86_64
+%define _libarch    lib64
 %endif
 
-%define	_ltrelease @LT_RELEASE@
-%define _ltversion @LT_MAJOR@
-
-%if %{?mklibname:0}%{?!mklibname:1}
-%define _libname %mklibname %{name} %{_ltrelease} %{_ltversion)
-%define _devname %mklibname %{name} -d
-%else
-%define _libname lib%{name}
-%define _devname lib%{name}-devel
+%if ! %{is_mandriva}
+%define _libarch    lib
 %endif
 
 Name: ucommon
@@ -31,26 +26,8 @@ URL: http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: gcc-c++ %{?_devel_requires}
-
-%package -n %{_libname}
-Group: System/Libraries
-Summary: Runtime library for portable C++ threading and sockets
-Provides: %{name} = %{version}-%{release}
-
-%package -n %{_devname}
-%if %uses_stdcpp
-Requires: %{?_devel_requires}
-%endif
-Requires: %{_libname} = %{epoch}:%{version}-%{release}
-Group: Development/Libraries
-Summary: Headers and static link library
-Provides: %{name}-devel = %{version}-%{release}
-
-%package doc
-Group: Documentation
-Summary: Generated class documentation for ucommon
-Requires: %{name}-devel = %{version}-%{release}
+BuildRequires: gcc-c++
+BuildRequires: doxygen graphviz %{_package_gd}
 
 %description
 uCommon is a lightweight C++ library to facilitate using C++ design patterns
@@ -60,6 +37,25 @@ features that consume memory or introduce runtime overhead. UCommon introduces
 some design patterns from Objective-C, such as reference counted objects,
 memory pools, and smart pointers. UCommon introduces some new concepts for
 handling of thread locking and synchronization.
+
+%define _libname %{_libarch}%{name}@LT_RELEASE@_@LT_MAJOR@
+%define _devname %{_libarch}%{name}-devel
+
+%package -n %{_libname}
+Group: System/Libraries
+Summary: Runtime library for portable C++ threading and sockets
+Provides: %{name} = %{version}-%{release}
+
+%package -n %{_devname}
+Requires: %{_libname} = %{epoch}:%{version}-%{release}
+Group: Development/Libraries
+Summary: Headers and static link library
+Provides: %{name}-devel = %{version}-%{release}
+
+%package doc
+Group: Documentation
+Summary: Generated class documentation for ucommon
+Requires: %{name}-devel = %{version}-%{release}
 
 %description -n %{_libname}
 This package contains the runtime library needed by applications that use 
@@ -78,7 +74,11 @@ html browsable.
 %setup
 %build
 
-%configure %{?_config_stdcpp} -CXXFLAGS="$RPM_OPT_FLAGS" 
+%if %{uses_stdcpp}
+%configure CXXFLAGS="$RPM_OPT_FLAGS"
+%else
+%configure --disable-stdcpp CXXFLAGS="$RPM_OPT_FLAGS" 
+%endif
 %{__make} %{?_smp_mflags} 
 %{__make} doxy
 
@@ -108,7 +108,7 @@ html browsable.
 %files doc
 %doc doc/html/*
 
-%post -p /sbin/ldconfig
+%post -n %{_libname} -p /sbin/ldconfig
 
-%postun -p /sbin/ldconfig
+%postun -n %{_libname} -p /sbin/ldconfig
 
