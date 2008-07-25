@@ -25,7 +25,7 @@ Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gcc-c++
-BuildRequires: doxygen graphviz %{_package_gd}
+BuildRequires: doxygen graphviz-gd %{_package_gd}
 
 %description
 uCommon is a lightweight C++ library to facilitate using C++ design patterns
