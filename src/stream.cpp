@@ -293,13 +293,14 @@ void tcpstream::allocate(unsigned mss)
 {
 	unsigned size = mss;
 	unsigned max = 0;
+#ifdef	TCP_MAXSEG
+	socklen_t alen = sizeof(max);
+#endif
 	
 	if(mss == 1)
 		goto allocate;
 
 #ifdef  TCP_MAXSEG
-	socklen_t alen = sizeof(max);
-
 	if(mss)
 		setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, sizeof(max));
 	getsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, &alen);
