@@ -1,5 +1,4 @@
 %{!?release: %define release 0}
-%{!?epoch:   %define epoch 0}
 %{!?version: %define version @VERSION@}
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
@@ -20,7 +19,6 @@ Name: ucommon
 Summary: "ucommon" - Portable C++ runtime for threads and sockets
 Version: %{version}
 Release: %{release}%{?dist}
-Epoch: %{epoch}
 License: GPL
 URL: http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
@@ -47,7 +45,7 @@ Summary: Runtime library for portable C++ threading and sockets
 Provides: %{name} = %{version}-%{release}
 
 %package -n %{_devname}
-Requires: %{_libname} = %{epoch}:%{version}-%{release}
+Requires: %{_libname} = %{version}-%{release}
 Group: Development/Libraries
 Summary: Headers and static link library
 Provides: %{name}-devel = %{version}-%{release}
@@ -88,7 +86,7 @@ html browsable.
 %{__strip} %{buildroot}/%{_libdir}/libucommon-*.so.*.*
 
 %clean
-%{__rm} -fr %{buildroot}
+%{__rm} -rf %{buildroot}
 
 %files -n %{_libname}
 %defattr(-,root,root,-)
