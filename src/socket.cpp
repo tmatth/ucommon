@@ -2226,8 +2226,6 @@ int Socket::bindto(socket_t so, struct sockaddr *iface)
 
 int Socket::listento(socket_t so, struct sockaddr *iface, int backlog)
 {
-	int rtn;
-
 	if(::bind(so, iface, getlen(iface)))
 		return -1;
 	return ::listen(so, backlog);
