@@ -428,7 +428,7 @@ else
 	flags="-fno-check-new -finline"
 fi
 
-for flag in "$flags" ; do
+for flag in $flags ; do
     AC_MSG_CHECKING([whether ${CXX} supports $flag])
     echo 'void f(){}' >conftest.cpp
     if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
