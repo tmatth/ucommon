@@ -51,6 +51,10 @@ shell::Option::Option(char shortopt, const char *longopt, bool value, const char
 	root = this;
 }
 
+shell::Option::~Option()
+{
+}
+
 #ifdef _MSWINDOWS_
 
 void shell::expand(void)

@@ -112,6 +112,8 @@ public:
 		 */
 		Option(char shortoption = 0, const char *longoption = NULL, bool value = false, const char *help = NULL);
 
+		virtual ~Option();
+
 	protected:
 		/**
 		 * Used to send option into derived receiver.

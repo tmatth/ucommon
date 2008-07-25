@@ -1272,7 +1272,6 @@ bool TimedEvent::sync(void)
 bool TimedEvent::wait(timeout_t timeout) 
 {
 	bool result = true;
-	struct timespec ts;
 
 	pthread_mutex_lock(&mutex);
 	operator+=(timeout);
@@ -1627,7 +1626,7 @@ void Thread::setPriority(void)
 	int policy;
 	struct sched_param sp;
 	pthread_t ptid = pthread_self();
-	int pri;
+	int pri = 0;
 
 	if(!priority)
 		return;

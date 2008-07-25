@@ -28,6 +28,10 @@ using namespace UCOMMON_NAMESPACE;
 const strsize_t string::npos = (strsize_t)(-1);
 const size_t memstring::header = sizeof(cstring);
 
+StringFormat::~StringFormat()
+{
+}
+
 string::cstring::cstring(strsize_t size)
 {
 	max = size;

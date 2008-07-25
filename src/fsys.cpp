@@ -449,7 +449,6 @@ void fsys::close(void)
 void fsys::create(const char *path, access_t access, unsigned mode)
 {
 	unsigned flags = 0;
-	int rtn;
 
 	close();
 
@@ -495,7 +494,6 @@ int fsys::removeDir(const char *path)
 void fsys::open(const char *path, access_t access)
 {
 	unsigned flags = 0;
-	int rtn;
 
 	close();
 
@@ -603,7 +601,7 @@ void fsys::seek(offset_t pos)
 	unsigned long rpos = pos;
 	int mode = SEEK_SET;
 
-	if(rpos == end) {
+	if(rpos == (offset_t)end) {
 		rpos = 0;
 		mode = SEEK_END;
 	}
@@ -659,7 +657,6 @@ int fsys::rename(const char *oldpath, const char *newpath)
 int fsys::load(const char *path)
 {
 	fsys module;
-	int rtn;
 
 	load(module, path);
 #ifdef	_MSWINDOWS_

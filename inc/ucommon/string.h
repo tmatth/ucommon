@@ -1481,6 +1481,9 @@ class __EXPORT StringFormat
 protected:
 	friend class string;
 	friend class string::cstring;
+
+	virtual ~StringFormat();
+
 	/**
 	 * Convert derived object into a string buffer.  This may be a public
 	 * method in a derived class.

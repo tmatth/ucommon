@@ -2,7 +2,6 @@
 %{!?version: %define version @VERSION@}
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
-%{!?_package_gd: %define _package_gd gd-progs}
 
 %define is_mandriva %(test -e /etc/mandriva-release && echo 1 || echo 0)
 
@@ -25,7 +24,7 @@ Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gcc-c++
-BuildRequires: doxygen graphviz-gd %{_package_gd}
+BuildRequires: doxygen graphviz-gd 
 
 %description
 uCommon is a lightweight C++ library to facilitate using C++ design patterns
@@ -53,7 +52,6 @@ Provides: %{name}-devel = %{version}-%{release}
 %package doc
 Group: Documentation
 Summary: Generated class documentation for ucommon
-Requires: %{name}-devel = %{version}-%{release}
 
 %description -n %{_libname}
 This package contains the runtime library needed by applications that use 
