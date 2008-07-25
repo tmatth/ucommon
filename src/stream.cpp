@@ -553,14 +553,21 @@ void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t 
 	close();
 	
 	if(mode == RDONLY || mode == RDWR) {
-		pipe(input);
+		if(pipe(input))
+			return;
 		fsys::assign(rd, input[0]);
 	}
 	else
 		input[1] = ::open("/dev/null", O_RDWR);
 
 	if(mode == WRONLY || mode == RDWR) {
-		pipe(output);
+		if(pipe(output)) {
+			if(mode == RDWR) {
+				::close(input[0]);
+				::close(input[1]);
+			}
+			return;
+		}
 		fsys::assign(wr, output[1]);
 	}
 	else
