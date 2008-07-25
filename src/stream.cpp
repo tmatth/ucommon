@@ -24,6 +24,9 @@
 #include <stdarg.h>
 
 #ifndef	_MSWINDOWS_
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #endif
@@ -290,12 +293,13 @@ void tcpstream::allocate(unsigned mss)
 {
 	unsigned size = mss;
 	unsigned max = 0;
-	socklen_t alen = sizeof(max);
 	
 	if(mss == 1)
 		goto allocate;
 
 #ifdef  TCP_MAXSEG
+	socklen_t alen = sizeof(max);
+
 	if(mss)
 		setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, sizeof(max));
 	getsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, &alen);
