@@ -601,7 +601,7 @@ void fsys::seek(offset_t pos)
 	unsigned long rpos = pos;
 	int mode = SEEK_SET;
 
-	if(rpos == (offset_t)end) {
+	if(rpos == (unsigned long)end) {
 		rpos = 0;
 		mode = SEEK_END;
 	}

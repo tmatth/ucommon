@@ -150,10 +150,7 @@ MultiMap *MultiMap::find(unsigned path, MultiMap **root, caddr_t key, unsigned m
 	assert(key != NULL);
 	assert(max > 0);
 
-	MultiMap *node;
-
-	if(keysize == 0)
-		node = root[NamedObject::keyindex(key, max)];
+	MultiMap *node = root[keyindex(key, max, keysize)];
 
 	while(node) {
 		if(node->compare(path, key, keysize))
