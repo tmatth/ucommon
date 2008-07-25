@@ -290,7 +290,6 @@ int shell::parse(int argc, char **argv)
 	char *arg;
 	char *argv0;
 	Option *node;
-	char optname[65];
 	unsigned len;
 	const char *value;
 	const char *opt;

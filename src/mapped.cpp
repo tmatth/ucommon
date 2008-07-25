@@ -291,7 +291,6 @@ void MappedMemory::remove(const char *fn)
 {
 	assert(fn != NULL && *fn != 0);
 
-	struct stat ino;
 	char fbuf[80];
 
 	if(!use_mapping)
