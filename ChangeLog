@@ -1,6 +1,7 @@
 From ucommon 1.9.4 to 1.9.5
 - mutex::gaurd for scope mutex locking arbitrary objects.
 - read/write locking access control for arbitrary objects.
+- multi-distro spec file.
 
 From ucommon 1.9.3 to 1.9.4
 - string equality tests.

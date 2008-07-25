@@ -10,9 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="1.9.4"
+VERSION="1.9.5"
 LT_RELEASE="1.9"
-LT_VERSION="1:0"
+LT_VERSION="1:1"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -503,6 +503,8 @@ AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
+AC_SUBST(LT_RELEASE)
+AC_SUBST(LT_MAJOR)
 
 AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
 ucommon.pc ucommon.spec ucommon-config)

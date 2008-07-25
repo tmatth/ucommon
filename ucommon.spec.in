@@ -10,6 +10,17 @@
 %define	_config_stdcpp --disable-stdcpp
 %endif
 
+%define	_ltrelease @LT_RELEASE@
+%define _ltversion @LT_MAJOR@
+
+%if %{?mklibname:0}%{?!mklibname:1}
+%define _libname %mklibname %{name} %{_ltrelease} %{_ltversion)
+%define _devname %mklibname %{name} -d
+%else
+%define _libname lib%{name}
+%define _devname lib%{name}-devel
+%endif
+
 Name: ucommon
 Summary: "ucommon" - Portable C++ runtime for threads and sockets
 Version: %{version}
@@ -22,17 +33,24 @@ Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gcc-c++ %{?_devel_requires}
 
-%package devel
+%package -n %{_libname}
+Group: System/Libraries
+Summary: Runtime library for portable C++ threading and sockets
+Provides: %{name} = %{version}-%{release}
+
+%package -n %{_devname}
 %if %uses_stdcpp
 Requires: %{?_devel_requires}
 %endif
-Requires: ucommon = %{epoch}:%{version}-%{release}
+Requires: %{_libname} = %{epoch}:%{version}-%{release}
 Group: Development/Libraries
 Summary: Headers and static link library
+Provides: %{name}-devel = %{version}-%{release}
 
 %package doc
 Group: Documentation
 Summary: Generated class documentation for ucommon
+Requires: %{name}-devel = %{version}-%{release}
 
 %description
 uCommon is a lightweight C++ library to facilitate using C++ design patterns
@@ -43,7 +61,11 @@ some design patterns from Objective-C, such as reference counted objects,
 memory pools, and smart pointers. UCommon introduces some new concepts for
 handling of thread locking and synchronization.
 
-%description devel
+%description -n %{_libname}
+This package contains the runtime library needed by applications that use 
+GNU uCommon.
+
+%description -n %{_devname}
 Static link and header files for building applications that use uCommon.
 
 %description doc
@@ -68,12 +90,12 @@ html browsable.
 %clean
 %{__rm} -fr %{buildroot}
 
-%files 
+%files -n %{_libname}
 %defattr(-,root,root,-)
 %doc AUTHORS README COPYING INSTALL NEWS BUILDS SUPPORT ChangeLog
 %{_libdir}/*.so.*
 
-%files devel
+%files -n %{_devname}
 %defattr(-,root,root,-)
 %{_libdir}/*.a
 %{_libdir}/*.so
