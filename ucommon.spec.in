@@ -3,16 +3,7 @@
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
 
-%define is_mandriva %(test -e /etc/mandriva-release && echo 1 || echo 0)
-
-%define _libarch    lib
-%ifarch x86_64
-%define _libarch    lib64
-%endif
-
-%if ! %{is_mandriva}
-%define _libarch    lib
-%endif
+%define	_libarch lib
 
 Name: ucommon
 Summary: "ucommon" - Portable C++ runtime for threads and sockets
