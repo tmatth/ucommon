@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-RELEASE = -version-info $(LT_VERSION) -release $(LT_RELEASE)
+RELEASE = -version-info $(LT_VERSION) 
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS)
 
 lib_LTLIBRARIES = libucommon.la 

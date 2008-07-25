@@ -35,7 +35,7 @@ some design patterns from Objective-C, such as reference counted objects,
 memory pools, and smart pointers. UCommon introduces some new concepts for
 handling of thread locking and synchronization.
 
-%define _libname %{_libarch}%{name}@LT_RELEASE@_@LT_MAJOR@
+%define _libname %{_libarch}%{name}@LT_MAJOR@
 %define _devname %{_libarch}%{name}-devel
 
 %package -n %{_libname}
