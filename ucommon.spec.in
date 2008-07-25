@@ -72,7 +72,7 @@ html browsable.
 %install
 
 %makeinstall
-%{__strip} %{buildroot}/%{_libdir}/libucommon-*.so.*.*
+%{__strip} %{buildroot}/%{_libdir}/lib*.so.*.*
 
 %clean
 %{__rm} -rf %{buildroot}
