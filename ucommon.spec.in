@@ -35,7 +35,7 @@ Summary: Runtime library for portable C++ threading and sockets
 Provides: %{name} = %{version}-%{release}
 
 %package -n %{_devname}
-Requires: %{_libname} = %{version}-%{release}
+Requires: %{_libname} = %{version}
 Group: Development/Libraries
 Summary: Headers and static link library
 Provides: %{name}-devel = %{version}-%{release}
