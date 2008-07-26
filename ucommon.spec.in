@@ -3,8 +3,6 @@
 
 %{!?uses_stdcpp:  %define uses_stdcpp 1}
 
-%define	_libarch lib
-
 Name: ucommon
 Summary: "ucommon" - Portable C++ runtime for threads and sockets
 Version: %{version}
@@ -26,8 +24,8 @@ some design patterns from Objective-C, such as reference counted objects,
 memory pools, and smart pointers. UCommon introduces some new concepts for
 handling of thread locking and synchronization.
 
-%define _libname %{_libarch}%{name}@LT_MAJOR@
-%define _devname %{_libarch}%{name}-devel
+%define _libname libucommon@LT_MAJOR@
+%define _devname libucommon-devel
 
 %package -n %{_libname}
 Group: System/Libraries
