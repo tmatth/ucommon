@@ -1024,10 +1024,10 @@ public:
 		/**
 	     * Set gaurd to mutex lock a new object.  If a lock is currently
 		 * held, it is released.
-		 * @param object to gaurd.
+		 * @param pointer to object to gaurd.
 		 */
-		inline void operator=(void *object)
-			{set(object);};
+		inline void operator=(void *pointer)
+			{set(pointer);};
 	};
 
 
