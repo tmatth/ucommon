@@ -456,6 +456,22 @@ public:
 		bool insert(struct sockaddr *address);
 
 		/**
+		 * Insert unique members from another socket address list to ours.
+		 * @param address list to insert into list.
+		 * @param address family to scan for or 0 for all.
+		 * @return count of addresses added.
+		 */
+		unsigned insert(struct addrinfo *address, int family = 0);
+
+		/**
+		 * Remove members from another socket address list from ours.
+		 * @param address list to remove from list.
+		 * @param address family to scan for or 0 for all.
+		 * @return count of addresses removed.
+		 */
+		unsigned remove(struct addrinfo *address, int family = 0);
+
+		/**
 		 * Set an individual socket address for our address list.
 		 * @param address to add.
 		 */

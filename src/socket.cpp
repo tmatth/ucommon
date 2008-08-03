@@ -1092,6 +1092,32 @@ bool Socket::address::remove(struct sockaddr *addr)
 	return true;
 }
 
+unsigned Socket::address::insert(struct addrinfo *list, int family)
+{
+	unsigned count = 0;
+	while(list) {
+		if(!family || list->ai_family == family) {
+			if(insert(list->ai_addr))
+				++count;
+		}
+		list = list->ai_next;
+	}
+	return count;
+}
+
+unsigned Socket::address::remove(struct addrinfo *list, int family)
+{
+	unsigned count = 0;
+	while(list) {
+		if(!family || list->ai_family == family) {
+			if(remove(list->ai_addr))
+				++count;
+		}
+		list = list->ai_next;
+	}
+	return count;
+}
+
 bool Socket::address::insert(struct sockaddr *addr)
 {
 	assert(addr != NULL);
