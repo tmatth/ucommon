@@ -91,6 +91,7 @@ html browsable.
 %attr(0755,root,root) %{_bindir}/ucommon-config
 
 %files doc
+%defattr(-,root,root,-)
 %doc doc/html/*
 
 %post -n %{_libname} -p /sbin/ldconfig
