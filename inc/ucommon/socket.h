@@ -504,6 +504,22 @@ public:
 		 * @return duplicate address object.
 		 */
 		static struct sockaddr *dup(struct sockaddr *address);
+
+		/**
+		 * Convert address object into ipv4 address.
+		 * @param address to convert.
+		 * @return new ipv4 address or NULL if not ipv4.
+		 */
+		static struct sockaddr_in *ipv4(struct sockaddr *address);
+
+#ifdef	AF_INET6
+		/**
+		 * Convert address object into ipv6 address.
+		 * @param address to convert.
+		 * @return new ipv6 address or NULL if not ipv6.
+		 */
+		static struct sockaddr_in6 *ipv6(struct sockaddr *address);
+#endif
 	};
 
 	friend class address;
@@ -1265,7 +1281,7 @@ public:
 	 * @return service port number.
 	 */
 	static short getservice(struct sockaddr *address);
-	
+
 	/**
 	 * Convert a socket address and service into a hash map index.
 	 * @param address to convert.

@@ -1165,7 +1165,25 @@ void Socket::address::copy(const struct addrinfo *addr)
 		last = node;
 	}
 }
-			
+
+struct sockaddr_in *Socket::address::ipv4(struct sockaddr *addr)
+{
+	if(addr == NULL || addr->sa_family != AF_INET)
+		return NULL;
+
+	return (struct sockaddr_in*)addr;
+}
+
+#ifdef	AF_INET6
+struct sockaddr_in6 *Socket::address::ipv6(struct sockaddr *addr)
+{
+	if(addr == NULL || addr->sa_family != AF_INET6)
+		return NULL;
+
+	return (struct sockaddr_in6*)addr;
+}
+#endif			
+
 struct sockaddr *Socket::address::dup(struct sockaddr *addr)
 {
 	struct sockaddr *node;
