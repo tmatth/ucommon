@@ -1028,7 +1028,7 @@ struct sockaddr *Socket::address::getAddr(void)
 {
 	if(!list)
 		return NULL;
-	
+
 	return list->ai_addr;
 }
 
@@ -1067,6 +1067,54 @@ void Socket::address::set(struct sockaddr *addr)
 	add(addr);
 }
 
+bool Socket::address::remove(struct sockaddr *addr)
+{
+	assert(addr != NULL);
+	struct addrinfo *node = list, *prior = NULL;
+
+	while(node) {
+		if(node->ai_addr && equal(addr, node->ai_addr))
+			break;
+		prior = node;
+		node = node->ai_next;
+	}
+
+	if(!node)
+		return false;
+
+	if(!prior) 
+		list = node->ai_next;
+	else
+		prior->ai_next = node->ai_next;
+
+	node->ai_next = NULL;
+	freeaddrinfo(node);
+	return true;
+}
+
+bool Socket::address::insert(struct sockaddr *addr)
+{
+	assert(addr != NULL);
+
+	struct addrinfo *node = list;
+
+	while(node) {
+		if(node->ai_addr && equal(addr, node->ai_addr))
+			return false;
+		node = node->ai_next;
+	}
+
+	node = (struct addrinfo *)malloc(sizeof(struct addrinfo));
+	memset(node, 0, sizeof(node));
+	node->ai_family = addr->sa_family;
+	node->ai_addrlen = getlen(addr);
+	node->ai_next = list;
+	node->ai_addr = (struct sockaddr *)malloc(node->ai_addrlen);
+	memcpy(node->ai_addr, addr, node->ai_addrlen);
+	list = node;
+	return true;
+}
+		
 void Socket::address::add(struct sockaddr *addr)
 {
 	assert(addr != NULL);

@@ -1,3 +1,6 @@
+From ucommon 1.9.5 to 1.9.6
+- better address list management, including unique insert and remove.
+
 From ucommon 1.9.4 to 1.9.5
 - mutex::gaurd for scope mutex locking arbitrary objects.
 - read/write locking access control for arbitrary objects.

@@ -441,6 +441,21 @@ public:
 		void add(struct sockaddr *address);
 
 		/**
+		 * Remove an individual socket address from our address list.
+		 * @param address to remove.
+		 * @return true if found and removed, false if not found.
+		 */
+		bool remove(struct sockaddr *address);
+
+		/**
+		 * Insert an individual socket address to our address list only if
+		 * unique.
+		 * @param address to insert into list.
+		 * @return true if inserted, false if duplicate.
+		 */
+		bool insert(struct sockaddr *address);
+
+		/**
 		 * Set an individual socket address for our address list.
 		 * @param address to add.
 		 */
