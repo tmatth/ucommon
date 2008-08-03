@@ -517,13 +517,115 @@ class __EXPORT rwlock : private ConditionalAccess, public Exclusive, public Shar
 {
 private:
 	unsigned writers;
-	pthread_t writer;
+	pthread_t writeid;
 
 	__LOCAL void Exlock(void);
 	__LOCAL void Shlock(void);
 	__LOCAL void Unlock(void);
 
 public:
+	/**
+	 * Gaurd class to apply scope based access locking to objects.  The rwlock
+	 * is located from the rwlock pool rather than contained in the target
+	 * object, and the read lock is released when the gaurd object falls out of 
+	 * scope.  This is essentially an automation mechanism for mutex::reader.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT gaurd_reader
+	{
+	private:
+		void *object;
+	
+	public:
+		/**
+		  * Create an unitialized instance of gaurd.  Usually used with a
+		  * gaurd = operator.
+		  */
+		gaurd_reader();
+
+		/**
+	     * Construct a gaurd for a specific object.
+		 * @param object to gaurd.
+	     */
+		gaurd_reader(void *object);
+
+		/**
+		 * Release mutex when gaurd falls out of scope.
+		 */
+		~gaurd_reader();
+		
+		/**
+	     * Set gaurd to mutex lock a new object.  If a lock is currently
+		 * held, it is released.
+		 * @param object to gaurd.
+		 */
+		void set(void *object);
+
+		/**
+		 * Prematurely release a gaurd.
+		 */
+		void release(void);
+
+		/**
+	     * Set gaurd to read lock a new object.  If a lock is currently
+		 * held, it is released.
+		 * @param pointer to object to gaurd.
+		 */
+		inline void operator=(void *pointer)
+			{set(pointer);};
+	};
+
+	/**
+	 * Gaurd class to apply scope based exclusive locking to objects.  The rwlock
+	 * is located from the rwlock pool rather than contained in the target
+	 * object, and the write lock is released when the gaurd object falls out of 
+	 * scope.  This is essentially an automation mechanism for mutex::writer.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT gaurd_writer
+	{
+	private:
+		void *object;
+	
+	public:
+		/**
+		  * Create an unitialized instance of gaurd.  Usually used with a
+		  * gaurd = operator.
+		  */
+		gaurd_writer();
+
+		/**
+	     * Construct a gaurd for a specific object.
+		 * @param object to gaurd.
+	     */
+		gaurd_writer(void *object);
+
+		/**
+		 * Release mutex when gaurd falls out of scope.
+		 */
+		~gaurd_writer();
+		
+		/**
+	     * Set gaurd to mutex lock a new object.  If a lock is currently
+		 * held, it is released.
+		 * @param object to gaurd.
+		 */
+		void set(void *object);
+
+		/**
+		 * Prematurely release a gaurd.
+		 */
+		void release(void);
+
+		/**
+	     * Set gaurd to read lock a new object.  If a lock is currently
+		 * held, it is released.
+		 * @param pointer to object to gaurd.
+		 */
+		inline void operator=(void *pointer)
+			{set(pointer);};
+	};
+
 	/**
 	 * Create an instance of a rwlock.
 	 */
@@ -558,7 +660,7 @@ public:
 	  * @param timeout in milliseconds to wait for lock.
 	  * @param return true if locked, false if timeout.
 	  */
-	bool exclusive(void *object, timeout_t timeout = Timer::inf);
+	static bool writer(void *object, timeout_t timeout = Timer::inf);
 
 	/**
 	 * Shared access to an arbitrary object.  This is based on the protect
@@ -567,13 +669,13 @@ public:
 	 * @param timeout in milliseconds to wait for lock.
 	 * @param return true if shared, false if timeout.
 	 */
-	bool shared(void *object, timeout_t timeout = Timer::inf);
+	static bool reader(void *object, timeout_t timeout = Timer::inf);
 
 	/**
 	 * Release an arbitrary object that has been protected by a rwlock.
 	 * @param object to release.
 	 */
-	void release(void *object);
+	static void release(void *object);
 
 	/**
 	 * Release the lock.

@@ -759,7 +759,7 @@ bool rwlock::modify(timeout_t timeout)
 	
 	lock();
 	while((writers || sharing) && rtn) {
-		if(writers && Thread::equal(writer, pthread_self()))
+		if(writers && Thread::equal(writeid, pthread_self()))
 			break;
 		++pending;
 		if(timeout == Timer::inf)
@@ -773,7 +773,7 @@ bool rwlock::modify(timeout_t timeout)
 	assert(!max_sharing || writers < max_sharing);
 	if(rtn) {
 		if(!writers)
-			writer = pthread_self();
+			writeid = pthread_self();
 		++writers;
 	}
 	unlock();
@@ -931,7 +931,77 @@ void rwlock::indexing(unsigned index)
 	}
 }
 
-bool rwlock::shared(void *ptr, timeout_t timeout)
+rwlock::gaurd_reader::gaurd_reader()
+{
+	object = NULL;
+}
+
+rwlock::gaurd_reader::gaurd_reader(void *obj)
+{
+	object = obj;
+	if(obj)
+		if(!rwlock::reader(object))
+			object = NULL;
+}
+
+rwlock::gaurd_reader::~gaurd_reader()
+{
+	release();
+}
+
+void rwlock::gaurd_reader::set(void *obj)
+{
+	release();
+	object = obj;
+	if(obj)
+		if(!rwlock::reader(object))
+			object = NULL;
+}
+
+void rwlock::gaurd_reader::release(void)
+{
+	if(object) {
+		rwlock::release(object);
+		object = NULL;
+	}
+}
+
+rwlock::gaurd_writer::gaurd_writer()
+{
+	object = NULL;
+}
+
+rwlock::gaurd_writer::gaurd_writer(void *obj)
+{
+	object = obj;
+	if(obj)
+		if(!rwlock::writer(object))
+			object = NULL;
+}
+
+rwlock::gaurd_writer::~gaurd_writer()
+{
+	release();
+}
+
+void rwlock::gaurd_writer::set(void *obj)
+{
+	release();
+	object = obj;
+	if(obj)
+		if(!rwlock::writer(object))
+			object = NULL;
+}
+
+void rwlock::gaurd_writer::release(void)
+{
+	if(object) {
+		rwlock::release(object);
+		object = NULL;
+	}
+}
+
+bool rwlock::reader(void *ptr, timeout_t timeout)
 {
 	rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
 	rwlock_entry *entry, *empty = NULL;
@@ -968,7 +1038,7 @@ bool rwlock::shared(void *ptr, timeout_t timeout)
 	return false;
 }			
 
-bool rwlock::exclusive(void *ptr, timeout_t timeout)
+bool rwlock::writer(void *ptr, timeout_t timeout)
 {
 	rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
 	rwlock_entry *entry, *empty = NULL;
