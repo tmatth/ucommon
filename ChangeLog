@@ -2,6 +2,7 @@ From ucommon 1.9.5 to 1.9.6
 - better address list management, including unique insert and remove.
 - copy constructor and address duplication for Socket::address.
 - fixup of reader/writer pool locking and addition of gaurd objects.
+- hopefully final core api for real 2.0 release!
 
 From ucommon 1.9.4 to 1.9.5
 - mutex::gaurd for scope mutex locking arbitrary objects.
