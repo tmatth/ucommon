@@ -331,6 +331,12 @@ public:
 		address();
 
 		/**
+		 * Copy constructor.
+		 * @param reference to object to copy from.
+		 */
+		address(const address& reference);
+
+		/**
 		 * Destroy address.  Deallocate addrinfo structure.
 		 */
 		~address();
@@ -438,7 +444,7 @@ public:
 		 * Add an individual socket address to our address list.
 		 * @param address to add.
 		 */
-		void add(struct sockaddr *address);
+		void add(sockaddr *address);
 
 		/**
 		 * Remove an individual socket address from our address list.
@@ -472,6 +478,13 @@ public:
 		unsigned remove(struct addrinfo *address, int family = 0);
 
 		/**
+		 * Copy an existing addrinfo into our object.  This is also used
+		 * to support the copy constructor.
+		 * @param address list to copy from.
+		 */
+		void copy(const struct addrinfo *address);
+
+		/**
 		 * Set an individual socket address for our address list.
 		 * @param address to add.
 		 */
@@ -484,6 +497,13 @@ public:
 		 * @param family of socket address.
 		 */
 		void set(const char *hostname, unsigned service = 0, int family = DEFAULT_FAMILY);
+
+		/**
+		 * Duplicate a socket address.
+		 * @param address to duplicate.
+		 * @return duplicate address object.
+		 */
+		static struct sockaddr *dup(struct sockaddr *address);
 	};
 
 	friend class address;

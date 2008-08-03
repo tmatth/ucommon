@@ -923,6 +923,12 @@ Socket::address::address()
 	list = NULL;
 }
 
+Socket::address::address(const address& from)
+{
+	list = NULL;
+	copy(from.list);
+}
+
 Socket::address::~address()
 {
 	clear();
@@ -1092,28 +1098,28 @@ bool Socket::address::remove(struct sockaddr *addr)
 	return true;
 }
 
-unsigned Socket::address::insert(struct addrinfo *list, int family)
+unsigned Socket::address::insert(struct addrinfo *alist, int family)
 {
 	unsigned count = 0;
-	while(list) {
-		if(!family || list->ai_family == family) {
-			if(insert(list->ai_addr))
+	while(alist) {
+		if(!family || alist->ai_family == family) {
+			if(insert(alist->ai_addr))
 				++count;
 		}
-		list = list->ai_next;
+		alist = alist->ai_next;
 	}
 	return count;
 }
 
-unsigned Socket::address::remove(struct addrinfo *list, int family)
+unsigned Socket::address::remove(struct addrinfo *alist, int family)
 {
 	unsigned count = 0;
-	while(list) {
-		if(!family || list->ai_family == family) {
-			if(remove(list->ai_addr))
+	while(alist) {
+		if(!family || alist->ai_family == family) {
+			if(remove(alist->ai_addr))
 				++count;
 		}
-		list = list->ai_next;
+		alist = alist->ai_next;
 	}
 	return count;
 }
@@ -1140,7 +1146,42 @@ bool Socket::address::insert(struct sockaddr *addr)
 	list = node;
 	return true;
 }
-		
+
+void Socket::address::copy(const struct addrinfo *addr)
+{
+	struct addrinfo *last = NULL;
+	struct addrinfo *node;
+
+	clear();
+	while(addr) {
+		node = (struct addrinfo *)malloc(sizeof(struct addrinfo));
+		memcpy(node, addr, sizeof(struct addrinfo));
+		node->ai_next = NULL;
+		node->ai_addr = dup(addr->ai_addr);
+		if(last)
+			last->ai_next = node;
+		else
+			list = node;
+		last = node;
+	}
+}
+			
+struct sockaddr *Socket::address::dup(struct sockaddr *addr)
+{
+	struct sockaddr *node;
+
+	if(!addr)
+		return NULL;
+
+	size_t len = getlen(addr);
+	if(!len)
+		return NULL;
+
+	node = (struct sockaddr *)malloc(len);
+	memcpy(node, addr, len);
+	return node;
+}	
+	
 void Socket::address::add(struct sockaddr *addr)
 {
 	assert(addr != NULL);
