@@ -403,6 +403,7 @@ inline void *operator new[](size_t size)
 	{return cpr_memalloc(size);};
 #endif
 
+#ifndef	_UCOMMON_EXTENDED_
 /**
  * A placement new array operator where we assume the size of memory is good.
  * We construct the array at a specified place in memory which we assume is
@@ -425,6 +426,7 @@ inline void *operator new[](size_t size, caddr_t address)
  */
 inline void *operator new[](size_t size, caddr_t address, size_t known)
 	{return cpr_memassign(size, address, known);};
+#endif
 
 /**
  * Overdraft new to allocate extra memory for object from heap.  This is
