@@ -1,3 +1,6 @@
+From ucommon 1.9.6 to 1.9.7
+- lots of code cleanup for final release candidate for 2.0.
+
 From ucommon 1.9.5 to 1.9.6
 - better address list management, including unique insert and remove.
 - copy constructor and address duplication for Socket::address.
