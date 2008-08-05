@@ -124,7 +124,8 @@ AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
-	UCOMMON_LIBS="$UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
+	UCOMMON_VISIBILITY="0"
+	UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
 	AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
 	AC_DEFINE(HAVE_GETADDRINFO, [1], [have getaddrinfo])
@@ -422,10 +423,11 @@ export CXXFLAGS
 
 # libstdc++ on some targets broken badly if inlines hidden.  Might be
 # deeper issue with ansi c++ library model...
+flags="-fno-check-new -finline"
 if test "$UCOMMON_MODEL" = "CC" ; then
-	flags="-fno-check-new -finline -fvisibility-inlines-hidden"
-else
-	flags="-fno-check-new -finline"
+	if test "$enable_shared" != "no" ; then
+		flags="flags -fvisibility-inlines-hidden"
+	fi
 fi
 
 for flag in $flags ; do
