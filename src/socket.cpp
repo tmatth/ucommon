@@ -134,7 +134,7 @@ static void socket_mapping(int family, socket_t so)
 	if(so == INVALID_SOCKET)
 		return;
 
-#ifdef	IPV6_V6ONLY
+#if defined(IPV6_V6ONLY) && defined(IPPROTO_IPV6)
 	if(family == AF_INET6) 
 		setsockopt (so, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &v6only, sizeof (v6only));
 #endif
@@ -798,7 +798,7 @@ void cidr::set(const char *cp)
 	char *ep;
 	unsigned dots = 0;
 #ifdef	_MSWINDOWS_
-	struct sockaddr saddr;
+//	struct sockaddr saddr;
 	int slen;
 	struct sockaddr_in6 *paddr;
 	int ok;
@@ -1710,7 +1710,7 @@ int Socket::loopback(socket_t so, bool enable)
 	switch(family) {
 	case AF_INET:
 		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
-#ifdef	AF_INET6
+#if defined(AF_INET6) && defined(IPROTO_IPV6)
 	case AF_INET6:
 		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
 #endif
@@ -1733,7 +1733,7 @@ int Socket::ttl(socket_t so, unsigned char t)
 	switch(family) {
 	case AF_INET:
 		return setsockopt(so, IPPROTO_IP, IP_TTL, (char *)&t, sizeof(t));
-#ifdef	AF_INET6
+#if defined(AF_INET6) && defined(IPPROTO_IPV6)
 	case AF_INET6:
 		return setsockopt(so, IPPROTO_IPV6, IPV6_UNICAST_HOPS, (char *)&t, sizeof(t));
 #endif
@@ -1815,7 +1815,7 @@ int Socket::multicast(socket_t so, unsigned ttl)
 			break;
 		}
 	switch(addr.addr.sa_family) {
-#ifdef	AF_INET6
+#if defined(AF_INET6) && defined(IPPROTO_IPV6)
 	case AF_INET6:
 		rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
 		if(rtn)
@@ -1896,7 +1896,7 @@ int Socket::join(socket_t so, struct addrinfo *node)
 		if(family != addr.addr.sa_family)
 			continue;
 		switch(addr.addr.sa_family) {
-#if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP)
+#if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP) && defined(IPPROTO_IPV6)
 		case AF_INET6:
 			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
@@ -1941,7 +1941,7 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 			continue;
 
 		switch(addr.addr.sa_family) {
-#if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP)
+#if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP) && defined(IPPROTO_IPV6)
 		case AF_INET6:
 			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
@@ -2255,7 +2255,7 @@ socket_t ListenSocket::accept(struct sockaddr_storage *addr)
 #undef	AF_UNIX
 #endif
 
-struct addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
+struct ::addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
 {
 	assert(hint != NULL);
 

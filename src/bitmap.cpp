@@ -17,7 +17,9 @@
 #include <config.h>
 #include <ucommon/bitmap.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -118,30 +120,33 @@ bool bitmap::get(size_t offset)
 		return false;
 
 	switch(bus) {
+#if !defined(_MSC_VER) || _MSC_VER >= 1400
 	case B64:
-		return addr.d[pos] & 1ll<<rem;
+		return (addr.d[pos] & 1ll<<rem) > 0;
+#endif
     case B32:
-		return addr.l[pos] & 1l<<rem;
+		return (addr.l[pos] & 1l<<rem) > 0;
 	case B16:
-		return addr.w[pos] & 1<<rem;
+		return (addr.w[pos] & 1<<rem) > 0;
 	default:
-		return addr.b[pos] & 1<<rem;
+		return (addr.b[pos] & 1<<rem) > 0;
 	}
 }
 
 void bitmap::clear(void)
 {
 	unsigned bs = memsize();
-	addr_t ptr = addr;
 
 	if(size % bs)
 		++size;
 
 	while(size--) {
 		switch(bus) {
+#if !defined(_MSC_VER) || _MSC_VER >= 1400
 		case B64:
 			*(addr.d++) = 0ll;
 			break;
+#endif
 		case B32:
 			*(addr.l++) = 0l;
 			break;

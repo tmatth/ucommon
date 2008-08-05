@@ -22,7 +22,9 @@
 #include <ucommon/shell.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#ifdef	HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 
 #ifndef	_MSWINDOWS_

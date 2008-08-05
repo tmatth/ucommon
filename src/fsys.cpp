@@ -21,9 +21,14 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <string.h>
 
 #ifdef	HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+
+#ifdef _MSWINDOWS_
+#include <direct.h>
 #endif
 
 using namespace UCOMMON_NAMESPACE;
@@ -119,6 +124,7 @@ int fsys::stat(const char *path, struct stat *buf)
 {
 	if(_stat(path, (struct _stat *)(buf)))
 		return remapError();
+	return 0;
 }
 
 int fsys::stat(struct stat *buf)

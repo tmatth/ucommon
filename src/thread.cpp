@@ -45,7 +45,7 @@ class __LOCAL rwlock_entry : public rwlock
 {
 public:
 	rwlock_entry();
-	struct rwlock_entry *next;
+	rwlock_entry *next;
 	void *object;
 	unsigned count;
 };
@@ -61,7 +61,7 @@ public:
 class __LOCAL rwlock_index : public mutex
 {
 public:
-	struct rwlock_entry *list;
+	rwlock_entry *list;
 
 	rwlock_index();
 };
@@ -378,7 +378,7 @@ bool Conditional::wait(struct timespec *ts)
 {
 	assert(ts != NULL);
 
-	return wait(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
+	return wait((timeout_t)(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l)));
 }
 
 #else
@@ -504,7 +504,7 @@ bool ConditionalAccess::waitSignal(struct timespec *ts)
 {
 	assert(ts != NULL);
 
-	return waitSignal(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
+	return waitSignal((timeout_t)(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l)));
 }
 
 
@@ -537,7 +537,7 @@ bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 {
 	assert(ts != NULL);
 
-	return waitBroadcast(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l));
+	return waitBroadcast((timeout_t)(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l)));
 }
 
 #else
@@ -1022,7 +1022,7 @@ bool rwlock::reader(void *ptr, timeout_t timeout)
 		if(empty)
 			entry = empty;
 		else {
-			entry = new struct rwlock_entry;
+			entry = new rwlock_entry;
 			entry->next = index->list;
 			index->list = entry;
 		}
@@ -1059,7 +1059,7 @@ bool rwlock::writer(void *ptr, timeout_t timeout)
 		if(empty)
 			entry = empty;
 		else {
-			entry = new struct rwlock_entry;
+			entry = new rwlock_entry;
 			entry->next = index->list;
 			index->list = entry;
 		}
@@ -1852,8 +1852,7 @@ void JoinableThread::start(int adj)
 
 void DetachedThread::start(int adj)
 {
-	HANDLE hThread;
-	unsigned temp;
+	HANDLE hThread;;
 	
 	priority = adj;
 
@@ -2517,7 +2516,7 @@ SharedObject *shared_release::get(void)
 	return NULL;
 }
 
-void SharedObject::commit(SharedPointer *pointer)
+void SharedObject::commit(SharedPointer *spointer)
 {
 }
 

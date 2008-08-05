@@ -20,7 +20,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
+#ifdef	HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #ifdef HAVE_SYS_MMAN_H
 #define	__EXTENSIONS__
@@ -43,7 +45,6 @@
 
 #include <ctype.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <limits.h>
 
 #if _POSIX_PRIORITY_SCHEDULING > 0
@@ -145,7 +146,6 @@ void MappedMemory::create(const char *fn, size_t len)
 	int share = FILE_SHARE_READ;
 	int prot = FILE_MAP_READ;
 	int mode = GENERIC_READ;
-	struct stat ino;
 
 	size = 0;
 	used = 0;

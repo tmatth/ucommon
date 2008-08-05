@@ -147,6 +147,10 @@ int tcpstream::uflow()
     return ret;
 }
 
+#ifndef	MSG_WAITALL
+#define	MSG_WAITALL	0
+#endif
+
 int tcpstream::underflow()
 {
 	ssize_t rlen = 1;

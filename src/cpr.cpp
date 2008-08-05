@@ -27,7 +27,9 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <limits.h>
 
 using namespace UCOMMON_NAMESPACE;
@@ -101,19 +103,19 @@ extern "C" void msb_setshort(uint8_t *b, uint16_t v)
 extern "C" void lsb_setlong(uint8_t *b, uint32_t v)
 {
 	assert(b != NULL);
-	b[0] = v & 0x0ff;
-	b[1] = (v / 256) & 0xff;
-	b[2] = (v / 65536l) & 0xff;
-	b[3] = (v / 16777216l) & 0xff;
+	b[0] = (uint8_t)(v & 0x0ff);
+	b[1] = (uint8_t)((v / 256) & 0xff);
+	b[2] = (uint8_t)((v / 65536l) & 0xff);
+	b[3] = (uint8_t)((v / 16777216l) & 0xff);
 }
 
-extern "C" void msb_setling(uint8_t *b, uint32_t v)
+extern "C" void msb_setlong(uint8_t *b, uint32_t v)
 {
 	assert(b != NULL);
-	b[3] = v & 0x0ff;
-	b[2] = (v / 256) & 0xff;
-	b[1] = (v / 65536l) & 0xff;
-	b[0] = (v / 16777216l) & 0xff;
+	b[3] = (uint8_t)(v & 0x0ff);
+	b[2] = (uint8_t)((v / 256) & 0xff);
+	b[1] = (uint8_t)((v / 65536l) & 0xff);
+	b[0] = (uint8_t)((v / 16777216l) & 0xff);
 }
 
 extern "C" void cpr_memswap(void *s1, void *s2, size_t size)

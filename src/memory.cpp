@@ -18,7 +18,9 @@
 #include <ucommon/memory.h>
 #include <ucommon/thread.h>
 #include <ucommon/string.h>
+#ifdef	HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <limits.h>
 #include <string.h>
 #include <stdio.h>
@@ -121,7 +123,9 @@ void mempager::purge(void)
 mempager::page_t *mempager::pager(void)
 {
 	page_t *npage = NULL;
+#ifdef	HAVE_POSIX_MEMALIGN
 	void *addr;
+#endif
 
 	crit(!limit || count < limit, "mempager limit reached");
 
@@ -134,7 +138,9 @@ mempager::page_t *mempager::pager(void)
 #endif
 	npage = (page_t *)malloc(pagesize);
 
+#ifdef	HAVE_POSIX_MEMALIGN
 use:
+#endif
 	crit(npage != NULL, "mempager alloc failed");
 
 	++count;

@@ -24,12 +24,12 @@ using namespace UCOMMON_NAMESPACE;
 
 #endif
 
-static time_t difftime(time_t ref)
+static long difftime(time_t ref)
 {
 	time_t now;
 	time(&now);
 
-	return ref - now;
+	return (long)(ref - now);
 }
 
 #if _POSIX_TIMERS > 0

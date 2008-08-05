@@ -660,6 +660,7 @@ strsize_t string::vprintf(const char *format, va_list args)
 	return len();
 }
 
+#if !defined(_MSC_VER)
 int string::vscanf(const char *format, va_list args)
 {
 	assert(format != NULL);
@@ -682,6 +683,17 @@ int string::scanf(const char *format, ...)
 	va_end(args);
 	return rtn;
 }
+#else
+int string::vscanf(const char *format, va_list args)
+{
+	return 0;
+}
+
+int string::scanf(const char *format, ...)
+{
+	return 0;
+}
+#endif
 
 void string::rsplit(const char *s)
 {
@@ -1170,11 +1182,11 @@ memstring *memstring::create(strsize_t size, char fill)
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
 
-memstring *memstring::create(mempager *pager, strsize_t size, char fill)
+memstring *memstring::create(mempager *mpager, strsize_t size, char fill)
 {
 	assert(size > 0);
 
-	caddr_t mem = (caddr_t)pager->alloc(size + sizeof(memstring) + sizeof(cstring));
+	caddr_t mem = (caddr_t)mpager->alloc(size + sizeof(memstring) + sizeof(cstring));
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
 

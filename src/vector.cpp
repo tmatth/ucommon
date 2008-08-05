@@ -173,11 +173,6 @@ Vector::~Vector()
 	release();
 }
 
-Vector::array *Vector::copy(void) const
-{
-	return data;
-}
-
 Object **Vector::list(void) const
 {
 	if(!data)
@@ -459,13 +454,6 @@ bool MemVector::resize(vectorsize_t size)
 
 void MemVector::cow(vectorsize_t adj)
 {
-}
-
-Vector::array *MemVector::copy(void) const
-{
-	array *tmp = create(data->max);
-	tmp->set(data->list);
-	return tmp;
 }
 
 ArrayReuse::ArrayReuse(size_t size, unsigned c) :
