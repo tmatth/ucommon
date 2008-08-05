@@ -129,18 +129,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-// older sdk's require windows header first
-#if !defined(_MSC_VER)
-#include <windows.h>
-#endif
-// these MUST be included first on newer sdk...
-#if defined(_MSC_VER)
 #include <winsock2.h>
-#endif
 #include <ws2tcpip.h>
-#if !defined(_MSC_VER)
-#include <winsock2.h>
-#endif
 
 #if defined(_MSC_VER)
 typedef	signed long ssize_t;
