@@ -63,7 +63,7 @@ public:
 	 * A convience member function for accessing the exclusive lock.
 	 */
 	inline void Lock(void)
-		{return Exlock();};
+		{Exlock();};
 };
 
 /**
@@ -109,7 +109,7 @@ public:
 	 * A convience member function for accessing the shared lock.
 	 */
 	inline void Lock(void)
-		{return Shlock();};
+		{Shlock();};
 };
 
 /**

@@ -47,7 +47,6 @@ class keyfile;
 class __EXPORT keydata : public OrderedObject
 {
 private:
-
 	friend class keyfile;
 	OrderedIndex index;
 	keydata(keyfile *file);
@@ -71,6 +70,8 @@ public:
 		const char *id;
 		const char *value;
 	};
+
+	friend class keyvalue;
 
 	/**
 	 * Lookup a key value by it's id.

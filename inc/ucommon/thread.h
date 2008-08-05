@@ -1563,7 +1563,7 @@ protected:
 public:
 #ifdef	_MSWINDOWS_
 	inline bool isRunning(void)
-		{joining != INVALID_HANDLE_VALUE;};
+		{return (joining != INVALID_HANDLE_VALUE);};
 #else
 	/**
 	 * Test if thread is currently running.

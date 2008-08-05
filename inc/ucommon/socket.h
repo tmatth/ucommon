@@ -1166,7 +1166,7 @@ public:
 	 * @param address list to connect to.
 	 */
 	inline static void connectto(Socket& socket, Socket::address &address)
-		{socket.connectto(socket, address);};
+		{socket.connectto(address);};
 
 	/**
 	 * Disconnect a connected socket.

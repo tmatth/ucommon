@@ -32,6 +32,10 @@
 #undef	__EXPORT
 #endif
 
+#ifdef	UCOMMON_STATIC
+#define	__EXPORT
+#else
 #define	__EXPORT __declspec(dllexport)
+#endif
 #endif
 

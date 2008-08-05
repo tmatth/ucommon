@@ -44,7 +44,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+
+#ifdef	HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 
 NAMESPACE_UCOMMON
 
@@ -80,6 +83,8 @@ protected:
 	 * for internal use.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
+
+public:
 	class __EXPORT cstring : public CountedObject
 	{
 	public:
@@ -179,6 +184,7 @@ protected:
 		void dec(strsize_t number);
 	};
 
+protected:
 	cstring *str;  /**< cstring instance our object references. */
 
 	/**
@@ -1315,7 +1321,7 @@ public:
 	 * @param list of characters to remove.
 	 */
 	inline static void trim(string& object, const char *list)
-		{return object.trim(list);};
+		{object.trim(list);};
 
 	/**
 	 * Chop trailing characters from the string.
@@ -1323,7 +1329,7 @@ public:
 	 * @param list of characters to remove.
 	 */
 	inline static void chop(string& object, const char *list)
-		{return object.trim(list);};
+		{object.trim(list);};
 
 	/**
 	 * Strip lead and trailing characters from the string.
@@ -1331,7 +1337,7 @@ public:
 	 * @param list of characters to remove.
 	 */
 	inline static void strip(string& object, const char *list)
-		{return object.trim(list);};
+		{object.trim(list);};
 
 	/**
 	 * Find a character in the string.

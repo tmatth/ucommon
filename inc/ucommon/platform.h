@@ -93,24 +93,58 @@
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_
-#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501
-#undef	_WIN32_WINNT
-#define	_WIN32_WINNT 0x0501
+
+//#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501
+//#undef	_WIN32_WINNT
+//#define	_WIN32_WINNT 0x0501
+//#endif
+
+//#ifndef _WIN32_WINNT
+//#define	_WIN32_WINNT 0x0501
+//#endif
+
+#pragma warning(disable: 4996)
+#pragma warning(disable: 4355)
+#pragma	warning(disable: 4291)
+
+#if defined(__BORLANDC__) && !defined(__MT__)
+#error Please enable multithreading
 #endif
 
+#if defined(_MSC_VER) && !defined(_MT)
+#error Please enable multithreading (Project -> Settings -> C/C++ -> Code Generation -> Use Runtime Library)
+#endif
+
+// Require for compiling with critical sections.
 #ifndef _WIN32_WINNT
-#define	_WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0400
+#endif
+
+// Make sure we're consistent with _WIN32_WINNT
+#ifndef WINVER
+#define WINVER _WIN32_WINNT
+#endif
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
 
 // older sdk's require windows header first
-#if !defined(_MSC_VER) || _MSC_VER < 1400
+#if !defined(_MSC_VER)
 #include <windows.h>
 #endif
 // these MUST be included first on newer sdk...
-#include <ws2tcpip.h>
+#if defined(_MSC_VER)
 #include <winsock2.h>
-#if defined(_MSC_VER) && _MSC_VER >= 1400
-#include <windows.h>
+#endif
+#include <ws2tcpip.h>
+#if !defined(_MSC_VER)
+#include <winsock2.h>
+#endif
+
+#if defined(_MSC_VER)
+typedef	signed long ssize_t;
+typedef int pid_t;
 #endif
 
 #include <process.h>
@@ -254,7 +288,8 @@ typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 typedef char *caddr_t;
 
-#if _MSC_VER < 1400
+#if defined(_MSC_VER)
+#include <stdio.h>
 #define	snprintf _snprintf
 #define vsnprintf _vsnprintf
 #endif

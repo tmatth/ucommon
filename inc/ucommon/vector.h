@@ -108,7 +108,7 @@ protected:
  */
 class __EXPORT Vector
 {
-protected:
+public:
 	class __EXPORT array : public CountedObject
 	{
 	public:
@@ -127,14 +127,16 @@ protected:
 		void dec(vectorsize_t adj);
 	};
 
+protected:
 	array *data;
 
 	array *create(vectorsize_t size) const;
 
 	virtual void release(void);
-	virtual array *copy(void) const;
 	virtual void cow(vectorsize_t adj = 0);
 	Object **list(void) const;
+
+	friend class Vector::array;
 
 public:
 	/**
@@ -313,7 +315,7 @@ public:
 	 * @param pointer to object to add to vector.
 	 */
 	inline void operator()(Object *pointer)
-		{return add(pointer);};
+		{add(pointer);};
 
 	/**
 	 * Assign (copy) into our existing vector from another vector.
@@ -392,8 +394,7 @@ private:
 	void cow(vectorsize_t adj = 0);
 	void release(void);
 
-protected:
-	array *copy(void) const;
+	friend class Vector::array;
 
 public:
 	/**

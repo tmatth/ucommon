@@ -525,9 +525,9 @@ class pager : private PagerPool
 public:
 	/**
 	 * Construct a pager and optionally assign a private pager heap.
-	 * @param pager heap to use.  If NULL, uses global heap.
+	 * @param heap pager to use.  If NULL, uses global heap.
 	 */
-	inline pager(mempager *pager = NULL) : PagerPool(pager) {};
+	inline pager(mempager *heap = NULL) : PagerPool(heap) {};
 
 	/**
 	 * Purge managed objects.
