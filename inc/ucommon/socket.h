@@ -1234,14 +1234,6 @@ public:
 	static socklen_t getlen(struct sockaddr *address);
 
 	/**
-	 * Copy a socket address from one structure to another.  The size of
-	 * the address is determined by getlen.
-	 * @param from address of original.
-	 * @param to address to save.
-	 */
-	static void copy(struct sockaddr *from, struct sockaddr *to);
-
-	/**
 	 * Compare socket addresses.  Test if the address and service matches
 	 * or if there is no service, then just the host address values.
 	 * @param address1 to compare.
@@ -1249,6 +1241,22 @@ public:
 	 * @return true if same family and equal.
 	 */
 	static bool equal(struct sockaddr *address1, struct sockaddr *address2);
+
+	/**
+	 * Copy a socket address.
+	 * @param target address pointer to copy into.
+	 * @param source address pointer to copy from.
+	 * @return target if address valid, 0 if not.
+	 */
+	static struct sockaddr *copy(struct sockaddr *target, struct sockaddr *source);
+
+	/**
+	 * Store an address into an address object.
+	 * @param storage for address.
+	 * @param address to store.
+	 * @return number of bytes stored.
+	 */
+	static unsigned store(struct sockaddr_storage *storage, struct sockaddr *address);
 
 	/**
 	 * Compare socket host addresses.  Test if the host addressmatches

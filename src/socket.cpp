@@ -2632,12 +2632,30 @@ bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
 	return true;
 }
 
-void Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
+unsigned Socket::store(struct sockaddr_storage *storage, struct sockaddr *address)
 {
-	assert(s1 != NULL && s2 != NULL);
+	if(storage == NULL || address == NULL)
+		return 0;
+
+	socklen_t len = getlen(address);
+	if(len < 1 || len > sizeof(struct sockaddr_storage))
+		return 0;
+
+	memcpy(storage, address, len);
+	return len;
+}
+
+struct sockaddr *Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
+{
+	if(s1 == NULL || s2 == NULL)
+		return NULL;
 
 	socklen_t len = getlen(s1);
-	memcpy(s2, s1, len);
+	if(len > 0) {
+		memcpy(s1, s2, len);
+		return s1;
+	}
+	return NULL;
 }
 
 bool Socket::equalhost(struct sockaddr *s1, struct sockaddr *s2)
