@@ -446,7 +446,7 @@ void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t 
 		CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
 		DuplicateHandle(GetCurrentProcess(),inputWriteTmp,
             GetCurrentProcess(), &inputWrite, 0,FALSE, DUPLICATE_SAME_ACCESS);
-		CloseHandle(&inputReadTmp);
+		CloseHandle(&inputRead);
 	}
 	if(mode == RDONLY || mode == RDWR) {
 		CreatePipe(&outputReadTmp, &outputWrite,&sa,0);
@@ -459,17 +459,17 @@ void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t 
 
 	memset(&si, 0, sizeof(si));
 	si.cb = sizeof(STARTUPINFO);
-	si.dwFlags = STARTF_USESDHANDLES;
+	si.dwFlags = STARTF_USESTDHANDLES;
 	
 	if(mode == RDONLY || mode == RDWR) {
-		si.StdOutput = outputWrite;
-		si.Stderror = errorWrite;
+		si.hStdOutput = outputWrite;
+		si.hStdError = errorWrite;
 	}
 
 	if(mode == WRONLY || mode == RDWR)
-		si.StdInput = inputRead;
+		si.hStdInput = inputRead;
 
-	if(!CreateProcess(cmdspec, cmd, NULL, NULL, TRUE,
+	if(!CreateProcess(cmdspec, (char *)cmd, NULL, NULL, TRUE,
 		CREATE_NEW_CONSOLE, ep, NULL, &si, &pi))
 		size = 0;
 	else

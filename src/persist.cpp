@@ -15,6 +15,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+#if !defined(_MSC_VER) || _MSC_VER >= 1400
 
 #include <config.h>
 #include <ucommon/platform.h>
@@ -118,7 +119,7 @@ myUnderlyingStream(stream), myOperationalMode(mode)
 PersistEngine::~PersistEngine()
 {
 	if (myUnderlyingStream.good())
-		sync();
+		myUnderlyingStream.sync();
 }
 
 void PersistEngine::writeBinary(const uint8_t* data, const uint32_t size) throw(PersistException) 
@@ -283,4 +284,5 @@ void PersistEngine::read(std::string& str) throw(PersistException)
   delete[] buffer;
 }
 
+#endif
 #endif
