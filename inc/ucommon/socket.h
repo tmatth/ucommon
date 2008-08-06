@@ -1070,6 +1070,18 @@ public:
 	static ssize_t sendto(socket_t socket, const void *buffer, size_t size, int flags = 0, struct sockaddr *address = NULL);
 
 	/**
+	 * Send reply on socket.  Used to reply to a recvfrom message.
+	 * @param socket to send to.
+	 * @param buffer to send.
+	 * @param size of data buffer to send.
+	 * @param flags for i/o operation (MSG_OOB, MSG_PEEK, etc).
+	 * @param address to reply to.
+	 * @return number of bytes sent, -1 if error.
+	 */
+	inline static ssize_t replyto(socket_t socket, const void *buffer, size_t size, int flags, struct sockaddr_storage *address)
+		{return sendto(socket, buffer, size, flags, (struct sockaddr *)address);};
+
+	/**
 	 * Bind the socket descriptor to a known interface and service port.
 	 * @param socket descriptor to bind.
 	 * @param address to bind to or "*" for all.
@@ -1247,6 +1259,15 @@ public:
 	 */
 	static bool equalhost(struct sockaddr *address1, struct sockaddr *address2);
 
+	/**
+	 * Compare socket addresses.  Test if the stored addresses received match.
+	 * or if there is no service, then just the host address values.
+	 * @param address1 to compare.
+	 * @param address2 to compare.
+	 * @return true if same family and equal.
+	 */
+	inline static bool equalfrom(struct sockaddr_storage *address1, struct sockaddr_storage *address2)
+		{return equal((struct sockaddr *)address1, (struct sockaddr *)address2);};
 
 	/**
 	 * See if both addresses are in the same subnet.  This is only relevent

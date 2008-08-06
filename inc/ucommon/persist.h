@@ -20,6 +20,7 @@
  */
 
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+#if !defined(_MSC_VER) || _MSC_VER >= 1400
 #ifndef	_UCOMMON_PERSIST_H_
 #define	_UCOMMON_PERSIST_H_
 
@@ -498,5 +499,6 @@ PersistEngine& operator >>(PersistEngine& ar, std::pair<x, y> &ob) throw(Persist
 	
 END_NAMESPACE
 
+#endif
 #endif
 #endif

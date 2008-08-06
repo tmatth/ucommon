@@ -105,6 +105,7 @@
 
 #pragma warning(disable: 4996)
 #pragma warning(disable: 4355)
+#pragma warning(disable: 4290)
 #pragma	warning(disable: 4291)
 
 #if defined(__BORLANDC__) && !defined(__MT__)
