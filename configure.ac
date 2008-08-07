@@ -35,7 +35,7 @@ UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 
-CHECK="test"
+CHECKFLAGS="$CHECKFLAGS"
 POSIX=false
 MSSYS=false
 
@@ -281,9 +281,11 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r ; 
 				found=$func
 				rt_lib="-lrt"
 			],[
-				AC_CHECK_LIB($tlib, $func, [
-					found=$func
-				])
+				if test ! -z "$tlib" ; then
+					AC_CHECK_LIB($tlib, $func, [
+						found=$func
+					])
+				fi
 			])
 		])
 	])
@@ -490,7 +492,7 @@ UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 
 AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
-AC_SUBST(CHECK)
+AC_SUBST(CHECKFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LINKED)
