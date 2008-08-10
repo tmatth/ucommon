@@ -130,8 +130,7 @@ mempager::page_t *mempager::pager(void)
 	crit(!limit || count < limit, "mempager limit reached");
 
 #ifdef	HAVE_POSIX_MEMALIGN
-	if(align) {
-		crit(posix_memalign(&addr, align, pagesize) == 0, "mempager alloc failed");
+	if(align && !posix_memalign(&addr, align, pagesize)) {
 		npage = (page_t *)addr;
 		goto use;
 	}
