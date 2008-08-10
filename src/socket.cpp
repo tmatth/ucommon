@@ -1585,6 +1585,15 @@ size_t Socket::peek(void *data, size_t len) const
 	return (size_t)rtn;
 }
 
+ssize_t Socket::recvinet(socket_t so, void *data, size_t len, int flags, struct sockaddr_internet *addr)
+{
+	assert(data != NULL);
+	assert(len > 0);
+
+	socklen_t slen = sizeof(struct sockaddr_internet);
+	return _recvfrom_(so, (caddr_t)data, len, flags, (struct sockaddr *)addr, &slen);
+}
+
 ssize_t Socket::recvfrom(socket_t so, void *data, size_t len, int flags, struct sockaddr_storage *addr)
 {
 	assert(data != NULL);

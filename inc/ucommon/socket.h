@@ -1094,6 +1094,17 @@ public:
 		{return sendto(socket, buffer, size, flags, (struct sockaddr *)address);};
 
 	/**
+	 * Get internet data waiting in receive queue.
+	 * @param socket to get from.
+	 * @param buffer to save.
+	 * @param size of data buffer to request.
+	 * @param flags for i/o operation (MSG_OOB, MSG_PEEK, etc).
+	 * @param internet address of source.
+	 * @return number of bytes received, -1 if error.
+	 */
+	static ssize_t recvinet(socket_t socket, void *buffer, size_t size, int flags = 0, struct sockaddr_internet *address = NULL);
+
+	/**
 	 * Bind the socket descriptor to a known interface and service port.
 	 * @param socket descriptor to bind.
 	 * @param address to bind to or "*" for all.
