@@ -2632,30 +2632,37 @@ bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
 	return true;
 }
 
-unsigned Socket::store(struct sockaddr_storage *storage, struct sockaddr *address)
+unsigned Socket::store(struct sockaddr_internet *storage, struct sockaddr *address)
 {
 	if(storage == NULL || address == NULL)
 		return 0;
 
-	socklen_t len = getlen(address);
-	if(len < 1 || len > sizeof(struct sockaddr_storage))
-		return 0;
+	if(address->sa_family == AF_INET) {
+		memcpy(&storage->ipv4, address, sizeof(storage->ipv4));
+		return sizeof(storage->ipv4);
+	}
 
-	memcpy(storage, address, len);
-	return len;
+#ifdef	AF_INET6
+	if(address->sa_family == AF_INET6) {
+		memcpy(&storage->ipv6, address, sizeof(storage->ipv6));
+		return sizeof(storage->ipv6);
+	}
+#endif
+
+	return 0;
 }
 
-struct sockaddr *Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
+unsigned Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
 {
 	if(s1 == NULL || s2 == NULL)
-		return NULL;
+		return 0;
 
 	socklen_t len = getlen(s1);
 	if(len > 0) {
 		memcpy(s1, s2, len);
-		return s1;
+		return len;
 	}
-	return NULL;
+	return 0;
 }
 
 bool Socket::equalhost(struct sockaddr *s1, struct sockaddr *s2)

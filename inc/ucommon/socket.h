@@ -1082,6 +1082,18 @@ public:
 		{return sendto(socket, buffer, size, flags, (struct sockaddr *)address);};
 
 	/**
+	 * Send to internet socket.  
+	 * @param socket to send to.
+	 * @param buffer to send.
+	 * @param size of data buffer to send.
+	 * @param flags for i/o operation (MSG_OOB, MSG_PEEK, etc).
+	 * @param address to send to.
+	 * @return number of bytes sent, -1 if error.
+	 */
+	inline static ssize_t sendinet(socket_t socket, const void *buffer, size_t size, int flags, struct sockaddr_internet *address)
+		{return sendto(socket, buffer, size, flags, (struct sockaddr *)address);};
+
+	/**
 	 * Bind the socket descriptor to a known interface and service port.
 	 * @param socket descriptor to bind.
 	 * @param address to bind to or "*" for all.
@@ -1246,9 +1258,9 @@ public:
 	 * Copy a socket address.
 	 * @param target address pointer to copy into.
 	 * @param source address pointer to copy from.
-	 * @return target if address valid, 0 if not.
+	 * @return number of bytes copied, 0 if invalid.
 	 */
-	static struct sockaddr *copy(struct sockaddr *target, struct sockaddr *source);
+	static unsigned copy(struct sockaddr *target, struct sockaddr *from);
 
 	/**
 	 * Store an address into an address object.
@@ -1256,7 +1268,16 @@ public:
 	 * @param address to store.
 	 * @return number of bytes stored.
 	 */
-	static unsigned store(struct sockaddr_storage *storage, struct sockaddr *address);
+	inline static unsigned store(struct sockaddr_storage *storage, struct sockaddr *address)
+		{return copy((struct sockaddr*)storage, address);};
+
+	/**
+	 * Store an address into an internet address object.
+	 * @param storage for address.
+	 * @param address to store.
+	 * @return number of bytes stored.
+	 */
+	static unsigned store(struct sockaddr_internet *storage, struct sockaddr *address);
 
 	/**
 	 * Compare socket host addresses.  Test if the host addressmatches
@@ -1275,6 +1296,16 @@ public:
 	 * @return true if same family and equal.
 	 */
 	inline static bool equalfrom(struct sockaddr_storage *address1, struct sockaddr_storage *address2)
+		{return equal((struct sockaddr *)address1, (struct sockaddr *)address2);};
+
+	/**
+	 * Compare socket addresses.  Test if the internet addresses received match.
+	 * or if there is no service, then just the host address values.
+	 * @param address1 to compare.
+	 * @param address2 to compare.
+	 * @return true if same family and equal.
+	 */
+	inline static bool equalinet(struct sockaddr_internet *address1, struct sockaddr_internet *address2)
 		{return equal((struct sockaddr *)address1, (struct sockaddr *)address2);};
 
 	/**
