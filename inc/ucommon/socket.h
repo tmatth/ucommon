@@ -1354,6 +1354,14 @@ public:
 	static short getservice(struct sockaddr *address);
 
 	/**
+	 * Get the service port of an inet socket.
+	 * @param address of internet socket to examine.
+	 * @return service port number.
+	 */
+	inline static short inetservice(struct sockaddr_internet *address)
+		{return getservice((struct sockaddr *)address);};
+
+	/**
 	 * Convert a socket address and service into a hash map index.
 	 * @param address to convert.
 	 * @param size of map index.
@@ -1368,7 +1376,6 @@ public:
 	 * @return key index path.
 	 */
 	static unsigned keyhost(struct sockaddr *address, unsigned size);
-
 
 	/**
 	 * Initialize socket subsystem.
