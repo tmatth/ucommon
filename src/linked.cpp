@@ -540,6 +540,10 @@ NamedTree *NamedTree::getChild(const char *tid) const
 
 void NamedTree::relistTail(NamedTree *trunk)
 {
+	// if moving to same place, just return...
+	if(parent == trunk)
+		return;
+
 	if(parent)
 		delist(&parent->child);
 	parent = trunk;
@@ -549,6 +553,9 @@ void NamedTree::relistTail(NamedTree *trunk)
 
 void NamedTree::relistHead(NamedTree *trunk)
 {
+	if(parent == trunk)
+		return;
+
 	if(parent)
 		delist(&parent->child);
 	parent = trunk;
