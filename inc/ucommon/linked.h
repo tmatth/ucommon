@@ -114,6 +114,14 @@ public:
 	static unsigned count(LinkedObject *root);
 
 	/**
+	 * Get member by index.
+	 * @return indexed member in linked list.
+	 * @param root pionter to list we are indexing.
+	 * @param index member to find.
+	 */
+	static LinkedObject *getIndexed(LinkedObject *root, unsigned index);
+
+	/**
 	 * Get next effective object when iterating.
 	 * @return next linked object in list.
 	 */
@@ -216,6 +224,14 @@ public:
 	 * @return LinkedObject based object that was head of the list.
 	 */
 	LinkedObject *get(void);
+
+	/**
+	 * Get an indexed member from the ordered index.
+	 * @param index of member to fetch.
+	 * @return LinkedObject member of index.
+	 */
+	inline LinkedObject *getIndexed(unsigned index) const
+		{return LinkedObject::getIndexed((LinkedObject*)head, index);};
 
 	/**
 	 * Return first object in list for iterators.
@@ -566,6 +582,14 @@ public:
 	 */
 	inline NamedTree *getParent(void) const
 		{return parent;};
+
+	/**
+	 * Get child by index number.
+	 * @param index of child to fetch.
+	 * @return indexed child node.
+	 */
+	inline NamedTree *getIndexed(unsigned index) const
+		{return static_cast<NamedTree *>(child.getIndexed(index));};
 
 	/**
 	 * Get the ordered index of our child nodes.
@@ -1301,6 +1325,14 @@ public:
 	 */
 	inline void operator=(const T& data)
 		{value = data;};
+
+	/**
+	 * Get child member node by index.
+	 * @param index of child member.
+	 * @return node or NULL if past end.
+	 */
+	inline treemap *getIndexed(unsigned index) const
+		{return static_cast<treemap*>(child.getIndexed(index));};
 
 	/**
 	 * Get the typed parent node for our node.

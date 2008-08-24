@@ -340,6 +340,14 @@ void LinkedObject::release(void)
 	}
 }
 
+LinkedObject *LinkedObject::getIndexed(LinkedObject *root, unsigned index)
+{
+	while(index-- && root != NULL)
+		root = root->next;
+
+	return root;
+}
+
 unsigned LinkedObject::count(LinkedObject *root)
 {
 	assert(root != NULL);
