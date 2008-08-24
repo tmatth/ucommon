@@ -626,6 +626,13 @@ public:
 	 * @param trunk we add leaf node to.
 	 */
 	void relistHead(NamedTree *trunk);
+
+	/**
+	 * Default relist is by tail...
+	 * @param trunk we add leaf node to, NULL to delist.
+	 */
+	inline void relist(NamedTree *trunk = NULL)
+		{relistTail(trunk);};
 };
 
 /**
