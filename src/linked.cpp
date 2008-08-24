@@ -538,6 +538,24 @@ NamedTree *NamedTree::getChild(const char *tid) const
 	return NULL;
 }
 
+void NamedTree::relistTail(NamedTree *trunk)
+{
+	if(parent)
+		delist(&parent->child);
+	parent = trunk;
+	if(parent)
+		enlistTail(&parent->child);
+}
+
+void NamedTree::relistHead(NamedTree *trunk)
+{
+	if(parent)
+		delist(&parent->child);
+	parent = trunk;
+	if(parent)
+		enlistHead(&parent->child);
+}
+
 NamedTree *NamedTree::path(const char *tid) const
 {
 	assert(tid != NULL && *tid != 0);

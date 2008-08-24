@@ -614,6 +614,18 @@ public:
 	 */
 	inline bool isRoot(void) const
 		{return (parent == NULL);};
+
+	/**
+	 * Add leaf to a trunk, by order.  If NULL, just remove.
+	 * @param trunk we add leaf node to.
+	 */
+	void relistTail(NamedTree *trunk);
+
+	/**
+	 * Add leaf to a trunk, by reverse order.  If NULL, just remove.
+	 * @param trunk we add leaf node to.
+	 */
+	void relistHead(NamedTree *trunk);
 };
 
 /**

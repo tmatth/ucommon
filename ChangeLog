@@ -1,3 +1,6 @@
+From ucommon 1.9.7 to ???
+- new NamedTree listing methods for moving and re-ordering tree branches.
+
 From ucommon 1.9.6 to 1.9.7
 - lots of code cleanup for final release candidate for 2.0.
 
