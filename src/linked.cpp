@@ -20,6 +20,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+// I am not sure if we ever use these...seemed like a good idea at the time
 const LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
 const LinkedObject *LinkedObject::inv = (LinkedObject *)-1;
 
@@ -29,6 +30,7 @@ MultiMap::MultiMap(unsigned count) : ReusableObject()
 
 	paths = count;
 	links = new link_t[count];
+	// just a cheap way to initially set the links to all NULL...
 	memset(links, 0, sizeof(link_t) * count);
 }
 
@@ -107,6 +109,7 @@ void MultiMap::enlist(unsigned path, MultiMap **root, caddr_t key, unsigned max,
 	links[path].key = key;
 }
 
+// this probably should be called "equal"...
 bool MultiMap::compare(unsigned path, caddr_t key, size_t keysize)
 {
 	assert(path < paths);
@@ -124,6 +127,8 @@ bool MultiMap::compare(unsigned path, caddr_t key, size_t keysize)
 	return false;
 }
 
+// this transforms either strings or binary fields (such as addresses)
+// into a hash index.
 unsigned MultiMap::keyindex(caddr_t key, unsigned max, size_t keysize)
 {
 	assert(key != NULL);
@@ -131,9 +136,12 @@ unsigned MultiMap::keyindex(caddr_t key, unsigned max, size_t keysize)
 
 	unsigned value = 0;
 
+	// if we are a string, we can just used our generic text hasher
 	if(!keysize)
 		return NamedObject::keyindex(key, max);
 
+	// strip off lead 0's...just saves time for data that is not changing,
+	// especially when little endian 64 bit wide...
 	while(keysize && !key[0]) {
 		++key;
 		--keysize;

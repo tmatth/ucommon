@@ -21,7 +21,7 @@
 using namespace UCOMMON_NAMESPACE;
 
 #if _POSIX_TIMERS > 0 && defined(HAVE_MACH_CLOCK_H) && !defined(HAVE_CLOCK_GETTIME)
-
+// wonder what was here...??
 #endif
 
 static long difftime(time_t ref)

@@ -75,7 +75,7 @@ struct sockaddr_internet;
 /**
  * An object that holds ipv4 or ipv6 binary encoded host addresses.
  */
-typedef	struct
+typedef struct hostaddr_internet
 {
 	union
 	{
@@ -87,7 +87,7 @@ typedef	struct
 }	inethostaddr_t;
 
 #if defined(AF_INET6) || defined(__CYGWIN__)
-struct sockaddr_internet
+typedef struct sockaddr_internet
 {
 	union {
 #ifdef	AF_INET6
@@ -96,15 +96,15 @@ struct sockaddr_internet
 		struct sockaddr_in ipv4;
 		struct sockaddr	address;
 	};
-};
+} inetsockaddr_t;
 #else
-struct sockaddr_internet
+typedef struct sockaddr_internet
 {
 	union {
 		struct sockaddr_in ipv4;
 		struct sockaddr address;
 	};
-};
+} inetsockaddr_t;
 
 struct sockaddr_storage
 {

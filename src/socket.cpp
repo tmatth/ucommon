@@ -55,18 +55,7 @@
 #endif
 #endif
 
-typedef struct
-{
-	union {
-		struct sockaddr addr;
-		struct sockaddr_in ipv4;
-#ifdef	AF_INET6
-		struct sockaddr_in6 ipv6;
-#endif
-	};
-}	inetsockaddr_t;
-
-typedef struct
+typedef struct multicast_internet
 {
 	union {
 		struct ip_mreq	ipv4;
@@ -74,7 +63,8 @@ typedef struct
 		struct ipv6_mreq ipv6;
 #endif
 	};
-}	inetmulticast_t;
+} inetmulticast_t;
+
 
 #ifndef	HAVE_GETADDRINFO
 
@@ -671,9 +661,9 @@ bool cidr::isMember(const struct sockaddr *s) const
 	assert(s != NULL);
 
 	inethostaddr_t host;
-	inetsockaddr_t *addr = (inetsockaddr_t *)s;
+	struct sockaddr_internet *addr = (struct sockaddr_internet *)s;
 
-	if(addr->addr.sa_family != family)
+	if(addr->address.sa_family != family)
 		return false;
 
 	switch(family) {
@@ -1795,7 +1785,7 @@ int Socket::keepalive(socket_t so, bool enable)
 
 int Socket::multicast(socket_t so, unsigned ttl)
 {
-	inetsockaddr_t addr;
+	struct sockaddr_internet addr;
 	socklen_t len = sizeof(addr);
 	bool enable;
 	int rtn;
@@ -1810,7 +1800,7 @@ int Socket::multicast(socket_t so, unsigned ttl)
 
 	::getsockname(so, (struct sockaddr *)&addr, &len);
 	if(!enable)
-		switch(addr.addr.sa_family)
+		switch(addr.address.sa_family)
 		{
 		case AF_INET:
 			memset(&addr.ipv4.sin_addr, 0, sizeof(addr.ipv4.sin_addr));
@@ -1823,7 +1813,7 @@ int Socket::multicast(socket_t so, unsigned ttl)
 		default:
 			break;
 		}
-	switch(addr.addr.sa_family) {
+	switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPPROTO_IPV6)
 	case AF_INET6:
 		rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
@@ -1887,10 +1877,10 @@ int Socket::join(socket_t so, struct addrinfo *node)
 {
 	assert(node != NULL);
 
-	inetmulticast_t mcast;
-	inetsockaddr_t addr;
+	struct multicast_internet mcast;
+	struct sockaddr_internet addr;
 	socklen_t len = sizeof(addr);
-	inetsockaddr_t *target;
+	struct sockaddr_internet *target;
 	int family;
 	int rtn = 0;
 
@@ -1899,12 +1889,12 @@ int Socket::join(socket_t so, struct addrinfo *node)
 	
 	getsockname(so, (struct sockaddr *)&addr, &len);
 	while(!rtn && node && node->ai_addr) {
-		target = (inetsockaddr_t *)node->ai_addr;
+		target = (struct sockaddr_internet *)node->ai_addr;
 		family = node->ai_family;
 		node = node->ai_next;
-		if(family != addr.addr.sa_family)
+		if(family != addr.address.sa_family)
 			continue;
-		switch(addr.addr.sa_family) {
+		switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP) && defined(IPPROTO_IPV6)
 		case AF_INET6:
 			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
@@ -1930,10 +1920,10 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 {
 	assert(node != NULL);
 
-	inetmulticast_t mcast;
-	inetsockaddr_t addr;
+	struct multicast_internet mcast;
+	struct sockaddr_internet addr;
 	socklen_t len = sizeof(addr);
-	inetsockaddr_t *target;
+	struct sockaddr_internet *target;
 	int family;
 	int rtn = 0;
 
@@ -1942,14 +1932,14 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 	
 	getsockname(so, (struct sockaddr *)&addr, &len);
 	while(!rtn && node && node->ai_addr) {
-		target = (inetsockaddr_t *)node->ai_addr;
+		target = (struct sockaddr_internet *)node->ai_addr;
 		family = node->ai_family;
 		node = node->ai_next;
 
-		if(family != addr.addr.sa_family)
+		if(family != addr.address.sa_family)
 			continue;
 
-		switch(addr.addr.sa_family) {
+		switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP) && defined(IPPROTO_IPV6)
 		case AF_INET6:
 			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));

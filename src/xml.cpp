@@ -300,6 +300,11 @@ ending:
 	return true;
 }
 
+// all our lovely base virtuals stubbed out so if we are lazy and forget to
+// impliment something we want to ignore anyway (say comments...) we don't
+// bring whatever it is crashing down one day when we choose to add a
+// comment into an xml stream...
+
 void XMLParser::startDocument()
 {
 }

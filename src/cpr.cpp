@@ -62,6 +62,8 @@ void cpr_runtime_error(const char *str)
 	abort();
 }
 
+// just become we need to get binary types in a specific binary endian order.  
+
 extern "C" uint16_t lsb_getshort(uint8_t *b)
 {
 	assert(b != NULL);
@@ -100,6 +102,8 @@ extern "C" void msb_setshort(uint8_t *b, uint16_t v)
 	b[0] = (v / 256) & 0xff;
 }
 
+// oh, and we have to be able to set them in order too...
+
 extern "C" void lsb_setlong(uint8_t *b, uint32_t v)
 {
 	assert(b != NULL);
@@ -131,6 +135,9 @@ extern "C" void cpr_memswap(void *s1, void *s2, size_t size)
     delete[] buf;
 }
 
+// if malloc ever fails, we probably should consider that a critial error and
+// kill the leaky dingy, which this does for us here..
+
 extern "C" void *cpr_memalloc(size_t size)
 {
 	void *mem;
@@ -151,6 +158,10 @@ extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 }
 
 #ifdef	__GNUC__
+
+// here we have one of those magic things in gcc, and what to do when
+// we have an unimplimented virtual function if we build ucommon without
+// a stdc++ runtime library.
 
 extern "C" void __cxa_pure_virtual(void)
 {
