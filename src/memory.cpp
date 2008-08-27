@@ -107,17 +107,23 @@ unsigned mempager::utilization(void)
 	return used;
 }
 
-void mempager::purge(void)
+void mempager::purge_locked(void)
 {
 	page_t *next;
-	pthread_mutex_lock(&mutex);	
 	while(page) {
 		next = page->next;
 		free(page);
 		page = next;
 	}
-	pthread_mutex_unlock(&mutex);
 	count = 0;
+}
+
+
+void mempager::purge(void)
+{
+	pthread_mutex_lock(&mutex);	
+	purge_locked();
+	pthread_mutex_unlock(&mutex);
 }
 
 mempager::page_t *mempager::pager(void)

@@ -191,6 +191,11 @@ public:
 	void purge(void);
 
 	/**
+	 * Purge all allocated memory and heap pages outside of lock.
+	 */
+	void purge_locked(void);
+
+	/**
 	 * Return memory back to pager heap.  This actually does nothing, but
 	 * might be used in a derived class to create a memory heap that can
 	 * also receive (free) memory allocated from our heap and reuse it,
