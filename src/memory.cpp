@@ -84,7 +84,7 @@ mempager::mempager(size_t ps)
 
 mempager::~mempager()
 {
-	mempager::purge();
+	mempager::purge_locked();
 	pthread_mutex_destroy(&mutex);
 }
 
