@@ -38,200 +38,6 @@ NAMESPACE_UCOMMON
 class PagerPool;
 
 /**
- * A managed private heap for small allocations.  This is used to allocate
- * a large number of small objects from a paged heap as needed and to then
- * release them together all at once.  This pattern has significiently less
- * overhead than using malloc and offers less locking contention since the 
- * memory pager can also have it's own mutex.  Pager pool allocated memory
- * is always aligned to the optimal data size for the cpu bus and pages are
- * themselves created from memory aligned allocations.  A page size for a
- * memory pager should be some multiple of the OS paging size.
- *
- * The mempager uses a strategy of allocating fixed size pages as needed
- * from the real heap and allocating objects from these pages as needed.
- * A new page is allocated from the real heap when there is insufficient
- * space in the existing page to complete a request.  The largest single
- * memory allocation one can make is restricted by the page size used, and
- * it is best to allocate objects a significent fraction smaller than the
- * page size, as fragmentation occurs at the end of pages when there is
- * insufficent space in the current page to complete a request. 
- * @author David Sugar <dyfet@gnutelephony.org>
- */ 
-class __EXPORT mempager
-{
-private:
-	size_t pagesize, align;
-	pthread_mutex_t mutex;
-	unsigned count;
-
-	typedef struct mempage {
-		struct mempage *next;
-		union {
-			void *memalign;
-			unsigned used;		
-		};
-	}	page_t;
-
-	page_t *page;
-
-protected:
-	unsigned limit;
-
-	/**
-	 * Acquire a new page from the heap.  This is mostly used internally.
-	 * @return page structure of the newly aquired memory page.
-	 */
-	page_t *pager(void);
-
-public:
-	/**
-	 * Construct a memory pager.
-	 * @param page size to use or 0 for OS allocation size.
-	 */
-	mempager(size_t page = 0);
-
-	/**
-	 * Destroy a memory pager.  Release all pages back to the heap at once.
-	 */
-	virtual ~mempager();
-
-	/**
-	 * Allocate memory from private heap while holding mutex lock.  Sometimes
-	 * an external class may make use of the mutex lock of a mempager for it's
-	 * own purposes.  When doing so, it can directly call this routine to
-	 * allocate memory from the pager while it holds the mutex.  This is a
-	 * virtual because it can be overriden in derived classes to impliment
-	 * different strategies such as page scavanging older pages when being
-	 * unable to satisfy a request with the current page, in addition to
-	 * allocating a new page from the heap.
-	 * @param size of memory request.
-	 * @return allocated memory or NULL if invalid size or limit exceeded.
-	 */
-	virtual void *alloc_locked(size_t size);
-
-	/**
-	 * Duplicate a NULL terminated string into allocated memory.  This
-	 * version of dup is used when one is already holding the pager's
-	 * mutex lock.
-	 * @param string to duplicate.
-	 * @return newly allocated copy of the string or NULL if cannot allocate.
-	 */	
-	char *dup_locked(const char *string);
-
-	/**
-	 * Duplicate existing memory into an allocated copy.  This version of
-	 * dup is used when one is already holding the pager's mutex lock.
-	 * @param memory to duplicate.
-	 * @param size of allocation.
-	 * @return newly allocated copy or NULL if cannot allocate.
-	 */	
-	char *dup_locked(void *memory, size_t size);
-
-	/**
-	 * Lock the memory pager mutex.  It will be more efficient to lock
-	 * the pager and then call the locked allocator than using alloc which
-	 * seperately locks and unlocks for each request when a large number of
-	 * allocation requests are being batched together.
-	 */
-	inline void lock(void)
-		{pthread_mutex_lock(&mutex);};
-
-	/**
-	 * Unlock the memory pager mutex.
-	 */
-	inline void unlock(void)
-		{pthread_mutex_unlock(&mutex);};
-
-	/**
-	 * Overhead size used for management of heap pages.
-	 * @return per page overhead.
-	 */	
-	inline unsigned overhead(void)
-		{return sizeof(page_t);};
-
-	/**
-	 * Get the number of pages that have been allocated from the real heap.
-	 * @return pages allocated from heap.
-	 */
-	inline unsigned getPages(void)
-		{return count;};
-
-	/**
-	 * Get the maximum number of pages that are permitted.  One can use a
-	 * derived class to set and enforce a maximum limit to the number of
-	 * pages that will be allocated from the real heap.  This is often used
-	 * to detect and bring down apps that are leaking.
-	 * @return page allocation limit.
-	 */
-	inline unsigned getLimit(void)
-		{return limit;};
-
-	/**
-	 * Get the size of a memory page.
-	 * @return size of each pager heap allocation.
-	 */
-	inline unsigned getAlloc(void)
-		{return pagesize;};
-
-	/**
-	 * Determine fragmentation level of acquired heap pages.  This is
-	 * represented as an average % utilization (0-100) and represents the
-	 * used portion of each allocated heap page vs the page size.  Since
-	 * requests that cannot fit on an already allocated page are moved into
-	 * a new page, there is some unusable space left over at the end of the
-	 * page.  When utilization approaches 100, this is good.  A low utilization
-	 * may suggest a larger page size should be used.
-	 * @return pager utilization.
-	 */
-	unsigned utilization(void);
-
-	/**
-	 * Purge all allocated memory and heap pages immediately.
-	 */
-	void purge(void);
-
-	/**
-	 * Purge all allocated memory and heap pages outside of lock.
-	 */
-	void purge_locked(void);
-
-	/**
-	 * Return memory back to pager heap.  This actually does nothing, but
-	 * might be used in a derived class to create a memory heap that can
-	 * also receive (free) memory allocated from our heap and reuse it,
-	 * for example in a full private malloc implimentation in a derived class.
-	 * @param memory to free back to private heap.
-	 */
-	virtual void dealloc(void *memory);
-
-	/**
-	 * Allocate memory from the pager heap.  The size of the request must be
-	 * less than the size of the memory page used.  The memory pager mutex
-	 * is locked during this operation and then released.
-	 * @param size of memory request.
-	 * @return allocated memory or NULL if not possible.
-	 */
-	void *alloc(size_t size);
-
-	/**
-	 * Duplicate NULL terminated string into allocated memory.  The mutex
-	 * lock is acquired to perform this operation and then released.
-	 * @param string to copy into memory.
-	 * @return allocated memory with copy of string or NULL if cannot allocate.
-	 */
-	char *dup(const char *string);
-
-	/**
-	 * Duplicate existing memory block into allocated memory.  The mutex
-	 * lock is acquired to perform this operation and then released.
-	 * @param memory to data copy from.
-	 * @param size of memory to allocate.
-	 * @return allocated memory with copy or NULL if cannot allocate.
-	 */
-	void *dup(void *memory, size_t size);
-};
-
-/**
  * An alternate memory pager private heap manager.  This is used to allocate
  * in an optimized manner, as it assumes no mutex locks are held or used as
  * part of it's own internal processing.  It also is designed for optimized
@@ -322,7 +128,7 @@ public:
 	 * @param size of memory request.
 	 * @return allocated memory or NULL if not possible.
 	 */
-	void *alloc(size_t size);
+	virtual void *alloc(size_t size);
 
 	/**
 	 * Duplicate NULL terminated string into allocated memory.
@@ -340,6 +146,110 @@ public:
 	void *dup(void *memory, size_t size);
 };
 
+/**
+ * A managed private heap for small allocations.  This is used to allocate
+ * a large number of small objects from a paged heap as needed and to then
+ * release them together all at once.  This pattern has significiently less
+ * overhead than using malloc and offers less locking contention since the 
+ * memory pager can also have it's own mutex.  Pager pool allocated memory
+ * is always aligned to the optimal data size for the cpu bus and pages are
+ * themselves created from memory aligned allocations.  A page size for a
+ * memory pager should be some multiple of the OS paging size.
+ *
+ * The mempager uses a strategy of allocating fixed size pages as needed
+ * from the real heap and allocating objects from these pages as needed.
+ * A new page is allocated from the real heap when there is insufficient
+ * space in the existing page to complete a request.  The largest single
+ * memory allocation one can make is restricted by the page size used, and
+ * it is best to allocate objects a significent fraction smaller than the
+ * page size, as fragmentation occurs at the end of pages when there is
+ * insufficent space in the current page to complete a request. 
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
+class __EXPORT mempager : public memalloc
+{
+private:
+	pthread_mutex_t mutex;
+
+public:
+	/**
+	 * Construct a memory pager.
+	 * @param page size to use or 0 for OS allocation size.
+	 */
+	mempager(size_t page = 0);
+
+	/**
+	 * Destroy a memory pager.  Release all pages back to the heap at once.
+	 */
+	virtual ~mempager();
+
+	/**
+	 * Lock the memory pager mutex.  It will be more efficient to lock
+	 * the pager and then call the locked allocator than using alloc which
+	 * seperately locks and unlocks for each request when a large number of
+	 * allocation requests are being batched together.
+	 */
+	inline void lock(void)
+		{pthread_mutex_lock(&mutex);};
+
+	/**
+	 * Unlock the memory pager mutex.
+	 */
+	inline void unlock(void)
+		{pthread_mutex_unlock(&mutex);};
+
+	/**
+	 * Determine fragmentation level of acquired heap pages.  This is
+	 * represented as an average % utilization (0-100) and represents the
+	 * used portion of each allocated heap page vs the page size.  Since
+	 * requests that cannot fit on an already allocated page are moved into
+	 * a new page, there is some unusable space left over at the end of the
+	 * page.  When utilization approaches 100, this is good.  A low utilization
+	 * may suggest a larger page size should be used.
+	 * @return pager utilization.
+	 */
+	unsigned utilization(void);
+
+	/**
+	 * Purge all allocated memory and heap pages immediately.
+	 */
+	void purge(void);
+
+	/**
+	 * Return memory back to pager heap.  This actually does nothing, but
+	 * might be used in a derived class to create a memory heap that can
+	 * also receive (free) memory allocated from our heap and reuse it,
+	 * for example in a full private malloc implimentation in a derived class.
+	 * @param memory to free back to private heap.
+	 */
+	virtual void dealloc(void *memory);
+
+	/**
+	 * Allocate memory from the pager heap.  The size of the request must be
+	 * less than the size of the memory page used.  The memory pager mutex
+	 * is locked during this operation and then released.
+	 * @param size of memory request.
+	 * @return allocated memory or NULL if not possible.
+	 */
+	void *alloc(size_t size);
+
+	/**
+	 * Duplicate NULL terminated string into allocated memory.  The mutex
+	 * lock is acquired to perform this operation and then released.
+	 * @param string to copy into memory.
+	 * @return allocated memory with copy of string or NULL if cannot allocate.
+	 */
+	char *dup(const char *string);
+
+	/**
+	 * Duplicate existing memory block into allocated memory.  The mutex
+	 * lock is acquired to perform this operation and then released.
+	 * @param memory to data copy from.
+	 * @param size of memory to allocate.
+	 * @return allocated memory with copy or NULL if cannot allocate.
+	 */
+	void *dup(void *memory, size_t size);
+};
 
 /**
  * Create a linked list of auto-releasable objects.  LinkedObject derived
