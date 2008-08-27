@@ -40,6 +40,159 @@ static size_t cpr_pagesize(void)
 #endif
 }
 
+
+
+memalloc::memalloc(size_t ps)
+{
+#ifdef	HAVE_SYSCONF
+	size_t paging = sysconf(_SC_PAGESIZE);
+#elif defined(PAGESIZE)
+	size_t paging = PAGESIZE;
+#elif defined(PAGE_SIZE)
+	size_t paging = PAGE_SIZE;
+#else
+	size_t paging = 1024;
+#endif
+	if(!ps)
+		ps = paging;
+	else if(ps > paging)
+		ps = (((ps + paging - 1) / paging)) * paging;
+
+#ifdef	HAVE_POSIX_MEMALIGN
+	if(ps >= paging)
+		align = sizeof(void *);
+	else
+		align = 0;
+
+	switch(align)
+	{
+	case 2:
+	case 4:
+	case 8:
+	case 16:
+		break;
+	default:
+		align = 0;
+	}
+#endif
+	pagesize = ps;
+	count = 0;
+	limit = 0;
+	page = NULL;
+}
+
+memalloc::~memalloc()
+{
+	memalloc::purge();
+}
+
+unsigned memalloc::utilization(void)
+{
+	unsigned long used = 0, alloc = 0;
+	page_t *mp = page;
+
+	while(mp) {
+		alloc += pagesize;
+		used += mp->used;
+		mp = mp->next;
+	}
+
+	if(!used)
+		return 0;
+
+	alloc /= 100;
+	used /= alloc;
+	return used;
+}
+
+void memalloc::purge(void)
+{
+	page_t *next;
+	while(page) {
+		next = page->next;
+		free(page);
+		page = next;
+	}
+	count = 0;
+}
+
+memalloc::page_t *memalloc::pager(void)
+{
+	page_t *npage = NULL;
+#ifdef	HAVE_POSIX_MEMALIGN
+	void *addr;
+#endif
+
+	crit(!limit || count < limit, "mempager limit reached");
+
+#ifdef	HAVE_POSIX_MEMALIGN
+	if(align && !posix_memalign(&addr, align, pagesize)) {
+		npage = (page_t *)addr;
+		goto use;
+	}
+#endif
+	npage = (page_t *)malloc(pagesize);
+
+#ifdef	HAVE_POSIX_MEMALIGN
+use:
+#endif
+	crit(npage != NULL, "mempager alloc failed");
+
+	++count;
+	npage->used = sizeof(page_t);
+	npage->next = page;
+	page = npage;
+	if((size_t)(npage) % sizeof(void *))
+		npage->used += sizeof(void *) - ((size_t)(npage) % sizeof(void 
+*));
+	return npage;
+}
+
+void *memalloc::alloc(size_t size)
+{
+	assert(size > 0);
+
+	caddr_t mem;
+	page_t *p = page;
+
+	crit(size <= (pagesize - sizeof(page_t)), "mempager alloc failed");
+
+	while(size % sizeof(void *))
+		++size;
+
+	while(p) {
+		if(size <= pagesize - p->used)	
+			break;
+		p = p->next;
+	}
+	if(!p)
+		p = pager();
+
+	mem = ((caddr_t)(p)) + p->used;	
+	p->used += size;
+	return mem;
+}
+
+char *memalloc::dup(const char *str)
+{
+    if(!str)
+        return NULL;
+	size_t len = strlen(str) + 1;
+    char *mem = static_cast<char *>(alloc(len));
+    String::set(mem, len, str);
+    return mem;
+}
+
+void *memalloc::dup(void *obj, size_t size)
+{
+	assert(obj != NULL);
+	assert(size > 0);
+
+    char *mem = static_cast<char *>(alloc(size));
+	memcpy(mem, obj, size);
+    return mem;
+}
+
 mempager::mempager(size_t ps)
 {
 #ifdef	HAVE_SYSCONF

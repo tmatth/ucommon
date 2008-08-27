@@ -232,6 +232,119 @@ public:
 };
 
 /**
+ * An alternate memory pager private heap manager.  This is used to allocate
+ * in an optimized manner, as it assumes no mutex locks are held or used as
+ * part of it's own internal processing.  It also is designed for optimized
+ * performance.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */ 
+class __EXPORT memalloc
+{
+private:
+	size_t pagesize, align;
+	unsigned count;
+
+	typedef struct mempage {
+		struct mempage *next;
+		union {
+			void *memalign;
+			unsigned used;		
+		};
+	}	page_t;
+
+	page_t *page;
+
+protected:
+	unsigned limit;
+
+	/**
+	 * Acquire a new page from the heap.  This is mostly used internally.
+	 * @return page structure of the newly aquired memory page.
+	 */
+	page_t *pager(void);
+
+public:
+	/**
+	 * Construct a memory pager.
+	 * @param page size to use or 0 for OS allocation size.
+	 */
+	memalloc(size_t page = 0);
+
+	/**
+	 * Destroy a memory pager.  Release all pages back to the heap at once.
+	 */
+	virtual ~memalloc();
+
+	/**
+	 * Get the number of pages that have been allocated from the real heap.
+	 * @return pages allocated from heap.
+	 */
+	inline unsigned getPages(void)
+		{return count;};
+
+	/**
+	 * Get the maximum number of pages that are permitted.  One can use a
+	 * derived class to set and enforce a maximum limit to the number of
+	 * pages that will be allocated from the real heap.  This is often used
+	 * to detect and bring down apps that are leaking.
+	 * @return page allocation limit.
+	 */
+	inline unsigned getLimit(void)
+		{return limit;};
+
+	/**
+	 * Get the size of a memory page.
+	 * @return size of each pager heap allocation.
+	 */
+	inline unsigned getAlloc(void)
+		{return pagesize;};
+
+	/**
+	 * Determine fragmentation level of acquired heap pages.  This is
+	 * represented as an average % utilization (0-100) and represents the
+	 * used portion of each allocated heap page vs the page size.  Since
+	 * requests that cannot fit on an already allocated page are moved into
+	 * a new page, there is some unusable space left over at the end of the
+	 * page.  When utilization approaches 100, this is good.  A low utilization
+	 * may suggest a larger page size should be used.
+	 * @return pager utilization.
+	 */
+	unsigned utilization(void);
+
+	/**
+	 * Purge all allocated memory and heap pages immediately.
+	 */
+	void purge(void);
+
+	/**
+	 * Allocate memory from the pager heap.  The size of the request must be
+	 * less than the size of the memory page used.  The memory pager mutex
+	 * is locked during this operation and then released.
+	 * @param size of memory request.
+	 * @return allocated memory or NULL if not possible.
+	 */
+	void *alloc(size_t size);
+
+	/**
+	 * Duplicate NULL terminated string into allocated memory.  The mutex
+	 * lock is acquired to perform this operation and then released.
+	 * @param string to copy into memory.
+	 * @return allocated memory with copy of string or NULL if cannot allocate.
+	 */
+	char *dup(const char *string);
+
+	/**
+	 * Duplicate existing memory block into allocated memory.  The mutex
+	 * lock is acquired to perform this operation and then released.
+	 * @param memory to data copy from.
+	 * @param size of memory to allocate.
+	 * @return allocated memory with copy or NULL if cannot allocate.
+	 */
+	void *dup(void *memory, size_t size);
+};
+
+
+/**
  * Create a linked list of auto-releasable objects.  LinkedObject derived
  * objects can be created that are assigned to an autorelease object list.
  * When the autorelease object falls out of scope, all the objects listed'

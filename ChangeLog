@@ -3,6 +3,7 @@ From ucommon 1.9.7 to ???
 - getIndexed methods for accessing a linked list by index.
 - some clarification of internet socket address types.
 - smart pointer can be initially assigned NULL...
+- new memalloc because I needed a mempager without mutexes...
 
 From ucommon 1.9.6 to 1.9.7
 - lots of code cleanup for final release candidate for 2.0.
