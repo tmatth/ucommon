@@ -83,9 +83,8 @@ auto_delete::~auto_delete()
 
 auto_pointer::auto_pointer(Object *o)
 {
-	assert(o != NULL);
-
-	o->retain();
+	if(o)
+		o->retain();
 	object = o;
 }
 
