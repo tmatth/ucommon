@@ -244,7 +244,11 @@ mempager::~mempager()
 unsigned mempager::utilization(void)
 {
 	unsigned long used = 0, alloc = 0;
-	page_t *mp = page;
+	page_t *mp;
+
+	pthread_mutex_lock(&mutex);
+
+	mp = page;
 
 	while(mp) {
 		alloc += pagesize;
@@ -257,6 +261,8 @@ unsigned mempager::utilization(void)
 
 	alloc /= 100;
 	used /= alloc;
+
+	pthread_mutex_unlock(&mutex);
 	return used;
 }
 

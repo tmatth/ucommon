@@ -318,24 +318,21 @@ public:
 
 	/**
 	 * Allocate memory from the pager heap.  The size of the request must be
-	 * less than the size of the memory page used.  The memory pager mutex
-	 * is locked during this operation and then released.
+	 * less than the size of the memory page used.
 	 * @param size of memory request.
 	 * @return allocated memory or NULL if not possible.
 	 */
 	void *alloc(size_t size);
 
 	/**
-	 * Duplicate NULL terminated string into allocated memory.  The mutex
-	 * lock is acquired to perform this operation and then released.
+	 * Duplicate NULL terminated string into allocated memory.
 	 * @param string to copy into memory.
 	 * @return allocated memory with copy of string or NULL if cannot allocate.
 	 */
 	char *dup(const char *string);
 
 	/**
-	 * Duplicate existing memory block into allocated memory.  The mutex
-	 * lock is acquired to perform this operation and then released.
+	 * Duplicate existing memory block into allocated memory.
 	 * @param memory to data copy from.
 	 * @param size of memory to allocate.
 	 * @return allocated memory with copy or NULL if cannot allocate.
