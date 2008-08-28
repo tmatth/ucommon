@@ -1,3 +1,6 @@
+From ucommon 1.9.9 to ???
+- mempager/memalloc "zalloc" method  added
+
 From ucommon 1.9.8 to 1.9.9
 - critical fix for assignment template for auto pointers.
 
