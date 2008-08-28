@@ -131,6 +131,15 @@ public:
 	virtual void *alloc(size_t size);
 
 	/**
+	 * Allocate memory from the pager heap.  The size of the request must be
+	 * less than the size of the memory page used.  The memory is initialized
+	 * to zero.
+	 * @param size of memory request.
+	 * @return allocated memory or NULL if not possible.
+	 */
+	void *zalloc(size_t size);
+
+	/**
 	 * Duplicate NULL terminated string into allocated memory.
 	 * @param string to copy into memory.
 	 * @return allocated memory with copy of string or NULL if cannot allocate.
@@ -232,6 +241,16 @@ public:
 	 * @return allocated memory or NULL if not possible.
 	 */
 	void *alloc(size_t size);
+
+	/**
+	 * Allocate memory from the pager heap.  The size of the request must be
+	 * less than the size of the memory page used.  The memory pager mutex
+	 * is locked during this operation and then released.  This version
+	 * zeros memory after the mutex lock has been released.
+	 * @param size of memory request.
+	 * @return allocated memory or NULL if not possible.
+	 */
+	void *zalloc(size_t size);
 
 	/**
 	 * Duplicate NULL terminated string into allocated memory.  The mutex

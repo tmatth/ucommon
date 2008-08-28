@@ -148,6 +148,16 @@ use:
 	return npage;
 }
 
+void *memalloc::zalloc(size_t size)
+{
+	void *mem = alloc(size);
+
+	if(mem)
+		memset(mem, 0, size);
+
+	return mem;
+}
+
 void *memalloc::alloc(size_t size)
 {
 	assert(size > 0);
@@ -234,6 +244,21 @@ void *mempager::alloc(size_t size)
 	pthread_mutex_lock(&mutex);
 	mem = memalloc::alloc(size);
 	pthread_mutex_unlock(&mutex);
+	return mem;
+}
+
+void *mempager::zalloc(size_t size)
+{
+	assert(size > 0);
+
+	void *mem;
+	pthread_mutex_lock(&mutex);
+	mem = memalloc::alloc(size);
+	pthread_mutex_unlock(&mutex);
+
+	if(mem)
+		memset(mem, 0, size);
+
 	return mem;
 }
 
