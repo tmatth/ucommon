@@ -255,7 +255,7 @@ public:
 	 * references our new object and that new object is retained.
 	 * @param object to assign to.
 	 */
-	auto_pointer &operator=(Object *object);
+	void operator=(Object *object);
 };	
 
 /**
@@ -494,9 +494,16 @@ public:
 
 	/**
 	 * Reference object we are pointing to through pointer indirection.
+	 * @return pointer to object we are pointing to.
+	 */
+	inline T* operator*() const
+		{return static_cast<T*>(P::object);};
+
+	/**
+	 * Reference object we are pointing to through function reference.
 	 * @return object we are pointing to.
 	 */
-	inline T& operator*() const
+	inline T& operator()() const
 		{return *(static_cast<T*>(P::object));};
 
 	/**
@@ -526,6 +533,13 @@ public:
 	 */
     inline void operator--()
         {P::operator--(); return get();};
+
+	/**
+	 * Perform assignment operator to existing object.
+	 * @param object to assign.
+	 */
+	inline void operator=(T *object)
+		{P::operator=((Object *)object);};
 };
 
 /**

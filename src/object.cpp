@@ -83,8 +83,12 @@ auto_delete::~auto_delete()
 
 auto_pointer::auto_pointer(Object *o)
 {
+	unsigned i;
+	unsigned char *c = (unsigned char *)o;
+
 	if(o)
 		o->retain();
+
 	object = o;
 }
 
@@ -134,18 +138,16 @@ bool auto_pointer::operator!=(Object *o) const
 	return object != o;
 }
 
-auto_pointer &auto_pointer::operator=(Object *o)
+void auto_pointer::operator=(Object *o)
 {
-	assert(o != NULL);
 	if(object == o)
-		return *this;
+		return;
 
 	if(o)
 		o->retain();
 	if(object)
 		object->release();
 	object = o;
-	return *this;
 }
 
 sparse_array::sparse_array(unsigned m)

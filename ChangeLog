@@ -1,3 +1,6 @@
+From ucommon 1.9.8 to 1.9.9
+- critical fix for assignment template for auto pointers.
+
 From ucommon 1.9.7 to 1.9.8
 - new NamedTree listing methods for moving and re-ordering tree branches.
 - getIndexed methods for accessing a linked list by index.
