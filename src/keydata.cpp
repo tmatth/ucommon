@@ -104,13 +104,13 @@ void keydata::set(const char *key, const char *value)
 
 
 keyfile::keyfile(size_t pagesize) :
-mempager(pagesize), index()
+memalloc(pagesize), index()
 {
 	defaults = NULL;
 }
 
 keyfile::keyfile(const char *path, size_t pagesize) :
-mempager(pagesize), index()
+memalloc(pagesize), index()
 {
 	defaults = NULL;
 	load(path);

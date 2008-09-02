@@ -137,7 +137,7 @@ public:
  * xxx.ini file, or a ~/.xxxrc file, and parses [] sections from the 
  * entire file at once.
  */
-class __EXPORT keyfile : public mempager
+class __EXPORT keyfile : public memalloc
 {
 private:
 	friend class keydata;
