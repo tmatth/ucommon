@@ -238,13 +238,14 @@ void fsys::open(const char *path, access_t access)
 	bool append = false;
 	DWORD amode;
 	DWORD smode = 0;
-	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
+	DWORD attr = FILE_ATTRIBUTE_NORMAL;
 
 	close();
 
 	switch(access)
 	{
 	case ACCESS_STREAM:
+		attr |= FILE_FLAG_SEQUENTIAL_SCAN; 
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		smode = FILE_SHARE_READ;
@@ -253,6 +254,7 @@ void fsys::open(const char *path, access_t access)
 		amode = GENERIC_WRITE;
 		break;
 	case ACCESS_RANDOM:
+		attr |= FILE_FLAG_RANDOM_ACCESS;
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		smode = FILE_SHARE_READ;
@@ -298,22 +300,23 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 	DWORD amode;
 	DWORD cmode;
 	DWORD smode = 0;
-	DWORD attr = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
+	DWORD attr = FILE_ATTRIBUTE_NORMAL; 
 	unsigned flags = 0;
 	switch(access)
 	{
-	case ACCESS_STREAM:
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		cmode = OPEN_ALWAYS;
 		smode = FILE_SHARE_READ;
 		break;
+	case ACCESS_STREAM:
 	case ACCESS_WRONLY:
 		amode = GENERIC_WRITE;
 		cmode = CREATE_ALWAYS; 
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
 		break;
 	case ACCESS_RANDOM:
+		attr |= FILE_FLAG_RANDOM_ACCESS;
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		cmode = OPEN_ALWAYS;
