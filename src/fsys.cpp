@@ -512,7 +512,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 #ifdef HAVE_POSIX_FADVISE
 	else {
 		if(access == ACCESS_RANDOM)
-			posix_fadvise(fd, 0, 0, POSIX_FADV_RANDOM);
+			posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_RANDOM);
 	}
 #endif
 }
@@ -571,9 +571,9 @@ void fsys::open(const char *path, access_t access)
 	else {
 		// linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
 		if(access == ACCESS_STREAM)
-			posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+			posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_SEQUENTIAL);
 		else if(access == ACCESS_RANDOM)
-			posix_fadvise(fd, 0, 0, POSIX_FADV_RANDOM);
+			posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_RANDOM);
 	}
 #endif
 }
@@ -654,7 +654,7 @@ void fsys::operator=(const fsys& from)
 void fsys::drop(offset_t size)
 {
 #ifdef	HAVE_POSIX_FADVISE
-	posix_fadvise(fd, 0, size, POSIX_FADV_DONTNEED);
+	posix_fadvise(fd, (off_t)0, size, POSIX_FADV_DONTNEED);
 #endif
 }
 
