@@ -245,7 +245,9 @@ void fsys::open(const char *path, access_t access)
 	switch(access)
 	{
 	case ACCESS_STREAM:
+#ifdef	FILE_FLAG_SEQUENTIAL_SCAN
 		attr |= FILE_FLAG_SEQUENTIAL_SCAN; 
+#endif
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		smode = FILE_SHARE_READ;
