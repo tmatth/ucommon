@@ -51,7 +51,7 @@ const fsys::offset_t fsys::end = (size_t)(-1);
 
 #ifdef	_MSWINDOWS_
 
-int remapError(void)
+int fsys::remapError(void)
 {
 	DWORD err = GetLastError();
 
@@ -413,9 +413,6 @@ void fsys::seek(offset_t pos)
 }
 
 #else
-
-inline int remapError(void)
-	{return errno;};
 
 ssize_t fsys::read(void *buf, size_t len)
 {

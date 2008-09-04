@@ -68,6 +68,13 @@ protected:
 #endif
 	int		error;
 
+#ifdef	_MSWINDOWS_
+	static int remapError(void);
+#else
+	inline static int remapError(void)
+		{return errno;};
+#endif
+
 public:
 	/**
 	 * Enumerated file access modes.
