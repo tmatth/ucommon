@@ -79,7 +79,9 @@ public:
 		ACCESS_RDWR = ACCESS_REWRITE,
 		ACCESS_APPEND,
 		ACCESS_SHARED,
-		ACCESS_DIRECTORY
+		ACCESS_DIRECTORY,
+		ACCESS_STREAM,
+		ACCESS_RANDOM
 	} access_t;
 
 	/**
@@ -168,7 +170,13 @@ public:
 	 * Set the position of a file descriptor.
 	 * @param offset from start of file or "end" to append.
 	 */
-	void	seek(offset_t offset);
+	void seek(offset_t offset);
+
+	/**
+	 * Drop cached data from start of file.
+	 * @param size of region to drop or until end of file.
+	 */
+	void drop(offset_t size = 0);	
 
 	/**
 	 * Read data from descriptor or scan directory.
@@ -185,6 +193,14 @@ public:
 	 * @return bytes transferred, -1 if error.
 	 */
 	ssize_t write(const void *buffer, size_t count);
+
+	/**
+	 * Send file data to a socket.
+	 * @param network socket to send to.
+	 * @param count of bytes to send.
+	 * @return bytes transferred, -1 if error.
+	 */
+	ssize_t send(socket_t network, size_t count);
 
 	/**
 	 * Get status of open descriptor.
@@ -283,12 +299,30 @@ public:
 		{return descriptor.write(buffer, count);};
 
 	/**
+	 * Send file data to a socket.
+	 * @param descriptor to send from.
+	 * @param network socket to send to.
+	 * @param count of bytes to send.
+	 * @return bytes transferred, -1 if error.
+	 */
+	inline static ssize_t send(fsys& descriptor, socket_t network, size_t count)
+		{return descriptor.send(network, count);};
+
+	/**
 	 * Set the position of a file descriptor.
 	 * @param descriptor to set.
 	 * @param offset from start of file or "end" to append.
 	 */
-	inline static void seek(fsys& descriptor, size_t offset)
+	inline static void seek(fsys& descriptor, offset_t offset)
 		{descriptor.seek(offset);};
+
+	/**
+	 * Drop cached data from a file descriptor.
+	 * @param descriptor to set.
+	 * @param size of region from start of file to drop or all.
+	 */
+	inline static void drop(fsys& descriptor, offset_t size)
+		{descriptor.drop(size);};
 
 	/**
 	 * Open a file or directory.

@@ -268,7 +268,7 @@ else
 	])
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -307,6 +307,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r ; 
 		;;
 	clock_gettime)		
 		AC_DEFINE(HAVE_POSIXTIME, [1], [has posix clock functions])
+		;;
+	posix_fadvise)
+		AC_DEFINE(HAVE_POSIX_FADVISE, [1], [can specify access options])
 		;;
 	esac
 done

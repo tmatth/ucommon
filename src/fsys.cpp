@@ -18,6 +18,24 @@
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
 #include <ucommon/string.h>
+#include <ucommon/socket.h>
+
+#ifdef	__linux__
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,8)
+#ifdef	HAVE_POSIX_FADVISE
+#undef	HAVE_POSIX_FADVISE
+#endif
+#else
+#include <sys/sendfile.h>
+#define	HAVE_SENDFILE
+#endif
+#endif
+
+#ifndef	_XOPEN_SOURCE
+#define	_XOPEN_SOURCE 600
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -230,6 +248,7 @@ void fsys::open(const char *path, access_t access)
 
 	switch(access)
 	{
+	case ACCESS_STREAM:
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		smode = FILE_SHARE_READ;
@@ -237,6 +256,7 @@ void fsys::open(const char *path, access_t access)
 	case ACCESS_WRONLY:
 		amode = GENERIC_WRITE;
 		break;
+	case ACCESS_RANDOM:
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		smode = FILE_SHARE_READ;
@@ -286,6 +306,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 	unsigned flags = 0;
 	switch(access)
 	{
+	case ACCESS_STREAM:
 	case ACCESS_RDONLY:
 		amode = GENERIC_READ;
 		cmode = OPEN_ALWAYS;
@@ -296,6 +317,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 		cmode = CREATE_ALWAYS; 
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
 		break;
+	case ACCESS_RANDOM:
 	case ACCESS_REWRITE:
 		amode = GENERIC_READ | GENERIC_WRITE;
 		cmode = OPEN_ALWAYS;
@@ -375,6 +397,10 @@ void fsys::operator=(const fsys& from)
 		fd = INVALID_HANDLE_VALUE;
 		error = remapError();
 	}
+}
+
+void fsys::drop(offset_t size)
+{
 }
 
 void fsys::seek(offset_t pos)
@@ -463,9 +489,11 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 	case ACCESS_RDONLY:
 		flags = O_RDONLY | O_CREAT;
 		break;
+	case ACCESS_STREAM:
 	case ACCESS_WRONLY:
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
 		break;
+	case ACCESS_RANDOM:
 	case ACCESS_SHARED:
 	case ACCESS_REWRITE:
 		flags = O_RDWR | O_CREAT;
@@ -481,6 +509,12 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 	fd = ::open(path, flags, mode);
 	if(fd == INVALID_HANDLE_VALUE)
 		error = remapError();
+#ifdef HAVE_POSIX_FADVISE
+	else {
+		if(access == ACCESS_RANDOM)
+			posix_fadvise(fd, 0, 0, POSIX_FADV_RANDOM);
+	}
+#endif
 }
 
 int fsys::createDir(const char *path, unsigned mode)
@@ -505,12 +539,18 @@ void fsys::open(const char *path, access_t access)
 
 	switch(access)
 	{
+	case ACCESS_STREAM:
+#if defined(O_STREAMING)
+		flags = O_RDONLY | O_STREAMING;
+		break;
+#endif
 	case ACCESS_RDONLY:
 		flags = O_RDONLY;
 		break;
 	case ACCESS_WRONLY:
 		flags = O_WRONLY;
 		break;
+	case ACCESS_RANDOM:
 	case ACCESS_SHARED:
 	case ACCESS_REWRITE:
 		flags = O_RDWR;
@@ -527,6 +567,15 @@ void fsys::open(const char *path, access_t access)
 	fd = ::open(path, flags);
 	if(fd == INVALID_HANDLE_VALUE)
 		error = remapError();
+#ifdef HAVE_POSIX_FADVISE
+	else {
+		// linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
+		if(access == ACCESS_STREAM)
+			posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+		else if(access == ACCESS_RANDOM)
+			posix_fadvise(fd, 0, 0, POSIX_FADV_RANDOM);
+	}
+#endif
 }
 
 int fsys::stat(const char *path, struct stat *ino)
@@ -600,6 +649,13 @@ void fsys::operator=(const fsys& from)
 		if(fd == INVALID_HANDLE_VALUE)
 			error = remapError();
 	}
+}
+
+void fsys::drop(offset_t size)
+{
+#ifdef	HAVE_POSIX_FADVISE
+	posix_fadvise(fd, 0, size, POSIX_FADV_DONTNEED);
+#endif
 }
 
 void fsys::seek(offset_t pos)
@@ -729,6 +785,24 @@ bool fsys::isdir(const char *path)
 	return false;
 #endif
 }
+
+#ifdef	HAVE_SENDFILE
+ssize_t fsys::send(socket_t so, size_t count)
+{
+	return sendfile(so, fd, NULL, count);
+}
+#else
+ssize_t fsys::send(socket_t so, size_t count)
+{
+	ssize_t ret;
+	char *buf = new char[count];
+	ret = read(buf, count);
+	if(ret > 0)
+		::send(so, buf, ret, 0);
+	delete[] buf;
+	return ret;
+}
+#endif
 
 #ifdef	_MSWINDOWS_
 
