@@ -195,14 +195,6 @@ public:
 	ssize_t write(const void *buffer, size_t count);
 
 	/**
-	 * Send file data to a socket.
-	 * @param network socket to send to.
-	 * @param count of bytes to send.
-	 * @return bytes transferred, -1 if error.
-	 */
-	ssize_t send(socket_t network, size_t count);
-
-	/**
 	 * Get status of open descriptor.
 	 * @param buffer to save status info in.
 	 * @return 0 on success, -1 on error.
@@ -297,16 +289,6 @@ public:
 	 */
 	inline static ssize_t write(fsys& descriptor, const void *buffer, size_t count)
 		{return descriptor.write(buffer, count);};
-
-	/**
-	 * Send file data to a socket.
-	 * @param descriptor to send from.
-	 * @param network socket to send to.
-	 * @param count of bytes to send.
-	 * @return bytes transferred, -1 if error.
-	 */
-	inline static ssize_t send(fsys& descriptor, socket_t network, size_t count)
-		{return descriptor.send(network, count);};
 
 	/**
 	 * Set the position of a file descriptor.

@@ -1,7 +1,6 @@
 From ucommon 1.9.10 to 2.0.0?
 - fsys stream and random access modes with posix_fadvise support.
 - new fsys drop method to drop used pages in streaming applications.
-- new fsys send method to use linux sendfile.
 
 From ucommon 1.9.9 to 1.9.10
 - mempager/memalloc "zalloc" method  added.

@@ -18,7 +18,6 @@
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
 #include <ucommon/string.h>
-#include <ucommon/socket.h>
 
 #ifdef HAVE_LINUX_VERSION_H
 #include <linux/version.h>
@@ -26,9 +25,6 @@
 #ifdef	HAVE_POSIX_FADVISE
 #undef	HAVE_POSIX_FADVISE
 #endif
-#else
-#include <sys/sendfile.h>
-#define	HAVE_SENDFILE
 #endif
 #endif
 
@@ -785,24 +781,6 @@ bool fsys::isdir(const char *path)
 	return false;
 #endif
 }
-
-#ifdef	HAVE_SENDFILE
-ssize_t fsys::send(socket_t so, size_t count)
-{
-	return sendfile(so, fd, NULL, count);
-}
-#else
-ssize_t fsys::send(socket_t so, size_t count)
-{
-	ssize_t ret;
-	char *buf = new char[count];
-	ret = read(buf, count);
-	if(ret > 0)
-		::send(so, buf, ret, 0);
-	delete[] buf;
-	return ret;
-}
-#endif
 
 #ifdef	_MSWINDOWS_
 
