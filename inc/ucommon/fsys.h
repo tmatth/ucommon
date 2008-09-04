@@ -133,6 +133,20 @@ public:
 	~fsys();
 
 	/**
+	 * Get the descriptor from the object by pointer reference.
+	 * @return low level file handle.
+	 */
+	inline fd_t operator*() const
+		{return fd;};
+
+	/**
+	 * Get the descriptor from the object by casting reference.
+	 * @return low level file handle.
+	 */
+	inline operator fd_t() const
+		{return fd;};
+
+	/**
 	 * Test if file descriptor is open.
 	 * @return true if open.
 	 */
