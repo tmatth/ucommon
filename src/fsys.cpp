@@ -20,7 +20,7 @@
 #include <ucommon/string.h>
 #include <ucommon/socket.h>
 
-#ifdef	__linux__
+#ifdef HAVE_LINUX_VERSION_H
 #include <linux/version.h>
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,8)
 #ifdef	HAVE_POSIX_FADVISE

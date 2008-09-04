@@ -120,7 +120,7 @@ clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
 AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h)
-AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h)
+AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
