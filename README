@@ -66,5 +66,8 @@ C++ releases, I may merge the two packages, or I may make GNU Common C++ an
 extension library for UCommon. This has not been decided yet.
 
 UCommon is a C++ linkable library distributed under the GNU General Public
-License, Version 3 or later.
+License, Version 3 or later.  As of version 2.0, we are now using the GNU
+Lesser General Public License, Version 3 or later, to remain consistent and
+compatible with past GNU Common C++ licensing.
+
 

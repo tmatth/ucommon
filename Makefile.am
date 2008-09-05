@@ -10,7 +10,7 @@
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec *-config.in \
-	Doxyfile cmodel.sh BUILDS SUPPORT
+	Doxyfile cmodel.sh BUILDS SUPPORT COPYING*
 
 SUBDIRS = src inc test
 

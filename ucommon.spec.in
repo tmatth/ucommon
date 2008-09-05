@@ -7,7 +7,7 @@ Name: ucommon
 Summary: "ucommon" - Portable C++ runtime for threads and sockets
 Version: %{version}
 Release: %{release}%{?dist}
-License: GPL
+License: lgplv3+
 URL: http://www.gnu.org/software/commoncpp
 Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
@@ -77,7 +77,7 @@ html browsable.
 
 %files -n %{_libname}
 %defattr(-,root,root,-)
-%doc AUTHORS README COPYING INSTALL NEWS BUILDS SUPPORT ChangeLog
+%doc AUTHORS README COPYING COPYING.LESSER INSTALL NEWS BUILDS SUPPORT ChangeLog
 %{_libdir}/*.so.*
 
 %files -n %{_devname}
