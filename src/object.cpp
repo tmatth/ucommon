@@ -84,9 +84,6 @@ auto_delete::~auto_delete()
 
 auto_pointer::auto_pointer(Object *o)
 {
-	unsigned i;
-	unsigned char *c = (unsigned char *)o;
-
 	if(o)
 		o->retain();
 
