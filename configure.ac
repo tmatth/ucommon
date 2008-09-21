@@ -324,7 +324,11 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 	])
 	if test "$GCC" != "yes" ; then
 		AC_CHECK_LIB(Crun, _ex_register, [
-			UCOMMON_LIBC="-L/opt/SUNWspro/lib -lCrun $UCOMMON_LIBC"
+			if test -d /opt/SUNWspro ; then
+				UCOMMON_LIBC="-L/opt/SUNWspro/lib -lCrun $UCOMMON_LIBC"
+			else
+				UCOMMON_LIBC="-L/opt/SunStudioExpress/lib -lCrun $UCOMMON_LIBC"
+			fi
 		])
 	fi
 fi
