@@ -537,10 +537,10 @@ public:
 
 	/**
 	 * Perform assignment operator to existing object.
-	 * @param object to assign.
+	 * @param typed object to assign.
 	 */
-	inline void operator=(T *object)
-		{P::operator=((Object *)object);};
+	inline void operator=(T *typed)
+		{P::operator=((Object *)typed);};
 };
 
 /**
