@@ -339,7 +339,7 @@ string string::get(strsize_t offset, strsize_t len) const
 
 	if(!len)
 		len = str->len - offset;
-	return string(len, str->text + offset);
+	return string(len, (str->text) + offset);
 }
 
 string::cstring *string::create(strsize_t size, char fill) const
