@@ -185,7 +185,7 @@ AC_CHECK_LIB($clib, posix_memalign, [
 	AC_DEFINE(HAVE_POSIX_MEMALIGN, [1], [posix memory alignment])
 ])
 
-AC_CHECK_LIB($clib, dl,,[
+AC_CHECK_LIB($clib, dlopen,,[
 	AC_CHECK_LIB(dl, dlopen, [UCOMMON_LIBS="$UCOMMON_LIBS -ldl"],[
 		AC_CHECK_LIB(compat, dlopen, [UCOMMON_LIBS="$UCOMMON_LIBS -lcompat"])
 		AC_CHECK_LIB(dld, shl_load,[
