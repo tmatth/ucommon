@@ -1,3 +1,6 @@
+From ucommon 2.0.0 to 2.0.1?
+- fix for failed dlopen detection in lc and false libcompat check for netbsd
+
 From ucommon 1.9.9 to 2.0.0
 - fsys stream and random access modes with posix_fadvise support.
 - new fsys drop method to drop used pages in streaming applications.
