@@ -336,6 +336,10 @@ fi
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
+
+if test "x$GCC" = "xyes" ; then
+	CXXFLAGS="$CXXFLAGS -Wno-long-long" ; fi
+
 for flag in $CXXFLAGS ; do
 	case $flag in
 	-f*exceptions|-f*rtti|-f*check-new|-f*enforce-eh-specs|-finline|-f*except)
