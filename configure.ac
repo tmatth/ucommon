@@ -338,7 +338,7 @@ AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
 
 if test "x$GCC" = "xyes" ; then
-	CXXFLAGS="$CXXFLAGS -Wno-long-long" ; fi
+	UCOMMON_FLAGS="$UCOMMON_FLAGS -Wno-long-long" ; fi
 
 for flag in $CXXFLAGS ; do
 	case $flag in
