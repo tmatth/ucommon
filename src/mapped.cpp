@@ -238,8 +238,12 @@ void MappedMemory::create(const char *fn, size_t len)
 		len += INSERT_OFFSET;
 		prot |= PROT_WRITE;
 		fd = shm_open(fn, O_RDWR | O_CREAT, 0660);
-		if(fd > -1)
-			ftruncate(fd, len);
+		if(fd > -1) {
+			if(ftruncate(fd, len)) {
+				::close(fd);
+				fd = -1;
+			}
+		}
 	}
 	else {
 		fd = shm_open(fn, O_RDONLY, 0660);

@@ -167,7 +167,7 @@ Vector::Vector(vectorsize_t size)
 
 	data = create(size);
 	data->retain();
-};
+}
 
 Vector::~Vector()
 {
@@ -570,7 +570,7 @@ ReusableAllocator()
 	limit = c;
 	count = 0;
 	osize = objsize;
-};
+}
 
 PagerReuse::~PagerReuse()
 {

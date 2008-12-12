@@ -42,7 +42,7 @@ shared_lock::shared_lock(Shared *obj)
 	lock = obj;
 	modify = false;
 	lock->Shlock();
-};
+}
 
 exclusive_lock::exclusive_lock(Exclusive *obj)
 {

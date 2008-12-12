@@ -52,5 +52,5 @@ extern "C" int main()
 	time(&later);
 	assert(later >= now + 1);
 	return 0;
-};
+}
 

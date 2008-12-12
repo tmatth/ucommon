@@ -56,4 +56,4 @@ extern "C" int main()
 	}
 	assert(count == 2);
 	return 0;
-};
+}

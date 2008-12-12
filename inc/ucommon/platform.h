@@ -40,7 +40,7 @@
 
 #define	UCOMMON_NAMESPACE	ucc
 #define	NAMESPACE_UCOMMON	namespace ucc {
-#define	END_NAMESPACE		};
+#define	END_NAMESPACE		}
 
 #ifndef	_REENTRANT
 #define _REENTRANT 1
@@ -440,7 +440,7 @@ inline void *operator new[](size_t size, caddr_t address, size_t known)
  * @param extra heap space needed for data.
  */
 inline void *operator new(size_t size, size_t extra)
-	{return cpr_memalloc(size + extra);};
+	{return cpr_memalloc(size + extra);}
 
 /**
  * A placement new operator where we assume the size of memory is good.
@@ -451,7 +451,7 @@ inline void *operator new(size_t size, size_t extra)
  * @return memory we placed object.
  */
 inline void *operator new(size_t size, caddr_t address)
-	{return cpr_memassign(size, address, size);};
+	{return cpr_memassign(size, address, size);}
 
 /**
  * A placement new operator where we know the allocated size.  We
@@ -464,7 +464,7 @@ inline void *operator new(size_t size, caddr_t address)
  */
 
 inline void *operator new(size_t size, caddr_t address, size_t known)
-	{return cpr_memassign(size, address, known);};
+	{return cpr_memassign(size, address, known);}
 
 #ifndef	_UCOMMON_EXTENDED_
 /**
@@ -472,14 +472,14 @@ inline void *operator new(size_t size, caddr_t address, size_t known)
  * @param object to delete.
  */
 inline void operator delete(void *object)
-	{free(object);};
+	{free(object);}
 
 /**
  * Delete an array from the heap.  All array element destructors are called.
  * @param array to delete.
  */
 inline void operator delete[](void *array)
-	{free(array);};
+	{free(array);}
 
 #ifdef	__GNUC__
 extern "C" __EXPORT void __cxa_pure_virtual(void);
@@ -517,6 +517,6 @@ extern "C" {
 	__EXPORT void msb_setshort(uint8_t *b, uint16_t v);
 	__EXPORT void msb_setlong(uint8_t *b, uint32_t v);
 
-};
+}
 
 #endif

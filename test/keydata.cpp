@@ -41,4 +41,4 @@ extern "C" int main()
 	assert(keys != NULL);
 	assert(stricmp(keys->get("key1"), "replaced value") == 0);
 	return 0;
-};
+}

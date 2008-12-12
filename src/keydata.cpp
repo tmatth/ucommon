@@ -167,7 +167,7 @@ void keyfile::load(const char *path)
 
 	for(;;) {
 		*lp = 0;
-		fgets(lp, size, fp);
+		char *lr = fgets(lp, size, fp);
 		String::chop(lp, "\r\n\t ");
 		ep = lp + strlen(lp);
 		if(ep != lp) {

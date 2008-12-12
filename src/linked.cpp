@@ -402,7 +402,7 @@ extern "C" {
 		const NamedObject * const*n2 = static_cast<const NamedObject * const*>(o2);
 		return (*n1)->compare((*n2)->getId());
 	}
-};
+}
 
 NamedObject **NamedObject::sort(NamedObject **list, size_t count)
 {

@@ -1831,7 +1831,7 @@ extern "C" {
 		th->run();
 		th->exit();
 		return NULL;
-	};
+	}
 #endif
 }
 

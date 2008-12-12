@@ -1232,8 +1232,8 @@ public:
 	 * @param args list to scan into.
 	 * @return number of items scanned.
 	 */
-	inline static int vscanf(string& object, const char *format, va_list args)
-		{return object.vscanf(format, args);} __SCANF(2, 0);
+	__SCANF(2,0) inline static int vscanf(string& object, const char *format, va_list args)
+		{return object.vscanf(format, args);}
 
 	/**
 	 * Print items into a string object.
@@ -1242,8 +1242,8 @@ public:
 	 * @param args list to print.
 	 * @return number of bytes written to string.
 	 */
-	inline static strsize_t vprintf(string& object, const char *format, va_list args)
-		{return object.vprintf(format, args);} __PRINTF(2, 0);
+	__PRINTF(2,0) inline static strsize_t vprintf(string& object, const char *format, va_list args)
+		{return object.vprintf(format, args);}
 
 	/**
 	 * Count all characters in the string object (strlen).
@@ -1654,7 +1654,7 @@ public:
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int stricmp(const char *string1, const char *string2)
-	{return string::case_compare(string1, string2);};
+	{return string::case_compare(string1, string2);}
 
 /**
  * Convenience function for case insensitive null terminated string compare.
@@ -1664,7 +1664,7 @@ extern "C" inline int stricmp(const char *string1, const char *string2)
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
-	{return string::case_compare(string1, string2, max);};
+	{return string::case_compare(string1, string2, max);}
 
 #endif
 

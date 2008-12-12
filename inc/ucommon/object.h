@@ -548,21 +548,21 @@ public:
  * @param object we are retaining.
  */
 inline void retain(Object *object)
-	{object->retain();};
+	{object->retain();}
 
 /**
  * Convenence function to access object release.
  * @param object we are releasing.
  */
 inline void release(Object *object)
-	{object->release();};
+	{object->release();}
 
 /**
  * Convenence function to access object copy.
  * @param object we are copying.
  */
 inline Object *copy(Object *object)
-	{return object->copy();};
+	{return object->copy();}
 
 /**
  * Convenience function to validate object.  This solves issues where
@@ -572,7 +572,7 @@ inline Object *copy(Object *object)
  */
 template<class T>
 inline bool is(T& object)
-	{return object.operator bool();};
+	{return object.operator bool();}
 
 /**
  * Convenience function to test pointer object.  This solves issues where
@@ -582,7 +582,7 @@ inline bool is(T& object)
  */
 template<class T>
 inline bool isnull(T& object)
-	{return (bool)(object.operator*() == NULL);};
+	{return (bool)(object.operator*() == NULL);}
 
 /**
  * Convenience function to test pointer-pointer object.  This solves issues 
@@ -592,7 +592,7 @@ inline bool isnull(T& object)
  */
 template<class T>
 inline bool isnullp(T *object)
-    {return (bool)(object->operator*() == NULL);};
+    {return (bool)(object->operator*() == NULL);}
 
 /**
  * Convenience function to swap objects.
@@ -601,7 +601,7 @@ inline bool isnullp(T *object)
  */
 template<class T>
 inline void swap(T& o1, T& o2)
-    {cpr_memswap(&o1, &o2, sizeof(T));};
+    {cpr_memswap(&o1, &o2, sizeof(T));}
 
 /**
  * Convenience function to return max of two objects.

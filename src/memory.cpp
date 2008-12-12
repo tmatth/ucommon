@@ -399,7 +399,7 @@ mempager(ps)
 	}
 	else
 		list = NULL;
-};
+}
 
 keyassoc::~keyassoc()
 {

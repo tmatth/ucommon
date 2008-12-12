@@ -1,5 +1,7 @@
-From ucommon 2.0.0 to 2.0.1?
+From ucommon 2.0.0 to 2.0.1
 - fix for failed dlopen detection in lc and false libcompat check for netbsd
+- general code cleanup with pedantic, some subtle header changes
+- fix for generic interface routing in ipv6 multicast operations
 
 From ucommon 1.9.9 to 2.0.0
 - fsys stream and random access modes with posix_fadvise support.

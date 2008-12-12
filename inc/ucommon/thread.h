@@ -2493,7 +2493,7 @@ public:
  * @param priority of thread.
  */
 inline void start(JoinableThread *thread, int priority = 0)
-	{thread->start(priority);};
+	{thread->start(priority);}
 
 /**
  * Convenience function to start a detached thread.
@@ -2501,7 +2501,7 @@ inline void start(JoinableThread *thread, int priority = 0)
  * @param priority of thread.
  */
 inline void start(DetachedThread *thread, int priority = 0)
-    {thread->start(priority);};
+    {thread->start(priority);}
 
 /**
  * Convenience type for using conditional locks.
@@ -2564,7 +2564,7 @@ typedef	queue fifo_t;
  * @param barrier to wait.
  */
 inline void wait(barrier_t &barrier)
-	{barrier.wait();};
+	{barrier.wait();}
 
 /**
  * Convenience function to wait on a semaphore.
@@ -2572,49 +2572,49 @@ inline void wait(barrier_t &barrier)
  * @param timeout to wait for.
  */
 inline void wait(semaphore_t &semaphore, timeout_t timeout = Timer::inf)
-	{semaphore.wait(timeout);};
+	{semaphore.wait(timeout);}
 
 /**
  * Convenience function to release a semaphore.
  * @param semaphore to release.
  */
 inline void release(semaphore_t &semaphore)
-	{semaphore.release();};
+	{semaphore.release();}
 
 /**
  * Convenience function to acquire a mutex.
  * @param mutex to acquire.
  */
 inline void acquire(mutex_t &mutex)
-	{mutex.lock();};
+	{mutex.lock();}
 
 /**
  * Convenience function to release a mutex.
  * @param mutex to release.
  */
 inline void release(mutex_t &mutex)
-	{mutex.release();};
+	{mutex.release();}
 
 /**
  * Convenience function to exclusively schedule conditional access.
  * @param lock to make exclusive.
  */
 inline void modify(accesslock_t &lock)
-	{lock.modify();};
+	{lock.modify();}
 
 /**
  * Convenience function to shared read schedule conditional access.
  * @param lock to access shared.
  */
 inline void access(accesslock_t &lock)
-	{lock.access();};
+	{lock.access();}
 
 /**
  * Convenience function to release an access lock.
  * @param lock to release.
  */
 inline void release(accesslock_t &lock)
-	{lock.release();};
+	{lock.release();}
 
 /**
  * Convenience function to commit an exclusive access lock.
@@ -2622,28 +2622,28 @@ inline void release(accesslock_t &lock)
  * @param lock to commit.
  */
 inline void commit(accesslock_t &lock)
-	{lock.commit();};
+	{lock.commit();}
 
 /**
  * Convenience function to exclusively lock shared conditional lock.
  * @param lock to make exclusive.
  */
 inline void exclusive(condlock_t &lock)
-	{lock.exclusive();};
+	{lock.exclusive();}
 
 /**
  * Convenience function to restore shared access on a conditional lock.
  * @param lock to make shared.
  */
 inline void share(condlock_t &lock)
-	{lock.share();};
+	{lock.share();}
 
 /**
  * Convenience function to exclusively aquire a conditional lock.
  * @param lock to acquire for modify.
  */
 inline void modify(condlock_t &lock)
-	{lock.modify();};
+	{lock.modify();}
 
 /**
  * Convenience function to commit and release an exclusively locked conditional
@@ -2651,21 +2651,21 @@ inline void modify(condlock_t &lock)
  * @param lock to commit.
  */
 inline void commit(condlock_t &lock)
-	{lock.commit();};
+	{lock.commit();}
 
 /**
  * Convenience function for shared access to a conditional lock.
  * @param lock to access.
  */
 inline void access(condlock_t &lock)
-	{lock.access();};
+	{lock.access();}
 
 /**
  * Convenience function to release shared access to a conditional lock.
  * @param lock to release.
  */
 inline void release(condlock_t &lock)
-	{lock.release();};
+	{lock.release();}
 
 /**
  * Convenience function for exclusive write access to a read/write lock.
@@ -2673,7 +2673,7 @@ inline void release(condlock_t &lock)
  * @param timeout to wait for exclusive locking.
  */
 inline bool exclusive(rwlock_t &lock, timeout_t timeout = Timer::inf)
-	{return lock.modify(timeout);};
+	{return lock.modify(timeout);}
 
 /**
  * Convenience function for shared read access to a read/write lock.
@@ -2681,28 +2681,28 @@ inline bool exclusive(rwlock_t &lock, timeout_t timeout = Timer::inf)
  * @param timeout to wait for shared access.
  */
 inline bool share(rwlock_t &lock, timeout_t timeout = Timer::inf)
-	{return lock.access(timeout);};
+	{return lock.access(timeout);}
 
 /**
  * Convenience function to release a shared lock.
  * @param lock to release.
  */
 inline void release(rwlock_t &lock)
-	{lock.release();};
+	{lock.release();}
 
 /**
  * Convenience function to lock a shared recursive mutex lock.
  * @param lock to acquire.
  */
 inline void lock(rexlock_t &lock)
-	{lock.lock();};
+	{lock.lock();}
 
 /**
  * Convenience function to release a shared recursive mutex lock.
  * @param lock to release.
  */
 inline void release(rexlock_t &lock)
-	{lock.release();};
+	{lock.release();}
 
 /**
  * Convenience function to push an object onto a stack.
@@ -2710,7 +2710,7 @@ inline void release(rexlock_t &lock)
  * @param object to push.
  */
 inline void push(stack_t &stack, Object *object)
-	{stack.push(object);};
+	{stack.push(object);}
 
 /**
  * Convenience function to pull an object from a stack.
@@ -2719,7 +2719,7 @@ inline void push(stack_t &stack, Object *object)
  * @return object pulled.
  */
 inline Object *pull(stack_t &stack, timeout_t timeout = Timer::inf)
-	{return stack.pull(timeout);};
+	{return stack.pull(timeout);}
 
 /**
  * Convenience function to remove an object from a stack.
@@ -2727,7 +2727,7 @@ inline Object *pull(stack_t &stack, timeout_t timeout = Timer::inf)
  * @param object to remove.
  */
 inline void remove(stack_t &stack, Object *object)
-	{stack.remove(object);};
+	{stack.remove(object);}
 
 /**
  * Convenience function to push an object onto a fifo.
@@ -2735,7 +2735,7 @@ inline void remove(stack_t &stack, Object *object)
  * @param object to push.
  */
 inline void push(fifo_t &fifo, Object *object)
-	{fifo.post(object);};
+	{fifo.post(object);}
 
 /**
  * Convenience function to pull an object from a fifo.
@@ -2744,7 +2744,7 @@ inline void push(fifo_t &fifo, Object *object)
  * @return object pulled.
  */
 inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
-	{return fifo.fifo(timeout);};
+	{return fifo.fifo(timeout);}
 
 /**
  * Convenience function to remove an object from a fifo.
@@ -2752,7 +2752,7 @@ inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
  * @param object to remove.
  */
 inline void remove(fifo_t &fifo, Object *object)
-	{fifo.remove(object);};
+	{fifo.remove(object);}
 
 END_NAMESPACE
 

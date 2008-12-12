@@ -217,7 +217,7 @@ void Timer::set(void)
     gettimeofday(&timer, NULL);
 #endif
 	updated = true;
-};	
+}
 
 void Timer::clear(void)
 {
@@ -228,7 +228,7 @@ void Timer::clear(void)
 	timer.tv_usec = 0;
 #endif
 	updated = false;
-};	
+}
 
 bool Timer::isUpdated(void)
 {

@@ -49,4 +49,4 @@ extern "C" int main()
 	assert(count == 3);
 	assert(!stricmp(array[1], "is"));
 	assert(!stricmp(array[2], "a test"));
-};
+}

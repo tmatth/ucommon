@@ -312,63 +312,63 @@ private:
 
 // Standard >> and << stream operators for PersistObject
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, PersistObject &ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, PersistObject &ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, PersistObject *&ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, PersistObject *&ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, PersistObject const &ob) throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, PersistObject const &ob) throw(PersistException) {CCXX_WE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, PersistObject const *ob) throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, PersistObject const *ob) throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, int8_t& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, int8_t& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, int8_t ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, int8_t ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, uint8_t& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, uint8_t& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, uint8_t ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, uint8_t ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, int16_t& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, int16_t& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, int16_t ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, int16_t ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, uint16_t& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, uint16_t& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, uint16_t ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, uint16_t ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, int32_t& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, int32_t& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, int32_t ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, int32_t ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, uint32_t& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, uint32_t& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, uint32_t ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, uint32_t ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, float& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, float& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, float ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, float ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, double& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, double& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, double ob) throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, double ob) throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, std::string& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, std::string& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, std::string ob) throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, std::string ob) throw(PersistException) {CCXX_WE(ar,ob);}
 
 /** @relates PersistEngine */
-inline PersistEngine& operator >>( PersistEngine& ar, bool& ob) throw(PersistException) {CCXX_RE(ar,ob);};
+inline PersistEngine& operator >>( PersistEngine& ar, bool& ob) throw(PersistException) {CCXX_RE(ar,ob);}
 /** @relates PersistEngine */
-inline PersistEngine& operator <<( PersistEngine& ar, bool ob)  throw(PersistException) {CCXX_WE(ar,ob);};
+inline PersistEngine& operator <<( PersistEngine& ar, bool ob)  throw(PersistException) {CCXX_WE(ar,ob);}
 
 #undef CCXX_RE
 #undef CCXX_WE

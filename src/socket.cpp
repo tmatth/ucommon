@@ -1898,7 +1898,7 @@ int Socket::join(socket_t so, struct addrinfo *node)
 		switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP) && defined(IPPROTO_IPV6)
 		case AF_INET6:
-			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+			mcast.ipv6.ipv6mr_interface = 0;
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
 			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
 			break;
@@ -1943,7 +1943,7 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 		switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP) && defined(IPPROTO_IPV6)
 		case AF_INET6:
-			memcpy(&mcast.ipv6.ipv6mr_interface, &addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
+			mcast.ipv6.ipv6mr_interface = 0;
 			memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
 			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
 			break;
@@ -2560,7 +2560,10 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 	int rtn = -1;
 	int so = INVALID_SOCKET;
 	socklen_t len = getlen(dest);
-	memset(iface, 0, len);
+
+	if(len)
+		memset(iface, 0, len);
+
 	iface->sa_family = AF_UNSPEC;
 	switch(dest->sa_family) {
 #ifdef	AF_INET6

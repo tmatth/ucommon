@@ -1504,7 +1504,7 @@ typedef	Socket socket;
  * @return addrinfo list or NULL if empty.
  */
 inline struct addrinfo *addrinfo(socket::address& address)
-	{return address.getList();};
+	{return address.getList();}
 
 /**
  * A convenience function to convert a socket address list into a socket 
@@ -1513,7 +1513,7 @@ inline struct addrinfo *addrinfo(socket::address& address)
  * @return first socket address in list or NULL if empty.
  */
 inline struct sockaddr *addr(socket::address& address)
-	{return address.getAddr();};
+	{return address.getAddr();}
 
 END_NAMESPACE
 

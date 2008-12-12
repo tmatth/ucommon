@@ -222,42 +222,42 @@ public:
  * @param object to lock.
  */
 inline void lock(Exclusive *object)
-	{object->Exlock();};
+	{object->Exlock();}
 
 /**
  * Convenience function to unlock an exclusive object through it's protocol.
  * @param object to unlock.
  */
 inline void unlock(Exclusive *object)
-	{object->Unlock();};
+	{object->Unlock();}
 
 /**
  * Convenience function to access (lock) shared object through it's protocol.
  * @param object to share lock.
  */
 inline void access(Shared *object)
-	{object->Shlock();};
+	{object->Shlock();}
 
 /**
  * Convenience function to unlock shared object through it's protocol.
  * @param object to unlock.
  */
 inline void release(Shared *object)
-	{object->Unlock();};
+	{object->Unlock();}
 
 /**
  * Convenience function to exclusive lock shared object through it's protocol.
  * @param object to exclusive lock.
  */
 inline void exclusive(Shared *object)
-	{object->Exclusive();};
+	{object->Exclusive();}
 
 /**
  * Convenience function to restore shared locking for object through it's protocol.
  * @param object to restore shared locking.
  */
 inline void share(Shared *object)
-	{object->Share();};
+	{object->Share();}
 
 /**
  * Convenience type to use for object referencing an exclusive object.
@@ -274,14 +274,14 @@ typedef	shared_lock shlock_t;
  * @param reference to object referencing exclusive locked object.
  */
 inline void release(exlock_t &reference)
-	{reference.release();};
+	{reference.release();}
 
 /**
  * Convenience function to release a reference to a shared lock.
  * @param reference to object referencing shared locked object.
  */
 inline void release(shlock_t &reference)
-	{reference.release();};
+	{reference.release();}
 
 // Special macros to allow member functions of an object with a protocol
 // to create self locking states while the member functions are called by
