@@ -91,7 +91,6 @@ AC_ARG_ENABLE(stdcpp,
 
 if test "x$enable_stdcpp" = "xno" ; then
 	UCOMMON_MODEL="CC"
-	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}"
 	AC_MSG_RESULT(no)
 else
 	AC_MSG_RESULT(yes)
@@ -322,15 +321,6 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 		UCOMMON_CLINK="$UCOMMON_CLINK -lSystemstubs"
 		UCOMMON_LIBC="$UCOMMON_LIBC -lgcc"
 	])
-	if test "$GCC" != "yes" ; then
-		AC_CHECK_LIB(Crun, _ex_register, [
-			if test -d /opt/SUNWspro ; then
-				UCOMMON_LIBC="-L/opt/SUNWspro/lib -lCrun $UCOMMON_LIBC"
-			else
-				UCOMMON_LIBC="-L/opt/SunStudioExpress/lib -lCrun $UCOMMON_LIBC"
-			fi
-		])
-	fi
 fi
 
 AC_LANG_SAVE
@@ -341,7 +331,7 @@ if test "x$GCC" = "xyes" ; then
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -Wno-long-long" ; fi
 
 for flag in $CXXFLAGS ; do
-	case $flag in
+	case "$flag" in
 	-f*exceptions|-f*rtti|-f*check-new|-f*enforce-eh-specs|-finline|-f*except)
 		if test "$UCOMMON_MODEL" = "CXX" ; then
 			UCOMMON_FLAGS="$UCOMMON_FLAGS $flag" ; fi
@@ -360,12 +350,12 @@ export CXXFLAGS="$COMPILER_FLAGS"
 if test "$UCOMMON_MODEL" = "CC" ; then	
 	UCOMMON_FLAGS="$UCOMMON_FLAGS"
 
-	if test "$GCC" = yes ; then
+	if test x"$GCC" = "xyes" ; then
 		ucflags="-fno-exceptions -fno-rtti -fno-enforce-eh-specs"
 		lcflags="-nodefaultlibs -nostdinc++"
 	else
-		ucflags="-features=no%except -features=namespace -features=no%rtti"
-		lcflags="-xnolib"
+		ucflags="-library=no%Cstd -features=no%except -features=namespace -features=no%rtti"
+		lcflags=""
 	fi
 
 	for flag in $ucflags ; do
@@ -374,6 +364,8 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 		if test -z "`${CXX} $flag -c conftest.cpp 2>&1`"; then
 			UCOMMON_FLAGS="$UCOMMON_FLAGS $flag"
 			AC_MSG_RESULT(yes)
+			if test "$flag" = "-library=no%Cstd" ; then
+				UCOMMON_MODEL="CXX" ; fi
 		else
 			AC_MSG_RESULT(no)
 		fi
@@ -442,7 +434,7 @@ export CXXFLAGS
 flags="-fno-check-new -finline"
 if test "$UCOMMON_MODEL" = "CC" ; then
 	if test "$enable_shared" != "no" ; then
-		flags="flags -fvisibility-inlines-hidden"
+		flags="$flags -fvisibility-inlines-hidden"
 	fi
 fi
 
@@ -503,6 +495,9 @@ cygwin*|mingw*)
 esac
 
 UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
+
+if test "$UCOMMON_MODEL" = "CC" ; then
+	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
 AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
