@@ -28,21 +28,6 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-static size_t cpr_pagesize(void)
-{
-#ifdef  HAVE_SYSCONF
-    return sysconf(_SC_PAGESIZE);
-#elif defined(PAGESIZE)
-    return PAGESIZE;
-#elif defined(PAGE_SIZE)
-    return PAGE_SIZE;
-#else
-    return 1024;
-#endif
-}
-
-
-
 memalloc::memalloc(size_t ps)
 {
 #ifdef	HAVE_SYSCONF

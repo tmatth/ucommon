@@ -392,6 +392,8 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 		rm -f conftest*
 	done
 else
+	ac_save_CXXFLAGS="$CXXFLAGS"
+	CXXFLAGS=""
 	AC_LANG_SAVE
 	AC_LANG_CPLUSPLUS
 	AC_CHECK_HEADERS(stdexcept)
@@ -416,6 +418,7 @@ else
 		UCOMMON_FLAGS="$UCOMMON_FLAGS -DOLD_STDCPP"
 	])
 	AC_LANG_RESTORE
+	CXXFLAGS="$ac_save_CXXFLAGS"
 fi
 
 if test ! -z "$PTHREAD_FLAGS" ; then
