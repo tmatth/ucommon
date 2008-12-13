@@ -1905,7 +1905,7 @@ int Socket::join(socket_t so, struct addrinfo *node)
 #endif
 #if defined(IP_ADD_MEMBERSHIP)
 		case AF_INET:
-			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
+			mcast.ipv4.imr_interface.s_addr = INADDR_ANY;
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
 			rtn = ::setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv4));
 			break;
@@ -1950,7 +1950,7 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 #endif
 #if defined(IP_DROP_MEMBERSHIP)
 		case AF_INET:
-			memcpy(&mcast.ipv4.imr_interface, &addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
+			mcast.ipv4.imr_interface.s_addr = INADDR_ANY;
 			memcpy(&mcast.ipv4.imr_multiaddr, &target->ipv4.sin_addr, sizeof(target->ipv4.sin_addr));
 			rtn = ::setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv4));
 			break;
