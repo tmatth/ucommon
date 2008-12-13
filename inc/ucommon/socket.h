@@ -465,7 +465,7 @@ public:
 		/**
 		 * Insert unique members from another socket address list to ours.
 		 * @param address list to insert into list.
-		 * @param address family to scan for or 0 for all.
+		 * @param family to scan for or 0 for all.
 		 * @return count of addresses added.
 		 */
 		unsigned insert(struct addrinfo *address, int family = 0);
@@ -473,7 +473,7 @@ public:
 		/**
 		 * Remove members from another socket address list from ours.
 		 * @param address list to remove from list.
-		 * @param address family to scan for or 0 for all.
+		 * @param family to scan for or 0 for all.
 		 * @return count of addresses removed.
 		 */
 		unsigned remove(struct addrinfo *address, int family = 0);
@@ -1100,7 +1100,7 @@ public:
 	 * @param buffer to save.
 	 * @param size of data buffer to request.
 	 * @param flags for i/o operation (MSG_OOB, MSG_PEEK, etc).
-	 * @param internet address of source.
+	 * @param address of source.
 	 * @return number of bytes received, -1 if error.
 	 */
 	static ssize_t recvinet(socket_t socket, void *buffer, size_t size, int flags = 0, struct sockaddr_internet *address = NULL);
@@ -1269,10 +1269,10 @@ public:
 	/**
 	 * Copy a socket address.
 	 * @param target address pointer to copy into.
-	 * @param source address pointer to copy from.
+	 * @param origin address pointer to copy from.
 	 * @return number of bytes copied, 0 if invalid.
 	 */
-	static unsigned copy(struct sockaddr *target, struct sockaddr *from);
+	static unsigned copy(struct sockaddr *target, struct sockaddr *origin);
 
 	/**
 	 * Store an address into an address object.
@@ -1431,7 +1431,7 @@ public:
 	 * address.  Such address strings are used for example in SIP to indicate
 	 * "hold" by re-inviting peers to a null address.  Supports IPV4 and
 	 * IPV6 addresses.
-	 * @param address string to check.
+	 * @param string address to check.
 	 * @return true if zero/null address.
 	 */
 	static bool isNull(const char *string);
@@ -1440,7 +1440,7 @@ public:
 	 * Simple function to validate that a given IP address string is a numeric
 	 * address.  This can be used to verify an address is not a "host" name.
 	 * Supports IPV4 and IPV6 address strings.
-	 * @param address string to check.
+	 * @param string address to check.
 	 * @return true if zero/null address.
 	 */
 	static bool isNumeric(const char *string);

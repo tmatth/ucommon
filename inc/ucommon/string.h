@@ -149,7 +149,7 @@ public:
 
 		/**
 		 * Append text to string buffer from formatting object.
-		 * @param formatting object to add from.
+		 * @param format object to add from.
 		 */
 		void add(const StringFormat &format);
 

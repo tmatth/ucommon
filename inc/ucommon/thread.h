@@ -659,7 +659,7 @@ public:
 	  * protect function of mutex.
 	  * @param object to protect.
 	  * @param timeout in milliseconds to wait for lock.
-	  * @param return true if locked, false if timeout.
+	  * @return true if locked, false if timeout.
 	  */
 	static bool writer(void *object, timeout_t timeout = Timer::inf);
 
@@ -668,7 +668,7 @@ public:
 	 * function of mutex.
 	 * @param object to share.
 	 * @param timeout in milliseconds to wait for lock.
-	 * @param return true if shared, false if timeout.
+	 * @return true if shared, false if timeout.
 	 */
 	static bool reader(void *object, timeout_t timeout = Timer::inf);
 
