@@ -3,3 +3,5 @@ ABI changes:
 	DetachedThread delete this into dealloc() virtual...
 
 	Mutex::protect/release can use "const" void objects...?
+
+	Maybe re-think mapped memory for smart self management?
