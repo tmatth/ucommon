@@ -1,3 +1,6 @@
+From ucommon 2.0.1 to 2.0.2
+- fix for missing functions in mingw32 cross-builds.
+
 From ucommon 2.0.0 to 2.0.1
 - fix for failed dlopen detection in lc and false libcompat check for netbsd
 - general code cleanup with pedantic, some subtle header changes

@@ -2835,6 +2835,8 @@ FILE *Socket::open(socket_t so, bool mode)
 	return fdopen(dup(so), "r");
 }
 
+#endif
+
 bool Socket::isNull(const char *str)
 {
 	assert(str != NULL);
@@ -2873,4 +2875,3 @@ bool Socket::isNumeric(const char *str)
 	return true;
 }
 
-#endif 
