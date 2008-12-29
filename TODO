@@ -5,3 +5,7 @@ ABI changes:
 	Mutex::protect/release can use "const" void objects...?
 
 	Maybe re-think mapped memory for smart self management?
+
+	Add "joinable" bool for handling of join when running thread terminated
+    so that isRunning() has "expected" behavior?
+
