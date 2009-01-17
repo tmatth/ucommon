@@ -18,8 +18,8 @@ Proposed changes:
 	native msw threading if better than code we have in ucommon, or maybe
 	use NSPR in place of native msw threading entirely?
 
-	Remove explicit thread exit calls from exit() methods (keep in 1.0.x
-	but note as depreciated, remove in 1.1?  no abi/link changes)
+	Remove explicit thread exit calls from exit() methods (keep in 2.0.x
+	but note as depreciated, remove in 2.1?  no abi/link changes)
 
 	Add serialio class?
 
