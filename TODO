@@ -1,11 +1,31 @@
-ABI changes:
+Proposed changes:
 
-	DetachedThread delete this into dealloc() virtual...
-
-	Mutex::protect/release can use "const" void objects...?
+	Mutex::protect/release use "const" void object pointers...?
 
 	Maybe re-think mapped memory for smart self management?
 
 	Add "joinable" bool for handling of join when running thread terminated
     so that isRunning() has "expected" behavior?
+
+	Remove pthread_exit/pthread_xxx re-defintion macros; no user code should
+	ever use "pthread_xxx" methods.
+
+	Use NSPR as an alternate thread runtime base like we do with GNU pth...
+	Especially convenient with common use of nss for future tls.  Do we
+	still keep GNU pth option if we do this?
+
+	Use NSPR code base for simulating msw conditional variables for direct
+	native msw threading if better than code we have in ucommon, or maybe
+	use NSPR in place of native msw threading entirely?
+
+	Remove explicit thread exit calls from exit() methods (keep in 1.0.x
+	but note as depreciated, remove in 1.1?  no abi/link changes)
+
+	Add serialio class?
+
+Rejected changes:
+
+	DetachedThread delete this into dealloc() virtual...
+		- use Thread::exit() virtual for this purpose instead
+
 
