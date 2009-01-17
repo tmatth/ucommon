@@ -1480,7 +1480,12 @@ public:
 	virtual ~Thread();
 
 	/**
-	 * Exit the thread context.
+	 * Exit the thread context.  This function should NO LONGER be called
+	 * directly to exit a running thread.  Instead this method will only be
+	 * used to modify the behavior of the thread context at thread exit,
+	 * including detached threads which by default delete themselves.  This
+	 * documented usage was changed to support Mozilla NSPR exit behavior
+	 * in case we support NSPR as an alternate thread runtime in the future.
 	 */
 	virtual void exit(void);
 
@@ -1616,7 +1621,12 @@ protected:
 	~DetachedThread();
 
 	/**
-	 * Exit context of detached thread.  Object will be deleted.
+	 * Exit context of detached thread.  Thread object will be deleted.
+	 * This function should NO LONGER be called directly to exit a running 
+	 * thread.  Instead, the thread should only "return" through the run() 
+	 * method to exit.  The documented usage was changed so that exit() can 
+	 * still be used to modify the "delete this" behavior of detached threads
+	 * while merging thread exit behavior with Mozilla NSPR.
 	 */
 	void exit(void);
 

@@ -1,3 +1,6 @@
+From ucommon 2.0.2 to 2.0.3
+- documented behavior and use case for ...Thread::exit() methods changed.
+
 From ucommon 2.0.1 to 2.0.2
 - fix for missing functions in mingw32 cross-builds.
 
