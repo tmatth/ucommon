@@ -1561,8 +1561,9 @@ protected:
 	virtual ~JoinableThread();
 
 	/**
-	 * Join thread with parent.  If called by child thread context, the
-	 * thread exits as if calling "exit" method. 
+	 * Join thread with parent.  Calling from a child thread to exit is
+	 * now depreciated behavior and in the future will not be supported.
+	 * Threads should always return through their run() method.
 	 */
 	void join(void);
 
