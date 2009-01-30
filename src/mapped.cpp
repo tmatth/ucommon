@@ -476,9 +476,8 @@ void MappedReuse::removeLocked(ReusableObject *obj)
 {
 	assert(obj != NULL);
 	
-	LinkedObject **ru = (LinkedObject **)freelist;
 	obj->retain();
-	obj->enlist(ru);
+	obj->enlist((LinkedObject **)&freelist);
 }
 
 ReusableObject *MappedReuse::getLocked(void)
