@@ -42,6 +42,10 @@
 #define	USE_POLL
 #endif
 
+#if defined(__linux__) && !defined(IP_MTU)
+#define	IP_MTU 14
+#endif
+
 #ifndef MSG_DONTWAIT
 #define MSG_DONTWAIT 0
 #endif
@@ -2223,7 +2227,11 @@ Socket()
 #endif
 
 retry:
-	so = ::socket(family, SOCK_STREAM, protocol);
+	if(protocol == IPPROTO_DCCP)
+		so = ::socket(family, SOCK_DCCP, protocol);
+	else
+		so = ::socket(family, SOCK_STREAM, protocol);
+
 	if(so == INVALID_SOCKET)
 		return;
 		
@@ -2280,6 +2288,31 @@ int Socket::gettype(socket_t so)
 	if(getsockopt(so, SOL_SOCKET, SO_TYPE, (caddr_t)&sotype, &slen))
 		return 0;
 	return sotype;
+}
+
+unsigned Socket::segsize(socket_t so, unsigned size)
+{
+	socklen_t alen = sizeof(size);
+	switch(gettype(so)) {
+	case SOCK_STREAM:
+#ifdef	TCP_MAXSEG
+		if(size)
+			setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&size, sizeof(size));
+#endif
+		break;
+	case SOCK_DCCP:
+#ifdef	DCCP_MAXSEG
+		if(size)
+			setsockopt(so, IPPROTO_DCCP, DCCP_MAXSEG, (char *)&size, sizeof(size));
+#endif
+		break;
+	}
+#ifdef	IP_MTU
+	getsockopt(so, IPPROTO_IP, IP_MTU, &size, &alen);
+#else
+	size = 0;
+#endif
+	return size;
 }
 
 char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)

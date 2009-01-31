@@ -117,6 +117,23 @@ struct sockaddr_storage
 };
 #endif
 
+#ifndef	SOCK_DCCP
+#define	SOCK_DCCP		6
+#endif
+
+#ifndef	IPPROTO_DCCP
+#define	IPPROTO_DCCP	23
+#endif
+
+#ifndef	SOL_DCCP
+#define	SOL_DCCP		269
+#endif
+
+#define DCCP_SOCKOPT_AVAILABLE_CCIDS    12
+#define DCCP_SOCKOPT_CCID               13
+#define DCCP_SOCKOPT_TX_CCID            14
+#define DCCP_SOCKOPT_RX_CCID            15
+
 NAMESPACE_UCOMMON
 
 /**
@@ -722,11 +739,26 @@ public:
 	static int gettype(socket_t socket);
 
 	/**
+	 * Set segment size and get MTU.
+	 * @param segment size or zero to not set.
+	 * @return mtu size of socket.
+	 */
+	static unsigned segsize(socket_t socket, unsigned size = 0);
+
+	/**
 	 * Get the type of a socket.
 	 * @return socket type.
 	 */
 	inline int gettype(void)
 		{return gettype(so);};
+
+	/**
+	 * Seg segment size and get mtu of a socket.
+	 * @param segment size to set or 0 to leave unchanged.
+	 * @return mtu size.
+	 */
+	inline unsigned segsize(unsigned size)
+		{return segsize(so, size);};
 
 	/**
 	 * Set the type of service field of outgoing packets.  Some useful
@@ -756,8 +788,8 @@ public:
 
 	/**
 	 * Connect our socket to a remote host from an address list.
-	 * For TCP sockets, the entire list may be tried.  For UDP, connect
-	 * is only a state and the first valid entry in the list is used.
+	 * For TCP (and DCCP) sockets, the entire list may be tried.  For UDP, 
+	 * connect is only a state and the first valid entry in the list is used.
 	 * @param list of addresses to connect to.
 	 * @return 0 on success, -1 on error.
 	 */
@@ -924,8 +956,8 @@ public:
 
 	/**
 	 * Connect socket descriptor to a remote host from an address list.
-	 * For TCP sockets, the entire list may be tried.  For UDP, connect
-	 * is only a state and the first valid entry in the list is used.
+	 * For TCP (and DCCP) sockets, the entire list may be tried.  For UDP, 
+	 * connect is only a state and the first valid entry in the list is used.
 	 * @param socket descriptor.
 	 * @param list of addresses to connect to.
 	 * @return 0 on success, -1 on error.
@@ -1448,7 +1480,7 @@ public:
 
 /**
  * A bound socket used to listen for inbound socket connections.  This class 
- * is commonly used for TCP listener sockets.
+ * is commonly used for TCP and DCCP listener sockets.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT ListenSocket : protected Socket
