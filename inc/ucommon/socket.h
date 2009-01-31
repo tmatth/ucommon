@@ -740,10 +740,19 @@ public:
 
 	/**
 	 * Set segment size and get MTU.
+	 * @param socket to modify.
 	 * @param segment size or zero to not set.
 	 * @return mtu size of socket.
 	 */
 	static unsigned segsize(socket_t socket, unsigned size = 0);
+
+	/**
+	 * Set congestion control id.
+	 * @param socket to modify.
+	 * @param ccid value to set.
+	 * @return true if success, false if not dccp or not supported ccid used.
+	 */
+	static bool setccid(socket_t socket, uint8_t ccid);
 
 	/**
 	 * Get the type of a socket.
@@ -753,12 +762,20 @@ public:
 		{return gettype(so);};
 
 	/**
-	 * Seg segment size and get mtu of a socket.
+	 * Set segment size and get mtu of a socket.
 	 * @param segment size to set or 0 to leave unchanged.
 	 * @return mtu size.
 	 */
 	inline unsigned segsize(unsigned size)
 		{return segsize(so, size);};
+
+	/**
+	 * Set ccid of dccp socket.
+	 * @param ccid to set.
+	 * @return true if success, false if not dccp or not supported ccid used.
+	 */
+	inline bool setccid(uint8_t ccid)
+		{return setccid(so, ccid);};
 
 	/**
 	 * Set the type of service field of outgoing packets.  Some useful

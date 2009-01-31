@@ -2290,6 +2290,30 @@ int Socket::gettype(socket_t so)
 	return sotype;
 }
 
+bool Socket::setccid(socket_t so, uint8_t ccid)
+{
+	uint8_t ccids[4];
+	socklen_t len = sizeof(ccids);
+	bool supported = false;
+	
+	// maybe also not dccp socket...
+	if(getsockopt(so, SOL_DCCP, DCCP_SOCKOPT_AVAILABLE_CCIDS, &ccids, &len) < 0)
+		return false;
+
+	for(unsigned pos = 0; pos < sizeof(ccids); ++pos) {
+		if(ccid == ccids[pos])
+			supported = true;
+	}
+
+	if(!supported)
+		return false;
+
+	if(setsockopt(so, SOL_DCCP, DCCP_SOCKOPT_CCID, &ccid, sizeof(ccid)) < 0)
+		return false;
+
+	return true;
+}
+		
 unsigned Socket::segsize(socket_t so, unsigned size)
 {
 	socklen_t alen = sizeof(size);
