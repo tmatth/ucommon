@@ -2301,8 +2301,10 @@ bool Socket::setccid(socket_t so, uint8_t ccid)
 		return false;
 
 	for(unsigned pos = 0; pos < sizeof(ccids); ++pos) {
-		if(ccid == ccids[pos])
+		if(ccid == ccids[pos]) {
 			supported = true;
+			break;
+		}
 	}
 
 	if(!supported)

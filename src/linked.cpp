@@ -754,6 +754,7 @@ void OrderedObject::enlist(OrderedIndex *root)
 {
 	assert(root != NULL);
 
+	next = NULL;
 	enlistTail(root);
 }
 
