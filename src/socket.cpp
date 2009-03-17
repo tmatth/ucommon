@@ -2297,7 +2297,7 @@ bool Socket::setccid(socket_t so, uint8_t ccid)
 	bool supported = false;
 	
 	// maybe also not dccp socket...
-	if(getsockopt(so, SOL_DCCP, DCCP_SOCKOPT_AVAILABLE_CCIDS, &ccids, &len) < 0)
+	if(getsockopt(so, SOL_DCCP, DCCP_SOCKOPT_AVAILABLE_CCIDS, (char *)&ccids, &len) < 0)
 		return false;
 
 	for(unsigned pos = 0; pos < sizeof(ccids); ++pos) {
@@ -2310,7 +2310,7 @@ bool Socket::setccid(socket_t so, uint8_t ccid)
 	if(!supported)
 		return false;
 
-	if(setsockopt(so, SOL_DCCP, DCCP_SOCKOPT_CCID, &ccid, sizeof(ccid)) < 0)
+	if(setsockopt(so, SOL_DCCP, DCCP_SOCKOPT_CCID, (char *)&ccid, sizeof(ccid)) < 0)
 		return false;
 
 	return true;
