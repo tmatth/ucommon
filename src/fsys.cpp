@@ -234,6 +234,11 @@ ssize_t fsys::write(const void *buf, size_t len)
 	return rtn;
 }
 
+int fsys::sync(void)
+{
+	return 0;
+}
+
 void fsys::open(const char *path, access_t access)
 {
 	bool append = false;
@@ -438,6 +443,19 @@ ssize_t fsys::read(void *buf, size_t len)
 	int rtn = ::read(fd, buf, len);
 #endif
 
+	if(rtn < 0)
+		error = remapError();
+	return rtn;
+}
+
+int fsys::sync(void)
+{
+	if(ptr) {
+		error = EBADF;
+		return -1;
+	}
+
+	int rtn = ::fsync(fd);
 	if(rtn < 0)
 		error = remapError();
 	return rtn;

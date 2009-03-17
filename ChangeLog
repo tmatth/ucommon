@@ -1,5 +1,6 @@
 From ucommon 2.0.4 to 2.0.5
 - small code cleanup.
+- added fsync to fsys as fsys::sync() method.
 
 From ucommon 2.0.3 to 2.0.4
 - fixed bug in reusable object handoff to free list.

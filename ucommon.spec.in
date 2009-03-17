@@ -1,3 +1,15 @@
+# spec file for ucommon, used for official builds for GNU Telephony.
+#
+# Copyright (c) 2008 David Sugar, Tycho Softworks.
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
 %{!?release: %define release 0}
 %{!?version: %define version @VERSION@}
 
@@ -14,6 +26,7 @@ Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gcc-c++
 BuildRequires: doxygen graphviz-gd 
+Packager: David Sugar <dyfet@gnutelephony.org>
 
 %description
 uCommon is a lightweight C++ library to facilitate using C++ design patterns

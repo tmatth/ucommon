@@ -224,6 +224,12 @@ public:
 	int stat(struct stat *buffer);
 
 	/**
+	 * Commit changes to the filesystem.
+	 * @return 0 on success, -1 on error.
+	 */
+	int sync(void);
+
+	/**
 	 * Set directory prefix (chdir).
 	 * @param path to change to.
 	 * @return 0 on success, -1 on error.
