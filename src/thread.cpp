@@ -1996,6 +1996,29 @@ OrderedIndex(), Conditional()
 	limit = size;
 }
 
+queue::~queue()
+{
+	linked_pointer<member> mp;
+	OrderedObject *next;
+
+	if(pager)
+		return;
+	
+	mp = freelist;
+	while(is(mp)) {
+		next = mp->getNext();
+		delete *mp;
+		mp = next;
+	}
+
+	mp = head;
+	while(is(mp)) {
+		next = mp->getNext();
+		delete *mp;
+		mp = next;
+	}
+}
+
 bool queue::remove(Object *o)
 {
 	assert(o != NULL);
@@ -2162,6 +2185,29 @@ Conditional()
 	freelist = usedlist = NULL;
 	limit = size;
 	used = 0;
+}
+
+stack::~stack()
+{
+	linked_pointer<member> mp;
+	LinkedObject *next;
+
+	if(pager)
+		return;
+	
+	mp = freelist;
+	while(is(mp)) {
+		next = mp->getNext();
+		delete *mp;
+		mp = next;
+	}
+
+	mp = usedlist;
+	while(is(mp)) {
+		next = mp->getNext();
+		delete *mp;
+		mp = next;
+	}
 }
 
 bool stack::remove(Object *o)

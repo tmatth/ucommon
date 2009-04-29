@@ -1,6 +1,8 @@
+
 From ucommon 2.0.4 to 2.0.5
 - small code cleanup.
 - added fsync to fsys as fsys::sync() method.
+- added missing destructors for queue and stack when no mempager is used.
 
 From ucommon 2.0.3 to 2.0.4
 - fixed bug in reusable object handoff to free list.

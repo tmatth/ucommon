@@ -1681,6 +1681,11 @@ public:
 	queue(mempager *pager = NULL, size_t number = 0);
 
 	/**
+	 * Destroy queue.  If no mempager is used, then frees heap.
+	 */
+	~queue();
+
+	/**
 	 * Remove a specific object pointer for the queue.  This can remove
 	 * a member from any location in the queue, whether beginning, end, or
 	 * somewhere in the middle.  This also releases the object.
@@ -1804,6 +1809,11 @@ public:
 	 * @param number of pointers that can be in the stack or 0 if unlimited.
 	 */
 	stack(mempager *pager = NULL, size_t number = 0);
+
+	/**
+	 * Destroy queue.  If no pager is used, then frees heap.
+	 */
+	~stack();
 
 	/**
 	 * Remove a specific object pointer for the queue.  This can remove
