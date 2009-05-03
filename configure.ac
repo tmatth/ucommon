@@ -24,10 +24,6 @@ AM_PROG_LIBTOOL
 AM_INIT_AUTOMAKE(ucommon, [$VERSION])
 AM_CONFIG_HEADER(config.h)
 
-LT_MAJOR="`echo $LT_VERSION | sed s/:.*$//`"
-AC_SUBST(LT_VERSION)
-AC_SUBST(LT_MAJOR)
-
 AC_C_RESTRICT
 AC_C_VOLATILE
 AC_C_INLINE
@@ -514,6 +510,7 @@ AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
+AC_SUBST(LT_VERSION)
 
 AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
 ucommon.pc ucommon.spec ucommon-config)

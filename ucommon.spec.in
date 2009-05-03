@@ -1,6 +1,4 @@
-# spec file for ucommon, used for official builds for GNU Telephony.
-#
-# Copyright (c) 2008 David Sugar, Tycho Softworks.
+# Copyright (c) 2008, 2009 David Sugar, Tycho Softworks.
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
 # modifications, as long as this notice is preserved.
@@ -10,23 +8,17 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-%{!?release: %define release 0}
-%{!?version: %define version @VERSION@}
-
-%{!?uses_stdcpp:  %define uses_stdcpp 1}
-
 Name: ucommon
-Summary: "ucommon" - Portable C++ runtime for threads and sockets
-Version: %{version}
-Release: %{release}%{?dist}
-License: lgplv3+
+Summary: Portable C++ runtime for threads and sockets
+Version: @VERSION@
+Release: 2
+License: LGPLv3+
 URL: http://www.gnu.org/software/commoncpp
-Group: Development/Libraries
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: gcc-c++
 BuildRequires: doxygen graphviz-gd 
-Packager: David Sugar <dyfet@gnutelephony.org>
+Group: System/Libraries
+Summary: Runtime library for portable C++ threading and sockets
 
 %description
 uCommon is a lightweight C++ library to facilitate using C++ design patterns
@@ -37,77 +29,71 @@ some design patterns from Objective-C, such as reference counted objects,
 memory pools, and smart pointers. UCommon introduces some new concepts for
 handling of thread locking and synchronization.
 
-%define _libname libucommon@LT_MAJOR@
-%define _devname libucommon-devel
-
-%package -n %{_libname}
-Group: System/Libraries
-Summary: Runtime library for portable C++ threading and sockets
-Provides: %{name} = %{version}-%{release}
-
-%package -n %{_devname}
-Requires: %{_libname} = %{version}
+%package devel
+Requires: %{name} = %{version}-%{release}
+Requires: pkgconfig
 Group: Development/Libraries
-Summary: Headers and static link library
-Provides: %{name}-devel = %{version}-%{release}
+Summary: Headers for building ucommon applications
+
+%package static
+Requires: %{name}-devel = %{version}-%{release}
+Group: Development/Libraries
+Summary: Static link libraries for ucommon
 
 %package doc
 Group: Documentation
 Summary: Generated class documentation for ucommon
 
-%description -n %{_libname}
-This package contains the runtime library needed by applications that use 
-GNU uCommon.
+%description devel
+This package provides header and support files needed for building 
+applications that use the uCommon library.
 
-%description -n %{_devname}
-Static link and header files for building applications that use uCommon.
+%description static
+This package offers a static ucommon library that can be used when creating 
+statically linked applications.
 
 %description doc
 Generated class documentation for GNU uCommon library from header files, 
 html browsable.
 
-%changelog
-
 %prep
-%setup
+%setup -q
 %build
 
-%if %{uses_stdcpp}
-%configure CXXFLAGS="$RPM_OPT_FLAGS"
-%else
-%configure --disable-stdcpp CXXFLAGS="$RPM_OPT_FLAGS" 
-%endif
+%configure
 %{__make} %{?_smp_mflags} 
 %{__make} doxy
 
 %install
 
-%makeinstall
-%{__strip} %{buildroot}/%{_libdir}/lib*.so.*.*
-
 %clean
 %{__rm} -rf %{buildroot}
 
-%files -n %{_libname}
+%files 
 %defattr(-,root,root,-)
-%doc AUTHORS README COPYING COPYING.LESSER INSTALL NEWS BUILDS SUPPORT ChangeLog
+%doc AUTHORS README COPYING COPYING.LESSER NEWS SUPPORT ChangeLog
 %{_libdir}/*.so.*
 
-%files -n %{_devname}
+%files devel
 %defattr(-,root,root,-)
-%{_libdir}/*.a
 %{_libdir}/*.so
-%{_libdir}/*.la
-%dir %{_includedir}/ucommon
-%{_includedir}/ucommon/*.h
+%{_includedir}/ucommon/
 %{_libdir}/pkgconfig/*.pc
 %attr(0755,root,root) %{_bindir}/ucommon-config
+
+%files static
+%defattr(-,root,root,-)
+%{_libdir}/*.a
 
 %files doc
 %defattr(-,root,root,-)
 %doc doc/html/*
 
-%post -n %{_libname} -p /sbin/ldconfig
+%post -p /sbin/ldconfig
 
-%postun -n %{_libname} -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
+
+%changelog
+* Sat May 02 2009 - dyfet@gnutelephony.org
+- spec file prepared for redhat/fedora submission.
 
