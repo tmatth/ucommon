@@ -17,7 +17,7 @@ URL: http://www.gnu.org/software/commoncpp
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: doxygen graphviz-gd 
-Group: System/Libraries
+Group: System Environment/Libraries
 Summary: Runtime library for portable C++ threading and sockets
 
 %description
@@ -35,11 +35,6 @@ Requires: pkgconfig
 Group: Development/Libraries
 Summary: Headers for building ucommon applications
 
-%package static
-Requires: %{name}-devel = %{version}-%{release}
-Group: Development/Libraries
-Summary: Static link libraries for ucommon
-
 %package doc
 Group: Documentation
 Summary: Generated class documentation for ucommon
@@ -47,10 +42,6 @@ Summary: Generated class documentation for ucommon
 %description devel
 This package provides header and support files needed for building 
 applications that use the uCommon library.
-
-%description static
-This package offers a static ucommon library that can be used when creating 
-statically linked applications.
 
 %description doc
 Generated class documentation for GNU uCommon library from header files, 
@@ -60,12 +51,16 @@ html browsable.
 %setup -q
 %build
 
-%configure
+%configure --disable-static
 %{__make} %{?_smp_mflags} 
+%{__rm} -rf doc/html
 %{__make} doxy
 
 %install
-%{__make} DESTDIR=%{buildroot}/ install
+%{__rm} -rf %{buildroot}
+%{__make} DESTDIR=%{buildroot} INSTALL="install -p" install
+%{__chmod} 0755 %{buildroot}%{_bindir}/ucommon-config
+%{__rm} %{buildroot}%{_libdir}/*.la
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -80,11 +75,7 @@ html browsable.
 %{_libdir}/*.so
 %{_includedir}/ucommon/
 %{_libdir}/pkgconfig/*.pc
-%attr(0755,root,root) %{_bindir}/ucommon-config
-
-%files static
-%defattr(-,root,root,-)
-%{_libdir}/*.a
+%{_bindir}/ucommon-config
 
 %files doc
 %defattr(-,root,root,-)
