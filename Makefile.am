@@ -10,7 +10,7 @@
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec *-config.in \
-	Doxyfile cmodel.sh BUILDS SUPPORT COPYING*
+	ucommon-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING*
 
 SUBDIRS = src inc test
 
@@ -19,6 +19,9 @@ pkgconfig_DATA = ucommon.pc
 
 scriptdir = $(bindir)
 script_SCRIPTS = ucommon-config
+
+man1_MANS = ucommon-config.1
+man_MANS = ucommon-config.1
 
 doxy:
 	$(DOXYGEN) Doxyfile

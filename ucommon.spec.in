@@ -75,6 +75,7 @@ html browsable.
 %{_includedir}/ucommon/
 %{_libdir}/pkgconfig/*.pc
 %{_bindir}/ucommon-config
+%{_mandir}/man1/ucommon-config.*
 
 %files doc
 %defattr(-,root,root,-)
