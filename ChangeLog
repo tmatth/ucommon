@@ -1,5 +1,6 @@
 From ucommon 2.0.5 to 2.0.6
 - spec file updated per redhat/fedora packaging policies
+- fixed install scripts handling
 
 From ucommon 2.0.4 to 2.0.5
 - small code cleanup.

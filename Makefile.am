@@ -18,7 +18,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ucommon.pc
 
 scriptdir = $(bindir)
-script_DATA = ucommon-config
+script_SCRIPTS = ucommon-config
 
 doxy:
 	$(DOXYGEN) Doxyfile
