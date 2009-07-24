@@ -1,11 +1,18 @@
-Proposed changes:
+Proposed ABI changes:
 
 	Mutex::protect/release use "const" void object pointers...?
 
-	Maybe re-think mapped memory for smart self management?
+	Re-think mapped memory for smart self management?
+
+	Add bool return for fsys::seek()
 
 	Add "joinable" bool for handling of join when running thread terminated
     so that isRunning() has "expected" behavior?
+
+	Remove explicit thread exit calls from exit() methods (keep in 2.0.x
+	but note as depreciated, remove in 2.1?  no abi/link changes?)
+
+Other proposed changes:
 
 	Remove pthread_exit/pthread_xxx re-defintion macros; no user code should
 	ever use "pthread_xxx" methods.
@@ -17,9 +24,6 @@ Proposed changes:
 	Use NSPR code base for simulating msw conditional variables for direct
 	native msw threading if better than code we have in ucommon, or maybe
 	use NSPR in place of native msw threading entirely?
-
-	Remove explicit thread exit calls from exit() methods (keep in 2.0.x
-	but note as depreciated, remove in 2.1?  no abi/link changes)
 
 	Add serialio class?
 
