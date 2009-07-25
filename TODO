@@ -6,6 +6,8 @@ Proposed ABI changes:
 
 	Add bool return for fsys::seek()
 
+	Add ftruncate and fsys::trim()
+
 	Add "joinable" bool for handling of join when running thread terminated
     so that isRunning() has "expected" behavior?
 
