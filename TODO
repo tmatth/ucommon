@@ -1,10 +1,19 @@
+Proposed for 2.0.7:
+	Mutex::protect/release unchanged - const readonly, no need to protect
+	
+	Add bool fsys::seek() as overload to preserve existing abi linkage
+
+	Add bool fsys::trim() in some form
+
+	Add derived mapped memory object??
+	
 Proposed ABI changes:
 
 	Mutex::protect/release use "const" void object pointers...?
 
 	Re-think mapped memory for smart self management?
 
-	Add bool return for fsys::seek()
+	Use bool return for fsys::seek()
 
 	Add ftruncate and fsys::trim()
 
