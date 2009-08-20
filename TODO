@@ -6,6 +6,8 @@ Proposed for 2.0.7:
 	Add bool fsys::trim() in some form
 
 	Add derived mapped memory object??
+
+	String::token and returning char * vs const char *?
 	
 Proposed ABI changes:
 
