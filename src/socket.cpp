@@ -1697,10 +1697,14 @@ ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)
 
 int Socket::loopback(socket_t so, bool enable)
 {
-	struct sockaddr_storage saddr;
-	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	union {
+		struct sockaddr_storage saddr;
+		struct sockaddr_in inaddr;
+	} us;
+
+	struct sockaddr *addr = (struct sockaddr *)&us.saddr;
 	int family;
-	socklen_t len = sizeof(addr);
+	socklen_t len = sizeof(us.saddr);
 	int opt = 0;
 
 	if(enable)
@@ -1710,7 +1714,7 @@ int Socket::loopback(socket_t so, bool enable)
 		return -1;
 
 	getsockname(so, addr, &len);
-	family = addr->sa_family;
+	family = us.inaddr.sin_family;
 	switch(family) {
 	case AF_INET:
 		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
@@ -1724,16 +1728,20 @@ int Socket::loopback(socket_t so, bool enable)
 
 int Socket::ttl(socket_t so, unsigned char t)
 {
-	struct sockaddr_storage saddr;
-	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	union {
+		struct sockaddr_storage saddr;
+		struct sockaddr_in inaddr;
+	} us;
+
+	struct sockaddr *addr = (struct sockaddr *)&us.saddr;
 	int family;
-	socklen_t len = sizeof(addr);
+	socklen_t len = sizeof(us.saddr);
 
 	if(so == INVALID_SOCKET)
 		return -1;
 
 	getsockname(so, addr, &len);
-	family = addr->sa_family;
+	family = us.inaddr.sin_family;
 	switch(family) {
 	case AF_INET:
 		return setsockopt(so, IPPROTO_IP, IP_TTL, (char *)&t, sizeof(t));
@@ -1860,21 +1868,25 @@ int Socket::blocking(socket_t so, bool enable)
 
 int Socket::disconnect(socket_t so)
 {
-	struct sockaddr_storage saddr;
-	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	union {
+		struct sockaddr_storage saddr;
+		struct sockaddr_in inaddr;
+	} us;
+
+	struct sockaddr *addr = (struct sockaddr *)&us.saddr;
 	int family;
-	socklen_t len = sizeof(saddr);
+	socklen_t len = sizeof(us.saddr);
 
 	getsockname(so, addr, &len);
-	family = addr->sa_family;
-	memset(addr, 0, sizeof(saddr));
+	family = us.inaddr.sin_family;
+	memset(addr, 0, sizeof(us.saddr));
 #if defined(_MSWINDOWS_)
-	addr->sa_family = family;
+	us.inaddr.sin_family = family;
 #else
-	addr->sa_family = AF_UNSPEC;
+	us.inaddr.sin_family = AF_UNSPEC;
 #endif
-	if(len > sizeof(saddr))
-		len = sizeof(saddr);
+	if(len > sizeof(us.saddr))
+		len = sizeof(us.saddr);
 	return _connect_(so, addr, len);
 }
 
@@ -2267,15 +2279,18 @@ struct ::addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
 {
 	assert(hint != NULL);
 
-	struct sockaddr_storage st;
-	struct sockaddr *sa = (struct sockaddr *)&st;
-	socklen_t slen = sizeof(st);
+	union {
+		struct sockaddr_storage st;
+		struct sockaddr_in in;
+	} us;
+	struct sockaddr *sa = (struct sockaddr *)&us.st;
+	socklen_t slen = sizeof(us.st);
 
 	memset(hint, 0, sizeof(struct addrinfo));
-	memset(sa, 0, sizeof(st));
+	memset(sa, 0, sizeof(us.st));
 	if(getsockname(so, sa, &slen))
 		return NULL;
-	hint->ai_family = sa->sa_family;
+	hint->ai_family = us.in.sin_family;
 	slen = sizeof(hint->ai_socktype);
 	getsockopt(so, SOL_SOCKET, SO_TYPE, (caddr_t)&hint->ai_socktype, &slen);
 	return hint;
@@ -2836,14 +2851,18 @@ int Socket::getfamily(socket_t so)
 {
 	assert(so != INVALID_SOCKET);
 
-	struct sockaddr_storage saddr;
-	socklen_t len = sizeof(saddr);
-	struct sockaddr *addr = (struct sockaddr *)&saddr;
+	union {
+		struct sockaddr_storage saddr;
+		struct sockaddr_in inaddr;
+	} us;
+
+	socklen_t len = sizeof(us.saddr);
+	struct sockaddr *addr = (struct sockaddr *)(&us.saddr);
 
 	if(getsockname(so, addr, &len))
 		return AF_UNSPEC;
 
-	return addr->sa_family;
+	return us.inaddr.sin_family;
 }
 
 #ifdef	_MSWINDOWS_

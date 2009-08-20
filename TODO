@@ -1,13 +1,11 @@
 Proposed for 2.0.7:
 	Mutex::protect/release unchanged - const readonly, no need to protect
 	
-	Add bool fsys::seek() as overload to preserve existing abi linkage
+	Add int fsys::seek() as overload to preserve existing abi linkage
 
-	Add bool fsys::trim() in some form
+	Add int fsys::trim() in some form
 
 	Add derived mapped memory object??
-
-	String::token and returning char * vs const char *?
 	
 Proposed ABI changes:
 
@@ -15,7 +13,7 @@ Proposed ABI changes:
 
 	Re-think mapped memory for smart self management?
 
-	Use bool return for fsys::seek()
+	Use int return for fsys::seek()
 
 	Add ftruncate and fsys::trim()
 
@@ -24,6 +22,8 @@ Proposed ABI changes:
 
 	Remove explicit thread exit calls from exit() methods (keep in 2.0.x
 	but note as depreciated, remove in 2.1?  no abi/link changes?)
+
+	String::token and returning char * vs const char *
 
 Other proposed changes:
 
