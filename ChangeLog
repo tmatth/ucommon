@@ -1,5 +1,6 @@
 From ucommon 2.0.6 to 2.0.7
 - strict aliasing, socket address manipulations, and gcc 4.4
+- doc generation cleanup
 
 From ucommon 2.0.5 to 2.0.6
 - spec file updated per redhat/fedora packaging policies
