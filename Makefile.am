@@ -25,3 +25,6 @@ man_MANS = ucommon-config.1
 
 doxy:
 	$(DOXYGEN) Doxyfile
+
+clean-local:
+	-rm -rf doc
