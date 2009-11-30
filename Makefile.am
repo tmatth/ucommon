@@ -20,7 +20,6 @@ pkgconfig_DATA = ucommon.pc
 scriptdir = $(bindir)
 script_SCRIPTS = ucommon-config
 
-man1_MANS = ucommon-config.1
 man_MANS = ucommon-config.1
 
 doxy:
