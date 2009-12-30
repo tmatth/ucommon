@@ -86,15 +86,12 @@ html browsable.
 %postun -p /sbin/ldconfig
 
 %changelog
-* Sun Jul 19 2009 - David Sugar <dyfet@gnutelephony.org> - 1.0.6-1
+* Sun Jul 19 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.6-1
 - fixed ucommon-config upstream.
 
-* Tue May 05 2009 - David Sugar <dyfet@gnutelephony.org> - 1.0.5-4
+* Tue May 05 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.5-4
 - removed static libraries, fixed other build issues (#498736)
 
-* Sun May 03 2009 - David Sugar <dyfet@gnutelephony.org> - 1.0.5-3
-- spec file further revised for redhat/fedora (#498736)
-
-* Sat May 02 2009 - David Sugar <dyfet@gnutelephony.org>
-- spec file prepared for redhat/fedora submission.
+* Sun May 03 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.5-3
+- spec file prepared for redhat/fedora (#498736)
 
