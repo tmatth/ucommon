@@ -11,6 +11,7 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = $(LT_VERSION) -release $(LT_RELEASE)
 AM_CXXFLAGS = $(UCOMMON_FLAGS)
+EXTRA_DIST = ucommon.cmake
 
 SUBDIRS = ucommon
 
