@@ -17,6 +17,10 @@
 
 #include <config.h>
 
+#if !defined(NEW_STDCPP) && !defined(OLD_STDCPP)
+#undef	HAVE_STDEXCEPT
+#endif
+
 #ifdef	HAVE_STDEXCEPT
 #include <stdexcept>
 #endif

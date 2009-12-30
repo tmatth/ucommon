@@ -92,5 +92,8 @@ check_include_files(mach-o/dyld.h HAVE_MACH_O_DYLD_H)
 check_include_files(linux/version.h HAVE_LINUX_VERSION_H)
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+add_subdirectory(src)
 
+message(DIRS "${CMAKE_SOURCE_DIR}/inc vs ${CMAKE_CURRENT_SOURCE_DIR}/inc")
 message(STATUS "ucommon libs ${LIBS}  ${CMAKE_REQUIRED_LIBRARIES}")
