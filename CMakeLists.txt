@@ -9,13 +9,12 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # This is a simplified build system for GNU uCommon.  In particular, it
-# does not support cmodel linkage for embedded or specialized cross-compile 
-# uses including libc substitution.  If one needs to do such things, it is 
-# suggested to continue using the existing autotools configure script driven 
-# build environment instead.  Mostly the cmake one is meant as a convenience 
-# for generating project files for those working with IDE's to do otherwise 
-# generic builds of the library and supporting applications.  In the future
-# we may migrate embedded support into cmake as well.
+# offers limited cmodel linkage support, at least for mingw32 support (and
+# probably visual c 6 also).  If one really needs to do such things outside
+# these use cases, it is suggested to continue using the existing autotools 
+# configure script driven build environment instead.  Mostly the cmake one is 
+# meant for generating project files for those working with IDE's to do 
+# otherwise generic builds of the library and supporting applications.
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)

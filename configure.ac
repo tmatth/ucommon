@@ -148,8 +148,6 @@ AC_CHECK_LIB(msvcrt, fopen, [
 			AC_CHECK_LIB(socket, gethostbyname2, [AC_DEFINE(HAVE_GETHOSTBYNAME2, [1], [have gethostbyname2])])
 	])
 
-
-
 	AC_CHECK_LIB($clib, inet_ntop, [
 		AC_DEFINE(HAVE_INET_NTOP, [1], [have inet ntop])
 	],[
