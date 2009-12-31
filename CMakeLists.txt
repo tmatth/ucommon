@@ -34,11 +34,6 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/inc/")
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/inc/")
 endif()
 
-# Set library postfix in case of 64 bit architecture
-if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-	set(LIB64 64)
-endif()
-
 include (inc/ucommon.cmake)
 
 set (CMAKE_REQUIRED_LIBRARIES ${UCOMMON_LIBS})
@@ -93,6 +88,7 @@ check_include_files(linux/version.h HAVE_LINUX_VERSION_H)
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+add_definitions(${UCOMMON_FLAGS} ${WITH_FLAGS})
 
 add_library(ucommon SHARED 
 	src/object.cpp src/linked.cpp src/string.cpp src/mapped.cpp src/shell.cpp 
@@ -100,8 +96,5 @@ add_library(ucommon SHARED
 	src/socket.cpp src/access.cpp src/thread.cpp src/fsys.cpp src/cpr.cpp 
 	src/vector.cpp src/xml.cpp src/stream.cpp src/persist.cpp src/keydata.cpp)
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-target_link_libraries(ucommon ${UCOMMON_LIBS})
-install(TARGETS ucommon DESTINATION lib${LIB64})
-
-message(DIRS "${CMAKE_SOURCE_DIR}/inc vs ${CMAKE_CURRENT_SOURCE_DIR}/inc")
-message(STATUS "ucommon libs ${LIBS}  ${CMAKE_REQUIRED_LIBRARIES}")
+target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+install(TARGETS ucommon DESTINATION lib)

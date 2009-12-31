@@ -8,8 +8,6 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-set (UCOMMON_FLAGS)
-
 if ((WIN32 AND CMAKE_COMPILER_IS_GNUCXX) OR MINGW OR MSYS)
 	set (UCOMMON_LIBS --enable-stdcall-fixup ${UCOMMON_LIBS} -lmingwex -lmingw32)
 endif()
@@ -59,7 +57,7 @@ if(UNIX OR MSYS OR MINGW OR CYGWIN)
 		if(ENABLE_DEBUG)
 			add_definitions(-g)
 		endif()
-		add_definitions(-Wno-long-long -fvisibility-inlines-hidden -fvisibility=hidden)
+		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -Wno-long-long -fvisibility-inlines-hidden -fvisibility=hidden)
 	endif()
 endif()
 
@@ -84,7 +82,7 @@ endif()
 # see if we are building with or without std c++ libraries...
 if (NOT ENABLE_STDLIB OR DISABLE_STDLIB)
 	if(CMAKE_COMPILER_IS_GNUCXX)
-		add_definitions(-fno-exceptions -fno-rtti -fno-enforce-eh-specs)
+		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -fno-exceptions -fno-rtti -fno-enforce-eh-specs)
 		if(MINGW OR MSYS)
 			set(UCOMMON_LIBS ${UCOMMON_LIBS} -nodefaultlibs -nostdinc++ -lmsvcrt)
 		else()
@@ -97,6 +95,6 @@ if (NOT ENABLE_STDLIB OR DISABLE_STDLIB)
 	endif()	
 else()
 	# for now assume newer c++ stdlib always....
-	add_definitions(-DNEW_STDLIB)
+	set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DNEW_STDLIB)
 endif()
 
