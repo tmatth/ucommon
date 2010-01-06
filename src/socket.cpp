@@ -2333,7 +2333,7 @@ bool Socket::setccid(socket_t so, uint8_t ccid)
 		
 unsigned Socket::segsize(socket_t so, unsigned size)
 {
-#ifdef	IP_M
+#ifdef	IP_MTU
 	socklen_t alen = sizeof(size);
 #endif
 	
