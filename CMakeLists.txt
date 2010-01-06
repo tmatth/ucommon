@@ -86,7 +86,7 @@ check_include_files(mach-o/dyld.h HAVE_MACH_O_DYLD_H)
 check_include_files(linux/version.h HAVE_LINUX_VERSION_H)
 
 # for some reason, normal library searches always fail on broken windows
-if (WIN32)
+if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
 	set(HAVE_GETADDRINFO True)
 	set(HAVE_INET_NTOP True)
 endif()
