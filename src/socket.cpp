@@ -2333,7 +2333,10 @@ bool Socket::setccid(socket_t so, uint8_t ccid)
 		
 unsigned Socket::segsize(socket_t so, unsigned size)
 {
+#ifdef	IP_M
 	socklen_t alen = sizeof(size);
+#endif
+	
 	switch(gettype(so)) {
 	case SOCK_STREAM:
 #ifdef	TCP_MAXSEG
