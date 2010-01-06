@@ -16,6 +16,10 @@ if (WIN32 OR MINGW OR MSYS)
 	set (UCOMMON_LIBS ${UCOMMON_LIBS} ws2_32 wsock32 kernel32)
 endif()
 
+if (MSVC60)
+	set (UCOMMON_FLAGS ${UCOMMON_FLAGS} -DWINVER=0x0400)
+endif()
+
 find_package(Threads)
 if (CMAKE_HAVE_PTHREAD_H)
 	set(HAVE_PTHREAD_H TRUE)
