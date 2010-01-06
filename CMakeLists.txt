@@ -35,7 +35,6 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/inc/")
 endif()
 
 include (inc/ucommon.cmake)
-
 set (CMAKE_REQUIRED_LIBRARIES ${UCOMMON_LIBS})
 check_function_exists(getaddrinfo HAVE_GETADDRINFO)
 check_function_exists(socketpair HAVE_SOCKETPAIR)
@@ -85,6 +84,12 @@ check_include_files(sys/resource.h HAVE_SYS_RESOURCE_H)
 check_include_files(mach/clock.h HAVE_MACH_CLOCK_H)
 check_include_files(mach-o/dyld.h HAVE_MACH_O_DYLD_H)
 check_include_files(linux/version.h HAVE_LINUX_VERSION_H)
+
+# for some reason, normal library searches always fail on broken windows
+if (WIN32)
+	set(HAVE_GETADDRINFO True)
+	set(HAVE_INET_NTOP True)
+endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc)
