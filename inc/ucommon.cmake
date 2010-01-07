@@ -62,6 +62,10 @@ if(UNIX OR MSYS OR MINGW OR CYGWIN)
 	endif()
 endif()
 
+if(NOT UNIX AND NOT WITH_SHARED_LIB)
+	set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_STATIC)
+endif()
+
 # some platforms we can only build non-c++ stdlib versions without issues...
 # we can force stdlib -DWITH_STDLIB, but we should only do so on some platforms
 # if we also only use static linking...
