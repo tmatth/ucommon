@@ -58,33 +58,26 @@ if(UNIX OR MSYS OR MINGW OR CYGWIN)
 	endif()
 
 	if(CMAKE_COMPILER_IS_GNUCXX)
-		if(ENABLE_DEBUG)
-			add_definitions(-g)
-		endif()
 		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -Wno-long-long -fvisibility-inlines-hidden -fvisibility=hidden)
 	endif()
 endif()
 
-if(WIN32)
-	if(ENABLE_DEBUG)
-		add_definitions(-DDEBUG)
-	else(ENABLE_DEBUG)
-		add_definitions(-DNDEBUG)
+# some platforms we can only build non-c++ stdlib versions without issues...
+# we can force stdlib -DWITH_STDLIB, but we should only do so on some platforms
+# if we also only use static linking...
+
+if(NOT WITH_STDLIB)
+	if(MSVC60)
+		set(WITH_NOSTDLIB TRUE)
+	endif()
+
+	if((MSYS OR MINGW OR WIN32) AND CMAKE_COMPILER_IS_GNUCXX)
+		set(WITH_NOSTDLIB TRUE)
 	endif()
 endif()
 
-# some platforms we can only build non-c++ stdlib versions without issues...
-
-if(MSVC60)
-	set(DISABLE_STDLIB TRUE)
-endif()
-
-if((MSYS OR MINGW OR WIN32) AND CMAKE_COMPILER_IS_GNUCXX)
-	set(DISABLE_STDLIB TRUE)
-endif()
-
 # see if we are building with or without std c++ libraries...
-if (NOT ENABLE_STDLIB OR DISABLE_STDLIB)
+if (WITH_NOSTDLIB)
 	if(CMAKE_COMPILER_IS_GNUCXX)
 		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -fno-exceptions -fno-rtti -fno-enforce-eh-specs)
 		if(MINGW OR MSYS)

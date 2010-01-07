@@ -95,7 +95,36 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 add_definitions(${UCOMMON_FLAGS} ${WITH_FLAGS})
 
-add_library(ucommon SHARED 
+# enable debug using -DWITH_DEBUG
+if(WIN32)
+	if(WITH_DEBUG)
+		add_definitions(-DDEBUG)
+	else()
+		add_definitions(-DNDEBUG)
+	endif()
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX AND WITH_DEBUG)
+	add_definitions(-g)
+endif()
+
+# by default we build static libs for windows, shared libs for unix.  
+# we may also set this from a top level cmake or -DWITH_XX_LIBS
+if(UNIX)
+	set(BUILD_LIBRARY_TYPE SHARED)
+else()
+	set(BUILD_LIBRARY_TYPE STATIC)
+endif()
+
+if(WITH_SHARED_LIBS)
+	set(BUILD_LIBRARY_TYPE SHARED)
+endif()
+
+if(WITH_STATIC_LIBS)
+	set(BUILD_LIBRARY_TYPE STATIC)
+endif()
+
+add_library(ucommon ${BUILD_LIBRARY_TYPE}
 	src/object.cpp src/linked.cpp src/string.cpp src/mapped.cpp src/shell.cpp 
 	src/counter.cpp src/bitmap.cpp src/timer.cpp src/memory.cpp 
 	src/socket.cpp src/access.cpp src/thread.cpp src/fsys.cpp src/cpr.cpp 
