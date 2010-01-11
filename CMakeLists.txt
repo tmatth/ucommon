@@ -111,11 +111,8 @@ if(WITH_STATIC_LIBS)
 	set(BUILD_LIBRARY_TYPE STATIC)
 endif()
 
-add_library(ucommon ${BUILD_LIBRARY_TYPE}
-	src/object.cpp src/linked.cpp src/string.cpp src/mapped.cpp src/shell.cpp 
-	src/counter.cpp src/bitmap.cpp src/timer.cpp src/memory.cpp 
-	src/socket.cpp src/access.cpp src/thread.cpp src/fsys.cpp src/cpr.cpp 
-	src/vector.cpp src/xml.cpp src/stream.cpp src/persist.cpp src/keydata.cpp)
+file(GLOB ucommon_src src/*.cpp)
+add_library(ucommon ${BUILD_LIBRARY_TYPE} ${ucommon_src})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 install(TARGETS ucommon DESTINATION lib)
