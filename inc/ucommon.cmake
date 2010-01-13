@@ -9,6 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
+	include(CheckCCompilerFlag)
 	if ((WIN32 AND CMAKE_COMPILER_IS_GNUCXX) OR MINGW OR MSYS)
 		set (UCOMMON_LIBS --enable-stdcall-fixup ${UCOMMON_LIBS} mingwex mingw32)
 	endif()
@@ -59,12 +60,25 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
 		endif()
 
 		if(CMAKE_COMPILER_IS_GNUCXX)
-			set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -Wno-long-long -fvisibility-inlines-hidden -fvisibility=hidden)
+			set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -Wno-long-long -fvisibility-inlines-hidden)
+			set(UCOMMON_VISIBILITY_FLAG "-fvisibility=hidden")
 		endif()
 	endif()
 
 	if(NOT UNIX AND NOT WITH_SHARED_LIB)
 		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_STATIC)
+	endif()
+
+	# visibility support for linking reduction (gcc >4.1 only so far...)
+
+	if(UCOMMON_VISIBILITY_FLAG)
+		check_c_compiler_flag(${UCOMMON_VISIBILITY_FLAG} CHECK_VISIBILITY)
+	endif()
+
+	if(CHECK_VISIBILITY)
+		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} ${UCOMMON_VISIBILITY_FLAG} -DUCOMMON_VISIBILITY=1)
+	else()
+		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_VISIBILITY=0)
 	endif()
 
 	# some platforms we can only build non-c++ stdlib versions without issues...
