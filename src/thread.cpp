@@ -1539,13 +1539,10 @@ Conditional()
 
 barrier::~barrier()
 {
-	for(;;)
-	{
-		lock();
-		if(waits)
-			broadcast();
-		unlock();
-	}
+	lock();
+	if(waits)
+		broadcast();
+	unlock();
 }
 
 void barrier::set(unsigned limit)
