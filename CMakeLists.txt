@@ -150,8 +150,12 @@ if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
 endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc)
-add_definitions(${UCOMMON_FLAGS} ${WITH_FLAGS})
+
+# common build options can be passed to cmake using WITH_CFLAGS, WITH_LIBS,
+# and WITH_INCLUDES.
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc ${WITH_INCLUDES})
+add_definitions(${UCOMMON_FLAGS} ${WITH_CFLAGS})
+link_libraries(${WITH_LIBS})
 
 # by default we build static libs for windows, shared libs for unix.  
 # we may also set this from a top level cmake or -DWITH_XX_LIBS
