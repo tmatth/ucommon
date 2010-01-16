@@ -10,7 +10,7 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="2.0.7"
+VERSION="2.0.8"
 LT_VERSION="2:10:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
