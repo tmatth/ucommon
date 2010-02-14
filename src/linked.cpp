@@ -525,6 +525,13 @@ NamedObject(), child()
 	parent = NULL;
 }
 
+NamedTree::NamedTree(const NamedTree& source)
+{
+	id = source.id;
+	parent = NULL;
+	memcpy(&child, &source.child, sizeof(child));
+}
+
 NamedTree::NamedTree(NamedTree *p, char *nid) :
 NamedObject(), child()
 {
@@ -538,6 +545,7 @@ NamedObject(), child()
 
 NamedTree::~NamedTree()
 {
+	id = NULL;
 	purge();
 }
 
@@ -673,7 +681,6 @@ void NamedTree::setId(char *nid)
 {
 	assert(nid != NULL && *nid != 0);
 
-	clearId();
 	id = nid;
 }
 

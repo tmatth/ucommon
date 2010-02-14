@@ -508,6 +508,12 @@ protected:
 	NamedTree(NamedTree *parent, char *name);
 
 	/**
+	 * Construct a copy of the tree.
+     * @param object to copy from.
+	 */
+	NamedTree(const NamedTree& source);
+
+	/**
 	 * Delete node in a tree.  If we delete a node, we must delist it from
 	 * it's parent.  We must also delink any child nodes.  This is done by
 	 * calling the purge() member.
@@ -1246,6 +1252,13 @@ public:
 	 * @param name of the node we are creating.
 	 */
 	inline treemap(char *name = NULL) : NamedTree(name) {};
+
+	/**
+	 * Construct a copy of the treemap object.
+	 * @param source of copy for new object.
+	 */
+	inline treemap(const treemap& source) : NamedTree(source) 
+		{value = source.value;};
 
 	/**
 	 * Construct a child node on an existing tree.

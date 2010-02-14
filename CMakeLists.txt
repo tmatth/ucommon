@@ -174,7 +174,10 @@ if(WITH_STATIC_LIBS)
 endif()
 
 file(GLOB ucommon_src src/*.cpp)
+file(GLOB ucommon_inc inc/ucommon/*.h)
 add_library(ucommon ${BUILD_LIBRARY_TYPE} ${ucommon_src})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+
+install(FILES ${ucommon_inc} DESTINATION include/ucommon)
 install(TARGETS ucommon DESTINATION lib)
