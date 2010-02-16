@@ -18,13 +18,77 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 2.0.7)
+set (VERSION 2.0.8)
 set (SOVERSION 2)
 
-MESSAGE( STATUS "Configuring GNU ucommon ${VERSION}...")
+# project options
+if (WIN32)
+	option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
+else()
+	option(BUILD_STATIC "Set to ON to build static libraries" OFF)
+endif()
+
+set(STDLIB TRUE)
+if(MSVC60)
+	set(STDLIB FALSE)
+endif()
+
+if((MSYS OR MINGW OR WIN32) AND CMAKE_COMPILER_IS_GNUCXX)
+	set(STDLIB FALSE)
+endif()
+
+option(BUILD_STDLIB "Set to ON to build with C++ stdlib" ${STDLIB})
+
+option(BUILD_TESTS "Set to ON to build test programs" OFF)
+
+MESSAGE( STATUS "Configuring GNU ${PROJECT_NAME} ${VERSION}...")
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckIncludeFiles)
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME} library")
+SET(CPACK_PACKAGE_VENDOR              "David Sugar")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/README")
+SET(CPACK_RESOURCE_FILE_LICENSE       "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+set(PACKAGE_FILE_NAME                 ${PROJECT_NAME})
+set(PACKAGE_FILE_VERSION              ${VERSION})
+
+IF (WIN32)
+	SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
+ELSE (WIN32)
+	SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-bin-${PACKAGE_FILE_VERSION}")
+	if (NOT CPACK_GENERATOR)
+		SET(CPACK_GENERATOR "TBZ2")
+	endif()
+ENDIF (WIN32)
+
+IF(WIN32 AND NOT UNIX)
+    SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_FILE_NAME}")
+
+    # There is a bug in NSI that does not handle full unix paths properly. Make
+    # sure there is at least one set of four (4) backlasshes.
+    # SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+    # SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
+    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${PROJECT_NAME}$")
+    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.gnutelephony.org")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.gnutelephony.org")
+    SET(CPACK_NSIS_CONTACT "dyfet@gnutelephony.org")
+    SET(CPACK_NSIS_MODIFY_PATH ON)
+
+ENDIF(WIN32 AND NOT UNIX)
+
+set(CPACK_COMPONENTS_ALL libraries headers)
+set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
+set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME   "C++ Headers")
+set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION  "Dynamic library")
+set(CPACK_COMPONENT_HEADERS_DESCRIPTION
+	"Header files needed to build applications using ucommon library")
+SET(CPACK_SOURCE_IGNORE_FILES ".bzr" "build" ".swp$" ".*~" ".svn" ".git")
+SET(CPACK_SOURCE_GENERATOR "TBZ2")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
+
+ # This must always be last!
+INCLUDE(CPack)
 
 # set to true for debug and trace during CMakeLists development
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
@@ -150,6 +214,9 @@ if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
 endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+if(NOT WIN32)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
+endif(NOT WIN32)
 
 # common build options can be passed to cmake using WITH_CFLAGS, WITH_LIBS,
 # and WITH_INCLUDES.
@@ -159,18 +226,16 @@ link_libraries(${WITH_LIBS})
 
 # by default we build static libs for windows, shared libs for unix.  
 # we may also set this from a top level cmake or -DWITH_XX_LIBS
-if(UNIX)
-	set(BUILD_LIBRARY_TYPE SHARED)
+if(BUILD_STATIC)
+	set(BUILD_LIBRARY_TYPE STATIC)
 else()
-	set(BUILD_LIBRARY_TYPE STATIC)
-endif()
-
-if(WITH_SHARED_LIBS)
 	set(BUILD_LIBRARY_TYPE SHARED)
 endif()
 
-if(WITH_STATIC_LIBS)
-	set(BUILD_LIBRARY_TYPE STATIC)
+if(LIB_SUFFIX)
+	if (NOT LIB_SUFFIX EQUAL 64)
+		message (FATAL_ERROR "LIB_SUFFIX must be empty (32 bits) or 64 (64 bits)")
+	endif()
 endif()
 
 file(GLOB ucommon_src src/*.cpp)
@@ -179,5 +244,25 @@ add_library(ucommon ${BUILD_LIBRARY_TYPE} ${ucommon_src})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
-install(FILES ${ucommon_inc} DESTINATION include/ucommon)
-install(TARGETS ucommon DESTINATION lib)
+message (STATUS)
+message (STATUS "-------------------------------------------------------------------------------")
+message (STATUS "CMAKE_INSTALL_PREFIX " ${CMAKE_INSTALL_PREFIX} )
+message (STATUS "LIB_SUFFIX           " ${LIB_SUFFIX})
+message (STATUS "BUILD_STATIC         " ${BUILD_STATIC})
+message (STATUS "BUILD STDLIB         " ${BUILD_STDLIB})
+message (STATUS "BUILD_TESTS          " ${BUILD_TESTS})
+message (STATUS "-------------------------------------------------------------------------------")
+message (STATUS)
+message (STATUS "Change a value with: cmake -D<Variable>=<Value>")
+message (STATUS)
+
+if (BUILD_TESTS)
+	add_subdirectory(test)
+endif()
+
+if(NOT WIN32)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
+endif(NOT WIN32)
+install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
+install(TARGETS ${PROJECT_NAME} DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
+

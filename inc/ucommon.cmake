@@ -20,26 +20,15 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
 		endif()
 	endif()
 
-	if(NOT UNIX AND NOT WITH_SHARED_LIB)
+	if(BUILD_STATIC)
 		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_STATIC)
 	endif()
 
-	# some platforms we can only build non-c++ stdlib versions without issues...
-	# we can force stdlib -DWITH_STDLIB, but we should only do so on some platforms
-	# if we also only use static linking...
-
-	if(NOT WITH_STDLIB)
-		if(MSVC60)
-			set(WITH_NOSTDLIB TRUE)
-		endif()
-
-		if((MSYS OR MINGW OR WIN32) AND CMAKE_COMPILER_IS_GNUCXX)
-			set(WITH_NOSTDLIB TRUE)
-		endif()
-	endif()
-
 	# see if we are building with or without std c++ libraries...
-	if (WITH_NOSTDLIB)
+	if (BUILD_STDLIB)
+		# for now we assume only newer libstdc++ library
+		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DNEW_STDLIB)
+	else()
 		if(CMAKE_COMPILER_IS_GNUCXX)
 			set(CHECK_FLAGS ${CHECK_FLAGS} -fno-exceptions -fno-rtti -fno-enforce-eh-specs)
 			if(MINGW OR MSYS)
@@ -48,9 +37,6 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
 				set(UCOMMON_LIBS ${UCOMMON_LIBS} -nodefaultlibs -nostdinc++)
 			endif()
 		endif()	
-	else()
-		# for now assume newer c++ stdlib always....
-		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DNEW_STDLIB)
 	endif()
 
 	# check final for compiler flags
