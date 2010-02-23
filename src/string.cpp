@@ -1205,7 +1205,7 @@ void memstring::cow(strsize_t adj)
 {
 }
 
-const char *string::token(char *text, char **token, const char *clist, const char *quote, const char *eol)
+char *string::token(char *text, char **token, const char *clist, const char *quote, const char *eol)
 {
 	char *result;
 

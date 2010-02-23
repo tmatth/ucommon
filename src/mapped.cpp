@@ -123,17 +123,21 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
 	assert(fn != NULL && *fn != 0);
 	assert(len > 0);
 
+	erase = true;
+	String::set(idname, sizeof(idname), fn);
 	create(fn, size);
 }
 
 MappedMemory::MappedMemory(const char *fn)
 {
+	erase = false;
 	assert(fn != NULL && *fn != 0);
 	create(fn, 0);
 }
 
 MappedMemory::MappedMemory()
 {
+	erase = false;
 	size = 0;
 	used = 0;
 	map = NULL;
@@ -206,6 +210,10 @@ void MappedMemory::release(void)
 			free(map);
 			map = NULL;
 		}
+	}
+	if(erase) {
+		remove(idname);
+		erase = false;
 	}
 }
 
@@ -290,6 +298,10 @@ void MappedMemory::release()
 		else
 			free(map);
 		size = 0;
+	}
+	if(erase) {
+		remove(idname);
+		erase = false;
 	}
 }
 
@@ -396,6 +408,10 @@ void MappedMemory::release(void)
 		else
 			free(map);
 		size = 0;
+	}
+	if(erase) {
+		remove(idname);
+		erase = false;
 	}
 }
 

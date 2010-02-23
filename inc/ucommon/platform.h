@@ -26,6 +26,7 @@
 
 #ifndef	_UCOMMON_PLATFORM_H_
 #define	_UCOMMON_PLATFORM_H_
+#define	UCOMMON_ABI	3
 
 /**
  * Common namespace for all ucommon objects.

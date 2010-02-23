@@ -18,8 +18,8 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 2.0.8)
-set (SOVERSION 2)
+set (VERSION 2.1.0)
+set (SOVERSION 3)
 
 # project options
 if (WIN32)

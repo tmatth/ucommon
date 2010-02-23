@@ -64,6 +64,8 @@ private:
 
 protected:
 	size_t size, used;
+	char idname[65];
+	bool erase;
 
 	MappedMemory();
 

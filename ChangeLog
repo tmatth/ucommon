@@ -1,4 +1,5 @@
-From ucommon 2.0.8 to 2.0.9
+From ucommon 2.0.8 to 2.1.0
+- new abi for fsys seek and drop
 - Added NamedTree/treemap copy constructor and changed id behavior
 - Improved cmake support using proper build options and adding cpack
 

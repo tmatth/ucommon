@@ -9,8 +9,6 @@ Proposed for 2.0.7:
 	
 Proposed ABI changes:
 
-	Mutex::protect/release use "const" void object pointers...?
-
 	Re-think mapped memory for smart self management?
 
 	Use int return for fsys::seek()

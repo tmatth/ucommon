@@ -297,7 +297,7 @@ void fsys::open(const char *path, access_t access)
 
 	fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
-		seek(end);
+		seek(end)
 	else
 		error = remapError();
 }
@@ -406,11 +406,13 @@ void fsys::operator=(const fsys& from)
 	}
 }
 
-void fsys::drop(offset_t size)
+int fsys::drop(offset_t size)
 {
+	error = ENOSYS;
+	return -1; 
 }
 
-void fsys::seek(offset_t pos)
+int fsys::seek(offset_t pos)
 {
 	DWORD rpos = pos;
 	int mode = FILE_BEGIN;
@@ -419,8 +421,11 @@ void fsys::seek(offset_t pos)
 		rpos = 0;
 		mode = FILE_END;
 	}
-	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER)
+	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER) {
 		error = remapError();
+		return -1;
+	}
+	return 0;
 }
 
 #else
@@ -668,14 +673,21 @@ void fsys::operator=(const fsys& from)
 	}
 }
 
-void fsys::drop(offset_t size)
+int fsys::drop(offset_t size)
 {
 #ifdef	HAVE_POSIX_FADVISE
-	posix_fadvise(fd, (off_t)0, size, POSIX_FADV_DONTNEED);
+	if(posix_fadvise(fd, (off_t)0, size, POSIX_FADV_DONTNEED)) {
+		error = remapError();
+		return -1;
+	}
+	return 0;
+#else
+	error = ENOSYS;
+	return -1;
 #endif
 }
 
-void fsys::seek(offset_t pos)
+int fsys::seek(offset_t pos)
 {
 	unsigned long rpos = pos;
 	int mode = SEEK_SET;
@@ -684,8 +696,11 @@ void fsys::seek(offset_t pos)
 		rpos = 0;
 		mode = SEEK_END;
 	}
-	if(lseek(fd, mode, rpos))
+	if(lseek(fd, mode, rpos)) {
 		error = remapError();
+		return -1;
+	}
+	return 0;
 }
 
 #endif

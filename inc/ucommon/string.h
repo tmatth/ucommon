@@ -952,7 +952,7 @@ public:
 	 * @param end of line marker characters or NULL if not used.
 	 * @return token extracted from string or NULL if no more tokens found.
 	 */
-	static const char *token(char *text, char **last, const char *list, const char *quote = NULL, const char *end = NULL);
+	static char *token(char *text, char **last, const char *list, const char *quote = NULL, const char *end = NULL);
 
 	/**
 	 * Skip after lead characters in a null terminated string.
@@ -1222,7 +1222,7 @@ public:
 	 * @param end of line marker characters or NULL if not used.
 	 * @return token extracted from string or NULL if no more tokens found.
 	 */
-	inline static const char *token(string& object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
+	inline static char *token(string& object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
 		{return token(object.c_mem(), last, list, quote, end);};
 
 	/**

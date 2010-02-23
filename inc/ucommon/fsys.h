@@ -191,14 +191,16 @@ public:
 	/**
 	 * Set the position of a file descriptor.
 	 * @param offset from start of file or "end" to append.
+	 * @return 0 on success, -1 on error.
 	 */
-	void seek(offset_t offset);
+	int seek(offset_t offset);
 
 	/**
 	 * Drop cached data from start of file.
 	 * @param size of region to drop or until end of file.
+	 * @return 0 on success, -1 on error.
 	 */
-	void drop(offset_t size = 0);	
+	int drop(offset_t size = 0);	
 
 	/**
 	 * Read data from descriptor or scan directory.
@@ -323,16 +325,16 @@ public:
 	 * @param descriptor to set.
 	 * @param offset from start of file or "end" to append.
 	 */
-	inline static void seek(fsys& descriptor, offset_t offset)
-		{descriptor.seek(offset);};
+	inline static int seek(fsys& descriptor, offset_t offset)
+		{return descriptor.seek(offset);};
 
 	/**
 	 * Drop cached data from a file descriptor.
 	 * @param descriptor to set.
 	 * @param size of region from start of file to drop or all.
 	 */
-	inline static void drop(fsys& descriptor, offset_t size)
-		{descriptor.drop(size);};
+	inline static int drop(fsys& descriptor, offset_t size)
+		{return descriptor.drop(size);};
 
 	/**
 	 * Open a file or directory.
