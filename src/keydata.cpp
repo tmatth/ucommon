@@ -63,7 +63,7 @@ const char *keydata::get(const char *key)
 	iterator keys = begin();
 
 	while(is(keys)) {
-		if(!stricmp(key, keys->id))
+		if(ieq(key, keys->id))
 			return keys->value;
 		keys.next();
 	}
@@ -77,7 +77,7 @@ void keydata::clear(const char *key)
 	iterator keys = begin();
 
 	while(is(keys)) {
-		if(!stricmp(key, keys->id)) {
+		if(ieq(key, keys->id)) {
 			keys->delist(&index);
 			return;
 		}
@@ -94,7 +94,7 @@ void keydata::set(const char *key, const char *value)
 	keydata::iterator keys = begin();
 
 	while(is(keys)) {
-		if(!stricmp(key, keys->id)) {
+		if(ieq(key, keys->id)) {
 			keys->delist(&index);
 			break;
 		}
@@ -124,7 +124,7 @@ keydata *keyfile::get(const char *key)
 	iterator keys = begin();
 
 	while(is(keys)) {
-		if(!stricmp(key, keys->name))
+		if(ieq(key, keys->name))
 			return *keys;
 		keys.next();
 	}

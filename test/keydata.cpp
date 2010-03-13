@@ -31,14 +31,14 @@ extern "C" int main()
 	keyfile myfile("keydata.conf");
 
 	keys = myfile.get();
-	assert(stricmp(keys->get("key2"), "value2") == 0);
+	assert(ieq(keys->get("key2"), "value2"));
 
 	keys = myfile["section1"];
 	assert(keys != NULL);
-	assert(stricmp(keys->get("key1"), "this is value 1 quoted") == 0);
+	assert(ieq(keys->get("key1"), "this is value 1 quoted"));
 
 	keys = myfile["section2"];
 	assert(keys != NULL);
-	assert(stricmp(keys->get("key1"), "replaced value") == 0);
+	assert(ieq(keys->get("key1"), "replaced value"));
 	return 0;
 }

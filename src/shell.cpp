@@ -92,7 +92,7 @@ skip:
 			skipped = true;
 			continue;
 		}
-		if(!strcmp(*_argv, "--")) {
+		if(eq(*_argv, "--")) {
 			flagged = false;
 			goto skip;
 		}
@@ -315,7 +315,7 @@ int shell::parse(int argc, char **argv)
 		++argv0;
 
 	while(argp < argc) {
-		if(!stricmp(argv[argp], "--"))
+		if(eq(argv[argp], "--"))
 			return ++argp;
 		arg = argv[argp];
 		node = Option::root;

@@ -79,15 +79,15 @@ bool XMLParser::parse(const char *data, size_t len)
 			buffer[bufpos] = 0;
 			if(buffer[0] == '#')
 				cp = atoi(buffer + 1);
-			else if(!stricmp(buffer, "amp"))
+			else if(ieq(buffer, "amp"))
 				cp = '&';
-			else if(!stricmp(buffer, "lt"))
+			else if(ieq(buffer, "lt"))
 				cp = '<';
-			else if(!stricmp(buffer, "gt"))
+			else if(ieq(buffer, "gt"))
 				cp = '>';
-			else if(!stricmp(buffer, "apos"))
+			else if(ieq(buffer, "apos"))
 				cp = '`';
-			else if(!stricmp(buffer, "quot"))
+			else if(ieq(buffer, "quot"))
 				cp = '\"';
 			else
 				return false;
@@ -134,7 +134,7 @@ bool XMLParser::parse(const char *data, size_t len)
 		case CDATA:
 			putBuffer(*data);
 			if(bufpos > 2)
-				if(!strcmp(&buffer[bufpos - 3], "]]>")) {
+				if(eq(&buffer[bufpos - 3], "]]>")) {
 					bufpos -= 3;
 					state = NONE;
 					clearBuffer();
