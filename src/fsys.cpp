@@ -696,7 +696,7 @@ int fsys::seek(offset_t pos)
 		rpos = 0;
 		mode = SEEK_END;
 	}
-	if(lseek(fd, mode, rpos)) {
+	if(lseek(fd, rpos, mode) == ~0l) {
 		error = remapError();
 		return -1;
 	}
