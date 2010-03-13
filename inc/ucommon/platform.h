@@ -520,14 +520,4 @@ extern "C" {
 
 }
 
-NAMESPACE_UCOMMON
-
-inline bool eq(int x1, int x2)
-	{return (x1 == x2);}
-
-inline bool eq(size_t s1, size_t s2)
-	{return (s1 == s2);}
-
-END_NAMESPACE
-
 #endif

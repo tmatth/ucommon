@@ -1691,7 +1691,6 @@ inline bool ieq(const char *s1, const char *s2)
 inline bool ieq(String &s1, String &s2)
 	{return String::iequal(s1.c_str(), s2.c_str());}
 
-
 END_NAMESPACE
 
 #endif
