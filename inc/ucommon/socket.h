@@ -1564,6 +1564,15 @@ inline struct addrinfo *addrinfo(socket::address& address)
 inline struct sockaddr *addr(socket::address& address)
 	{return address.getAddr();}
 
+inline bool eq(struct sockaddr *s1, struct sockaddr *s2)
+	{return Socket::equal(s1, s2);};
+
+inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
+	{return Socket::equal((struct sockaddr *)s1, (struct sockaddr *)s2);};
+
+inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
+	{return Socket::equalhost(s1, s2);};
+
 END_NAMESPACE
 
 #endif

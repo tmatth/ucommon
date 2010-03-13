@@ -1097,7 +1097,7 @@ public:
 	 * @param text2 to compare.
 	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
 	 */
-	static int case_compare(const char *text1, const char *text2);
+	static int icompare(const char *text1, const char *text2);
 
 	/**
 	 * Simple case insensitive equal test for strings.
@@ -1105,7 +1105,7 @@ public:
 	 * @param text2 to test.
 	 * @return true if equal.
 	 */
-	static bool case_equal(const char *text1, const char *text2);
+	static bool iequal(const char *text1, const char *text2);
 
 	/**
 	 * Safe case insensitive string comparison function.
@@ -1114,7 +1114,7 @@ public:
 	 * @param size limit of strings to compare.
 	 * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
 	 */
-	static int case_compare(const char *text1, const char *text2, size_t size);
+	static int icompare(const char *text1, const char *text2, size_t size);
 
 	/**
 	 * Simple case insenstive equal test for strings.
@@ -1123,7 +1123,7 @@ public:
 	 * @param size limit of strings to compare.
 	 * @return true if equal.
 	 */
-	static bool case_equal(const char *text1, const char *text2, size_t size);
+	static bool iequal(const char *text1, const char *text2, size_t size);
 
 	/**
 	 * Return start of string after characters to trim from beginning.
@@ -1654,7 +1654,7 @@ public:
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int stricmp(const char *string1, const char *string2)
-	{return string::case_compare(string1, string2);}
+	{return string::icompare(string1, string2);}
 
 /**
  * Convenience function for case insensitive null terminated string compare.
@@ -1664,7 +1664,7 @@ extern "C" inline int stricmp(const char *string1, const char *string2)
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
-	{return string::case_compare(string1, string2, max);}
+	{return string::icompare(string1, string2, max);}
 
 #endif
 
@@ -1678,6 +1678,18 @@ typedef	string string_t;
  * with namespaces...
  */
 typedef string String;
+
+inline bool eq(const char *s1, const char *s2)
+	{return String::equal(s1, s2);};
+
+inline bool eq(String &s1, String &s2)
+	{return String::equal(s1.c_str(), s2.c_str());};
+
+inline bool ieq(const char *s1, const char *s2)
+	{return String::iequal(s1, s2);};
+
+inline bool ieq(String &s1, String &s2)
+	{return String::iequal(s1.c_str(), s2.c_str());};
 
 
 END_NAMESPACE
