@@ -175,7 +175,7 @@ public:
 
 	/**
 	 * Get the error number (errno) associated with the descriptor from
-	 * the last error recorded.
+	 * the last error event from an opened file.
 	 * @return error number.
 	 */
 	inline int getError(void)
@@ -191,14 +191,14 @@ public:
 	/**
 	 * Set the position of a file descriptor.
 	 * @param offset from start of file or "end" to append.
-	 * @return 0 on success, -1 on error.
+	 * @return error number or 0 on success.
 	 */
 	int seek(offset_t offset);
 
 	/**
 	 * Drop cached data from start of file.
 	 * @param size of region to drop or until end of file.
-	 * @return 0 on success, -1 on error.
+	 * @return error number or 0 on success.
 	 */
 	int drop(offset_t size = 0);	
 
@@ -221,20 +221,20 @@ public:
 	/**
 	 * Get status of open descriptor.
 	 * @param buffer to save status info in.
-	 * @return 0 on success, -1 on error.
+	 * @return error number or 0 on success.
 	 */
 	int stat(struct stat *buffer);
 
 	/**
 	 * Commit changes to the filesystem.
-	 * @return 0 on success, -1 on error.
+	 * @return error number or 0 on success.
 	 */
 	int sync(void);
 
 	/**
 	 * Set directory prefix (chdir).
 	 * @param path to change to.
-	 * @return 0 on success, -1 on error.
+	 * @return error number or 0 on success.
 	 */
 	static int changeDir(const char *path);
 
@@ -242,22 +242,22 @@ public:
 	 * Get current directory prefix (pwd).
 	 * @param path to save directory into.
 	 * @param size of path we can save.
-	 * @return path of current directory or NULL.
+	 * @return error number or 0 on success.
 	 */
-	static char *getPrefix(char *path, size_t size);
+	static int getPrefix(char *path, size_t size);
 
 	/**
 	 * Stat a file.
 	 * @param path of file to stat.
 	 * @param buffer to save stat info.	
-	 * @return 0 on success, errno on error.
+	 * @return error number or 0 on success.
 	 */
 	static int stat(const char *path, struct stat *buffer);
 	
 	/**
 	 * Remove a file.
 	 * @param path of file.
-	 * @return 0 on success, errno on error.
+	 * @return error number or 0 on success.
 	 */
 	static int remove(const char *path);
 
@@ -265,7 +265,7 @@ public:
 	 * Rename a file.
 	 * @param oldpath to rename from.
 	 * @param newpath to rename to.
-	 * @return 0 on success, errno on error.
+	 * @return error number or 0 on success.
 	 */
 	static int rename(const char *oldpath, const char *newpath);
 
@@ -273,7 +273,7 @@ public:
 	 * Change file access mode.
 	 * @param path to change.
 	 * @param mode to assign.
-	 * @return 0 on success, errno on error.
+	 * @return error number or 0 on success.
 	 */
 	static int change(const char *path, unsigned mode);
 	
@@ -281,7 +281,7 @@ public:
 	 * Test path access.
 	 * @param path to test.
 	 * @param mode to test for.
-	 * @return 0 if accessible, -1 if not.
+	 * @return error number or 0 on success.
 	 */
 	static int access(const char *path, unsigned mode);
 
@@ -324,6 +324,7 @@ public:
 	 * Set the position of a file descriptor.
 	 * @param descriptor to set.
 	 * @param offset from start of file or "end" to append.
+	 * @return error number or 0 on success.
 	 */
 	inline static int seek(fsys& descriptor, offset_t offset)
 		{return descriptor.seek(offset);};
@@ -332,6 +333,7 @@ public:
 	 * Drop cached data from a file descriptor.
 	 * @param descriptor to set.
 	 * @param size of region from start of file to drop or all.
+	 * @return error number or 0 on success.
 	 */
 	inline static int drop(fsys& descriptor, offset_t size)
 		{return descriptor.drop(size);};
@@ -370,14 +372,14 @@ public:
 	 * Simple direct method to create a directory.
 	 * @param path of directory to create.
 	 * @param mode of directory.
-	 * @return 0 if success, else errno.
+	 * @return error number or 0 on success.
 	 */
 	static int createDir(const char *path, unsigned mode); 
 
 	/**
 	 * Simple direct method to remove a directory.
 	 * @param path to remove.
-	 * @return 0 if success, else errno.
+	 * @return error number or 0 on success.
 	 */
 	static int removeDir(const char *path);
 
@@ -415,7 +417,7 @@ public:
 	/**
 	 * Load an unmaged plugin directly.
 	 * @param path to plugin.
-	 * @return 0 if success, else errno associated with failure.
+	 * @return error number or 0 on success.
 	 */
 	static int load(const char *path);
 

@@ -155,14 +155,16 @@ int fsys::stat(struct stat *buf)
 
 int fsys::changeDir(const char *path)
 {
-	if(_chdir(path))
+	if (_chdir(path))
 		return remapError();
 	return 0;
 }
 
 char *fsys::getPrefix(char *path, size_t len)
 {
-	return _getcwd(path, len);
+	if (_getcwd(path, len))
+		return remapError();
+	return 0;
 }
 
 int fsys::change(const char *path, unsigned mode)
@@ -409,7 +411,7 @@ void fsys::operator=(const fsys& from)
 int fsys::drop(offset_t size)
 {
 	error = ENOSYS;
-	return -1; 
+	return ENOSYS; 
 }
 
 int fsys::seek(offset_t pos)
@@ -423,7 +425,7 @@ int fsys::seek(offset_t pos)
 	}
 	if(SetFilePointer(fd, rpos, NULL, mode) == INVALID_SET_FILE_POINTER) {
 		error = remapError();
-		return -1;
+		return error;
 	}
 	return 0;
 }
@@ -463,7 +465,9 @@ int fsys::sync(void)
 	int rtn = ::fsync(fd);
 	if(rtn < 0)
 		error = remapError();
-	return rtn;
+	else
+		return 0;
+	return error;
 }
 
 ssize_t fsys::write(const void *buf, size_t len)
@@ -602,15 +606,18 @@ void fsys::open(const char *path, access_t access)
 
 int fsys::stat(const char *path, struct stat *ino)
 {
-	return ::stat(path, ino);
+	if(::stat(path, ino))
+		return remapError();
+	return 0;
 }
 
 int fsys::stat(struct stat *ino)
 {
-	int rtn = ::fstat(fd, ino);
-	if(rtn)
+	if(::fstat(fd, ino)) {
 		error = remapError();
-	return rtn;
+		return error;
+	}
+	return 0;
 }
 
 int fsys::changeDir(const char *path)
@@ -620,9 +627,11 @@ int fsys::changeDir(const char *path)
 	return 0;
 }
 
-char *fsys::getPrefix(char *path, size_t len)
+int fsys::getPrefix(char *path, size_t len)
 {
-	return ::getcwd(path, len);
+	if(::getcwd(path, len))
+		return remapError();
+	return 0;
 }
 
 int fsys::change(const char *path, unsigned mode)
@@ -678,12 +687,12 @@ int fsys::drop(offset_t size)
 #ifdef	HAVE_POSIX_FADVISE
 	if(posix_fadvise(fd, (off_t)0, size, POSIX_FADV_DONTNEED)) {
 		error = remapError();
-		return -1;
+		return error;
 	}
 	return 0;
 #else
 	error = ENOSYS;
-	return -1;
+	return ENOSYS;
 #endif
 }
 
@@ -698,7 +707,7 @@ int fsys::seek(offset_t pos)
 	}
 	if(lseek(fd, rpos, mode) == ~0l) {
 		error = remapError();
-		return -1;
+		return error;
 	}
 	return 0;
 }

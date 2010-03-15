@@ -4,6 +4,7 @@ From ucommon 2.0.8 to 2.1.0
 - Improved cmake support using proper build options and adding cpack
 - Common use of "eq()" inlines for string and other data types
 - fix for lseek (also patched in 2.0.9)
+- all int fsys functions now return errno on failure, not -1
 
 From ucommon 2.0.7 to 2.0.8
 - support for optional cmake based build system being added
