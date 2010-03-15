@@ -1555,24 +1555,6 @@ typedef	Socket socket;
 inline struct addrinfo *addrinfo(socket::address& address)
 	{return address.getList();}
 
-/**
- * A convenience function to convert a socket address list into a socket 
- * address.
- * @param address list object.
- * @return first socket address in list or NULL if empty.
- */
-inline struct sockaddr *addr(socket::address& address)
-	{return address.getAddr();}
-
-inline bool eq(struct sockaddr *s1, struct sockaddr *s2)
-	{return Socket::equal(s1, s2);}
-
-inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
-	{return Socket::equal((struct sockaddr *)s1, (struct sockaddr *)s2);}
-
-inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
-	{return Socket::equalhost(s1, s2);}
-
 END_NAMESPACE
 
 #endif
