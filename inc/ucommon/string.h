@@ -1679,13 +1679,19 @@ typedef	string string_t;
  */
 typedef string String;
 
-inline bool eq(const char *s1, const char *s2)
+inline bool eq(char const *s1, char const *s2)
 	{return String::equal(s1, s2);}
+
+inline bool eq(char const *s1, char const *s2, size_t size)
+	{return String::equal(s1, s2, size);}
 
 inline bool eq(String &s1, String &s2)
 	{return String::equal(s1.c_str(), s2.c_str());}
 
-inline bool ieq(const char *s1, const char *s2)
+inline bool ieq(char const *s1, char const *s2)
+	{return String::iequal(s1, s2);}
+
+inline bool ieq(char const *s1, char const *s2, size_t size)
 	{return String::iequal(s1, s2);}
 
 inline bool ieq(String &s1, String &s2)
