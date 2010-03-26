@@ -194,8 +194,11 @@ public:
  * @short Integer based time class.
  */
 
-class __EXPORT DateTime : public Date, public Time
+class __EXPORT DateTime : protected Date, protected Time
 {
+protected:
+	void update(void);
+
 public:
 	static const long c_day;
 	static const long c_hour;

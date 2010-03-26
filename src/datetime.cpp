@@ -768,21 +768,22 @@ DateTime& DateTime::operator=(const DateTime datetime)
 DateTime& DateTime::operator+=(long value)
 {
 	seconds += value;
-	julian += (seconds / c_day);
-	seconds %= c_day;
-	Date::update();
+	DateTime::update();
 	return *this;
 }
 
 DateTime& DateTime::operator-=(long value)
 {
 	seconds -= value;
-	if(seconds < 0) {
-		julian += (seconds / c_day);
-		seconds = c_day + (seconds % c_day);
-	}
-	Date::update();		
+	DateTime::update();
 	return *this;
+}
+
+void DateTime::update(void)
+{
+	julian += (seconds / c_day);
+	Date::update();
+	Time::update();
 }
 
 int DateTime::operator==(const DateTime &d)
