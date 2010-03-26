@@ -85,6 +85,7 @@
 #include <ucommon/platform.h>
 #include <ucommon/object.h>
 #include <ucommon/counter.h>
+#include <ucommon/numbers.h>
 #include <ucommon/vector.h>
 #include <ucommon/linked.h>
 #include <ucommon/timers.h>
