@@ -55,18 +55,19 @@ public:
 	Number(char *buffer, unsigned size);
 
 	void set(long value);
-	const char *c_str() const
+
+	inline const char *c_str() const
 		{return buffer;};
 
 	long get() const;
 
-	long operator()()
+	inline long operator()()
 		{return get();};
 
-	operator long()
+	inline operator long()
 		{return get();};
 
-	operator char*()
+	inline operator char*()
 		{return buffer;};
 
 	long operator=(const long value);

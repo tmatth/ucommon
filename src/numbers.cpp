@@ -215,6 +215,3 @@ long operator-(long val, const Number &num)
 	return num.get() - val;
 }
 
-#ifdef	CCXX_NAMESPACES
-}
-#endif
