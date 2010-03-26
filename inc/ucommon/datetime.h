@@ -158,9 +158,7 @@ public:
 
 	operator bool();
 
-	inline long operator-(Time &ref)
-		{return seconds - ref.seconds;};
-
+	long operator-(const Time &ref);
 	Time operator+(long val);
 	Time operator-(long val);
 

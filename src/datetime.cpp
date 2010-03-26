@@ -498,6 +498,7 @@ int Time::getSecond(void) const
 
 void Time::update(void)
 {
+	seconds = abs(seconds % 86400l); 
 }
 
 void Time::set(char *str, size_t size)
@@ -517,6 +518,7 @@ void Time::set(char *str, size_t size)
 		sec = nsecond();
 	}
 	else {
+		seconds = -1;
 		return;
 	}
 
@@ -611,6 +613,14 @@ int Time::operator>(const Time &t)
 int Time::operator>=(const Time &t)
 {
 	return seconds >= t.seconds;
+}
+
+long Time::operator-(const Time &t)
+{
+	if(seconds < t.seconds)
+		return (seconds + 86400l) - t.seconds;
+	else
+		return seconds - t.seconds;
 }
 
 void Time::toSeconds(int hour, int minute, int second)
