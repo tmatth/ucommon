@@ -763,13 +763,21 @@ DateTime& DateTime::operator=(const DateTime datetime)
 
 DateTime& DateTime::operator+=(long value)
 {
-	Date::operator+=(value); 
+	seconds += value;
+	julian += (seconds / 86400l);
+	seconds %= 86400l;
+	Date::update();
 	return *this;
 }
 
 DateTime& DateTime::operator-=(long value)
 {
-	Date::operator-=(value); 
+	seconds -= value;
+	if(seconds < 0) {
+		julian += (seconds / 86400l);
+		seconds = 86400 + (seconds % 86400l);
+	}
+	Date::update();		
 	return *this;
 }
 
@@ -849,12 +857,9 @@ String DateTime::strftime(const char *format) const
 
 long DateTime::operator-(const DateTime &dt)
 {
-	long days = julian - dt.julian;
-	if(days > -1 && seconds < dt.seconds)
-		--days;
-	else if(days < 0 && seconds > dt.seconds)
-		++days;
-	return days;
+	long secs = (julian - dt.julian) * 86400l;
+	secs += (seconds - dt.seconds);
+	return secs;
 }
 
 DateTime DateTime::operator+(long value)
