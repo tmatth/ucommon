@@ -197,6 +197,10 @@ public:
 class __EXPORT DateTime : public Date, public Time
 {
 public:
+	static const long c_day;
+	static const long c_hour;
+	static const long c_week;
+
   	DateTime(time_t tm);
 	DateTime(tm *dt);
 	DateTime(const char *str, size_t size = 0);

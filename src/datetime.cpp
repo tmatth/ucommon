@@ -33,6 +33,10 @@ using std::tm;
 using std::localtime;
 #endif
 
+const long DateTime::c_day = 86400l;
+const long DateTime::c_hour = 3600l;
+const long DateTime::c_week = 604800l;
+
 #ifdef	HAVE_LOCALTIME_R
 
 struct tm *DateTime::getLocaltime(time_t *now)
@@ -498,7 +502,7 @@ int Time::getSecond(void) const
 
 void Time::update(void)
 {
-	seconds = abs(seconds % 86400l); 
+	seconds = abs(seconds % DateTime::c_day); 
 }
 
 void Time::set(char *str, size_t size)
@@ -618,7 +622,7 @@ int Time::operator>=(const Time &t)
 long Time::operator-(const Time &t)
 {
 	if(seconds < t.seconds)
-		return (seconds + 86400l) - t.seconds;
+		return (seconds + DateTime::c_day) - t.seconds;
 	else
 		return seconds - t.seconds;
 }
@@ -764,8 +768,8 @@ DateTime& DateTime::operator=(const DateTime datetime)
 DateTime& DateTime::operator+=(long value)
 {
 	seconds += value;
-	julian += (seconds / 86400l);
-	seconds %= 86400l;
+	julian += (seconds / c_day);
+	seconds %= c_day;
 	Date::update();
 	return *this;
 }
@@ -774,8 +778,8 @@ DateTime& DateTime::operator-=(long value)
 {
 	seconds -= value;
 	if(seconds < 0) {
-		julian += (seconds / 86400l);
-		seconds = 86400 + (seconds % 86400l);
+		julian += (seconds / c_day);
+		seconds = c_day + (seconds % c_day);
 	}
 	Date::update();		
 	return *this;
@@ -857,7 +861,7 @@ String DateTime::strftime(const char *format) const
 
 long DateTime::operator-(const DateTime &dt)
 {
-	long secs = (julian - dt.julian) * 86400l;
+	long secs = (julian - dt.julian) * c_day;
 	secs += (seconds - dt.seconds);
 	return secs;
 }
