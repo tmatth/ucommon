@@ -219,7 +219,7 @@ public:
 	DateTime& operator=(const DateTime datetime);
 
 	inline DateTime& operator+=(long value)
-		{Date:operator+=(value); return *this;};
+		{Date::operator+=(value); return *this;};
 	
 	inline DateTime& operator-=(long value)
 		{Date::operator-=(value); return *this;};

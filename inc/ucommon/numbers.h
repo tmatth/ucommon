@@ -105,7 +105,7 @@ typedef	ZNumber znumber_t;
  * @return absolute value
  */
 template<typename T>
-inline const T& abs(const T& v)
+inline const T abs(const T& v)
 {
     if(v < (T)0)
         return -v;
@@ -120,7 +120,7 @@ inline const T& abs(const T& v)
  * @return v1 if < v2, else v2
  */
 template<typename T>
-inline const T& min(const T& v1, const T& v2)
+inline const T min(const T& v1, const T& v2)
 {
 	return ((v1 < v2) ? v1 : v2);
 }
@@ -132,7 +132,7 @@ inline const T& min(const T& v1, const T& v2)
  * @return v1 if > v2, else v2
  */
 template<typename T>
-inline const T& max(const T& v1, const T& v2)
+inline const T max(const T& v1, const T& v2)
 {
 	return ((v1 > v2) ? v1 : v2);
 }
