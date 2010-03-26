@@ -151,14 +151,14 @@ public:
 	 * Test if file descriptor is open.
 	 * @return true if open.
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return fd != INVALID_HANDLE_VALUE || ptr != NULL;};
 
 	/**
 	 * Test if file descriptor is closed.
 	 * @return true if closed.
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return fd == INVALID_HANDLE_VALUE && ptr == NULL;};
 
 	/**
@@ -178,14 +178,14 @@ public:
 	 * the last error event from an opened file.
 	 * @return error number.
 	 */
-	inline int getError(void)
+	inline int getError(void) const
 		{return error;};
 
 	/**
 	 * Get the native system descriptor handle of the file descriptor.
 	 * @return native os descriptor.
 	 */
-	inline fd_t getHandle(void)
+	inline fd_t getHandle(void) const
 		{return fd;};
 
 	/**

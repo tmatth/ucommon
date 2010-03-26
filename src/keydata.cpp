@@ -56,7 +56,7 @@ OrderedObject(), index()
 	name = "-";
 }
 
-const char *keydata::get(const char *key)
+const char *keydata::get(const char *key) const
 {
 	assert(key != NULL);
 
@@ -117,7 +117,7 @@ memalloc(pagesize), index()
 	load(path);
 }
 
-keydata *keyfile::get(const char *key)
+keydata *keyfile::get(const char *key) const
 {
 	assert(key != NULL);
 

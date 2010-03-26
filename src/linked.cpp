@@ -45,7 +45,7 @@ MultiMap::~MultiMap()
 	delete[] links;
 }
 
-MultiMap *MultiMap::next(unsigned path)
+MultiMap *MultiMap::next(unsigned path) const
 {
 	assert(path < paths);
 
@@ -111,7 +111,7 @@ void MultiMap::enlist(unsigned path, MultiMap **root, caddr_t key, unsigned max,
 }
 
 // this probably should be called "equal"...
-bool MultiMap::compare(unsigned path, caddr_t key, size_t keysize)
+bool MultiMap::compare(unsigned path, caddr_t key, size_t keysize) const
 {
 	assert(path < paths);
 	assert(key != NULL);
@@ -349,7 +349,7 @@ void LinkedObject::release(void)
 	}
 }
 
-LinkedObject *LinkedObject::getIndexed(LinkedObject *root, unsigned index)
+LinkedObject *LinkedObject::getIndexed(LinkedObject *root, unsigned index) 
 {
 	while(index-- && root != NULL)
 		root = root->next;
@@ -357,7 +357,7 @@ LinkedObject *LinkedObject::getIndexed(LinkedObject *root, unsigned index)
 	return root;
 }
 
-unsigned LinkedObject::count(LinkedObject *root)
+unsigned LinkedObject::count(const LinkedObject *root)
 {
 	assert(root != NULL);
 
@@ -953,7 +953,7 @@ LinkedObject *OrderedIndex::get(void)
 	if(!head)
 		tail = NULL;
 
-	return node;
+	return static_cast<LinkedObject *>(node);
 }
 
 void OrderedIndex::purge(void)

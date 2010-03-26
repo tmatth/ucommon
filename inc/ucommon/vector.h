@@ -499,14 +499,14 @@ public:
 	 * Test if typed objects available in heap or re-use list.
 	 * @return true if objects still are available.
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return avail();};
 
 	/**
 	 * Test if the entire heap has been allocated.
 	 * @return true if no objects are available.
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return !avail();};
 
 	/**
@@ -581,14 +581,14 @@ public:
 	 * Test if typed objects available from the pager or re-use list.
 	 * @return true if objects still are available.
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return PagerReuse::avail();};
 
 	/**
 	 * Test if no objects are available for reuse or the pager.
 	 * @return true if no objects are available.
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return !PagerReuse::avail();};
 
 	/**

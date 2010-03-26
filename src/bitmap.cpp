@@ -52,7 +52,7 @@ bitmap::~bitmap()
 	addr.b = NULL;
 }
 
-unsigned bitmap::memsize(void)
+unsigned bitmap::memsize(void) const
 {
 	switch(bus) {
 	case B64:
@@ -111,7 +111,7 @@ void bitmap::set(size_t offset, bool bit)
 	}
 }
 
-bool bitmap::get(size_t offset)
+bool bitmap::get(size_t offset) const
 {
 	unsigned bs = memsize();
 	size_t pos = offset / bs;

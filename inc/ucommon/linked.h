@@ -112,7 +112,7 @@ public:
 	 * Count the number of linked objects in a list.
 	 * @param root pointer to list we are counting.
 	 */
-	static unsigned count(LinkedObject *root);
+	static unsigned count(const LinkedObject *root);
 
 	/**
 	 * Get member by index.
@@ -827,7 +827,7 @@ protected:
 	 * @param size of key to check or 0 if NULL terminated string.
 	 * @return true if matches key.
 	 */
-	virtual bool compare(unsigned path, caddr_t key, size_t size);
+	virtual bool compare(unsigned path, caddr_t key, size_t size) const;
 	
 public:
 	/**
@@ -857,7 +857,7 @@ public:
 	 * Get next node from single chain.
 	 * @param path to follow.
 	 */
-	MultiMap *next(unsigned path);
+	MultiMap *next(unsigned path) const;
 
 	/**
 	 * Compute binary key index.

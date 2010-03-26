@@ -134,14 +134,14 @@ public:
 	 * See if stream connection is active.
 	 * @return true if stream is active.
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return so != INVALID_SOCKET && bufsize > 0;};
 
 	/**
 	 * See if stream is disconnected.
 	 * @return true if stream disconnected.
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return so == INVALID_SOCKET || bufsize == 0;};
 
 	/**
@@ -246,14 +246,14 @@ public:
 	 * See if stream connection is active.
 	 * @return true if stream is active.
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return (bufsize > 0);};
 
 	/**
 	 * See if stream is disconnected.
 	 * @return true if stream disconnected.
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return bufsize == 0;};
 
 	/**
@@ -366,14 +366,14 @@ public:
 	 * See if stream connection is active.
 	 * @return true if stream is active.
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return (bufsize > 0);};
 
 	/**
 	 * See if stream is disconnected.
 	 * @return true if stream disconnected.
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return bufsize == 0;};
 
 	/**
@@ -406,7 +406,7 @@ public:
 	 * Get error flag from last i/o operation.
 	 * @return last error.
      */
-	inline int error(void)
+	inline int error(void) const
 		{return fd.getError();};
 };
 

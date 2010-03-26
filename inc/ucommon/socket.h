@@ -363,67 +363,67 @@ public:
 		 * Get the first socket address in our address list.
 		 * @return first socket address or NULL if none.
 		 */
-		struct sockaddr *getAddr(void);
+		struct sockaddr *getAddr(void) const;
 
 		/**
 		 * Get the first socket address of specified family from our list.
 		 * @param family to seek.
 		 * @return first socket address of family or NULL if none.
 		 */
-		struct sockaddr *get(int family);
+		struct sockaddr *get(int family) const;
 
 		/**
 		 * Get the family of a socket address by first entry.
 		 * @return family of first socket address or 0 if none.
 		 */
-		int getfamily(void);
+		int getfamily(void) const;
 
 		/**
 		 * Find a specific socket address in our address list.
 		 * @return matching address from list or NULL if not found.
 		 */
-		struct sockaddr *find(struct sockaddr *addr);
+		struct sockaddr *find(struct sockaddr *addr) const;
 
 		/**
 		 * Get the full socket address list from the object.
 		 * @return addrinfo list we resolved or NULL if none.
 		 */
-		inline struct addrinfo *getList(void)
+		inline struct addrinfo *getList(void) const
 			{return list;};
 
 		/**
 		 * Get the full socket address list by casted reference.
 		 * @return addrinfo list we resolved or NULL if none.
 		 */
-		inline operator struct addrinfo *()
+		inline operator struct addrinfo *() const
 			{return list;};
 
 		/**
 		 * Return the full socket address list by pointer reference.
 		 * @return addrinfo list we resolved or NULL if none.
 		 */
-		inline struct addrinfo *operator*()
+		inline struct addrinfo *operator*() const
 			{return list;};
 
 		/**
 		 * Test if the address list is valid.
 		 * @return true if we have an address list.
 		 */
-		inline operator bool()
+		inline operator bool() const
 			{return list != NULL;};
 
 		/**
 		 * Test if we have no address list.
 		 * @return true if we have no address list.
 		 */
-		inline bool operator!()
+		inline bool operator!() const
 			{return list == NULL;};
 
 		/**
 		 * Get the first socket address by casted reference.
 		 * @return first socket address we resolved or NULL if none.
 		 */
-		inline operator struct sockaddr *()
+		inline operator struct sockaddr *() const
 			{return getAddr();};
 
 		/**

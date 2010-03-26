@@ -141,14 +141,14 @@ public:
 	 * Test if the reference holds an active lock.
 	 * @return true if is not locking an object.
 	 */
-	bool operator!()
+	bool operator!() const
 		{return lock == NULL;};
 
 	/**
 	 * Test if the reference holds an active lock.
 	 * @return true if locking an object.
 	 */
-	operator bool()
+	operator bool() const
 		{return lock != NULL;};
 	
 	/**
@@ -189,14 +189,14 @@ public:
 	 * Test if the reference holds an active lock.
 	 * @return true if is not locking an object.
 	 */
-	bool operator!()
+	bool operator!() const
 		{return lock == NULL;};
 
 	/**
 	 * Test if the reference holds an active lock.
 	 * @return true if locking an object.
 	 */
-	operator bool()
+	operator bool() const
 		{return lock != NULL;};
 
 	/**

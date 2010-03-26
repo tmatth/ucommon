@@ -1025,7 +1025,7 @@ proc:
 	getaddrinfo(host, svc, &hint, &list);
 }
 
-struct sockaddr *Socket::address::getAddr(void)
+struct sockaddr *Socket::address::getAddr(void) const
 {
 	if(!list)
 		return NULL;
@@ -1033,7 +1033,7 @@ struct sockaddr *Socket::address::getAddr(void)
 	return list->ai_addr;
 }
 
-int Socket::address::getfamily(void)
+int Socket::address::getfamily(void) const
 {
 	struct sockaddr *ap;
 	if(!list)
@@ -1046,7 +1046,7 @@ int Socket::address::getfamily(void)
 	return ap->sa_family;
 }
 
-struct sockaddr *Socket::address::get(int family)
+struct sockaddr *Socket::address::get(int family) const
 {
 	struct sockaddr *ap;
 	struct addrinfo *lp;
@@ -1254,7 +1254,7 @@ void Socket::address::add(const char *host, const char *svc, int family, int soc
 	last->ai_next = join;
 }
 
-struct sockaddr *Socket::address::find(struct sockaddr *addr)
+struct sockaddr *Socket::address::find(struct sockaddr *addr) const
 {
 	assert(addr != NULL);
 

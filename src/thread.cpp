@@ -2497,7 +2497,7 @@ Buffer::operator bool()
 	return rtn;
 }
 
-bool Buffer::operator!()
+bool Buffer::operator!() 
 {
 	bool rtn = false;
 

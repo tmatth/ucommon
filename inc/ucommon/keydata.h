@@ -79,14 +79,14 @@ public:
 	 * @param id to look for.
 	 * @return value string or NULL if not found.
 	 */
-	const char *get(const char *id);
+	const char *get(const char *id) const;
 
 	/**
 	 * Lookup a key value by it's id.
 	 * @param id to look for.
 	 * @return value string or NULL if not found.
 	 */
-	inline const char *operator()(const char *id)
+	inline const char *operator()(const char *id) const
 		{return get(id);};
 
 	/**
@@ -109,21 +109,21 @@ public:
 	 * Get the name of this section.  Useful in iterative examinations.
 	 * @return name of keydata section.
 	 */
-	inline const char *get(void)
+	inline const char *get(void) const
 		{return name;};
 
 	/**
 	 * Get first value object, for iterative examinations.
 	 * @return first key value in chain.
 	 */
-	inline keyvalue *begin(void)
+	inline keyvalue *begin(void) const
 		{return (keyvalue *)index.begin();};
 
 	/**
 	 * Get last value object, for iterative examinations.
 	 * @return first key value in chain.
 	 */
-	inline keyvalue *end(void)
+	inline keyvalue *end(void) const
 		{return (keyvalue*)index.end();};
 
 	/**
@@ -174,33 +174,33 @@ public:
 	 * @param section name to look for.
 	 * @return keydata section object if found, NULL if not.
 	 */
-	keydata *get(const char *section);
+	keydata *get(const char *section) const;
 
-	inline keydata *operator()(const char *section)
+	inline keydata *operator()(const char *section) const
 		{return get(section);};
 
-	inline keydata *operator[](const char *section)
+	inline keydata *operator[](const char *section) const
 		{return get(section);};
 
 	/**
 	 * Get the non-sectioned defaults if there are any.
 	 * @return default key section.
 	 */
-	inline keydata *get(void)
+	inline keydata *get(void) const
 		{return defaults;};
 
 	/**
 	 * Get first keydata object, for iterative examinations.
 	 * @return first key value in chain.
 	 */
-	inline keydata *begin(void)
+	inline keydata *begin(void) const
 		{return (keydata *)index.begin();};
 
 	/**
 	 * Get last keydata object, for iterative examinations.
 	 * @return first key value in chain.
 	 */
-	inline keydata *end(void)
+	inline keydata *end(void) const
 		{return (keydata *)index.end();};
 	
 	/**

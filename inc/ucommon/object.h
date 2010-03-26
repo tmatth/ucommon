@@ -574,6 +574,7 @@ template<class T>
 inline bool is(T& object)
 	{return object.operator bool();}
 
+
 /**
  * Convenience function to test pointer object.  This solves issues where
  * some compilers get confused between bool and pointer operators.

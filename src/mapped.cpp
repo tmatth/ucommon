@@ -417,7 +417,7 @@ void MappedMemory::release(void)
 
 #endif
 
-void MappedMemory::fault(void) 
+void MappedMemory::fault(void) const 
 {
 	abort();
 }
@@ -432,7 +432,7 @@ void *MappedMemory::sbrk(size_t len)
 	return mp;
 }
 	
-void *MappedMemory::offset(size_t offset)
+void *MappedMemory::offset(size_t offset) const
 {
 	if(offset >= size)
 		fault();

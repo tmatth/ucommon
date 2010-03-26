@@ -81,7 +81,7 @@ public:
 protected:
 	bus_t bus;
 
-	unsigned memsize(void);
+	unsigned memsize(void) const;
 
 public:
 	/**
@@ -116,7 +116,7 @@ public:
 	 * @param offset to bit in map to get.
 	 * @return true if bit is set.
 	 */
-	bool get(size_t offset);
+	bool get(size_t offset) const;
 
 	/**
 	 * Set an individual bit in the bitmask.

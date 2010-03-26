@@ -81,7 +81,7 @@ protected:
 	 * Handler to invoke in derived class when accessing outside the
 	 * shared memory segment boundry.
 	 */
-	virtual void fault(void);
+	virtual void fault(void) const;
 
 public:
 	/**
@@ -146,7 +146,7 @@ public:
 	 * @param offset from start of segment.  Will fault if past end.
 	 * @return address of offset.
 	 */
-	void *offset(size_t offset);
+	void *offset(size_t offset) const;
 
 	/**
 	 * Get size of mapped segment.
@@ -360,14 +360,14 @@ public:
 	 * Check whether there are typed objects available to be allocated.
 	 * @return true if objects are available.	
 	 */
-	inline operator bool()
+	inline operator bool() const
 		{return MappedReuse::avail();};
 
 	/**
 	 * Check whether there are typed objects available to be allocated.
 	 * @return true if no more typed objects are available.	
 	 */
-	inline bool operator!()
+	inline bool operator!() const
 		{return !MappedReuse::avail();};
 
 	/**
