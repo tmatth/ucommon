@@ -97,6 +97,14 @@ public:
 	Date operator+(long val);
 	Date operator-(long val);
 
+	/**
+	 * Operator to compute number of days between two dates.
+	 * @param offset for computation.
+	 * @return number of days difference.
+	 */
+	inline long operator-(const Date &date)
+		{return (julian - date.julian);};
+
 	int operator==(const Date &date);
 	int operator!=(const Date &date);
 	int operator<(const Date &date);
@@ -150,6 +158,9 @@ public:
 
 	operator bool();
 
+	inline long operator-(Time &ref)
+		{return seconds - ref.seconds;};
+
 	Time operator+(long val);
 	Time operator-(long val);
 
@@ -200,9 +211,27 @@ public:
 	time_t get(void) const;
 	bool isValid(void) const;
 
+	/**
+	 * Operator to compute number of days between two dates.
+	 * @param offset for computation.
+	 * @return number of days difference.
+	 */
+	long operator-(const DateTime &date);
+
 	DateTime& operator=(const DateTime datetime);
-	DateTime& operator+=(const DateTime &datetime);
-	DateTime& operator-=(const DateTime &datetime);
+
+	inline DateTime& operator+=(long value)
+		{Date:operator+=(value); return *this;};
+	
+	inline DateTime& operator-=(long value)
+		{Date::operator-=(value); return *this;};
+
+	inline DateTime operator+(long value)
+		{DateTime result = *this; result += value; return result;};
+
+	inline DateTime operator-(long value)
+		{DateTime result = *this; result -= value; return result;};
+
 	DateTime& operator+=(const Time &time);
 	DateTime& operator-=(const Time &time);
 

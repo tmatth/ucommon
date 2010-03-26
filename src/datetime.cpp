@@ -319,14 +319,14 @@ Date& Date::operator--()
 
 Date Date::operator+(long val)
 {
-	Date result;
+	Date result = *this;
 	result += val;
 	return result;
 }
 
 Date Date::operator-(long val)
 {
-	Date result;
+	Date result = *this;
 	result -= val;
 	return result;
 }
@@ -571,14 +571,14 @@ Time& Time::operator-=(long val)
 
 Time Time::operator+(long val)
 {
-	Time result;
+	Time result = *this;
 	result += val;
 	return result;
 }
 
 Time Time::operator-(long val)
 {
-	Time result;
+	Time result = *this;
 	result -= val;
 	return result;
 }
@@ -839,6 +839,16 @@ String DateTime::strftime(const char *format) const
 	buffer[last] = '\0';
 	retval = buffer;
 	return retval;
+}
+
+long DateTime::operator-(const DateTime &dt)
+{
+	long days = julian - dt.julian;
+	if(days > -1 && seconds < dt.seconds)
+		--days;
+	else if(days < 0 && seconds > dt.seconds)
+		++days;
+	return days;
 }
 
 DateNumber::DateNumber(char *str) :
