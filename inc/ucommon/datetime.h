@@ -218,20 +218,10 @@ public:
 
 	DateTime& operator=(const DateTime datetime);
 
-	inline DateTime& operator+=(long value)
-		{Date::operator+=(value); return *this;};
-	
-	inline DateTime& operator-=(long value)
-		{Date::operator-=(value); return *this;};
-
-	inline DateTime operator+(long value)
-		{DateTime result = *this; result += value; return result;};
-
-	inline DateTime operator-(long value)
-		{DateTime result = *this; result -= value; return result;};
-
-	DateTime& operator+=(const Time &time);
-	DateTime& operator-=(const Time &time);
+	DateTime& operator+=(long value);
+	DateTime& operator-=(long value);
+	DateTime operator+(long value);
+	DateTime operator-(long value);
 
 	int operator==(const DateTime&);
 	int operator!=(const DateTime&);

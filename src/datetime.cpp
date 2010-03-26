@@ -761,19 +761,15 @@ DateTime& DateTime::operator=(const DateTime datetime)
 	return *this;
 }
 
-DateTime& DateTime::operator+=(const Time &time)
+DateTime& DateTime::operator+=(long value)
 {
-	seconds += time.get();
-	Date::update();
-	Time::update();
+	Date::operator+=(value); 
 	return *this;
 }
 
-DateTime& DateTime::operator-=(const Time &time)
+DateTime& DateTime::operator-=(long value)
 {
-	seconds -= time.get();
-	Date::update();
-	Time::update();
+	Date::operator-=(value); 
 	return *this;
 }
 
@@ -859,6 +855,20 @@ long DateTime::operator-(const DateTime &dt)
 	else if(days < 0 && seconds > dt.seconds)
 		++days;
 	return days;
+}
+
+DateTime DateTime::operator+(long value)
+{
+	DateTime result = *this; 
+	result += value; 
+	return result;
+}
+
+DateTime DateTime::operator-(long value)
+{
+	DateTime result = *this; 
+	result -= value; 
+	return result;
 }
 
 DateNumber::DateNumber(char *str) :
