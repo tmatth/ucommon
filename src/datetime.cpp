@@ -444,9 +444,9 @@ Time::Time(char *str, size_t size)
 	set(str, size);
 }
 
-Time::Time(int hour, int minute, int second)
+Time::Time(int hour, int minute, int second, int msec)
 {
-	toSeconds(hour, minute, second);
+	toSeconds(hour, minute, second, msec);
 }
 
 Time::~Time()
@@ -466,66 +466,87 @@ char *Time::get(char *buf) const
 	return buf;
 }
 
-time_t Time::getTime(void) const
-{
-	return static_cast<time_t>(seconds);
-}
-
 int Time::getHour(void) const
 {
-	char buf[7];
-	fromSeconds(buf);
-	ZNumber num(buf, 2);
-	return num();
+	if(seconds == -1)
+		return -1;
+
+	return (int)(seconds / 3600l);
 }
 
 int Time::getMinute(void) const
 {
-	char buf[7];
-	fromSeconds(buf);
-	ZNumber num(buf + 2, 2);
-	return num();
+	if(seconds == -1)
+		return -1;
+
+	return (int)((seconds / 60l) % 60l);
+}
+
+int Time::getMillisecond(void) const
+{
+	if(seconds == -1)
+		return -1;
+
+	return msecs;
+}
+
+timeout_t Time::getTimeout(void) const
+{
+	if(seconds == -1)
+		return ~0;
+	
+	return seconds * 1000l + msecs;
 }
 
 int Time::getSecond(void) const
 {
-	char buf[7];
-	fromSeconds(buf);
-	ZNumber num(buf + 4, 2);
-	return num();
+	if(seconds == -1)
+		return -1;
+
+	return (int)(seconds % 60l);
 }
 
 void Time::update(void)
 {
-	seconds = abs(seconds % DateTime::c_day); 
 }
 
 void Time::set(char *str, size_t size)
 {
 	int sec = 00;
+	int msec = 0;
 
 	if(!size)
 		size = strlen(str);
 
-//00:00
-	if (size == 5) {
-		sec = 00;
-	}
-//00:00:00
-	else if (size == 8) {
-		ZNumber nsecond(str + 6, 2);
-		sec = nsecond();
-	}
-	else {
+	char *cp = strchr(str, ':');
+	if(!cp) {
 		seconds = -1;
 		return;
 	}
 
-	ZNumber nhour(str, 2);
-	ZNumber nminute(str+3, 2);
-	toSeconds(nhour(), nminute(), sec);
-}
+	int hours = atoi(str);
+	str = ++cp;
 
+//..00:00
+	if (size < 8) {
+		sec = 00;
+	}
+//..00:00:00
+	else if (size < 11) {
+		ZNumber nsecond(str + 3, 2);
+		sec = nsecond();
+	}
+//xx:xx:xx.xxx
+	else {
+		ZNumber nsecond(str + 3, 2);
+		ZNumber nmsec(str + 6, 3);
+		sec = nsecond();
+		msec = nmsec();
+	}
+
+	ZNumber nminute(str, 2);
+	toSeconds(hours, nminute(), sec, msec);
+}
 
 String Time::operator()() const
 {
@@ -622,14 +643,15 @@ long Time::operator-(const Time &t)
 		return seconds - t.seconds;
 }
 
-void Time::toSeconds(int hour, int minute, int second)
+void Time::toSeconds(int hour, int minute, int second, int msec)
 {
 	seconds = -1;
 
-	if (hour > 23 ||minute > 59 ||second > 59)
+	if (minute > 59 ||second > 59 || msec > 999)
 		return;
 
 	seconds = 3600 * hour + 60 * minute + second;
+	msecs = msec;
 }
 
 void Time::fromSeconds(char *buffer) const
@@ -644,6 +666,16 @@ void Time::fromSeconds(char *buffer) const
 	buffer[6] = '\0';
 }
 
+void Time::put(char *str, size_t size)
+{
+	if(seconds == -1) {
+		*str = 0;
+		return;
+	}
+
+	snprintf(str, size, "%u:%02u:%02u.%03lu",
+		getHour(), getMinute(), getSecond(), msecs); 
+}
 
 DateTime::DateTime(time_t tm)
 {
@@ -777,8 +809,7 @@ DateTime& DateTime::operator-=(long value)
 void DateTime::update(void)
 {
 	julian += (seconds / c_day);
-	Date::update();
-	Time::update();
+	seconds = abs(seconds % DateTime::c_day); 
 }
 
 int DateTime::operator==(const DateTime &d)

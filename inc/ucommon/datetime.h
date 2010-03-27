@@ -265,39 +265,125 @@ public:
 
 /**
  * The Time class uses a integer representation of the current
- * time.  This is then manipulated in several forms
- * and may be exported as needed.
+ * time.  This is then manipulated in several forms and may be
+ * exported as needed.  The time object can represent an instance in
+ * time (hours, minutes, and seconds) in a 24 hour period or can
+ * represent a duration.  Millisecond accuracy can be offered.
  *
- * @author Marcelo Dalmas <mad@brasmap.com.br>
+ * @author Marcelo Dalmas <mad@brasmap.com.br> and David Sugar <dyfet@gnutelephony.org>
  * @short Integer based time class.
  */
 
 class __EXPORT Time
 {
 protected:
-	long seconds;
+	long seconds, msecs;	// msecs may be used later...
 
 protected:
-	void toSeconds(int hour, int minute, int second);
+	void toSeconds(int hour, int minute, int second, int msec = 0);
 	void fromSeconds(char *buf) const;
 	virtual void update(void);
 
 public:
-	Time(time_t tm);
+	/**
+	 * Create a time from the time portion of a time_t.
+	 * @param value of time_t to use.
+	 */
+	Time(time_t value);
+
+	/**
+	 * Create a time from the time portion of a date and time object.
+	 * @param object from DateTime::glt() or gmt().
+	 */
 	Time(tm *dt);
-	Time(char *str, size_t size = 0);
-	Time(int hour, int minute, int second);
+
+	/**
+	 * Create a time from a hh:mm:ss formatted time string.
+	 * @param pointer to formatted time field.
+	 * @param size of field if not null terminated.
+	 */
+	Time(char *pointer, size_t size = 0);
+
+	/**
+	 * Create a time from hours (0-23), minutes (0-59), and seconds (0-59).
+	 * @param hour of time.	
+	 * @param minute of time.
+	 * @param second of time.
+	 * @param millisecond offset (0-999).
+	 */
+	Time(int hour, int minute, int second, int msec = 0);
+
+	/**
+	 * Create a time from current time.
+	 */
 	Time();
+
+	/**
+	 * Destroy time object.
+	 */
 	virtual ~Time();
 
+	/**
+	 * Get current time in seconds from midnight.
+	 * @return seconds from midnight.
+	 */
 	long get(void) const;
+	
+	/**
+	 * Get hours from midnight.
+	 * @return hours from midnight.
+	 */
 	int getHour(void) const;
+
+	/**
+	 * Get minutes from current hour.
+	 * @return minutes from current hour.
+	 */
 	int getMinute(void) const;
+
+	/**
+	 * Get seconds from current minute.
+	 * @return seconds from current minute.
+	 */
 	int getSecond(void) const;
+
+	/**
+	 * Get millisecond value.
+	 * @return millisecond offset.
+	 */
+	int getMillisecond(void) const;
+
+	/**
+	 * Get timeout value for timer.
+	 * @return timeout value.
+	 */
+	timeout_t getTimeout(void) const;
+
+	/**
+	 * Get a hh:mm:ss[.msec] formatted string for current time.
+	 * @param buffer to store time string in.
+	 * @return time string buffer or NULL if invalid.
+	 */
 	char *get(char *buffer) const;
-	time_t getTime(void) const;
-	tm *get(tm *buf) const;
+
+	/**
+	 * Put a time stamp formatted string, hours:mm:sec.msec.
+	 * @param buffer to put into.
+	 * @param size of buffer.
+	 */
+	void put(char *buffer, size_t size);
+
+	/**
+	 * Set time from a hh:mm:ss formatted string.
+	 * @param pointer to time field.
+	 * @param size of field if not null terminated.
+	 */
 	void set(char *str, size_t size = 0);
+
+	/**
+	 * Check if time object had valid value.
+	 * @return true if object is valid.
+	 */
 	bool isValid(void) const;
 
 	operator bool();
