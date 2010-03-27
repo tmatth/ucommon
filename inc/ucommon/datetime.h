@@ -366,15 +366,50 @@ public:
 	 */
 	bool isValid(void) const;
 
-	operator bool();
+	/**
+	 * Check if time object has valid value for is() operator.
+	 * @return true if object is valid.
+	 */
+	inline operator bool() const
+		{return isValid();};
 
-	long operator-(const Time &ref);
+	/**
+	 * Check if time object has valid value for ! operator.
+	 * @return true if object is not valid.
+	 */
+	inline bool operator!() const
+		{return !isValid();};
+
+	/**
+	 * Get difference (in seconds) between two times.
+	 * @param reference time to subtract.
+	 * @return difference in seconds.
+	 */
+	long operator-(const Time &reference);
+
+	/**
+	 * Add seconds to the current time, wrap if 24 hours.
+     * @param seconds to add.
+	 */
 	Time operator+(long val);
+
+	/**
+	 * Subtract seconds to the current time, wrap if 24 hours.
+	 * @param seconds to subtract.
+	 */
 	Time operator-(long val);
 
+	/**
+	 * Get time in seconds.
+	 * @return seconds.
+	 */
 	inline operator long()
 		{return get();};
-
+	
+	/**
+	 * Convert to standard 24 hour time string.
+	 * @return time string.
+	 */
 	String operator()() const;
 	Time& operator++();
 	Time& operator--();
@@ -386,12 +421,6 @@ public:
 	int operator<=(const Time &time);
 	int operator>(const Time &time);
 	int operator>=(const Time &time);
-
-	inline bool operator!() const
-		{return !isValid();};
-
-	inline operator bool() const
-		{return isValid();};
 };
 
 /**

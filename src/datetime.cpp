@@ -197,7 +197,6 @@ void Date::set(const char *str, size_t size)
 		mstr = str + 3;
 		dstr = str + 6;
 	}
-
 //0000/00/00
 	else if(size == 10) {
 		ZNumber nyear((char*)str, 4);
@@ -492,6 +491,7 @@ int Time::getSecond(void) const
 
 void Time::update(void)
 {
+	seconds = abs(seconds % DateTime::c_day); 
 }
 
 void Time::set(char *str, size_t size)
@@ -639,9 +639,9 @@ void Time::fromSeconds(char *buffer) const
 	ZNumber minute(buffer + 2, 2);
 	ZNumber second(buffer + 4, 2);
 
-	hour = seconds / 3600;
-	minute = (seconds - (3600 * hour())) / 60;
-	second = seconds - (3600 * hour()) - (60 * minute());
+	hour = (seconds / 3600l) % 24l;
+	minute = (seconds - (3600l * hour())) / 60l;
+	second = seconds - (3600l * hour()) - (60l * minute());
 	buffer[6] = '\0';
 }
 
@@ -777,7 +777,7 @@ DateTime& DateTime::operator-=(long value)
 void DateTime::update(void)
 {
 	julian += (seconds / c_day);
-	seconds = abs(seconds % DateTime::c_day); 
+	Time::update();
 }
 
 int DateTime::operator==(const DateTime &d)
