@@ -496,36 +496,28 @@ void Time::update(void)
 
 void Time::set(char *str, size_t size)
 {
-	int sec = 00;
+    int sec = 00;
 
-	if(!size)
-		size = strlen(str);
+    if(!size)
+        size = strlen(str);
 
-	char *cp = strchr(str, ':');
-	if(!cp) {
-		seconds = -1;
-		return;
-	}
-
-	int hours = atoi(str);
-	str = ++cp;
-
-//..00:00
-	if (size < 8) {
-		sec = 00;
-	}
-//..00:00:00
-	else if (size < 11) {
-		ZNumber nsecond(str + 3, 2);
-		sec = nsecond();
-	}
+//00:00
+    if (size == 5) {
+        sec = 00;
+    }
+//00:00:00
+    else if (size == 8) {
+        ZNumber nsecond(str + 6, 2);
+        sec = nsecond();
+    }
 	else {
 		seconds = -1;
 		return;
 	}
 
-	ZNumber nminute(str, 2);
-	toSeconds(hours, nminute(), sec);
+    ZNumber nhour(str, 2);
+    ZNumber nminute(str+3, 2);
+    toSeconds(nhour(), nminute(), sec);
 }
 
 String Time::operator()() const
