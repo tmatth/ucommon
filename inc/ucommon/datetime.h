@@ -277,10 +277,10 @@ public:
 class __EXPORT Time
 {
 protected:
-	long seconds, msecs;	// msecs may be used later...
+	long seconds;
 
 protected:
-	void toSeconds(int hour, int minute, int second, int msec = 0);
+	void toSeconds(int hour, int minute, int second);
 	void fromSeconds(char *buf) const;
 	virtual void update(void);
 
@@ -309,9 +309,8 @@ public:
 	 * @param hour of time.	
 	 * @param minute of time.
 	 * @param second of time.
-	 * @param millisecond offset (0-999).
 	 */
-	Time(int hour, int minute, int second, int msec = 0);
+	Time(int hour, int minute, int second);
 
 	/**
 	 * Create a time from current time.
@@ -348,30 +347,11 @@ public:
 	int getSecond(void) const;
 
 	/**
-	 * Get millisecond value.
-	 * @return millisecond offset.
-	 */
-	int getMillisecond(void) const;
-
-	/**
-	 * Get timeout value for timer.
-	 * @return timeout value.
-	 */
-	timeout_t getTimeout(void) const;
-
-	/**
-	 * Get a hh:mm:ss[.msec] formatted string for current time.
+	 * Get a hh:mm:ss formatted string for current time.
 	 * @param buffer to store time string in.
 	 * @return time string buffer or NULL if invalid.
 	 */
 	char *get(char *buffer) const;
-
-	/**
-	 * Put a time stamp formatted string, hours:mm:sec.msec.
-	 * @param buffer to put into.
-	 * @param size of buffer.
-	 */
-	void put(char *buffer, size_t size);
 
 	/**
 	 * Set time from a hh:mm:ss formatted string.

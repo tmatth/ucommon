@@ -444,9 +444,9 @@ Time::Time(char *str, size_t size)
 	set(str, size);
 }
 
-Time::Time(int hour, int minute, int second, int msec)
+Time::Time(int hour, int minute, int second)
 {
-	toSeconds(hour, minute, second, msec);
+	toSeconds(hour, minute, second);
 }
 
 Time::~Time()
@@ -482,22 +482,6 @@ int Time::getMinute(void) const
 	return (int)((seconds / 60l) % 60l);
 }
 
-int Time::getMillisecond(void) const
-{
-	if(seconds == -1)
-		return -1;
-
-	return msecs;
-}
-
-timeout_t Time::getTimeout(void) const
-{
-	if(seconds == -1)
-		return ~0;
-	
-	return seconds * 1000l + msecs;
-}
-
 int Time::getSecond(void) const
 {
 	if(seconds == -1)
@@ -513,7 +497,6 @@ void Time::update(void)
 void Time::set(char *str, size_t size)
 {
 	int sec = 00;
-	int msec = 0;
 
 	if(!size)
 		size = strlen(str);
@@ -536,16 +519,13 @@ void Time::set(char *str, size_t size)
 		ZNumber nsecond(str + 3, 2);
 		sec = nsecond();
 	}
-//xx:xx:xx.xxx
 	else {
-		ZNumber nsecond(str + 3, 2);
-		ZNumber nmsec(str + 6, 3);
-		sec = nsecond();
-		msec = nmsec();
+		seconds = -1;
+		return;
 	}
 
 	ZNumber nminute(str, 2);
-	toSeconds(hours, nminute(), sec, msec);
+	toSeconds(hours, nminute(), sec);
 }
 
 String Time::operator()() const
@@ -643,15 +623,14 @@ long Time::operator-(const Time &t)
 		return seconds - t.seconds;
 }
 
-void Time::toSeconds(int hour, int minute, int second, int msec)
+void Time::toSeconds(int hour, int minute, int second)
 {
 	seconds = -1;
 
-	if (minute > 59 ||second > 59 || msec > 999)
+	if (minute > 59 ||second > 59 || hour > 23)
 		return;
 
 	seconds = 3600 * hour + 60 * minute + second;
-	msecs = msec;
 }
 
 void Time::fromSeconds(char *buffer) const
@@ -664,17 +643,6 @@ void Time::fromSeconds(char *buffer) const
 	minute = (seconds - (3600 * hour())) / 60;
 	second = seconds - (3600 * hour()) - (60 * minute());
 	buffer[6] = '\0';
-}
-
-void Time::put(char *str, size_t size)
-{
-	if(seconds == -1) {
-		*str = 0;
-		return;
-	}
-
-	snprintf(str, size, "%u:%02u:%02u.%03lu",
-		getHour(), getMinute(), getSecond(), msecs); 
 }
 
 DateTime::DateTime(time_t tm)
