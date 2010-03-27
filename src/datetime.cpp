@@ -39,7 +39,7 @@ const long DateTime::c_week = 604800l;
 
 #ifdef	HAVE_LOCALTIME_R
 
-struct tm *DateTime::getLocaltime(time_t *now)
+struct tm *DateTime::glt(time_t *now)
 {	
 	struct tm *result, *dt = new struct tm;
 	time_t tmp;
@@ -56,7 +56,7 @@ struct tm *DateTime::getLocaltime(time_t *now)
 	return NULL;
 }
 
-struct tm *DateTime::getGMT(time_t *now)
+struct tm *DateTime::gmt(time_t *now)
 {	
 	struct tm *result, *dt = new struct tm;
 	time_t tmp;
@@ -82,7 +82,7 @@ void DateTime::release(struct tm *dt)
 #else
 static Mutex locking;
 
-struct tm *DateTime::getLocaltime(time_t *now)
+struct tm *DateTime::glt(time_t *now)
 {	
 	struct tm *dt;
 	time_t tmp;
@@ -100,7 +100,7 @@ struct tm *DateTime::getLocaltime(time_t *now)
 	return NULL;
 }
 
-struct tm *DateTime::getGMT(time_t *now)
+struct tm *DateTime::gmt(time_t *now)
 {	
 	struct tm *dt;
 	time_t tmp;
@@ -128,7 +128,7 @@ void DateTime::release(struct tm *dt)
 
 Date::Date()
 {
-	struct tm *dt = DateTime::getLocaltime();
+	tm_t *dt = DateTime::glt();
 
 	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 	DateTime::release(dt);
@@ -141,7 +141,7 @@ Date::Date(struct tm *dt)
 
 Date::Date(time_t tm)
 {
-	struct tm *dt = DateTime::getLocaltime(&tm);
+	tm_t *dt = DateTime::glt(&tm);
 	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 	DateTime::release(dt);
 }
@@ -157,7 +157,7 @@ Date::~Date()
 
 void Date::set(const char *str, size_t size)
 {
-	struct tm *dt = DateTime::getLocaltime();
+	tm_t *dt = DateTime::glt();
 	int year = 0;
 	const char *mstr = str;
 	const char *dstr = str;
@@ -427,7 +427,7 @@ void Date::fromJulian(char *buffer) const
 
 Time::Time()
 {
-	struct tm *dt = DateTime::getLocaltime();
+	tm_t *dt = DateTime::glt();
 	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
 	DateTime::release(dt);
 }
@@ -439,7 +439,7 @@ Time::Time(struct tm *dt)
 
 Time::Time(time_t tm)
 {
-	struct tm *dt = DateTime::getLocaltime(&tm);
+	tm_t *dt = DateTime::glt(&tm);
 	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
 	DateTime::release(dt);
 }
@@ -652,7 +652,7 @@ void Time::fromSeconds(char *buffer) const
 
 DateTime::DateTime(time_t tm)
 {
-	struct tm *dt = DateTime::getLocaltime();
+	tm_t *dt = DateTime::glt();
 	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
 	DateTime::release(dt);
@@ -708,7 +708,7 @@ DateTime::DateTime(int year, unsigned month, unsigned day,
 
 DateTime::DateTime() : Date(), Time()
 {
-	struct tm *dt = DateTime::getLocaltime();
+	tm_t *dt = DateTime::glt();
 	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
 	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 	DateTime::release(dt);
@@ -847,11 +847,11 @@ String DateTime::strftime(const char *format) const
 	char buffer[64];
 	size_t last;
 	time_t t;
-	struct tm *tbp;
+	tm_t *tbp;
 	String retval;
 
 	t = get();
-	tbp = getLocaltime(&t);
+	tbp = glt(&t);
 	last = ::strftime(buffer, 64, format, tbp);
 	release(tbp);
 

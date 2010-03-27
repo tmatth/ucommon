@@ -242,8 +242,8 @@ public:
 
 	String strftime(const char *format) const;
 
-	static struct tm *getLocaltime(time_t *now = NULL);
-	static struct tm *getGMT(time_t *now = NULL);
+	static struct tm *glt(time_t *now = NULL);
+	static struct tm *gmt(time_t *now = NULL);
 	static void release(struct tm *dt);
 };
 
@@ -266,6 +266,7 @@ public:
 
 typedef	DateTime	datetime_t;
 typedef	Date		date_t;
+typedef	struct tm	tm_t;
 
 END_NAMESPACE
 
