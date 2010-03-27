@@ -241,18 +241,18 @@ char *Date::get(char *buf) const
 time_t Date::getTime(void) const
 {
 	char buf[11];
-	tm_t *dt;
-	memset(dt, 0, sizeof(tm));
+	tm_t dt;
+	memset(&dt, 0, sizeof(tm));
 	fromJulian(buf);
 	Number nyear(buf, 4);
 	Number nmonth(buf + 5, 2);
 	Number nday(buf + 8, 2);
 
-	dt->tm_year = nyear() - 1900;
-	dt->tm_mon = nmonth() - 1;
-	dt->tm_mday = nday();
+	dt.tm_year = nyear() - 1900;
+	dt.tm_mon = nmonth() - 1;
+	dt.tm_mday = nday();
 
-	return mktime(dt); // to fill in day of week etc.
+	return mktime(&dt); // to fill in day of week etc.
 }
 
 int Date::getYear(void) const
