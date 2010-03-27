@@ -239,9 +239,10 @@ char *Date::get(char *buf) const
 	return buf;
 }
 
-time_t Date::getTime(tm* dt) const
+time_t Date::getTime(void) const
 {
 	char buf[11];
+	tm_t *dt;
 	memset(dt, 0, sizeof(tm));
 	fromJulian(buf);
 	Number nyear(buf, 4);
@@ -253,12 +254,6 @@ time_t Date::getTime(tm* dt) const
 	dt->tm_mday = nday();
 
 	return mktime(dt); // to fill in day of week etc.
-}
-
-time_t Date::getTime(void) const
-{
-	struct tm dt;
-	return getTime(&dt);
 }
 
 int Date::getYear(void) const
@@ -842,7 +837,7 @@ bool DateTime::operator!() const
 }
 
 
-String DateTime::strftime(const char *format) const
+String DateTime::format(const char *text) const
 {
 	char buffer[64];
 	size_t last;
@@ -852,7 +847,7 @@ String DateTime::strftime(const char *format) const
 
 	t = get();
 	tbp = glt(&t);
-	last = ::strftime(buffer, 64, format, tbp);
+	last = ::strftime(buffer, 64, text, tbp);
 	release(tbp);
 
 	buffer[last] = '\0';
@@ -879,6 +874,20 @@ DateTime DateTime::operator-(long value)
 	DateTime result = *this; 
 	result -= value; 
 	return result;
+}
+
+DateTime& DateTime::operator++()
+{
+	++julian;
+	Date::update();
+	return *this;
+}
+
+DateTime& DateTime::operator--()
+{
+	--julian;
+	Date::update();
+	return *this;
 }
 
 DateNumber::DateNumber(char *str) :

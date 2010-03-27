@@ -67,54 +67,198 @@ protected:
 	virtual void update(void);
 
 public:
-	Date(time_t tm);
-	Date(tm *dt);
-	Date(const char *str, size_t size = 0);
+	/**
+	 * Create a julian date from a time_t type.
+	 * @param value from time()
+	 */
+	Date(time_t value);
+
+	/**
+	 * Create a julian date from a local or gmt date and time.
+	 * @param object from DateTime::glt() or gmt().
+	 */
+	Date(struct tm *object);
+
+	/**
+	 * Create a julian date from a ISO date string of a specified size.
+	 * @param pointer to ISO date string.
+	 * @param size of date field if not null terminated.
+	 */
+	Date(const char *pointer, size_t size = 0);
+
+	/**
+	 * Create a julian date from an arbitrary year, month, and day.
+	 * @param year of date.
+	 * @param month of date (1-12).
+	 * @param day of month (1-31).
+	 */
 	Date(int year, unsigned month, unsigned day);
+
+	/**
+	 * Construct a new julian date with today's date.
+	 */
 	Date();
+
+	/**
+	 * Destroy julian date object.
+	 */
 	virtual ~Date();
 
+	/**
+	 * Get the year of the date.
+	 */
 	int getYear(void) const;
+
+	/**
+	 * Get the month of the date (1-12).
+	 */
 	unsigned getMonth(void) const;
+
+	/**
+	 * Get the day of the month of the date.
+	 */
 	unsigned getDay(void) const;
+
+	/**
+	 * Get the day of the week (0-7).
+	 */
 	unsigned getDayOfWeek(void) const;
+
+	/**
+	 * Get a ISO string representation of the date (yyyy-mm-dd).
+	 * @param buffer to store string.
+	 * @return string representation.
+	 */
 	char *get(char *buffer) const;
+
+	/**
+	 * Get a time_t for the julian date if in time_t epoch.
+	 * @return time_t or -1 if out of range.
+	 */
 	time_t getTime(void) const;
-	time_t getTime(tm *buf) const;
+	
+	/**
+	 * Get the julian number for the object.
+	 * @return julian number.
+	 */
 	long get(void) const;
-	void set(const char *str, size_t size = 0);
+
+	/**
+	 * Set the julian date based on an ISO date string of specified size.
+	 * @param pointer to date string field.
+	 * @param size of field if not null terminated.
+	 */
+	void set(const char *pointer, size_t size = 0);
+
+	/**
+	 * Check if date is valid.
+	 * @return true if julian date is valid.
+	 */
 	bool isValid(void) const;
 
+	/**
+	 * Casting operator to return julian number.
+	 * @return julian number.
+	 */
 	inline operator long() const
 		{return get();};
 
+	/**
+	 * Expression operator to return an ISO date string for the current
+	 * julian date.
+	 * @return ISO date string.
+	 */
 	String operator()() const;
+
+	/**
+	 * Increment date by one day.
+	 */
 	Date& operator++();
+
+	/**
+	 * Decrement date by one day.
+	 */
 	Date& operator--();
-	Date& operator+=(long val);
-	Date& operator-=(long val);
+
+	/**
+	 * Increment date by offset.
+	 * @param offset to add to julian date.
+	 */
+	Date& operator+=(long offset);
+
+	/**
+	 * Decrement date by offset.
+	 * @param offset to subtract from julian date.
+	 */
+	Date& operator-=(long offset);
 	
-	Date operator+(long val);
-	Date operator-(long val);
+	/**
+	 * Add days to julian date in an expression.
+	 * @param days to add.
+	 */
+	Date operator+(long days);
+
+	/**
+	 * Subtract days from a julian date in an expression.
+	 * @param days to subtract.
+	 */
+	Date operator-(long days);
 
 	/**
 	 * Operator to compute number of days between two dates.
-	 * @param offset for computation.
+	 * @param date offset for computation.
 	 * @return number of days difference.
 	 */
 	inline long operator-(const Date &date)
 		{return (julian - date.julian);};
 
+	/**
+	 * Compare julian dates if same date.
+	 * @param date to compare with.
+	 */
 	int operator==(const Date &date);
+
+	/**
+	 * Compare julian dates if not same date.
+	 * @param date to compare with.
+	 */
 	int operator!=(const Date &date);
+
+	/**
+	 * Compare julian date if less than another date.
+	 * @param date to compare with.
+	 */
 	int operator<(const Date &date);
+
+	/**
+	 * Compare julian date if less than or equal to another date.
+	 * @param date to compare with.
+	 */
 	int operator<=(const Date &date);
+
+	/**
+	 * Compare julian date if greater than another date.
+	 * @param date to compare with.
+	 */
 	int operator>(const Date &date);
+
+	/**
+	 * Compare julian date if greater than or equal to another date.
+	 * @param date to compare with.
+	 */
 	int operator>=(const Date &date);
 
+	/**
+	 * Check if julian date is not valid.
+	 * @return true if date is invalid.
+	 */
 	inline bool operator!() const
 		{return !isValid();};
 
+	/**
+	 * Check if julian date is valid for is() expression.
+	 * @return true if date is valid.
+	 */
 	inline operator bool() const
 		{return isValid();};
 };
@@ -194,7 +338,7 @@ public:
  * @short Integer based time class.
  */
 
-class __EXPORT DateTime : protected Date, protected Time
+class __EXPORT DateTime : public Date, public Time
 {
 protected:
 	void update(void);
@@ -224,11 +368,13 @@ public:
 	long operator-(const DateTime &date);
 
 	DateTime& operator=(const DateTime datetime);
-
 	DateTime& operator+=(long value);
 	DateTime& operator-=(long value);
 	DateTime operator+(long value);
 	DateTime operator-(long value);
+
+	DateTime& operator++();
+	DateTime& operator--();
 
 	int operator==(const DateTime&);
 	int operator!=(const DateTime&);
@@ -240,7 +386,7 @@ public:
 	bool operator!() const;
 	operator bool() const;
 
-	String strftime(const char *format) const;
+	String format(const char *test) const;
 
 	static struct tm *glt(time_t *now = NULL);
 	static struct tm *gmt(time_t *now = NULL);
