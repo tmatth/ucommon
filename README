@@ -49,10 +49,10 @@ The minimum platform support for UCommon is a modern and working posix pthread
 threading library.  I use a subset of posix threads to assure wider portability
 by avoiding more specialized features like process shared synchronization
 objects, pthread rwlocks and pthread semaphores, as these are not implemented
-on all platforms that I have found.  I also eliminate the practice and dependency
-on pthread automatic cancellation behavior, which otherwise introduces much 
-greater complexity to user applications and can often lead to defective 
-coding practices.
+on all platforms that I have found.  I also eliminate the practice and
+dependency on pthread automatic cancellation behavior, which otherwise
+introduces much greater complexity to user applications and can often lead to
+defective coding practices.
 
 The first three releases of UCommon were introduced in 1999-2000 as a pure "C"
 library for embedded targets, and had not seen an update in 7 years.  Hence I
@@ -68,6 +68,9 @@ extension library for UCommon. This has not been decided yet.
 UCommon is a C++ linkable library distributed under the GNU General Public
 License, Version 3 or later.  As of version 2.0, we are now using the GNU
 Lesser General Public License, Version 3 or later, to remain consistent and
-compatible with past GNU Common C++ licensing.
-
+compatible with past GNU Common C++ licensing.  The current release series of
+UCommon is 2.1, and this is considered a new and refactored abi release from
+prior 2.0.x releases offering greater clarity, consistency of use, and some
+new features that were migrated from Common C++.  The 2.1 release series may
+introduce additional classes.
 
