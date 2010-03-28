@@ -94,6 +94,12 @@ public:
 	Date(int year, unsigned month = 1, unsigned day = 1);
 
 	/**
+	 * Create a julian date object from another object.
+	 * @param object to copy.
+	 */
+	Date(const Date& object);
+
+	/**
 	 * Construct a new julian date with today's date.
 	 */
 	Date();
@@ -335,6 +341,12 @@ public:
 	Time(int hour, int minute, int second);
 
 	/**
+	 * Create a time object from another object.
+	 * @param object to copy.
+	 */
+	Time(const Time& object);
+
+	/**
 	 * Create a time from current time.
 	 */
 	Time();
@@ -573,6 +585,12 @@ public:
 	 */
 	DateTime(int year, unsigned month = 1, unsigned day = 1,
 		 int hour = 0, int minute = 0, int second = 0);
+
+	/**
+	 * Create a datetime object from another object.
+	 * @param object to copy.
+	 */
+	DateTime(const DateTime& object);
 
 	/**
 	 * Construct a new date and time object with current date and time.

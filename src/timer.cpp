@@ -132,6 +132,11 @@ Timer::Timer(timeout_t in)
 	operator+=(in);
 }
 
+Timer::Timer(const Timer& copy)
+{
+	timer = copy.timer;
+}
+
 Timer::Timer(time_t in)
 {
 	set();

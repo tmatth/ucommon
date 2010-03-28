@@ -134,6 +134,11 @@ Date::Date()
 	DateTime::release(dt);
 }
 
+Date::Date(const Date& copy)
+{
+	julian = copy.julian;
+}
+
 Date::Date(struct tm *dt)
 {
 	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
@@ -432,6 +437,11 @@ Time::Time()
 	DateTime::release(dt);
 }
 
+Time::Time(const Time& copy)
+{
+	seconds = copy.seconds;
+}
+
 Time::Time(struct tm *dt)
 {
 	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
@@ -660,6 +670,12 @@ DateTime::DateTime(time_t tm)
 DateTime::DateTime(tm *dt) :
 Date(dt), Time(dt)
 {}
+
+DateTime::DateTime(const DateTime& copy)
+{
+	julian = copy.julian;
+	seconds = copy.seconds;
+}
 
 DateTime::DateTime(const char *a_str, size_t size)
 {

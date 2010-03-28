@@ -82,6 +82,12 @@ public:
 	Timer(time_t offset);
 
 	/**
+	 * Construct a timer from a copy of another timer.
+	 * @param copy of timer to construct from.
+	 */
+	Timer(const Timer& copy);
+
+	/**
 	 * Check if timer expired.
 	 * @return true if expired.
 	 */
