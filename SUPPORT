@@ -1,4 +1,4 @@
-uCommon has been accepted as part of the GNU Project for use as  GNU
+uCommon has been accepted as part of the GNU Project for use as GNU
 Common C++ 2 "2.0" and is used in GNU Telephony.
 
 Web resources:
@@ -10,6 +10,7 @@ Web resources:
 Mailing lists and email contacts:
 
 	mailto:dyfet@gnutelephony.org
-	mailto:cplusplus-devel@lists.sourceforge.net
+	mailto:sipwitch-devel@gnu.org
+	mailto:bug-commoncpp@gnu.org
 	http://lists.gnu.org/mailman/listinfo/bug-commoncpp
 
