@@ -618,32 +618,36 @@ public:
 	DateTime& operator=(const DateTime& datetime);
 
 	/**
-	 * Add days to the current datetime object.
-	 * @param days to add to object.
+	 * Add seconds to the current datetime object.  Day overflows update
+	 * julian date.
+	 * @param seconds to add to object.
 	 * @return modified datetime object.
 	 */
-	DateTime& operator+=(long days);
+	DateTime& operator+=(long seconds);
 
 	/**
-	 * Subtract days from current datetime object.
-	 * @param days to subtract from object.
+	 * Subtract seconds from current datetime object.  Day underflows
+	 * update julian date.
+	 * @param seconds to subtract from object.
 	 * @return modified datetime object.
 	 */
-	DateTime& operator-=(long days);
+	DateTime& operator-=(long seconds);
 
 	/**
-	 * Add days to datetime in an expression.
-	 * @param days to add to datetime.
+	 * Add seconds to datetime in an expression.  Day overflows update
+	 * julian date.
+	 * @param seconds to add to datetime.
 	 * @return new modified datetime object.
 	 */
-	DateTime operator+(long days);
+	DateTime operator+(long seconds);
 
 	/**
-	 * Subtract days from datetime in an expression.
-	 * @param days to subtract from datetime.
+	 * Subtract seconds from datetime in an expression.  Day underflows
+	 * update julian date.
+	 * @param seconds to subtract from datetime.
 	 * @return new modified datetime object.
 	 */
-	DateTime operator-(long days);
+	DateTime operator-(long seconds);
 
 	/**
 	 * Add a day from the current date and time.
