@@ -8,6 +8,8 @@ From ucommon 2.0.8 to 2.1.0
 - Common C++ number string manip classes
 - greater use of const in abi
 - datetime class support added
+- timer class expanded for operators
+- fix for generated docs
 
 From ucommon 2.0.7 to 2.0.8
 - support for optional cmake based build system being added
