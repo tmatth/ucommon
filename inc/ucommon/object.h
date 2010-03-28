@@ -565,8 +565,7 @@ inline Object *copy(Object *object)
 	{return object->copy();}
 
 /**
- * Convenience function to validate object.  This solves issues where
- * some compilers get confused between bool and pointer operators.
+ * Convenience function to validate object assuming it is castable to bool.
  * @param object we are testing.
  * @return true if object valid.
  */
