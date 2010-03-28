@@ -21,5 +21,10 @@ UCommon 2.0 will instead be released as GNU Common C++ 2 2.0.
 
 uCommon 1.9 first release candidate for use as GNU Common C++ 2 2.0.
 
-uCommon 2.0 released under the GNU Lesser General Public License, Version 3 or later.
+uCommon 2.0 released under the GNU Lesser General Public License, Version 3 or
+later.
+
+uCommon 2.1 is considered a refactored abi release offering greater clarity,
+consistency of use, and additional features that were migrated from Common C++.
+The 2.1 release series may continue to introduce additional classes.
 
