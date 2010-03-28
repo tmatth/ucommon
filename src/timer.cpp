@@ -281,6 +281,14 @@ timeout_t Timer::get(void) const
 	return diff;
 }
 
+Timer::operator bool() const
+{
+	if(get())
+		return false;
+
+	return true;
+}
+
 bool Timer::operator!() const
 {
 	if(get())

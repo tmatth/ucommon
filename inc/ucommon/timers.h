@@ -135,6 +135,12 @@ public:
 	bool operator!() const;
 
 	/**
+	 * Check if timer expired for is() expression.
+	 * @return true if timer expired.
+	 */
+	operator bool() const;
+
+	/**
 	 * Set timer expiration.
 	 * @param expire timer in specified seconds.
 	 */
