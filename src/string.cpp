@@ -1770,9 +1770,9 @@ char *string::first(char *str, const char *clist)
     return fp;
 }
 
-bool string::iequal(const char *s1, const char *s2)
+bool string::case_equal(const char *s1, const char *s2)
 {
-	return icompare(s1, s2) == 0;
+	return case_compare(s1, s2) == 0;
 }
 
 bool string::equal(const char *s1, const char *s2)
@@ -1780,9 +1780,9 @@ bool string::equal(const char *s1, const char *s2)
 	return compare(s1, s2) == 0;
 }
 
-bool string::iequal(const char *s1, const char *s2, size_t size)
+bool string::case_equal(const char *s1, const char *s2, size_t size)
 {
-	return icompare(s1, s2, size) == 0;
+	return case_compare(s1, s2, size) == 0;
 }
 
 bool string::equal(const char *s1, const char *s2, size_t size)
@@ -1810,7 +1810,7 @@ int string::compare(const char *s1, const char *s2, size_t s)
     return strncmp(s1, s2, s);
 }
 
-int string::icompare(const char *s1, const char *s2)
+int string::case_compare(const char *s1, const char *s2)
 {
 	if(!s1)
 		s1 = "";
@@ -1825,7 +1825,7 @@ int string::icompare(const char *s1, const char *s2)
 #endif
 }
 
-int string::icompare(const char *s1, const char *s2, size_t s)
+int string::case_compare(const char *s1, const char *s2, size_t s)
 {
     if(!s1)
         s1 = "";

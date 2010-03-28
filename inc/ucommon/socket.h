@@ -64,13 +64,6 @@ struct addrinfo;
 #define	DEFAULT_FAMILY	AF_INET
 #endif
 
-/**
- * An object that can hold a ipv4 or ipv6 socket address.  This would be
- * used for tcpip socket connections.  We do not use sockaddr_storage
- * because it is not present in pre ipv6 stacks, and because the storage
- * size also includes the size of the path of a unix domain socket on
- * posix systems.
- */
 struct sockaddr_internet;
 
 /**
@@ -88,6 +81,13 @@ typedef struct hostaddr_internet
 }	inethostaddr_t;
 
 #if defined(AF_INET6) || defined(__CYGWIN__)
+/**
+ * An object that can hold a ipv4 or ipv6 socket address.  This would be
+ * used for tcpip socket connections.  We do not use sockaddr_storage
+ * because it is not present in pre ipv6 stacks, and because the storage
+ * size also includes the size of the path of a unix domain socket on
+ * posix systems.
+ */
 typedef struct sockaddr_internet
 {
 	union {
