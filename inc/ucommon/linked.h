@@ -509,7 +509,7 @@ protected:
 
 	/**
 	 * Construct a copy of the tree.
-     * @param object to copy from.
+     * @param source object to copy from.
 	 */
 	NamedTree(const NamedTree& source);
 

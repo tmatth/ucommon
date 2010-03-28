@@ -741,7 +741,7 @@ public:
 	/**
 	 * Set segment size and get MTU.
 	 * @param socket to modify.
-	 * @param segment size or zero to not set.
+	 * @param size of segment or zero to not set.
 	 * @return mtu size of socket.
 	 */
 	static unsigned segsize(socket_t socket, unsigned size = 0);
@@ -763,7 +763,7 @@ public:
 
 	/**
 	 * Set segment size and get mtu of a socket.
-	 * @param segment size to set or 0 to leave unchanged.
+	 * @param size of segment or 0 to leave unchanged.
 	 * @return mtu size.
 	 */
 	inline unsigned segsize(unsigned size)

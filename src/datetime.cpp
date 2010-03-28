@@ -389,6 +389,12 @@ void Date::toJulian(long year, long month, long day)
 		3l * ((year + 4900l + (month - 14l) / 12l) / 100l) / 4l;
 }
 
+Date& Date::operator=(const Date& date)
+{
+	julian = date.julian;
+	return *this;
+}
+
 void Date::fromJulian(char *buffer) const
 {
 // The following conversion algorithm is due to
@@ -637,6 +643,12 @@ void Time::fromSeconds(char *buffer) const
 	buffer[6] = '\0';
 }
 
+Time& Time::operator=(const Time& time)
+{
+	seconds = time.seconds;
+	return *this;
+}
+
 DateTime::DateTime(time_t tm)
 {
 	tm_t *dt = DateTime::glt();
@@ -744,7 +756,7 @@ time_t DateTime::get(void) const
 	return mktime(&dt);
 }
 
-DateTime& DateTime::operator=(const DateTime datetime)
+DateTime& DateTime::operator=(const DateTime& datetime)
 {
 	julian = datetime.julian;
 	seconds = datetime.seconds;

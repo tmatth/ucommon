@@ -56,7 +56,6 @@ class __EXPORT Date
 protected:
 	long julian;
 
-protected:
 	void toJulian(long year, long month, long day);
 	void fromJulian(char *buf) const;
 
@@ -106,21 +105,25 @@ public:
 
 	/**
 	 * Get the year of the date.
+	 * @return year of the date
 	 */
 	int getYear(void) const;
 
 	/**
 	 * Get the month of the date (1-12).
+	 * @return month of year
 	 */
 	unsigned getMonth(void) const;
 
 	/**
 	 * Get the day of the month of the date.
+	 * @return day of month
 	 */
 	unsigned getDay(void) const;
 
 	/**
 	 * Get the day of the week (0-7).
+	 * @return day of week
 	 */
 	unsigned getDayOfWeek(void) const;
 
@@ -172,35 +175,41 @@ public:
 
 	/**
 	 * Increment date by one day.
+	 * @return instance of current date object.
 	 */
 	Date& operator++();
 
 	/**
 	 * Decrement date by one day.
+	 * @return instance of current date object.
 	 */
 	Date& operator--();
 
 	/**
 	 * Increment date by offset.
 	 * @param offset to add to julian date.
+	 * @return instance of current date object.
 	 */
 	Date& operator+=(long offset);
 
 	/**
 	 * Decrement date by offset.
 	 * @param offset to subtract from julian date.
+	 * @return instance of current date object.
 	 */
 	Date& operator-=(long offset);
 	
 	/**
 	 * Add days to julian date in an expression.
 	 * @param days to add.
+	 * @return new date object with modified days.
 	 */
 	Date operator+(long days);
 
 	/**
 	 * Subtract days from a julian date in an expression.
 	 * @param days to subtract.
+	 * @return new date object with modified days.
 	 */
 	Date operator-(long days);
 
@@ -213,38 +222,51 @@ public:
 		{return (julian - date.julian);};
 
 	/**
+	 * Assign date from another date object.
+	 * @param date object to assign from.
+	 * @return current modified date object.
+	 */
+	Date& operator=(const Date& date);
+
+	/**
 	 * Compare julian dates if same date.
 	 * @param date to compare with.
+	 * @return true if same.
 	 */
 	bool operator==(const Date &date);
 
 	/**
 	 * Compare julian dates if not same date.
 	 * @param date to compare with.
+	 * @return true if not same.
 	 */
 	bool operator!=(const Date &date);
 
 	/**
 	 * Compare julian date if earlier than another date.
 	 * @param date to compare with.
+	 * @return true if earlier.
 	 */
 	bool operator<(const Date &date);
 
 	/**
 	 * Compare julian date if earlier than or equal to another date.
 	 * @param date to compare with.
+	 * @return true if earlier or same.
 	 */
 	bool operator<=(const Date &date);
 
 	/**
 	 * Compare julian date if later than another date.
 	 * @param date to compare with.
+	 * @return true if later.
 	 */
 	bool operator>(const Date &date);
 
 	/**
 	 * Compare julian date if later than or equal to another date.
 	 * @param date to compare with.
+	 * @return true if later or same.
 	 */
 	bool operator>=(const Date &date);
 
@@ -295,7 +317,7 @@ public:
 	 * Create a time from the time portion of a date and time object.
 	 * @param object from DateTime::glt() or gmt().
 	 */
-	Time(tm *dt);
+	Time(struct tm *object);
 
 	/**
 	 * Create a time from a hh:mm:ss formatted time string.
@@ -358,7 +380,7 @@ public:
 	 * @param pointer to time field.
 	 * @param size of field if not null terminated.
 	 */
-	void set(char *str, size_t size = 0);
+	void set(char *pointer, size_t size = 0);
 
 	/**
 	 * Check if time object had valid value.
@@ -391,13 +413,13 @@ public:
 	 * Add seconds to the current time, wrap if 24 hours.
      * @param seconds to add.
 	 */
-	Time operator+(long val);
+	Time operator+(long seconds);
 
 	/**
 	 * Subtract seconds to the current time, wrap if 24 hours.
 	 * @param seconds to subtract.
 	 */
-	Time operator-(long val);
+	Time operator-(long seconds);
 
 	/**
 	 * Get time in seconds.
@@ -421,6 +443,13 @@ public:
 	 * Decrement time by 1 second, wrap on 24 hour period.
 	 */
 	Time& operator--();
+
+	/**
+	 * Assign a time as a copy of another time.
+	 * @param time to assign from.
+	 * @return time object modified.
+	 */
+	Time& operator=(const Time& time);
 
 	/**
 	 * Increment time by specified seconds.  Wraps on 24 hour period.
@@ -505,18 +534,27 @@ public:
 
 	/**
 	 * Operator to compute number of days between two dates.
-	 * @param offset for computation.
+	 * @param datetme to offset from for computation.
 	 * @return number of days difference.
 	 */
-	long operator-(const DateTime &date);
+	long operator-(const DateTime &datetime);
 
-	DateTime& operator=(const DateTime datetime);
+	DateTime& operator=(const DateTime& datetime);
 	DateTime& operator+=(long value);
 	DateTime& operator-=(long value);
 	DateTime operator+(long value);
 	DateTime operator-(long value);
 
+	/**
+	 * Add a day from the current date and time.
+	 * @return datetime object reference that was modified.
+	 */
 	DateTime& operator++();
+	
+	/**
+	 * Subtract a day from the current date and time.
+	 * @return datetime object reference that was modified.
+	 */
 	DateTime& operator--();
 
 	/**
@@ -553,7 +591,7 @@ public:
 	 * @param datetime to compare with.
 	 * @return true if later.
 	 */
-	bool operator>(const DateTime&);
+	bool operator>(const DateTime& datetime);
 
 	/**
 	 * Compare date and time with another date and time to see if later or
@@ -561,7 +599,7 @@ public:
 	 * @param datetime to compare with.
 	 * @return true if later or equal.
 	 */
-	bool operator>=(const DateTime&);
+	bool operator>=(const DateTime& datetime);
 
 	/**
 	 * Check if date and time is not valid.
@@ -571,6 +609,7 @@ public:
 
 	/**
 	 * Test is date and time is valid for is() operator.
+	 * @return true if object is valid.
 	 */
 	operator bool() const;
 
@@ -621,12 +660,31 @@ protected:
 		{fromJulian(buffer);};
 
 public:
-	DateNumber(char *buffer);
+	/**
+	 * Create a date number tied to a refreshed string buffer.
+	 * @param pointer to string buffer to rewrite.
+	 */
+	DateNumber(char *pointer);
+
+	/**
+	 * Release a datenumber object.
+	 */
 	virtual ~DateNumber();
 };
 
+/**
+ * Convenience type for using DateTime object.
+ */
 typedef	DateTime	datetime_t;
+
+/**
+ * Convenience type for using Date object.
+ */
 typedef	Date		date_t;
+
+/**
+ * Convenience type for struct tm.
+ */
 typedef	struct tm	tm_t;
 
 END_NAMESPACE
