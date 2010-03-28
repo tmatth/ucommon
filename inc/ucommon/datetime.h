@@ -91,7 +91,7 @@ public:
 	 * @param month of date (1-12).
 	 * @param day of month (1-31).
 	 */
-	Date(int year, unsigned month, unsigned day);
+	Date(int year, unsigned month = 1, unsigned day = 1);
 
 	/**
 	 * Construct a new julian date with today's date.
@@ -302,7 +302,7 @@ protected:
 	long seconds;
 
 protected:
-	void toSeconds(int hour, int minute, int second);
+	void toSeconds(int hour, int minute = 0, int second = 0);
 	void fromSeconds(char *buf) const;
 	virtual void update(void);
 
@@ -404,7 +404,7 @@ public:
 
 	/**
 	 * Get difference (in seconds) between two times.
-	 * @param reference time to subtract.
+	 * @param reference time to get difference from.
 	 * @return difference in seconds.
 	 */
 	long operator-(const Time &reference);
@@ -412,12 +412,14 @@ public:
 	/**
 	 * Add seconds to the current time, wrap if 24 hours.
      * @param seconds to add.
+	 * @return new time object with modified value.
 	 */
 	Time operator+(long seconds);
 
 	/**
 	 * Subtract seconds to the current time, wrap if 24 hours.
 	 * @param seconds to subtract.
+	 * @return new time object with modified value.
 	 */
 	Time operator-(long seconds);
 
@@ -436,66 +438,76 @@ public:
 
 	/**
 	 * Incrememnt time by 1 second, wrap on 24 hour period.
+	 * @return modified instance of current time object.
 	 */
 	Time& operator++();
 
 	/**
 	 * Decrement time by 1 second, wrap on 24 hour period.
+	 * @return modified instance of current time object.
 	 */
 	Time& operator--();
 
 	/**
 	 * Assign a time as a copy of another time.
 	 * @param time to assign from.
-	 * @return time object modified.
+	 * @return time object that was assigned.
 	 */
 	Time& operator=(const Time& time);
 
 	/**
 	 * Increment time by specified seconds.  Wraps on 24 hour period.
 	 * @param seconds to add to current time.
+	 * @return modified instance of current time object.
 	 */
 	Time& operator+=(long seconds);
 
 	/**
 	 * Decrement time by specified seconds.  Wraps on 24 hour period.
 	 * @param seconds to subtract from current time.
+	 * @return modified instance of current time object.
 	 */
 	Time& operator-=(long seconds);
 
 	/**
 	 * Compare time with another time to see if same time.
 	 * @param time to compare with.
+	 * @return true if same time.
 	 */
 	bool operator==(const Time &time);
 
 	/**
 	 * Compare time with another time to see if not same time.
 	 * @param time to compare with.
+	 * @return true if not same time.
 	 */
 	bool operator!=(const Time &time);
 
 	/**
 	 * Compare time if earlier than another time.
-	 * @param time to compare with.
+	 * @param time object to compare with.
+	 * @return true if earlier than object. 
 	 */
 	bool operator<(const Time &time);
 
 	/**
 	 * Compare time if earlier than or equal to another time.
-	 * @param time to compare with.
+	 * @param time object to compare with.
+	 * @return true if earlier or same as object.
 	 */
 	bool operator<=(const Time &time);
 
 	/**
 	 * Compare time if later than another time.
-	 * @param time to compare with.
+	 * @param time object to compare with.
+	 * @return true if later than object.
 	 */
 	bool operator>(const Time &time);
 
 	/**
 	 * Compare time if later than or equal to another time.
-	 * @param time to compare with.
+	 * @param time object to compare with.
+	 * @return true if later than or same as object.
 	 */
 	bool operator>=(const Time &time);
 };
@@ -516,34 +528,122 @@ protected:
 	void update(void);
 
 public:
+	/**
+	 * Constant for number of seconds in a day.
+	 */
 	static const long c_day;
+
+	/**
+	 * Constant for number of seconds in a hour.
+	 */
 	static const long c_hour;
+
+	/**
+	 * Constant for number of seconds in a week.
+	 */
 	static const long c_week;
 
-  	DateTime(time_t tm);
-	DateTime(tm *dt);
-	DateTime(const char *str, size_t size = 0);
-	DateTime(int year, unsigned month, unsigned day,
-		 int hour, int minute, int second);
+	/**
+	 * Construct a date and time from C libraray time_t type.		
+	 * @param time type to make date and time from.
+	 */
+  	DateTime(time_t time);
+
+	/**
+	 * Construct a date and time from C library time structure.
+	 * @param tm structure from C library (from glt or gmt).
+	 */
+	DateTime(struct tm *tm);
+
+	/**
+	 * Construct a date and time from ISO string buffer.
+	 * @param pointer to string field holding date and time.
+	 * @param size of field if not null terminated string.
+	 */
+	DateTime(const char *pointer, size_t size = 0);
+
+	/**
+	 * Construct a date and time object from explicit date and time values.
+	 * @param year of object.
+	 * @param month of object (1-12).
+	 * @param day of month of object (1-31).
+	 * @param hour of object (0-23).
+	 * @param minute of object (0-59).
+	 * @param second of object (0-59).
+	 */
+	DateTime(int year, unsigned month = 1, unsigned day = 1,
+		 int hour = 0, int minute = 0, int second = 0);
+
+	/**
+	 * Construct a new date and time object with current date and time.
+	 */
 	DateTime();
+
+	/**
+	 * Destroy date and time object.
+	 */
 	virtual ~DateTime();
 
+	/**
+	 * Get a ISO formatted date and time string for current object.
+	 * @param buffer to store date and time in (yyyy-mm-dd hh:mm:ss).
+	 * @return string buffer if object is valid.
+	 */
 	char *get(char *buffer) const;
+
+	/**
+	 * Get C library time_t type if object in C library epoch range.
+	 * @return time in seconds from epoch or ~0l if out of range.
+	 */
 	time_t get(void) const;
+
+	/**
+	 * Test if object is valid.
+	 * @return true if object is valid.
+	 */
 	bool isValid(void) const;
 
 	/**
 	 * Operator to compute number of days between two dates.
-	 * @param datetme to offset from for computation.
+	 * @param datetime to offset from for computation.
 	 * @return number of days difference.
 	 */
 	long operator-(const DateTime &datetime);
 
+	/**
+	 * Assign date and time from another datetime object.
+	 * @param datetime object to assign from.
+	 * @return assigned datetime object.
+	 */
 	DateTime& operator=(const DateTime& datetime);
-	DateTime& operator+=(long value);
-	DateTime& operator-=(long value);
-	DateTime operator+(long value);
-	DateTime operator-(long value);
+
+	/**
+	 * Add days to the current datetime object.
+	 * @param days to add to object.
+	 * @return modified datetime object.
+	 */
+	DateTime& operator+=(long days);
+
+	/**
+	 * Subtract days from current datetime object.
+	 * @param days to subtract from object.
+	 * @return modified datetime object.
+	 */
+	DateTime& operator-=(long days);
+
+	/**
+	 * Add days to datetime in an expression.
+	 * @param days to add to datetime.
+	 * @return new modified datetime object.
+	 */
+	DateTime operator+(long days);
+
+	/**
+	 * Subtract days from datetime in an expression.
+	 * @param days to subtract from datetime.
+	 * @return new modified datetime object.
+	 */
+	DateTime operator-(long days);
 
 	/**
 	 * Add a day from the current date and time.
