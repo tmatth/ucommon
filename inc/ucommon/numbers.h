@@ -187,9 +187,9 @@ typedef	ZNumber znumber_t;
 template<typename T>
 inline const T abs(const T& value)
 {
-    if(v < (T)0)
-        return -v;
-    return v;
+    if(value < (T)0)
+        return -value;
+    return value;
 }
 
 
