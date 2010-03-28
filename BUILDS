@@ -41,13 +41,13 @@ c model and build the ucommon subset by default, as otherwise software
 that uses plugins would be hugely bloated.  Full libstdc++ support can 
 always be re-enabled explicitly using --enable-stdcpp.
 
-It should be possible to build ucommon using Microsoft native compilers, 
-and if people wish to submit patches for code changes based on using 
-native Microsoft compilers, they will be accepted so long as they do not 
-break other build environments.  We do not recommend or even suggest the 
-use of proprietary compilers on proprietary operating systems, and we 
-will continue to work to make the debian hosted mingw build environment 
-as effective for building our packages as we can.
+It should be possible to build ucommon using Microsoft native compilers, and if
+people wish to submit patches for code changes based on using native Microsoft
+compilers, they will be accepted so long as they do not break other build
+environments.  Native Microsoft Visual studio files may be generated using
+cmake.  We do not recommend the use of proprietary compilers on proprietary
+operating systems, and we will continue to work to make the debian hosted mingw
+build environment as effective for building our packages as we can.
 
 Support for older GCC (<3.x):
 
