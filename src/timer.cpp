@@ -249,7 +249,7 @@ bool Timer::isExpired(void)
 	return false;
 }
 
-timeout_t Timer::get(void)
+timeout_t Timer::get(void) const
 {
 	timeout_t diff;
 #if _POSIX_TIMERS > 0
@@ -281,7 +281,7 @@ timeout_t Timer::get(void)
 	return diff;
 }
 
-bool Timer::operator!()
+bool Timer::operator!() const
 {
 	if(get())
 		return true;
@@ -289,7 +289,25 @@ bool Timer::operator!()
 	return false;
 }
 
-void Timer::operator=(timeout_t to)
+timeout_t Timer::operator-(const Timer& timer)
+{
+	timeout_t tv = get(), dv = timer.get();
+	if(!tv)
+		return 0;
+
+	if(tv == Timer::inf)
+		return Timer::inf;
+
+	if(dv == Timer::inf)
+		return tv;
+
+	if(dv > tv)
+		return 0;
+
+	return tv - dv;
+}
+
+Timer& Timer::operator=(timeout_t to)
 {
 #if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
 	clock_gettime(CLOCK_MONOTONIC, &timer);
@@ -299,9 +317,10 @@ void Timer::operator=(timeout_t to)
 	gettimeofday(&timer, NULL);
 #endif
 	operator+=(to);
+	return *this;
 }
 
-void Timer::operator+=(timeout_t to)
+Timer& Timer::operator+=(timeout_t to)
 {
 	if(isExpired())
 		set();
@@ -314,9 +333,10 @@ void Timer::operator+=(timeout_t to)
 #endif
 	adj(&timer);
 	updated = true;
+	return *this;
 }
 
-void Timer::operator-=(timeout_t to)
+Timer& Timer::operator-=(timeout_t to)
 {
 	if(isExpired())
 		set();
@@ -327,25 +347,28 @@ void Timer::operator-=(timeout_t to)
     timer.tv_usec -= (to % 1000l) * 1000l;
 #endif
     adj(&timer);
+	return *this;
 }
 
 
-void Timer::operator+=(time_t abs)
+Timer& Timer::operator+=(time_t abs)
 {
 	if(isExpired())
 		set();
 	timer.tv_sec += difftime(abs);
 	updated = true;
+	return *this;
 }
 
-void Timer::operator-=(time_t abs)
+Timer& Timer::operator-=(time_t abs)
 {
 	if(isExpired())
 		set();
 	timer.tv_sec -= difftime(abs);
+	return *this;
 }
 
-void Timer::operator=(time_t abs)
+Timer& Timer::operator=(time_t abs)
 {
 #if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
 	clock_gettime(CLOCK_MONOTONIC, &timer);
@@ -355,10 +378,11 @@ void Timer::operator=(time_t abs)
 	gettimeofday(&timer, NULL);
 #endif
 	if(!abs)
-		return;
+		return *this;
 
 	timer.tv_sec += difftime(abs);
 	updated = true;
+	return *this;
 }
 
 void Timer::sync(Timer &t)

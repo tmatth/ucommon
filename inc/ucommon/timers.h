@@ -119,56 +119,63 @@ public:
 	 * Get remaining time until the timer expires.
 	 * @return 0 if expired or milliseconds still waiting.
 	 */
-	timeout_t get(void);
+	timeout_t get(void) const;
 
 	/**
 	 * Get remaining time until timer expires by reference.
 	 * @return 0 if expired or milliseconds still waiting.
 	 */
-	inline timeout_t operator*()
+	inline timeout_t operator*() const
 		{return get();};
 
 	/**
 	 * Check if timer has expired.
 	 * @return true if timer still pending.
 	 */
-	bool operator!();
+	bool operator!() const;
 
 	/**
 	 * Set timer expiration.
 	 * @param expire timer in specified seconds.
 	 */
-	void operator=(time_t expire);
+	Timer& operator=(time_t expire);
 
 	/**
 	 * Set timer expiration.
 	 * @param expire timer in milliseconds.
 	 */
-	void operator=(timeout_t expire);
+	Timer& operator=(timeout_t expire);
 
 	/**
 	 * Adjust timer expiration.
 	 * @param expire time to add in seconds.
 	 */
-	void operator+=(time_t expire);
+	Timer& operator+=(time_t expire);
 
 	/**
 	 * Adjust timer expiration.
 	 * @param expire time to add in milliseconds.
 	 */
-	void operator+=(timeout_t expire);
+	Timer& operator+=(timeout_t expire);
 
 	/**
 	 * Adjust timer expiration.
 	 * @param expire time to subtract in seconds.
 	 */
-	void operator-=(time_t expire);
+	Timer& operator-=(time_t expire);
 
 	/**
 	 * Adjust timer expiration.
 	 * @param expire time to subtract in milliseconds.
 	 */
-	void operator-=(timeout_t expire);
+	Timer& operator-=(timeout_t expire);
+
+	/**
+	 * Compute difference between two timers.
+	 * @param timer to use for difference.
+	 * @return difference in milliseconds.
+	 */
+	timeout_t operator-(const Timer& timer);
 
 	/**
 	 * Sleep current thread until the specified timer expires.
@@ -268,7 +275,7 @@ public:
 		 * Time remaining until expired.
 		 * @return milliseconds until timer expires.
 		 */
-		inline timeout_t get(void)
+		inline timeout_t get(void) const
 			{return Timer::get();};
 
 		/**
