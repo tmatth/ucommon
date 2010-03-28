@@ -1564,12 +1564,33 @@ inline struct addrinfo *addrinfo(socket::address& address)
 inline struct sockaddr *addr(socket::address& address)
 	{return address.getAddr();}
 
+/**
+ * Compare two socket addresses to see if equal.  If the port is zero
+ * then this is the same as comparing host address alone.
+ * @param s1 socket address to compare.
+ * @param s2 socket address to compare.
+ * @return true if addresses same.
+ */
 inline bool eq(struct sockaddr *s1, struct sockaddr *s2)
 	{return Socket::equal(s1, s2);}
 
+/**
+ * Compare two stored socket addresses to see if equal.  If the port is zero
+ * then this is the same as comparing host address alone.
+ * @param s1 stored socket address to compare.
+ * @param s2 stored socket address to compare.
+ * @return true if addresses same.
+ */
 inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
 	{return Socket::equal((struct sockaddr *)s1, (struct sockaddr *)s2);}
 
+/**
+ * Compare two host addresses to see if equal.  The port numbers are
+ * ignored.
+ * @param s1 socket address to compare.
+ * @param s2 socket address to compare.
+ * @return true if addresses same.
+ */
 inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
 	{return Socket::equalhost(s1, s2);}
 
