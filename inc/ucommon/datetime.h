@@ -216,37 +216,37 @@ public:
 	 * Compare julian dates if same date.
 	 * @param date to compare with.
 	 */
-	int operator==(const Date &date);
+	bool operator==(const Date &date);
 
 	/**
 	 * Compare julian dates if not same date.
 	 * @param date to compare with.
 	 */
-	int operator!=(const Date &date);
+	bool operator!=(const Date &date);
 
 	/**
-	 * Compare julian date if less than another date.
+	 * Compare julian date if earlier than another date.
 	 * @param date to compare with.
 	 */
-	int operator<(const Date &date);
+	bool operator<(const Date &date);
 
 	/**
-	 * Compare julian date if less than or equal to another date.
+	 * Compare julian date if earlier than or equal to another date.
 	 * @param date to compare with.
 	 */
-	int operator<=(const Date &date);
+	bool operator<=(const Date &date);
 
 	/**
-	 * Compare julian date if greater than another date.
+	 * Compare julian date if later than another date.
 	 * @param date to compare with.
 	 */
-	int operator>(const Date &date);
+	bool operator>(const Date &date);
 
 	/**
-	 * Compare julian date if greater than or equal to another date.
+	 * Compare julian date if later than or equal to another date.
 	 * @param date to compare with.
 	 */
-	int operator>=(const Date &date);
+	bool operator>=(const Date &date);
 
 	/**
 	 * Check if julian date is not valid.
@@ -411,16 +411,64 @@ public:
 	 * @return time string.
 	 */
 	String operator()() const;
+
+	/**
+	 * Incrememnt time by 1 second, wrap on 24 hour period.
+	 */
 	Time& operator++();
+
+	/**
+	 * Decrement time by 1 second, wrap on 24 hour period.
+	 */
 	Time& operator--();
-	Time& operator+=(long val);
-	Time& operator-=(long val);
-	int operator==(const Time &time);
-	int operator!=(const Time &time);
-	int operator<(const Time &time);
-	int operator<=(const Time &time);
-	int operator>(const Time &time);
-	int operator>=(const Time &time);
+
+	/**
+	 * Increment time by specified seconds.  Wraps on 24 hour period.
+	 * @param seconds to add to current time.
+	 */
+	Time& operator+=(long seconds);
+
+	/**
+	 * Decrement time by specified seconds.  Wraps on 24 hour period.
+	 * @param seconds to subtract from current time.
+	 */
+	Time& operator-=(long seconds);
+
+	/**
+	 * Compare time with another time to see if same time.
+	 * @param time to compare with.
+	 */
+	bool operator==(const Time &time);
+
+	/**
+	 * Compare time with another time to see if not same time.
+	 * @param time to compare with.
+	 */
+	bool operator!=(const Time &time);
+
+	/**
+	 * Compare time if earlier than another time.
+	 * @param time to compare with.
+	 */
+	bool operator<(const Time &time);
+
+	/**
+	 * Compare time if earlier than or equal to another time.
+	 * @param time to compare with.
+	 */
+	bool operator<=(const Time &time);
+
+	/**
+	 * Compare time if later than another time.
+	 * @param time to compare with.
+	 */
+	bool operator>(const Time &time);
+
+	/**
+	 * Compare time if later than or equal to another time.
+	 * @param time to compare with.
+	 */
+	bool operator>=(const Time &time);
 };
 
 /**
@@ -471,21 +519,93 @@ public:
 	DateTime& operator++();
 	DateTime& operator--();
 
-	int operator==(const DateTime&);
-	int operator!=(const DateTime&);
-	int operator<(const DateTime&);
-	int operator<=(const DateTime&);
-	int operator>(const DateTime&);
-	int operator>=(const DateTime&);
+	/**
+	 * Compare date and time with another date and time to see if the same.
+	 * @param datetime to compare with.
+	 * @return true if equal.
+	 */
+	bool operator==(const DateTime& datetime);
 
+	/**
+	 * Compare date and time with another date and time to see if not same.
+	 * @param datetime to compare with.
+	 * @return true if not equal.
+	 */
+	bool operator!=(const DateTime& datetime);
+
+	/**
+	 * Compare date and time with another date and time to see if earlier.
+	 * @param datetime to compare with.
+	 * @return true if earlier.
+	 */
+	bool operator<(const DateTime& datetime);
+
+	/**
+	 * Compare date and time with another date and time to see if earlier or
+	 * the same.
+	 * @param datetime to compare with.
+	 * @return true if earlier or equal.
+	 */
+	bool operator<=(const DateTime& datetime);
+
+	/**
+	 * Compare date and time with another date and time to see if later.
+	 * @param datetime to compare with.
+	 * @return true if later.
+	 */
+	bool operator>(const DateTime&);
+
+	/**
+	 * Compare date and time with another date and time to see if later or
+	 * the same.
+	 * @param datetime to compare with.
+	 * @return true if later or equal.
+	 */
+	bool operator>=(const DateTime&);
+
+	/**
+	 * Check if date and time is not valid.
+	 * @return true if not valid.
+	 */
 	bool operator!() const;
+
+	/**
+	 * Test is date and time is valid for is() operator.
+	 */
 	operator bool() const;
 
-	String format(const char *test) const;
+	/**
+	 * Return date and time formatted using strftime format values.
+	 * @param strftime format to use.
+	 * @return String object with formatted time.
+	 */
+	String format(const char *strftime) const;
 
-	static struct tm *glt(time_t *now = NULL);
-	static struct tm *gmt(time_t *now = NULL);
-	static void release(struct tm *dt);
+	/**
+	 * Fetch an instance of time converted to local time.  If the localtime
+	 * abi is not re-entrant, than a lock is held, otherwise a unique
+	 * object is returned.  In either case, when you are done, you must
+	 * release the object.
+	 * @param time object or NULL if using current time.
+	 * @return locked instance of struct tm object.
+	 */
+	static struct tm *glt(time_t *time = NULL);
+
+	/**
+	 * Fetch an instance of time converted to gmt.  If the gmtime abi
+	 * is not re-entrant, than a lock is held, otherwise a unique
+	 * object is returned.  In either case, when you are done, you must
+	 * release the object.
+	 * @param time object or NULL if using current time.
+	 * @return locked instance of struct tm object.
+	 */
+	static struct tm *gmt(time_t *time = NULL);
+
+	/**
+	 * Release a struct tm object from glt or gmt.
+	 * @param object to release.
+	 */
+	static void release(struct tm *object);
 };
 
 /**

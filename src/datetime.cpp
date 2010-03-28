@@ -343,32 +343,32 @@ Date& Date::operator-=(long val)
 	return *this;
 }
 
-int Date::operator==(const Date &d)
+bool Date::operator==(const Date &d)
 {
 	return julian == d.julian;
 }
 
-int Date::operator!=(const Date &d)
+bool Date::operator!=(const Date &d)
 {
 	return julian != d.julian;
 }
 
-int Date::operator<(const Date &d)
+bool Date::operator<(const Date &d)
 {
 	return julian < d.julian;
 }
 
-int Date::operator<=(const Date &d)
+bool Date::operator<=(const Date &d)
 {
 	return julian <= d.julian;
 }
 
-int Date::operator>(const Date &d)
+bool Date::operator>(const Date &d)
 {
 	return julian > d.julian;
 }
 
-int Date::operator>=(const Date &d)
+bool Date::operator>=(const Date &d)
 {
 	return julian >= d.julian;
 }
@@ -577,32 +577,32 @@ Time Time::operator-(long val)
 	return result;
 }
 
-int Time::operator==(const Time &t)
+bool Time::operator==(const Time &t)
 {
 	return seconds == t.seconds;
 }
 
-int Time::operator!=(const Time &t)
+bool Time::operator!=(const Time &t)
 {
 	return seconds != t.seconds;
 }
 
-int Time::operator<(const Time &t)
+bool Time::operator<(const Time &t)
 {
 	return seconds < t.seconds;
 }
 
-int Time::operator<=(const Time &t)
+bool Time::operator<=(const Time &t)
 {
 	return seconds <= t.seconds;
 }
 
-int Time::operator>(const Time &t)
+bool Time::operator>(const Time &t)
 {
 	return seconds > t.seconds;
 }
 
-int Time::operator>=(const Time &t)
+bool Time::operator>=(const Time &t)
 {
 	return seconds >= t.seconds;
 }
@@ -772,17 +772,17 @@ void DateTime::update(void)
 	Time::update();
 }
 
-int DateTime::operator==(const DateTime &d)
+bool DateTime::operator==(const DateTime &d)
 {
 	return (julian == d.julian) && (seconds == d.seconds);
 }
 
-int DateTime::operator!=(const DateTime &d)
+bool DateTime::operator!=(const DateTime &d)
 {
 	return (julian != d.julian) || (seconds != d.seconds);
 }
 
-int DateTime::operator<(const DateTime &d)
+bool DateTime::operator<(const DateTime &d)
 {
 	if (julian != d.julian) {
 		return (julian < d.julian);
@@ -792,7 +792,7 @@ int DateTime::operator<(const DateTime &d)
 	}
 }
 
-int DateTime::operator<=(const DateTime &d)
+bool DateTime::operator<=(const DateTime &d)
 {
 	if (julian != d.julian) {
 		return (julian < d.julian);
@@ -802,7 +802,7 @@ int DateTime::operator<=(const DateTime &d)
 	}
 }
 
-int DateTime::operator>(const DateTime &d)
+bool DateTime::operator>(const DateTime &d)
 {
 	if (julian != d.julian) {
 		return (julian > d.julian);
@@ -812,7 +812,7 @@ int DateTime::operator>(const DateTime &d)
 	}
 }
 
-int DateTime::operator>=(const DateTime &d)
+bool DateTime::operator>=(const DateTime &d)
 {
 	if (julian != d.julian) {
 		return (julian > d.julian);
