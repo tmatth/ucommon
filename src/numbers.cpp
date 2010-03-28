@@ -102,14 +102,20 @@ long Number::operator=(long value)
 	return value;
 }
 
-long Number::operator+=(const long value)
+long Number::operator=(const Number& num)
+{
+	set(num.get());
+	return get();
+}
+
+long Number::operator+=(long value)
 {
 	long value1 = get() + value;
 	set(value1);
 	return value1;
 }
 
-long Number::operator-=(const long value)
+long Number::operator-=(long value)
 {
 	long value1 = get() - value;
 	set(value1);
@@ -128,36 +134,6 @@ long Number::operator++()
 	long val = get();
 	set(++val);
 	return val;
-}
-
-int Number::operator==(const Number &num)
-{
-	return get() == num.get();
-}
-
-int Number::operator!=(const Number &num)
-{
-	return get() != num.get();
-}
-
-int Number::operator<(const Number &num)
-{
-	return get() < num.get();
-}
-
-int Number::operator<=(const Number &num)
-{
-	return get() <= num.get();
-}
-
-int Number::operator>(const Number &num)
-{
-	return get() > num.get();
-}
-
-int Number::operator>=(const Number &num)
-{
-	return get() >= num.get();
 }
 
 ZNumber::ZNumber(char *buf, unsigned chars) :
@@ -193,25 +169,5 @@ long ZNumber::operator=(long value)
 {
 	set(value);
 	return value;
-}
-
-long operator+(const Number &num, long val)
-{
-	return num.get() + val;
-}
-
-long operator+(long val, const Number &num)
-{
-	return num.get() + val;
-}
-
-long operator-(const Number &num, long val)
-{
-	return num.get() - val;
-}
-
-long operator-(long val, const Number &num)
-{
-	return num.get() - val;
 }
 
