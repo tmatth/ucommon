@@ -184,6 +184,48 @@ public:
 	timeout_t operator-(const Timer& timer);
 
 	/**
+	 * Compare timers if same timeout.
+	 * @param timer to compare with.
+	 * @return true if same.
+	 */
+	bool operator==(const Timer& timer);
+
+	/**
+	 * Compare timers if not same timeout.
+	 * @param timer to compare with.
+	 * @return true if not same.
+	 */
+	bool operator!=(const Timer& timer);
+
+	/**
+	 * Compare timers if earlier timeout than another timer.
+	 * @param timer to compare with.
+	 * @return true if earlier.
+	 */
+	bool operator<(const Timer& timer);
+
+	/**
+	 * Compare timers if earlier than or equal to another timer.
+	 * @param timer to compare with.
+	 * @return true if earlier or same.
+	 */
+	bool operator<=(const Timer& timer);
+
+	/**
+	 * Compare timers if later timeout than another timer.
+	 * @param timer to compare with.
+	 * @return true if later.
+	 */
+	bool operator>(const Timer& timer);
+
+	/**
+	 * Compare timers if later than or equal to another timer.
+	 * @param timer to compare with.
+	 * @return true if later or same.
+	 */
+	bool operator>=(const Timer& timer);
+
+	/**
 	 * Sleep current thread until the specified timer expires.
 	 * @param timer to reference for sleep.
 	 */

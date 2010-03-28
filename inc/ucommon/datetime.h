@@ -233,42 +233,42 @@ public:
 	 * @param date to compare with.
 	 * @return true if same.
 	 */
-	bool operator==(const Date &date);
+	bool operator==(const Date& date);
 
 	/**
 	 * Compare julian dates if not same date.
 	 * @param date to compare with.
 	 * @return true if not same.
 	 */
-	bool operator!=(const Date &date);
+	bool operator!=(const Date& date);
 
 	/**
 	 * Compare julian date if earlier than another date.
 	 * @param date to compare with.
 	 * @return true if earlier.
 	 */
-	bool operator<(const Date &date);
+	bool operator<(const Date& date);
 
 	/**
 	 * Compare julian date if earlier than or equal to another date.
 	 * @param date to compare with.
 	 * @return true if earlier or same.
 	 */
-	bool operator<=(const Date &date);
+	bool operator<=(const Date& date);
 
 	/**
 	 * Compare julian date if later than another date.
 	 * @param date to compare with.
 	 * @return true if later.
 	 */
-	bool operator>(const Date &date);
+	bool operator>(const Date& date);
 
 	/**
 	 * Compare julian date if later than or equal to another date.
 	 * @param date to compare with.
 	 * @return true if later or same.
 	 */
-	bool operator>=(const Date &date);
+	bool operator>=(const Date& date);
 
 	/**
 	 * Check if julian date is not valid.

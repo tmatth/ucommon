@@ -315,6 +315,36 @@ timeout_t Timer::operator-(const Timer& timer)
 	return tv - dv;
 }
 
+bool Timer::operator==(const Timer& timer)
+{
+	return get() == timer.get();
+}
+
+bool Timer::operator!=(const Timer& timer)
+{
+	return get() != timer.get();
+}
+
+bool Timer::operator<(const Timer& timer)
+{
+	return get() < timer.get();
+}
+
+bool Timer::operator<=(const Timer& timer)
+{
+	return get() <= timer.get();
+}
+
+bool Timer::operator>(const Timer& timer)
+{
+	return get() > timer.get();
+}
+
+bool Timer::operator>=(const Timer& timer)
+{
+	return get() >= timer.get();
+}
+
 Timer& Timer::operator=(timeout_t to)
 {
 #if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
