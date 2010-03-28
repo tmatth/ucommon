@@ -43,7 +43,9 @@ current version supports compiling with GCC, which is commonly found on
 GNU/Linux, OS/X, BSD based systems, and many other platforms; and the Sun
 Workshop compiler, which is offered as an example how to adapt UCommon for
 additional compilers. UCommon may also be built with GCC cross compiling for
-mingw32 to build Microsoft Windows targets natively.  
+mingw32 to build Microsoft Windows targets natively.  The cmake build system
+can also be used, to create project files for various platforms including
+xcode for OS/X and various Microsoft Visual Studio project file formats.
 
 The minimum platform support for UCommon is a modern and working posix pthread
 threading library.  I use a subset of posix threads to assure wider portability
