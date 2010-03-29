@@ -59,6 +59,21 @@ int main(int argc, char **argv)
 	assert(eq(buf, "2003-01-06"));
 	assert(exp_ctime == date.getTime());
 	
+	// some operator tests...
+	Date aday = date;
+	Date nextday(2003, 1, 7);
+	assert(aday == date);
+	assert((++aday) == nextday);
+	assert(aday != date);
+	assert(date <= aday);
+	assert(date < aday);
+
+	// play with math and casting operators...
+	Date newday = nextday + 5;
+	assert((long)newday == 20030112l);
+	assert((long)nextday == 20030107l);
+	assert(newday - nextday == 5);
+
 	// test some math...
 	assert(20030106l == date.get());
 	date -= 6;
