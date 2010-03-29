@@ -750,6 +750,12 @@ public:
 		{return Date::get();};
 
 	/**
+	 * Convert date and time to julian day number.
+	 * @return julian day number as a double.
+	 */
+	operator double() const;
+
+	/**
 	 * Return date and time formatted using strftime format values.
 	 * @param strftime format to use.
 	 * @return String object with formatted time.

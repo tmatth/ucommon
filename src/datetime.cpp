@@ -909,6 +909,11 @@ DateTime& DateTime::operator--()
 	return *this;
 }
 
+DateTime::operator double() const
+{
+	return (double)julian + ((double)seconds/86400.0);
+}
+
 DateNumber::DateNumber(char *str) :
 Number(str, 10), Date(str, 10)
 {}

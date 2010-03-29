@@ -88,6 +88,8 @@ int main(int argc, char **argv)
 	assert((long)date == 20030804l);
 
 	DateTime tmp("2003-02-28 23:59:55");
+	snprintf(buf, sizeof(buf), "%.5f", (double)tmp);
+	assert(eq(buf, "2452699.99994"));
 	assert((long)tmp == 20030228l);
 	tmp += 5;	// add 5 seconds to force rollover...
 	assert((long)tmp == 20030301l);
