@@ -83,6 +83,10 @@ int main(int argc, char **argv)
 	date = "20031306";
 	assert(!is(date));
 
+	// conversion check...
+	date = "2003-08-04";
+	assert((long)date == 20030804l);
+
 	return 0;
 }
 
