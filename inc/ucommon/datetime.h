@@ -134,6 +134,13 @@ public:
 	unsigned getDayOfWeek(void) const;
 
 	/**
+	 * Get the julian number of a date.
+	 * @return julian number.
+	 */
+	inline long getJulian(void)
+		{return julian;};
+
+	/**
 	 * Get a ISO string representation of the date (yyyy-mm-dd).
 	 * @param buffer to store string.
 	 * @return string representation.
@@ -148,7 +155,7 @@ public:
 	
 	/**
 	 * Get the julian number for the object.
-	 * @return julian number.
+	 * @return date as number.
 	 */
 	long get(void) const;
 
@@ -166,7 +173,7 @@ public:
 	bool isValid(void) const;
 
 	/**
-	 * Casting operator to return julian number.
+	 * Casting operator to return date as number.
 	 * @return julian number.
 	 */
 	inline operator long() const
@@ -734,6 +741,13 @@ public:
 	 * @return true if object is valid.
 	 */
 	operator bool() const;
+
+	/**
+	 * Casting operator to return date as number.
+	 * @return julian number.
+	 */
+	inline operator long() const
+		{return Date::get();};
 
 	/**
 	 * Return date and time formatted using strftime format values.

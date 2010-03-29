@@ -87,6 +87,11 @@ int main(int argc, char **argv)
 	date = "2003-08-04";
 	assert((long)date == 20030804l);
 
+	DateTime tmp("2003-02-28 23:59:55");
+	assert((long)tmp == 20030228l);
+	tmp += 5;	// add 5 seconds to force rollover...
+	assert((long)tmp == 20030301l);
+
 	return 0;
 }
 
