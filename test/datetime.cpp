@@ -1,0 +1,73 @@
+// Copyright (C) 2006-2008 David Sugar, Tycho Softworks.
+//
+// This file is part of GNU ucommon.
+//
+// GNU ucommon is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published 
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// GNU ucommon is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with GNU ucommon.  If not, see <http://www.gnu.org/licenses/>.
+
+#ifndef	DEBUG
+#define	DEBUG
+#endif
+
+#include <ucommon/ucommon.h>
+
+#include <stdio.h>
+
+using namespace UCOMMON_NAMESPACE;
+using namespace std;
+
+int main(int argc, char **argv)
+{
+	Date date = Date(2003, 1, 6);
+	unsigned exp_year = 2003;
+	unsigned exp_month = 1;
+	unsigned exp_day = 6;
+	unsigned exp_dayofweek = 1;
+	String exp_stringdate;
+	tm_t exp_dt;
+	time_t exp_ctime;
+	char buf[20];
+
+	snprintf(buf, sizeof(buf),
+		"%04d-%02d-%02d", exp_year, exp_month, exp_day);
+
+	memset(&exp_dt, 0, sizeof(exp_dt));
+	exp_dt.tm_year = exp_year - 1900;
+	exp_dt.tm_mon = exp_month - 1;
+	exp_dt.tm_mday = exp_day;
+	exp_ctime = mktime(&exp_dt);
+
+	assert(exp_year == date.getYear());
+	assert(exp_month == date.getMonth());
+	assert(exp_day == date.getDay());
+	assert(exp_dayofweek == date.getDayOfWeek());
+
+	// test some conversions...
+	exp_stringdate = date();
+	assert(eq(*exp_stringdate, "2003-01-06"));
+	date.get(buf);
+	assert(eq(buf, "2003-01-06"));
+	assert(exp_ctime == date.getTime());
+	
+	// test some math...
+	assert(20030106l == date.get());
+	date -= 6;
+	assert(20021231l == date.get());
+
+	// test invalid date...
+	date = "20031306";
+	assert(!is(date));
+
+	return 0;
+}
+

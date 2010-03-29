@@ -14,7 +14,7 @@ LDADD = ../src/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = stdcpp.cpp keydata.conf
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
-	ucommonKeydata ucommonStream
+	ucommonKeydata ucommonStream ucommonDatetime
 check_PROGRAMS = $(TESTS)
 
 testing:  $(TESTS)
@@ -25,6 +25,7 @@ ucommonLinked_SOURCES = linked.cpp
 ucommonSocket_SOURCES = socket.cpp
 ucommonStream_SOURCES = stream.cpp
 ucommonKeydata_SOURCES = keydata.cpp
+ucommonDatetime_SOURCES = datetime.cpp
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp
