@@ -154,7 +154,7 @@ public:
 	time_t getTime(void) const;
 	
 	/**
-	 * Get the julian number for the object.
+	 * Get the date as a number for the object or 0 if invalid.
 	 * @return date as number.
 	 */
 	long get(void) const;
@@ -744,7 +744,7 @@ public:
 
 	/**
 	 * Casting operator to return date as number.
-	 * @return julian number.
+	 * @return date as a number.
 	 */
 	inline operator long() const
 		{return Date::get();};
