@@ -644,13 +644,15 @@ void Time::toSeconds(int hour, int minute, int second)
 void Time::fromSeconds(char *buffer) const
 {
 	ZNumber hour(buffer, 2);
-	ZNumber minute(buffer + 2, 2);
-	ZNumber second(buffer + 4, 2);
+	buffer[2] = ':';
+	ZNumber minute(buffer + 3, 2);
+	buffer[5] = ':';
+	ZNumber second(buffer + 6, 2);
 
 	hour = (seconds / 3600l) % 24l;
 	minute = (seconds - (3600l * hour())) / 60l;
 	second = seconds - (3600l * hour()) - (60l * minute());
-	buffer[6] = '\0';
+	buffer[8] = '\0';
 }
 
 Time& Time::operator=(const Time& time)
