@@ -1,3 +1,6 @@
+From ucommon 2.1.1 to 2.1.2
+- set() methods for date, time, and datetime added.
+
 From ucommon 2.1.0 to 2.1.1
 - fix for Time string conversion
 - size fields for date and time strings.

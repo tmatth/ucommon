@@ -165,6 +165,11 @@ public:
 	long get(void) const;
 
 	/**
+	 * Set (update) the date with current date.
+	 */
+	void set(void);
+
+	/**
 	 * Set the julian date based on an ISO date string of specified size.
 	 * @param pointer to date string field.
 	 * @param size of field if not null terminated.
@@ -403,6 +408,11 @@ public:
 	 * @return time string buffer or NULL if invalid.
 	 */
 	char *get(char *buffer) const;
+
+	/**
+	 * Set (update) the time with current time.
+	 */
+	void set(void);
 
 	/**
 	 * Set time from a hh:mm:ss formatted string.
@@ -763,6 +773,11 @@ public:
 	 */
 	inline operator long() const
 		{return Date::get();};
+
+	/**
+	 * Set (update) the date and time with current date and time.
+	 */
+	void set(void);
 
 	/**
 	 * Convert date and time to julian day number.

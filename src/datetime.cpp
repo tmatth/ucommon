@@ -132,10 +132,7 @@ void DateTime::release(struct tm *dt)
 
 Date::Date()
 {
-	tm_t *dt = DateTime::glt();
-
-	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
-	DateTime::release(dt);
+	set();
 }
 
 Date::Date(const Date& copy)
@@ -162,6 +159,14 @@ Date::Date(const char *str, size_t size)
 
 Date::~Date()
 {
+}
+
+void Date::set()
+{
+	tm_t *dt = DateTime::glt();
+
+	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
+	DateTime::release(dt);
 }
 
 void Date::set(const char *str, size_t size)
@@ -436,9 +441,7 @@ void Date::fromJulian(char *buffer) const
 
 Time::Time()
 {
-	tm_t *dt = DateTime::glt();
-	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
-	DateTime::release(dt);
+	set();
 }
 
 Time::Time(const Time& copy)
@@ -470,6 +473,13 @@ Time::Time(int hour, int minute, int second)
 
 Time::~Time()
 {
+}
+
+void Time::set(void)
+{
+	tm_t *dt = DateTime::glt();
+	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
+	DateTime::release(dt);
 }
 
 bool Time::isValid(void) const
@@ -737,6 +747,12 @@ DateTime::DateTime() : Date(), Time()
 
 DateTime::~DateTime()
 {
+}
+
+void DateTime::set()
+{
+	Date::set();
+	Time::set();
 }
 
 bool DateTime::isValid(void) const
