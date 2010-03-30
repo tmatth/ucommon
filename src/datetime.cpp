@@ -37,6 +37,10 @@ const long DateTime::c_day = 86400l;
 const long DateTime::c_hour = 3600l;
 const long DateTime::c_week = 604800l;
 
+const size_t Date::sz_string = 11;
+const size_t Time::sz_string = 9;
+const size_t DateTime::sz_string = 20;
+
 #ifdef	HAVE_LOCALTIME_R
 
 struct tm *DateTime::glt(time_t *now)

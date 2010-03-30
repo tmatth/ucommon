@@ -67,6 +67,11 @@ protected:
 
 public:
 	/**
+	 * Size of date string field.
+	 */
+	static const size_t sz_string;
+
+	/**
 	 * Create a julian date from a time_t type.
 	 * @param value from time()
 	 */
@@ -321,6 +326,11 @@ protected:
 
 public:
 	/**
+	 * Size of time string field.
+	 */
+	static const size_t sz_string;
+
+	/**
 	 * Create a time from the time portion of a time_t.
 	 * @param value of time_t to use.
 	 */
@@ -561,6 +571,11 @@ public:
 	 * Constant for number of seconds in a week.
 	 */
 	static const long c_week;
+
+	/**
+	 * Size of datetime string field.
+	 */
+	static const size_t sz_string;
 
 	/**
 	 * Construct a date and time from C libraray time_t type.		

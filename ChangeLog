@@ -1,5 +1,6 @@
 From ucommon 2.1.0 to 2.1.1
 - fix for Time string conversion
+- size fields for date and time strings.
 
 From ucommon 2.0.8 to 2.1.0
 - new abi for fsys seek and drop
