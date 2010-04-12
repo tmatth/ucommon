@@ -52,13 +52,14 @@ html browsable.
 %build
 
 %configure --disable-static
-%{__make} %{?_smp_mflags} 
+%{__make} %{?_smp_mflags}
 %{__rm} -rf doc/html
 %{__make} doxy
 
 %install
 %{__rm} -rf %{buildroot}
 %{__make} DESTDIR=%{buildroot} INSTALL="install -p" install
+%{__chmod} 0755 %{buildroot}%{_bindir}/ucommon-config
 %{__rm} %{buildroot}%{_libdir}/*.la
 
 %clean
