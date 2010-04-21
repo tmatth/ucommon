@@ -36,6 +36,13 @@
 #include <ucommon/string.h>
 #endif
 
+#define	DATE_STRING_SIZE		10
+#define	DATE_BUFFER_SIZE		11
+#define	TIME_STRING_SIZE		8
+#define	TIME_BUFFER_SIZE		9
+#define	DATETIME_STRING_SIZE	19
+#define	DATETIME_BUFFER_SIZE	20
+
 NAMESPACE_UCOMMON
 
 #ifdef __BORLANDC__
