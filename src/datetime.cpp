@@ -805,14 +805,14 @@ DateTime& DateTime::operator=(const DateTime& datetime)
 DateTime& DateTime::operator+=(long value)
 {
 	seconds += value;
-	DateTime::update();
+	update();
 	return *this;
 }
 
 DateTime& DateTime::operator-=(long value)
 {
 	seconds -= value;
-	DateTime::update();
+	update();
 	return *this;
 }
 
@@ -920,14 +920,15 @@ DateTime DateTime::operator-(long value)
 DateTime& DateTime::operator++()
 {
 	++julian;
-	Date::update();
+	update();
 	return *this;
 }
+
 
 DateTime& DateTime::operator--()
 {
 	--julian;
-	Date::update();
+	update();
 	return *this;
 }
 
@@ -942,4 +943,56 @@ Number(str, 10), Date(str, 10)
 
 DateNumber::~DateNumber()
 {}
+
+
+DateTimeString::DateTimeString(time_t tm) :
+DateTime(tm)
+{
+	DateTime::get(buffer);
+}
+
+DateTimeString::DateTimeString(struct tm *dt) :
+DateTime(dt)
+{
+	DateTime::get(buffer);
+}
+
+
+DateTimeString::DateTimeString(const DateTime& copy) :
+DateTime(copy)
+{
+	DateTime::get(buffer);
+}
+
+DateTimeString::DateTimeString(const char *a_str, size_t size) :
+DateTime(a_str, size)
+{
+	DateTime::get(buffer);
+}
+
+
+DateTimeString::DateTimeString(int year, unsigned month, unsigned day,
+		   int hour, int minute, int second) :
+DateTime(year, month, day, hour, minute, second)
+{
+	DateTime::get(buffer);
+}
+
+DateTimeString::DateTimeString() :
+DateTime()
+{
+	DateTime::get(buffer);
+}
+
+void DateTimeString::update(void)
+{
+	DateTime::update();
+	DateTime::get(buffer);
+}
+
+void DateTimeString::set(void)
+{
+	DateTime::set();
+	DateTime::get(buffer);
+}
 

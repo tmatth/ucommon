@@ -827,6 +827,86 @@ public:
 };
 
 /**
+ * A DateTime string class.  This can be used to access the date and time
+ * as a standard string without requiring an external buffer.
+ *
+ * @author David Sugar <dyfet@gnutelephony.org>
+ * @short a datetime class that returns strings.
+ */
+class __EXPORT DateTimeString : public DateTime
+{
+private:
+	char buffer[DATETIME_BUFFER_SIZE];
+
+protected:
+	void update(void);
+
+public:
+	/**
+	 * Construct a date and time from C libraray time_t type.		
+	 * @param time type to make date and time from.
+	 */
+  	DateTimeString(time_t time);
+
+	/**
+	 * Construct a date and time from C library time structure.
+	 * @param tm structure from C library (from glt or gmt).
+	 */
+	DateTimeString(struct tm *tm);
+
+	/**
+	 * Construct a date and time from ISO string buffer.
+	 * @param pointer to string field holding date and time.
+	 * @param size of field if not null terminated string.
+	 */
+	DateTimeString(const char *pointer, size_t size = 0);
+
+	/**
+	 * Construct a date and time object from explicit date and time values.
+	 * @param year of object.
+	 * @param month of object (1-12).
+	 * @param day of month of object (1-31).
+	 * @param hour of object (0-23).
+	 * @param minute of object (0-59).
+	 * @param second of object (0-59).
+	 */
+	DateTimeString(int year, unsigned month = 1, unsigned day = 1,
+		 int hour = 0, int minute = 0, int second = 0);
+
+	/**
+	 * Create a datetime object from another object.
+	 * @param object to copy.
+	 */
+	DateTimeString(const DateTime& object);
+
+	/**
+	 * Construct a new date and time object with current date and time.
+	 */
+	DateTimeString();
+
+	/**
+	 * Extract char from string.
+	 *
+	 * @return string of datetime.
+	 */
+	inline const char *c_str(void)
+		{return buffer;};
+
+	/**
+	 * Cast to string.
+	 *
+	 * @return string of datetime.
+	 */
+	inline operator const char *(void)
+		{return buffer;};
+
+	/**
+	 * Set (update) the date and time with current date and time.
+	 */
+	void set(void);
+};
+
+/**
  * A number class that manipulates a string buffer that is also a date.
  *
  * @author David Sugar <dyfet@ostel.com>
@@ -855,6 +935,11 @@ public:
  * Convenience type for using DateTime object.
  */
 typedef	DateTime	datetime_t;
+
+/**
+ * Convenience type for using DateTimeString object.
+ */
+typedef	DateTimeString	datetimestring_t;
 
 /**
  * Convenience type for using Date object.
