@@ -944,11 +944,25 @@ Number(str, 10), Date(str, 10)
 DateNumber::~DateNumber()
 {}
 
+void DateNumber::update(void)
+{
+	fromJulian(buffer);
+}
+
+void DateNumber::set(void)
+{
+	Date::set();
+	update();
+}
 
 DateTimeString::DateTimeString(time_t tm) :
 DateTime(tm)
 {
 	DateTime::get(buffer);
+}
+
+DateTimeString::~DateTimeString()
+{
 }
 
 DateTimeString::DateTimeString(struct tm *dt) :

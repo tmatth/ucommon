@@ -68,7 +68,7 @@ protected:
 
 	/**
 	 * A method to use to "post" any changed values when shadowing
-	 * a mixed object class.  This is used by DateNumber.
+	 * a mixed object class.  This is used by DateNumber and string classes.
 	 */
 	virtual void update(void);
 
@@ -885,6 +885,11 @@ public:
 	DateTimeString();
 
 	/**
+	 * Destroy date time string.
+	 */
+	virtual ~DateTimeString();
+
+	/**
 	 * Extract char from string.
 	 *
 	 * @return string of datetime.
@@ -915,8 +920,7 @@ public:
 class __EXPORT DateNumber : public Number, public Date
 {
 protected:
-	void update(void)
-		{fromJulian(buffer);};
+	void update(void);
 
 public:
 	/**
@@ -929,6 +933,11 @@ public:
 	 * Release a datenumber object.
 	 */
 	virtual ~DateNumber();
+
+	/**
+	 * Set date number to current date.
+	 */
+	void set(void);
 };
 
 /**
