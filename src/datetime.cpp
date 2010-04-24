@@ -997,11 +997,11 @@ DateTime(year, month, day, hour, minute, second)
 	DateTime::get(buffer);
 }
 
-DateTimeString::DateTimeString() :
+DateTimeString::DateTimeString(mode_t m) :
 DateTime()
 {
-	mode = BOTH;
-	DateTime::get(buffer);
+	mode = m;
+	DateTimeString::update();
 }
 
 void DateTimeString::update(void)

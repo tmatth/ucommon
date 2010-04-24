@@ -891,7 +891,7 @@ public:
 	/**
 	 * Construct a new date and time object with current date and time.
 	 */
-	DateTimeString();
+	DateTimeString(mode_t string = DateTimeString::BOTH);
 
 	/**
 	 * Destroy date time string.
