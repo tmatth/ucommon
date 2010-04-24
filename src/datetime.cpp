@@ -958,6 +958,7 @@ void DateNumber::set(void)
 DateTimeString::DateTimeString(time_t tm) :
 DateTime(tm)
 {
+	mode = BOTH;
 	DateTime::get(buffer);
 }
 
@@ -968,6 +969,7 @@ DateTimeString::~DateTimeString()
 DateTimeString::DateTimeString(struct tm *dt) :
 DateTime(dt)
 {
+	mode = BOTH;
 	DateTime::get(buffer);
 }
 
@@ -975,12 +977,14 @@ DateTime(dt)
 DateTimeString::DateTimeString(const DateTime& copy) :
 DateTime(copy)
 {
+	mode = BOTH;
 	DateTime::get(buffer);
 }
 
 DateTimeString::DateTimeString(const char *a_str, size_t size) :
 DateTime(a_str, size)
 {
+	mode = BOTH;
 	DateTime::get(buffer);
 }
 
@@ -989,24 +993,41 @@ DateTimeString::DateTimeString(int year, unsigned month, unsigned day,
 		   int hour, int minute, int second) :
 DateTime(year, month, day, hour, minute, second)
 {
+	mode = BOTH;
 	DateTime::get(buffer);
 }
 
 DateTimeString::DateTimeString() :
 DateTime()
 {
+	mode = BOTH;
 	DateTime::get(buffer);
 }
 
 void DateTimeString::update(void)
 {
 	DateTime::update();
-	DateTime::get(buffer);
+	switch(mode) {
+	case BOTH:
+		DateTime::get(buffer);
+		break;
+	case DATE:
+		Date::get(buffer);
+		break;
+	case TIME:
+		Time::get(buffer);
+	}
+}
+
+void DateTimeString::set(mode_t newmode)
+{
+	mode = newmode;
+	update();
 }
 
 void DateTimeString::set(void)
 {
 	DateTime::set();
-	DateTime::get(buffer);
+	update();
 }
 

@@ -835,8 +835,17 @@ public:
  */
 class __EXPORT DateTimeString : public DateTime
 {
+public:
+	/**
+	 * Specify string buffer mode.  By default we form a string with date
+	 * and time.
+	 */
+	typedef enum {
+		DATE, TIME, BOTH} mode_t;
+	
 private:
 	char buffer[DATETIME_BUFFER_SIZE];
+	mode_t mode;
 
 protected:
 	void update(void);
@@ -909,6 +918,12 @@ public:
 	 * Set (update) the date and time with current date and time.
 	 */
 	void set(void);
+
+	/**
+	 * Set the string mode.
+	 * @param string mode to use.
+	 */
+	void set(mode_t string);
 };
 
 /**
