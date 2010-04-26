@@ -302,9 +302,9 @@ bool Timer::operator!() const
 	return false;
 }
 
-timeout_t Timer::operator-(const Timer& timer)
+timeout_t Timer::operator-(const Timer& source)
 {
-	timeout_t tv = get(), dv = timer.get();
+	timeout_t tv = get(), dv = source.get();
 	if(!tv)
 		return 0;
 
@@ -320,34 +320,34 @@ timeout_t Timer::operator-(const Timer& timer)
 	return tv - dv;
 }
 
-bool Timer::operator==(const Timer& timer)
+bool Timer::operator==(const Timer& source)
 {
-	return get() == timer.get();
+	return get() == source.get();
 }
 
-bool Timer::operator!=(const Timer& timer)
+bool Timer::operator!=(const Timer& source)
 {
-	return get() != timer.get();
+	return get() != source.get();
 }
 
-bool Timer::operator<(const Timer& timer)
+bool Timer::operator<(const Timer& source)
 {
-	return get() < timer.get();
+	return get() < source.get();
 }
 
-bool Timer::operator<=(const Timer& timer)
+bool Timer::operator<=(const Timer& source)
 {
-	return get() <= timer.get();
+	return get() <= source.get();
 }
 
-bool Timer::operator>(const Timer& timer)
+bool Timer::operator>(const Timer& source)
 {
-	return get() > timer.get();
+	return get() > source.get();
 }
 
-bool Timer::operator>=(const Timer& timer)
+bool Timer::operator>=(const Timer& source)
 {
-	return get() >= timer.get();
+	return get() >= source.get();
 }
 
 Timer& Timer::operator=(timeout_t to)
