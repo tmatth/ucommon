@@ -160,7 +160,7 @@ int fsys::changeDir(const char *path)
 	return 0;
 }
 
-char *fsys::getPrefix(char *path, size_t len)
+int fsys::getPrefix(char *path, size_t len)
 {
 	if (_getcwd(path, len))
 		return remapError();
@@ -299,7 +299,7 @@ void fsys::open(const char *path, access_t access)
 
 	fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
 	if(fd != INVALID_HANDLE_VALUE && append)
-		seek(end)
+		seek(end);
 	else
 		error = remapError();
 }

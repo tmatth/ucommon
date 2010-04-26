@@ -200,7 +200,7 @@ inline const T abs(const T& value)
  * @return v1 if < v2, else v2
  */
 template<typename T>
-inline const T min(const T& v1, const T& v2)
+inline const T (min)(const T& v1, const T& v2)
 {
 	return ((v1 < v2) ? v1 : v2);
 }
@@ -212,7 +212,7 @@ inline const T min(const T& v1, const T& v2)
  * @return v1 if > v2, else v2
  */
 template<typename T>
-inline const T max(const T& v1, const T& v2)
+inline const T (max)(const T& v1, const T& v2)
 {
 	return ((v1 > v2) ? v1 : v2);
 }
