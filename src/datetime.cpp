@@ -84,7 +84,7 @@ void DateTime::release(struct tm *dt)
 }
 
 #else
-static Mutex locking;
+static mutex_t lockflag;
 
 struct tm *DateTime::glt(time_t *now)
 {	
@@ -96,11 +96,11 @@ struct tm *DateTime::glt(time_t *now)
 		time(&tmp);
 	}
 
-	locking.acquire();
+	lockflag.acquire();
 	dt = localtime(now);
 	if(dt)
 		return dt;
-	locking.release();
+	lockflag.release();
 	return NULL;
 }
 
@@ -114,18 +114,18 @@ struct tm *DateTime::gmt(time_t *now)
 		time(&tmp);
 	}
 
-	locking.acquire();
+	lockflag.acquire();
 	dt = gmtime(now);
 	if(dt)
 		return dt;
-	locking.release();
+	lockflag.release();
 	return NULL;
 }
 
 void DateTime::release(struct tm *dt)
 {
 	if(dt)
-		locking.release();
+		lockflag.release();
 }
 
 #endif
