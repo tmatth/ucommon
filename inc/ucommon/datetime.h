@@ -856,26 +856,23 @@ public:
 	 * @param string mode to use.
 	 * @param time type to make date and time from.
 	 */
-  	DateTimeString(mode_t string, time_t time);
+  	DateTimeString(time_t time);
 
 	/**
 	 * Construct a date and time from C library time structure.
-	 * @param string mode to use.
 	 * @param tm structure from C library (from glt or gmt).
 	 */
-	DateTimeString(mode_t string, struct tm *tm);
+	DateTimeString(struct tm *tm);
 
 	/**
 	 * Construct a date and time from ISO string buffer.
-	 * @param string mode to use.
 	 * @param pointer to string field holding date and time.
 	 * @param size of field if not null terminated string.
 	 */
-	DateTimeString(mode_t m, const char *pointer, size_t size = 0);
+	DateTimeString(const char *pointer, size_t size = 0);
 
 	/**
 	 * Construct a date and time object from explicit date and time values.
-	 * @param string mode to use.
 	 * @param year of object.
 	 * @param month of object (1-12).
 	 * @param day of month of object (1-31).
@@ -883,7 +880,7 @@ public:
 	 * @param minute of object (0-59).
 	 * @param second of object (0-59).
 	 */
-	DateTimeString(mode_t string, int year, unsigned month = 1, unsigned day = 1,
+	DateTimeString(int year, unsigned month, unsigned day,
 		 int hour = 0, int minute = 0, int second = 0);
 
 	/**
