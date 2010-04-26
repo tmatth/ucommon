@@ -955,46 +955,46 @@ void DateNumber::set(void)
 	update();
 }
 
-DateTimeString::DateTimeString(time_t tm) :
-DateTime(tm)
+DateTimeString::DateTimeString(mode_t m, time_t t) :
+DateTime(t)
 {
-	mode = BOTH;
-	DateTime::get(buffer);
+	mode = m;
+	DateTimeString::update();
 }
 
 DateTimeString::~DateTimeString()
 {
 }
 
-DateTimeString::DateTimeString(struct tm *dt) :
+DateTimeString::DateTimeString(mode_t m, struct tm *dt) :
 DateTime(dt)
 {
-	mode = BOTH;
-	DateTime::get(buffer);
+	mode = m;
+	DateTimeString::update();
 }
 
 
-DateTimeString::DateTimeString(const DateTime& copy) :
+DateTimeString::DateTimeString(const DateTimeString& copy) :
 DateTime(copy)
 {
-	mode = BOTH;
-	DateTime::get(buffer);
+	mode = copy.mode;
+	DateTimeString::update();
 }
 
-DateTimeString::DateTimeString(const char *a_str, size_t size) :
+DateTimeString::DateTimeString(mode_t m, const char *a_str, size_t size) :
 DateTime(a_str, size)
 {
-	mode = BOTH;
-	DateTime::get(buffer);
+	mode = m;
+	DateTimeString::update();
 }
 
 
-DateTimeString::DateTimeString(int year, unsigned month, unsigned day,
+DateTimeString::DateTimeString(mode_t m, int year, unsigned month, unsigned day,
 		   int hour, int minute, int second) :
 DateTime(year, month, day, hour, minute, second)
 {
-	mode = BOTH;
-	DateTime::get(buffer);
+	mode = m;
+	DateTimeString::update();
 }
 
 DateTimeString::DateTimeString(mode_t m) :
