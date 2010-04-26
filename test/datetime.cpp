@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	exp_dt.tm_mday = exp_day;
 	exp_ctime = mktime(&exp_dt);
 
-	assert(exp_year == date.getYear());
+	assert(exp_year == (unsigned)date.getYear());
 	assert(exp_month == date.getMonth());
 	assert(exp_day == date.getDay());
 	assert(exp_dayofweek == date.getDayOfWeek());
