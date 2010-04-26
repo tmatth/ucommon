@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 	assert(date < aday);
 
 	// play with math and casting operators...
-	Date newday = nextday + 5;
+	Date newday = nextday + 5l;
 	assert((long)newday == 20030112l);
 	assert((long)nextday == 20030107l);
 	assert(newday - nextday == 5);
