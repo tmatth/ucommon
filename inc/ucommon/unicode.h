@@ -198,6 +198,12 @@ protected:
 	void set(const unicode_t unicode);
 
 	/**
+	 * Add (append) unicode to a utf8 encoded string.
+	 * @param unicode text to add.
+	 */
+	void add(const unicode_t unicode);
+
+	/**
 	 * Extract a unicode byte sequence from utf8 object.
 	 * @param unicode data buffer.
 	 * @param size of data buffer.
@@ -229,6 +235,9 @@ protected:
 	 * @return character value at offset.
 	 */
 	ucs4_t operator[](int offset) const;
+
+	inline strsize_t count(void) const
+		{return utf8::count(str->text);}
 };
 
 /**

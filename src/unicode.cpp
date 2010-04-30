@@ -295,8 +295,23 @@ void UString::set(const unicode_t text)
 	str = NULL;
 	str = create(size);
 	str->retain();
-	utf8::convert(text, str->text, str->len + 1);
+	utf8::convert(text, str->text, str->max);
 	str->len = size;
+	str->fix();
+}
+
+void UString::add(const unicode_t text)
+{
+	strsize_t alloc, size;
+	
+	size = alloc = utf8::chars(text); 
+	if(str)
+		alloc += str->len;
+
+	if(!resize(alloc))
+		return;
+
+	utf8::convert(text, str->text + str->len, size + 1);
 	str->fix();
 }
 
