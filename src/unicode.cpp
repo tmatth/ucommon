@@ -25,6 +25,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#ifdef	HAVE_WCHAR_H
+#include <wchar.h>
+#else
+typedef	ucs4_t	wchar_t;
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 unsigned utf8::size(const char *string)
@@ -141,9 +147,10 @@ char *utf8::offset(char *string, ssize_t pos)
 	return string;
 }
 
-size_t utf8::chars(wchar_t *string)
+size_t utf8::chars(const unicode_t str)
 {
 	size_t ccount = 0;
+	const wchar_t *string = (const wchar_t *)str;
 
 	if(!string)
 		return 0;

@@ -31,10 +31,6 @@
 #include <ucommon/string.h>
 #endif
 
-#ifdef	HAVE_WCHAR_H
-#include <wchar.h>
-#endif
-
 NAMESPACE_UCOMMON
 
 /**
@@ -47,6 +43,11 @@ typedef	int32_t	ucs4_t;
  * 16 bit unicode character code.  Java and some api's like these.
  */
 typedef	int16_t	ucs2_t;
+
+/**
+ * Resolves issues where wchar_t is not defined.
+ */
+typedef	void *unicode_t;
 
 /**
  * A core class of ut8 encoded string functions.  This is a foundation for 
@@ -85,14 +86,12 @@ public:
 	 */
 	static ucs4_t codepoint(const char *encoded);
 
-#ifdef	HAVE_WCHAR_H
 	/**
 	 * How many chars requires to encode a given wchar string.
 	 * @param string of ucs4 data.
 	 * @return number of chars required to encode given string.
 	 */
-	static size_t chars(const wchar_t *string);
-#endif
+	static size_t chars(const unicode_t string);
 };
 
 /**
