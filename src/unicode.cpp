@@ -193,7 +193,7 @@ size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
 		if(code < 1)
 			break;
 		text += size(text);
-		*(target++) = code;
+		*(target++) = (wchar_t)code;
 		++used;
 	}
 	*target = 0;
@@ -218,7 +218,7 @@ size_t utf8::convert(const unicode_t str, char *buffer, size_t size)
 			break;
 		++points;
 		if(code < 0x80) {
-			buffer[used++] = code;
+			buffer[used++] = code & 0x7f;
 			continue;
 		}
 		if(code < 0x000007ff) {
