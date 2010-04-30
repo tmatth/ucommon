@@ -168,6 +168,30 @@ protected:
 	 * @return string object holding substring.
 	 */
 	UString get(strsize_t codepoint, strsize_t size = 0) const;
+
+	/**
+	 * Get a new substring through object expression.
+	 * @param codepoint offset of substring.
+	 * @param size of substring or 0 if to end.
+	 * @return string object holding substring.
+	 */
+	UString operator()(int codepoint, strsize_t size) const;
+
+	/**
+	 * Reference a string in the object by codepoint offset.  Positive
+	 * offsets are from the start of the string, negative from the
+	 * end.
+	 * @param offset to string position.
+	 * @return pointer to string data or NULL if invalid offset.
+	 */
+	const char *operator()(int offset) const;
+
+	/**
+	 * Reference a unicode character in string object by array offset.
+	 * @param offset to character.
+	 * @return character value at offset.
+	 */
+	ucs4_t operator[](int offset) const;
 };
 
 /**

@@ -214,3 +214,23 @@ UString UString::get(strsize_t pos, strsize_t size) const
 	return UString(substr, pos);
 }	
 
+ucs4_t UString::operator[](int offset) const
+{
+	const char *cp = utf8::offset(str->text, offset);
+
+	if(!cp)
+		return -1;
+
+	return utf8::codepoint(cp);
+}
+
+UString UString::operator()(int codepoint, strsize_t size) const
+{
+	return UString::get(codepoint, size);
+}
+
+const char *UString::operator()(int offset) const
+{
+	return utf8::offset(str->text, offset);
+}
+
