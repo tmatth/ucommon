@@ -157,20 +157,104 @@ size_t utf8::chars(const unicode_t str)
 
 	while(*string != 0l) {
 		ucs4_t chr = (ucs4_t)(*(string++));
-		if(chr <= 0x80)
-			++ccount;
-		else if(chr <= 0x000007ff)
-			ccount += 2;
-		else if(chr <= 0x0000ffff)
-			ccount += 3;
-		else if(chr <= 0x001fffff)
-			ccount += 4;
-		else if(chr <= 0x03ffffff)
-			ccount += 5;
-		else
-			ccount += 6;
+		ccount += chars(chr);
 	}
 	return ccount;
+}
+
+size_t utf8::chars(ucs4_t code)
+{
+	if(code <= 0x80)
+		return 1;
+	if(code <= 0x000007ff)
+		return 2;
+	if(code <= 0x0000ffff)
+		return 3;
+	if(code <= 0x001fffff)
+		return 4;
+	if(code <= 0x03ffffff)
+		return 5;
+
+	return 6;
+}
+
+size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
+{
+	size_t used = 0;
+	wchar_t *target = (wchar_t *)buffer;
+
+	if(!text) {
+		*target = 0;
+		return 0;
+	}
+
+	while(--len) {
+		ucs4_t code = codepoint(text);
+		if(code < 1)
+			break;
+		text += size(text);
+		*(target++) = code;
+		++used;
+	}
+	*target = 0;
+	return used;
+}
+
+size_t utf8::convert(const unicode_t str, char *buffer, size_t size)
+{
+	unsigned used = 0;
+	unsigned points = 0;
+	ucs4_t code;
+	const wchar_t *string = (const wchar_t *)str;
+	unsigned cs;
+	if(!str) {
+		*buffer = 0;
+		return 0;
+	}
+
+	while(0 != (code = (*(string++)))) {
+		cs = chars(code);
+		if(cs + used > (size - 1))
+			break;
+		++points;
+		if(code < 0x80) {
+			buffer[used++] = code;
+			continue;
+		}
+		if(code < 0x000007ff) {
+			buffer[used++] = (code >> 6) | 0xc0;
+			buffer[used++] = (code & 0x3f) | 0x80;
+			continue;
+		}
+		if(code <= 0x0000ffff) {
+			buffer[used++] = (code >> 12) | 0xe0;
+			buffer[used++] = (code >> 6 & 0x3f) | 0x80;
+			buffer[used++] = (code & 0x3f) | 0x80;
+			continue;
+		}
+		if(code <= 0x001fffff) {
+			buffer[used++] = (code >> 18) | 0xf0;
+			buffer[used++] = (code >> 12 & 0x3f) | 0x80;
+			buffer[used++] = (code >> 6  & 0x3f) | 0x80;
+			buffer[used++] = (code & 0x3f) | 0x80;
+			continue;
+		}
+		if(code <= 0x03ffffff) {
+			buffer[used++] = (code >> 24) | 0xf8;
+			buffer[used++] = (code >> 18 & 0x3f) | 0x80;
+			buffer[used++] = (code >> 12 & 0x3f) | 0x80;
+			buffer[used++] = (code >> 6  & 0x3f) | 0x80;
+			buffer[used++] = (code & 0x3f) | 0x80;
+		}
+		buffer[used++] = (code >> 30) | 0xfc;
+		buffer[used++] = (code >> 24 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 18 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 12 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 6  & 0x3f) | 0x80;
+		buffer[used++] = (code & 0x3f) | 0x80;
+	}
+	buffer[used++] = 0;
+	return points;
 }
 
 UString::UString() :
@@ -178,33 +262,40 @@ string::string() {}
 
 UString::~UString() {}
 
-UString::UString(const StringFormat& format) :
-string::string(format) {}
-
 UString::UString(strsize_t size) :
 string::string(size) {}
-
-UString::UString(const char *text) :
-string::string(text) {}
 
 UString::UString(const char *text, strsize_t size) :
 string::string(text, size) {}
 
-UString::UString(const char *text, const char *end) :
-string::string(text, end) {}
+UString::UString(const unicode_t text) :
+string::string()
+{
+	set(text);
+}
 
 UString::UString(const UString& copy) :
 string::string(copy) {}
+
+void UString::set(const unicode_t text)
+{
+	strsize_t size = utf8::chars(text); 
+	str = create(size);
+	str->retain();
+	utf8::convert(text, str->text, str->len + 1);
+	str->len = size;
+	str->fix();
+}
 
 UString UString::get(strsize_t pos, strsize_t size) const
 {
 
 	char *substr = utf8::offset(str->text, (ssize_t)pos);	
 	if(!substr)
-		return UString("");
+		return UString("", 0);
 
 	if(!size)
-		return UString(substr);
+		return UString(substr, 0);
 
 	const char *end = utf8::offset(substr, size);
 	if(!end)
@@ -233,4 +324,5 @@ const char *UString::operator()(int offset) const
 {
 	return utf8::offset(str->text, offset);
 }
+
 

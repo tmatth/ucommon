@@ -92,6 +92,31 @@ public:
 	 * @return number of chars required to encode given string.
 	 */
 	static size_t chars(const unicode_t string);
+
+	/**
+	 * How many chars requires to encode a given unicode character.
+	 * @param character tyo encode.
+	 * @return number of chars required to encode given character.
+	 */
+	static size_t chars(ucs4_t character);
+
+	/**
+	 * Convert a unicode string into utf8.
+	 * @param string of unicode data.
+	 * @param buffer to convert into.
+	 * @param size of conversion buffer.
+	 * @return number of code points converted.
+	 */
+	static size_t convert(const unicode_t string, char *buffer, size_t size);
+
+	/**
+	 * Convert a utf8 string into a unicode data buffer.
+	 * @param utf8 string to copy.
+	 * @param unicode data buffer.
+	 * @param size of unicode data buffer in codepoints.
+	 * @return number of code points converted.
+	 */
+	static size_t extract(const char *source, unicode_t unicode, size_t size);
 };
 
 /**
@@ -109,28 +134,16 @@ protected:
 	UString();
 
 	/**
-	 * Create a utf8 aware string from a formatting object.
-	 * @param format object to use in creating string.
-	 */
-	UString(const StringFormat& format);
-
-	/**
 	 * Create an empty string with a buffer pre-allocated to a specified size.
 	 * @param size of buffer to allocate.
 	 */
 	UString(strsize_t size);
 
 	/**
-	 * Create a utf8 aware string from null terminated text.
-	 * @param text to use for string.
-	 */ 
-	UString(const char *text);
-
-	/**
-	 * Create a utf8 aware string for a null terminated ucs4 string.
+	 * Create a utf8 aware string for a null terminated unicode string.
 	 * @param text of ucs4 encoded data.
 	 */
-	UString(const ucs4_t *text);
+	UString(const unicode_t text);
 
 	/**
 	 * Create a string from null terminated text up to a maximum specified
@@ -146,7 +159,7 @@ protected:
 	 * @param text to use for string.
 	 * @param end of text in substring.
 	 */
-	UString(const char *text, const char *end);
+	UString(const unicode_t *text, const unicode_t *end);
 
 	/**
 	 * Construct a copy of a string object.  Our copy inherets the same 
@@ -168,6 +181,30 @@ protected:
 	 * @return string object holding substring.
 	 */
 	UString get(strsize_t codepoint, strsize_t size = 0) const;
+
+	/**
+	 * Extract a unicode byte sequence from utf8 object.
+	 * @param unicode data buffer.
+	 * @param size of data buffer.
+	 * @return codepoints copied.
+	 */
+	inline size_t get(unicode_t unicode, size_t size) const
+		{return utf8::extract(str->text, unicode, size);};
+
+	/**
+	 * Set a utf8 encoded string based on unicode data.
+	 * @param unicode text to set.
+	 */
+	void set(const unicode_t unicode);
+
+	/**
+	 * Extract a unicode byte sequence from utf8 object.
+	 * @param unicode data buffer.
+	 * @param size of data buffer.
+	 * @return codepoints copied.
+	 */
+	inline size_t operator()(unicode_t unicode, size_t size) const
+		{return utf8::extract(str->text, unicode, size);};
 
 	/**
 	 * Get a new substring through object expression.
