@@ -257,7 +257,10 @@ size_t utf8::convert(const unicode_t str, char *buffer, size_t size)
 	return points;
 }
 
-UString::UString() {}
+UString::UString() 
+{
+	str = NULL;
+}
 
 UString::~UString() {}
 
@@ -269,16 +272,19 @@ UString::UString(strsize_t size)
 
 UString::UString(const char *text, strsize_t size) 
 {
+	str = NULL;
 	String::set(0, text, size);
 }
 
 UString::UString(const unicode_t text) 
 {
+	str = NULL;
 	set(text);
 }
 
 UString::UString(const UString& copy) 
 {
+	str = NULL;
 	if(copy.str)
 		String::set(copy.str->text);
 }
