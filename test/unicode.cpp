@@ -27,8 +27,8 @@ using namespace UCOMMON_NAMESPACE;
 
 extern "C" int main()
 {
-	char u1[] = {0xc2, 0xa9, 0x00};
-	char u2[] = {0xe2, 0x89, 0xa0, 0x00};
+	char u1[] = {(char)0xc2, (char)0xa9, 0x00};
+	char u2[] = {(char)0xe2, (char)0x89, (char)0xa0, 0x00};
 
 	assert(utf8::size(u1) == 2);
 	assert(utf8::size(u2) == 3);
