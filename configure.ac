@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="2.1.2"
-LT_VERSION="3:2:0"
+VERSION="2.1.3"
+LT_VERSION="3:3:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -118,7 +118,7 @@ AH_BOTTOM([
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h) 
 AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [

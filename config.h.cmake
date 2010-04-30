@@ -54,6 +54,7 @@
 #cmakedefine HAVE_SYS_TIMEB_H 1
 #cmakedefine HAVE_SYS_TYPES_H 1
 #cmakedefine HAVE_UNISTD_H 1
+#cmakedefine HAVE_WCHAR_H 1
 #cmakedefine PACKAGE ${PROJECT_NAME}
 #define STDC_HEADERS 1
 #cmakedefine VERSION ${VERSION}

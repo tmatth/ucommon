@@ -31,6 +31,10 @@
 #include <ucommon/string.h>
 #endif
 
+#ifdef	HAVE_WCHAR_H
+#include <wchar.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 /**
@@ -81,12 +85,14 @@ public:
 	 */
 	static ucs4_t codepoint(const char *encoded);
 
+#ifdef	HAVE_WCHAR_H
 	/**
-	 * How many chars requires to encode a given ucs4 string.
+	 * How many chars requires to encode a given wchar string.
 	 * @param string of ucs4 data.
 	 * @return number of chars required to encode given string.
 	 */
-	static size_t chars(ucs4_t *string);
+	static size_t chars(const wchar_t *string);
+#endif
 };
 
 /**
@@ -120,6 +126,12 @@ protected:
 	 * @param text to use for string.
 	 */ 
 	UString(const char *text);
+
+	/**
+	 * Create a utf8 aware string for a null terminated ucs4 string.
+	 * @param text of ucs4 encoded data.
+	 */
+	UString(const ucs4_t *text);
 
 	/**
 	 * Create a string from null terminated text up to a maximum specified
