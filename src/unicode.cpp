@@ -257,25 +257,31 @@ size_t utf8::convert(const unicode_t str, char *buffer, size_t size)
 	return points;
 }
 
-UString::UString() :
-string::string() {}
+UString::UString() {}
 
 UString::~UString() {}
 
-UString::UString(strsize_t size) :
-string::string(size) {}
+UString::UString(strsize_t size)
+{
+	str = create(size);
+	str->retain();
+}
 
-UString::UString(const char *text, strsize_t size) :
-string::string(text, size) {}
+UString::UString(const char *text, strsize_t size) 
+{
+	String::set(0, text, size);
+}
 
-UString::UString(const unicode_t text) :
-string::string()
+UString::UString(const unicode_t text) 
 {
 	set(text);
 }
 
-UString::UString(const UString& copy) :
-string::string(copy) {}
+UString::UString(const UString& copy) 
+{
+	if(copy.str)
+		String::set(copy.str->text);
+}
 
 void UString::set(const unicode_t text)
 {
