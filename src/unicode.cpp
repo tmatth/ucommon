@@ -58,8 +58,11 @@ ucs4_t utf8::codepoint(const char *string)
 	unsigned char encoded = (unsigned char)(*(string++));
 	ucs4_t code = 0;
 
-	if(!codesize)
+	if(encoded == 0)
 		return 0;
+
+	if(!codesize)
+		return -1;
 
 	switch(codesize)
 	{
