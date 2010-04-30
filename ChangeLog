@@ -1,3 +1,6 @@
+From ucommon 2.1.2 to 2.1.3
+- unicode string support and utf8 string processing.
+
 From ucommon 2.1.1 to 2.1.2
 - set() methods for date, time, and datetime added.
 - new defines for buffer sizes added.
