@@ -138,6 +138,31 @@ char *utf8::offset(char *string, ssize_t pos)
 	return string;
 }
 
+size_t utf8::chars(ucs4_t *string)
+{
+	size_t ccount = 0;
+
+	if(!string)
+		return 0;
+
+	while(*string != 0l) {
+		ucs4_t chr = *(string++);
+		if(chr <= 0x80)
+			++ccount;
+		else if(chr <= 0x000007ff)
+			ccount += 2;
+		else if(chr <= 0x0000ffff)
+			ccount += 3;
+		else if(chr <= 0x001fffff)
+			ccount += 4;
+		else if(chr <= 0x03ffffff)
+			ccount += 5;
+		else
+			ccount += 6;
+	}
+	return ccount;
+}
+
 UString::UString() :
 string::string() {};
 

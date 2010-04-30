@@ -37,12 +37,12 @@ NAMESPACE_UCOMMON
  * 32 bit unicode character code.  We may extract this from a ucs2 or utf8
  * string.
  */
-typedef	uint32_t	ucs4_t;
+typedef	int32_t	ucs4_t;
 
 /**
  * 16 bit unicode character code.  Java and some api's like these.
  */
-typedef	uint16_t	ucs2_t;
+typedef	int16_t	ucs2_t;
 
 /**
  * A core class of ut8 encoded string functions.  This is a foundation for 
@@ -80,6 +80,13 @@ public:
 	 * @return ucs4 string or 0 if invalid.
 	 */
 	static ucs4_t codepoint(const char *encoded);
+
+	/**
+	 * How many chars requires to encode a given ucs4 string.
+	 * @param string of ucs4 data.
+	 * @return number of chars required to encode given string.
+	 */
+	static size_t chars(ucs4_t *string);
 };
 
 /**
