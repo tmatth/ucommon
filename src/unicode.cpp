@@ -54,8 +54,8 @@ unsigned utf8::size(const char *string)
 
 ucs4_t utf8::codepoint(const char *string)
 {
-	unsigned char encoded = (unsigned char)(*(string++));
 	unsigned codesize = size(string);
+	unsigned char encoded = (unsigned char)(*(string++));
 	ucs4_t code = 0;
 
 	if(!codesize)
@@ -100,7 +100,7 @@ size_t utf8::count(const char *string)
 	if(!string)
 		return 0;
 
-	while(*string && (codesize == size(string) != 0)) {
+	while(*string && (codesize = size(string) != 0)) {
 		pos += codesize;
 		string += codesize;
 	}
