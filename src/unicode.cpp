@@ -174,27 +174,27 @@ size_t utf8::chars(const unicode_t str)
 }
 
 UString::UString() :
-string::string() {};
+string::string() {}
 
-UString::~UString() {};
+UString::~UString() {}
 
 UString::UString(const StringFormat& format) :
-string::string(format) {};
+string::string(format) {}
 
 UString::UString(strsize_t size) :
-string::string(size) {};
+string::string(size) {}
 
 UString::UString(const char *text) :
-string::string(text) {};
+string::string(text) {}
 
 UString::UString(const char *text, strsize_t size) :
-string::string(text, size) {};
+string::string(text, size) {}
 
 UString::UString(const char *text, const char *end) :
-string::string(text, end) {};
+string::string(text, end) {}
 
 UString::UString(const UString& copy) :
-string::string(copy) {};
+string::string(copy) {}
 
 UString UString::get(strsize_t pos, strsize_t size) const
 {
