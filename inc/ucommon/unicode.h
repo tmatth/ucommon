@@ -204,6 +204,13 @@ protected:
 	void add(const unicode_t unicode);
 
 	/**
+	 * Return unicode character found at a specific codepoint in the string.
+	 * @param position of codepoint in string, negative values computed from end.
+	 * @return character code at specified position in string.
+	 */
+	ucs4_t at(int position) const;
+
+	/**
 	 * Extract a unicode byte sequence from utf8 object.
 	 * @param unicode data buffer.
 	 * @param size of data buffer.
@@ -231,10 +238,11 @@ protected:
 
 	/**
 	 * Reference a unicode character in string object by array offset.
-	 * @param offset to character.
+	 * @param position of codepoint offset to character.
 	 * @return character value at offset.
 	 */
-	ucs4_t operator[](int offset) const;
+	inline ucs4_t operator[](int position) const
+		{return UString::at(position);};
 
 	inline strsize_t count(void) const
 		{return utf8::count(str->text);}

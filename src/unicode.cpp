@@ -333,7 +333,7 @@ UString UString::get(strsize_t pos, strsize_t size) const
 	return UString(substr, pos);
 }	
 
-ucs4_t UString::operator[](int offset) const
+ucs4_t UString::at(int offset) const
 {
 	const char *cp = utf8::offset(str->text, offset);
 
