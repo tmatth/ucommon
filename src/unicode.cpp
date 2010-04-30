@@ -292,6 +292,7 @@ UString::UString(const UString& copy)
 void UString::set(const unicode_t text)
 {
 	strsize_t size = utf8::chars(text); 
+	str = NULL;
 	str = create(size);
 	str->retain();
 	utf8::convert(text, str->text, str->len + 1);
