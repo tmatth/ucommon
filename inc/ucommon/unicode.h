@@ -82,6 +82,81 @@ public:
 	static ucs4_t codepoint(const char *encoded);
 };
 
+/**
+ * A copy-on-write utf8 string class that operates by reference count.  This
+ * is derived from the classic uCommon String class by adding operations that
+ * are utf8 encoding aware.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT UString : public String, public utf8
+{
+protected:
+	/**
+	 * Create a new empty utf8 aware string object.
+	 */
+	UString();
+
+	/**
+	 * Create a utf8 aware string from a formatting object.
+	 * @param format object to use in creating string.
+	 */
+	UString(const StringFormat& format);
+
+	/**
+	 * Create an empty string with a buffer pre-allocated to a specified size.
+	 * @param size of buffer to allocate.
+	 */
+	UString(strsize_t size);
+
+	/**
+	 * Create a utf8 aware string from null terminated text.
+	 * @param text to use for string.
+	 */ 
+	UString(const char *text);
+
+	/**
+	 * Create a string from null terminated text up to a maximum specified
+	 * size.
+	 * @param text to use for string.
+	 * @param size limit of new string.
+	 */ 
+	UString(const char *text, strsize_t size);
+
+	/**
+	 * Create a string for a substring.  The end of the substring is a
+	 * pointer within the substring itself.
+	 * @param text to use for string.
+	 * @param end of text in substring.
+	 */
+	UString(const char *text, const char *end);
+
+	/**
+	 * Construct a copy of a string object.  Our copy inherets the same 
+	 * reference counted instance of cstring as in the original.
+	 * @param existing string to copy from.
+	 */
+	UString(const UString& existing);
+
+	/**
+	 * Destroy string.  De-reference cstring.  If last reference to cstring, 
+	 * then also remove cstring from heap.
+	 */
+	virtual ~UString();
+
+	/**
+	 * Get a new string object as a substring of the current object.
+	 * @param codepoint offset of substring.
+	 * @param size of substring in codepoints or 0 if to end.
+	 * @return string object holding substring.
+	 */
+	UString get(strsize_t codepoint, strsize_t size = 0) const;
+};
+
+/**
+ * Convenience type for utf8 encoded strings.
+ */
+typedef	UString	ustring_t;
+
 END_NAMESPACE
 
 #endif

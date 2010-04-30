@@ -110,6 +110,9 @@ size_t utf8::count(const char *string)
 
 char *utf8::offset(char *string, ssize_t pos)
 {
+	if(!string)
+		return NULL;
+
 	ssize_t codepoints = count(string);
 	if(pos > codepoints)
 		return NULL;
@@ -134,4 +137,45 @@ char *utf8::offset(char *string, ssize_t pos)
 	}
 	return string;
 }
+
+UString::UString() :
+string::string() {};
+
+UString::~UString() {};
+
+UString::UString(const StringFormat& format) :
+string::string(format) {};
+
+UString::UString(strsize_t size) :
+string::string(size) {};
+
+UString::UString(const char *text) :
+string::string(text) {};
+
+UString::UString(const char *text, strsize_t size) :
+string::string(text, size) {};
+
+UString::UString(const char *text, const char *end) :
+string::string(text, end) {};
+
+UString::UString(const UString& copy) :
+string::string(copy) {};
+
+UString UString::get(strsize_t pos, strsize_t size) const
+{
+
+	char *substr = utf8::offset(str->text, (ssize_t)pos);	
+	if(!substr)
+		return UString("");
+
+	if(!size)
+		return UString(substr);
+
+	const char *end = utf8::offset(substr, size);
+	if(!end)
+		return UString(substr);
+
+	pos = (end - substr + 1);
+	return UString(substr, pos);
+}	
 
