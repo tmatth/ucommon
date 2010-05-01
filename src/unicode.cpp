@@ -257,6 +257,78 @@ size_t utf8::convert(const unicode_t str, char *buffer, size_t size)
 	return points;
 }
 
+unsigned utf8::ccount(const char *cp, ucs4_t code)
+{
+	unsigned total = 0;
+	ucs4_t ch;
+	unsigned cs;
+
+	if(!cp)
+		return 0;
+
+	while(*cp) {
+		ch = utf8::codepoint(cp);
+		cs = utf8::size(cp);
+		if(!cs || ch == -1)
+			break;
+		if(ch == code)
+			++total;
+		cp += cs;
+	}
+	return total;
+}	
+
+const char *utf8::find(const char *cp, ucs4_t code, size_t pos)
+{
+	ucs4_t ch;
+	unsigned cs;
+	size_t cpos = 0;
+
+	if(!cp)
+		return NULL;
+
+	while(*cp) {
+		ch = utf8::codepoint(cp);
+		cs = utf8::size(cp);
+		if(pos && ++cpos > pos)
+			return NULL;
+		if(!cs || ch == -1)
+			return NULL;
+		if(ch == code)
+			return cp;
+		cp += cs;
+	}
+	return NULL;
+}
+
+const char *utf8::rfind(const char *cp, ucs4_t code, size_t pos)
+{
+	const char *result = NULL;
+	ucs4_t ch;
+	unsigned cs;
+	size_t cpos = 0;
+
+	if(!cp)
+		return NULL;
+		
+	while(*cp) {
+		ch = utf8::codepoint(cp);
+		cs = utf8::size(cp);
+
+		if(!cs || ch == -1)
+			break;
+
+		if(ch == code)
+			result = cp;
+
+		if(++cpos > pos) 
+			break;
+
+		cp += cs;
+	}
+	return result;
+}
+
 UString::UString() 
 {
 	str = NULL;
@@ -350,27 +422,28 @@ ucs4_t UString::at(int offset) const
 	return utf8::codepoint(cp);
 }
 
+const char *UString::find(ucs4_t code, strsize_t pos) const
+{
+	if(!str)
+		return NULL;
+
+	return utf8::find(str->text, code, (size_t)pos);
+}
+
+const char *UString::rfind(ucs4_t code, strsize_t pos) const
+{
+	if(!str)
+		return NULL;
+
+	return utf8::rfind(str->text, code, (size_t)pos);
+}
+		
 unsigned UString::ccount(ucs4_t code) const
 {
-	unsigned total = 0;
-	const char *cp;
-	ucs4_t ch;
-	unsigned cs;
-
 	if(!str)
 		return 0;
 
-	cp = str->text;
-	while(*cp) {
-		ch = utf8::codepoint(cp);
-		cs = utf8::size(cp);
-		if(!cs || ch == -1)
-			break;
-		if(ch == code)
-			++total;
-		cp += cs;
-	}
-	return total;
+	return utf8::ccount(str->text, code);
 }	
 
 UString UString::operator()(int codepoint, strsize_t size) const

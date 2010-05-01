@@ -117,6 +117,32 @@ public:
 	 * @return number of code points converted.
 	 */
 	static size_t extract(const char *source, unicode_t unicode, size_t size);
+
+	/**
+	 * Find first occurance of character in string.
+	 * @param string to search in.
+	 * @param character code to search for.
+	 * @param start offset in string in codepoints.
+	 * @return pointer to first instance or NULL if not found.
+	 */
+	static const char *find(const char *string, ucs4_t character, size_t start = 0);
+
+	/**
+	 * Find last occurance of character in string.
+	 * @param string to search in.
+	 * @param character code to search for.
+	 * @param end offset to start from in codepoints.
+	 * @return pointer to last instance or NULL if not found.
+	 */
+	static const char *rfind(const char *string, ucs4_t character, size_t end = (size_t)-1l);
+
+	/**
+	 * Count occurences of a unicode character in string.
+	 * @param string to search in.
+	 * @param character code to search for.
+	 * @return count of occurences.
+	 */
+	static unsigned ccount(const char *string, ucs4_t character);
 };
 
 /**
@@ -257,6 +283,22 @@ protected:
 	 * @return count of occurences.
 	 */
 	unsigned ccount(ucs4_t character) const;
+
+	/**
+	 * Find first occurance of character in string.
+	 * @param character code to search for.
+	 * @param start offset in string in codepoints.
+	 * @return pointer to first instance or NULL if not found.
+	 */
+	const char *find(ucs4_t character, strsize_t start = 0) const;
+
+	/**
+	 * Find last occurance of character in string.
+	 * @param character code to search for.
+	 * @param end offset to start from in codepoints.
+	 * @return pointer to last instance or NULL if not found.
+	 */
+	const char *rfind(ucs4_t character, strsize_t end = npos) const;
 };
 
 /**
