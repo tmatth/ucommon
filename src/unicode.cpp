@@ -317,6 +317,8 @@ void UString::add(const unicode_t text)
 
 UString UString::get(strsize_t pos, strsize_t size) const
 {
+	if(!str)
+		return UString("", 0);
 
 	char *substr = utf8::offset(str->text, (ssize_t)pos);	
 	if(!substr)
@@ -335,13 +337,41 @@ UString UString::get(strsize_t pos, strsize_t size) const
 
 ucs4_t UString::at(int offset) const
 {
-	const char *cp = utf8::offset(str->text, offset);
+	const char *cp;
+
+	if(!str)
+		return -1;
+
+	cp = utf8::offset(str->text, offset);
 
 	if(!cp)
 		return -1;
 
 	return utf8::codepoint(cp);
 }
+
+unsigned UString::ccount(ucs4_t code) const
+{
+	unsigned total = 0;
+	const char *cp;
+	ucs4_t ch;
+	unsigned cs;
+
+	if(!str)
+		return 0;
+
+	cp = str->text;
+	while(*cp) {
+		ch = utf8::codepoint(cp);
+		cs = utf8::size(cp);
+		if(!cs || ch == -1)
+			break;
+		if(ch == code)
+			++total;
+		cp += cs;
+	}
+	return total;
+}	
 
 UString UString::operator()(int codepoint, strsize_t size) const
 {
@@ -350,6 +380,9 @@ UString UString::operator()(int codepoint, strsize_t size) const
 
 const char *UString::operator()(int offset) const
 {
+	if(!str)
+		return NULL;
+
 	return utf8::offset(str->text, offset);
 }
 

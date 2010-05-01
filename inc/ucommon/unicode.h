@@ -244,8 +244,19 @@ protected:
 	inline ucs4_t operator[](int position) const
 		{return UString::at(position);};
 
+	/**
+	 * Count codepoints in current string.
+	 * @return count of codepoints.
+	 */
 	inline strsize_t count(void) const
 		{return utf8::count(str->text);}
+
+	/**
+	 * Count occurences of a unicode character in string.
+	 * @param character code to search for.
+	 * @return count of occurences.
+	 */
+	unsigned ccount(ucs4_t character) const;
 };
 
 /**
