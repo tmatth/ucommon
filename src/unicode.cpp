@@ -183,6 +183,8 @@ size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
 	size_t used = 0;
 	wchar_t *target = (wchar_t *)buffer;
 
+	assert(len > 0);
+
 	if(!text) {
 		*target = 0;
 		return 0;
@@ -196,6 +198,7 @@ size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
 		*(target++) = (wchar_t)code;
 		++used;
 	}
+
 	*target = 0;
 	return used;
 }
