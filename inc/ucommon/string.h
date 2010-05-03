@@ -1726,7 +1726,7 @@ inline bool ieq(char const *s1, char const *s2)
  * @return true if equal.
  */
 inline bool ieq(char const *s1, char const *s2, size_t size)
-	{return String::case_equal(s1, s2);}
+	{return String::case_equal(s1, s2, size);}
 
 /**
  * Compare two string objects if equal ignoring case.  This is
