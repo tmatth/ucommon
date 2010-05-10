@@ -65,6 +65,20 @@ public:
 	static unsigned size(const char *codepoint);
 
 	/**
+	 * Compute prior codepoint of string of utf8 codepoints.
+	 * @param current codepoint in string.
+	 * @return previous codepoint in string.
+	 */
+	static const char *prior(const char *current);
+
+	/**
+	 * Compute next codepoint of a string of utf8 codepoints.
+	 * @param current codepoint in string.
+	 * @return next codepoint in string.
+	 */
+	static const char *next(const char *current);
+
+	/**
 	 * Count ut8 encoded ucs4 codepoints in string.
 	 * @param string of utf8 data.
 	 * @return codepount count, 0 if empty or invalid.

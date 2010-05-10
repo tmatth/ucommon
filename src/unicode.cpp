@@ -58,6 +58,32 @@ unsigned utf8::size(const char *string)
 	return 0;
 }
 
+const char *utf8::next(const char *str)
+{
+	uint8_t *cp = (uint8_t *)str;
+
+	if(*cp < 0x80)
+		return (const char *)(++cp);
+
+	if((*cp & 0xc0) == 0xc0)
+		++cp;
+
+	while((*cp & 0xc0) == 0x80)
+		++cp;
+
+	return (const char *)cp;
+}
+
+const char *utf8::prior(const char *str)
+{
+	uint8_t *cp = (uint8_t *)str;
+
+	while((*(--cp) & 0xc0) == 0x80)
+		;
+
+	return (const char *)cp;
+}
+
 ucs4_t utf8::codepoint(const char *string)
 {
 	unsigned codesize = size(string);
