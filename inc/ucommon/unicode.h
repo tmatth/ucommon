@@ -57,6 +57,8 @@ typedef	void *unicode_t;
 class __EXPORT utf8
 {
 public:
+	static const char *nil;
+
 	/**
 	 * Compute character size of utf8 string codepoint.
 	 * @param codepoint in string.
@@ -143,6 +145,18 @@ public:
 	 * @return count of occurences.
 	 */
 	static unsigned ccount(const char *string, ucs4_t character);
+};
+
+class Unicode
+{
+public:
+	static size_t len(unicode_t string);
+	static unicode_t dup(unicode_t string);
+	static unicode_t set(unicode_t target, size_t size, unicode_t source);
+	static unicode_t add(unicode_t target, size_t size, unicode_t source);
+	static unicode_t find(unicode_t source, ucs4_t code, size_t start = 0);
+	static unicode_t rfind(unicode_t source, ucs4_t code, size_t end = (size_t)-1l);
+	static unicode_t token(unicode_t *ptr, unicode_t delim, unicode_t quote = NULL, unicode_t end = NULL);
 };
 
 /**
@@ -309,20 +323,37 @@ protected:
 public:
 	utf8_pointer();
 	utf8_pointer(const char *str);
-	utf8_pointer(utf8_pointer& copy);
+	utf8_pointer(const utf8_pointer& copy);
 
 	utf8_pointer& operator ++();
 	utf8_pointer& operator --();
-	ucs4_t operator *();
-	operator bool() const;
-	bool operator!() const;
-	ucs4_t operator[](size_t codepoint);
+	utf8_pointer& operator +=(long offset);
+	utf8_pointer& operator -=(long offset);
+	utf8_pointer operator+(long offset) const;
+	utf8_pointer operator-(long offset) const;
+
+	inline operator bool() const
+		{return text != NULL;};
+
+	inline bool operator!() const
+		{return text == NULL;};
+
+	ucs4_t operator[](long codepoint) const;
 	
 	utf8_pointer& operator=(const char *str);
 
 	void inc(void);
 
 	void dec(void);
+
+	inline bool operator==(const char *string) const
+		{return (const char *)text == string;};
+
+	inline bool operator!=(const char *string) const
+		{return (const char *)text != string;};
+
+	inline	ucs4_t operator*() const
+		{return utf8::codepoint((const char *)text);};
 
 	inline char *c_str(void) const
 		{return (char *)text;};
@@ -334,6 +365,57 @@ public:
 		{return utf8::count((const char *)text);};
 };
 
+class __EXPORT unicode_pointer : public Unicode
+{
+protected:
+	unicode_t text;
+
+public:
+	unicode_pointer();
+	unicode_pointer(unicode_t pointer);
+	unicode_pointer(const unicode_pointer& copy);
+
+	unicode_pointer& operator ++();
+	unicode_pointer& operator --();
+	unicode_pointer& operator +=(long offset);
+	unicode_pointer& operator -=(long offset);
+	unicode_pointer operator+(long offset) const;
+	unicode_pointer operator-(long offset) const;
+
+	inline operator bool() const
+		{return text != NULL;};
+
+	inline bool operator!() const
+		{return text == NULL;};
+
+	ucs4_t operator[](long codepoint) const;
+	
+	unicode_pointer& operator=(unicode_t str);
+
+	inline bool operator==(const unicode_t string) const
+		{return text == string;};
+
+	inline bool operator!=(const unicode_t string) const
+		{return (const char *)text != string;};
+
+	ucs4_t operator*() const;
+
+	inline operator unicode_t() const
+		{return text;};
+
+	inline size_t len(void) const
+		{return Unicode::len(text);};
+
+	inline unicode_t find(ucs4_t code, size_t start = 0) const
+		{return Unicode::find(text, code, start);};
+
+	inline unicode_t rfind(ucs4_t code, size_t end = (size_t)-1) const
+		{return Unicode::rfind(text, code, end);};
+
+	inline unicode_t token(unicode_t list, unicode_t quote = NULL, unicode_t end = NULL)
+		{return Unicode::token(&text, list, quote, end);};
+};
+
 /**
  * Convenience type for utf8 encoded strings.
  */
@@ -343,6 +425,11 @@ typedef	UString	ustring_t;
  * Convience type for utf8_pointer strings.
  */
 typedef	utf8_pointer utf8_t;
+
+/**
+ * Convience type for unicode_pointer strings.
+ */
+typedef unicode_pointer ucsw_t;
 
 END_NAMESPACE
 

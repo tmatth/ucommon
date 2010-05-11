@@ -33,6 +33,8 @@ typedef	ucs4_t	wchar_t;
 
 using namespace UCOMMON_NAMESPACE;
 
+const char *utf8::nil = NULL;
+
 unsigned utf8::size(const char *string)
 {
 	unsigned char v = (unsigned char)(*string);
@@ -332,6 +334,160 @@ const char *utf8::rfind(const char *cp, ucs4_t code, size_t pos)
 	return result;
 }
 
+size_t Unicode::len(unicode_t text)
+{
+	wchar_t *cp = (wchar_t *)text;
+	if(!text)
+		return 0;
+
+	size_t count = 0;
+	while(*(cp++))
+		++count;
+
+	return count;
+}
+
+unicode_t Unicode::dup(unicode_t source)
+{
+	if(!source)
+		return NULL;
+
+	unicode_t ptr;
+	size_t size = Unicode::len(source);
+	size = ++size * sizeof(wchar_t);
+	
+	ptr = (unicode_t)malloc(size);
+	if(ptr)
+		memcpy(ptr, source, size);
+	return ptr;
+}
+
+unicode_t Unicode::set(unicode_t buf, size_t size, unicode_t src)
+{
+	assert(buf != NULL);
+	assert(size != 0);
+
+	wchar_t *tp = (wchar_t *)buf;
+	wchar_t *sp = (wchar_t *)src;
+	size_t count = 1;
+
+	while(count++ < size && *sp && sp) {
+		*(tp++) = *(tp++);
+	}
+
+	*tp = 0;
+	return buf;
+}
+
+unicode_t Unicode::add(unicode_t buf, size_t size, unicode_t src)
+{
+	assert(buf != NULL);
+	assert(size != 0);
+
+	wchar_t *tp = (wchar_t *)buf;
+	wchar_t *sp = (wchar_t *)src;
+	size_t count = Unicode::len(buf);
+
+	tp += count;
+	++count;
+
+	while(count++ < size && *sp && sp) {
+		*(tp++) = *(tp++);
+	}
+
+	*tp = 0;
+	return buf;
+}
+
+unicode_t Unicode::find(unicode_t str, ucs4_t code, size_t pos)
+{
+	ucs4_t ch;
+	wchar_t *cp = (wchar_t *)str;
+	size_t cpos = 0;
+
+	if(!cp)
+		return NULL;
+
+	while(*cp) {
+		ch = *(cp++);
+		if(pos && ++cpos > pos)
+			return NULL;
+		if(ch == code)
+			return (unicode_t)cp;
+	}
+	return NULL;
+}
+
+unicode_t Unicode::rfind(unicode_t str, ucs4_t code, size_t pos)
+{
+	wchar_t *cp = (wchar_t*)str;
+	unicode_t result = NULL;
+	ucs4_t ch;
+	size_t cpos = 0;
+
+	if(!cp)
+		return NULL;
+		
+	while(*cp) {
+		ch = *(cp++);
+
+		if(ch == code)
+			result = cp;
+
+		if(++cpos > pos) 
+			break;
+	}
+	return result;
+}
+
+unicode_t Unicode::token(unicode_t *ptr, unicode_t delim, unicode_t quote, unicode_t end)
+{
+	if(!ptr || *ptr == NULL)
+		return NULL;
+
+	bool ending = false;
+	wchar_t qf = 0;
+	wchar_t *cp = (wchar_t *)(*ptr);
+	unicode_t result;
+	while(!ending && *cp && Unicode::find(delim, (ucs4_t)(*cp))) {
+		if(end && Unicode::find(end, (ucs4_t)(*cp)))
+			ending = true;
+		else
+			++cp;
+	}
+
+	wchar_t *scan = (wchar_t *)quote;
+	while(scan && !qf && *scan) {
+		if(*cp == *(scan++)) {
+			++cp;
+			qf = *(scan++);
+		}
+		else if(*scan)
+			++scan;
+	}
+
+	*ptr = result = (unicode_t)cp;
+
+	while(!ending && *cp && !Unicode::find(delim, (ucs4_t)(*cp))) {
+		if(qf == *cp) {
+			qf = 0;
+			break;
+		}
+		if(end && Unicode::find(end, (ucs4_t)(*cp)))
+			ending = true;
+		else
+			++cp;
+	}
+
+	if(ending)
+		*cp = 0;
+	else if(*cp)
+		*(cp++) = 0;
+
+	*ptr = (unicode_t *)cp;
+	return result;
+}
+	
 UString::UString() 
 {
 	str = NULL;
@@ -472,7 +628,7 @@ utf8_pointer::utf8_pointer(const char *str)
 	text = (uint8_t*)str;
 }
 
-utf8_pointer::utf8_pointer(utf8_pointer& copy)
+utf8_pointer::utf8_pointer(const utf8_pointer& copy)
 {
 	text = copy.text;
 }
@@ -503,22 +659,6 @@ void utf8_pointer::dec(void)
 		;
 }
 
-bool utf8_pointer::operator!() const
-{
-	if(text == NULL)
-		return true;
-	
-	return false;
-}
-
-utf8_pointer::operator bool() const
-{
-	if(text != NULL)
-		return true;
-
-	return false;
-}
-
 utf8_pointer& utf8_pointer::operator++()
 {
 	inc();
@@ -529,5 +669,183 @@ utf8_pointer& utf8_pointer::operator--()
 {
 	dec();
 	return *this;
+}
+
+utf8_pointer& utf8_pointer::operator+=(long offset)
+{
+	if(!text || !offset)
+		return *this;
+
+	if(offset > 0) {
+		while(offset--)
+			inc();
+	}
+	else {
+		while(offset++)
+			dec();
+	}
+	return *this;
+}
+
+utf8_pointer& utf8_pointer::operator-=(long offset)
+{
+	if(!text || !offset)
+		return *this;
+
+	if(offset > 0) {
+		while(offset--)
+			dec();
+	}
+	else {
+		while(offset++)
+			inc();
+	}
+	return *this;
+}
+
+utf8_pointer utf8_pointer::operator+(long offset) const
+{
+	utf8_pointer nsp(c_str());
+	nsp += offset;
+	return nsp;
+}
+
+utf8_pointer utf8_pointer::operator-(long offset) const
+{
+	utf8_pointer nsp(c_str());
+	nsp -= offset;
+	return nsp;
+}
+
+utf8_pointer& utf8_pointer::operator=(const char *str)
+{
+	text = (uint8_t *)str;
+	return *this;
+}
+
+ucs4_t utf8_pointer::operator[](long offset) const
+{
+	utf8_pointer ncp(c_str());
+
+	if(!text)
+		return 0l;
+
+	if(!offset)
+		return utf8::codepoint((const char*)text);
+
+	if(offset > 0) {
+		while(offset--)
+			ncp.inc();
+	}
+	else {
+		while(offset++)
+			ncp.dec();
+	}
+	return *ncp;
+}
+
+unicode_pointer::unicode_pointer()
+{
+	text = NULL;
+}
+
+unicode_pointer::unicode_pointer(unicode_t str)
+{
+	text = str;
+}
+
+unicode_pointer::unicode_pointer(const unicode_pointer& copy)
+{
+	text = copy.text;
+}
+
+unicode_pointer& unicode_pointer::operator ++()
+{
+	wchar_t *cp = (wchar_t *)text;
+
+	if(cp != NULL)
+		++cp;
+	text = (unicode_t)cp;
+}
+
+unicode_pointer& unicode_pointer::operator --()
+{
+	wchar_t *cp = (wchar_t *)text;
+
+	if(cp != NULL)
+		--cp;
+	text = (unicode_t)cp;
+}
+
+unicode_pointer& unicode_pointer::operator+=(long offset)
+{
+	if(!text)
+		return *this;
+
+	wchar_t *cp = (wchar_t *)text;
+	while(offset > 0) {
+		--offset;
+		++cp;
+	}
+	while(offset < 0) {
+		++offset;
+		--cp;
+	}
+	text = (unicode_t)cp;
+	return *this;
+}
+
+unicode_pointer& unicode_pointer::operator-=(long offset)
+{
+	if(!text)
+		return *this;
+
+	wchar_t *cp = (wchar_t *)text;
+	while(offset > 0) {
+		--offset;
+		--cp;
+	}
+	while(offset < 0) {
+		++offset;
+		++cp;
+	}
+	text = (unicode_t)cp;
+	return *this;
+}
+
+unicode_pointer unicode_pointer::operator+(long offset) const
+{
+	unicode_pointer ncp(text);
+
+	return (ncp += offset);
+}
+
+unicode_pointer unicode_pointer::operator-(long offset) const
+{
+	unicode_pointer ncp(text);
+
+	return (ncp -= offset);
+} 
+
+ucs4_t unicode_pointer::operator[](long offset) const
+{
+	wchar_t *cp = (wchar_t *)text;
+
+	if(!text)
+		return 0;
+
+	return (ucs4_t)cp[offset];
+}
+
+unicode_pointer& unicode_pointer::operator=(unicode_t data)
+{
+	text = data;
+	return *this;
+}
+
+ucs4_t unicode_pointer::operator*() const
+{
+	wchar_t *cp = (wchar_t *)text;
+	return (ucs4_t)(*cp);
 }
 
