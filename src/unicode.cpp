@@ -58,32 +58,6 @@ unsigned utf8::size(const char *string)
 	return 0;
 }
 
-const char *utf8::next(const char *str)
-{
-	uint8_t *cp = (uint8_t *)str;
-
-	if(*cp < 0x80)
-		return (const char *)(++cp);
-
-	if((*cp & 0xc0) == 0xc0)
-		++cp;
-
-	while((*cp & 0xc0) == 0x80)
-		++cp;
-
-	return (const char *)cp;
-}
-
-const char *utf8::prior(const char *str)
-{
-	uint8_t *cp = (uint8_t *)str;
-
-	while((*(--cp) & 0xc0) == 0x80)
-		;
-
-	return (const char *)cp;
-}
-
 ucs4_t utf8::codepoint(const char *string)
 {
 	unsigned codesize = size(string);
@@ -488,4 +462,72 @@ const char *UString::operator()(int offset) const
 	return utf8::offset(str->text, offset);
 }
 
+utf8_pointer::utf8_pointer()
+{
+	text = NULL;
+}
+
+utf8_pointer::utf8_pointer(const char *str)
+{
+	text = (uint8_t*)str;
+}
+
+utf8_pointer::utf8_pointer(utf8_pointer& copy)
+{
+	text = copy.text;
+}
+
+void utf8_pointer::inc(void)
+{
+	if(!text)
+		return;
+
+	if(*text < 0x80) {
+		++text;
+		return;
+	}
+
+	if((*text & 0xc0) == 0xc0)
+		++text;
+
+	while((*text & 0xc0) == 0x80)
+		++text;
+}
+
+void utf8_pointer::dec(void)
+{
+	if(!text)
+		return;
+
+	while((*(--text) & 0xc0) == 0x80)
+		;
+}
+
+bool utf8_pointer::operator!() const
+{
+	if(text == NULL)
+		return true;
+	
+	return false;
+}
+
+utf8_pointer::operator bool() const
+{
+	if(text != NULL)
+		return true;
+
+	return false;
+}
+
+utf8_pointer& utf8_pointer::operator++()
+{
+	inc();
+	return *this;
+}
+
+utf8_pointer& utf8_pointer::operator--()
+{
+	dec();
+	return *this;
+}
 

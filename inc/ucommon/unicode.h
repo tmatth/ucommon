@@ -65,20 +65,6 @@ public:
 	static unsigned size(const char *codepoint);
 
 	/**
-	 * Compute prior codepoint of string of utf8 codepoints.
-	 * @param current codepoint in string.
-	 * @return previous codepoint in string.
-	 */
-	static const char *prior(const char *current);
-
-	/**
-	 * Compute next codepoint of a string of utf8 codepoints.
-	 * @param current codepoint in string.
-	 * @return next codepoint in string.
-	 */
-	static const char *next(const char *current);
-
-	/**
 	 * Count ut8 encoded ucs4 codepoints in string.
 	 * @param string of utf8 data.
 	 * @return codepount count, 0 if empty or invalid.
@@ -315,10 +301,48 @@ protected:
 	const char *rfind(ucs4_t character, strsize_t end = npos) const;
 };
 
+class __EXPORT utf8_pointer
+{
+protected:
+	uint8_t *text;
+
+public:
+	utf8_pointer();
+	utf8_pointer(const char *str);
+	utf8_pointer(utf8_pointer& copy);
+
+	utf8_pointer& operator ++();
+	utf8_pointer& operator --();
+	ucs4_t operator *();
+	operator bool() const;
+	bool operator!() const;
+	ucs4_t operator[](size_t codepoint);
+	
+	utf8_pointer& operator=(const char *str);
+
+	void inc(void);
+
+	void dec(void);
+
+	inline char *c_str(void) const
+		{return (char *)text;};
+
+	inline operator char*() const
+		{return (char *)text;};
+
+	inline size_t len(void) const
+		{return utf8::count((const char *)text);};
+};
+
 /**
  * Convenience type for utf8 encoded strings.
  */
 typedef	UString	ustring_t;
+
+/**
+ * Convience type for utf8_pointer strings.
+ */
+typedef	utf8_pointer utf8_t;
 
 END_NAMESPACE
 
