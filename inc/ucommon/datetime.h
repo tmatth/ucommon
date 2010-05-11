@@ -853,7 +853,6 @@ protected:
 public:
 	/**
 	 * Construct a date and time from C libraray time_t type.		
-	 * @param string mode to use.
 	 * @param time type to make date and time from.
 	 */
   	DateTimeString(time_t time);

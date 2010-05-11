@@ -113,12 +113,12 @@ public:
 
 	/**
 	 * Convert a utf8 string into a unicode data buffer.
-	 * @param utf8 string to copy.
+	 * @param string to copy.
 	 * @param unicode data buffer.
 	 * @param size of unicode data buffer in codepoints.
 	 * @return number of code points converted.
 	 */
-	static size_t extract(const char *source, unicode_t unicode, size_t size);
+	static size_t extract(const char *string, unicode_t unicode, size_t size);
 
 	/**
 	 * Find first occurance of character in string.
@@ -145,18 +145,6 @@ public:
 	 * @return count of occurences.
 	 */
 	static unsigned ccount(const char *string, ucs4_t character);
-};
-
-class Unicode
-{
-public:
-	static size_t len(unicode_t string);
-	static unicode_t dup(unicode_t string);
-	static unicode_t set(unicode_t target, size_t size, unicode_t source);
-	static unicode_t add(unicode_t target, size_t size, unicode_t source);
-	static unicode_t find(unicode_t source, ucs4_t code, size_t start = 0);
-	static unicode_t rfind(unicode_t source, ucs4_t code, size_t end = (size_t)-1l);
-	static unicode_t token(unicode_t *ptr, unicode_t delim, unicode_t quote = NULL, unicode_t end = NULL);
 };
 
 /**
@@ -315,105 +303,155 @@ protected:
 	const char *rfind(ucs4_t character, strsize_t end = npos) const;
 };
 
+/**
+ * Pointer to utf8 encoded character data.  This is a kind of "char *" for
+ * utf8 text.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT utf8_pointer
 {
 protected:
 	uint8_t *text;
 
 public:
+	/**
+	 * Create a utf8 pointer set to NULL.
+	 */
 	utf8_pointer();
-	utf8_pointer(const char *str);
+
+	/**
+	 * Create a utf8 pointer for an existing char pointer.
+	 * @param string pointer to use.
+	 */ 
+	utf8_pointer(const char *string);
+
+	/**
+	 * Create a utf8 pointer as a copy of existing utf8 pointer.
+	 * @param copy of object to use.
+	 */
 	utf8_pointer(const utf8_pointer& copy);
 
+	/**
+	 * Iterative increment of a utf8 pointer to prior codepoint.
+	 * @return object incremented.
+	 */
 	utf8_pointer& operator ++();
+
+	/**
+	 * Iterative decrement of a utf8 pointer to next codepoint.
+	 * @return object decremented.
+	 */
 	utf8_pointer& operator --();
+
+	/**
+	 * Adjust utf8 pointer by specified codepoints forward.
+	 * @param offset to increment by.
+	 * @return object incremented.
+	 */
 	utf8_pointer& operator +=(long offset);
+
+	/**
+	 * Adjust utf8 pointer by specified codepoints backward.
+	 * @param offset to decrement by.
+	 * @return object decremented.
+	 */
 	utf8_pointer& operator -=(long offset);
+
+	/**
+	 * Get new utf8 string after adding a codepoint offset.
+	 * @param offset to add.
+	 * @return new utf8 pointer pointing to specified offset.
+	 */
 	utf8_pointer operator+(long offset) const;
+
+	/**
+	 * Get new utf8 string after subtracting a codepoint offset.
+	 * @param offset to subtract.
+	 * @return new utf8 pointer pointing to specified offset.
+	 */
 	utf8_pointer operator-(long offset) const;
 
+	/**
+	 * Check if text is valid pointer.
+	 * @return true if not NULL.
+	 */
 	inline operator bool() const
 		{return text != NULL;};
 
+	/**
+	 * Check if text is an invalid pointer.
+	 * @return false if not NULL.
+	 */
 	inline bool operator!() const
 		{return text == NULL;};
 
+	/**
+	 * Extract a unicode character from a specified codepoint.
+	 * @param codepoint offset to extract character from.
+	 * @return unicode character or 0.
+	 */
 	ucs4_t operator[](long codepoint) const;
 	
-	utf8_pointer& operator=(const char *str);
+	/**
+	 * Assign a utf8 string to point to.
+	 * @param string to point to.
+	 * @return current object after set to string.
+	 */
+	utf8_pointer& operator=(const char *string);
 
+	/**
+	 * Iterative increment of a utf8 pointer to next codepoint.
+	 */
 	void inc(void);
 
+	/**
+	 * Iterative decrement of a utf8 pointer to prior codepoint.
+	 */
 	void dec(void);
 
+	/**
+	 * check if pointer equals another string.
+	 * @param string to check.
+	 * @return true if same memory address.
+	 */
 	inline bool operator==(const char *string) const
 		{return (const char *)text == string;};
 
+	/**
+	 * check if pointer does not equal another string.
+	 * @param string to check.
+	 * @return false if same memory address.
+	 */
 	inline bool operator!=(const char *string) const
 		{return (const char *)text != string;};
 
+	/**
+	 * Get unicode character pointed to by pointer.
+	 * @return unicode character we are pointing to.
+	 */
 	inline	ucs4_t operator*() const
 		{return utf8::codepoint((const char *)text);};
 
+	/**
+	 * Get c string we point to.	
+	 * @return string we point to.
+	 */
 	inline char *c_str(void) const
 		{return (char *)text;};
 
+	/**
+	 * Convert utf8 pointer to a generic string pointer.
+	 * @return generic string pointer.
+	 */
 	inline operator char*() const
 		{return (char *)text;};
 
+	/**
+	 * Get length of null terminated utf8 string in codepoints.
+	 * @return codepoint length of string.
+	 */
 	inline size_t len(void) const
 		{return utf8::count((const char *)text);};
-};
-
-class __EXPORT unicode_pointer : public Unicode
-{
-protected:
-	unicode_t text;
-
-public:
-	unicode_pointer();
-	unicode_pointer(unicode_t pointer);
-	unicode_pointer(const unicode_pointer& copy);
-
-	unicode_pointer& operator ++();
-	unicode_pointer& operator --();
-	unicode_pointer& operator +=(long offset);
-	unicode_pointer& operator -=(long offset);
-	unicode_pointer operator+(long offset) const;
-	unicode_pointer operator-(long offset) const;
-
-	inline operator bool() const
-		{return text != NULL;};
-
-	inline bool operator!() const
-		{return text == NULL;};
-
-	ucs4_t operator[](long codepoint) const;
-	
-	unicode_pointer& operator=(unicode_t str);
-
-	inline bool operator==(const unicode_t string) const
-		{return text == string;};
-
-	inline bool operator!=(const unicode_t string) const
-		{return (const char *)text != string;};
-
-	ucs4_t operator*() const;
-
-	inline operator unicode_t() const
-		{return text;};
-
-	inline size_t len(void) const
-		{return Unicode::len(text);};
-
-	inline unicode_t find(ucs4_t code, size_t start = 0) const
-		{return Unicode::find(text, code, start);};
-
-	inline unicode_t rfind(ucs4_t code, size_t end = (size_t)-1) const
-		{return Unicode::rfind(text, code, end);};
-
-	inline unicode_t token(unicode_t list, unicode_t quote = NULL, unicode_t end = NULL)
-		{return Unicode::token(&text, list, quote, end);};
 };
 
 /**
@@ -425,11 +463,6 @@ typedef	UString	ustring_t;
  * Convience type for utf8_pointer strings.
  */
 typedef	utf8_pointer utf8_t;
-
-/**
- * Convience type for unicode_pointer strings.
- */
-typedef unicode_pointer ucsw_t;
 
 END_NAMESPACE
 
