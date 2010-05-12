@@ -1,5 +1,6 @@
 From ucommon 2.1.3 to 2.1.4
 - new utf8_pointer class.
+- new component access api for datetime objects.
 
 From ucommon 2.1.2 to 2.1.3
 - unicode string support and utf8 string processing.

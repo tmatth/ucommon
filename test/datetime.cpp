@@ -47,10 +47,10 @@ int main(int argc, char **argv)
 	exp_dt.tm_mday = exp_day;
 	exp_ctime = mktime(&exp_dt);
 
-	assert(exp_year == (unsigned)date.getYear());
-	assert(exp_month == date.getMonth());
-	assert(exp_day == date.getDay());
-	assert(exp_dayofweek == date.getDayOfWeek());
+	assert(exp_year == (unsigned)date[Date::year]);
+	assert(exp_month == date[Date::month]);
+	assert(exp_day == date[Date::day]);
+	assert(exp_dayofweek == date[Date::dow]);
 
 	// test some conversions...
 	exp_stringdate = date();

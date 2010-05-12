@@ -74,6 +74,11 @@ protected:
 
 public:
 	/**
+	 * index elements.
+	 */
+	typedef enum {year = 10, month, day, dow} index_t;
+
+	/**
 	 * Size of date string field.
 	 */
 	static const size_t sz_string;
@@ -194,6 +199,20 @@ public:
 	 * @return julian number.
 	 */
 	inline operator long() const
+		{return get();};
+
+	/**
+	 * Access numeric components.
+	 * @param component to access.
+	 * @return value of component.
+	 */
+	int operator[](index_t component) const;
+
+	/**
+	 * Access julian value.
+	 * @return julian number of object.
+	 */
+	inline long operator*() const
 		{return get();};
 
 	/**
@@ -338,6 +357,11 @@ protected:
 
 public:
 	/**
+	 * Component access index.
+	 */
+	typedef enum {hour = 20, minute, second} index_t;
+
+	/**
 	 * Size of time string field.
 	 */
 	static const size_t sz_string;
@@ -475,6 +499,20 @@ public:
 	 */
 	inline operator long()
 		{return get();};
+
+	/**
+	 * Get object time in seconds.
+	 * @return time in seconds.
+	 */
+	inline long operator*() const
+		{return get();};
+
+	/**
+	 * Get component of time object.
+	 * @param component index.
+	 * @return value of component.
+	 */
+	int operator[](index_t) const;
 	
 	/**
 	 * Convert to standard 24 hour time string.
@@ -574,6 +612,13 @@ protected:
 	void update(void);
 
 public:
+	/**
+	 * Index to components we can access.
+	 */
+	typedef enum {year = Date::year, month = Date::month, day = Date::day, 
+		dow = Date::dow, 
+		hour = Time::hour, minute = Time::minute, second = Time::second} index_t;
+
 	/**
 	 * Constant for number of seconds in a day.
 	 */
@@ -767,6 +812,13 @@ public:
 	 * @return true if not valid.
 	 */
 	bool operator!() const;
+
+	/**
+	 * Access time components.
+	 * @param component to access.
+	 * @return number or -1 if invalid.
+	 */
+	int operator[](index_t component) const;
 
 	/**
 	 * Test is date and time is valid for is() operator.

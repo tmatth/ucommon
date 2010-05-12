@@ -269,6 +269,21 @@ time_t Date::getTime(void) const
 	return mktime(&dt); // to fill in day of week etc.
 }
 
+int Date::operator[](index_t idx) const
+{
+	switch(idx) {
+	case year:
+		return getYear();
+	case month:
+		return getMonth();
+	case day:
+		return getDay();
+	case dow:
+		return getDayOfWeek();
+	}
+	return -1;
+}
+
 int Date::getYear(void) const
 {
 	char buf[11];
@@ -493,6 +508,19 @@ char *Time::get(char *buf) const
 {
 	fromSeconds(buf);
 	return buf;
+}
+
+int Time::operator[](index_t idx) const
+{
+	switch(idx) {
+	case hour:
+		return getHour();
+	case minute:
+		return getMinute();
+	case second:
+		return getSecond();
+	}
+	return -1;
 }
 
 int Time::getHour(void) const
@@ -792,6 +820,27 @@ time_t DateTime::get(void) const
 	dt.tm_isdst = -1;
 
 	return mktime(&dt);
+}
+
+int DateTime::operator[](index_t idx) const
+{
+	switch(idx) {
+	case year:
+		return getYear();
+	case month:
+		return getMonth();
+	case day:
+		return getDay();
+	case dow:
+		return getDayOfWeek();
+	case hour:
+		return getHour();
+	case minute:
+		return getMinute();
+	case second:
+		return getSecond();
+	}
+	return -1;
 }
 
 DateTime& DateTime::operator=(const DateTime& datetime)
