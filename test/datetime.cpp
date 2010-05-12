@@ -29,10 +29,10 @@ using namespace std;
 int main(int argc, char **argv)
 {
 	Date date = Date(2003, 1, 6);
-	unsigned exp_year = 2003;
-	unsigned exp_month = 1;
-	unsigned exp_day = 6;
-	unsigned exp_dayofweek = 1;
+	int exp_year = 2003;
+	int exp_month = 1;
+	int exp_day = 6;
+	int exp_dayofweek = 1;
 	String exp_stringdate;
 	tm_t exp_dt;
 	time_t exp_ctime;
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	exp_dt.tm_mday = exp_day;
 	exp_ctime = mktime(&exp_dt);
 
-	assert(exp_year == (unsigned)date[Date::year]);
+	assert(exp_year == date[Date::year]);
 	assert(exp_month == date[Date::month]);
 	assert(exp_day == date[Date::day]);
 	assert(exp_dayofweek == date[Date::dow]);
