@@ -996,7 +996,7 @@ void DLinkedObject::delist(void)
 }
 
 ObjectQueue::ObjectQueue() :
-OrderedIndex() {};
+OrderedIndex() {}
 
 void ObjectQueue::add(DLinkedObject *object)
 {
