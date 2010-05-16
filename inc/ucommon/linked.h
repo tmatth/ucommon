@@ -1624,7 +1624,7 @@ public:
  * @param object to push onto stack.
  */
 inline void push(ObjectStack& stack, LinkedObject *object)
-	{stack.push(object);};
+	{stack.push(object);}
 
 /**
  * Pop a linked object from a stack of linked objects.
@@ -1632,7 +1632,7 @@ inline void push(ObjectStack& stack, LinkedObject *object)
  * @return object pulled from stack or NULL if none.
  */
 inline LinkedObject *pop(ObjectStack& stack) 
-	{return stack.pop();};
+	{return stack.pop();}
 
 /**
  * Convenience typedef for root pointers of single linked lists.
