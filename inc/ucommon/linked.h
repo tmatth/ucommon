@@ -167,6 +167,7 @@ class __EXPORT OrderedIndex
 {
 protected:
 	friend class OrderedObject;
+	friend class DLinkedObject;
 	friend class LinkedList;
 	friend class NamedObject;
 
@@ -228,6 +229,12 @@ public:
 	LinkedObject *get(void);
 
 	/**
+	 * Add an object into the ordered index.
+	 * @param ordered object to add to the index.
+	 */
+	void add(OrderedObject *object);
+
+	/**
 	 * Get an indexed member from the ordered index.
 	 * @param index of member to fetch.
 	 * @return LinkedObject member of index.
@@ -274,6 +281,8 @@ class __EXPORT OrderedObject : public LinkedObject
 protected:
 	friend class LinkedList;
 	friend class OrderedIndex;
+	friend class DLinkedObject;
+	friend class ObjectQueue;
 
 	/**
 	 * Construct an ordered object aot end of a an index.
@@ -318,6 +327,30 @@ public:
 	 */
 	inline OrderedObject *getNext(void) const
 		{return static_cast<OrderedObject *>(LinkedObject::getNext());};
+};
+
+/**
+ * A double-linked Object, used for certain kinds of lists.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class DLinkedObject : private OrderedObject
+{
+public:
+	friend class ObjectQueue;
+
+	/**
+	 * Construct an empty object.
+	 */
+	DLinkedObject();
+
+protected:
+	/**
+	 * Remove a cross-linked list from itself.
+	 */
+	void delist(void);
+
+private:
+	DLinkedObject *prev;
 };
 
 /**
@@ -676,6 +709,8 @@ public:
 class __EXPORT LinkedList : public OrderedObject
 {
 protected:
+	friend class ObjectQueue;
+
 	LinkedList *prev;
 	OrderedIndex *root;
 
@@ -791,6 +826,44 @@ public:
 		{insert(object);};
 };
 
+/**
+ * A queue of double linked object.  This uses the linkedlist class to
+ * form a basic queue of objects.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class ObjectQueue : public OrderedIndex
+{
+public:
+	/**
+	 * Create an empty object queue.
+	 */
+	ObjectQueue();
+
+	/**
+	 * Add an object to the end of the queue.
+	 * @param object to add.
+	 */
+	void add(DLinkedObject *object);
+
+	/**
+	 * Push an object to the front of the queue.
+	 * @param object to push.
+	 */
+	void push(DLinkedObject *object);
+
+	/**
+	 * Pull an object from the front of the queue.
+	 * @return object pulled or NULL if empty.
+	 */
+	DLinkedObject *pull(void);
+
+	/**
+	 * Pop an object from the end of the queue.
+	 * @return object popped or NULL if empty.
+	 */
+	DLinkedObject *pop(void);	
+};
+
 class ObjectStack
 {
 protected:
@@ -815,10 +888,17 @@ public:
 	void push(LinkedObject *object);
 
 	/**
-	 * Pop an object from the stack.
+	 * Pull an object from the stack.
 	 * @return object popped from stack or NULL if empty.
 	 */
-	LinkedObject *pop(void);
+	LinkedObject *pull(void);
+
+	/**
+	 * Pop an object from the stack.
+	 * @return object popped from stack or NULL if empy.
+	 */
+	inline LinkedObject *pop(void)
+		{return ObjectStack::pull();};
 };
 
 
@@ -1002,6 +1082,142 @@ public:
 	inline void operator=(const T& typed_value)
 		{set(typed_value);};
 };	
+
+/**
+ * Template for typesafe basic object stack container.  The object type, T,
+ * that is contained in the stack must be derived from LinkedObject.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class objstack : public ObjectStack
+{
+public:
+	/**
+	 * Create a new object stack.
+	 */
+	inline objstack() : ObjectStack() {}
+	
+	/**
+	 * Create an object stack from a list of objects.
+	 */
+	inline objstack(T *list) : ObjectStack(list) {}
+
+	/**
+	 * Push an object onto the object stack.
+	 * @param object of specified type to push.
+	 */
+	inline void push(T *object)
+		{ObjectStack::push(object);}
+
+	/**
+	 * Add an object onto the object stack.
+	 * @param object of specified type to push.
+	 */
+	inline void add(T *object)
+		{ObjectStack::push(object);}
+
+	/**
+	 * Pull an object from the object stack.
+	 * @return object of specified type or NULL if empty.
+	 */
+	inline T *pull(void)		
+		{(T *)ObjectStack::pull();}
+
+	/**
+	 * Pull (pop) an object from the object stack.
+	 * @return object of specified type or NULL if empty.
+	 */
+	inline T *pop(void)
+		{(T *)ObjectStack::pull();}
+};
+
+/**
+ * Template for typesafe basic object fifo container.  The object type, T,
+ * that is contained in the fifo must be derived from OrderedObject or
+ * LinkedObject.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class objfifo : public OrderedIndex
+{
+public:
+	/**
+	 * Create a new object stack.
+	 */
+	inline objfifo() : OrderedIndex() {}
+	
+	/**
+	 * Push an object onto the object fifo.
+	 * @param object of specified type to push.
+	 */
+	inline void push(T *object)
+		{OrderedIndex::add((OrderedObject *)object);}
+
+	/**
+	 * Add an object onto the object fifo.
+	 * @param object of specified type to push.
+	 */
+	inline void add(T *object)
+		{OrderedIndex::add((OrderedObject *)object);}
+
+	/**
+	 * Pull an object from the object stack.
+	 * @return object of specified type or NULL if empty.
+	 */
+	inline T *pull(void)		
+		{(T *)OrderedIndex::get();}
+
+	/**
+	 * Pull (pop) an object from the object stack.
+	 * @return object of specified type or NULL if empty.
+	 */
+	inline T *pop(void)
+		{(T *)OrderedIndex::get();}
+};
+
+/**
+ * Template for typesafe basic object queue container.  The object type, T,
+ * that is contained in the fifo must be derived from DLinkedObject.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class objqueue : public ObjectQueue
+{
+public:
+	/**
+	 * Create a new object stack.
+	 */
+	inline objqueue() : ObjectQueue() {}
+	
+	/**
+	 * Push an object to start of queue.
+	 * @param object of specified type to push.
+	 */
+	inline void push(T *object)
+		{ObjectQueue::push((DLinkedObject *)object);}
+
+	/**
+	 * Add an object to the end of the object queue.
+	 * @param object of specified type to add.
+	 */
+	inline void add(T *object)
+		{ObjectQueue::add((DLinkedObject *)object);}
+
+	/**
+	 * Pull an object from the start of the object queue.
+	 * @return object of specified type or NULL if empty.
+	 */
+	inline T *pull(void)		
+		{(T *)ObjectQueue::pull();}
+
+	/**
+	 * Pop an object from the end of the object queue.
+	 * @return object of specified type or NULL if empty.
+	 */
+	inline T *pop(void)
+		{(T *)ObjectQueue::pop();}
+};
+
 
 /**
  * A templated smart pointer for iterating linked lists.  This class allows
@@ -1627,12 +1843,92 @@ inline void push(ObjectStack& stack, LinkedObject *object)
 	{stack.push(object);}
 
 /**
+ * Add a linked object onto a stack of linked objects.
+ * @param stack to push object onto.
+ * @param object to push onto stack.
+ */
+inline void add(ObjectStack& stack, LinkedObject *object)
+	{stack.push(object);}
+
+/**
  * Pop a linked object from a stack of linked objects.
  * @param stack to pull object from.
  * @return object pulled from stack or NULL if none.
  */
 inline LinkedObject *pop(ObjectStack& stack) 
-	{return stack.pop();}
+	{return stack.pull();}
+
+/**
+ * Pop a linked object from a stack of linked objects.
+ * @param stack to pull object from.
+ * @return object pulled from stack or NULL if none.
+ */
+inline LinkedObject *pull(ObjectStack& stack) 
+	{return stack.pull();}
+
+/**
+ * Push a linked object onto a fifo of linked objects.
+ * @param fifo to push object onto.
+ * @param object to push onto fifo.
+ */
+inline void push(OrderedIndex& fifo, LinkedObject *object)
+	{fifo.add((OrderedObject *)object);}
+
+/**
+ * Add a linked object onto a fifo of linked objects.
+ * @param fifo to push object onto.
+ * @param object to push onto fifo.
+ */
+inline void add(OrderedIndex& fifo, LinkedObject *object)
+	{fifo.add((OrderedObject *)object);}
+
+/**
+ * Pop a linked object from a fifo of linked objects.
+ * @param fifo to pull object from.
+ * @return object pulled from stack or NULL if none.
+ */
+inline LinkedObject *pop(OrderedIndex& fifo) 
+	{return fifo.get();}
+
+/**
+ * Pop a linked object from a fifo of linked objects.
+ * @param fifo to pull object from.
+ * @return object pulled from stack or NULL if none.
+ */
+inline LinkedObject *pull(OrderedIndex& fifo) 
+	{return fifo.get();}
+
+/**
+ * Push a linked object to start of queue.
+ * @param queue to push object into.
+ * @param object to push onto fifo.
+ */
+inline void push(ObjectQueue& queue, DLinkedObject *object)
+	{queue.add(object);}
+
+/**
+ * Add a linked object to end of queue of objects.
+ * @param queue to add object onto.
+ * @param object to add onto queue.
+ */
+inline void add(ObjectQueue& queue, DLinkedObject *object)
+	{queue.add(object);}
+
+/**
+ * Pop a linked object from end of queue.
+ * @param queue to pop object from.
+ * @return object popped from queue or NULL if none.
+ */
+inline DLinkedObject *pop(ObjectQueue& queue) 
+	{return (DLinkedObject *)queue.pop();}
+
+/**
+ * Pull a linked object from start of a queue.
+ * @param queue to pull object from.
+ * @return object pulled from queue or NULL if none.
+ */
+inline DLinkedObject *pull(ObjectQueue& queue) 
+	{return (DLinkedObject *)queue.pull();}
 
 /**
  * Convenience typedef for root pointers of single linked lists.
@@ -1640,9 +1936,19 @@ inline LinkedObject *pop(ObjectStack& stack)
 typedef	LinkedObject *LinkedIndex;
 
 /**
- * Convenience typedef for a stack of linked objects.
+ * Convenience type for a stack of linked objects.
  */
-typedef ObjectStack ostack_t;
+typedef ObjectStack objstack_t;
+
+/**
+ * Convenience type for a fifo of linked objects.
+ */
+typedef	OrderedIndex objfifo_t;
+
+/**
+ * Convenience type for a queue of linked objects.
+ */
+typedef	ObjectQueue objqueue_t;
 
 END_NAMESPACE
 

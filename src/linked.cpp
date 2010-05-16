@@ -941,6 +941,13 @@ void OrderedIndex::operator*=(OrderedObject *object)
 	object->enlist(this);
 }
 
+void OrderedIndex::add(OrderedObject *object)
+{
+	assert(object != NULL);
+
+	object->enlist(this);
+}
+
 LinkedObject *OrderedIndex::get(void)
 {
 	LinkedObject *node;
@@ -970,6 +977,74 @@ void OrderedIndex::lock_index(void)
 
 void OrderedIndex::unlock_index(void)
 {
+}
+
+DLinkedObject::DLinkedObject() : OrderedObject()
+{
+	prev = NULL;
+}
+
+void DLinkedObject::delist(void)
+{
+	if(prev)
+		prev->next = next;
+
+	if(next)
+		((DLinkedObject *)next)->prev = prev;
+
+	next = prev = NULL;
+}
+
+ObjectQueue::ObjectQueue() :
+OrderedIndex() {};
+
+void ObjectQueue::add(DLinkedObject *object)
+{
+	assert(object);
+
+	if(tail) {
+		((DLinkedObject *)tail)->next = object;
+		object->prev = (DLinkedObject *)tail;
+	}
+
+	object->next = NULL;
+	tail = object;
+}
+
+void ObjectQueue::push(DLinkedObject *object)
+{
+	assert(object);
+
+	if(head) {
+		((DLinkedObject *)head)->prev = object;
+		object->next = (DLinkedObject *)head;
+	}
+	object->prev = NULL;
+	head = object;
+}
+
+DLinkedObject *ObjectQueue::pull(void)
+{
+	DLinkedObject *obj = (DLinkedObject *)head;
+
+	if(!obj)
+		return NULL;
+
+	head = (OrderedObject *)(obj->next);
+	obj->delist();
+	return obj;
+}
+
+DLinkedObject *ObjectQueue::pop(void)
+{
+	DLinkedObject *obj = (DLinkedObject *)tail;
+
+	if(!obj)
+		return NULL;
+
+	tail = (OrderedObject *)(obj->prev);
+	obj->delist();
+	return obj;
 }
 
 LinkedObject **OrderedIndex::index(void) const
@@ -1032,7 +1107,7 @@ void ObjectStack::push(LinkedObject *list)
 	root = list;
 }
 
-LinkedObject *ObjectStack::pop(void)
+LinkedObject *ObjectStack::pull(void)
 {
 	LinkedObject *obj;
 
