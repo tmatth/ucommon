@@ -1121,14 +1121,14 @@ public:
 	 * @return object of specified type or NULL if empty.
 	 */
 	inline T *pull(void)		
-		{(T *)ObjectStack::pull();}
+		{return (T *)ObjectStack::pull();}
 
 	/**
 	 * Pull (pop) an object from the object stack.
 	 * @return object of specified type or NULL if empty.
 	 */
 	inline T *pop(void)
-		{(T *)ObjectStack::pull();}
+		{return (T *)ObjectStack::pull();}
 };
 
 /**
@@ -1165,14 +1165,14 @@ public:
 	 * @return object of specified type or NULL if empty.
 	 */
 	inline T *pull(void)		
-		{(T *)OrderedIndex::get();}
+		{return (T *)OrderedIndex::get();}
 
 	/**
 	 * Pull (pop) an object from the object stack.
 	 * @return object of specified type or NULL if empty.
 	 */
 	inline T *pop(void)
-		{(T *)OrderedIndex::get();}
+		{return (T *)OrderedIndex::get();}
 };
 
 /**
@@ -1208,14 +1208,14 @@ public:
 	 * @return object of specified type or NULL if empty.
 	 */
 	inline T *pull(void)		
-		{(T *)ObjectQueue::pull();}
+		{return (T *)ObjectQueue::pull();}
 
 	/**
 	 * Pop an object from the end of the object queue.
 	 * @return object of specified type or NULL if empty.
 	 */
 	inline T *pop(void)
-		{(T *)ObjectQueue::pop();}
+		{return (T *)ObjectQueue::pop();}
 };
 
 

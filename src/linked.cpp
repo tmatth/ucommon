@@ -1038,6 +1038,7 @@ DLinkedObject *ObjectQueue::pull(void)
 	if(!head)
 		tail = NULL;
 	obj->delist();
+	return obj;
 }
 
 DLinkedObject *ObjectQueue::pop(void)
