@@ -1009,6 +1009,8 @@ void ObjectQueue::add(DLinkedObject *object)
 
 	object->next = NULL;
 	tail = object;
+	if(!head)
+		head = tail;
 }
 
 void ObjectQueue::push(DLinkedObject *object)
@@ -1021,6 +1023,8 @@ void ObjectQueue::push(DLinkedObject *object)
 	}
 	object->prev = NULL;
 	head = object;
+	if(!tail)
+		tail = head;
 }
 
 DLinkedObject *ObjectQueue::pull(void)
@@ -1031,8 +1035,9 @@ DLinkedObject *ObjectQueue::pull(void)
 		return NULL;
 
 	head = (OrderedObject *)(obj->next);
+	if(!head)
+		tail = NULL;
 	obj->delist();
-	return obj;
 }
 
 DLinkedObject *ObjectQueue::pop(void)
@@ -1043,6 +1048,8 @@ DLinkedObject *ObjectQueue::pop(void)
 		return NULL;
 
 	tail = (OrderedObject *)(obj->prev);
+	if(!tail)
+		head = NULL;
 	obj->delist();
 	return obj;
 }

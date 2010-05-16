@@ -333,7 +333,7 @@ public:
  * A double-linked Object, used for certain kinds of lists.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class DLinkedObject : private OrderedObject
+class __EXPORT DLinkedObject : public OrderedObject
 {
 public:
 	friend class ObjectQueue;
@@ -831,7 +831,7 @@ public:
  * form a basic queue of objects.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class ObjectQueue : public OrderedIndex
+class __EXPORT ObjectQueue : public OrderedIndex
 {
 public:
 	/**
@@ -864,7 +864,7 @@ public:
 	DLinkedObject *pop(void);	
 };
 
-class ObjectStack
+class __EXPORT ObjectStack
 {
 protected:
 	LinkedObject *root;

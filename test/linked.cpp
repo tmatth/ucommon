@@ -29,6 +29,14 @@ typedef linked_value<int> ints;
 
 static OrderedIndex list;
 
+class member : public DLinkedObject
+{
+public:
+	inline member(unsigned v) : DLinkedObject() {value = v;}
+
+	unsigned value;
+};
+
 extern "C" int main()
 {
 	linked_pointer<ints> ptr;
@@ -55,5 +63,31 @@ extern "C" int main()
 		++ptr;
 	}
 	assert(count == 2);
+
+	member ov1 = 1, ov2 = 2, ov3 = 3;
+
+	assert(ov2.value == 2);
+
+	objstack_t st;
+	push(st, &ov1);
+	push(st, &ov2);
+	push(st, &ov3);
+
+	member *mv = (member *)pop(st);
+	assert(mv->value == 3);
+	pop(st);
+	pop(st);
+	assert(NULL == pop(st));
+
+	objqueue<member> que;
+	que.add(&ov1);
+	que.add(&ov2);
+	que.add(&ov3);
+	mv = que.pop();
+	assert(mv->value == 3);
+	mv = que.pull();
+	assert(mv != NULL);
+//	assert(mv->value == 1);
+
 	return 0;
 }
