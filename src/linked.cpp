@@ -1014,3 +1014,35 @@ unsigned OrderedIndex::count(void) const
 	return count;
 }
 
+ObjectStack::ObjectStack()
+{
+	root = NULL;
+}
+
+ObjectStack::ObjectStack(LinkedObject *list)
+{
+	root = list;
+}
+
+void ObjectStack::push(LinkedObject *list)
+{
+	assert(list != NULL);
+
+	list->next = root;
+	root = list;
+}
+
+LinkedObject *ObjectStack::pop(void)
+{
+	LinkedObject *obj;
+
+	obj = root;
+
+	if(obj) {
+		root = obj->next;
+		obj->next = NULL;
+	}
+
+	return obj;
+}
+

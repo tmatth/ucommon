@@ -48,6 +48,7 @@ protected:
 	friend class OrderedIndex;
 	friend class LinkedRing;
 	friend class NamedObject;
+	friend class ObjectStack;
 
 	LinkedObject *next;
 
@@ -789,6 +790,37 @@ public:
 	inline void operator*=(LinkedList *object)
 		{insert(object);};
 };
+
+class ObjectStack
+{
+protected:
+	LinkedObject *root;
+
+public:
+	/**
+	 * Create an empty stack.
+	 */
+	ObjectStack();
+
+	/**
+	 * Create a stack from an existing list of obejects.
+	 * @param list of already linked objects.
+	 */
+	ObjectStack(LinkedObject *list);
+
+	/**
+	 * Push an object onto the stack.
+	 * @param object to push.
+	 */
+	void push(LinkedObject *object);
+
+	/**
+	 * Pop an object from the stack.
+	 * @return object popped from stack or NULL if empty.
+	 */
+	LinkedObject *pop(void);
+};
+
 
 /**
  * A multipath linked list where membership is managed in multiple
@@ -1587,9 +1619,30 @@ public:
 };
 
 /**
+ * Push a linked object onto a stack of linked objects.
+ * @param stack to push object onto.
+ * @param object to push onto stack.
+ */
+inline void push(ObjectStack& stack, LinkedObject *object)
+	{stack.push(object);};
+
+/**
+ * Pop a linked object from a stack of linked objects.
+ * @param stack to pull object from.
+ * @return object pulled from stack or NULL if none.
+ */
+inline LinkedObject *pop(ObjectStack& stack) 
+	{return stack.pop();};
+
+/**
  * Convenience typedef for root pointers of single linked lists.
  */
 typedef	LinkedObject *LinkedIndex;
+
+/**
+ * Convenience typedef for a stack of linked objects.
+ */
+typedef ObjectStack ostack_t;
 
 END_NAMESPACE
 
