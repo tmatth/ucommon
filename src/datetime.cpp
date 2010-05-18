@@ -172,7 +172,7 @@ void Date::set()
 void Date::set(const char *str, size_t size)
 {
 	tm_t *dt = DateTime::glt();
-	int year = 0;
+	int nyear = 0;
 	const char *mstr = str;
 	const char *dstr = str;
 
@@ -180,41 +180,41 @@ void Date::set(const char *str, size_t size)
 		size = strlen(str);
 //0000
 	if(size == 4) {
-		year = dt->tm_year + 1900;
+		nyear = dt->tm_year + 1900;
 		mstr = str;
 		dstr = str + 2;
 	}
 //00/00
 	else if(size == 5) {
-		year = dt->tm_year + 1900;
+		nyear = dt->tm_year + 1900;
 		mstr = str;
 		dstr = str + 3;
 	}
 //000000
 	else if(size == 6) {
-		ZNumber nyear((char*)str, 2);
-		year = ((dt->tm_year + 1900) / 100) * 100 + nyear();
+		ZNumber zyear((char*)str, 2);
+		nyear = ((dt->tm_year + 1900) / 100) * 100 + zyear();
 		mstr = str + 2;
 		dstr = str + 4;
 	}
 //00000000
 	else if(size == 8 && str[2] >= '0' && str[2] <= '9' && str[5] >= '0' && str[5] <= '9') {
-		ZNumber nyear((char*)str, 4);
-		year = nyear();
+		ZNumber zyear((char*)str, 4);
+		nyear = zyear();
 		mstr = str + 4;
 		dstr = str + 6;
 	}
 //00/00/00
 	else if(size == 8) {
-		ZNumber nyear((char*)str, 2);
-		year = ((dt->tm_year + 1900) / 100) * 100 + nyear();
+		ZNumber zyear((char*)str, 2);
+		nyear = ((dt->tm_year + 1900) / 100) * 100 + zyear();
 		mstr = str + 3;
 		dstr = str + 6;
 	}
 //0000/00/00
 	else if(size == 10) {
-		ZNumber nyear((char*)str, 4);
-		year = nyear();
+		ZNumber zyear((char*)str, 4);
+		nyear = zyear();
 		mstr = str + 5;
 		dstr = str + 8;
 	}
@@ -227,12 +227,12 @@ void Date::set(const char *str, size_t size)
 	DateTime::release(dt);
 	ZNumber nmonth((char*)mstr, 2);
 	ZNumber nday((char*)dstr, 2);
-	toJulian(year, nmonth(), nday());
+	toJulian(nyear, nmonth(), nday());
 }
 
-Date::Date(int year, unsigned month, unsigned day)
+Date::Date(int nyear, unsigned nmonth, unsigned nday)
 {
-	toJulian(year, month, day);
+	toJulian(nyear, nmonth, nday);
 }
 
 void Date::update(void)
@@ -402,20 +402,20 @@ bool Date::operator>=(const Date &d)
 	return julian >= d.julian;
 }
 
-void Date::toJulian(long year, long month, long day)
+void Date::toJulian(long nyear, long nmonth, long nday)
 {
 	julian = 0x7fffffffl;
 
-	if(month < 1 || month > 12 || day < 1 || day > 31 || year == 0)
+	if(nmonth < 1 || nmonth > 12 || nday < 1 || nday > 31 || nyear == 0)
 		return;
 
-	if(year < 0)
-		year--;
+	if(nyear < 0)
+		nyear--;
 
-	julian = day - 32075l +
-		1461l * (year + 4800l + ( month - 14l) / 12l) / 4l +
-		367l * (month - 2l - (month - 14l) / 12l * 12l) / 12l -
-		3l * ((year + 4900l + (month - 14l) / 12l) / 100l) / 4l;
+	julian = nday - 32075l +
+		1461l * (nyear + 4800l + ( nmonth - 14l) / 12l) / 4l +
+		367l * (nmonth - 2l - (nmonth - 14l) / 12l * 12l) / 12l -
+		3l * ((nyear + 4900l + (nmonth - 14l) / 12l) / 100l) / 4l;
 }
 
 Date& Date::operator=(const Date& date)
@@ -481,9 +481,9 @@ Time::Time(char *str, size_t size)
 	set(str, size);
 }
 
-Time::Time(int hour, int minute, int second)
+Time::Time(int nhour, int nminute, int nsecond)
 {
-	toSeconds(hour, minute, second);
+	toSeconds(nhour, nminute, nsecond);
 }
 
 Time::~Time()
@@ -673,27 +673,27 @@ long Time::operator-(const Time &t)
 		return seconds - t.seconds;
 }
 
-void Time::toSeconds(int hour, int minute, int second)
+void Time::toSeconds(int nhour, int nminute, int nsecond)
 {
 	seconds = -1;
 
-	if (minute > 59 ||second > 59 || hour > 23)
+	if (nminute > 59 || nsecond > 59 || nhour > 23)
 		return;
 
-	seconds = 3600 * hour + 60 * minute + second;
+	seconds = 3600 * nhour + 60 * nminute + nsecond;
 }
 
 void Time::fromSeconds(char *buffer) const
 {
-	ZNumber hour(buffer, 2);
+	ZNumber zhour(buffer, 2);
 	buffer[2] = ':';
-	ZNumber minute(buffer + 3, 2);
+	ZNumber zminute(buffer + 3, 2);
 	buffer[5] = ':';
-	ZNumber second(buffer + 6, 2);
+	ZNumber zsecond(buffer + 6, 2);
 
-	hour = (seconds / 3600l) % 24l;
-	minute = (seconds - (3600l * hour())) / 60l;
-	second = seconds - (3600l * hour()) - (60l * minute());
+	zhour = (seconds / 3600l) % 24l;
+	zminute = (seconds - (3600l * zhour())) / 60l;
+	zsecond = seconds - (3600l * zhour()) - (60l * zminute());
 	buffer[8] = '\0';
 }
 
