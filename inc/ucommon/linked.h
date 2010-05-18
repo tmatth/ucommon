@@ -232,7 +232,7 @@ public:
 	 * Add an object into the ordered index.
 	 * @param ordered object to add to the index.
 	 */
-	void add(OrderedObject *object);
+	void add(OrderedObject *ordered);
 
 	/**
 	 * Get an indexed member from the ordered index.
