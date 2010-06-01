@@ -239,9 +239,9 @@ if(LIB_SUFFIX)
 	endif()
 endif()
 
-file(GLOB ucommon_src src/*.cpp)
+file(GLOB common_src common/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
-add_library(ucommon ${BUILD_LIBRARY_TYPE} ${ucommon_src})
+add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 

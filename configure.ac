@@ -510,6 +510,6 @@ AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 AC_SUBST(LT_VERSION)
 
-AC_OUTPUT(Makefile src/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
+AC_OUTPUT(Makefile common/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
 ucommon.pc ucommon.spec ucommon-config)
 
