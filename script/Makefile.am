@@ -11,10 +11,18 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
+EXTRA_DIST = script.tex
 
 lib_LTLIBRARIES = libucommonscript.la 
 
 libucommonscript_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
 libucommonscript_la_SOURCES = common.cpp interp.cpp methods.cpp checks.cpp
+
+docs:
+	pdflatex script.tex
+	latex2html -nosubdir -split 0 script.tex
+	pdflatex script.tex
+	latex2html -nosubdir -split 0 script.tex
+	lynx --dump script.html >script.text
 
 

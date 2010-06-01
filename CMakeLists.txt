@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 2.1.4)
+set (VERSION 2.2.0)
 set (SOVERSION 3)
 
 # project options
@@ -250,6 +250,7 @@ target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_library(ucommonscript ${BUILD_LIBRARY_TYPE} ${script_src})
 set_target_properties(ucommonscript PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+target_link_libraries(ucommonscript ${UCOMMON_LIBS} ${WITH_LIBS})
 add_dependencies(ucommonscript ucommon)
 
 message (STATUS)

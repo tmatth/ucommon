@@ -11,7 +11,7 @@
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec *-config.in \
 	ucommon-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
-	CMakeLists.txt config.h.cmake script.tex
+	CMakeLists.txt config.h.cmake
 
 SUBDIRS = common script inc test
 
@@ -26,13 +26,6 @@ man_MANS = ucommon-config.1
 doxy:
 	-rm -rf doc
 	$(DOXYGEN) Doxyfile
-
-docs:
-	pdflatex script.tex
-	latex2html -nosubdir -split 0 script.tex
-	pdflatex script.tex
-	latex2html -nosubdir -split 0 script.tex
-	lynx --dump script.html >script.text
 
 clean-local:
 	-rm -rf doc
