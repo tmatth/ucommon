@@ -207,6 +207,7 @@ check_include_files(wchar.h HAVE_WCHAR_H)
 check_include_files(mach/clock.h HAVE_MACH_CLOCK_H)
 check_include_files(mach-o/dyld.h HAVE_MACH_O_DYLD_H)
 check_include_files(linux/version.h HAVE_LINUX_VERSION_H)
+check_include_files(regex.h HAVE_REGEX_H)
 
 # for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
@@ -240,10 +241,16 @@ if(LIB_SUFFIX)
 endif()
 
 file(GLOB common_src common/*.cpp)
+file(GLOB script_src script/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
+
 add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+
+add_library(ucommonscript ${BUILD_LIBRARY_TYPE} ${script_src})
+set_target_properties(ucommonscript PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+add_dependencies(ucommonscript ucommon)
 
 message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")

@@ -6,4 +6,4 @@ Description:
 Version: @VERSION@
 Libs:  -lucommon @UCOMMON_LINKED@ 
 Cflags: @UCOMMON_FLAGS@ 
- 
+Scripting: -lucommonscript 

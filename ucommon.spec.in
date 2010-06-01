@@ -29,6 +29,11 @@ some design patterns from Objective-C, such as reference counted objects,
 memory pools, and smart pointers. UCommon introduces some new concepts for
 handling of thread locking and synchronization.
 
+%package script
+Requires: %{name} = %{version}-%{release}
+Group: System Environment/Libraries
+Summary: ucommon framework for script extensible applications
+
 %package devel
 Requires: %{name} = %{version}-%{release}
 Requires: pkgconfig
@@ -39,13 +44,19 @@ Summary: Headers for building ucommon applications
 Group: Documentation
 Summary: Generated class documentation for ucommon
 
+%description script
+GNU uCommon script is a highly specialized embedded scripting engine and 
+virtual execution environment for creating script "extensible" applications.  
+This system is a C++ class library which allows one to derive application
+specific dialects of the core language as needed through subclassing.
+
 %description devel
 This package provides header and support files needed for building 
-applications that use the uCommon library.
+applications that use the uCommon library and frameworks.
 
 %description doc
-Generated class documentation for GNU uCommon library from header files, 
-html browsable.
+Generated class documentation for GNU uCommon library and related frameworks
+from header files, html browsable.
 
 %prep
 %setup -q
@@ -68,7 +79,11 @@ html browsable.
 %files 
 %defattr(-,root,root,-)
 %doc AUTHORS README COPYING COPYING.LESSER NEWS SUPPORT ChangeLog
-%{_libdir}/*.so.*
+%{_libdir}/libucommon.so.*
+
+%files script
+%defattr(-,root,root,-)
+%{_libdir}/libucommonscript.so.*
 
 %files devel
 %defattr(-,root,root,-)

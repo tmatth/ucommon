@@ -10,11 +10,13 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS) $(CHECKFLAGS)
-LDADD = ../src/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
+LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = stdcpp.cpp keydata.conf
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
-	ucommonKeydata ucommonStream ucommonUnicode ucommonDatetime
+	ucommonKeydata ucommonStream ucommonUnicode ucommonDatetime \
+	ucommonScript
+
 check_PROGRAMS = $(TESTS)
 
 testing:  $(TESTS)
@@ -27,7 +29,9 @@ ucommonStream_SOURCES = stream.cpp
 ucommonKeydata_SOURCES = keydata.cpp
 ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
+
 ucommonScript_SOURCES = script.cpp
+ucommonScript_LDFLAGS = ../script/libucommonscript.la
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp

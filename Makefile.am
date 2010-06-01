@@ -13,7 +13,7 @@ EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec *-config.in \
 	ucommon-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
 	CMakeLists.txt config.h.cmake
 
-SUBDIRS = src inc test
+SUBDIRS = common script inc test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ucommon.pc
