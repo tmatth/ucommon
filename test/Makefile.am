@@ -27,6 +27,7 @@ ucommonStream_SOURCES = stream.cpp
 ucommonKeydata_SOURCES = keydata.cpp
 ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
+ucommonScript_SOURCES = script.cpp
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp
