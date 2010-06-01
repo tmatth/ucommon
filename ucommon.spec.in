@@ -36,6 +36,7 @@ Summary: ucommon framework for script extensible applications
 
 %package devel
 Requires: %{name} = %{version}-%{release}
+Requires: %{name}-script = %{version}-%{release}
 Requires: pkgconfig
 Group: Development/Libraries
 Summary: Headers for building ucommon applications
