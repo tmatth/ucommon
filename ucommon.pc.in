@@ -1,9 +1,10 @@
 clink=@UCOMMON_CLINK@
 model=@UCOMMON_MODEL@
+scripting=-lucommonscript
+audiolibs=-lucommonaudio @MATH_LIB@
 
 Name: ucommon
 Description: 
 Version: @VERSION@
 Libs:  -lucommon @UCOMMON_LINKED@ 
 Cflags: @UCOMMON_FLAGS@ 
-Scripting: -lucommonscript 

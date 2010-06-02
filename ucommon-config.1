@@ -27,7 +27,8 @@ ucommon-config \- script to get information about ucommon library
 .B [--version]
 .B [--cflags]
 .B [--libs]
-.B [--script]
+.B [--scripting]
+.B [--audiolibs]
 .SH DESCRIPTION
 .B ucommon-config
 is a tool that is used to configure to determine the compiler and
@@ -47,7 +48,11 @@ Print the currently installed version of
 .B ucommon
 on the standard output.
 .TP
-.B --script
+.B --audiolibs
+Print additional linker flags needed to link a program with
+.BR ucommon telephonic audio library
+.TP
+.B --scripting
 Print additional linker flags needed to link a program with
 .BR ucommon script library
 .TP

@@ -192,6 +192,7 @@ AC_CHECK_LIB($clib, dlopen,,[
 	])
 ])
 
+AC_CHECK_LIB([m], [sqrt], [MATH_LIB="-lm"])
 
 PTHREAD_FLAGS=""
 
@@ -265,7 +266,7 @@ else
 	])
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -307,6 +308,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
 		;;
 	posix_fadvise)
 		AC_DEFINE(HAVE_POSIX_FADVISE, [1], [can specify access options])
+		;;
+	ftruncate)
+		AC_DEFINE(HAVE_FTRUNCATE, [1], [can truncate files])
 		;;
 	esac
 done
@@ -509,6 +513,7 @@ AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 AC_SUBST(LT_VERSION)
+AC_SUBST(MATH_LIB)
 
 AC_OUTPUT(Makefile common/Makefile script/Makefile
 inc/Makefile inc/ucommon/Makefile test/Makefile

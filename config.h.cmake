@@ -45,6 +45,7 @@
 #cmakedefine HAVE_STRINGS_H 1
 #cmakedefine HAVE_STRISTR 1
 #cmakedefine HAVE_SYSCONF 1
+#cmakedefine HAVE_FTRUNCATE 1
 #cmakedefine HAVE_SYS_FILIO_H 1
 #cmakedefine HAVE_SYS_MMAN_H 1
 #cmakedefine HAVE_SYS_POLL_H 1

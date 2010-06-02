@@ -32,7 +32,9 @@ Known values for OPTION are:
   --libs		print library linking information
   --clink       print c model linking information
   --cflags		print pre-processor and compiler flags
-  --model       print the linking modek used
+  --audiolibs   print linkage for audio libraries
+  --scripting   print linkage for scripting engine
+  --model       print the linking model used
   --help		display this help and exit
   --version		output version information
 EOF
@@ -104,7 +106,12 @@ while test $# -gt 0; do
     --libs)
 		echo -lucommon @UCOMMON_LINKED@ 
        	;;
-
+    --scripting)
+		echo -lucommonscript
+		;;
+	--audiolibs)
+		echo -lucommonaudio @MATH_LIB@
+		;;
     *)
 	usage
 	exit 1
