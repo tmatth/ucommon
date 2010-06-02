@@ -23,9 +23,15 @@ script_SCRIPTS = ucommon-config
 
 man_MANS = ucommon-config.1
 
+.phony: doxy
+
 doxy:
 	-rm -rf doc
 	$(DOXYGEN) Doxyfile
 
+docs: doxy
+	(cd script ; make docs)
+
 clean-local:
 	-rm -rf doc
+

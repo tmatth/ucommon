@@ -512,7 +512,7 @@ public:
 	 * @param component index.
 	 * @return value of component.
 	 */
-	int operator[](index_t) const;
+	int operator[](index_t component) const;
 	
 	/**
 	 * Convert to standard 24 hour time string.

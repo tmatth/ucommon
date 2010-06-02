@@ -333,7 +333,7 @@ public:
 		/**
 	     * Search for an event object in the method table.
 		 * @param name to search for.
-		 * @retrn method if found.
+		 * @return method if found.
 		 */
 		event *scriptMethod(const char *name);
 		
@@ -451,9 +451,9 @@ public:
 	 * Append a file into an existing image.  A shared config script can be
      * used that holds common definitions.  Multiple script files can also be
 	 * merged together into a final image.
+	 * @param merge with prior compiled script.
 	 * @param filename to compile.
 	 * @param config image of script with common definitions.
-	 * @param merge with prior compiled script.
 	 * @return compiled script object if successful.
 	 */
 	static script *append(script *merge, const char *filename, script *config = NULL);
