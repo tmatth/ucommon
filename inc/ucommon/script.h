@@ -464,7 +464,6 @@ public:
 	 * to hold common definitions.
 	 * @param filename to compile.
 	 * @param config image of script with common definitions.
-	 * @param merge with prior compiled script.
 	 * @return compiled script object if successful.
 	 */
 	static script *compile(const char *filename, script *config = NULL);
