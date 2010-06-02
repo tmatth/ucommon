@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
-#include <ccscript.h>
+#include <ucommon/script.h>
 
 using namespace UCOMMON_NAMESPACE;
 
