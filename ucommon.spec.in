@@ -21,13 +21,13 @@ Group: System Environment/Libraries
 Summary: Runtime library for portable C++ threading and sockets
 
 %description
-uCommon is a lightweight C++ library to facilitate using C++ design patterns
-even for very deeply embedded applications, such as for systems using uClibc
-along with POSIX threading support. For this reason, UCommon disables language
-features that consume memory or introduce runtime overhead. UCommon introduces
-some design patterns from Objective-C, such as reference counted objects,
-memory pools, and smart pointers. UCommon introduces some new concepts for
-handling of thread locking and synchronization.
+GNU uCommon C++ is a lightweight library to facilitate using C++ design
+patterns even for very deeply embedded applications, such as for systems using
+uClibc along with POSIX threading support. For this reason, uCommon disables
+language features that consume memory or introduce runtime overhead. uCommon
+introduces some design patterns from Objective-C, such as reference counted
+objects, memory pools, and smart pointers.  uCommon introduces some new
+concepts for handling of thread locking and synchronization.
 
 %package script
 Requires: %{name} = %{version}-%{release}
@@ -46,7 +46,7 @@ Group: Documentation
 Summary: Generated class documentation for ucommon
 
 %description script
-GNU uCommon script is a highly specialized embedded scripting engine and 
+GNU uCommon C++ script is a highly specialized embedded scripting engine and 
 virtual execution environment for creating script "extensible" applications.  
 This system is a C++ class library which allows one to derive application
 specific dialects of the core language as needed through subclassing.
@@ -56,7 +56,7 @@ This package provides header and support files needed for building
 applications that use the uCommon library and frameworks.
 
 %description doc
-Generated class documentation for GNU uCommon library and related frameworks
+Generated class documentation for GNU uCommon C++ framework
 from header files, html browsable.
 
 %prep

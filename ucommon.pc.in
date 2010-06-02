@@ -4,7 +4,7 @@ scripting=-lucommonscript
 audiolibs=-lucommonaudio @MATH_LIB@
 
 Name: ucommon
-Description: GNU ucommon class framework
+Description: GNU uCommon C++ class framework
 Version: @VERSION@
 Libs:  -lucommon @UCOMMON_LINKED@ 
 Cflags: @UCOMMON_FLAGS@ 
