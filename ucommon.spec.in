@@ -59,8 +59,7 @@ specific dialects of the core language as needed through subclassing.
 %description audio
 The GNU uCommon C++ telephonic audio library covers a range of functionality 
 including tone generation and detection, streaming and transcoding of encoded 
-audio frames, accessing of audio files on disk, phrasebook management, and
-audio utilities.
+audio frames, accessing of audio files on disk, and phrasebook management.
 
 %description devel
 This package provides header and support files needed for building 
