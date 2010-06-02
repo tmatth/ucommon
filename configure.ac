@@ -43,6 +43,8 @@ socket_lib=""
 posix4_lib=""
 rt_lib=""
 
+test -z "$plugindir" && plugindir='${libdir}/ucommon'
+
 AC_DEFUN([AC_SUBST_DIR], [
         ifelse($2,,,$1="[$]$2")
         result="***"
@@ -501,6 +503,9 @@ UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 if test "$UCOMMON_MODEL" = "CC" ; then
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
+AC_SUBST_DIR(plugins, plugindir)
+AC_DEFINE_UNQUOTED(UCOMMON_PLUGINS, "$plugins", [plugin path])
+
 AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
 AC_SUBST(CHECKFLAGS)
@@ -514,6 +519,7 @@ AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(MATH_LIB)
+AC_SUBST(plugindir)
 
 AC_OUTPUT(Makefile common/Makefile script/Makefile
 inc/Makefile inc/ucommon/Makefile test/Makefile

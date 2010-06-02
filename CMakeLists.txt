@@ -163,6 +163,13 @@ if (HAVE_MATHLIB)
 	set(MATH_LIB m)
 endif()
 
+# this may have to change for mswindows...
+if (WITH_PLUGINDIR)
+	set(UCOMMON_PLUGINS ${WITH_PLUGINDIR})
+else()
+	set(UCOMMON_PLUGINS ${CMAKE_INSTALL_PREFIX}/lib/ucommon)
+endif()
+
 set (CMAKE_REQUIRED_LIBRARIES ${UCOMMON_LIBS})
 check_function_exists(getaddrinfo HAVE_GETADDRINFO)
 check_function_exists(socketpair HAVE_SOCKETPAIR)
