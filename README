@@ -76,3 +76,8 @@ prior 2.0.x releases offering greater clarity, consistency of use, and some
 new features that were migrated from Common C++.  The 2.1 release series may
 introduce additional classes.
 
+Recent work, starting with version 2.2, has focused on turning ucommon from
+a single library into a framework by merging ucommon derived libraries into
+a single source package.  This allows us to create a single documentation
+package with doxygen that covers the entire framework, not just ucommon alone.
+
