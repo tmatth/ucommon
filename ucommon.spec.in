@@ -84,7 +84,7 @@ from header files, html browsable.
 
 %files script
 %defattr(-,root,root,-)
-%{_libdir}/libucommonscript.so.*
+%{_libdir}/libuccscript.so.*
 
 %files devel
 %defattr(-,root,root,-)

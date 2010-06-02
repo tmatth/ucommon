@@ -31,7 +31,7 @@ ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
 
 ucommonScript_SOURCES = script.cpp
-ucommonScript_LDFLAGS = ../script/libucommonscript.la
+ucommonScript_LDFLAGS = ../script/libuccscript.la
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp

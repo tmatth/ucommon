@@ -13,10 +13,10 @@ RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
 EXTRA_DIST = script.tex
 
-lib_LTLIBRARIES = libucommonscript.la 
+lib_LTLIBRARIES = libuccscript.la 
 
-libucommonscript_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
-libucommonscript_la_SOURCES = common.cpp interp.cpp methods.cpp checks.cpp
+libuccscript_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
+libuccscript_la_SOURCES = common.cpp interp.cpp methods.cpp checks.cpp
 
 docs:
 	pdflatex script.tex

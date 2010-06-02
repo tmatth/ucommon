@@ -107,10 +107,10 @@ while test $# -gt 0; do
 		echo -lucommon @UCOMMON_LINKED@ 
        	;;
     --scripting)
-		echo -lucommonscript
+		echo -luccscript
 		;;
 	--audiolibs)
-		echo -lucommonaudio @MATH_LIB@
+		echo -luccaudio @MATH_LIB@
 		;;
     *)
 	usage

@@ -1,7 +1,7 @@
 clink=@UCOMMON_CLINK@
 model=@UCOMMON_MODEL@
-scripting=-lucommonscript
-audiolibs=-lucommonaudio @MATH_LIB@
+scripting=-luccscript
+audiolibs=-luccaudio @MATH_LIB@
 
 Name: ucommon
 Description: GNU uCommon C++ class framework
