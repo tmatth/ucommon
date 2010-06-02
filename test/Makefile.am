@@ -11,7 +11,7 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS) $(CHECKFLAGS)
 LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
-EXTRA_DIST = stdcpp.cpp keydata.conf
+EXTRA_DIST = stdcpp.cpp keydata.conf testscript.scr mergescript.scr
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
 	ucommonKeydata ucommonStream ucommonUnicode ucommonDatetime \
