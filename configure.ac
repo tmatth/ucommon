@@ -521,7 +521,7 @@ AC_SUBST(LT_VERSION)
 AC_SUBST(MATH_LIB)
 AC_SUBST(plugindir)
 
-AC_OUTPUT(Makefile common/Makefile script/Makefile
+AC_OUTPUT(Makefile common/Makefile audio/Makefile script/Makefile
 inc/Makefile inc/ucommon/Makefile test/Makefile
 ucommon.pc ucommon.spec ucommon-config)
 

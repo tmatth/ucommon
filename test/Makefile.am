@@ -15,7 +15,7 @@ EXTRA_DIST = stdcpp.cpp keydata.conf testscript.scr mergescript.scr
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
 	ucommonKeydata ucommonStream ucommonUnicode ucommonDatetime \
-	ucommonScript
+	ucommonScript ucommonAudio
 
 check_PROGRAMS = $(TESTS)
 
@@ -32,6 +32,9 @@ ucommonDatetime_SOURCES = datetime.cpp
 
 ucommonScript_SOURCES = script.cpp
 ucommonScript_LDFLAGS = ../script/libuccscript.la
+
+ucommonAudio_SOURCES = audio.cpp
+ucommonAudio_LDFLAGS = ../audio/libuccaudio.la @MATH_LIB@
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp

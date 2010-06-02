@@ -34,6 +34,11 @@ Requires: %{name} = %{version}-%{release}
 Group: System Environment/Libraries
 Summary: ucommon framework for script extensible applications
 
+%package audio
+Requires: %{name} = %{version}-%{release}
+Group: System Environment/Libraries
+Summary: ucommon framework for telephonic audio support
+
 %package devel
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-script = %{version}-%{release}
@@ -50,6 +55,12 @@ GNU uCommon C++ script is a highly specialized embedded scripting engine and
 virtual execution environment for creating script "extensible" applications.  
 This system is a C++ class library which allows one to derive application
 specific dialects of the core language as needed through subclassing.
+
+%description audio
+The GNU uCommon C++ telephonic audio library covers a range of functionality 
+including tone generation and detection, streaming and transcoding of encoded 
+audio frames, accessing of audio files on disk, phrasebook management, and
+audio utilities.
 
 %description devel
 This package provides header and support files needed for building 
@@ -85,6 +96,10 @@ from header files, html browsable.
 %files script
 %defattr(-,root,root,-)
 %{_libdir}/libuccscript.so.*
+
+%files audio
+%defattr(-,root,root,-)
+%{_libdir}/libuccaudio.so.*
 
 %files devel
 %defattr(-,root,root,-)

@@ -254,6 +254,7 @@ if(LIB_SUFFIX)
 	endif()
 endif()
 
+file(GLOB audio_src audio/*.cpp)
 file(GLOB common_src common/*.cpp)
 file(GLOB script_src script/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
@@ -266,6 +267,11 @@ add_library(uccscript ${BUILD_LIBRARY_TYPE} ${script_src})
 set_target_properties(uccscript PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(uccscript ${UCOMMON_LIBS} ${WITH_LIBS})
 add_dependencies(uccscript ucommon)
+
+add_library(uccaudio ${BUILD_LIBRARY_TYPE} ${audio_src})
+set_target_properties(uccaudio PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+target_link_libraries(uccaudio ${UCOMMON_LIBS} ${WITH_LIBS} ${MATH_LIB})
+add_dependencies(uccaudio ucommon)
 
 message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
@@ -286,6 +292,7 @@ endif()
 if(NOT WIN32)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
 endif(NOT WIN32)
+
 install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
-install(TARGETS ${PROJECT_NAME} DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
+install(TARGETS ucommon uccscript uccaudio DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
 

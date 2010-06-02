@@ -19,7 +19,7 @@
  * This library holds the ucommon scripting engine code.  The entire
  * engine is described in a number of classes that are all part of
  * the script class.
- * @file script.h
+ * @file ucommon/script.h
  */
 
 #ifndef _UCOMMON_SCRIPT_H_
