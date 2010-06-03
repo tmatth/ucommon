@@ -39,7 +39,7 @@ CHECKFLAGS="$CHECKFLAGS"
 POSIX=false
 MSSYS=false
 
-components="script audio"
+components="script audio utils"
 socket_lib=""
 posix4_lib=""
 rt_lib=""
@@ -510,15 +510,40 @@ UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 if test -z "$UCOMMON_COMPONENTS" ; then
 	UCOMMON_COMPONENTS="$components" ; fi
 
+uses_audio=0
+uses_utils=0
+uses_script=0
 for component in $UCOMMON_COMPONENTS ; do
 	case "$component" in
-	script|audio)
+	script)
+		uses_script=1
+		;;
+	audio)
+		uses_audio=1
+		;;
+	utils)
+		uses_utils=1
 		;;
 	*)
 		AC_ERROR([Invalid component: $component.  Please choose from script and audio])
 		;;
 	esac
 done
+
+# make sure dependencies are fullfilled
+if test "$uses_utils" == "1" ; then
+	uses_audio="1" ; fi
+
+# make sure order of components is correct
+UCOMMON_COMPONENTS=""
+if test "$uses_script" == 1 ; then
+	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS script" ; fi
+
+if test "$uses_audio" == 1 ; then
+	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS audio" ; fi
+
+if test "$uses_utils" == 1 ; then
+	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS utils" ; fi
 
 if test "$UCOMMON_MODEL" = "CC" ; then
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
@@ -547,6 +572,6 @@ AC_SUBST(MATH_LIB)
 AC_SUBST(plugindir)
 
 AC_OUTPUT(Makefile common/Makefile audio/Makefile script/Makefile
-inc/Makefile inc/ucommon/Makefile test/Makefile
+utils/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
 ucommon.pc ucommon.spec ucommon-config)
 

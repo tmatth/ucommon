@@ -1,0 +1,123 @@
+.\" audiotool - manipulation telephony audio files.
+.\" Copyright (c) 2009-2010 David Sugar <dyfet@gnutelephony.org>
+.\"
+.\" This manual page is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc.,59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+.\"
+.\" This manual page is written especially for Debian GNU/Linux.
+.\"
+.TH audiotool "1" "January 2010" "GNU ccAudio" "GNU Telephony"
+.SH NAME
+audiotool \- manipulate telephony audio files.
+.SH SYNOPSIS
+.B audiotool \fI[options]\fR \fIcommand\fR \fIfiles...\fR
+.br
+.SH DESCRIPTION
+The audiotool command is used to examine and manipulate telephony audio files
+such as those which might be used in GNU Bayonne.  It can be used to convert
+audio to different formats or join audio files together as well.  Current
+releases of audiotool do not support resampling, and are principally focused
+on either raw audio samples or SUN .au contained audio.  In the future .wav
+contained audio files may also be supported.
+.SH OPTIONS
+.TP
+\fB-buffer\fR \fImsecs\fR
+Specify ``size'' of user space buffering in milliseconds.  Buffering is used
+to reduce how frequently user space audio data has to be pushed into kernel
+space file operations.  Because some codecs and conversions have fixed
+and specific frame sizes, you want to choose a value that will be a good
+multiplier of any possible codec that might be used.  The default is 120
+milliseconds, which is good for the list of suggested framing values.  This
+also allows for predictive I/O scheduling.
+.TP
+\fB-codecs\fR
+Lists codec channel encoding formats that are supported.
+.TP
+\fB-encoding\fR \fIformat\fR
+Specify the encoding format that audiotool will use for internal operations.
+Files opened in different encoding formats will be transcoded to this format
+if possible.  The default is pcmu.  The list of supported formats is shown
+with the \fI-codecs\fR option.
+.TP
+\fB-framing\fR \fImsecs\fR
+Specify audio framing in milliseconds.  Generally you
+should use values like 10, 15, 20, 30, 50, or 60 milliseconds.  If no
+framing is used, then the default requirements of the codec will be
+selected, and this is often 20 milliseconds.  Some commands are only
+supported if ulaw or linear is chosen.
+.TP
+\fB-help\fR
+Outputs help screen for the user.
+.TP
+\fB-note\fR \fI``text''\fR
+Specify a file annotation when creating a new file.
+.TP
+\fB-output\fR \fIformat\fR
+Specify the output encoding that audiotool wil use for creating a new file
+such as for the \fBcreate\fR command.  This is useful when it cannot be
+determined from the file extension alone, such as when one wants to use a
+specific codec format for creating a .au file.
+.TP
+\fB-verbose\fR
+Display extra debugging information for some commands.
+.TP
+\fB-version\fR
+Outputs package version and copyright notice.
+.SH COMMANDS
+.TP
+\fBappend\fR \fInewfile\fR \fIfiles...\fR
+Append to existing audio file, converting other files in the process.
+.TP
+\fBcreate\fR \fInewfile\fR \fIfiles...\fR
+Create a new audio file, converting existing files in the process.  The 
+encoding for the target file might be specified by the file extension, or 
+optionally through the \fB-output\fR option.
+.TP
+\fBinfo\fR \fIfiles...\fR
+Output core library information and (when verbose) buffering stats for 
+each of the files listed.  When used verbose, this can be useful to better 
+understand how buffering factors and framing works as well.
+.TP
+\fBpipe\fR \fIfiles...\fR
+Pipe the raw output of the specified files to stdout based on the channel
+encoding format.  The encoding format is by default 8khz ulaw, and hence the
+output can be directly piped to and played on a oss /dev/audio or sun 
+audio device if the format is left unchanged.
+.TP
+\fBtext\fR \fIfile\fR
+Output the annotation stored in a SUN .au (and later .wav) file.
+.TP
+\fBverify\fR \fIfile\fR
+Tests if audio file is readable.  If used verbose, it will report frames 
+read successfully vs I/O context switches to kernel space.
+.SH "EXIT STATUS"
+Normally exit status is 0 if the request was successfully processed by the
+sipwitch service daemon.  An exit status of 1 indicates a file referenced
+does not exist or cannot be accessed.  A 2 indicates that the encoding format
+of the specified file is unsupported or cannot be converted.  An exit status
+of 3 indicates an I/O failure happened. Any command syntax error will return 
+a 4.
+.SH AUTHOR
+.B audiotool
+was written by David Sugar <dyfet@gnutelephony.org>.
+.SH "REPORTING BUGS"
+Report bugs to sipwitch-devel@gnu.org.
+.SH COPYRIGHT
+Copyright \(co 2009 David Sugar, Tycho Softworks.
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.
+
+
