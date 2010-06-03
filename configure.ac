@@ -510,6 +510,16 @@ UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 if test -z "$UCOMMON_COMPONENTS" ; then
 	UCOMMON_COMPONENTS="$components" ; fi
 
+for component in $UCOMMON_COMPONENTS ; do
+	case "$component" in
+	script|audio)
+		;;
+	*)
+		AC_ERROR([Invalid component: $component.  Please choose from script and audio])
+		;;
+	esac
+done
+
 if test "$UCOMMON_MODEL" = "CC" ; then
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
