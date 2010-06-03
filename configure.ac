@@ -39,6 +39,7 @@ CHECKFLAGS="$CHECKFLAGS"
 POSIX=false
 MSSYS=false
 
+components="script audio"
 socket_lib=""
 posix4_lib=""
 rt_lib=""
@@ -97,6 +98,12 @@ if test "x$enable_stdcpp" = "xno" ; then
 else
 	AC_MSG_RESULT(yes)
 fi
+
+AC_ARG_WITH(components,
+	AC_HELP_STRING([--with-components=libs],[specify which libs to build]),[
+	if test x$with_components != x ; then
+		UCOMMON_COMPONENTS="${with_components}" ; fi
+])
 
 AC_ARG_WITH(libc, 
 	AC_HELP_STRING([--with-libc=path],[specify path to alternate libc]),[
@@ -500,6 +507,9 @@ esac
 
 UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 
+if test -z "$UCOMMON_COMPONENTS" ; then
+	UCOMMON_COMPONENTS="$components" ; fi
+
 if test "$UCOMMON_MODEL" = "CC" ; then
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
@@ -510,6 +520,7 @@ AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
 AC_SUBST(CHECKFLAGS)
 AC_SUBST(CXXFLAGS)
+AC_SUBST(UCOMMON_COMPONENTS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_LINKED)
 AC_SUBST(UCOMMON_MODEL)
