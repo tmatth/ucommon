@@ -16,7 +16,7 @@ noinst_HEADERS = local.h
 
 lib_LTLIBRARIES = libuccaudio.la
 
-libuccaudio_la_LDFLAGS = @UCOMMON_LIBS@ @MATH_LIB@ @UCOMMON_CLINK@ $(RELEASE)
+libuccaudio_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @MATH_LIB@ @UCOMMON_CLINK@ $(RELEASE)
 libuccaudio_la_SOURCES = common.cpp g711.cpp buffer.cpp codecs.cpp \
 	files.cpp reader.cpp writer.cpp
 
