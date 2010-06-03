@@ -27,6 +27,8 @@ ucommon-config \- script to get information about ucommon library
 .B [--version]
 .B [--cflags]
 .B [--libs]
+.B [--includes]
+.B [--plugins]
 .B [--scripting]
 .B [--audiolibs]
 .SH DESCRIPTION
@@ -56,13 +58,21 @@ Print additional linker flags needed to link a program with
 Print additional linker flags needed to link a program with
 .BR ucommon script library
 .TP
+.B --includes
+Print the include directory for
+.BR ucommon headers
+.TP
 .B --libs
 Print the linker flags that are necessary to link a program with
-.BR ucommon .
+.BR ucommon
+.TP
+.B --plugins
+Print the directory for
+.BR ucommon plugins
 .TP
 .B --cflags
 Print the compiler flags that are necessary to compile a program with
-.BR ucommon .
+.BR ucommon 
 .TP
 .BI  --prefix= PREFIX
 If specified, use

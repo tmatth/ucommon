@@ -1,3 +1,8 @@
+From ucommon 2.1.4 to 3.0.0
+- merged ccscript and ccaudio into ucommon core framework.
+- extended configuration support for includes and plugins.
+- expanded configure for framework component selection.
+
 From ucommon 2.1.3 to 2.1.4
 - new utf8_pointer string class and further unicode support.
 - new component access api for datetime objects.
