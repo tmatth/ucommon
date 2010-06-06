@@ -54,6 +54,9 @@ extern "C" int main()
 		assert(x != NULL);
 	}
 	assert(x->count == 8);
+
+	init(x);
+	assert(x->count == 11);
 	return 0;
 }
 
