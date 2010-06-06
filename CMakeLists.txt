@@ -275,7 +275,7 @@ add_dependencies(uccaudio ucommon)
 
 add_executable(audiotool utils/audiotool.cpp)
 add_dependencies(audiotool uccaudio ucommon)
-target_link_libraries(audiotool ccaudio ${UCOMMON_LIBS})
+target_link_libraries(audiotool uccaudio ${UCOMMON_LIBS})
 
 message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
