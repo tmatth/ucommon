@@ -2061,7 +2061,7 @@ Object *queue::lifo(timeout_t timeout)
 	}
     if(rtn && tail) {
         --used;
-        member = static_cast<queue::member *>(head);
+        member = static_cast<queue::member *>(tail);
         obj = member->object;
 		member->delist(this);
         member->LinkedObject::enlist(&freelist);

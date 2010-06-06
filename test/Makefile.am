@@ -15,7 +15,7 @@ EXTRA_DIST = stdcpp.cpp keydata.conf testscript.scr mergescript.scr
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
 	ucommonKeydata ucommonStream ucommonUnicode ucommonDatetime \
-	ucommonScript ucommonAudio
+	ucommonScript ucommonAudio ucommonQueue
 
 check_PROGRAMS = $(TESTS)
 
@@ -29,6 +29,7 @@ ucommonStream_SOURCES = stream.cpp
 ucommonKeydata_SOURCES = keydata.cpp
 ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
+ucommonQueue_SOURCES = queue.cpp
 
 ucommonScript_SOURCES = script.cpp
 ucommonScript_LDFLAGS = ../script/libuccscript.la
