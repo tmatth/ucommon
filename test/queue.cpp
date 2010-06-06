@@ -55,7 +55,7 @@ extern "C" int main()
 	}
 	assert(x->count == 8);
 
-	init(x);
+	init<myobject>(x);
 	assert(x->count == 11);
 	return 0;
 }
