@@ -506,6 +506,10 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #define	crit(x, text) if(!(x)) cpr_runtime_error(text)
 #endif
 
+template<class T>
+inline T *init(T *x)
+	{return new(((caddr_t)x)) T;}
+
 extern "C" {
 
 	__EXPORT uint16_t lsb_getshort(uint8_t *b);

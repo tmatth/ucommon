@@ -1,5 +1,6 @@
 from ucommon 3.0.0 to 3.0.1
 - bug fix and unit test for queueof.
+- initialization template function added.
 
 From ucommon 2.1.4 to 3.0.0
 - merged ccscript and ccaudio into ucommon core framework.
