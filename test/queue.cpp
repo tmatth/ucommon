@@ -57,6 +57,10 @@ extern "C" int main()
 
 	init<myobject>(x);
 	assert(x->count == 11);
+
+	x = init<myobject>(NULL);
+	assert(x == NULL);
+	assert(reused == 11);
 	return 0;
 }
 

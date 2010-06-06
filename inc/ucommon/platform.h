@@ -508,7 +508,7 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 
 template<class T>
 inline T *init(T *x)
-	{return new(((caddr_t)x)) T;}
+	{if(x) new(((caddr_t)x)) T; return x;}
 
 extern "C" {
 
