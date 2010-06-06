@@ -525,6 +525,14 @@ public:
 		{return static_cast<T*>(ArrayReuse::get());};
 
 	/**
+	 * Create a typed object from the heap.  This function blocks when the
+	 * heap is empty until an object is returned to the heap.
+	 * @return typed object pointer from heap.
+	 */
+	inline T* create(void)
+		{return init<T>(static_cast<T*>(ArrayReuse::get()));};
+
+	/**
 	 * Get a typed object from the heap.  This function blocks until the
 	 * the heap has an object to return or the timer has expired.
 	 * @param timeout to wait for heap in milliseconds.
@@ -532,6 +540,15 @@ public:
 	 */
 	inline T* get(timeout_t timeout)
 		{return static_cast<T*>(ArrayReuse::get(timeout));};
+
+	/**
+	 * Create a typed object from the heap.  This function blocks until the
+	 * the heap has an object to return or the timer has expired.
+	 * @param timeout to wait for heap in milliseconds.
+	 * @return typed object pointer from heap or NULL if timeout.
+	 */
+	inline T* create(timeout_t timeout)
+		{return init<T>(static_cast<T*>(ArrayReuse::get(timeout)));};
 
 	/**
 	 * Release (return) a typed object back to the heap for re-use.
@@ -600,6 +617,15 @@ public:
 		{return static_cast<T*>(PagerReuse::get());};
 
 	/**
+	 * Get a typed object from the pager heap.  This function blocks when the
+	 * heap is empty until an object is returned to the heap.  The objects
+	 * default constructor is used.
+	 * @return typed object pointer from heap.
+	 */
+	inline T *create(void)
+		{return init<T>(static_cast<T*>(PagerReuse::get()));};
+
+	/**
 	 * Get a typed object from the heap.  This function blocks until the
 	 * the heap has an object to return or the timer has expired.
 	 * @param timeout to wait for heap in milliseconds.
@@ -607,6 +633,16 @@ public:
 	 */
 	inline T *get(timeout_t timeout)
 		{return static_cast<T*>(PagerReuse::get(timeout));};
+
+	/**
+	 * Create a typed object from the heap.  This function blocks until the
+	 * the heap has an object to return or the timer has expired.  The
+	 * objects default constructor is used.
+	 * @param timeout to wait for heap in milliseconds.
+	 * @return typed object pointer from heap or NULL if timeout.
+	 */
+	inline T *create(timeout_t timeout)
+		{return init<T>(static_cast<T*>(PagerReuse::get(timeout)));};
 
 	/**
 	 * Request immediately next available typed object from the pager heap.

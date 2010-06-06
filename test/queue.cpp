@@ -44,7 +44,7 @@ extern "C" int main()
 {
 	myobject *x;
 	for(unsigned i = 0; i < 10; ++i) {
-		x = init<myobject>(myobjects.get());
+		x = myobjects.create();
 		mycache.post(x);
 	}
 	assert(x->count == 10);
