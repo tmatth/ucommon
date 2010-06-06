@@ -270,12 +270,12 @@ add_dependencies(uccscript ucommon)
 
 add_library(uccaudio ${BUILD_LIBRARY_TYPE} ${audio_src})
 set_target_properties(uccaudio PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-target_link_libraries(uccaudio ${UCOMMON_LIBS} ${WITH_LIBS} ${MATH_LIB})
+target_link_libraries(uccaudio ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${MATH_LIB})
 add_dependencies(uccaudio ucommon)
 
 add_executable(audiotool utils/audiotool.cpp)
 add_dependencies(audiotool uccaudio ucommon)
-target_link_libraries(audiotool uccaudio ${UCOMMON_LIBS})
+target_link_libraries(audiotool uccaudio ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${MATH_LIB})
 
 message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
