@@ -506,9 +506,15 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #define	crit(x, text) if(!(x)) cpr_runtime_error(text)
 #endif
 
+/**
+ * Template function to initialize memory by invoking default constructor.
+ * If NULL is passed, then NULL is returned without any constructor called.
+ * @param memory to initialize.
+ * @return memory initialized.
+ */
 template<class T>
-inline T *init(T *x)
-	{return ((x) ? new(((caddr_t)x)) T : NULL);}
+inline T *init(T *memory)
+	{return ((memory) ? new(((caddr_t)memory)) T : NULL);}
 
 extern "C" {
 

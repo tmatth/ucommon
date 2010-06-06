@@ -208,7 +208,6 @@ public:
 	/**
 	 * Test by name or extension matching.
 	 * @param name to check.
-	 * @param framing option to check.
 	 * @return true if this is us.
 	 */
 	virtual bool test(const char *name) const = 0;
@@ -394,7 +393,7 @@ public:
 	 * @param preferred I/O framing.
 	 * @return true if success.
 	 */
-	static bool access(audiobuffer *buffer, const char *path, timeout_t framing = 0);
+	static bool access(audiobuffer *buffer, const char *path, timeout_t preferred = 0);
 
 	/**
 	 * Create a new file to record audio into.
@@ -406,7 +405,7 @@ public:
 	 * @param mode of access for new file.
 	 * @return true if success.
 	 */
-	static bool create(audiobuffer *buffer, const char *path, timeout_t framing = 0, const char *note = NULL, const audiocodec *format = NULL, unsigned mode = 0640);
+	static bool create(audiobuffer *buffer, const char *path, timeout_t preferred = 0, const char *note = NULL, const audiocodec *encoding = NULL, unsigned mode = 0640);
 
 	/**
 	 * Append audio to an existing file.
@@ -415,7 +414,7 @@ public:
 	 * @param preferred I/O framing.
 	 * @return true if success.
 	 */
-	static bool append(audiobuffer *buffer, const char *path, timeout_t framing = 0);
+	static bool append(audiobuffer *buffer, const char *path, timeout_t preferred = 0);
 };
 
 /**
