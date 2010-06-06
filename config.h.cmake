@@ -59,7 +59,7 @@
 #cmakedefine HAVE_REGEX_H 1
 #cmakedefine PACKAGE ${PROJECT_NAME}
 #define STDC_HEADERS 1
-#cmakedefine VERSION ${VERSION}
+#cmakedefine VERSION "${VERSION}"
 #define	UCOMMON_PLUGINS "${UCOMMON_PLUGINS}"
 
 #include <ucommon/export.h>
