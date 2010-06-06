@@ -2110,15 +2110,16 @@ public:
  * object class.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template<class T, mempager *P = NULL>
+template<class T>
 class queueof : public queue
 {
 public:
 	/**
 	 * Create templated queue of typed objects.
+	 * @param memory pool for internal use by queue.
 	 * @param size of queue to construct.  Uses 0 if no size limit.
 	 */
-	inline queueof(size_t size = 0) : queue(P, size) {};
+	inline queueof(mempager *memory, size_t size = 0) : queue(memory, size) {};
 
 	/**
 	 * Remove a specific typed object pointer for the queue.  This can remove
@@ -2169,15 +2170,16 @@ public:
  * object class.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template<class T, mempager *P = NULL>
+template<class T>
 class stackof : public stack
 {
 public:
 	/**
 	 * Create templated stack of typed objects.
+	 * @param memory pool for internal use of stack.
 	 * @param size of stack to construct.  Uses 0 if no size limit.
 	 */
-	inline stackof(size_t size = 0) : stack(P, size) {};
+	inline stackof(mempager *memory, size_t size = 0) : stack(memory, size) {};
 
 	/**
 	 * Remove a specific typed object pointer for the stack.  This can remove

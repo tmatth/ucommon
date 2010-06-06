@@ -36,9 +36,9 @@ public:
 		{count = ++reused;};
 };
 
-mempager pool;
+static mempager pool;
 static paged_reuse<myobject> myobjects(&pool, 100);
-static queueof<myobject, &pool> mycache(10);
+static queueof<myobject> mycache(&pool, 10);
 
 extern "C" int main()
 {
