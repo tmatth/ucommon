@@ -53,7 +53,7 @@ extern "C" int main()
 		x = mycache.lifo();
 		assert(x != NULL);
 	}
-	assert(x->count == 7);
+	assert(x->count == 8);
 	return 0;
 }
 
