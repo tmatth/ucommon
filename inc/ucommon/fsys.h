@@ -444,9 +444,90 @@ public:
 };
 
 /**
+ * Class to receive notification of changes when a directory is
+ * modified.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT dnotify
+{
+private:
+	fd_t sys, dir;
+	int error;
+	char path[512];
+
+public:
+	typedef enum {TIMEOUT = 0, ERROR, RENAMED, MODIFIED, DELETED, CREATED} event_t;
+
+	/*
+	 * Construct an inactive dnotify object.
+	 */
+	dnotify();
+
+	/**
+	 * Construct a dnotify object to watch a directory.
+	 * @param directory path to watch.
+	 */
+	dnotify(const char *directory);
+
+	/**
+	 * Release active notification.
+	 */
+	~dnotify();
+
+	/**
+	 * Set directory to watch.  If active, clear prior watch first.
+	 * @param directory path to watch.
+	 */
+	void watch(const char *directory);
+
+	/**
+	 * Test if actively watching.
+	 * @return true if active watch.
+	 */
+	operator bool();
+		
+	/**
+	 * Test if actively watching.
+	 * @return true if inactive.
+	 */
+	bool operator!();
+
+	/**
+	 * Release a current watch if active.
+	 */
+	void release(void);
+
+	/**
+	 * Wait until directory event occurs.  This is a blocking operation.
+	 * @param timeout to wait or infinity.
+	 * @return event type.
+	 */
+	event_t wait(timeout_t timeout = 0);
+
+	/**
+	 * Get filename associated with last event.
+	 * @return filename of last event or NULL if unknown.
+	 */
+	inline char *getPath(void)
+		{return path;};
+
+	/**
+	 * Get last error reported.
+	 * @return prior error state.
+	 */
+	inline int getError(void) const
+		{return error;};
+};
+	
+/**
  * Convience type for fsys.
  */
 typedef	fsys fsys_t;
+
+/**
+ * Convience type for dnotify.
+ */
+typedef dnotify dnotify_t;
 
 END_NAMESPACE
 

@@ -46,6 +46,14 @@
 #include <direct.h>
 #endif
 
+#ifdef	HAVE_SYS_INOTIFY_H
+#include <sys/inotify.h>
+#endif
+
+#ifdef	HAVE_SYS_EVENT_H
+#include <sys/event.h>
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 const fsys::offset_t fsys::end = (size_t)(-1);
@@ -430,7 +438,333 @@ int fsys::seek(offset_t pos)
 	return 0;
 }
 
+dnotify::dnotify()
+{
+	sys = dir = INVALID_HANDLE_VALUE;
+	error = 0;
+}
+
+dnotify::dotify(const char *dirname)
+{
+	dir = sys = INVALID_HANDLE_VALUE;
+	error = 0;
+	watch(dirname);
+}
+
+dnotify::~dnotify()
+{
+	dnotify::release();
+}
+
+void dnotify::release()
+{
+	if(dir != INVALID_HANDLE_VALUE) {
+		::CloseHandle(dir);
+		dir = INVALID_HANDLE_VALUE;
+		error = 0;
+	}	
+
+	if(sys != INVALID_HANDLE_VALUE) {
+		::CloseHandle(sys);
+		sys = INVALID_HANDLE_VALUE;
+	}
+}
+
+dnotify::operator bool()
+{
+	return dir != INVALID_HANDLE_VALUE;
+}
+
+bool dnotify::operator!()
+{
+	return dir == INVALID_HANDLE_VALUE;
+}
+
+void dnotify::watch(const char *dirpath)
+{
+	release();
+
+	dir = ::CreateFile(dirpath, FILE_LIST_DIRECTORY,
+		(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE),
+		NULL, OPEN_EXISTING,
+		(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED), NULL);
+
+	if(dir == INVALID_HANDLE_VALUE) {
+		error = remapError();
+		return;
+	}
+
+	sys = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+	if(sys == INVALID_HANDLE_VALUE) {
+		::CloseHandle(dir);
+		dir = INVALID_HANDLE_VALUE;
+		error = remapError();
+	}
+	else
+		error = 0;
+}
+
+dnotify::event_t dnotify::wait(timeout_t timeout)
+{
+	char buf[4096];
+	dir = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+	OVERLAPPED ov = {0, 0, 0, 0, dir};
+
+	if(sys == INVALID_HANDLE_VALUE) {
+		error = EBADF;
+		return INACTIVE;
+	}
+
+	if(!::ReadDirectoryChangesW(sys, buf, sizeof(buf), FALSE,
+		(FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE),
+		&count, &ovl, NULL)) {
+		error = remapError();
+		::CloseHandle(dir);
+		return ERROR;
+	}
+
+	if(!timeout)
+		timeout = INFINITE;
+
+	if(::WaitForSingleObjectEx(evt, timeout, TRUE) != WAIT_OBJECT_0)
+		return TIMEOUT;
+
+	::ResetEvent(dir);
+	::GetOverlappedResult(dir, &ovl, &count, FALSE);
+	FILE_NOTIFY_INFORMATION *info = (FILE_NOTIFY_INFORMATION *)buf;
+	int size = ::WideCharToMultiByte(CP_ACP, 0, info->FileName, info->FileNameLength / sizeof(WCHAR),
+		path, MAX_PATH, NULL, NULL);
+
+	path[size] = 0;
+
+	switch(info->Action) {
+	case FILE_ACTION_CREATED:
+		return CREATED;
+	case FILE_ACTION_REMOVED:
+	case FILE_ACTION_RENAMED_OLD_NAME:
+		return DELETED;
+	case FILE_ACTION_RENAMED_NEW_NAME:
+		return RENAMED;
+	default:
+		return MODIFIED;
+	}
+}
+	
 #else
+
+#if defined(HAVE_SYS_INOTIFY_H)
+
+void dnotify::release(void)
+{
+	if(dir != -1) {
+		if(::inotify_rm_watch(sys, dir) != -1)
+			error = errno;
+		::close(dir);
+	}
+
+	if(sys != -1)
+		::close(sys);
+
+	dir = sys = -1;
+}
+
+void dnotify::watch(const char *dirpath)
+{
+	sys = ::inotify_init();
+	if(sys == -1) {
+		error = errno;
+		return;
+	}
+
+	dir = ::inotify_add_watch(sys, dirpath,
+		(IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVE));
+
+	if(dir == -1) {
+		error = errno;
+		::close(sys);
+		sys = -1;
+	}
+	else
+		error = 0;
+}
+
+dnotify::event_t dnotify::wait(timeout_t timeout)
+{
+	struct inotify_event event;
+	fd_set fds;
+	struct timeval tv;
+	int result;
+
+	if(dir == -1) {
+		error = ENXIO;
+		return ERROR;
+	}
+
+	FD_ZERO(&fds);
+	FD_SET(sys, &fds);
+
+	if(timeout) {
+		tv.tv_usec = (timeout % 1000) * 1000;
+        tv.tv_sec = timeout / 1000;
+		result = ::select(sys + 1, &fds, NULL, NULL, &tv);
+	}
+	else
+		result = ::select(sys + 1, &fds, NULL, NULL, NULL);
+
+	if(result <= 0)
+		return TIMEOUT;
+
+	result = ::read(sys, &event, sizeof(event));
+	if(result < sizeof(event)) {
+		error = errno;
+		return ERROR;
+	}
+
+	if(event.len)
+		result = ::read(sys, path, event.len);
+	else
+		result = 0;
+
+	if(result > 0)
+		path[result] = 0;
+
+	if(event.mask & IN_CREATE)
+		return CREATED;
+
+	if(event.mask & IN_DELETE || event.mask & IN_MOVED_FROM)
+		return DELETED;
+
+	if(event.mask & IN_MOVED_TO)
+		return RENAMED;
+
+	return MODIFIED;
+}
+
+#elif defined(HAVE_SYS_EVENT_H)
+
+void dnotify::watch(const char *dirpath)
+{
+	release();
+	sys = kqueue();
+
+	if(sys < 0) {
+		error = errno;
+		sys = -1;
+		return;
+	}
+
+	dir = ::open(dirpath, O_EVTONLY);
+	if(dir == -1) {
+		error = errno;
+		::close(sys);
+		sys = -1;
+	}
+	else
+		error = 0;
+}
+
+void dnotify::release(void)
+{
+	if(dir != -1)
+		::close(dir);
+
+	if(sys != -1)
+		::close(sys);
+
+	sys = dir = -1;
+}
+
+dnotify::event_t dnotify::wait(timeout_t msecs)
+{
+	if(dir == -1) {
+		error = EBADF;
+		return ERROR;
+	}
+
+	struct kqfile *fp;
+	struct kevent evt;
+	uint_t events = (NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB |
+		NOTE_LINK | NOTE_RENAME | NOTE_REVOKE);
+
+	EV_SET(&evt, dir, EVFILT_VNODE, EV_ADD | EV_CLEAR, events, 0, NULL);
+
+	struct timespec tv;
+	struct keven evt_out;
+	int result;
+
+	if(msecs) { 
+		Conditional::gettimeout(msecs, &tv);
+		result = ::kevent(sys, &evt, 1, &tv);
+	}
+	else
+		result = ::kevent(sys, &evt, 1, NULL);
+	
+	if(result < 0) {
+		error = errno;
+		return ERROR;
+	}
+
+	if(!result)
+		return TIMEOUT;
+
+	fp = (struct kqfile *)evt.udata;
+	if(fp)
+		String::set(path, sizeof(path), fp->path);
+
+	if(evt.fflags & NOTE_RENAME)
+		return RENAMED;
+
+	if(evt.fflags & NOTE_DELETE)
+		return DELETED;
+
+	return MODIFIED;
+}
+		
+#else
+
+void dnotify::release(void)
+{
+}
+
+void dnotify::watch(const char *dirpath)
+{
+	error = ENOSYS;
+}
+
+dnotify::event_t dnotify::wait(timeout_t msecs)
+{
+	return ERROR;
+}
+		
+#endif
+
+dnotify::dnotify()
+{
+	dir = sys = -1;
+	error = 0;
+}
+
+dnotify::dnotify(const char *dirpath)
+{
+	dir = sys = -1;
+	error = 0;
+	watch(dirpath);
+}
+
+dnotify::~dnotify()
+{
+	release();
+}
+
+dnotify::operator bool()
+{
+	return (dir != -1);
+}
+
+bool dnotify::operator!()
+{
+	return dir == -1;
+}
 
 ssize_t fsys::read(void *buf, size_t len)
 {
