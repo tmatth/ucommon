@@ -98,6 +98,7 @@ public:
 	static encoded_t repack(encoded_t ulaw, unsigned samples, linear_t source = NULL);
 	static int16_t dbm(float dbm);
 	static float dbm(int16_t linear);
+	static void init(void);
 };
 
 /**

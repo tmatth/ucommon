@@ -147,6 +147,11 @@ static int table_toulaw[256] = {
         7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
         7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 
+void audio::init(void)
+{
+	__ccaudio__::g711_init();
+}
+
 void audio::u2a(encoded_t ulaw, unsigned size)
 {
 	while(size--) {

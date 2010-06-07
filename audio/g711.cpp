@@ -303,4 +303,9 @@ bool _ulaw::test(const char *id) const
 	return false;
 }
 
+// forces linkage of this object module for static linkage...
+void g711_init(void)
+{
+}
+
 END_NAMESPACE

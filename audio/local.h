@@ -93,6 +93,8 @@ private:
 	void release(void);
 };
 
+void g711_init(void);
+
 END_NAMESPACE
 
 
