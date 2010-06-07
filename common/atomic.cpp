@@ -99,15 +99,23 @@ long atomic::counter::operator-=(long change)
 	return rval;
 }
 
-// we can never spin in the default implimentation...
 bool atomic::lock::acquire(void)
 {
+	bool rtn = true;
+
 	mutex::protect((void *)&value);
-	return true;
+	if(value == 1)
+		rtn = false;
+	else
+		value = 1;
+	mutex::release((void *)&value);
+	return rtn;
 }
 
 void atomic::lock::release(void)
 {
+	mutex::protect((void *)&value);
+	value = 0;
 	mutex::release((void *)&value);
 }
 
