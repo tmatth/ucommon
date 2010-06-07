@@ -682,12 +682,18 @@ dnotify::event_t dnotify::wait(timeout_t msecs)
 		return FAILED;
 	}
 
-	struct kqfile *fp = NULL;
+	struct kqfile {
+		int fd;
+		char *path;
+		char *name;
+	}	files[2];
+
+	struct kqfile *fp = files;
 	struct kevent evt;
 	unsigned events = (NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB |
 		NOTE_LINK | NOTE_RENAME | NOTE_REVOKE);
 
-	EV_SET(&evt, dir, EVFILT_VNODE, EV_ADD | EV_CLEAR, events, 0, NULL);
+	EV_SET(&evt, dir, EVFILT_VNODE, EV_ADD | EV_CLEAR, events, 2, &files);
 
 	struct kevent out;
 	struct timespec tv;
