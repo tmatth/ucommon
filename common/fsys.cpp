@@ -641,7 +641,7 @@ dnotify::event_t dnotify::wait(timeout_t timeout)
 	return MODIFIED;
 }
 
-#elif defined(HAVE_SYS_EVENT_H)
+#elif defined(HAVE_SYS_EVENT_H) && defined(O_EVTONLY)
 
 void dnotify::watch(const char *dirpath)
 {
@@ -682,23 +682,23 @@ dnotify::event_t dnotify::wait(timeout_t msecs)
 		return FAILED;
 	}
 
-	struct kqfile *fp;
+	struct kqfile *fp = NULL;
 	struct kevent evt;
-	uint_t events = (NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB |
+	unsigned events = (NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB |
 		NOTE_LINK | NOTE_RENAME | NOTE_REVOKE);
 
 	EV_SET(&evt, dir, EVFILT_VNODE, EV_ADD | EV_CLEAR, events, 0, NULL);
 
+	struct kevent out;
 	struct timespec tv;
-	struct keven evt_out;
 	int result;
 
 	if(msecs) { 
 		Conditional::gettimeout(msecs, &tv);
-		result = ::kevent(sys, &evt, 1, &tv);
+		result = ::kevent(sys, &evt, 1, &out, 1, &tv);
 	}
 	else
-		result = ::kevent(sys, &evt, 1, NULL);
+		result = ::kevent(sys, &evt, 1, &out, 1, NULL);
 	
 	if(result < 0) {
 		error = errno;
@@ -708,14 +708,14 @@ dnotify::event_t dnotify::wait(timeout_t msecs)
 	if(!result)
 		return TIMEOUT;
 
-	fp = (struct kqfile *)evt.udata;
+	fp = (struct kqfile *)out.udata;
 	if(fp)
 		String::set(path, sizeof(path), fp->path);
 
-	if(evt.fflags & NOTE_RENAME)
+	if(out.fflags & NOTE_RENAME)
 		return RENAMED;
 
-	if(evt.fflags & NOTE_DELETE)
+	if(out.fflags & NOTE_DELETE)
 		return DELETED;
 
 	return MODIFIED;
