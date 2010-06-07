@@ -92,7 +92,9 @@ static void usage(void)
 		"  append file files     Append audio to existing file\n"
 		"  create newfile files  Create new file from existing ones\n"
 		"  info files            Display info for specified audio files\n"
+#ifndef	_MSWINDOWS_
 		"  pipe files            Pipe raw transcoded audio to stdout\n"
+#endif
 		"  text file             Display annotation for audio file if set\n"
 		"  verify file           Verify readability of an audio file\n"
 	);
@@ -308,6 +310,7 @@ static void create(const char *to, char **argv)
 	exit(0);
 }
 
+#ifndef	_MSWINDOWS_
 static void pipe(const char *fn)
 {
 	audio::encoded_t data;
@@ -343,6 +346,7 @@ static void pipe(const char *fn)
 		exit(3);
 	}
 }
+#endif
 
 static void verify(const char *fn)
 {
@@ -505,6 +509,7 @@ int main(int argc, char **argv)
 		verify(argv[1]);
 	}
 
+#ifndef	_MSWINDOWS_
 	if(eq(cp, "pipe")) {
 		if(NULL == argv[1])
 			goto nofiles;
@@ -513,6 +518,7 @@ int main(int argc, char **argv)
         }
 		exit(0);
     }
+#endif
 
     fprintf(stderr, "*** audiotool: %s: unknown command\n", cp);
     exit(4);

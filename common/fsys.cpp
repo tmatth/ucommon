@@ -444,7 +444,7 @@ dnotify::dnotify()
 	error = 0;
 }
 
-dnotify::dotify(const char *dirname)
+dnotify::dnotify(const char *dirname)
 {
 	dir = sys = INVALID_HANDLE_VALUE;
 	error = 0;
@@ -490,7 +490,7 @@ void dnotify::watch(const char *dirpath)
 		(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED), NULL);
 
 	if(dir == INVALID_HANDLE_VALUE) {
-		error = remapError();
+		error = fsys::remapError();
 		return;
 	}
 
@@ -498,7 +498,7 @@ void dnotify::watch(const char *dirpath)
 	if(sys == INVALID_HANDLE_VALUE) {
 		::CloseHandle(dir);
 		dir = INVALID_HANDLE_VALUE;
-		error = remapError();
+		error = fsys::remapError();
 	}
 	else
 		error = 0;
@@ -509,28 +509,29 @@ dnotify::event_t dnotify::wait(timeout_t timeout)
 	char buf[4096];
 	dir = ::CreateEvent(NULL, TRUE, FALSE, NULL);
 	OVERLAPPED ov = {0, 0, 0, 0, dir};
+	DWORD count;
 
 	if(sys == INVALID_HANDLE_VALUE) {
 		error = EBADF;
-		return INACTIVE;
+		return FAILED;
 	}
 
 	if(!::ReadDirectoryChangesW(sys, buf, sizeof(buf), FALSE,
 		(FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE),
-		&count, &ovl, NULL)) {
-		error = remapError();
+		&count, &ov, NULL)) {
+		error = fsys::remapError();
 		::CloseHandle(dir);
-		return ERROR;
+		return FAILED;
 	}
 
 	if(!timeout)
 		timeout = INFINITE;
 
-	if(::WaitForSingleObjectEx(evt, timeout, TRUE) != WAIT_OBJECT_0)
+	if(::WaitForSingleObjectEx(sys, timeout, TRUE) != WAIT_OBJECT_0)
 		return TIMEOUT;
 
 	::ResetEvent(dir);
-	::GetOverlappedResult(dir, &ovl, &count, FALSE);
+	::GetOverlappedResult(dir, &ov, &count, FALSE);
 	FILE_NOTIFY_INFORMATION *info = (FILE_NOTIFY_INFORMATION *)buf;
 	int size = ::WideCharToMultiByte(CP_ACP, 0, info->FileName, info->FileNameLength / sizeof(WCHAR),
 		path, MAX_PATH, NULL, NULL);
@@ -538,7 +539,7 @@ dnotify::event_t dnotify::wait(timeout_t timeout)
 	path[size] = 0;
 
 	switch(info->Action) {
-	case FILE_ACTION_CREATED:
+	case FILE_ACTION_ADDED:
 		return CREATED;
 	case FILE_ACTION_REMOVED:
 	case FILE_ACTION_RENAMED_OLD_NAME:
@@ -596,8 +597,8 @@ dnotify::event_t dnotify::wait(timeout_t timeout)
 	int result;
 
 	if(dir == -1) {
-		error = ENXIO;
-		return ERROR;
+		error = EBADF;
+		return FAILED;
 	}
 
 	FD_ZERO(&fds);
@@ -617,7 +618,7 @@ dnotify::event_t dnotify::wait(timeout_t timeout)
 	result = ::read(sys, &event, sizeof(event));
 	if(result < sizeof(event)) {
 		error = errno;
-		return ERROR;
+		return FAILED;
 	}
 
 	if(event.len)
@@ -678,7 +679,7 @@ dnotify::event_t dnotify::wait(timeout_t msecs)
 {
 	if(dir == -1) {
 		error = EBADF;
-		return ERROR;
+		return FAILED;
 	}
 
 	struct kqfile *fp;
@@ -701,7 +702,7 @@ dnotify::event_t dnotify::wait(timeout_t msecs)
 	
 	if(result < 0) {
 		error = errno;
-		return ERROR;
+		return FAILED;
 	}
 
 	if(!result)
@@ -733,7 +734,7 @@ void dnotify::watch(const char *dirpath)
 
 dnotify::event_t dnotify::wait(timeout_t msecs)
 {
-	return ERROR;
+	return FAILED;
 }
 		
 #endif

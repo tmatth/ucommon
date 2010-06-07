@@ -60,6 +60,8 @@ typedef	void *mem_t;
 class __EXPORT fsys
 {
 protected:
+	friend class dnotify;
+
 	fd_t	fd;
 #ifdef	_MSWINDOWS_
 	WIN32_FIND_DATA *ptr;
@@ -456,7 +458,7 @@ private:
 	char path[512];
 
 public:
-	typedef enum {TIMEOUT = 0, ERROR, RENAMED, MODIFIED, DELETED, CREATED} event_t;
+	typedef enum {TIMEOUT = 0, FAILED, RENAMED, MODIFIED, DELETED, CREATED} event_t;
 
 	/*
 	 * Construct an inactive dnotify object.

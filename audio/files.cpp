@@ -17,6 +17,10 @@
 
 #include "local.h"
 
+#ifdef	_MSWINDOWS_
+#undef	HAVE_FTRUNCATE
+#endif
+
 using namespace LOCAL_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
@@ -49,6 +53,10 @@ fd_t audiofile::handle(void)
 		return *fs;
 	return INVALID_HANDLE_VALUE;
 }
+
+#ifdef	MINGW32
+#define	stat	_stat
+#endif
 
 void audiofile::open(const char *path, fsys::access_t access, size_t objsize, timeout_t framing)
 {
