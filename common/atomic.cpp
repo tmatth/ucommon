@@ -1,0 +1,112 @@
+// Copyright (C) 2006-2008 David Sugar, Tycho Softworks.
+//
+// This file is part of GNU ucommon.
+//
+// GNU ucommon is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published 
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// GNU ucommon is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with GNU ucommon.  If not, see <http://www.gnu.org/licenses/>.
+
+#include <config.h>
+#include <ucommon/atomic.h>
+#include <ucommon/thread.h>
+
+using namespace UCOMMON_NAMESPACE;
+
+atomic::counter::counter(long init)
+{
+	value = init;
+}
+
+atomic::lock::lock()
+{
+	value = 0;
+}
+
+#ifdef HAVE_GCC_ATOMICSXX
+
+long atomic::counter::operator++()
+{
+	return __sync_add_and_fetch(&value, 1);
+}
+
+long atomic::counter::operator--()
+{
+	return __sync_sub_and_fetch(&value, 1);
+}
+
+long atomic::counter::operator+=(long change)
+{
+	return __sync_add_and_fetch(&value, change);
+}
+
+long atomic::counter::operator-=(long change)
+{
+	return __sync_sub_and_fetch(&value, change);
+}
+
+bool atomic::lock::acquire(void)
+{
+	// if not locked by another already, then we acquired it...
+	return (__sync_lock_test_and_set(&value, 1) == 0);
+}
+
+#else
+
+long atomic::counter::operator++()
+{
+	long rval;
+	mutex::protect((void *)&value);
+	rval = (long)(++value);
+	mutex::release((void *)&value);
+	return rval;
+}
+
+long atomic::counter::operator--()
+{
+	long rval;
+	mutex::protect((void *)&value);
+	rval = (long)(--value);
+	mutex::release((void *)&value);
+	return rval;
+}
+
+long atomic::counter::operator+=(long change)
+{
+	long rval;
+	mutex::protect((void *)&value);
+	rval = (long)(value += change);
+	mutex::release((void *)&value);
+	return rval;
+}
+
+long atomic::counter::operator-=(long change)
+{
+	long rval;
+	mutex::protect((void *)&value);
+	rval = (long)(value -= change);
+	mutex::release((void *)&value);
+	return rval;
+}
+
+// we can never spin in the default implimentation...
+bool atomic::lock::acquire(void)
+{
+	mutex::protect((void *)&value);
+	return true;
+}
+
+void atomic::lock::release(void)
+{
+	mutex::release((void *)&value);
+}
+
+#endif
