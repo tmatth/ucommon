@@ -54,10 +54,6 @@ fd_t audiofile::handle(void)
 	return INVALID_HANDLE_VALUE;
 }
 
-#ifdef	MINGW32
-#define	stat	_stat
-#endif
-
 void audiofile::open(const char *path, fsys::access_t access, size_t objsize, timeout_t framing)
 {
 	const audiocodec *format = NULL;
@@ -70,7 +66,7 @@ void audiofile::open(const char *path, fsys::access_t access, size_t objsize, ti
     filetype = RAW;
 	hiwater = current = headersize = 0l;	
 
-	if(stat(path, &ino))
+	if(fs.stat(path, &ino))
 		return;
 
 	fs.open(path, access);
