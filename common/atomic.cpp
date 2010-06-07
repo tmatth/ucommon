@@ -31,7 +31,7 @@ atomic::lock::lock()
 	value = 0;
 }
 
-#ifdef HAVE_GCC_ATOMICSXX
+#ifdef HAVE_GCC_ATOMICS
 
 long atomic::counter::operator++()
 {
@@ -57,6 +57,11 @@ bool atomic::lock::acquire(void)
 {
 	// if not locked by another already, then we acquired it...
 	return (__sync_lock_test_and_set(&value, 1) == 0);
+}
+
+void atomic::lock::release(void)
+{
+	__sync_lock_release(&value);
 }
 
 #else
