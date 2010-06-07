@@ -36,8 +36,6 @@ UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 
 CHECKFLAGS="$CHECKFLAGS"
-POSIX=false
-MSSYS=false
 
 components="script audio utils"
 socket_lib=""
@@ -128,7 +126,7 @@ clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
 AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h) 
-AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h)
+AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h)
 
 AC_MSG_CHECKING([for gcc atomics])
 AC_TRY_COMPILE([],[
@@ -476,8 +474,6 @@ for flag in $flags ; do
     rm -f conftest*
 done
 
-AM_CONDITIONAL(POSIX, test "$POSIX" = "true")
-
 AC_MSG_CHECKING([whether ${CXX} supports visibility])
 echo 'void f(){}' >conftest.cpp
 if test -z "`${CXX} -fvisibility=hidden -c conftest.cpp 2>&1`"; then
@@ -544,6 +540,9 @@ for component in $UCOMMON_COMPONENTS ; do
 		;;
 	esac
 done
+
+AM_CONDITIONAL(TEST_SCRIPT, test "$uses_script" != "0")
+AM_CONDITIONAL(TEST_AUDIO, test "$uses_audio" != "0")
 
 # make sure dependencies are fullfilled
 if test "$uses_utils" == "1" ; then

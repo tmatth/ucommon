@@ -11,11 +11,19 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS) $(CHECKFLAGS)
 LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
-EXTRA_DIST = stdcpp.cpp keydata.conf testscript.scr mergescript.scr
+EXTRA_DIST = *.cpp keydata.conf testscript.scr mergescript.scr
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
-	ucommonKeydata ucommonStream ucommonUnicode ucommonDatetime \
-	ucommonScript ucommonAudio ucommonQueue
+	ucommonKeydata ucommonStream ucommonUnicode ucommonQueue \
+	ucommonDatetime
+
+if TEST_SCRIPT
+TESTS += ucommonScript
+endif
+
+if TEST_AUDIO
+TESTS += ucommonAudio
+endif
 
 check_PROGRAMS = $(TESTS)
 
@@ -31,11 +39,15 @@ ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
 ucommonQueue_SOURCES = queue.cpp
 
+if TEST_SCRIPT
 ucommonScript_SOURCES = script.cpp
 ucommonScript_LDFLAGS = ../script/libuccscript.la
+endif
 
+if TEST_AUDIO
 ucommonAudio_SOURCES = audio.cpp
 ucommonAudio_LDFLAGS = ../audio/libuccaudio.la @MATH_LIB@
+endif
 
 # test using full stdc++ linkage...
 stdcpp:	stdcpp.cpp

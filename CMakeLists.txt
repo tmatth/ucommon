@@ -222,6 +222,8 @@ check_include_files(mach/clock.h HAVE_MACH_CLOCK_H)
 check_include_files(mach-o/dyld.h HAVE_MACH_O_DYLD_H)
 check_include_files(linux/version.h HAVE_LINUX_VERSION_H)
 check_include_files(regex.h HAVE_REGEX_H)
+check_include_files(sys/inotify.h HAVE_SYS_INOTIFY_H)
+check_include_files(sys/event.h HAVE_SYS_EVENT_H)
 
 # for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
