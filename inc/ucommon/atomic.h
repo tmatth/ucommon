@@ -31,11 +31,27 @@
 
 NAMESPACE_UCOMMON
 
+/**
+ * Generic atomic class for referencing atomic objects and static functions.
+ * We have an atomic counter and spinlock, and in the future we may add
+ * other atomic classes and atomic manipulations needed to create lockfree
+ * data structures.  The atomic classes use mutexes if no suitable atomic
+ * code is available.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT atomic
 {
 public:
+	/**
+	 * Set to true if atomics have to be simulated with mutexes.
+	 */
 	static const bool simulated;
 
+	/**
+	 * Atomic counter class.  Can be used to manipulate value of an
+	 * atomic counter without requring explicit thread locking.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
 	class __EXPORT counter
 	{
 	private:
@@ -56,15 +72,32 @@ public:
 			{return value;};
 	};
 
-	class __EXPORT lock
+	/**
+	 * Atomic spinlock class.  Used as high-performance sync lock between
+	 * threads.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT spinlock
 	{
 	private:
 		volatile long value;
 
 	public:
-		lock();
+		/**
+		 * Construct and initialize spinlock.
+		 */
+		spinlock();
 
+		/**
+		 * Acquire the lock.  If the lock is not acquired, one "spins"
+		 * by doing something else.  One suggestion is using thread::yield.
+		 * @return true if acquired.
+		 */
 		bool acquire(void);
+
+		/**
+		 * Release an acquired spinlock.
+		 */
 		void release(void);
 	};
 };

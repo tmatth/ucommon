@@ -26,7 +26,7 @@ atomic::counter::counter(long init)
 	value = init;
 }
 
-atomic::lock::lock()
+atomic::spinlock::spinlock()
 {
 	value = 0;
 }
@@ -53,13 +53,13 @@ long atomic::counter::operator-=(long change)
 	return __sync_sub_and_fetch(&value, change);
 }
 
-bool atomic::lock::acquire(void)
+bool atomic::spinlock::acquire(void)
 {
 	// if not locked by another already, then we acquired it...
 	return (__sync_lock_test_and_set(&value, 1) == 0);
 }
 
-void atomic::lock::release(void)
+void atomic::spinlock::release(void)
 {
 	__sync_lock_release(&value);
 }
@@ -104,7 +104,7 @@ long atomic::counter::operator-=(long change)
 	return rval;
 }
 
-bool atomic::lock::acquire(void)
+bool atomic::spinlock::acquire(void)
 {
 	bool rtn = true;
 
@@ -117,7 +117,7 @@ bool atomic::lock::acquire(void)
 	return rtn;
 }
 
-void atomic::lock::release(void)
+void atomic::spinlock::release(void)
 {
 	mutex::protect((void *)&value);
 	value = 0;
