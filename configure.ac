@@ -128,21 +128,6 @@ tlib=""
 AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h) 
 AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h)
 
-AC_MSG_CHECKING([for gcc atomics])
-AC_TRY_COMPILE([],[
-	volatile unsigned long val = 10;
-	unsigned long retval = __sync_sub_fetch(&val, 1);
-	retval = __sync_add_and_fetch(&val, 1);
-	retval = __sync_lock_test_and_set(&val, 1);
-	__sync_lock_release(&val);
-	return 0;
-],[
-	AC_MSG_RESULT([yes])
-	AC_DEFINE(HAVE_GCC_ATOMICS, [1], [define atomics])
-],[
-	AC_MSG_RESULT([no])
-])
-
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
 	UCOMMON_VISIBILITY="0"
@@ -220,6 +205,11 @@ PTHREAD_FLAGS=""
 
 if test "$enable_shared" = "no" ; then
 	UCOMMON_FLAGS="$UCOMMON_FLAGS -DUCOMMON_STATIC" ; fi
+
+AC_ARG_ENABLE(atomics, [
+	AC_HELP_STRING([--enable-atomics],[enable gcc atomic support])], [
+	AC_DEFINE(HAVE_GCC_ATOMICS, [1], ["cannot test in autoconf safely"])
+])
 
 AC_ARG_ENABLE(pth, [
 	AC_HELP_STRING([--enable-pth],[always use GNU pth for threading])
