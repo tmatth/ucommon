@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU ucommon.  If not, see <http://www.gnu.org/licenses/>.
 
-#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
-
 #include <config.h>
 #include <ucommon/string.h>
 #include <ucommon/memory.h>
@@ -495,7 +493,5 @@ int shell::system(const char *cmd, const char **envp)
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
 	exit(127);
 }
-
-#endif
 
 #endif
