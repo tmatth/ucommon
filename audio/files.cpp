@@ -17,10 +17,6 @@
 
 #include "local.h"
 
-#ifdef	_MSWINDOWS_
-#undef	HAVE_FTRUNCATE
-#endif
-
 using namespace LOCAL_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
@@ -175,15 +171,12 @@ timeout_t audiofile::locate(void)
 	return frames * encoding->getFraming();
 }
 
-#ifdef	HAVE_FTRUNCATE
 bool audiofile::trim(timeout_t pos) 
 {
 	if(state != ACTIVE && state != END)
 		return false;
 
 	assert(encoding != NULL);
-
-	fd_t fd = *fs;
 
 	if(minio == maxio) {
 		flush();
@@ -193,12 +186,9 @@ bool audiofile::trim(timeout_t pos)
 			pos = current;
 		pos = current - pos;
 		++iocount;
-		fs.seek(headersize + pos);
 		current = pos;
-		if(ftruncate(fd, headersize + current) == -1) {
-			state = FAILED;
+		if(fs.trunc(headersize + current) != 0)
 			return false;
-		}
 		else {
 			hiwater = current;	
 			return true;
@@ -206,12 +196,6 @@ bool audiofile::trim(timeout_t pos)
 	}
 	return false;		
 }
-#else
-bool audiofile::trim(timeout_t pos)
-{
-	return false;
-}
-#endif
 
 bool audiofile::seek(timeout_t pos) 
 {

@@ -226,6 +226,14 @@ public:
 	int stat(struct stat *buffer);
 
 	/**
+	 * Truncate file to specified length.  The file pointer is positioned
+	 * to the new end of file.
+	 * @param offset to truncate to.
+	 * @return true if truncate successful.
+	 */
+	int trunc(offset_t offset);
+
+	/**
 	 * Commit changes to the filesystem.
 	 * @return error number or 0 on success.
 	 */

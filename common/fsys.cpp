@@ -150,6 +150,17 @@ int fsys::stat(const char *path, struct stat *buf)
 	return 0;
 }
 
+int fsys::trunc(offset_t offset)
+{
+	if(fsys::seek(offset) != 0)
+		return remapError();
+
+	if(SetEndOfFile(fd))
+		return 0;
+
+	return remapError();
+}
+
 int fsys::stat(struct stat *buf)
 {
 	int fn = _open_osfhandle((long int)(fd), _O_RDONLY);
@@ -618,6 +629,26 @@ int fsys::stat(const char *path, struct stat *ino)
 		return remapError();
 	return 0;
 }
+
+#ifdef	HAVE_FTRUNCATE
+int fsys::trunc(offset_t offset)
+{
+	if(fsys::seek(offset) != 0)
+		return remapError();
+
+	if(::ftruncate(fd, offset) == 0)
+		return 0;
+	return remapError();
+}
+#else
+int fsys::trunc(offset_t offset)
+{
+	if(fsys::seek(offset) != 0)
+		return remapError();
+
+	return ENOSYS;
+}
+#endif
 
 int fsys::stat(struct stat *ino)
 {
