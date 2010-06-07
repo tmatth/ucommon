@@ -34,6 +34,8 @@ NAMESPACE_UCOMMON
 class __EXPORT atomic
 {
 public:
+	static const bool simulated;
+
 	class __EXPORT counter
 	{
 	private:

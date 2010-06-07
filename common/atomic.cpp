@@ -61,6 +61,8 @@ bool atomic::lock::acquire(void)
 
 #else
 
+#define SIMULATED true
+
 long atomic::counter::operator++()
 {
 	long rval;
@@ -109,4 +111,10 @@ void atomic::lock::release(void)
 	mutex::release((void *)&value);
 }
 
+#endif
+
+#ifdef SIMULATED
+const bool atomic::simulated = true;
+#else
+const bool atomic::simulated = false;
 #endif

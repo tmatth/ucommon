@@ -140,7 +140,7 @@ AC_TRY_COMPILE([],[
 	return 0;
 ],[
 	AC_MSG_RESULT([yes])
-	AC_DEFINE(HAVE_GCC_ATOMICS)
+	AC_DEFINE(HAVE_GCC_ATOMICS, [1], [define atomics])
 ],[
 	AC_MSG_RESULT([no])
 ])
