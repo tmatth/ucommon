@@ -35,6 +35,52 @@ using namespace UCOMMON_NAMESPACE;
 
 const char *utf8::nil = NULL;
 
+ucs4_t utf8::getchar(FILE *fp)
+{
+	int ch = fgetc(fp);
+	unsigned count = 0;
+	ucs4_t code;
+	
+	if(ch == EOF)
+		return EOF;
+
+	if(ch < 0x80)
+		return ch;
+
+	if((ch & 0xe0) == 0xc0) {
+		code = ch & 0x1f;
+		count = 1;
+	}
+	else if((ch & 0xf0) == 0xe0) {
+		code = ch & 0x0f;
+		count = 2;
+	}
+	else if((ch && 0xf8) == 0xf0) {
+		code = ch & 0x07;
+		count = 3;
+	}
+	else if((ch && 0xfc) == 0xf8) {
+		code = ch & 0x03;
+		count = 4;
+	}
+	else if((ch & 0xfe) == 0xfc) {
+		code = ch & 0x01;
+		count = 5;
+	}
+	else
+		return EOF;
+
+	while(count--) {
+		ch = fgetc(fp);
+		if(ch == EOF)
+			return EOF;
+		if((ch & 0xc0) != 0x80)
+			return EOF;
+		code = (code << 6) | (ch & 0x3f);
+	}
+	return code;
+}
+
 unsigned utf8::size(const char *string)
 {
 	unsigned char v = (unsigned char)(*string);
@@ -203,6 +249,52 @@ size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
 
 	*target = 0;
 	return used;
+}
+
+ucs4_t utf8::putchar(ucs4_t code, FILE *fp)
+{
+	char buffer[8];
+	unsigned used = 0, count = 0;
+
+	if(code < 0x80)
+		return fputc(code, fp);
+
+	if(code < 0x000007ff) {
+		buffer[used++] = (code >> 6) | 0xc0;
+		buffer[used++] = (code & 0x3f) | 0x80;
+	}
+	else if(code <= 0x0000ffff) {
+		buffer[used++] = (code >> 12) | 0xe0;
+		buffer[used++] = (code >> 6 & 0x3f) | 0x80;
+		buffer[used++] = (code & 0x3f) | 0x80;
+	}
+	else if(code <= 0x001fffff) {
+		buffer[used++] = (code >> 18) | 0xf0;
+		buffer[used++] = (code >> 12 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 6  & 0x3f) | 0x80;
+		buffer[used++] = (code & 0x3f) | 0x80;
+	}
+	else if(code <= 0x03ffffff) {
+		buffer[used++] = (code >> 24) | 0xf8;
+		buffer[used++] = (code >> 18 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 12 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 6  & 0x3f) | 0x80;
+		buffer[used++] = (code & 0x3f) | 0x80;
+	}
+	else {
+		buffer[used++] = (code >> 30) | 0xfc;
+		buffer[used++] = (code >> 24 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 18 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 12 & 0x3f) | 0x80;
+		buffer[used++] = (code >> 6  & 0x3f) | 0x80;
+		buffer[used++] = (code & 0x3f) | 0x80;
+	}
+
+	while(count < used) {
+		if(fputc(buffer[count++], fp) == EOF)
+			return EOF;
+	}
+	return code;
 }
 
 size_t utf8::convert(const unicode_t str, char *buffer, size_t size)

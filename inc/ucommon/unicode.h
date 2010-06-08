@@ -145,6 +145,21 @@ public:
 	 * @return count of occurences.
 	 */
 	static unsigned ccount(const char *string, ucs4_t character);
+
+	/**
+	 * Get a unicode character from a file stream.
+	 * @param file to get character from.
+	 * @return unicode character or EOF error.
+	 */
+	ucs4_t getchar(FILE *file);
+
+	/**
+	 * Push a unicode character to a file stream.
+	 * @param character to push to file.
+	 * @param file to push character to.
+	 * @return unicode character or EOF on error.
+	 */
+	ucs4_t putchar(ucs4_t character, FILE *file);
 };
 
 /**

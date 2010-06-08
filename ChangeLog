@@ -4,6 +4,7 @@ from ucommon 3.0.1 to 3.0.2
 - unit tests conditional by component selection.
 - audio::init for static linkage issues.
 - fsys::trunc method added.
+- unicode utf8 file character operations.
 
 from ucommon 3.0.0 to 3.0.1
 - bug fix and unit test for queueof.
