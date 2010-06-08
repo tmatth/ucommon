@@ -149,6 +149,12 @@ static int table_toulaw[256] = {
 
 void audio::init(void)
 {
+	static volatile bool initialized = false;
+
+	if(initialized)
+		return;
+
+	initialized = true;
 	__ccaudio__::g711_init();
 }
 

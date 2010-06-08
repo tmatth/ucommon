@@ -88,11 +88,14 @@ void audiocodec::reset(void)
 
 audiocodec *audiocodec::first(void)
 {
+	audio::init();
 	return static_cast<audiocodec *>(list);
 }
 
 const audiocodec *audiocodec::find(const char *id, const audiocodec *channel)
 {
+	audio::init();
+
 	if(channel && channel->test(id))
 		return channel;
 
@@ -113,6 +116,8 @@ const audiocodec *audiocodec::find(const char *id, const audiocodec *channel)
 
 audiocodec *audiocodec::get(const char *id, const audiocodec *channel)
 {
+	audio::init();
+
 	linked_pointer<const audiocodec> cp = list;
 
 	if(channel && channel->test(id))
