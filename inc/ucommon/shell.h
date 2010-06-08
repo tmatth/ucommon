@@ -116,7 +116,7 @@ public:
 	protected:
 		/**
 		 * Used to send option into derived receiver.
-		 * @param option that was received.
+		 * @param value option that was received.
 		 * @return NULL or error string to use.
 		 */
 		virtual const char *assign(const char *value) = 0;

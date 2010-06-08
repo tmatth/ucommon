@@ -57,6 +57,14 @@ typedef	void *unicode_t;
 class __EXPORT utf8
 {
 public:
+	/**
+	 * Size of "unicode_t" character codes, may not be ucs4_t size.
+	 */
+	static const unsigned ucsize;
+
+	/**
+	 * A convenient NULL pointer value.
+	 */
 	static const char *nil;
 
 	/**

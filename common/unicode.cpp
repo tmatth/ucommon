@@ -34,6 +34,7 @@ typedef	ucs4_t	wchar_t;
 using namespace UCOMMON_NAMESPACE;
 
 const char *utf8::nil = NULL;
+const unsigned utf8::ucsize = sizeof(wchar_t);
 
 ucs4_t utf8::getchar(FILE *fp)
 {
