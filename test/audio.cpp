@@ -62,8 +62,6 @@ public:
 
 int main(int argc, char **argv)
 {
-	audio::init();
-
 	ac = audiocodec::get("pcmu");
 	assert(ac != NULL);
 
