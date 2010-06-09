@@ -1,3 +1,6 @@
+from ucommon 3.0.2 to 3.0.3
+- buffered i/o support without need for libstdc++.
+
 from ucommon 3.0.1 to 3.0.2
 - atomic counter and lock class added.
 - shell no longer a second class member of ucommon.
