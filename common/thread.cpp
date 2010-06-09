@@ -150,7 +150,7 @@ void ReusableAllocator::release(ReusableObject *obj)
 {
 	assert(obj != NULL);
 
-	LinkedObject **ru = (LinkedObject **)freelist;
+	LinkedObject **ru = (LinkedObject **)&freelist;
 
 	obj->retain();
 	obj->release();

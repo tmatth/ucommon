@@ -58,6 +58,12 @@ extern "C" int main()
 	init<myobject>(x);
 	assert(x->count == 11);
 
+	for(unsigned i = 0; i < 3; ++i) {
+		x = mycache.lifo();
+		assert(x != NULL);
+		myobjects.release(x);
+	}
+
 	x = init<myobject>(NULL);
 	assert(x == NULL);
 	assert(reused == 11);

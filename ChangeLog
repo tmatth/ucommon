@@ -1,5 +1,6 @@
 from ucommon 3.0.2 to 3.0.3
 - buffered i/o support without need for libstdc++.
+- bug in ReusableAllocator freelist assignment.
 
 from ucommon 3.0.1 to 3.0.2
 - atomic counter and lock class added.
