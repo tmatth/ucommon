@@ -49,10 +49,11 @@ private:
 	char *buffer;
 	char *input, *output;
 	size_t bufsize, bufpos, insize, outsize;
-	int error;
 	bool end;
 
 protected:
+	int ioerror;
+
 	/**
 	 * Construct an empty (unallocated) buffer.
 	 */
@@ -109,6 +110,21 @@ protected:
 	 */
 	virtual size_t _pull(char *address, size_t size);
 
+	/**
+	 * Get current input position.  Sometimes used to help compute and report 
+     * a "tell" offset.
+	 * @return offset of input buffer.
+	 */
+	inline size_t _pending(void)
+		{return bufpos;};
+
+	/**
+	 * Get current output position.  Sometimes used to help compute a
+	 * "trunc" operation.
+	 */
+	inline size_t _waiting(void)
+		{return outsize;};
+
 public:
 	/**
 	 * Get a character from the buffer.  If no data is available, return EOF.
@@ -154,6 +170,11 @@ public:
 	bool flush(void);
 
 	/**
+	 * Reset input buffer state.  Drops any pending input.
+	 */
+	void reset(void);
+
+	/**
 	 * Get a string as a line of input from the buffer.  The eol character(s)
 	 * are used to mark the end of a line.
 	 * @param string to save input into.
@@ -174,7 +195,7 @@ public:
 	 * Check if at end of input.
 	 * @return true if end of data, false if input still buffered.
 	 */
-	bool eod();
+	bool eof();
 };
 
 END_NAMESPACE

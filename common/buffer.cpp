@@ -73,7 +73,7 @@ void IOBuffer::allocate(size_t size, type_t mode)
 
 	bufpos = insize = outsize = 0;
 	bufsize = size;
-	error = 0;
+	ioerror = 0;
 
 	if(buffer)
 		end = false;
@@ -94,7 +94,7 @@ size_t IOBuffer::getchars(char *address, size_t size)
 			insize = _pull(input, bufsize);
 			bufpos = 0;
 			if(insize < bufsize) {
-				error = errno;
+				ioerror = errno;
 				end = true;
 			}
 			if(!insize)
@@ -117,7 +117,7 @@ int IOBuffer::getchar(void)
 		insize = _pull(input, bufsize);
 		bufpos = 0;
 		if(insize < bufsize) {
-			error = errno;
+			ioerror = errno;
 			end = true;
 		}
 		if(!insize)
@@ -141,7 +141,7 @@ size_t IOBuffer::putchars(const char *address, size_t size)
 		if(outsize == bufsize) {
 			outsize = 0;
 			if(_push(output, bufsize) < bufsize) {
-				error = errno;
+				ioerror = errno;
 				output = NULL;
 				end = true;		// marks a disconnection...
 				return count;
@@ -162,7 +162,7 @@ int IOBuffer::putchar(int ch)
 	if(outsize == bufsize) {
 		outsize = 0;
 		if(_push(output, bufsize) < bufsize) {
-			error = errno;
+			ioerror = errno;
 			output = NULL;
 			end = true;		// marks a disconnection...
 			return EOF;
@@ -271,7 +271,12 @@ size_t IOBuffer::getline(char *string, size_t size)
 	return count;
 }
 
-bool IOBuffer::eod(void)
+void IOBuffer::reset(void)
+{
+	insize = bufpos = 0;
+}
+
+bool IOBuffer::eof(void)
 {
 	if(!input)
 		return true;
