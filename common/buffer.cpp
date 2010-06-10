@@ -217,6 +217,48 @@ bool IOBuffer::flush(void)
 	return false;
 }
 
+char *IOBuffer::gather(size_t size)
+{
+	if(!input || size > bufsize)
+		return NULL;
+
+	if(size + bufpos > insize) {
+		if(end)
+			return NULL;
+	
+		size_t adjust = outsize - bufpos;
+		memmove(input, input + bufpos, adjust);
+		insize = adjust +  _pull(input, bufsize - adjust);
+		bufpos = 0;
+
+		if(insize < bufsize) {
+			ioerror = errno;
+			end = true;
+		}
+	}
+
+	if(size + bufpos <= insize) {
+		char *bp = input + bufpos;
+		bufpos += size;
+		return bp;
+	}
+
+	return NULL;	
+}
+
+char *IOBuffer::request(size_t size)
+{
+	if(!output || size > bufsize)
+		return NULL;
+
+	if(size + outsize > bufsize)
+		flush();
+
+	size_t offset = outsize;
+	outsize += size;
+	return output + offset;
+}	
+
 size_t IOBuffer::putline(const char *string)
 {
 	size_t count = 0;

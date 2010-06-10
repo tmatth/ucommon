@@ -93,6 +93,23 @@ protected:
 	void release(void);
 
 	/**
+	 * Request workspace in output buffer.  This returns a pointer to
+	 * memory from the output buffer and advances the output position.
+	 * This is sometimes used for a form of zero copy write.
+	 * @param size of request area.
+	 * @return data pointer or NULL if not available.
+	 */
+	char *request(size_t size);
+
+	/**
+	 * Gather returns a pointer to contigues input of specified size.
+	 * This may require moving the input data in memory.
+	 * @param size of gather space.
+	 * @return data pointer to gathered data or NULL if not available.
+	 */
+	char *gather(size_t size);
+
+	/**
 	 * Method to push buffer into physical i/o (write).  The address is
 	 * passed to this virtual since it is hidden as private.
 	 * @param address of data to push.
