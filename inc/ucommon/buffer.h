@@ -224,7 +224,7 @@ public:
 	 * Get last error associated with a failed I/O operation.
 	 * @return last error.
 	 */
-	inline int errcode(void)
+	inline int err(void)
 		{return ioerror;};
 };
 
