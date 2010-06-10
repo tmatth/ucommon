@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="3.0.2"
-LT_VERSION="3:5:0"
+VERSION="3.1.0"
+LT_VERSION="3:6:0"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -278,7 +278,7 @@ else
 	])
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -323,6 +323,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
 		;;
 	ftruncate)
 		AC_DEFINE(HAVE_FTRUNCATE, [1], [can truncate files])
+		;;
+	pwrite)
+		AC_DEFINE(HAVE_PWRITE, [1], [can do atomic write with offset])
 		;;
 	esac
 done

@@ -100,8 +100,8 @@
 #include <ucommon/bitmap.h>
 #include <ucommon/socket.h>
 #include <ucommon/thread.h>
-#include <ucommon/buffer.h>
 #include <ucommon/fsys.h>
+#include <ucommon/buffer.h>
 #include <ucommon/xml.h>
 
 #ifdef	_UCOMMON_EXTENDED_

@@ -937,6 +937,83 @@ void Socket::address::clear(void)
 	}
 }
 
+void Socket::release(struct addrinfo *list)
+{
+	if(list)
+		freeaddrinfo(list);
+}
+
+struct addrinfo *Socket::getaddress(const char *hp, const char *svc, int type, int protocol)
+{
+	assert(hp != NULL && *hp != 0);
+
+	int family = DEFAULT_FAMILY;
+	char hostbuf[256];
+	struct addrinfo hint;
+	String::set(hostbuf, sizeof(hostbuf), hp);
+	char *cp = strchr(hostbuf, '/');	
+	char *host = hostbuf;
+
+	memset(&hint, 0, sizeof(hint));
+
+	hint.ai_socktype = type;
+	hint.ai_protocol = protocol;
+
+#ifdef	PF_UNSPEC
+	hint.ai_family = PF_UNSPEC;
+	hint.ai_flags = AI_PASSIVE;
+#endif
+
+	if(cp)
+		*cp = 0;
+
+	if(*host == '[') {
+		cp = strchr(++host, ']');
+		if(cp) {
+			*(cp++) = 0;
+			if(*cp == ':')
+				svc = ++cp;
+		}	
+#ifdef	AF_INET6
+		family = AF_INET6;
+#else
+		return NULL;
+#endif
+	}
+	else if(((cp = strrchr(host, ':')) != NULL) && (strchr(host, ':') == cp)) {
+		*(cp++) = 0;
+		svc = cp;
+	}
+	
+	if(isNumeric(host)) {
+		hint.ai_flags |= AI_NUMERICHOST;
+
+		if(strchr(host, ':')) {
+#ifdef	AF_INET6
+			family = AF_INET6;
+#else
+			return NULL;
+#endif
+		}
+		else
+			family = AF_INET;
+	}
+
+	if(family && family != AF_UNSPEC)
+		hint.ai_family = family;
+
+#if defined(AF_INET6) && defined(AI_V4MAPPED)
+	if(hint.ai_family == AF_INET6 && !v6only)
+		hint.ai_flags |= AI_V4MAPPED;
+#endif
+	if(svc && atoi(svc) > 0)
+		hint.ai_flags |= AI_NUMERICSERV;
+
+	struct addrinfo *result = NULL;
+	getaddrinfo(host, svc, &hint, &result);
+	return result;
+}	
+
 void Socket::address::set(const char *host, unsigned port, int family)
 {
 	assert(host != NULL && *host != 0);
@@ -945,27 +1022,14 @@ void Socket::address::set(const char *host, unsigned port, int family)
 	char buf[16];
 	char *svc = NULL;
 
-	family = setfamily(family, host);
-
 	clear();
-	memset(&hint, 0, sizeof(hint));
-	hint.ai_family = family;
-	hint.ai_socktype = SOCK_STREAM;		// BSD requires valid type...
 
 	if(port) {
 		snprintf(buf, sizeof(buf), "%u", port);
-		svc = buf;
-#ifdef	AI_NUMERICSERV
-		hint.ai_flags |= AI_NUMERICSERV;
-#endif
+		list = Socket::getaddress(host, buf);
 	}
-
-#if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6 && !v6only)
-		hint.ai_flags |= AI_V4MAPPED;
-#endif
-
-	getaddrinfo(host, svc, &hint, &list);
+	else
+		list = Socket::getaddress(host, NULL);
 }
 
 void Socket::address::set(int family, const char *a, int type, int protocol)
@@ -1220,27 +1284,9 @@ void Socket::address::add(const char *host, const char *svc, int family, int soc
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
 
-	struct addrinfo *join = NULL, *last = NULL, hint;
+	struct addrinfo *join = NULL, *last = NULL;
 
-	memset(&hint, 0, sizeof(hint));
-#ifdef	PF_UNSPEC
-	hint.ai_family = PF_UNSPEC;
-	hint.ai_flags = AI_PASSIVE;
-#endif
-
-	hint.ai_socktype = socktype;
-
-	family = setfamily(family, host);
-	if(family && family != AF_UNSPEC)
-		hint.ai_family = family;
-
-#if defined(AF_INET6) && defined(AI_V4MAPPED)
-	if(hint.ai_family == AF_INET6 && !v6only)
-		hint.ai_flags |= AI_V4MAPPED;
-#endif
-
-	getaddrinfo(host, svc, &hint, &join);
-
+	join = Socket::getaddress(host, svc, socktype);
 	if(!join)
 		return;
 
@@ -1976,6 +2022,47 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 		}
 	}
 	return rtn;
+}
+
+socket_t Socket::create(struct addrinfo *node, int stype, int sprotocol)
+{
+	assert(node != NULL);
+
+	socket_t so = INVALID_SOCKET;
+	int sfamily = AF_UNSPEC;
+	int cprotocol, ctype;
+
+	while(node) {
+		if(stype && node->ai_socktype && node->ai_socktype != stype)
+			goto next;
+
+		if(sprotocol && node->ai_protocol && node->ai_protocol != sprotocol)
+			goto next;
+
+		if(node->ai_family != sfamily) {
+			if(so != INVALID_SOCKET)
+				Socket::release(so);
+			sfamily = node->ai_family;
+			if(stype)
+				ctype = stype;
+			else
+				ctype = node->ai_socktype;
+			if(sprotocol)
+				cprotocol = sprotocol;
+			else
+				cprotocol = node->ai_protocol;
+			so = Socket::create(sfamily, ctype, cprotocol);
+		}
+		if(so != INVALID_SOCKET) {
+			if(!_connect_(so, node->ai_addr, node->ai_addrlen))
+				return so;
+		}
+next:
+		node = node->ai_next;
+	}
+	if(so != INVALID_SOCKET)
+		Socket::release(so);
+	return INVALID_SOCKET;
 }
 	
 int Socket::connectto(socket_t so, struct addrinfo *node)

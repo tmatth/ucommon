@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 3.0.2)
+set (VERSION 3.1.0)
 set (SOVERSION 3)
 
 # project options
@@ -197,6 +197,7 @@ check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
 check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posixtime HAVE_POSIXTIME)
 check_function_exists(ftruncate HAVE_FTRUNCATE)
+check_function_exists(pwrite HAVE_PWRITE)
 
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(strings.h HAVE_STRINGS_H)

@@ -1,3 +1,11 @@
+ABI Changes:
+
+	Use of "family" in address type often no longer needed - depreciate.  Some
+	parts of Socket::address may also need rewriting.
+	
+	tcpstream should be rewritten to use a char * address like TCPSocket.
+	tcpstream will require Socket() as base class to do this.
+
 Proposed changes:
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...

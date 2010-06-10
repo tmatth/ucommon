@@ -19,4 +19,3 @@ bin_PROGRAMS = audiotool
 
 audiotool_SOURCES = audiotool.cpp
 audiotool_LDFLAGS = ../audio/libuccaudio.la @MATH_LIB@
-

@@ -295,6 +295,23 @@ class __EXPORT Socket
 protected:
 	socket_t so;
 
+	/**
+	 * Get an address list directly.  This is used internally by some derived
+	 * socket types when generic address lists would be invalid.
+	 * @param host name in the form address or "address:port"
+	 * @param service id or port to use if not specified in host string.
+	 * @param type of service to get.
+	 * @param protocol of service to get.
+	 */
+	static struct addrinfo *getaddress(const char *host, const char *service, int type = SOCK_STREAM, int protocol = 0);
+
+	/**
+	 * Release an address list directly.  This is used internally by some
+	 * derived socket types which do not use generic address lists.
+	 * @param list of addresses.
+	 */
+	static void release(struct addrinfo *list);
+
 public:
 	/**
 	 * A generic socket address class.  This class uses the addrinfo list
@@ -1199,6 +1216,15 @@ public:
 	static socket_t create(int family, int type, int protocol);
 
 	/**
+	 * Create a connected socket.
+	 * @param address list to connect to.
+	 * @param type of socket to create.
+	 * @param protocol of socket.
+	 * @return socket descriptor created or INVALID_SOCKET.
+	 */
+	static socket_t create(struct addrinfo *address, int type, int protocol);
+
+	/**
 	 * Create a bound socket for a service.
 	 * @param iface to bind.
 	 * @param service port to bind.
@@ -1540,6 +1566,13 @@ public:
 	 */
     inline socket_t operator*() const
         {return so;};	
+
+	/**
+	 * Get the socket descriptor of the listener.
+	 * @return socket descriptor.
+	 */
+	inline socket_t getsocket(void) const
+		{return so;};
 };
 
 /**
