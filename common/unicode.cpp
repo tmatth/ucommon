@@ -56,11 +56,11 @@ ucs4_t utf8::getchar(FILE *fp)
 		code = ch & 0x0f;
 		count = 2;
 	}
-	else if((ch && 0xf8) == 0xf0) {
+	else if((ch & 0xf8) == 0xf0) {
 		code = ch & 0x07;
 		count = 3;
 	}
-	else if((ch && 0xfc) == 0xf8) {
+	else if((ch & 0xfc) == 0xf8) {
 		code = ch & 0x03;
 		count = 4;
 	}

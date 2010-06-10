@@ -188,7 +188,7 @@ size_t IOBuffer::printf(const char *format, ...)
 	if(result < 1)
 		return 0;
 
-	if(result > bufsize)
+	if((size_t)result > bufsize)
 		result = bufsize;
 
 	count = _push(output, result);
@@ -268,6 +268,8 @@ size_t IOBuffer::putline(const char *string)
 
 	if(eol)
 		count += putchars(eol);
+
+	return count;
 }
 
 size_t IOBuffer::getline(char *string, size_t size)
