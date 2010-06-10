@@ -157,8 +157,10 @@ void ReusableAllocator::release(ReusableObject *obj)
 
 	lock();
 	obj->enlist(ru);
+
 	if(waiting)
 		signal();
+
 	unlock();
 }
 

@@ -44,6 +44,7 @@ IOBuffer::~IOBuffer()
 void IOBuffer::release(void)
 {
 	if(buffer) {
+		flush();
 		free(buffer);
 		input = output = buffer = NULL;
 		end = true;
@@ -169,6 +170,7 @@ int IOBuffer::putchar(int ch)
 	}
 	
 	output[outsize++] = ch;
+	return ch;
 }
 
 size_t IOBuffer::printf(const char *format, ...)
