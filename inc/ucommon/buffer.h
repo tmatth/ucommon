@@ -142,6 +142,12 @@ protected:
 	inline size_t _waiting(void)
 		{return outsize;};
 
+	/**
+	 * Get size of the I/O buffer.
+	 */
+	inline size_t _buffering(void)
+		{return bufsize;};
+
 public:
 	/**
 	 * Get a character from the buffer.  If no data is available, return EOF.
@@ -213,6 +219,13 @@ public:
 	 * @return true if end of data, false if input still buffered.
 	 */
 	bool eof();
+
+	/**
+	 * Get last error associated with a failed I/O operation.
+	 * @return last error.
+	 */
+	inline int errcode(void)
+		{return ioerror;};
 };
 
 END_NAMESPACE
