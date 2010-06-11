@@ -99,7 +99,7 @@ size_t IOBuffer::getchars(char *address, size_t size)
 			bufpos = 0;
 			if(insize == 0)
 				end = true;
-			else if(insize < bufsize && (timeout == Timer::inf || timeout == 0))
+			else if(insize < bufsize && !timeout)
 				end = true;
 
 			if(!insize)
@@ -123,7 +123,7 @@ int IOBuffer::getchar(void)
 		bufpos = 0;
 		if(insize == 0)
 			end = true;
-		else if(insize < bufsize && timeout == Timer::inf)
+		else if(insize < bufsize && !timeout)
 			end = true;
 
 		if(!insize)
@@ -361,15 +361,18 @@ bool IOBuffer::pending(void)
 
 fbuf::fbuf() : IOBuffer(), fsys()
 {
+	timeout = 0;
 }
 
 fbuf::fbuf(const char *path, access_t access, size_t size)
 {
+	timeout = 0;
 	open(path, access, size);
 }
 
 fbuf::fbuf(const char *path, access_t access, unsigned mode, size_t size)
 {
+	timeout = 0;
 	create(path, access, mode, size);
 }
 
