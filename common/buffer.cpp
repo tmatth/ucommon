@@ -388,6 +388,7 @@ void fbuf::open(const char *path, access_t mode, size_t size)
 	case ACCESS_APPEND:
 		outpos = fsys::end;
 		allocate(size, BUF_WR);
+	default:
 		break;
 	}
 }
@@ -418,6 +419,7 @@ void fbuf::create(const char *path, access_t mode, unsigned cmode, size_t size)
 	case ACCESS_APPEND:
 		outpos = fsys::end;
 		allocate(size, BUF_WR);
+	default:
 		break;
 	}
 }

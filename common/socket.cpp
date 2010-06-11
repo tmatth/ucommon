@@ -1018,9 +1018,7 @@ void Socket::address::set(const char *host, unsigned port, int family)
 {
 	assert(host != NULL && *host != 0);
 	
-	struct addrinfo hint;
 	char buf[16];
-	char *svc = NULL;
 
 	clear();
 
