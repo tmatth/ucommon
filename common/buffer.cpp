@@ -204,6 +204,11 @@ size_t IOBuffer::printf(const char *format, ...)
 	return count;
 }
 
+void IOBuffer::purge(void)
+{
+	outsize = insize = bufpos = 0;
+}
+
 bool IOBuffer::flush(void)
 {
 	if(!output)

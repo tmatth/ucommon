@@ -201,6 +201,11 @@ public:
 	bool flush(void);
 
 	/**
+	 * Purge any pending input or output buffer data.
+	 */
+	void purge(void);
+
+	/**
 	 * Reset input buffer state.  Drops any pending input.
 	 */
 	void reset(void);
