@@ -943,7 +943,7 @@ void Socket::release(struct addrinfo *list)
 		freeaddrinfo(list);
 }
 
-struct addrinfo *Socket::getaddress(const char *hp, const char *svc, int type, int protocol)
+struct ::addrinfo *Socket::getaddress(const char *hp, const char *svc, int type, int protocol)
 {
 	assert(hp != NULL && *hp != 0);
 
@@ -1006,8 +1006,10 @@ struct addrinfo *Socket::getaddress(const char *hp, const char *svc, int type, i
 	if(hint.ai_family == AF_INET6 && !v6only)
 		hint.ai_flags |= AI_V4MAPPED;
 #endif
+#ifdef	AI_NUMERICSERV
 	if(svc && atoi(svc) > 0)
 		hint.ai_flags |= AI_NUMERICSERV;
+#endif
 
 	struct addrinfo *result = NULL;
 	getaddrinfo(host, svc, &hint, &result);

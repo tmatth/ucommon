@@ -732,10 +732,14 @@ size_t TCPSocket::_pull(char *address, size_t len)
 	if(timeout && !Socket::wait(so, timeout))
 		return 0;
 
+#ifdef	MSG_DONTWAIT
 	if(timeout)
 		result = Socket::recvfrom(so, address, len, MSG_DONTWAIT);
 	else
 		result = Socket::recvfrom(so, address, len, MSG_WAITALL);
+#else
+	result = Socket::recvfrom(so, address, len, 0);
+#endif
 
 	if(result < 0) {
 		result = 0;

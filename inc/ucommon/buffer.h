@@ -436,7 +436,7 @@ protected:
 	 * @return service identifier associated with the socket.
 	 */
 	inline short getservice(void) const
-		{return atol(serviceid);};
+		{return (short)(atol(serviceid));};
 
 	/**
 	 * Get the tag used for this socket.
