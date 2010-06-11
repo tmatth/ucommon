@@ -34,7 +34,9 @@
 #include <ucommon/linked.h>
 #endif
 
-struct addrinfo;
+extern "C" {
+	struct addrinfo;
+}
 
 #ifdef	_MSWINDOWS_
 #define	SHUT_RDWR	SD_BOTH
