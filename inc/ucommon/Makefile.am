@@ -16,5 +16,5 @@ pkgincludedir = $(includedir)/ucommon
 pkginclude_HEADERS = object.h linked.h string.h counter.h vector.h \
 	bitmap.h timers.h socket.h access.h export.h thread.h mapped.h keydata.h \
 	memory.h platform.h fsys.h xml.h ucommon.h stream.h persist.h shell.h \
-	buffer.h numbers.h datetime.h unicode.h script.h audio.h
+	atomic.h buffer.h numbers.h datetime.h unicode.h script.h audio.h
 
