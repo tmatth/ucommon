@@ -1,3 +1,8 @@
+from ucommon 3.0.3 to 3.0.4
+- buffer purge method added.
+- new flush socket virtual method.
+- buffering support and tcp socket for non-blocking i/o.
+
 from ucommon 3.0.2 to 3.0.3
 - new biderectional buffered i/o support added.
 - new buffered file and buffered tcp socket classes added.

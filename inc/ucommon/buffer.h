@@ -198,7 +198,7 @@ public:
 	 * Flush buffered memory to physical I/O.
 	 * @return true on success, false if not active or fails.
 	 */
-	bool flush(void);
+	virtual bool flush(void);
 
 	/**
 	 * Purge any pending input or output buffer data.
@@ -286,6 +286,12 @@ public:
 	 */
 	inline void seteof(void)
 		{end = true;};
+
+	/**
+	 * See if data is pending.
+	 * @return true if data is pending.
+	 */
+	virtual bool pending(void);
 };
 
 /**
@@ -416,7 +422,7 @@ public:
 class __EXPORT TCPSocket : public IOBuffer, private Socket
 {
 private:
-	void _buffer(size_t size, timeout_t timer);
+	void _buffer(size_t size);
 
 	char serviceid[16];
 	const char *servicetag;
@@ -473,7 +479,7 @@ public:
 	 * @param size of buffer and tcp fragments.
 	 * @param timer mode for i/o operations.
 	 */
-	TCPSocket(TCPServer *server, size_t size = 536, timeout_t timer = Timer::inf);
+	TCPSocket(TCPServer *server, size_t size = 536);
 
 	/**
 	 * Construct a tcp client session connected to a specific host uri.
@@ -482,7 +488,7 @@ public:
 	 * @param size of buffer and tcp fragments.
 	 * @param timer mode for i/o operations.
 	 */
-	TCPSocket(const char *service, const char *host, size_t size = 536, timeout_t timer = Timer::inf);
+	TCPSocket(const char *service, const char *host, size_t size = 536);
 
 	/**
 	 * Destroy the tcp socket and release all resources.
@@ -496,21 +502,32 @@ public:
 	 * @param size of buffer and tcp fragments.
 	 * @param timer mode for i/o operations.
 	 */
-	void open(TCPServer *server, size_t size = 536, timeout_t timer = Timer::inf);
+	void open(TCPServer *server, size_t size = 536);
 
 	/**
 	 * Connect a tcp client session to a specific host uri.  If the socket
 	 * was already connected, it is automatically closed first.
 	 * @param host and optional :port we are connecting to.
 	 * @param size of buffer and tcp fragments.
-	 * @param timer mode for i/o operations.
 	 */
-	void open(const char *host, size_t size = 536, timeout_t timer = Timer::inf);
+	void open(const char *host, size_t size = 536);
 
 	/**
 	 * Close active connection.
 	 */
 	void close(void);
+
+	/**
+	 * Set timeout interval and blocking.
+	 * @param timeout to use.
+	 */
+	void blocking(timeout_t timeout = Timer::inf);	
+
+	/**
+	 * Check for pending tcp or ssl data.
+	 * @return true if data pending.
+	 */
+	bool pending(void);
 };
 
 /**

@@ -99,7 +99,7 @@ size_t IOBuffer::getchars(char *address, size_t size)
 			bufpos = 0;
 			if(insize == 0)
 				end = true;
-			else if(insize < bufsize && timeout == Timer::inf)
+			else if(insize < bufsize && (timeout == Timer::inf || timeout == 0))
 				end = true;
 
 			if(!insize)
@@ -348,6 +348,17 @@ size_t IOBuffer::_pull(char *address, size_t size)
 	return 0;
 }
 
+bool IOBuffer::pending(void)
+{
+	if(!input)
+		return false;
+
+	if(!bufpos)
+		return false;
+
+	return true;
+}
+
 fbuf::fbuf() : IOBuffer(), fsys()
 {
 }
@@ -592,23 +603,23 @@ TCPSocket::TCPSocket(const char *service) : IOBuffer()
 	servicetag = service;	// default tag for new connections...
 }
 
-TCPSocket::TCPSocket(const char *service, const char *host, size_t size, timeout_t timer) :
+TCPSocket::TCPSocket(const char *service, const char *host, size_t size) :
 IOBuffer()
 {
 	so = INVALID_SOCKET;
 	timeout = Timer::inf;
 	String::set(serviceid, sizeof(serviceid), service);
 	servicetag = service;
-	open(host, size, timeout);
+	open(host, size);
 }
 
-TCPSocket::TCPSocket(TCPServer *server, size_t size, timeout_t timer) :
+TCPSocket::TCPSocket(TCPServer *server, size_t size) :
 IOBuffer()
 {
 	String::set(serviceid, sizeof(serviceid), "0");
 	servicetag = serviceid;
 	so = INVALID_SOCKET;
-	open(server, size, timer);
+	open(server, size);
 }
 
 TCPSocket::~TCPSocket()
@@ -616,7 +627,7 @@ TCPSocket::~TCPSocket()
 	TCPSocket::close();
 }
 
-void TCPSocket::open(const char *host, size_t size, timeout_t timer)
+void TCPSocket::open(const char *host, size_t size)
 {
 	struct sockaddr_storage address;
 	socklen_t alen = sizeof(address);
@@ -634,10 +645,10 @@ void TCPSocket::open(const char *host, size_t size, timeout_t timer)
 	if(getpeername(so, (struct sockaddr *)&address, &alen) == 0)
 		snprintf(serviceid, sizeof(serviceid), "%u", Socket::getservice((struct sockaddr *)&address));
 
-	_buffer(size, timer);
+	_buffer(size);
 }
 
-void TCPSocket::open(TCPServer *server, size_t size, timeout_t timer)
+void TCPSocket::open(TCPServer *server, size_t size)
 {
 	close();
 	so = server->accept();
@@ -654,7 +665,7 @@ void TCPSocket::open(TCPServer *server, size_t size, timeout_t timer)
 	if(getsockname(server->getsocket(), (struct sockaddr *)&address, &alen) == 0)
 		snprintf(serviceid, sizeof(serviceid), "%u", Socket::getservice((struct sockaddr *)&address));	
 
-	_buffer(size, timer);
+	_buffer(size);
 }
 
 void TCPSocket::close(void)
@@ -667,13 +678,22 @@ void TCPSocket::close(void)
 	so = INVALID_SOCKET;
 }
 
-void TCPSocket::_buffer(size_t size, timeout_t timer)
+void TCPSocket::blocking(timeout_t timer)
+{
+	timeout = timer;
+	if(timeout == Timer::inf)
+		Socket::blocking(so, true);
+	else
+		Socket::blocking(so, false);
+}
+
+void TCPSocket::_buffer(size_t size)
 {
 	unsigned iobuf = 0;
 	unsigned mss = size;
 	unsigned max = 0;
 
-	timeout = timer;
+	timeout = Timer::inf;
 #ifdef	TCP_MAXSEG
 	socklen_t alen = sizeof(max);
 #endif
@@ -734,11 +754,11 @@ size_t TCPSocket::_pull(char *address, size_t len)
 {
 	ssize_t result;
 
-	if(timeout && !Socket::wait(so, timeout))
+	if(timeout && timeout != Timer::inf && !Socket::wait(so, timeout))
 		return 0;
 
 #ifdef	MSG_DONTWAIT
-	if(timeout)
+	if(timeout != Timer::inf)
 		result = Socket::recvfrom(so, address, len, MSG_DONTWAIT);
 	else
 		result = Socket::recvfrom(so, address, len, MSG_WAITALL);
@@ -762,3 +782,13 @@ size_t TCPSocket::peek(char *data, size_t size, timeout_t timeout)
 	return Socket::peek(data, size);
 }
 
+bool TCPSocket::pending(void)
+{
+	if(_pending())
+		return true;
+	
+	if(isinput())
+		return Socket::wait(so, timeout);
+
+	return false;
+}

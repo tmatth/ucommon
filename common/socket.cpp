@@ -1677,6 +1677,17 @@ ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, str
 	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL | flags, dest, slen);
 }
 
+ssize_t Socket::puts(const char *str, struct sockaddr *address)
+{
+	if(!str)
+		return 0;
+
+	if(!*str)
+		return 0;
+
+	return put(str, strlen(str), address);
+}
+
 ssize_t Socket::puts(const char *str)
 {
 	if(!str)
@@ -2200,6 +2211,31 @@ socket_t Socket::acceptfrom(socket_t so, struct sockaddr_storage *addr)
 bool Socket::waitPending(timeout_t timeout) const
 {
 	return wait(so, timeout);
+}
+
+bool Socket::flush(void)
+{
+	if(so == INVALID_SOCKET)
+		return false;
+
+#ifdef	USE_POLL
+	struct pollfd pfd;
+
+	pfd.fd = so;
+	pfd.revents = 0;
+	pfd.events = POLLOUT;
+	_poll_(&pfd, 1, -1);
+	if(pfd.revents & POLLOUT)
+		return true;
+#else
+	fd_set grp;
+
+	FD_ZERO(&grp);
+	FD_SET(so, &grp);
+	if(_select_((int)(so + 1), NULL, &grp, NULL, NULL) > 0)
+		return true;
+#endif
+	return false;
 }
 
 bool Socket::wait(socket_t so, timeout_t timeout)

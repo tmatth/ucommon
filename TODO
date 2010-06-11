@@ -1,10 +1,16 @@
-ABI Changes:
+Proposed ABI changes (3.1 or 4.0?):
 
 	Use of "family" in address type often no longer needed - depreciate.  Some
 	parts of Socket::address may also need rewriting.
 	
 	tcpstream should be rewritten to use a char * address like TCPSocket.
 	tcpstream will require Socket() as base class to do this.
+
+	consolidate "Socket::puts"
+
+Proposed additions:
+
+	A pipe stream/process pipe handler that uses the new IOBuffer class.
 
 Proposed changes:
 

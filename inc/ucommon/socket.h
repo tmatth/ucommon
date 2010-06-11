@@ -926,6 +926,16 @@ public:
 	ssize_t puts(const char *string);
 
 	/**
+	 * Write a null terminated string to the socket.  This exists because
+	 * we messed up consistency with the original puts() method.  In the
+	 * future there will be a single puts() that has a NULL default.
+	 * @param string to write.
+	 * @param address to write to.
+	 * @return number of bytes sent, 0 if none, -1 if error.
+	 */
+	ssize_t puts(const char *string, struct sockaddr *address);
+
+	/**
 	 * Test if socket is valid.
 	 * @return true if valid socket.
 	 */
@@ -1521,6 +1531,13 @@ public:
 	 * @return true if zero/null address.
 	 */
 	static bool isNumeric(const char *string);
+
+	/**
+	 * Flush socket by verifying the socket is ready to "send".  This is a
+	 * virtual that can be altered up the stack.
+	 * @return true on success, false on some failure.
+	 */
+	virtual bool flush(void);
 };
 
 /**
