@@ -58,6 +58,7 @@ private:
 protected:
 	int ioerror;
 	timeout_t timeout;
+	const char *format;
 
 	/**
 	 * Construct an empty (unallocated) buffer.
