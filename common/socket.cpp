@@ -2213,31 +2213,6 @@ bool Socket::waitPending(timeout_t timeout) const
 	return wait(so, timeout);
 }
 
-bool Socket::flush(void)
-{
-	if(so == INVALID_SOCKET)
-		return false;
-
-#ifdef	USE_POLL
-	struct pollfd pfd;
-
-	pfd.fd = so;
-	pfd.revents = 0;
-	pfd.events = POLLOUT;
-	_poll_(&pfd, 1, -1);
-	if(pfd.revents & POLLOUT)
-		return true;
-#else
-	fd_set grp;
-
-	FD_ZERO(&grp);
-	FD_SET(so, &grp);
-	if(_select_((int)(so + 1), NULL, &grp, NULL, NULL) > 0)
-		return true;
-#endif
-	return false;
-}
-
 bool Socket::wait(socket_t so, timeout_t timeout)
 {
 	int status;

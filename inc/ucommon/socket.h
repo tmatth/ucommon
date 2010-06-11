@@ -1531,13 +1531,6 @@ public:
 	 * @return true if zero/null address.
 	 */
 	static bool isNumeric(const char *string);
-
-	/**
-	 * Flush socket by verifying the socket is ready to "send".  This is a
-	 * virtual that can be altered up the stack.
-	 * @return true on success, false on some failure.
-	 */
-	virtual bool flush(void);
 };
 
 /**

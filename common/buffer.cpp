@@ -140,8 +140,8 @@ size_t IOBuffer::putchars(const char *address, size_t size)
 	if(!output || !address)
 		return 0;
 
-	if(!count)
-		count = strlen(address);
+	if(!size)
+		size = strlen(address);
 
 	while(count < size) {
 		if(outsize == bufsize) {
@@ -296,7 +296,7 @@ size_t IOBuffer::getline(char *string, size_t size)
 
 	while(count < size - 1) {
 		int ch = getchar();
-		if(EOF) {
+		if(ch == EOF) {
 			eolp = 0;
 			break;
 		}
@@ -702,7 +702,7 @@ void TCPSocket::_buffer(size_t size)
 #endif
 
 	if(size < 80) {
-		allocate(size);
+		allocate(size, BUF_RDWR);
 		return;
 	}
 
@@ -740,7 +740,7 @@ void TCPSocket::_buffer(size_t size)
 		Socket::sendwait(so, mss * 4);
 
 alloc:
-	allocate(size);
+	allocate(size, BUF_RDWR);
 }
 
 size_t TCPSocket::_push(const char *address, size_t len)
@@ -757,7 +757,7 @@ size_t TCPSocket::_pull(char *address, size_t len)
 {
 	ssize_t result;
 
-	if(timeout && timeout != Timer::inf && !Socket::wait(so, timeout))
+	if((timeout && timeout != Timer::inf) && !Socket::wait(so, timeout))
 		return 0;
 
 #ifdef	MSG_DONTWAIT
