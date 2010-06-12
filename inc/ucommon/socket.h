@@ -647,6 +647,21 @@ public:
 	bool waitPending(timeout_t timeout = 0) const;
 
 	/**
+	 * Wait for outbound socket to flush, with an optional timeout.
+	 * @param timeout or 0 if none.
+	 * @return true if queue no longer blocked.
+	 */
+	inline bool flush(timeout_t timeout = 0) const
+		{return flush(timeout);};
+
+	/**
+	 * Set nodelay option for tcp socket.
+	 * @return 0 if successful, -1 on error.
+	 */
+	inline int nodelay(void) const
+		{return nodelay(so);};
+
+	/**
 	 * Test for pending input data.  This function can wait up to a specified
 	 * timeout for data to appear.
 	 * @param socket to test.
@@ -1079,6 +1094,21 @@ public:
 	 * @return 0 if success, -1 if error.
 	 */
 	static int broadcast(socket_t socket, bool enable);
+
+	/**
+	 * Set tcp nodelay option on socket descriptor.
+	 * @param socket desciptor.
+	 * @return 0 if success, -1 if error.
+	 */
+	static int nodelay(socket_t socket);
+
+	/**
+	 * Wait until output buffer of socket is flushed.
+	 * @param socket descriptor.
+	 * @param timeout to wait or 0 if none.
+	 * @return true if no longer blocked.
+	 */
+	static bool flush(socket_t socket, timeout_t timeout = 0);
 
 	/**
 	 * Set packet priority of socket descriptor.

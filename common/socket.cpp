@@ -1840,6 +1840,19 @@ int Socket::broadcast(socket_t so, bool enable)
               (char *)&opt, (socklen_t)sizeof(opt));
 }
 
+int Socket::nodelay(socket_t so)
+{
+	if(so == INVALID_SOCKET)
+		return -1;
+#if defined(TCP_NODELAY)
+	int opt = 1;
+	return ::setsockopt(so, IPPROTO_TCP, TCP_NODELAY,
+		(char *)&ipt, (socklen_t)sizeof(opt));
+#else
+	return -1;
+#endif
+}
+
 int Socket::keepalive(socket_t so, bool enable)
 {
 	if(so == INVALID_SOCKET)
@@ -1847,7 +1860,7 @@ int Socket::keepalive(socket_t so, bool enable)
 #if defined(SO_KEEPALIVE) || defined(_MSWINDOWS_)
 	int opt = (enable ? ~0 : 0);
 	return ::setsockopt(so, SOL_SOCKET, SO_KEEPALIVE,
-             (char *)&opt, (socklen_t)sizeof(opt));
+		(char *)&opt, (socklen_t)sizeof(opt));
 #else
 	return -1;
 #endif
@@ -2211,6 +2224,60 @@ socket_t Socket::acceptfrom(socket_t so, struct sockaddr_storage *addr)
 bool Socket::waitPending(timeout_t timeout) const
 {
 	return wait(so, timeout);
+}
+
+bool Socket::flush(socket_t so, timeout_t timeout)
+{
+	int status;
+
+#ifdef	USE_POLL
+	struct pollfd pfd;
+
+	pfd.fd = so;
+	pfd.revents = 0;
+	pfd.events = POLLOUT;
+
+	if(so == INVALID_SOCKET)
+		return false;
+
+	status = 0;
+	while(status < 1) {
+		if(timeout == Timer::inf)
+			status = _poll_(&pfd, 1, -1);
+		else
+			status = _poll_(&pfd, 1, timeout);
+		if(status == -1 && errno == EINTR)
+			continue;
+		if(status < 0)
+			return false;
+	}
+	if(pfd.revents & POLLOUT)
+		return true;
+	return false;
+#else
+	struct timeval tv;
+	struct timeval *tvp = &tv;
+	fd_set grp;
+
+	if(so == INVALID_SOCKET)
+		return false;
+
+	if(timeout == Timer::inf)
+		tvp = NULL;
+	else {
+        tv.tv_usec = (timeout % 1000) * 1000;
+        tv.tv_sec = timeout / 1000;
+	}
+
+	FD_ZERO(&grp);
+	FD_SET(so, &grp);
+	status = _select_((int)(so + 1), NULL, &grp, NULL, tvp);
+	if(status < 1)
+		return false;
+	if(FD_ISSET(so, &grp))
+		return true;
+	return false;
+#endif
 }
 
 bool Socket::wait(socket_t so, timeout_t timeout)
