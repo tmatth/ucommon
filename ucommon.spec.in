@@ -103,7 +103,7 @@ from header files, html browsable.
 
 %files 
 %defattr(-,root,root,-)
-%doc AUTHORS README COPYING COPYING.LESSER NEWS SUPPORT ChangeLog
+%doc AUTHORS README COPYING COPYING.LESSER COPYRIGHT NEWS SUPPORT ChangeLog
 %{_libdir}/libucommon.so.*
 
 %files script

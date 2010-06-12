@@ -8,6 +8,8 @@ Proposed ABI changes (3.1 or 4.0?):
 
 	consolidate "Socket::puts"
 
+	redo socket return int's like fsys to return errno() on error.
+
 Proposed additions:
 
 	A pipe stream/process pipe handler that uses the new IOBuffer class.

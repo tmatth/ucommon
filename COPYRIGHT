@@ -1,0 +1,18 @@
+This package is collectively known as GNU uCommon C++.
+
+This package is collectively licensed using the GNU General Public License
+version 3.0 or later.  
+
+Specific component libraries of the GNU uCommon C++ framework may be licensed
+using the GNU Lesser General General Public License 3.0 or later.  At this
+time, only the core library, libucommon, is licensed in this way.
+
+The primary copyright holder is David Sugar and Tycho Softworks, both directly
+and through copyright assignment.
+
+Some specific individual classes in the library may have additional individual
+copyright holders or copyrighted by the Free Software Foundation. 
+
+Our preference is that all contributions are copyright assigned to the Free
+Software Foundation.
+

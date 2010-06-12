@@ -1,4 +1,4 @@
-// Copyright (C) 2006-2008 David Sugar, Tycho Softworks.
+// Copyright (C) 2006-2010 David Sugar, Tycho Softworks.
 //
 // This file is part of GNU uCommon C++.
 //
@@ -13,7 +13,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with GNU ucommon.  If not, see <http://www.gnu.org/licenses/>.
+// along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Top level include file for the GNU uCommon C++ core library.
