@@ -1,5 +1,5 @@
 from ucommon 3.0.4 to 3.0.5
-- new socket options for nodelay and i/o send flush.
+- new socket option for nodelay.
 - copyright notices fixed for consistency.
 
 from ucommon 3.0.3 to 3.0.4
