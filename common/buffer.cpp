@@ -83,7 +83,7 @@ void IOBuffer::allocate(size_t size, type_t mode)
 		end = false;
 }
 
-size_t IOBuffer::getchars(char *address, size_t size)
+size_t IOBuffer::getstr(char *address, size_t size)
 {
 	size_t count = 0;
 
@@ -110,7 +110,7 @@ size_t IOBuffer::getchars(char *address, size_t size)
 	return count;
 }
 
-int IOBuffer::getchar(void)
+int IOBuffer::getch(void)
 {
 	if(!input)
 		return EOF;
@@ -133,7 +133,7 @@ int IOBuffer::getchar(void)
 	return input[bufpos++];
 }
 
-size_t IOBuffer::putchars(const char *address, size_t size)
+size_t IOBuffer::putstr(const char *address, size_t size)
 {
 	size_t count = 0;
 
@@ -159,7 +159,7 @@ size_t IOBuffer::putchars(const char *address, size_t size)
 	return count;
 }
 
-int IOBuffer::putchar(int ch)
+int IOBuffer::putch(int ch)
 {
 	if(!output)
 		return EOF;
@@ -271,10 +271,10 @@ size_t IOBuffer::putline(const char *string)
 	size_t count = 0;
 
 	if(string)
-		count += putchars(string);
+		count += putstr(string);
 
 	if(eol)
-		count += putchars(eol);
+		count += putstr(eol);
 
 	return count;
 }
@@ -295,7 +295,7 @@ size_t IOBuffer::getline(char *string, size_t size)
 		return 0;
 
 	while(count < size - 1) {
-		int ch = getchar();
+		int ch = getch();
 		if(ch == EOF) {
 			eolp = 0;
 			break;
