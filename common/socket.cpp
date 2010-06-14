@@ -1847,7 +1847,7 @@ int Socket::nodelay(socket_t so)
 #if defined(TCP_NODELAY)
 	int opt = 1;
 	return ::setsockopt(so, IPPROTO_TCP, TCP_NODELAY,
-		(char *)&ipt, (socklen_t)sizeof(opt));
+		(char *)&opt, (socklen_t)sizeof(opt));
 #else
 	return -1;
 #endif
