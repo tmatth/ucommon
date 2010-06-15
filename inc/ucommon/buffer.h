@@ -161,13 +161,13 @@ public:
 	 * Get a character from the buffer.  If no data is available, return EOF.
 	 * @return character from buffer or eof.
 	 */
-	int get(void);
+	int getch(void);
 
 	/**
 	 * Put a character into the buffer.
 	 * @return character put into buffer or eof.
 	 */
-	int put(int ch);
+	int putch(int ch);
 
 	/**
 	 * Gry memory from the buffer.
@@ -175,7 +175,7 @@ public:
 	 * @param count of characters to get from buffer.
 	 * @return number of characters actually copied.
 	 */
-	size_t get(char *address, size_t count);
+	size_t getstr(char *address, size_t count);
 
 	/**
 	 * Put memory into the buffer.  If count is 0 then put as NULL
@@ -184,7 +184,7 @@ public:
 	 * @param count of characters to put into buffer.
 	 * @return number of characters actually written.
 	 */
-	size_t put(const char *address, size_t count = 0);
+	size_t putstr(const char *address, size_t count = 0);
 
 	/**
 	 * Print formatted string to the buffer.  The maximum output size is
