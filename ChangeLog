@@ -1,6 +1,6 @@
 from ucommon 3.0.5 to 3.0.6
-- socks proxy support possible with --enable-socks configure flag.
-- new Socket methods to wrap core socket functionality.
+- optional socks proxy support possible with --enable-socks configure flag.
+- new Socket methods to wrap core socket functionality and new init method.
 
 from ucommon 3.0.4 to 3.0.5
 - new socket option for nodelay.
