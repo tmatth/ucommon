@@ -19,6 +19,7 @@
 #include <ucommon/socket.h>
 #include <ucommon/string.h>
 #include <ucommon/thread.h>
+#include <ucommon/fsys.h>
 #ifndef	_MSWINDOWS_
 #include <net/if.h>
 #include <sys/un.h>
@@ -575,10 +576,35 @@ void Socket::init(void)
 
 void Socket::init(const char *progname)
 {
+	assert(progname != NULL);
+
 	Socket::init();
 #ifdef	HAVE_SOCKS
-	if(progname)
-		SOCKSinit((char *)progname);
+	const char *cp;
+
+#ifdef	_MSWINDOWS_
+	char path[65];
+
+	cp = strrchr(progname, '/');
+	if(!cp)
+		cp = strrchr(progname, '\\');
+	if(!cp)
+		cp = strrchr(progname, ':');
+	if(cp)
+		progname = ++cp;
+
+	String::set(path, sizeof(path), progname);
+	const char *ext = strrchr(path, '.');
+	if(ext && (ieq(ext, ".exe") || ieq(ext, ".com")))
+		*ext = 0;
+	progname = path;
+#else
+	cp = strrchr(progname, '/');
+	if(cp)
+		progname = ++cp;
+#endif
+
+	SOCKSinit((char *)progname);
 #endif
 }
 

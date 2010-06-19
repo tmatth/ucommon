@@ -20,6 +20,10 @@
 #include <ucommon/fsys.h>
 #include <ucommon/string.h>
 
+#ifdef	HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #ifdef HAVE_LINUX_VERSION_H
 #include <linux/version.h>
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,8)
@@ -1030,3 +1034,4 @@ void *fsys::find(mem_t addr, const char *sym)
 }
 
 #endif
+

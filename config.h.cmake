@@ -60,6 +60,7 @@
 #cmakedefine HAVE_REGEX_H 1
 #cmakedefine HAVE_SYS_INOTIFY_H 1
 #cmakedefine HAVE_SYS_EVENT_H 1
+#cmakedefine HAVE_SYSLOG_H 1
 #cmakedefine PACKAGE ${PROJECT_NAME}
 #define STDC_HEADERS 1
 #cmakedefine VERSION "${VERSION}"
