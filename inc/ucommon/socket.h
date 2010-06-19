@@ -316,6 +316,13 @@ protected:
 
 public:
 	/**
+	 * External definition of fd_set type.  This is used to generate
+	 * select calls which may be wrapped through an internal function
+	 * such as socks proxy or pth library.
+	 */
+	typedef	void *set_t;
+
+	/**
 	 * A generic socket address class.  This class uses the addrinfo list
 	 * to store socket multiple addresses in a protocol and family
 	 * independent manner.  Hence, this address class can be used for ipv4
@@ -1485,6 +1492,12 @@ public:
 	static void init(void);
 
 	/**
+	 * Initialize with program name.  Used by socks, for example.
+	 * @param program name.
+	 */
+	static void init(const char *program);
+
+	/**
 	 * Set default socket family preference for query options when the
 	 * socket type is otherwise not specified.
 	 * @param query family to select.
@@ -1545,6 +1558,44 @@ public:
 	 * @return true if zero/null address.
 	 */
 	static bool isNumeric(const char *string);
+
+	/**
+	 * Get local address to which the socket is bound.  This is defined here
+	 * because we may re-define the backend linkage for the socks proxy in 
+	 * the future.
+	 * @param socket descriptor to examine.
+	 * @param address storage for local address.
+	 * @return 0 on success, -1 on failure.
+	 */
+	static int getlocal(socket_t socket, struct sockaddr_storage *address);
+
+	/**
+	 * Get remote address to which the socket is connected.  This is defined 
+	 * here because we may re-define the backend linkage for the socks proxy in 
+	 * the future.
+	 * @param socket descriptor to examine.
+	 * @param address storage for remote address.
+	 * @return 0 on success, -1 on failure.
+	 */
+	static int getremote(socket_t socket, struct sockaddr_storage *address);
+
+	/**
+	 * Select without timeout.
+	 * @param max socket id + 1.
+	 * @param read mask of socket id's.
+	 * @param write mask of socket id's.
+	 * @param error mask of socket id's.
+	 */
+	static int select(int max, set_t read, set_t write, set_t error);
+
+	/**
+	 * Select with timeout.
+	 * @param max socket id + 1.
+	 * @param read mask of socket id's.
+	 * @param write mask of socket id's.
+	 * @param error mask of socket id's.
+	 */
+	static int select(int max, set_t read, set_t write, set_t error, timeout_t timeout);
 };
 
 /**
@@ -1599,6 +1650,7 @@ public:
 	 */
 	inline socket_t getsocket(void) const
 		{return so;};
+
 };
 
 /**

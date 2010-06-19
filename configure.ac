@@ -88,7 +88,8 @@ if test -z "$enable_stdcpp" ; then
 fi
 		
 AC_ARG_ENABLE(stdcpp, 
-	AC_HELP_STRING([--disable-stdcpp],[compile without stdc++ runtime overhead]))
+	AC_HELP_STRING([--disable-stdcpp],
+		[compile without stdc++ runtime overhead]))
 
 if test "x$enable_stdcpp" = "xno" ; then
 	UCOMMON_MODEL="CC"
@@ -96,6 +97,9 @@ if test "x$enable_stdcpp" = "xno" ; then
 else
 	AC_MSG_RESULT(yes)
 fi
+
+
+AC_MSG_CHECKING([socks proxy support])
 
 AC_ARG_WITH(components,
 	AC_HELP_STRING([--with-components=libs],[specify which libs to build]),[
@@ -172,6 +176,25 @@ AC_CHECK_LIB(msvcrt, fopen, [
 		socket_lib="$socket_lib -lnsl"
 	])
 ])
+
+AC_ARG_ENABLE(socks, 
+	AC_HELP_STRING([--enable-socks],
+		[compile with socks proxy support]))
+
+if test "x$enable_socks" = "xyes" ; then
+	AC_MSG_RESULT(yes)
+	enable_socks="no"
+	AC_CHECK_HEADERS(socks.h, [
+		enable_socks="yes"
+	])
+else
+	AC_MSG_RESULT(no)
+fi
+
+if test "x$enable_socks" = "xyes" ; then
+	socket_lib="-lsocksd $socket_lib"
+	AC_DEFINE(HAVE_SOCKS, [1], "Socks proxy support")
+fi
 
 AC_CHECK_LIB($clib, stricmp, [
 	AC_DEFINE(HAVE_STRICMP, [1], [string icmp])

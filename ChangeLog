@@ -1,3 +1,7 @@
+from ucommon 3.0.5 to 3.0.6
+- socks proxy support possible with --enable-socks configure flag.
+- new Socket methods to wrap core socket functionality.
+
 from ucommon 3.0.4 to 3.0.5
 - new socket option for nodelay.
 - copyright notices fixed for consistency.
