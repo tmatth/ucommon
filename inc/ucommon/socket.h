@@ -322,6 +322,8 @@ public:
 	 */
 	typedef	void *set_t;
 
+	static const size_t masksize;
+
 	/**
 	 * A generic socket address class.  This class uses the addrinfo list
 	 * to store socket multiple addresses in a protocol and family
@@ -1596,6 +1598,46 @@ public:
 	 * @param error mask of socket id's.
 	 */
 	static int select(int max, set_t read, set_t write, set_t error, timeout_t timeout);
+
+	/**
+	 * Get a mask from the heap.
+	 * @return mask to use, all bits cleared.
+	 */
+	static set_t getmask(void);
+	
+	/**
+	 * Clear a mask, setting all entries to zero.
+	 * @param mask to clear.
+	 */
+	static void clear(set_t mask);
+
+	/**
+	 * Release a heap allocated mask.
+	 * @param mask to release.
+	 */
+	static void release(set_t mask);
+
+	/**
+	 * Set a socket entry in a mask.
+	 * @param socket entry to set.
+	 * @param mask to set entry in.
+	 */
+	static void set(socket_t socket, set_t mask);
+
+	/**
+	 * Clear a socket entry in a mask.
+	 * @param socket entry to clear.
+	 * @param mask to set entry in.
+	 */
+	static void clear(socket_t socket, set_t mask);
+
+	/**
+	 * Test a socket entry in a mask.
+	 * @param socket entry to test.
+	 * @param mask to set entry in.
+	 * @return true if entry set.
+	 */
+	static bool test(socket_t socket, set_t mask);
 };
 
 /**

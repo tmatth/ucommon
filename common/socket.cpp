@@ -541,6 +541,8 @@ static unsigned bitcount(bit_t *bits, unsigned len)
     return count;
 }
 
+const size_t Socket::masksize = sizeof(fd_set);
+
 #ifdef	_MSWINDOWS_
 
 static bool _started = false;
@@ -3165,4 +3167,35 @@ int Socket::select(int max, set_t read, set_t write, set_t error, timeout_t time
 	return _select_(max, (fd_set *)read, (fd_set *)write, (fd_set *)error, tvp);
 }
 
+Socket::set_t Socket::getmask(void)
+{
+	set_t mask = (set_t)malloc(sizeof(fd_set));
+	clear(mask);
+	return mask;
+}
+
+void Socket::clear(set_t mask)
+{
+	FD_ZERO((fd_set *)mask);
+}
+
+void Socket::set(socket_t sock, set_t mask)
+{
+	FD_SET(sock, (fd_set *)mask);
+}
+
+void Socket::clear(socket_t sock, set_t mask)
+{
+	FD_CLR(sock, (fd_set *)mask);
+}
+
+bool Socket::test(socket_t sock, set_t mask)
+{
+	return FD_ISSET(sock, (fd_set *)mask) != 0;
+}
+
+void Socket::release(set_t mask)
+{
+	free(mask);
+}
 

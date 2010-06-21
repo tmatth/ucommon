@@ -1,3 +1,7 @@
+from ucommon 3.0.6 to 3.0.7
+- encapuslate select() bit mask operations into select class.
+- new read/write based stream methods.
+
 from ucommon 3.0.5 to 3.0.6
 - optional socks proxy support possible with --enable-socks configure flag.
 - new Socket methods to wrap more socket functionality and new init method.

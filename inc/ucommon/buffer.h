@@ -187,6 +187,50 @@ public:
 	size_t putstr(const char *address, size_t count = 0);
 
 	/**
+	 * Method to write a null terminated string.
+	 * @param string to write.
+	 */
+	inline size_t writes(const char *string)
+		{return putstr(string);};
+
+	/**
+	 * Method to write memory to the buffer.
+	 * @param address of memory to write.
+	 * @param size of memory to write.
+	 * @return number of character bytes written.
+	 */
+	inline size_t write(const char *address, size_t size)
+		{return putstr(address, size);};
+
+	/**
+	 * Method to write a null terminated string.  This adds the current
+	 * newline character sequence to the output.
+	 * @param string to write.
+	 * @return number of characters actually written.
+	 */
+	inline size_t writeln(const char *string)
+		{return putline(string);};
+
+	/**
+	 * Method to read a line of input from the buffer.  This uses the current
+	 * newline character sequence to mark the end of line input.
+	 * @param address of string buffer to use.
+	 * @param size of string buffer.
+	 * @return number of characters actually read.
+	 */
+	inline size_t readln(char *address, size_t size)
+		{return getline(address, size);};
+
+	/**
+	 * Method to read input data from the buffer.
+	 * @param address of buffer to use.
+	 * @param size of buffer to request.
+	 * @return number of characters actually read.
+	 */
+	inline size_t read(char *address, size_t size)
+		{return getstr(address, size);};
+
+	/**
 	 * Print formatted string to the buffer.  The maximum output size is
 	 * the buffer size, and the operation flushes the buffer.
 	 * @param format string.
