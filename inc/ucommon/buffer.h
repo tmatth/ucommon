@@ -465,7 +465,7 @@ public:
  * members.  Some additional members are added for layering ssl services.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT TCPSocket : public IOBuffer, private Socket
+class __EXPORT TCPSocket : public IOBuffer, protected Socket
 {
 private:
 	void _buffer(size_t size);
