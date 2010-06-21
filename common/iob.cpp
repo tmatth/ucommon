@@ -564,6 +564,11 @@ size_t fbuf::_push(const char *buf, size_t size)
 #endif
 }
 
+bool fbuf::flush(void)
+{
+	return IOBuffer::flush();
+}
+
 size_t fbuf::_pull(char *buf, size_t size)
 {
 	ssize_t result;

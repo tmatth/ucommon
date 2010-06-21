@@ -433,6 +433,18 @@ public:
 	 * @return file offset of current i/o operations.
 	 */
 	offset_t tell(void);
+
+	/**
+	 * Derived flush virtual.
+	 * @return true if file active.
+	 */
+	bool flush(void);
+
+	/**
+	 * Return error code.
+	 */
+	inline int err(void)
+		{return ioerror;};
 };
 
 /**
