@@ -902,6 +902,26 @@ public:
 	virtual ssize_t put(const void *data, size_t number, struct sockaddr *address = NULL);
 
 	/**
+	 * Read data from the socket receive buffer.  This will be used in abi 4.
+	 * @param data pointer to save data in.
+	 * @param number of bytes to read.
+	 * @param address of peer data was received from.
+	 * @return number of bytes actually read, 0 if none, -1 if error.
+	 */
+	inline ssize_t readfrom(void *data, size_t number, struct sockaddr_storage *address = NULL)
+		{return get(data, number, address);};
+
+	/**
+	 * Write data to the socket send buffer.  This will be used in abi 4.
+	 * @param data pointer to write data from.
+	 * @param number of bytes to write.
+	 * @param address of peer to send data to if not connected.
+	 * @return number of bytes actually sent, 0 if none, -1 if error.
+	 */
+	inline ssize_t writeto(const void *data, size_t number, struct sockaddr *address = NULL)
+		{return put(data, number, address);};
+
+	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
 	 * string.  This uses an optimized I/O method that takes advantage of
 	 * socket peeking.  As such, it has to be rewritten to be used in a ssl
@@ -1292,7 +1312,7 @@ public:
 	 * @param address to send to or NULL if connected.
 	 * @return number of bytes send, -1 if error.
 	 */
-	inline static ssize_t sendto(Socket& socket, const char *buffer, size_t size, struct sockaddr *address)
+	inline static ssize_t writeto(Socket& socket, const char *buffer, size_t size, struct sockaddr *address)
 		{return socket.put(buffer, size, address);};
 	
 	/**
@@ -1303,7 +1323,7 @@ public:
 	 * @param address receving from or NULL if connected.
 	 * @return number of bytes received, -1 if error.
 	 */
-	inline static ssize_t recvfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
+	inline static ssize_t readfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
 		{return socket.get(buffer, size, address);};
 
 	/**
