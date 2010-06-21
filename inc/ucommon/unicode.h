@@ -159,7 +159,7 @@ public:
 	 * @param file to get character from.
 	 * @return unicode character or EOF error.
 	 */
-	ucs4_t getchar(FILE *file);
+	ucs4_t getch(FILE *file);
 
 	/**
 	 * Push a unicode character to a file stream.
@@ -167,7 +167,7 @@ public:
 	 * @param file to push character to.
 	 * @return unicode character or EOF on error.
 	 */
-	ucs4_t putchar(ucs4_t character, FILE *file);
+	ucs4_t putch(ucs4_t character, FILE *file);
 };
 
 /**

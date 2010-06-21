@@ -36,7 +36,7 @@ using namespace UCOMMON_NAMESPACE;
 const char *utf8::nil = NULL;
 const unsigned utf8::ucsize = sizeof(wchar_t);
 
-ucs4_t utf8::getchar(FILE *fp)
+ucs4_t utf8::getch(FILE *fp)
 {
 	int ch = fgetc(fp);
 	unsigned count = 0;
@@ -252,7 +252,7 @@ size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
 	return used;
 }
 
-ucs4_t utf8::putchar(ucs4_t code, FILE *fp)
+ucs4_t utf8::putch(ucs4_t code, FILE *fp)
 {
 	char buffer[8];
 	unsigned used = 0, count = 0;
