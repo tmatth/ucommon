@@ -15,7 +15,7 @@ AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS)
 lib_LTLIBRARIES = libucommon.la 
 
 libucommon_la_LDFLAGS = @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE) 
-libucommon_la_SOURCES = object.cpp linked.cpp string.cpp mapped.cpp iob.cpp \
+libucommon_la_SOURCES = object.cpp linked.cpp string.cpp mapped.cpp bufio.cpp \
 	counter.cpp bitmap.cpp timer.cpp memory.cpp socket.cpp access.cpp \
 	thread.cpp fsys.cpp cpr.cpp vector.cpp xml.cpp stream.cpp persist.cpp \
 	shell.cpp keydata.cpp numbers.cpp datetime.cpp unicode.cpp atomic.cpp
