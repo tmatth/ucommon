@@ -158,6 +158,25 @@ protected:
 
 public:
 	/**
+	 * Get memory from the buffer.  This method will become "get()" in
+	 * abi 4 and may become a protected method.
+	 * @param address of characters save from buffer.
+	 * @param count of characters to get from buffer.
+	 * @return number of characters actually copied.
+	 */
+	size_t getstr(char *address, size_t count);
+
+	/**
+	 * Put memory into the buffer.  If count is 0 then put as NULL
+	 * terminated string.  This method will become "put()" in abi 4 and
+	 * may become a protected method.
+	 * @param address of characters to put into buffer.
+	 * @param count of characters to put into buffer.
+	 * @return number of characters actually written.
+	 */
+	size_t putstr(const char *address, size_t count = 0);
+
+	/**
 	 * Get a character from the buffer.  If no data is available, return EOF.
 	 * @return character from buffer or eof.
 	 */
@@ -168,23 +187,6 @@ public:
 	 * @return character put into buffer or eof.
 	 */
 	int putch(int ch);
-
-	/**
-	 * Gry memory from the buffer.
-	 * @param address of characters save from buffer.
-	 * @param count of characters to get from buffer.
-	 * @return number of characters actually copied.
-	 */
-	size_t getstr(char *address, size_t count);
-
-	/**
-	 * Put memory into the buffer.  If count is 0 then put as NULL
-	 * terminated string.
-	 * @param address of characters to put into buffer.
-	 * @param count of characters to put into buffer.
-	 * @return number of characters actually written.
-	 */
-	size_t putstr(const char *address, size_t count = 0);
 
 	/**
 	 * Method to write a null terminated string.
