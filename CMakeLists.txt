@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 3.0.5)
+set (VERSION 3.1.0)
 set (SOVERSION 3)
 
 # project options

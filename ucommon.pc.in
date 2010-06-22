@@ -4,6 +4,7 @@ scripting=-luccscript
 audiolibs=-luccaudio @MATH_LIB@
 includes=@UCOMMON_INCLUDES@
 plugins=@UCOMMON_PLUGINS@
+secure=@SECURE_EXPORT@
 
 Name: ucommon
 Description: GNU uCommon C++ class framework

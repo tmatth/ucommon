@@ -76,7 +76,7 @@ uCommon C++ is 2.1 involved refactoring the abi release from prior 2.0.x
 releases, offering greater clarity, consistency of use, and some new features
 that were migrated from Common C++.
 
-Recent work, starting with version 2.2, has focused on turning uCommon from a
+Recent work, starting with version 3.0, has focused on turning uCommon from a
 single library into a framework by merging other uCommon derived libraries into
 a single source package.  This allows us to create a single documentation
 package with doxygen that covers the entire framework, not just uCommon

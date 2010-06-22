@@ -30,6 +30,10 @@
 #ifndef	_UCOMMON_MEMORY_H_
 #define	_UCOMMON_MEMORY_H_
 
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
 #ifndef	 _UCOMMON_LINKED_H_
 #include <ucommon/linked.h>
 #endif

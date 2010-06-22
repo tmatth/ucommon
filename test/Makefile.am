@@ -25,6 +25,10 @@ if TEST_AUDIO
 TESTS += ucommonAudio
 endif
 
+if TEST_SECURE
+TESTS += ucommonDigest ucommonCipher
+endif
+
 check_PROGRAMS = $(TESTS)
 
 testing:  $(TESTS)
@@ -38,6 +42,15 @@ ucommonKeydata_SOURCES = keydata.cpp
 ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
 ucommonQueue_SOURCES = queue.cpp
+
+if TEST_SECURE
+ucommonDigest_SOURCES = digest.cpp
+ucommonDigest_LDFLAGS = @SECURE_LOCAL@
+
+ucommonCipher_SOURCES = cipher.cpp
+ucommonCipher_LDFLAGS = @SECURE_LOCAL@
+
+endif
 
 if TEST_SCRIPT
 ucommonScript_SOURCES = script.cpp

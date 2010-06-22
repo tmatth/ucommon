@@ -27,6 +27,10 @@
 #ifndef _UCOMMON_SCRIPT_H_
 #define _UCOMMON_SCRIPT_H_
 
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
 #ifndef _UCOMMON_UCOMMON_H_
 #include <ucommon/ucommon.h>
 #endif

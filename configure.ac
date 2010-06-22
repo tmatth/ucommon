@@ -10,8 +10,9 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="3.0.6"
-LT_VERSION="3:9:0"
+VERSION="3.1.0"
+LT_VERSION="3:10:0"
+OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CANONICAL_SYSTEM
@@ -37,7 +38,7 @@ UCOMMON_LIBS=""
 
 CHECKFLAGS="$CHECKFLAGS"
 
-components="script audio utils"
+components="script audio utils openssl"
 socket_lib=""
 posix4_lib=""
 rt_lib=""
@@ -537,9 +538,24 @@ UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 if test -z "$UCOMMON_COMPONENTS" ; then
 	UCOMMON_COMPONENTS="$components" ; fi
 
+OPENSSL_LIBS=""
+GNUTLS_LIBS=""
+
+AC_ARG_WITH(pkg-config,
+	AC_HELP_STRING([--with-pkg-config],[enable support for pkg-config]),[
+	PKG_CHECK_MODULES(OPENSSL, openssl >= $OPENSSL_REQUIRES)
+],[
+	AC_CHECK_HEADERS(openssl/ssl.h, [
+		OPENSSL_LIBS="-lssl -lcrypto"
+	])
+])
+	
 uses_audio=0
 uses_utils=0
 uses_script=0
+uses_secure=0
+secure=""
+
 for component in $UCOMMON_COMPONENTS ; do
 	case "$component" in
 	script)
@@ -551,14 +567,37 @@ for component in $UCOMMON_COMPONENTS ; do
 	utils)
 		uses_utils=1
 		;;
+	openssl|ssl|secure)
+		uses_secure="1"
+		if test -z "$secure" ; then
+			if test ! -z "$OPENSSL_LIBS" ; then
+				SECURE_LIBS="$OPENSSL_LIBS"
+				secure="openssl"
+
+			fi
+		fi
+		;;
+	insecure)
+		uses_secure="1"
+		;;			
 	*)
 		AC_ERROR([Invalid component: $component.  Please choose from script and audio])
 		;;
 	esac
 done
 
+SECURE_EXPORT=""
+if test "$uses_secure" == 1 ; then
+	if test -z "$secure" ; then
+		secure="insecure"
+	fi
+	SECURE_EXPORT="-luccsecure $SECURE_LIBS"
+	SECURE_LOCAL="../$secure/libuccsecure.la $SECURE_LIBS"
+fi	
+
 AM_CONDITIONAL(TEST_SCRIPT, test "$uses_script" != "0")
 AM_CONDITIONAL(TEST_AUDIO, test "$uses_audio" != "0")
+AM_CONDITIONAL(TEST_SECURE, test "$uses_secure" != "0")
 
 # make sure dependencies are fullfilled
 if test "$uses_utils" == "1" ; then
@@ -575,13 +614,30 @@ if test "$uses_audio" == 1 ; then
 if test "$uses_utils" == 1 ; then
 	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS utils" ; fi
 
+UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS $secure"
+
 if test "$UCOMMON_MODEL" = "CC" ; then
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
 includes='${includedir}/ucommon'
+
+if test -z "$ssl_certs" ; then
+    ssl_certs='${sysconfdir}/ssl/certs' ; fi
+
+if test -z "$ssl_private" ; then
+    ssl_private='${sysconfdir}/ssl/private' ; fi
+
+if test "$sysconfdir" = '${prefix}/etc' ; then
+    sysconfdir="/etc"
+fi
+
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
 AC_SUBST_DIR(UCOMMON_PLUGINS, plugindir)
+AC_SUBST_DIR(ssl_publickeys, ssl_certs)
+AC_SUBST_DIR(ssl_privatekeys, ssl_private)
 AC_DEFINE_UNQUOTED(UCOMMON_PLUGINS, "$UCOMMON_PLUGINS", [plugin path])
+AC_DEFINE_UNQUOTED(SSL_CERTS, "$ssl_publickeys", [certificate path])
+AC_DEFINE_UNQUOTED(SSL_PRIVATE, "$ssl_privatekeys", [private certificates])
 
 AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
@@ -597,11 +653,15 @@ AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
+AC_SUBST(SECURE_EXPORT)
+AC_SUBST(SECURE_LOCAL)
+AC_SUBST(SECURE_LIBS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(MATH_LIB)
 AC_SUBST(plugindir)
 
 AC_OUTPUT(Makefile common/Makefile audio/Makefile script/Makefile
-utils/Makefile inc/Makefile inc/ucommon/Makefile test/Makefile
+openssl/Makefile insecure/Makefile utils/Makefile 
+inc/Makefile inc/ucommon/Makefile test/Makefile 
 ucommon.pc ucommon.spec ucommon-config)
 

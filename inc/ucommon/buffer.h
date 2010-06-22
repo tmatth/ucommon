@@ -25,6 +25,10 @@
 #ifndef	_UCOMMON_BUFFER_H_
 #define	_UCOMMON_BUFFER_H_
 
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
 #ifndef	_UCOMMON_SOCKET_H_
 #include <ucommon/socket.h>
 #endif
@@ -523,7 +527,6 @@ public:
 	 * Construct a tcp server session from a listening socket.
 	 * @param server socket we are created from.
 	 * @param size of buffer and tcp fragments.
-	 * @param timer mode for i/o operations.
 	 */
 	TCPSocket(TCPServer *server, size_t size = 536);
 
@@ -532,7 +535,6 @@ public:
 	 * @param service identifier of our client.
 	 * @param host and optional :port we are connecting to.
 	 * @param size of buffer and tcp fragments.
-	 * @param timer mode for i/o operations.
 	 */
 	TCPSocket(const char *service, const char *host, size_t size = 536);
 
@@ -546,7 +548,6 @@ public:
 	 * already connected, it is automatically closed first.
 	 * @param server we are connected from.
 	 * @param size of buffer and tcp fragments.
-	 * @param timer mode for i/o operations.
 	 */
 	void open(TCPServer *server, size_t size = 536);
 

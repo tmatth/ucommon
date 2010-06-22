@@ -26,8 +26,11 @@
  * release the lock when the member function returns that are used in
  * conjunction with special referencing smart pointers.
  * @file ucommon/access.h
- * @author David Sugar <dyfet@gnutelephony.org>
  */
+
+// we do this twice because of some bizzare issue in just this file that
+// otherwise breaks doxygen and lists all items outside the namespace...
+#include <ucommon/platform.h>
 
 #ifndef _UCOMMON_ACCESS_H_
 #define	_UCOMMON_ACCESS_H_
@@ -141,14 +144,14 @@ public:
 	 * Test if the reference holds an active lock.
 	 * @return true if is not locking an object.
 	 */
-	bool operator!() const
+	inline bool operator!() const
 		{return lock == NULL;};
 
 	/**
 	 * Test if the reference holds an active lock.
 	 * @return true if locking an object.
 	 */
-	operator bool() const
+	inline operator bool() const
 		{return lock != NULL;};
 	
 	/**
@@ -189,14 +192,14 @@ public:
 	 * Test if the reference holds an active lock.
 	 * @return true if is not locking an object.
 	 */
-	bool operator!() const
+	inline bool operator!() const
 		{return lock == NULL;};
 
 	/**
 	 * Test if the reference holds an active lock.
 	 * @return true if locking an object.
 	 */
-	operator bool() const
+	inline operator bool() const
 		{return lock != NULL;};
 
 	/**

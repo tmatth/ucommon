@@ -1,7 +1,9 @@
-from ucommon 3.0.6 to 3.0.7
+from ucommon 3.0.6 to 3.1.0
 - encapuslate select() bit mask operations into select class.
 - new read/write based stream methods.
-- Socket cannot be private in TCPSocket.
+- socket cannot be private in TCPSocket.
+- fixed doxygen generated docs, now much more complete.
+- introduced new secure library for ssl sockets, digests, ciphers, etc.
 
 from ucommon 3.0.5 to 3.0.6
 - optional socks proxy support possible with --enable-socks configure flag.

@@ -34,6 +34,7 @@ Known values for OPTION are:
   --cflags		print pre-processor and compiler flags
   --audiolibs   print linkage for audio libraries
   --scripting   print linkage for scripting engine
+  --secure      print linkage for secure applications
   --includes    print framework include directory
   --plugins     print framework plugin directory
   --model       print the linking model used
@@ -110,6 +111,9 @@ while test $# -gt 0; do
        	;;
     --scripting)
 		echo -luccscript
+		;;
+	--secure)
+		echo @SECURE_EXPORT@
 		;;
 	--audiolibs)
 		echo -luccaudio @MATH_LIB@

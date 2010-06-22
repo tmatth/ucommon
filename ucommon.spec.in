@@ -16,7 +16,7 @@ License: LGPLv3+
 URL: http://www.gnu.org/software/commoncpp
 Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: doxygen graphviz-gd 
+BuildRequires: doxygen graphviz-gd openssl-devel
 Group: System Environment/Libraries
 Summary: Runtime library for portable C++ threading and sockets
 
@@ -34,6 +34,12 @@ Requires: %{name} = %{version}-%{release}
 Group: System Environment/Libraries
 Summary: ucommon framework for script extensible applications
 
+%package secure
+Requires: %{name} = %{version}-%{release}
+Requires: openssl
+Group: System Environment/Libraries
+Summary: ucommon framework for secure sockets and cryptography
+
 %package audio
 Requires: %{name} = %{version}-%{release}
 Group: System Environment/Libraries
@@ -47,10 +53,12 @@ Summary: Telephonic audio file manipulation utilities
 
 %package devel
 Requires: %{name} = %{version}-%{release}
+Requires: %{name}-secure = %{version}-%{release}
 Requires: %{name}-script = %{version}-%{release}
 Requires: %{name}-audio = %{version}-%{release}
 Requires: %{name}-audio-tools = %{version}-%{release}
 Requires: pkgconfig
+Requires: openssl-devel
 Group: Development/Libraries
 Summary: Headers for building ucommon applications
 
@@ -63,6 +71,11 @@ GNU uCommon C++ script is a highly specialized embedded scripting engine and
 virtual execution environment for creating script "extensible" applications.  
 This system is a C++ class library which allows one to derive application
 specific dialects of the core language as needed through subclassing.
+
+%description secure
+The GNU uCommon C++ secure sockets and cryptography library offers thread-safe
+ssl sockets for building clients and servers.  The crytographic library also
+provides for random number generation, digest computation, and ciphering.
 
 %description audio
 The GNU uCommon C++ telephonic audio library covers a range of functionality 
@@ -105,6 +118,10 @@ from header files, html browsable.
 %defattr(-,root,root,-)
 %doc AUTHORS README COPYING COPYING.LESSER COPYRIGHT NEWS SUPPORT ChangeLog
 %{_libdir}/libucommon.so.*
+
+%files secure
+%defattr(-,root,root,-)
+%{_libdir}/libuccsecure.so.*
 
 %files script
 %defattr(-,root,root,-)

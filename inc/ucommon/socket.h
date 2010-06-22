@@ -1616,6 +1616,7 @@ public:
 	 * @param read mask of socket id's.
 	 * @param write mask of socket id's.
 	 * @param error mask of socket id's.
+	 * @param timeout in milliseconds to wait for select activity.
 	 */
 	static int select(int max, set_t read, set_t write, set_t error, timeout_t timeout);
 

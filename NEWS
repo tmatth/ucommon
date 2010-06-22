@@ -28,6 +28,10 @@ clarity, consistency of use, and additional features that were migrated from
 Common C++. The 2.1 release series may continue to introduce additional
 classes.
 
-ucommon 2.2 merges other ucommon related libraries to create a single ucommon
+ucommon 3.0 merges other ucommon related libraries to create a single ucommon
 framework for application development.
+
+ucommon 3.1 introduced the ucommon secure framework with support for ssl
+sockets, random number generation, ciphering, and digest computation.
+Further cryptographic features will be added over time.
 

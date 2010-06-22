@@ -27,6 +27,10 @@
 #ifndef	_UCOMMON_FILE_H_
 #define	_UCOMMON_FILE_H_
 
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
 #ifndef	_UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif

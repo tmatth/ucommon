@@ -27,6 +27,10 @@
 #ifndef _UCOMMON_LINKED_H_
 #define	_UCOMMON_LINKED_H_
 
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
 #ifndef	_UCOMMON_OBJECT_H_
 #include <ucommon/object.h>
 #endif

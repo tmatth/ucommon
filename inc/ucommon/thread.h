@@ -41,6 +41,10 @@
 #ifndef _UCOMMON_THREAD_H_
 #define	_UCOMMON_THREAD_H_
 
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
 #ifndef _UCOMMON_ACCESS_H_
 #include <ucommon/access.h>
 #endif
