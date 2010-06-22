@@ -18,12 +18,6 @@
 #include <config.h>
 #include <ucommon/buffer.h>
 #include <ucommon/string.h>
-#include <errno.h>
-#include <ctype.h>
-#include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -647,7 +641,7 @@ void TCPSocket::open(const char *host, size_t size)
 	so = Socket::create(list, SOCK_STREAM, 0);
 	Socket::release(list);
 	if(so == INVALID_SOCKET) {
-		ioerror = errno;
+		ioerror = Socket::error();
 		return;
 	}
 
@@ -662,7 +656,7 @@ void TCPSocket::open(TCPServer *server, size_t size)
 	close();
 	so = server->accept();
 	if(so == INVALID_SOCKET) {
-		ioerror = errno;
+		ioerror = Socket::error();
 		return;
 	}
 	
@@ -754,7 +748,7 @@ size_t TCPSocket::_push(const char *address, size_t len)
 	ssize_t result = Socket::sendto(so, address, len);
 	if(result < 0) {
 		result = 0;
-		ioerror = errno;
+		ioerror = Socket::error();
 	}
 	return (size_t)result;
 }
@@ -770,7 +764,7 @@ size_t TCPSocket::_pull(char *address, size_t len)
 
 	if(result < 0) {
 		result = 0;
-		ioerror = errno;
+		ioerror = Socket::error();
 	}
 	return (size_t)result;
 }
