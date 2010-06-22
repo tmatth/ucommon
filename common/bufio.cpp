@@ -18,6 +18,12 @@
 #include <config.h>
 #include <ucommon/buffer.h>
 #include <ucommon/string.h>
+#include <errno.h>
+#include <ctype.h>
+#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 using namespace UCOMMON_NAMESPACE;
 
