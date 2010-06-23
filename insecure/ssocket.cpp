@@ -66,6 +66,11 @@ size_t SSocket::_pull(char *address, size_t size)
 	return TCPSocket::_pull(address, size);
 }
 
+bool SSocket::pending(void)
+{
+	return TCPSocket::pending();
+}
+
 bool SSocket::flush(void)
 {
 	return TCPSocket::flush();

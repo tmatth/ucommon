@@ -205,6 +205,8 @@ public:
 
 	size_t _pull(char *address, size_t size);
 
+	bool pending(void);
+
 	bool issecure(void)
 		{return bio != NULL;};
 };

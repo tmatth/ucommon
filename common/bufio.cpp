@@ -684,6 +684,9 @@ void TCPSocket::close(void)
 void TCPSocket::blocking(timeout_t timer)
 {
 	timeout = timer;
+	if(so == INVALID_SOCKET)
+		return;
+
 	if(timeout == Timer::inf)
 		Socket::blocking(so, true);
 	else
@@ -696,7 +699,8 @@ void TCPSocket::_buffer(size_t size)
 	unsigned mss = size;
 	unsigned max = 0;
 
-	timeout = Timer::inf;
+	blocking(timeout);
+
 #ifdef	TCP_MAXSEG
 	socklen_t alen = sizeof(max);
 #endif
@@ -771,7 +775,6 @@ size_t TCPSocket::_pull(char *address, size_t len)
 
 size_t TCPSocket::peek(char *data, size_t size, timeout_t timeout)
 {
-	Socket::wait(timeout);
 	if(!Socket::wait(timeout))
 		return 0;
 
@@ -783,8 +786,8 @@ bool TCPSocket::pending(void)
 	if(_pending())
 		return true;
 	
-	if(isinput())
+	if(isinput() && timeout && timeout != Timer::inf)
 		return Socket::wait(so, timeout);
 
-	return false;
+	return Socket::wait(so, 0);
 }

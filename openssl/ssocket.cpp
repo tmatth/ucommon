@@ -112,6 +112,23 @@ size_t SSocket::_push(const char *address, size_t size)
 	return (ssize_t)result;
 }
 
+bool SSocket::pending(void)
+{
+	if(so == INVALID_SOCKET)
+		return false;
+
+	if(_pending())
+		return true;
+
+	if(ssl && SSL_pending((SSL *)ssl))
+		return true;
+
+	if(timeout && timeout != Timer::inf)
+		return Socket::wait(so, timeout);
+
+	return Socket::wait(so, 0);
+}
+
 size_t SSocket::_pull(char *address, size_t size)
 {
 	if(!bio)
