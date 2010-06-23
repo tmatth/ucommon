@@ -543,7 +543,7 @@ GNUTLS_LIBS=""
 
 AC_ARG_WITH(pkg-config,
 	AC_HELP_STRING([--with-pkg-config],[enable support for pkg-config]),[
-	PKG_CHECK_MODULES(OPENSSL, openssl >= $OPENSSL_REQUIRES)
+	PKG_CHECK_MODULES(OPENSSL, openssl >= $OPENSSL_REQUIRES, [], [])
 ],[
 	AC_CHECK_HEADERS(openssl/ssl.h, [
 		OPENSSL_LIBS="-lssl -lcrypto"
