@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <local.h>
+#include "local.h"
 
 #ifndef	_MSWINDOWS_
 #include <fcntl.h>
@@ -71,7 +71,7 @@ size_t random::key(unsigned char *buf, size_t size)
 size_t random::fill(unsigned char *buf, size_t size)
 {
 #ifdef	_MSWINDOWS_
-	return get(buf, size);
+	return key(buf, size);
 #else
 	int fd = open("/dev/urandom", O_RDONLY);
 	ssize_t result = 0;

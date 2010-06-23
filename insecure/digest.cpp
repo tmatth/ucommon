@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <local.h>
+#include "local.h"
 
 struct MD5_CTX {
     uint32_t buf[4];

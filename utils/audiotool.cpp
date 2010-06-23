@@ -474,7 +474,7 @@ int main(int argc, char **argv)
 			goto nofiles;
 		cp = *(argv++);
 		create(cp, argv);
-		exit(0);
+		goto done;
 	}
 
 	if(eq(cp, "append")) {
@@ -483,7 +483,7 @@ int main(int argc, char **argv)
 			goto nofiles;
 		cp = *(argv++);
 		append(cp, argv);
-		exit(0);
+		goto done;
 	}
 	
 	if(eq(cp, "info")) {
@@ -492,7 +492,7 @@ int main(int argc, char **argv)
         while(*++argv) {
             info(*argv);
         }
-		exit(0);
+		goto done;
     }
 
 	if(eq(cp, "text")) {
@@ -518,7 +518,7 @@ int main(int argc, char **argv)
         while(*++argv) {
             pipe(*argv);
         }
-		exit(0);
+		goto done;
     }
 #endif
 
@@ -532,5 +532,8 @@ nofiles:
 toomany:
 	fprintf(stderr, "*** audiotool: %s: too many filenames used\n", cp);
 	exit(4);
+
+done:
+	return 0;
 }
 
