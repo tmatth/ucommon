@@ -31,8 +31,8 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-//	if(!secure::init())
-//		return 0;
+	if(!secure::init())
+		return 0;
 
 	skey_t mykey("aes256", "sha", "testing");
 	cipher_t enc, dec;
