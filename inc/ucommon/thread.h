@@ -38,6 +38,18 @@
  * @file ucommon/thread.h
  */
 
+/**
+ * An example of the thread queue class.  This may be relevant to producer-
+ * consumer scenarios and realtime applications where queued messages are
+ * stored on a re-usable object pool.
+ * @example queue.cpp
+ */
+
+/**
+ * A simple example of threading and join operation.
+ * @example thread.cpp
+ */
+
 #ifndef _UCOMMON_THREAD_H_
 #define	_UCOMMON_THREAD_H_
 

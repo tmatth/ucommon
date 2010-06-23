@@ -6,6 +6,7 @@ STRIP_FROM_PATH = inc
 SHORT_NAMES = YES
 TAB_SIZE = 4
 INPUT = inc/ucommon/platform.h inc/ucommon
+EXAMPLE_PATH = test
 FILE_PATTERNS = *.h
 RECURSIVE = NO
 ALIASES = "license=\par License:\n"

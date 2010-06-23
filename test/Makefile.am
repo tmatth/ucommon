@@ -27,6 +27,11 @@ endif
 
 if TEST_SECURE
 TESTS += ucommonDigest ucommonCipher
+
+noinst_PROGRAMS = demoSSL
+demoSSL_SOURCES = ssl.cpp
+demoSSL_LDFLAGS = @SECURE_LOCAL@
+
 endif
 
 check_PROGRAMS = $(TESTS)

@@ -23,6 +23,21 @@
  * @file ucommon/secure.h
  */
 
+/**
+ * Example of SSL socket code.
+ * @example ssl.cpp
+ */
+
+/**
+ * Example of crytographic digest code.
+ * @example digest.cpp
+ */
+
+/**
+ * Example of cipher code.
+ * @example cipher.cpp
+ */
+
 #ifndef _UCOMMON_SECURE_H_
 #define _UCOMMON_SECURE_H_
 
@@ -53,6 +68,9 @@ public:
 	typedef enum {OK=0, INVALID, MISSING_CERTIFICATE, MISSING_PRIVATEKEY, INVALID_CERTIFICATE, INVALID_AUTHORITY, INVALID_PEERNAME, INVALID_CIPHER} error_t;
 
 protected:
+	/**
+	 * Last error flagged for this context.
+	 */
 	error_t error;
 
 	inline secure() {error = OK;};
@@ -205,6 +223,13 @@ class __EXPORT Cipher
 public:
 	typedef	enum {ENCRYPT = 1, DECRYPT = 0} mode_t;
 
+	/**
+	 * Cipher key formed by hash algorithm.  This can generate both a
+	 * key and iv table based on the algorithms used and required.  Normally
+	 * it is used from a pass-phrase, though any block of data may be
+	 * supplied.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
 	class __EXPORT Key
 	{
 	private:
@@ -403,12 +428,24 @@ public:
 	bool status(void);
 };
 
+/**
+ * Convenience type for secure socket.
+ */
 typedef	SSocket	ssl_t;
 
+/**
+ * Convenience type for generic digests.
+ */
 typedef	Digest digest_t;
 
+/**
+ * Convenience type for generic ciphers.
+ */
 typedef	Cipher cipher_t;
 
+/**
+ * Convenience type for generic cipher key.
+ */
 typedef Cipher::Key skey_t;
 
 END_NAMESPACE

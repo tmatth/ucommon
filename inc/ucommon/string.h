@@ -27,6 +27,11 @@
  * @file ucommon/string.h
  */
 
+/**
+ * An example of the string class.
+ * @example string.cpp
+ */
+
 #ifndef	_UCOMMON_STRING_H_
 #define	_UCOMMON_STRING_H_
 

@@ -24,6 +24,11 @@
  * @file ucommon/linked.h
  */
 
+/**
+ * An example of the linked object classes and their use.
+ * @example linked.cpp
+ */
+
 #ifndef _UCOMMON_LINKED_H_
 #define	_UCOMMON_LINKED_H_
 

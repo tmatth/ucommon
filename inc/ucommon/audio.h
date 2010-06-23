@@ -25,6 +25,11 @@
  * @file ucommon/audio.h
  */
 
+/**
+ * Some testing code for audio classes.
+ * @example audio.cpp
+ */
+
 #ifndef _UCOMMON_AUDIO_H_
 #define _UCOMMON_AUDIO_H_
 

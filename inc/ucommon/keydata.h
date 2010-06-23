@@ -22,6 +22,11 @@
  * @file ucommon/keydata.h
  */
 
+/**
+ * Some exercise of keydata routines.
+ * @example keydata.cpp
+ */
+
 #ifndef	_UCOMMON_KEYDATA_H_
 #define	_UCOMMON_KEYDATA_H_
 

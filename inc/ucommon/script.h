@@ -24,6 +24,11 @@
  * @file ucommon/script.h
  */
 
+/**
+ * Example of creating a script interpreter.
+ * @example script.cpp
+ */
+
 #ifndef _UCOMMON_SCRIPT_H_
 #define _UCOMMON_SCRIPT_H_
 

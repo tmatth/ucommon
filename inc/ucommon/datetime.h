@@ -21,6 +21,11 @@
  * @file ucommon/datetime.h
  */
 
+/**
+ * Example of date & time manipulation.
+ * @example datetime.cpp
+ */
+
 #ifndef _UCOMMON_DATETIME_H_
 #define	_UCOMMON_DATETIME_H_
 

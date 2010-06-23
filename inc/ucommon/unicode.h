@@ -24,6 +24,11 @@
  * @file ucommon/unicode.h
  */
 
+/**
+ * An example of some unicode-utf8 transcoding.
+ * @example unicode.cpp
+ */
+
 #ifndef _UCOMMON_UNICODE_H_
 #define	_UCOMMON_UNICODE_H_
 
