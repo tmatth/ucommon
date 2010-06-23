@@ -58,7 +58,6 @@ Requires: %{name}-script = %{version}-%{release}
 Requires: %{name}-audio = %{version}-%{release}
 Requires: %{name}-audio-tools = %{version}-%{release}
 Requires: pkgconfig
-Requires: openssl-devel
 Group: Development/Libraries
 Summary: Headers for building ucommon applications
 

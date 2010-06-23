@@ -226,6 +226,7 @@ check_include_files(regex.h HAVE_REGEX_H)
 check_include_files(sys/inotify.h HAVE_SYS_INOTIFY_H)
 check_include_files(sys/event.h HAVE_SYS_EVENT_H)
 check_include_files(syslog.h HAVE_SYSLOG_H)
+check_include_files(openssl/ssl.h HAVE_OPENSSL)
 
 # for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
@@ -263,6 +264,13 @@ file(GLOB common_src common/*.cpp)
 file(GLOB script_src script/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
 
+if(HAVE_OPENSSL)
+	file(GLOB secure_src openssl/*.cpp)
+	set(SECURE_LIBS ssl crypto)
+else()
+	file(GLOB secure_src insecure/*.cpp)
+endif()
+
 add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
@@ -276,6 +284,11 @@ add_library(uccaudio ${BUILD_LIBRARY_TYPE} ${audio_src})
 set_target_properties(uccaudio PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(uccaudio ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${MATH_LIB})
 add_dependencies(uccaudio ucommon)
+
+add_library(uccsecure ${BUILD_LIBRARY_TYPE} ${secure_src})
+set_target_properties(uccsecure PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+target_link_libraries(uccsecure ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
+add_dependencies(uccsecure ucommon)
 
 add_executable(audiotool utils/audiotool.cpp)
 add_dependencies(audiotool uccaudio ucommon)
