@@ -28,13 +28,19 @@ using namespace UCOMMON_NAMESPACE;
 
 int main(int argc, char **argv)
 {
-    secure::init();
+	const char *proto = "https";
+
+	if(!secure::init())
+		proto = "http";
+
+	printf("protocol %s\n", proto);
 
     secure::context_t ctx = secure::client();
 
-    printf("ctx %p %d\n", (void *)ctx, ctx->err());
+	if(ctx)
+	    printf("ctx %p %d\n", (void *)ctx, ctx->err());
 
-    ssl_t ssl("https", ctx);
+    ssl_t ssl(proto, ctx);
     ssl.open("www.google.com");
     printf("open %d\n", ssl.isopen());
 

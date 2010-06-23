@@ -136,7 +136,7 @@ AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.
 AC_CHECK_LIB(msvcrt, fopen, [
 	clib="msvcrt"
 	UCOMMON_VISIBILITY="0"
-	UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -lws2_32 -lwsock32 -lkernel32"
+	UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -ladvapi32 -lws2_32 -lwsock32 -lkernel32"
 	UCOMMON_LIBC="-lmsvcrt -lgcc"
 	AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
 	AC_DEFINE(HAVE_GETADDRINFO, [1], [have getaddrinfo])
@@ -543,7 +543,7 @@ GNUTLS_LIBS=""
 
 AC_ARG_WITH(pkg-config,
 	AC_HELP_STRING([--with-pkg-config],[enable support for pkg-config]),[
-	PKG_CHECK_MODULES(OPENSSL, openssl >= $OPENSSL_REQUIRES, [], [])
+	PKG_CHECK_MODULES(OPENSSL, [openssl >= $OPENSSL_REQUIRES], [], [OPENSSL_LIBS=""])
 ],[
 	AC_CHECK_HEADERS(openssl/ssl.h, [
 		OPENSSL_LIBS="-lssl -lcrypto"
