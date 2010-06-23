@@ -237,8 +237,15 @@ public:
 	private:
 		friend class Cipher;
 	
-		const void *algotype;
-		const void *hashtype;
+		union {
+			const void *algotype;
+			int algoid;
+		};
+
+		union {
+			const void *hashtype;
+			int hashid;
+		};
 		
 		// assume 512 bit cipher keys possible...
 		unsigned char keybuf[MAX_CIPHER_KEYSIZE / 8], ivbuf[MAX_CIPHER_KEYSIZE / 8];
@@ -305,7 +312,12 @@ class __EXPORT Digest
 {
 private:
 	void *context;
-	const void *hashtype;
+
+	union {
+		const void *hashtype;
+		int hashid;
+	};
+
 	unsigned bufsize;
 	unsigned char buffer[MAX_DIGEST_HASHSIZE / 8];
 	char text[MAX_DIGEST_HASHSIZE / 8 + 1];
