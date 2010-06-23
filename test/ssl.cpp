@@ -28,14 +28,15 @@ using namespace UCOMMON_NAMESPACE;
 
 int main(int argc, char **argv)
 {
-	const char *proto = "https";
+	const char *proto = "http";
+	secure::context_t ctx = NULL;
 
-	if(!secure::init())
-		proto = "http";
+	if(secure::init()) {
+		proto = "https";
+		ctx = secure::client();
+	}
 
 	printf("protocol %s\n", proto);
-
-    secure::context_t ctx = secure::client();
 
 	if(ctx)
 	    printf("ctx %p %d\n", (void *)ctx, ctx->err());
