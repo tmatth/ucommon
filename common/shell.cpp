@@ -270,15 +270,14 @@ int shell::systemf(const char *format, ...)
 void shell::parse(int argc, char **argv)
 {
 	int argp = 1;
-	char *arg;
+	const char *arg, *opt;
 	Option *node;
 	unsigned len;
 	const char *value;
-	const char *opt;
 	const char *err;
 
 	if(argc < 1 || !argv)
-		exit(-1, "%s\n", "*** invalid or missing command arguments");
+		errexit(-1, "%s\n", "*** invalid or missing command arguments");
 
 	set0(argv[0]);
 
@@ -287,7 +286,7 @@ void shell::parse(int argc, char **argv)
 			++argp;
 			break;
 		}
-		arg = argv[argp];
+		arg = opt = argv[argp];
 		if(*arg != '-')
 			break;
 
@@ -297,20 +296,23 @@ void shell::parse(int argc, char **argv)
 		err = NULL;
 		value = NULL;
 
+		if(opt[1] == '-')
+			++opt;
+
 		// long option parsing...
 
 		while(is(op)) {
 			len = strlen(op->long_option);
 			value = NULL;
-			if(eq(op->long_option, arg, len)) {
-				if(arg[len] == '=' && !op->uses_option) 			
-					shell::exit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "option does not use assignment");
-				if(arg[len] == '=') {
-					value = arg + len;
+			if(eq(op->long_option, opt, len)) {
+				if(opt[len] == '=' && !op->uses_option) 			
+					errexit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "option does not use assignment");
+				if(opt[len] == '=') {
+					value = opt + len;
 					break;
 				}
 				if(arg[len] != 0)
-					shell::exit(1, "*** %s: %s: %s\n", _argv0, arg, "unknown option");
+					errexit(1, "*** %s: %s: %s\n", _argv0, arg, "unknown option");
 				if(op->uses_option) {
 					value = argv[argp++];
 					break;
@@ -321,10 +323,10 @@ void shell::parse(int argc, char **argv)
 		// if we have long option, try to assign it...
 		if(is(op)) {
 			if(op->uses_option && value == NULL)
-				shell::exit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "missing value option");
+				errexit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "missing value option");
 			err = op->assign(value);
 			if(err)
-				shell::exit(1, "*** %s: %s: %s\n", _argv0, op->long_option, err);
+				errexit(1, "*** %s: %s: %s\n", _argv0, op->long_option, err);
 			continue;
 		}
 
@@ -338,7 +340,7 @@ void shell::parse(int argc, char **argv)
 				op.next();
 			}
 			if(!is(op))
-				shell::exit(1, "*** %s: -%c: %s\n", _argv0, *arg, "unknown option");
+				errexit(1, "*** %s: -%c: %s\n", _argv0, *arg, "unknown option");
 			if(op->uses_option && arg[1] == 0) {
 				value = argv[argp++];
 				break;
@@ -352,10 +354,10 @@ void shell::parse(int argc, char **argv)
 		}
 		if(is(op)) {
 			if(op->uses_option && value == NULL)
-				shell::exit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, "missing value option");
+				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, "missing value option");
 			err = op->assign(value);
 			if(err)
-				shell::exit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
+				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
 		}
 	}
 	_argv = &argv[argp];
@@ -363,7 +365,7 @@ void shell::parse(int argc, char **argv)
 	// expansion here...??
 }
 
-void shell::exit(int exitcode, const char *format, ...)
+void shell::errexit(int exitcode, const char *format, ...)
 {
 	va_list args;
 
@@ -472,7 +474,7 @@ int shell::system(const char *cmd, const char **envp)
 	::signal(SIGCHLD, SIG_DFL);
 	::signal(SIGPIPE, SIG_DFL);
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
-	exit(127);
+	::exit(127);
 }
 
 #endif

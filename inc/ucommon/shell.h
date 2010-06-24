@@ -188,7 +188,7 @@ public:
 	 * @param exitcode to return to parent process.
 	 * @param format string to use.
 	 */
-	static void exit(int exitcode, const char *format = NULL, ...) __PRINTF(2, 3);
+	static void errexit(int exitcode, const char *format = NULL, ...) __PRINTF(2, 3);
 
 	/**
 	 * Print to standard output.
