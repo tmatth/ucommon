@@ -1,3 +1,6 @@
+from ucommon 3.1.0 to 3.1.1
+- some attention to the shell functions.
+
 from ucommon 3.0.6 to 3.1.0
 - encapuslate select() bit mask operations into select class.
 - new read/write based stream methods.

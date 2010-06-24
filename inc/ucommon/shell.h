@@ -44,15 +44,14 @@ class __EXPORT shell : public mempager
 {
 private:
 	char **_argv;
-	int _argc;
-	char *argv0;
+	unsigned _argc;
+	char *_argv0;
 
-	class __LOCAL args
+	class __LOCAL args : public OrderedObject
 	{
 	public:
-		args *next;
 		char *item;
-	} *first, *last;
+	};
 
 	/**
 	 * Shell expansion for some platforms.
@@ -62,12 +61,12 @@ private:
 	/**
 	 * Collapse argument list.
 	 */
-	void collapse(void);
+	void collapse(LinkedObject *first);
 
 	/**
 	 * Set argv0
 	 */
-	void set0(void);
+	void set0(char *argv0);
 
 public:
 	/**
@@ -77,43 +76,31 @@ public:
 	 * class is created to perform the argument parsing.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT Option
+	class __EXPORT Option : public OrderedObject
 	{
 	private:
-		friend class shell;
-
-		static Option *root;
-
-		Option *next;
-
-	protected:
-		char short_option;
-		const char *long_option;
-		bool uses_value;
-		const char *help_string;
-
-		static const char *errmsg[];
-
-		enum {
-			ERR_NO_VALUE = 0,
-			ERR_IMPROPER_USAGE = 1,
-			ERR_VALUE_MISSING = 2,
-			ERR_INVALID_OPTION = 3
-		};
+		static OrderedIndex index;
 
 	public:
+		char short_option;
+		const char *long_option;
+		const char *uses_option;
+		const char *help_string;
+
 		/**
 		 * Construct a shell parser option.
-		 * @param shortoption for single character code.
-		 * @param longoption for extended string.
-		 * @param value flag if -x value or -long=yyy.
+		 * @param short_option for single character code.
+		 * @param long_option for extended string.
+		 * @param value_type if -x value or -long=yyy.
 		 * @param help string, future use.
 		 */
-		Option(char shortoption = 0, const char *longoption = NULL, bool value = false, const char *help = NULL);
+		Option(char short_option = 0, const char *long_option = NULL, const char *value_type = NULL, const char *help = NULL);
 
 		virtual ~Option();
 
-	protected:
+		inline static LinkedObject *first(void)
+			{return index.begin();};
+
 		/**
 		 * Used to send option into derived receiver.
 		 * @param value option that was received.
@@ -135,10 +122,11 @@ public:
 	 * Construct a shell argument list from existing arguments.  This
 	 * copies and on some platforms expands the argument list originally 
 	 * passed to main.
+	 * @param argc from main.
 	 * @param argv from main.
 	 * @param pagesize for local heap.
 	 */
-	shell(char **argv, size_t pagesize = 0);
+	shell(int argc, char **argv, size_t pagesize = 0);
 
 	/**
 	 * Construct an empty shell parser argument list.
@@ -171,28 +159,14 @@ public:
 	char **parse(const char *string);
 
 	/**
-	 * Parse/copy an argv list, expand as needed for wildcards on some
-	 * platforms.  The original argv is replaced with an expanded one.
+	 * Parse the command line arguments using the option table.  File
+	 * arguments will be expanded for wildcards on some platforms.
+	 * The argv will be set to the first file argument after all options
+	 * are parsed.
 	 * @param argc from main.
 	 * @param argv from main.
-	 * @return new argc.  argv also overridden.
 	 */
-	int expand(int *argc, char ***argv);
-
-	/**
-	 * Parse the command line arguments using the option table.
-	 * @param argc from main.
-	 * @param argv from main.
-	 * @return start of file arguments. -1 if error.
-	 */
-	static int parse(int argc, char **argv);
-
-	/**
-	 * Fetch arguments list.
-	 * @return argument array.
-	 */
-	inline char **get(void)
-		{return _argv;};
+	void parse(int argc, char **argv);
 
 	/**
 	 * Parse shell arguments directly into a shell object.
@@ -204,15 +178,47 @@ public:
 		{return args.parse(string);};
 
 	/**
-	 * Parse shell arguments from main directly into a shell object.  This
-	 * expands arguments as needed.
-	 * @param args table.
-	 * @param argc from main.
-	 * @param argv from main, replaced.
-	 * @return argument count.
+	 * Get program name (argv0).
 	 */
-	inline static int expand(shell &args, int *argc, char ***argv)
-		{return args.expand(argc, argv);};
+	inline const char *argv0() const
+		{return _argv0;};
+
+	/**
+	 * Print error message and exit.
+	 * @param exitcode to return to parent process.
+	 * @param format string to use.
+	 */
+	static void exit(int exitcode, const char *format = NULL, ...) __PRINTF(2, 3);
+
+	/**
+	 * Print to standard output.
+	 * @param format string to use.
+	 */
+	static void printf(const char *format, ...) __PRINTF(1, 2);
+
+	/**
+	 * Get saved internal argc count for items.  This may be items that
+	 * remain after shell expansion and options have been parsed.
+	 * @return count of remaining arguments.
+	 */
+	inline unsigned argc(void) const
+		{return _argc;};
+
+	/**
+	 * Get saved internal argv count for items in this shell object.  This
+	 * may be filename items only that remain after shell expansion and
+	 * options that have been parsed.
+	 * @return list of remaining arguments.
+	 */	
+	inline char **argv(void) const
+		{return _argv;};
+
+	/**
+	 * Get argc count for an existing array.
+	 * @param argv to count items in.
+	 * @return argc count of array.
+	 */
+	static unsigned count(char **argv);
 };
 		
 END_NAMESPACE

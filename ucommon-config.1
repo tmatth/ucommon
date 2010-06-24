@@ -29,6 +29,7 @@ ucommon-config \- script to get information about ucommon library
 .B [--libs]
 .B [--includes]
 .B [--plugins]
+.B [--secure]
 .B [--scripting]
 .B [--audiolibs]
 .SH DESCRIPTION
@@ -53,6 +54,10 @@ on the standard output.
 .B --audiolibs
 Print additional linker flags needed to link a program with
 .BR ucommon telephonic audio library
+.TP
+.B --secure
+Print additional libraries needed to link a program with
+.BR ucommon secure crytographic library
 .TP
 .B --scripting
 Print additional linker flags needed to link a program with

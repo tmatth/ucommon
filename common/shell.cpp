@@ -38,18 +38,15 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-shell::Option *shell::Option::root = NULL;
+OrderedIndex shell::Option::index;
 
-const char *shell::Option::errmsg[] = {"has no value", "improper usage", "value missing", "unknown option"};
-
-shell::Option::Option(char shortopt, const char *longopt, bool value, const char *help)
+shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
+OrderedObject(&index)
 {
 	short_option = shortopt;
 	long_option = longopt;
-	uses_value = value;
+	uses_option = value;
 	help_string = help;
-	next = root;
-	root = this;
 }
 
 shell::Option::~Option()
@@ -150,35 +147,42 @@ skip:
 
 void shell::expand(void)
 {
-	first = last = NULL;
 }
 
 #endif
 
-void shell::collapse(void)
+void shell::collapse(LinkedObject *first)
 {
 	char **argv = _argv = (char **)mempager::alloc(sizeof(char **) * (_argc + 1));
-	while(first) {
-		*(argv++) = first->item;
-		first = first->next;
+	linked_pointer<args> ap = first;
+	while(is(ap)) {
+		*(argv++) = ap->item;
+		ap.next();
 	}
 	*argv = NULL;
-	first = last = NULL;
 }
 
-void shell::set0(void)
+void shell::set0(char *argv0)
 {
-	argv0 = strrchr(*_argv, '/');
+	_argv0 = strrchr(argv0, '/');
 #ifdef	_MSWINDOWS_
-	if(!argv0)
-		argv0 = strrchr(*_argv, '\\');
-	if(!argv0)
-		argv0 = strchr(*_argv, ':');
+	if(!_argv0)
+		_argv0 = strrchr(argv0, '\\');
+	if(!_argv0)
+		_argv0 = strchr(argv0, ':');
 #endif
-	if(!argv0)
-		argv0 = *_argv;
+	if(!_argv0)
+		_argv0 = argv0;
 	else
-		++argv0;
+		++_argv0;
+
+	_argv0 = dup(_argv0);
+
+#ifdef	_MSWINDOWS_
+	char *ext = strrchr(_argv0, '.');
+	if(ieq(ext, ".exe") || ieq(ext, ".com"))
+		*ext = 0;
+#endif
 }
 
 shell::shell(size_t pagesize) :
@@ -194,11 +198,10 @@ mempager(pagesize)
 	parse(string);
 }
 
-shell::shell(char **argv, size_t pagesize) :
+shell::shell(int argc, char **argv, size_t pagesize) :
 mempager(pagesize)
 {
-	int tmp;
-	expand(&tmp, &argv);
+	parse(argc, argv);
 }
 
 char **shell::parse(const char *string)
@@ -209,7 +212,7 @@ char **shell::parse(const char *string)
 	char quote = 0;
 	char *cp = mempager::dup(string);
 	bool active = false;
-	first = last = NULL;
+	OrderedIndex arglist;
 
 	_argc = 0;
 
@@ -242,19 +245,13 @@ argument:
 			active = true;
 			arg = (args *)mempager::alloc(sizeof(args));
 			arg->item = (cp++);
-			arg->next = NULL;
-			if(last) {
-				last->next = arg;
-				last = arg;
-			}
-			else
-				first = last = arg;
+			arg->enlist(&arglist);
 			continue;
 		}
 		++cp;
 	}
-	collapse();
-	set0();
+	collapse(arglist.begin());
+	set0(*_argv);
 	return _argv;
 }
 
@@ -270,137 +267,121 @@ int shell::systemf(const char *format, ...)
 	return system(buffer);
 }
 
-int shell::expand(int *argc, char ***argv)
-{
-	_argc = *argc;
-	_argv = *argv;
-
-	expand();
-	if(first) {
-		collapse();
-		*argv = _argv;
-		*argc = _argc;
-	}
-	set0();
-	return _argc;
-}
-
-int shell::parse(int argc, char **argv)
+void shell::parse(int argc, char **argv)
 {
 	int argp = 1;
 	char *arg;
-	char *argv0;
 	Option *node;
 	unsigned len;
 	const char *value;
 	const char *opt;
 	const char *err;
-	char buf[4];
 
-	if(argc < 2)
-		return argc;
+	if(argc < 1 || !argv)
+		exit(-1, "%s\n", "*** invalid or missing command arguments");
 
-	argv0 = strrchr(*argv, '/');
-#ifdef	_MSWINDOWS_
-	if(!argv0)
-		argv0 = strrchr(*argv, '\\');
-	if(!argv0)
-		argv0 = strchr(*argv, ':');
-#endif
-	if(!argv0)
-		argv0 = *argv;
-	else
-		++argv0;
+	set0(argv[0]);
 
 	while(argp < argc) {
-		if(eq(argv[argp], "--"))
-			return ++argp;
+		if(eq(argv[argp], "--")) {
+			++argp;
+			break;
+		}
 		arg = argv[argp];
-		node = Option::root;
+		if(*arg != '-')
+			break;
+
+		++argp;
+
+		linked_pointer<Option> op = Option::first();
 		err = NULL;
-		buf[0] = '-';
-		buf[2] = 0;
+		value = NULL;
 
-		// long and exact match short form parsing...
+		// long option parsing...
 
-		while(node) {
-			buf[1] = node->short_option;
-			len = strlen(node->long_option);
-			opt = node->long_option;
+		while(is(op)) {
+			len = strlen(op->long_option);
 			value = NULL;
-			if(!strncmp(node->long_option, arg, len)) {
-				++argp;
-				if(arg[len] == '=' && !node->uses_value) { 			
-					fprintf(stderr, "*** %s: %s: %s\n", argv0, node->long_option, Option::errmsg[Option::ERR_NO_VALUE]);
-					exit(1);
-				}
+			if(eq(op->long_option, arg, len)) {
+				if(arg[len] == '=' && !op->uses_option) 			
+					shell::exit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "option does not use assignment");
 				if(arg[len] == '=') {
 					value = arg + len;
 					break;
 				}
-				if(node->uses_value) {
+				if(arg[len] != 0)
+					shell::exit(1, "*** %s: %s: %s\n", _argv0, arg, "unknown option");
+				if(op->uses_option) {
 					value = argv[argp++];
 					break;
 				}
 			}
-			if(!strcmp(arg, buf)) {
-				++argp;
-				opt = buf;
-				if(node->uses_value)
-					value = argv[argp++];
-			}
-			node = node->next;
+		}
+
+		// if we have long option, try to assign it...
+		if(is(op)) {
+			if(op->uses_option && value == NULL)
+				shell::exit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "missing value option");
+			err = op->assign(value);
+			if(err)
+				shell::exit(1, "*** %s: %s: %s\n", _argv0, op->long_option, err);
+			continue;
 		}
 
 		// short form -xyz flags parsing...
 	
-		if(!node && *arg == '-') {
-			while(*(++arg)) {
-				node = Option::root;
-				while(node) {
-					if(node->short_option == *arg) 
-						break;
-					node = node->next;
-				}
-				if(!node) {
-					fprintf(stderr, "*** %s: -%c: %s\n", argv0, *arg, Option::errmsg[Option::ERR_INVALID_OPTION]);
-					exit(1);
-				}
-				if(node->uses_value) {
-					fprintf(stderr, "*** %s: -%c: %s\n", argv0, *arg, Option::errmsg[Option::ERR_IMPROPER_USAGE]);
-					exit(1);
-				}
-				err = node->assign(NULL);
-				if(err) {
-					fprintf(stderr, "*** %s: -%c: %s\n", argv0, *arg, err);
-					exit(1);
-				}
+		while(*(++arg)) {
+			op = Option::first();
+			while(is(op)) {
+				if(op->short_option == *arg) 
+					break;
+				op.next();
 			}
-			node = NULL;
-			arg = NULL;
+			if(!is(op))
+				shell::exit(1, "*** %s: -%c: %s\n", _argv0, *arg, "unknown option");
+			if(op->uses_option && arg[1] == 0) {
+				value = argv[argp++];
+				break;
+			}
+			if(op->uses_option) {
+				value = ++arg;
+				break;
+			}
+			
+			++arg;
 		}
-		if(!node && !arg) {
-			++argp;
-			continue;
-		}
-		if(!node && (*arg == '-' || *arg == '+')) {
-			fprintf(stderr, "*** %s: %s: %s\n", argv0, arg, Option::errmsg[Option::ERR_INVALID_OPTION]);
-			exit(1);
-		}
-		if(!node)
-			return argp;
-
-		if(node->uses_value && !value) {
-			fprintf(stderr, "*** %s: %s: %s\n", argv0, opt, Option::errmsg[Option::ERR_VALUE_MISSING]);
-			exit(1);
-		}
-		err = node->assign(value);
-		if(err) {
-			fprintf(stderr, "*** %s: %s: %s\n", argv0, opt, err);
-			exit(1);
+		if(is(op)) {
+			if(op->uses_option && value == NULL)
+				shell::exit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, "missing value option");
+			err = op->assign(value);
+			if(err)
+				shell::exit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
 		}
 	}
-	return argp;
+	_argv = &argv[argp];
+	_argc = argc - argp;
+	// expansion here...??
+}
+
+void shell::exit(int exitcode, const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	fflush(stderr);
+	va_end(args);
+	if(exitcode)
+		::exit(exitcode);
+}
+
+void shell::printf(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	vfprintf(stdout, format, args);
+	fflush(stdout);
+	va_end(args);
 }
 
 #ifdef _MSWINDOWS_
