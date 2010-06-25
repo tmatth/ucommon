@@ -96,7 +96,7 @@ public:
 	class __EXPORT errormap
 	{
 	public:
-		inline error(shell::errmsg_t id, const char *text)
+		inline errormap(shell::errmsg_t id, const char *text)
 			{shell::errmsg(id, text);};
 	};
 
