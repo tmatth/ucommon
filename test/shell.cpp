@@ -25,9 +25,9 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-static shell::flag rflag('r', "--reverse", "reverse order of arguments");
-static shell::flag tflag('t', "--testing", "never hit this flag");
-static shell::numeric lines('l', "--lines", "number of lines in output");
+static shell::flagopt rflag('r', "--reverse", "reverse order of arguments");
+static shell::flagopt tflag('t', "--testing", "never hit this flag");
+static shell::numericopt lines('l', "--lines", "number of lines in output");
 
 extern "C" int main()
 {
