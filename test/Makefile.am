@@ -15,7 +15,7 @@ EXTRA_DIST = *.cpp keydata.conf testscript.scr mergescript.scr
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
 	ucommonKeydata ucommonStream ucommonUnicode ucommonQueue \
-	ucommonDatetime
+	ucommonDatetime ucommonShell
 
 if TEST_SCRIPT
 TESTS += ucommonScript
@@ -47,6 +47,7 @@ ucommonKeydata_SOURCES = keydata.cpp
 ucommonUnicode_SOURCES = unicode.cpp
 ucommonDatetime_SOURCES = datetime.cpp
 ucommonQueue_SOURCES = queue.cpp
+ucommonShell_SOURCES = shell.cpp
 
 if TEST_SECURE
 ucommonDigest_SOURCES = digest.cpp
