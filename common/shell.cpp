@@ -87,8 +87,8 @@ const char *shell::numeric::assign(const char *value)
 		return errmsg(shell::OPTION_USED);
 
 	number = strtol(value, &endptr, 0);
-	if(*endptr != 0)
-		return errmsg(shell::NON_NUMERIC);
+	if(!endptr || *endptr != 0)
+		return errmsg(shell::BAD_VALUE);
 
 	return NULL;
 }
@@ -103,9 +103,40 @@ shell::Option(short_option, long_option, type, help_string)
 const char *shell::string::assign(const char *value)
 {
 	if(used)
-		return "option already set";
+		return shell::errmsg(shell::OPTION_USED);
 
 	text = value;
+	return NULL;
+}
+
+shell::character::character(char short_option, const char *long_option, const char *help_string, const char *type, char def_value) :
+shell::Option(short_option, long_option, type, help_string)
+{
+	used = false;
+	code = def_value;
+}
+
+const char *shell::character::assign(const char *value)
+{
+	long number;
+	char *endptr = NULL;
+
+	if(used)
+		return shell::errmsg(shell::OPTION_USED);
+
+	if(value[1] == 0) {
+		code = value[0];
+		return NULL;
+	}
+
+	number = strtol(value, &endptr, 0);
+	if(!endptr || *endptr != 0)
+		return errmsg(shell::BAD_VALUE);
+
+	if(number < 0 || number > 255)
+		return errmsg(shell::BAD_VALUE);
+
+	code = (char)(number);
 	return NULL;
 }
 
@@ -266,7 +297,7 @@ static const char *msgs[] = {
 	"option does not have argument",
 	"unknown command option",
 	"option already used",
-	"non-numeric argument",
+	"invalid argument used",
 	NULL};
 
 const char *shell::errmsg(errmsg_t id)

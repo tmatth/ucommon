@@ -69,7 +69,7 @@ private:
 	void set0(char *argv0);
 
 public:
-	typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, NON_NUMERIC} errmsg_t;
+	typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, BAD_VALUE} errmsg_t;
 
 	/**
 	 * This can be used to get internationalized error messages.  The internal
@@ -201,6 +201,38 @@ public:
 
 		inline const char *operator*()
 			{return text;};
+	};
+
+	/**
+	 * Character option for shell parsing.  This offers a quick-use class
+	 * to parse a shell flag, along with a character code that may be
+	 * saved.  Multiple invokations is an error.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT character : public Option
+	{
+	private:
+		bool used;
+
+	protected:
+		char code;
+
+		virtual const char *assign(const char *value);
+
+	public:
+		character(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "char", char default_code = ' ');
+
+		inline operator bool()
+			{return used;};
+
+		inline bool operator!()
+			{return !used;};
+
+		inline operator char()
+			{return code;};
+
+		inline char operator*()
+			{return code;};
 	};
 
 	/**
