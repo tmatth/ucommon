@@ -261,7 +261,7 @@ inactive:
 argument:
 			++_argc;
 			active = true;
-			arg = (args *)mempager::alloc(sizeof(args));
+			arg = init<args>((args *)mempager::alloc(sizeof(args)));
 			arg->item = (cp++);
 			arg->enlist(&arglist);
 			continue;
@@ -400,7 +400,7 @@ void shell::parse(int argc, char **argv)
 	OrderedIndex arglist;
 	_argc = 0;
 
-	while(_argv && *_argv) {
+	while(_argv != NULL && *_argv != NULL) {
 		fn = strrchr(*_argv, '/');
 		if(!fn)
 			fn = strrchr(*_argv, '\\');
@@ -436,7 +436,7 @@ void shell::parse(int argc, char **argv)
 				String::set(dirname + len, sizeof(dirname) - len, fn);
 			else
 				String::set(dirname, sizeof(dirname), fn);
-			argitem = (args *)mempager::alloc(sizeof(args));
+			argitem = init<args>((args *)mempager::alloc(sizeof(args)));
 			argitem->item = mempager::dup(dirname);
 			argitem->enlist(&arglist);
 			++_argc;
@@ -445,7 +445,7 @@ void shell::parse(int argc, char **argv)
 		++*_argv;
 		continue;
 skip:
-		argitem = (args *)mempager::alloc(sizeof(args));
+		argitem = init<args>((args *)mempager::alloc(sizeof(args)));
 		argitem->item = *(_argv++);
 		argitem->enlist(&arglist);
 		++_argc;
