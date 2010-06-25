@@ -69,6 +69,24 @@ private:
 	void set0(char *argv0);
 
 public:
+	typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, NON_NUMERIC} errmsg_t;
+
+	/**
+	 * This can be used to get internationalized error messages.  The internal
+	 * text for shell parser errors are passed through here.
+	 * @param id of error message to use.
+	 * @return published text of error message.
+	 */
+	static const char *errmsg(errmsg_t id);
+
+	/**
+	 * This is used to set internationalized error messages for the shell
+	 * parser.
+	 * @param id of message to set.
+	 * @param string to be used.
+	 */
+	static void errmsg(errmsg_t id, const char *text);
+
 	/**
 	 * A base class used to create parsable shell options.  The virtual
 	 * is invoked when the shell option is detected.  Both short and long

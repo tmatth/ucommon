@@ -66,7 +66,7 @@ shell::Option(short_option, long_option, NULL, help_string)
 const char *shell::flag::assign(const char *value)
 {
 	if(single && counter)
-		return "option already set";
+		return shell::errmsg(shell::OPTION_USED);
 
 	++counter;
 	return NULL;
@@ -84,11 +84,11 @@ const char *shell::numeric::assign(const char *value)
 	char *endptr = NULL;
 
 	if(used)
-		return "option already set";
+		return errmsg(shell::OPTION_USED);
 
 	number = strtol(value, &endptr, 0);
 	if(*endptr != 0)
-		return "invalid value used";
+		return errmsg(shell::NON_NUMERIC);
 
 	return NULL;
 }
@@ -260,6 +260,35 @@ mempager(pagesize)
 	parse(argc, argv);
 }
 
+static const char *msgs[] = {
+	"missing command line arguments",
+	"missing argument for option",
+	"option does not have argument",
+	"unknown command option",
+	"option already used",
+	"non-numeric argument",
+	NULL};
+
+const char *shell::errmsg(errmsg_t id)
+{
+	return msgs[id];
+}
+
+void shell::errmsg(errmsg_t id, const char *text)
+{
+	msgs[id] = text;
+}
+
+unsigned shell::count(char **argv)
+{
+	unsigned count;
+
+	while(argv && *argv[count])
+		++count;
+
+	return count;
+}
+
 char **shell::parse(const char *string)
 {
 	assert(string != NULL);
@@ -333,7 +362,7 @@ void shell::parse(int argc, char **argv)
 	const char *err;
 
 	if(argc < 1 || !argv)
-		errexit(-1, "%s\n", "*** invalid or missing command arguments");
+		errexit(-1, "*** %s\n", errmsg(shell::NOARGS));
 
 	set0(argv[0]);
 
@@ -363,7 +392,7 @@ void shell::parse(int argc, char **argv)
 			value = NULL;
 			if(eq(op->long_option, opt, len)) {
 				if(opt[len] == '=' && !op->uses_option) 			
-					errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, "option does not use assignment");
+					errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, errmsg(shell::INVARGUMENT));
 				if(opt[len] == '=') {
 					value = opt + len + 1;
 					break;
@@ -380,7 +409,7 @@ void shell::parse(int argc, char **argv)
 		// if we have long option, try to assign it...
 		if(is(op)) {
 			if(op->uses_option && value == NULL)
-				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, "missing value option");
+				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, errmsg(shell::NOARGUMENT));
 			err = op->assign(value);
 			if(err)
 				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, err);
@@ -392,12 +421,14 @@ void shell::parse(int argc, char **argv)
 			char *cp = strchr(arg, '=');
 			if(cp)
 				*cp = 0;
-			errexit(1, "*** %s: %s: %s\n", _argv0, arg, "unknown option");
+			errexit(1, "*** %s: %s: %s\n", _argv0, arg, errmsg(shell::BADOPTION));
 		}
 
 		// short form -xyz flags parsing...
 	
 		while(*(++arg) != 0) {
+			value = NULL;
+
 			op = Option::first();
 			while(is(op)) {
 				if(op->short_option == *arg) 
@@ -406,7 +437,7 @@ void shell::parse(int argc, char **argv)
 			}
 			
 			if(!is(op))
-				errexit(1, "*** %s: -%c: %s\n", _argv0, *arg, "unknown option");
+				errexit(1, "*** %s: -%c: %s\n", _argv0, *arg, errmsg(shell::BADOPTION));
 			if(op->uses_option && arg[1] == 0) {
 				value = argv[argp++];
 				break;
@@ -415,13 +446,14 @@ void shell::parse(int argc, char **argv)
 				value = ++arg;
 				break;
 			}
-		}
-		if(is(op)) {
-			if(op->uses_option && value == NULL)
-				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, "missing value option");
-			err = op->assign(value);
-			if(err)
-				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
+	
+			if(is(op)) {
+				if(op->uses_option && value == NULL)
+					errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, errmsg(shell::NOARGUMENT));
+				err = op->assign(value);
+				if(err)
+					errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
+			}
 		}
 	}
 	_argv = &argv[argp];
