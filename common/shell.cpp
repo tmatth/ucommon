@@ -402,15 +402,19 @@ void shell::parse(int argc, char **argv)
 
 	while(_argv != NULL && *_argv != NULL) {
 		fn = strrchr(*_argv, '/');
+		arg = *_argv;
 		if(!fn)
 			fn = strrchr(*_argv, '\\');
-		if(!fn)
+		if(!fn && arg[1] == ':')
 			fn = strrchr(*_argv, ':');
 		if(fn)
 			++fn;
 		else
 			fn = *_argv;
 		if(!*fn)
+			goto skip;
+		// url type things do not get expanded...
+		if(strchr(fn, ':'))
 			goto skip;
 		if(*fn != '*' && fn[strlen(fn) - 1] != '*' && !strchr(fn, '?'))
 			goto skip;
