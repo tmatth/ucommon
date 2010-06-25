@@ -102,6 +102,7 @@
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
 #include <ucommon/buffer.h>
+#include <ucommon/shell.h>
 #include <ucommon/xml.h>
 
 #ifdef	_UCOMMON_EXTENDED_
