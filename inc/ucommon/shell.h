@@ -52,11 +52,6 @@ private:
 	public:
 		char *item;
 	};
-
-	/**
-	 * Shell expansion for some platforms.
-	 */
-	void expand(void);
 	
 	/**
 	 * Collapse argument list.
@@ -96,7 +91,7 @@ public:
 	class __EXPORT errormap
 	{
 	public:
-		inline errormap(shell::errmsg_t id, const char *text)
+		inline errormap(errmsg_t id, const char *text)
 			{shell::errmsg(id, text);};
 	};
 
@@ -147,7 +142,7 @@ public:
 	 * verbose options, for example.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT flag : public Option
+	class __EXPORT flagopt : public Option
 	{
 	private:
 		unsigned counter;
@@ -156,7 +151,7 @@ public:
 		virtual const char *assign(const char *value);
 
 	public:
-		flag(char short_option, const char *long_option = NULL, const char *help = NULL, bool single_use = true);
+		flagopt(char short_option, const char *long_option = NULL, const char *help = NULL, bool single_use = true);
 
 		inline operator bool()
 			{return counter > 0;};
@@ -177,7 +172,7 @@ public:
 	 * saved and a use counter, as multiple invokations is an error.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT string : public Option
+	class __EXPORT stringopt : public Option
 	{
 	private:
 		bool used;
@@ -188,7 +183,7 @@ public:
 		virtual const char *assign(const char *value);
 
 	public:
-		string(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "text", const char *def_text = NULL);
+		stringopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "text", const char *def_text = NULL);
 
 		inline operator bool()
 			{return used;};
@@ -209,7 +204,7 @@ public:
 	 * saved.  Multiple invokations is an error.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT character : public Option
+	class __EXPORT charopt : public Option
 	{
 	private:
 		bool used;
@@ -220,7 +215,7 @@ public:
 		virtual const char *assign(const char *value);
 
 	public:
-		character(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "char", char default_code = ' ');
+		charopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "char", char default_code = ' ');
 
 		inline operator bool()
 			{return used;};
@@ -241,7 +236,7 @@ public:
 	 * saved and a use counter, as multiple invokations is an error.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT numeric : public Option
+	class __EXPORT numericopt : public Option
 	{
 	private:
 		bool used;
@@ -252,7 +247,7 @@ public:
 		virtual const char *assign(const char *value);
 
 	public:
-		numeric(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
+		numericopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
 
 		inline operator bool()
 			{return used;};

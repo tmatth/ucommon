@@ -56,14 +56,14 @@ shell::Option::~Option()
 {
 }
 
-shell::flag::flag(char short_option, const char *long_option, const char *help_string, bool single_use) :
+shell::flagopt::flagopt(char short_option, const char *long_option, const char *help_string, bool single_use) :
 shell::Option(short_option, long_option, NULL, help_string)
 {
 	single = single_use;
 	counter = 0;
 }
 
-const char *shell::flag::assign(const char *value)
+const char *shell::flagopt::assign(const char *value)
 {
 	if(single && counter)
 		return shell::errmsg(shell::OPTION_USED);
@@ -72,14 +72,14 @@ const char *shell::flag::assign(const char *value)
 	return NULL;
 }
 
-shell::numeric::numeric(char short_option, const char *long_option, const char *help_string, const char *type, long def_value) :
+shell::numericopt::numericopt(char short_option, const char *long_option, const char *help_string, const char *type, long def_value) :
 shell::Option(short_option, long_option, type, help_string)
 {
 	used = false;
 	number = def_value;
 }
 
-const char *shell::numeric::assign(const char *value)
+const char *shell::numericopt::assign(const char *value)
 {
 	char *endptr = NULL;
 
@@ -93,14 +93,14 @@ const char *shell::numeric::assign(const char *value)
 	return NULL;
 }
 
-shell::string::string(char short_option, const char *long_option, const char *help_string, const char *type, const char *def_value) :
+shell::stringopt::stringopt(char short_option, const char *long_option, const char *help_string, const char *type, const char *def_value) :
 shell::Option(short_option, long_option, type, help_string)
 {
 	used = false;
 	text = def_value;
 }
 
-const char *shell::string::assign(const char *value)
+const char *shell::stringopt::assign(const char *value)
 {
 	if(used)
 		return shell::errmsg(shell::OPTION_USED);
@@ -109,14 +109,14 @@ const char *shell::string::assign(const char *value)
 	return NULL;
 }
 
-shell::character::character(char short_option, const char *long_option, const char *help_string, const char *type, char def_value) :
+shell::charopt::charopt(char short_option, const char *long_option, const char *help_string, const char *type, char def_value) :
 shell::Option(short_option, long_option, type, help_string)
 {
 	used = false;
 	code = def_value;
 }
 
-const char *shell::character::assign(const char *value)
+const char *shell::charopt::assign(const char *value)
 {
 	long number;
 	char *endptr = NULL;
@@ -139,104 +139,6 @@ const char *shell::character::assign(const char *value)
 	code = (char)(number);
 	return NULL;
 }
-
-#ifdef _MSWINDOWS_
-
-void shell::expand(void)
-{
-	first = last = NULL;
-	const char *fn;
-	char dirname[128];
-	WIN32_FIND_DATA entry;
-	bool skipped = false, flagged = true;
-	args *arg;
-	int len;
-	fd_t dir;
-
-	first = last = NULL;
-
-	while(_argv && *_argv) {
-		if(skipped) {
-skip:
-			arg = (args *)mempager::alloc(sizeof(args));
-			arg->item = *(_argv++);
-			arg->next = NULL;
-			if(last) {
-				last->next = arg;	
-				last = arg;
-			}
-			else
-				last = first = arg;
-			continue;
-		}
-		if(!strncmp(*_argv, "-*", 2)) {
-			++_argv;
-			skipped = true;
-			continue;
-		}
-		if(eq(*_argv, "--")) {
-			flagged = false;
-			goto skip;
-		}
-		if(**_argv == '-' && flagged) 
-			goto skip;
-		fn = strrchr(*_argv, '/');
-		if(!fn)
-			fn = strrchr(*_argv, '\\');
-		if(!fn)
-			fn = strrchr(*_argv, ':');
-		if(fn)
-			++fn;
-		else
-			fn = *_argv;
-		if(!*fn)
-			goto skip;
-		if(*fn != '*' && fn[strlen(fn) - 1] != '*' && !strchr(fn, '?'))
-			goto skip;
-		if(!strcmp(fn, "*"))
-			fn = "*.*";
-		len = fn - *_argv;
-		if(len >= sizeof(dirname))
-			len = sizeof(dirname) - 1;
-		if(len == 0)
-			dirname[0] = 0;
-		else
-			String::set(dirname, ++len, *_argv);	
-		len = strlen(dirname);
-		if(len)
-			String::set(dirname + len, sizeof(dirname) - len, fn);
-		else
-			String::set(dirname, sizeof(dirname), fn);
-		dir = FindFirstFile(dirname, &entry);
-		if(dir == INVALID_HANDLE_VALUE)
-			goto skip;
-		do {
-			if(len)
-				String::set(dirname + len, sizeof(dirname) - len, fn);
-			else
-				String::set(dirname, sizeof(dirname), fn);
-			arg = (args *)mempager::alloc(sizeof(args));
-			arg->item = mempager::dup(dirname);
-			arg->next = NULL;
-			if(last) {
-				last->next = arg;	
-				last = arg;
-			}
-			else
-				last = first = arg;
-		} while(FindNextFile(dir, &entry));
-		CloseHandle(dir);
-		++*_argv;
-	}
-}
-
-#else
-
-void shell::expand(void)
-{
-}
-
-#endif
 
 void shell::collapse(LinkedObject *first)
 {
@@ -387,7 +289,6 @@ void shell::parse(int argc, char **argv)
 {
 	int argp = 1;
 	char *arg, *opt;
-	Option *node;
 	unsigned len;
 	const char *value;
 	const char *err;
@@ -489,7 +390,68 @@ void shell::parse(int argc, char **argv)
 	}
 	_argv = &argv[argp];
 	_argc = argc - argp;
-	// expansion here...??
+
+#ifdef	_MSWINDOWS_
+	const char *fn;
+	char dirname[128];
+	WIN32_FIND_DATA entry;
+	args *argitem;
+	fd_t dir;
+	OrderedIndex arglist;
+	_argc = 0;
+
+	while(_argv && *_argv) {
+		fn = strrchr(*_argv, '/');
+		if(!fn)
+			fn = strrchr(*_argv, '\\');
+		if(!fn)
+			fn = strrchr(*_argv, ':');
+		if(fn)
+			++fn;
+		else
+			fn = *_argv;
+		if(!*fn)
+			goto skip;
+		if(*fn != '*' && fn[strlen(fn) - 1] != '*' && !strchr(fn, '?'))
+			goto skip;
+		if(eq(fn, "*"))
+			fn = "*.*";
+		len = fn - *_argv;
+		if(len >= sizeof(dirname))
+			len = sizeof(dirname) - 1;
+		if(len == 0)
+			dirname[0] = 0;
+		else
+			String::set(dirname, ++len, *_argv);	
+		len = strlen(dirname);
+		if(len)
+			String::set(dirname + len, sizeof(dirname) - len, fn);
+		else
+			String::set(dirname, sizeof(dirname), fn);
+		dir = FindFirstFile(dirname, &entry);
+		if(dir == INVALID_HANDLE_VALUE)
+			goto skip;
+		do {
+			if(len)
+				String::set(dirname + len, sizeof(dirname) - len, fn);
+			else
+				String::set(dirname, sizeof(dirname), fn);
+			argitem = (args *)mempager::alloc(sizeof(args));
+			argitem->item = mempager::dup(dirname);
+			argitem->enlist(&arglist);
+			++_argc;
+		} while(FindNextFile(dir, &entry));
+		CloseHandle(dir);
+		++*_argv;
+		continue;
+skip:
+		argitem = (args *)mempager::alloc(sizeof(args));
+		argitem->item = *(_argv++);
+		argitem->enlist(&arglist);
+		++_argc;
+	}
+	collapse(arglist.begin());
+#endif
 }
 
 void shell::errexit(int exitcode, const char *format, ...)
