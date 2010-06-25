@@ -88,6 +88,19 @@ public:
 	static void errmsg(errmsg_t id, const char *text);
 
 	/**
+	 * A class to redefine error messages.  This can be used as a statically
+	 * initialized object to remap error messages for easier
+	 * internationalization.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT error
+	{
+	public:
+		inline error(shell::errmsg_t id, const char *text)
+			{shell::errmsg(id, text);};
+	};
+
+	/**
 	 * A base class used to create parsable shell options.  The virtual
 	 * is invoked when the shell option is detected.  Both short and long
 	 * forms of argument parsing are supported.  An instance of a derived
