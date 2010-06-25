@@ -65,6 +65,11 @@ Cipher::~Cipher()
 	release();
 }
 
+bool Cipher::is(const char *id)
+{
+	return (EVP_get_cipherbyname(id) != NULL);
+}
+
 void Cipher::push(unsigned char *address, size_t size)
 {
 }

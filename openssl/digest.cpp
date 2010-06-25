@@ -40,6 +40,11 @@ Digest::~Digest()
 	release();
 }
 
+bool Digest::is(const char *id)
+{
+	return (EVP_get_digestbyname(id) != NULL);
+}
+
 void Digest::set(const char *type)
 {
 	secure::init();

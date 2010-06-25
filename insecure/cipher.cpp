@@ -51,6 +51,11 @@ Cipher::~Cipher()
 	release();
 }
 
+bool Cipher::is(const char *id)
+{
+	return false;
+}
+
 void Cipher::push(unsigned char *address, size_t size)
 {
 }

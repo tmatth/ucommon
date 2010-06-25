@@ -300,6 +300,13 @@ public:
 		{return bufpos;};
 
 	size_t alignment(void);
+
+	/**
+	 * Check if a specific cipher is supported.
+	 * @param name of cipher to check.
+	 * @return true if supported, false if not.
+	 */
+	static bool is(const char *name);
 };
 
 /**
@@ -363,6 +370,13 @@ public:
 
 	inline operator bool() const
 		{return bufsize > 0 || context != NULL;};
+
+	/**
+	 * Test to see if a specific digest type is supported.
+	 * @param name of digest we want to check.
+	 * @return true if supported, false if not.
+	 */
+	static bool is(const char *name);
 };
 
 /**

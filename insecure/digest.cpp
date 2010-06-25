@@ -260,6 +260,14 @@ Digest::~Digest()
     release();
 }
 
+bool Digest::is(const char *id)
+{
+	if(ieq(id, "md5"))
+		return true;
+
+	return false;
+}
+
 void Digest::set(const char *type)
 {
     release();
