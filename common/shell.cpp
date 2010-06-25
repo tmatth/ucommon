@@ -43,6 +43,9 @@ OrderedIndex shell::Option::index;
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
 OrderedObject(&index)
 {
+	while(*longopt == '-')
+		++longopt;
+
 	short_option = shortopt;
 	long_option = longopt;
 	uses_option = value;
@@ -323,7 +326,7 @@ int shell::systemf(const char *format, ...)
 void shell::parse(int argc, char **argv)
 {
 	int argp = 1;
-	const char *arg, *opt;
+	char *arg, *opt;
 	Option *node;
 	unsigned len;
 	const char *value;
@@ -349,7 +352,8 @@ void shell::parse(int argc, char **argv)
 		err = NULL;
 		value = NULL;
 
-		if(opt[1] == '-')
+		++opt;
+		if(*opt == '-')
 			++opt;
 
 		// long option parsing...
@@ -359,39 +363,48 @@ void shell::parse(int argc, char **argv)
 			value = NULL;
 			if(eq(op->long_option, opt, len)) {
 				if(opt[len] == '=' && !op->uses_option) 			
-					errexit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "option does not use assignment");
+					errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, "option does not use assignment");
 				if(opt[len] == '=') {
-					value = opt + len;
+					value = opt + len + 1;
 					break;
 				}
-				if(arg[len] != 0)
-					errexit(1, "*** %s: %s: %s\n", _argv0, arg, "unknown option");
-				if(op->uses_option) {
-					value = argv[argp++];
+				if(opt[len] == 0) {
+					if(op->uses_option)
+						value = argv[argp++];
 					break;
 				}
 			}
+			op.next();
 		}
 
 		// if we have long option, try to assign it...
 		if(is(op)) {
 			if(op->uses_option && value == NULL)
-				errexit(1, "*** %s: %s: %s\n", _argv0, op->long_option, "missing value option");
+				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, "missing value option");
 			err = op->assign(value);
 			if(err)
-				errexit(1, "*** %s: %s: %s\n", _argv0, op->long_option, err);
+				errexit(1, "*** %s: %s: --%s\n", _argv0, op->long_option, err);
 			continue;
+		}
+
+		// if unknown long option was used...
+		if(eq(arg, "--", 2)) {
+			char *cp = strchr(arg, '=');
+			if(cp)
+				*cp = 0;
+			errexit(1, "*** %s: %s: %s\n", _argv0, arg, "unknown option");
 		}
 
 		// short form -xyz flags parsing...
 	
-		while(*(++arg)) {
+		while(*(++arg) != 0) {
 			op = Option::first();
 			while(is(op)) {
 				if(op->short_option == *arg) 
 					break;
 				op.next();
 			}
+			
 			if(!is(op))
 				errexit(1, "*** %s: -%c: %s\n", _argv0, *arg, "unknown option");
 			if(op->uses_option && arg[1] == 0) {
@@ -402,8 +415,6 @@ void shell::parse(int argc, char **argv)
 				value = ++arg;
 				break;
 			}
-			
-			++arg;
 		}
 		if(is(op)) {
 			if(op->uses_option && value == NULL)

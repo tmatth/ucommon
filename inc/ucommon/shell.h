@@ -150,6 +150,8 @@ public:
 	{
 	private:
 		bool used;
+
+	protected:
 		const char *text;
 
 		virtual const char *assign(const char *value);
@@ -180,6 +182,8 @@ public:
 	{
 	private:
 		bool used;
+
+	protected:
 		long number;
 
 		virtual const char *assign(const char *value);
@@ -303,6 +307,21 @@ public:
 	 */	
 	inline char **argv(void) const
 		{return _argv;};
+
+	/**
+	 * Return parser argv element.
+	 * @param offset into array.
+	 * @return argument string.
+	 */
+	inline const char *operator[](unsigned offset)
+		{return _argv[offset];};
+
+	/**
+	 * Return argc count.
+	 * @return argc count.
+	 */
+	inline unsigned operator()(void)
+		{return _argc;};
 
 	/**
 	 * Get argc count for an existing array.
