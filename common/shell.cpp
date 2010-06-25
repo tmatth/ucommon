@@ -214,7 +214,7 @@ void shell::errmsg(errmsg_t id, const char *text)
 
 unsigned shell::count(char **argv)
 {
-	unsigned count;
+	unsigned count = 0;
 
 	while(argv && *argv[count])
 		++count;
