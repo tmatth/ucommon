@@ -391,7 +391,7 @@ void shell::parse(int argc, char **argv)
 	_argv = &argv[argp];
 	_argc = argc - argp;
 
-#ifdef	_MSWINDOWS_
+#if defined(_MSWINDOWS_) && defined(_MSC_VER)
 	const char *fn;
 	char dirname[128];
 	WIN32_FIND_DATA entry;

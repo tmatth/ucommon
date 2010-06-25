@@ -44,7 +44,6 @@ extern "C" int main()
 	test_argv[5] = NULL;
 
 	shell args1(test_argc, test_argv);
-
 	assert(!tflag);
 	assert(is(rflag));
 	assert(*lines == 5);
