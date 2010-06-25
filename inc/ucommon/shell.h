@@ -110,6 +110,97 @@ public:
 	};
 
 	/**
+	 * Flag option for shell parsing.  This offers a quick-use class
+	 * to parse a shell flag, along with a counter for how many times
+	 * the flag was selected.  The counter might be used for -vvvv style
+	 * verbose options, for example.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT flag : public Option
+	{
+	private:
+		unsigned counter;
+		bool single;
+
+		virtual const char *assign(const char *value);
+
+	public:
+		flag(char short_option, const char *long_option = NULL, const char *help = NULL, bool single_use = true);
+
+		inline operator bool()
+			{return counter > 0;};
+
+		inline bool operator!()
+			{return counter == 0;};
+
+		inline operator unsigned()
+			{return counter;};
+
+		inline unsigned operator*()
+			{return counter;};
+	};
+
+	/**
+	 * Text option for shell parsing.  This offers a quick-use class
+	 * to parse a shell flag, along with a numberic text that may be
+	 * saved and a use counter, as multiple invokations is an error.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT string : public Option
+	{
+	private:
+		bool used;
+		const char *text;
+
+		virtual const char *assign(const char *value);
+
+	public:
+		string(char short_option, const char *long_option = NULL, const char *help = NULL, const char *def_text = NULL);
+
+		inline operator bool()
+			{return used;};
+
+		inline bool operator!()
+			{return !used;};
+
+		inline operator const char *()
+			{return text;};
+
+		inline const char *operator*()
+			{return text;};
+	};
+
+	/**
+	 * Numeric option for shell parsing.  This offers a quick-use class
+	 * to parse a shell flag, along with a numberic value that may be
+	 * saved and a use counter, as multiple invokations is an error.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT numeric : public Option
+	{
+	private:
+		bool used;
+		long value;
+
+		virtual const char *assign(const char *value);
+
+	public:
+		numeric(char short_option, const char *long_option = NULL, const char *help = NULL, long def_value = 0);
+
+		inline operator bool()
+			{return used;};
+
+		inline bool operator!()
+			{return !used;};
+
+		inline operator long()
+			{return value;};
+
+		inline long operator*()
+			{return value;};
+	};
+
+	/**
 	 * Construct a shell argument list by parsing a simple command string.
 	 * This seperates a string into a list of command line arguments which
 	 * can be used with exec functions.

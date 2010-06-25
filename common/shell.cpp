@@ -53,6 +53,21 @@ shell::Option::~Option()
 {
 }
 
+shell::flag::flag(char short_option, const char *long_option, const char *help_string, bool single_use) :
+shell::Option(short_option, long_option, NULL, help_string)
+{
+	single = single_use;
+	counter = 0;
+}
+
+const char *shell::flag::assign(const char *value)
+{
+	if(single && counter)
+		return "option already set";
+
+	++counter;
+}
+
 #ifdef _MSWINDOWS_
 
 void shell::expand(void)
