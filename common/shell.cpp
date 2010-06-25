@@ -383,7 +383,7 @@ void shell::parse(int argc, char **argv)
 				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, "missing value option");
 			err = op->assign(value);
 			if(err)
-				errexit(1, "*** %s: %s: --%s\n", _argv0, op->long_option, err);
+				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, err);
 			continue;
 		}
 
