@@ -155,7 +155,7 @@ public:
 		virtual const char *assign(const char *value);
 
 	public:
-		string(char short_option, const char *long_option = NULL, const char *help = NULL, const char *def_text = NULL);
+		string(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "text", const char *def_text = NULL);
 
 		inline operator bool()
 			{return used;};
@@ -180,12 +180,12 @@ public:
 	{
 	private:
 		bool used;
-		long value;
+		long number;
 
 		virtual const char *assign(const char *value);
 
 	public:
-		numeric(char short_option, const char *long_option = NULL, const char *help = NULL, long def_value = 0);
+		numeric(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
 
 		inline operator bool()
 			{return used;};
@@ -194,10 +194,10 @@ public:
 			{return !used;};
 
 		inline operator long()
-			{return value;};
+			{return number;};
 
 		inline long operator*()
-			{return value;};
+			{return number;};
 	};
 
 	/**

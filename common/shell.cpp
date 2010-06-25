@@ -66,6 +66,44 @@ const char *shell::flag::assign(const char *value)
 		return "option already set";
 
 	++counter;
+	return NULL;
+}
+
+shell::numeric::numeric(char short_option, const char *long_option, const char *help_string, const char *type, long def_value) :
+shell::Option(short_option, long_option, type, help_string)
+{
+	used = false;
+	number = def_value;
+}
+
+const char *shell::numeric::assign(const char *value)
+{
+	char *endptr = NULL;
+
+	if(used)
+		return "option already set";
+
+	number = strtol(value, &endptr, 0);
+	if(*endptr != 0)
+		return "invalid value used";
+
+	return NULL;
+}
+
+shell::string::string(char short_option, const char *long_option, const char *help_string, const char *type, const char *def_value) :
+shell::Option(short_option, long_option, type, help_string)
+{
+	used = false;
+	text = def_value;
+}
+
+const char *shell::string::assign(const char *value)
+{
+	if(used)
+		return "option already set";
+
+	text = value;
+	return NULL;
 }
 
 #ifdef _MSWINDOWS_
