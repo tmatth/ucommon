@@ -93,7 +93,7 @@ public:
 	 * internationalization.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT error
+	class __EXPORT errormap
 	{
 	public:
 		inline error(shell::errmsg_t id, const char *text)
