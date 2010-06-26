@@ -268,11 +268,10 @@ public:
 
 private:
 	Key keys;
-	size_t bufsize, bufpos, padpos;
+	size_t bufsize, bufpos;
 	mode_t bufmode;
 	unsigned char *bufaddr;
 	void *context;
-	char pad[32];
 	
 protected:
 	virtual void push(unsigned char *address, size_t size);

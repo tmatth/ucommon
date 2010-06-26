@@ -56,7 +56,7 @@ Cipher::Key::Key()
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
 {
 	bufaddr = NULL;
-	bufsize = bufpos = padpos = 0;
+	bufsize = bufpos;
 	context = NULL;
 	set(key, mode, address, size);
 }
@@ -64,7 +64,7 @@ Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
 Cipher::Cipher()
 {
 	bufaddr = NULL;
-	bufsize = bufpos = padpos = 0;
+	bufsize = bufpos;
 	context = NULL;
 }
 
