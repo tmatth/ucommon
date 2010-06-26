@@ -25,10 +25,6 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-static shell::flagopt rflag('r', "--reverse", "reverse order of arguments");
-static shell::flagopt tflag('t', "--testing", "never hit this flag");
-static shell::numericopt lines('l', "--lines", "number of lines in output");
-
 extern "C" int main()
 {
 	int test_argc;
@@ -43,10 +39,14 @@ extern "C" int main()
 	test_argv[4] = (char *)"b";
 	test_argv[5] = NULL;
 
-	shell args1(test_argc, test_argv);
+	shell::flagopt rflag('r', "--reverse", "reverse order of arguments");
+	shell::flagopt tflag('t', "--testing", "never hit this flag");
+	shell::numericopt lines('l', "--lines", "number of lines in output");
+	shell args(test_argc, test_argv);
+
 	assert(!tflag);
 	assert(is(rflag));
 	assert(*lines == 5);
-	assert(args1() == 2);			// two file arguments left
-	assert(eq(args1[0], "a"));		// first file argument is "a"
+	assert(args() == 2);			// two file arguments left
+	assert(eq(args[0], "a"));		// first file argument is "a"
 }
