@@ -56,7 +56,7 @@ Cipher::Key::Key()
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
 {
 	bufaddr = NULL;
-	bufsize = bufpos;
+	bufsize = bufpos = 0;
 	context = NULL;
 	set(key, mode, address, size);
 }
@@ -64,7 +64,7 @@ Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
 Cipher::Cipher()
 {
 	bufaddr = NULL;
-	bufsize = bufpos;
+	bufsize = bufpos = 0;
 	context = NULL;
 }
 
@@ -94,25 +94,31 @@ void Cipher::release(void)
 
 size_t Cipher::flush(void)
 {
-	int outlen;
+	size_t total = bufpos;
 
-	if(context && EVP_CipherFinal_ex((EVP_CIPHER_CTX *)context, bufaddr + bufpos, &outlen)) {
-		bufpos += outlen;
-		if(bufpos >= bufsize) {
-			push(bufaddr, bufsize);
-			bufpos = 0;
-		}
-		return outlen;
+	if(bufpos && bufsize) {
+		push(bufaddr, bufpos);
+		bufpos = 0;
 	}
-	return 0;
+	return total;
 }
 
 size_t Cipher::puts(const char *text)
 {
+	char padbuf[64];
 	if(!text)
 		return 0;
 
-	return put((const unsigned char *)text, strlen(text));
+	size_t len = strlen(text) + 1;
+	unsigned pad = len % keys.iosize();
+
+	size_t count = put((const unsigned char *)text, len - pad);
+	if(pad) {
+		memcpy(padbuf, text + len - pad, pad);
+		memset(padbuf + pad, 0, keys.iosize() - pad);
+		count += put((const unsigned char *)padbuf, keys.iosize());
+	}
+	return flush();
 }
 		
 void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
@@ -130,12 +136,16 @@ void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
 	context = new EVP_CIPHER_CTX;
 	EVP_CIPHER_CTX_init((EVP_CIPHER_CTX *)context);
 	EVP_CipherInit_ex((EVP_CIPHER_CTX *)context, (EVP_CIPHER *)keys.algotype, NULL, keys.keybuf, keys.ivbuf, (int)mode);
+	EVP_CIPHER_CTX_set_padding((EVP_CIPHER_CTX *)context, 0);
 }
 
 size_t Cipher::put(const unsigned char *data, size_t size)
 {
 	int outlen;
 	size_t count = 0;
+
+	if(size % keys.iosize())
+		return 0;
 
 	while(bufsize && size + bufpos > bufsize) {
 		size_t diff = bufsize - bufpos;
@@ -156,3 +166,35 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 	}
 	return count;
 }
+
+size_t Cipher::final(const unsigned char *data, size_t size)
+{
+	size_t pad = 0;
+	unsigned char padbuf[64];
+	const unsigned char *ep;
+
+	switch(bufmode) {
+	case DECRYPT:
+		if(size % keys.iosize())
+			return 0;
+		put(data, size);
+		ep = data + size - 1;
+		bufpos -= *ep;		
+		size -= *ep;
+		break;
+	case ENCRYPT:
+		pad = size % keys.iosize();
+		put(data, size - pad);
+		if(pad) {
+			memcpy(padbuf, data + size - pad, pad);
+			memset(padbuf + pad, keys.iosize() - pad, keys.iosize() - pad);
+		}
+		else
+			memset(padbuf, keys.iosize(), keys.iosize());
+
+		put((const unsigned char *)padbuf, keys.iosize());
+	}
+
+	return flush();
+}
+

@@ -43,14 +43,15 @@ int main(int argc, char **argv)
 	enc.set(&mykey, Cipher::ENCRYPT, ebuf);
 	dec.set(&mykey, Cipher::DECRYPT, dbuf);
 
-	enc.puts(STR);
-	enc.flush();
+	size_t total = enc.puts(STR);
 
 	assert(!eq(STR, (char *)ebuf, strlen(STR)));
 
-	dec.put(ebuf, 48);
+	assert(total == 48);
+
+	dec.put(ebuf, total);
 	dec.flush();
-	assert(eq((char *)dbuf, STR, strlen(STR)));
+	assert(eq((char *)dbuf, STR));
 	return 0;
 }
 

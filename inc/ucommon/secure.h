@@ -287,11 +287,41 @@ public:
 
 	void set(key_t key, mode_t mode, unsigned char *address, size_t size = 0);
 
+	/**
+	 * Push a final cipher block.  This is used to push the final buffer into
+	 * the push method for any remaining data.
+	 */
 	size_t flush(void);
 
+	/**
+	 * Process cipher data.  This requires the size to be a multiple of the
+	 * cipher block size.  If an unaligned sized block of data is used, it
+	 * will be ignored and the size returned will be 0.
+	 * @param data to process.
+	 * @param size of data to process.
+	 * @return size of processed output, should be same as size or 0 if error.
+	 */
 	size_t put(const unsigned char *data, size_t size);
 
-	size_t puts(const char *str);
+	/**
+	 * This essentially encrypts a single string and pads with NULL bytes
+	 * as needed.
+	 * @param string to encrypt.
+	 * @return total encrypted size.
+	 */
+	size_t puts(const char *string);
+
+	/**
+	 * This is used to process any data unaligned to the blocksize at the end
+	 * of a cipher session.  On an encryption, it will add padding or an
+	 * entire padding block with the number of bytes to strip.  On decryption
+	 * it will remove padding at the end.  The pkcs5 method of padding with
+	 * removal count is used.
+	 * @param address of data to add before final pad.
+	 * @param size of data to add before final pad.
+	 * @return total encrypted buffer size, including padding.
+	 */
+	size_t final(const unsigned char *data, size_t size);
 		
 	inline size_t size(void)
 		{return bufsize;};
@@ -299,7 +329,8 @@ public:
 	inline size_t pos(void)
 		{return bufpos;};
 
-	size_t alignment(void);
+	inline size_t align(void)
+		{return keys.iosize();};
 
 	/**
 	 * Check if a specific cipher is supported.
