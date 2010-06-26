@@ -23,6 +23,9 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 
 	algotype = EVP_get_cipherbyname(cipher);
 	hashtype = EVP_get_digestbyname(digest);
+	keysize = blksize = 0;
+	memset(keybuf, 0, sizeof(keybuf));
+	memset(ivbuf, 0, sizeof(ivbuf));
 
 	if(!algotype || !hashtype)
 		return;
@@ -41,7 +44,9 @@ Cipher::Key::Key()
 
 	algotype = NULL;
 	hashtype = NULL;
-	keysize = 0;
+	keysize = blksize = 0;
+	memset(keybuf, 0, sizeof(keybuf));
+	memset(ivbuf, 0, sizeof(ivbuf));
 }
 
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
