@@ -51,6 +51,10 @@ void Digest::set(const char *type)
 
 	release();
 
+	// never use sha0
+	if(ieq(type, "sha"))
+		type = "sha1";
+
 	hashtype = (void *)EVP_get_digestbyname(type);
 	if(hashtype) {
 		context = new EVP_MD_CTX;

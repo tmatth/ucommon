@@ -21,6 +21,10 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 {
 	secure::init();
 
+	// never use sha0...
+	if(ieq(digest, "sha"))
+		digest = "sha1";
+
 	algotype = EVP_get_cipherbyname(cipher);
 	hashtype = EVP_get_digestbyname(digest);
 	keysize = blksize = 0;
