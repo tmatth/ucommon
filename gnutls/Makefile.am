@@ -12,11 +12,11 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
 
-noinst_HEADERS = local.h
+noinst_HEADER = local.h
 
 lib_LTLIBRARIES = libuccsecure.la
 
-libuccsecure_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @OPENSSL_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
+libuccsecure_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @SECURE_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
 libuccsecure_la_SOURCES = secure.cpp ssocket.cpp digest.cpp random.cpp \
 	cipher.cpp
 

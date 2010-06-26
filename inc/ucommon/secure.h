@@ -246,6 +246,8 @@ public:
 			const void *hashtype;
 			int hashid;
 		};
+
+		int modeid;
 		
 		// assume 512 bit cipher keys possible...
 		unsigned char keybuf[MAX_CIPHER_KEYSIZE / 8], ivbuf[MAX_CIPHER_KEYSIZE / 8];

@@ -38,7 +38,7 @@ UCOMMON_LIBS=""
 
 CHECKFLAGS="$CHECKFLAGS"
 
-components="script audio utils openssl"
+components="script audio utils secure"
 socket_lib=""
 posix4_lib=""
 rt_lib=""
@@ -544,9 +544,13 @@ GNUTLS_LIBS=""
 AC_ARG_WITH(pkg-config,
 	AC_HELP_STRING([--with-pkg-config],[enable support for pkg-config]),[
 	PKG_CHECK_MODULES(OPENSSL, [openssl >= $OPENSSL_REQUIRES], [], [OPENSSL_LIBS=""])
+	PKG_CHECK_MODULES(GNUTLS, [gnutls >= 2.8.0], [], [GNUTLS_LIBS=""])
 ],[
 	AC_CHECK_HEADERS(openssl/ssl.h, [
 		OPENSSL_LIBS="-lssl -lcrypto"
+	])
+	AC_CHECK_LIB(gnutls, gnutls_init, [
+		GNUTLS_LIBS="-lgnutls -lgcrypt"
 	])
 ])
 	
@@ -567,7 +571,32 @@ for component in $UCOMMON_COMPONENTS ; do
 	utils)
 		uses_utils=1
 		;;
-	openssl|ssl|secure)
+	secure|ssl|crypto)
+		uses_secure="1"
+		if test -z "$secure" ; then
+			if test ! -z "$GNUTLS_LIBS" ; then
+				SECURE_LIBS="$GNUTLS_LIBS"
+				secure="gnutls"
+			fi
+		fi
+		if test -z "$secure" ; then
+			if test ! -z "$OPENSSL_LIBS" ; then
+				SECURE_LIBS="$OPENSSL_LIBS"
+				secure="openssl"
+
+			fi
+		fi
+		;;
+	gnutls)
+		uses_secure="1"
+		if test -z "$secure" ; then
+			if test ! -z "$GNUTLS_LIBS" ; then
+				SECURE_LIBS="$GNUTLS_LIBS"
+				secure="gnutls"
+			fi
+		fi
+		;;
+	openssl)
 		uses_secure="1"
 		if test -z "$secure" ; then
 			if test ! -z "$OPENSSL_LIBS" ; then
@@ -656,12 +685,14 @@ AC_SUBST(UCOMMON_LIBS)
 AC_SUBST(SECURE_EXPORT)
 AC_SUBST(SECURE_LOCAL)
 AC_SUBST(SECURE_LIBS)
+AC_SUBST(OPENSSL_LIBS)
+AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(MATH_LIB)
 AC_SUBST(plugindir)
 
 AC_OUTPUT(Makefile common/Makefile audio/Makefile script/Makefile
-openssl/Makefile insecure/Makefile utils/Makefile 
+openssl/Makefile gnutls/Makefile insecure/Makefile utils/Makefile 
 inc/Makefile inc/ucommon/Makefile test/Makefile 
 ucommon.pc ucommon.spec ucommon-config)
 
