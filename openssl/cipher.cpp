@@ -84,7 +84,16 @@ Cipher::~Cipher()
 
 bool Cipher::is(const char *id)
 {
-	return (EVP_get_cipherbyname(id) != NULL);
+	// make sure cipher-bitsize forms without -mode do not fail...
+	char algoname[64];
+    String::set(algoname, sizeof(algoname), id);
+    char *fpart = strchr(algoname, '-');
+    char *lpart = strrchr(algoname, '-');
+
+    if(fpart && fpart == lpart)
+        strcpy(fpart, fpart + 1);
+
+	return (EVP_get_cipherbyname(algoname) != NULL);
 }
 
 void Cipher::push(unsigned char *address, size_t size)

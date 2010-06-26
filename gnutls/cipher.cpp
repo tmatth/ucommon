@@ -141,6 +141,21 @@ void Cipher::release(void)
 	}
 }
 
+bool Cipher::is(const char *cipher)
+{
+	// eliminate issues with algo-size-mode formed algo strings...
+
+	char algoname[64];
+
+    String::set(algoname, sizeof(algoname), cipher);
+    char *fpart = strchr(algoname, '-');
+    char *lpart = strrchr(algoname, '-');
+	if(lpart && lpart != fpart)
+		*(lpart++) = 0;
+
+	return gcry_cipher_map_name(algoname) != GCRY_CIPHER_NONE;
+}
+
 size_t Cipher::flush(void)
 {
     size_t total = bufpos;
