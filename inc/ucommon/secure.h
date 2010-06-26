@@ -319,7 +319,7 @@ public:
 	 * removal count is used.
 	 * @param address of data to add before final pad.
 	 * @param size of data to add before final pad.
-	 * @return total encrypted buffer size, including padding.
+	 * @return actual bytes encrypted or decrypted.
 	 */
 	size_t final(const unsigned char *data, size_t size);
 		

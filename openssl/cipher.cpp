@@ -188,13 +188,17 @@ size_t Cipher::final(const unsigned char *data, size_t size)
 		if(pad) {
 			memcpy(padbuf, data + size - pad, pad);
 			memset(padbuf + pad, keys.iosize() - pad, keys.iosize() - pad);
+			size = (size - pad) + keys.iosize();
 		}
-		else
+		else {
+			size += keys.iosize();
 			memset(padbuf, keys.iosize(), keys.iosize());
+		}
 
 		put((const unsigned char *)padbuf, keys.iosize());
 	}
 
-	return flush();
+	flush();
+	return size;
 }
 
