@@ -25,7 +25,15 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 	if(ieq(digest, "sha"))
 		digest = "sha1";
 
-	algotype = EVP_get_cipherbyname(cipher);
+	char algoname[64];
+    String::set(algoname, sizeof(algoname), cipher);
+    char *fpart = strchr(algoname, '-');
+    char *lpart = strrchr(algoname, '-');
+
+    if(fpart && fpart == lpart)
+        strcpy(fpart, fpart + 1);
+
+	algotype = EVP_get_cipherbyname(algoname);
 	hashtype = EVP_get_digestbyname(digest);
 	keysize = blksize = 0;
 	memset(keybuf, 0, sizeof(keybuf));
