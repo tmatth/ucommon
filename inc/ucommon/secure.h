@@ -251,16 +251,16 @@ public:
 		unsigned char keybuf[MAX_CIPHER_KEYSIZE / 8], ivbuf[MAX_CIPHER_KEYSIZE / 8];
 
 		// generated keysize
-		unsigned keysize, blksize;
+		size_t keysize, blksize;
 
 	public:
 		Key(const char *cipher, const char *digest, const char *text, size_t size = 0, const unsigned char *salt = NULL, unsigned rounds = 1);
 		Key();
 
-		inline unsigned size(void)
+		inline size_t size(void)
 			{return keysize;};
 
-		inline unsigned iosize(void)
+		inline size_t iosize(void)
 			{return blksize;};
 	};
 
@@ -268,10 +268,11 @@ public:
 
 private:
 	Key keys;
-	size_t bufsize, bufpos;
+	size_t bufsize, bufpos, padpos;
 	mode_t bufmode;
 	unsigned char *bufaddr;
 	void *context;
+	char pad[32];
 	
 protected:
 	virtual void push(unsigned char *address, size_t size);
