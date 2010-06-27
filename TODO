@@ -6,35 +6,53 @@ Proposed ABI changes (3.1 or 4.0?):
 	tcpstream should be rewritten to use a char * address like TCPSocket.
 	tcpstream will require Socket() as base class to do this.
 
-	consolidate "Socket::puts"
+	consolidate "Socket::puts" and inline splints for 4.0 abi.
 
-	redo socket return int's like fsys to return errno() on error.
+	redo socket return int's like fsys to return errno() on error (this
+	may not require abi change, as no linkage is effected...)
 
-	add err() method and errno info to keyfile.
+	add err() method and errno info to keyfile and perhaps elsewhere.
 
-	new operator, namespaces, and include file issues with std lib.
+	changed new operators confined to namespace for include file issues
+	with std lib.
 
-	in script engine make expression operands virtuals.
-
-Proposed additions:
-
-	A pipe stream/process pipe handler that uses the new IOBuffer class.
+	in script engine make expression operands virtuals or expression
+	operation itself virtual.
 
 Proposed changes:
 
+	A pipe stream/process pipe handler that uses the new IOBuffer class.
+	This probably will happen in shell.h as an object that can be created by
+	a future shell::spawn()/pipe/popen like method.
+
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
-	Especially convenient with common use of nss for future tls.  Do we
+	Especially convenient with common use of NSS for future tls.  Do we
 	still keep GNU pth option if we do this?
 
 	Use NSPR code base for simulating msw conditional variables for direct
 	native msw threading if better than code we have in ucommon, or maybe
 	use NSPR in place of native msw threading entirely?
 
-	Add serialio class?
+	Add serialio and logging class?
+
+	Add a "add" and "remove" method for keymap?
+
+	Add NSS backend for secure alongside openssl & gnutls.
+
+	SSocket does not do validation yet and peer method missing.  We should load
+    all ca certificates rather than depend on using a directory path for using
+    multiple CA's because the latter depends on hash mapped directories for
+    openssl and may not exist as a feature in gnutls.  
+
+	Should we have a new generic ca archive format and ca management tool?
+
+	Certificate paths should be exposed and changable.  Base-name of
+	certificate service should be changable.
+
+	PKI related functions in secure library.
 
 Rejected changes:
 
 	DetachedThread delete this into dealloc() virtual...
 		- use Thread::exit() virtual for this purpose instead
-
 
