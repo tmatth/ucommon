@@ -1,6 +1,7 @@
 from ucommon 3.1.1 to 3.1.2
 - some attention to the question of padding cipher blocks.
 - gnutls can now also be used in place of openssl.
+- make sure all keys are destroyed cleanly when secure objects are released.
 
 from ucommon 3.1.0 to 3.1.1
 - some attention to the shell functions.
