@@ -76,6 +76,14 @@ size_t Cipher::puts(const char *text)
 
 	return put((const unsigned char *)text, strlen(text));
 }
+
+void Cipher::set(unsigned char *address, size_t size)
+{
+	flush();
+	bufaddr = address;
+	bufsize = size;
+	bufpos = 0;
+}
 		
 void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
 {
@@ -99,5 +107,15 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 		size -= diff;
 	}
 
+	return 0;
+}
+
+size_t Cipher::pad(const unsigned char *data, size_t size)
+{
+	return 0;
+}
+
+size_t Cipher::process(unsigned char *data, size_t size, bool flag)
+{
 	return 0;
 }
