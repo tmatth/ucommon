@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = autogen.sh README *.pc.in *.spec.in *.spec *-config.in \
+EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
 	ucommon-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
 	COPYRIGHT CMakeLists.txt config.h.cmake
 

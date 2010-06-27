@@ -11,7 +11,6 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
-EXTRA_DIST = README
 
 noinst_HEADERS = local.h
 
