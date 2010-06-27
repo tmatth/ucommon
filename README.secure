@@ -13,8 +13,8 @@ Programming to the GNU uCommon C++ secure api is intended to avoid the need
 entirely of using openssl, gcrypt, or other library specific functions.  This
 means the total size of the secure library will grow as we add additional
 common features, such as pki support. In the past as there has been no
-generally agreed upon crypto library developers building new apps would use a
-library they already know, or that is best optimized for the platform they are
-using.  Our goal is to remove this complexity of supporting different crypto
-libraries by offering a single API for secure application development.
+generally agreed upon crypto library, so developers building new apps would use
+a library they already know, or that is best optimized for the platform they
+are using.  Our goal is to remove this complexity of supporting different
+crypto libraries by offering a single API for secure application development.
 
