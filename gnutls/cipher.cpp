@@ -19,6 +19,9 @@
 
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
+	secure::init();
+	clear();
+
 	if(ieq(digest, "sha"))
 		digest = "sha1";
 
@@ -47,10 +50,6 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 	algoid = gcry_cipher_map_name(algoname);
 	hashid = gcry_md_map_name(digest);
 
-	memset(keybuf, 0, sizeof(keybuf));
-	memset(ivbuf, 0, sizeof(ivbuf));
-	keysize = blksize = 0;
-
     if(hashid == GCRY_MD_NONE || algoid == GCRY_CIPHER_NONE)
         return;
 
@@ -58,8 +57,10 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 	(void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_BLKLEN, NULL, &blksize);
 
 	gcry_md_hd_t mdc;
-	if(gcry_md_open(&mdc, hashid, 0) != 0)
+	if(gcry_md_open(&mdc, hashid, 0) != 0) {
+		clear();
 		return;
+	}
 
 	size_t kpos = 0, ivpos = 0;
 	size_t mdlen = gcry_md_get_algo_dlen(hashid);
@@ -101,11 +102,22 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 
 Cipher::Key::Key()
 {
+	secure::init();
+	clear();
+}
+
+Cipher::Key::~Key()
+{
+	clear();
+}
+
+void Cipher::Key::clear()
+{
 	algoid = GCRY_CIPHER_NONE;
 	hashid = GCRY_MD_NONE;
 	keysize = blksize = 0;
-	memset(keybuf, 0, sizeof(keybuf));
-	memset(ivbuf, 0, sizeof(ivbuf));
+	zerofill(keybuf, sizeof(keybuf));
+	zerofill(ivbuf, sizeof(ivbuf));
 }
 
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
@@ -135,6 +147,7 @@ void Cipher::push(unsigned char *address, size_t size)
 
 void Cipher::release(void)
 {
+	keys.clear();
 	if(context) {
 		gcry_cipher_close((CIPHER_CTX)context);
 		context = NULL;
@@ -162,9 +175,18 @@ size_t Cipher::flush(void)
 
     if(bufpos && bufsize) {
         push(bufaddr, bufpos);
-        bufpos = 0;
+		bufpos = 0;
     }
+	bufaddr = NULL;
     return total;
+}
+
+void Cipher::set(unsigned char *address, size_t size)
+{
+	flush();
+	bufaddr = address;
+	bufsize = size;
+	bufpos = 0;
 }
 	
 void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
@@ -187,7 +209,7 @@ void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
 size_t Cipher::puts(const char *text)
 {
     char padbuf[64];
-    if(!text)
+    if(!text || !bufaddr)
         return 0;
 
     size_t len = strlen(text) + 1;
@@ -198,6 +220,7 @@ size_t Cipher::puts(const char *text)
         memcpy(padbuf, text + len - pad, pad);
         memset(padbuf + pad, 0, keys.iosize() - pad);
         count += put((const unsigned char *)padbuf, keys.iosize());
+		zerofill(padbuf, sizeof(padbuf));
     }
     return flush();
 }
@@ -206,7 +229,7 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 {
 	gcry_error_t errcode;
 
-	if(size % keys.iosize())
+	if(size % keys.iosize() || !bufaddr)
         return 0;
 
 	size_t count = 0;
@@ -239,11 +262,14 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 	return count;
 }
 
-size_t Cipher::final(const unsigned char *data, size_t size)
+size_t Cipher::pad(const unsigned char *data, size_t size)
 {
-	size_t pad = 0;
+	size_t padsz = 0;
 	unsigned char padbuf[64];
 	const unsigned char *ep;
+
+	if(!bufaddr)
+		return 0;
 
 	switch(bufmode) {
 	case DECRYPT:
@@ -255,12 +281,12 @@ size_t Cipher::final(const unsigned char *data, size_t size)
 		size -= *ep;
 		break;
 	case ENCRYPT:
-		pad = size % keys.iosize();
-		put(data, size - pad);
-		if(pad) {
-			memcpy(padbuf, data + size - pad, pad);
-			memset(padbuf + pad, keys.iosize() - pad, keys.iosize() - pad);
-			size = (size - pad) + keys.iosize();
+		padsz = size % keys.iosize();
+		put(data, size - padsz);
+		if(padsz) {
+			memcpy(padbuf, data + size - padsz, padsz);
+			memset(padbuf + padsz, keys.iosize() - padsz, keys.iosize() - padsz);
+			size = (size - padsz) + keys.iosize();
 		}
 		else {
 			size += keys.iosize();
@@ -268,9 +294,19 @@ size_t Cipher::final(const unsigned char *data, size_t size)
 		}
 
 		put((const unsigned char *)padbuf, keys.iosize());
+		zerofill(padbuf, sizeof(padbuf));
 	}
 
 	flush();
 	return size;
+}
+
+size_t Cipher::process(unsigned char *buf, size_t len, bool flag)
+{
+	set(buf);
+	if(flag)
+		return pad(buf, len);
+	else
+		return put(buf, len);
 }
 

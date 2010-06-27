@@ -258,6 +258,9 @@ public:
 	public:
 		Key(const char *cipher, const char *digest, const char *text, size_t size = 0, const unsigned char *salt = NULL, unsigned rounds = 1);
 		Key();
+		~Key();
+
+		void clear(void);
 
 		inline size_t size(void)
 			{return keysize;};
@@ -283,9 +286,11 @@ protected:
 public:
 	Cipher();
 
-	Cipher(key_t key, mode_t mode, unsigned char *address, size_t size = 0);
+	Cipher(key_t key, mode_t mode, unsigned char *address = NULL, size_t size = 0);
 
 	~Cipher();
+
+	void set(unsigned char *address, size_t size = 0);
 
 	void set(key_t key, mode_t mode, unsigned char *address, size_t size = 0);
 
@@ -318,12 +323,23 @@ public:
 	 * of a cipher session.  On an encryption, it will add padding or an
 	 * entire padding block with the number of bytes to strip.  On decryption
 	 * it will remove padding at the end.  The pkcs5 method of padding with
-	 * removal count is used.
+	 * removal count is used.  This also sets the address buffer to NULL
+	 * to prevent further puts until reset.
 	 * @param address of data to add before final pad.
 	 * @param size of data to add before final pad.
 	 * @return actual bytes encrypted or decrypted.
 	 */
-	size_t final(const unsigned char *data, size_t size);
+	size_t pad(const unsigned char *data, size_t size);
+
+	/**
+	 * Process encrypted data in-place.  This assumes no need to set the
+	 * address buffer.
+	 * @param address of data to process.
+	 * @param size of data to process.
+	 * @param flag if to pad data.
+	 * @return bytes processed and written back to buffer.
+	 */
+	size_t process(unsigned char *data, size_t size, bool flag = false);
 		
 	inline size_t size(void)
 		{return bufsize;};
@@ -508,6 +524,11 @@ typedef	Cipher cipher_t;
  * Convenience type for generic cipher key.
  */
 typedef Cipher::Key skey_t;
+
+inline void zerofill(void *addr, size_t size)
+{
+	::memset(addr, 0, size);
+}
 
 END_NAMESPACE
 
