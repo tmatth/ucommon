@@ -288,6 +288,11 @@ public:
 	shell(size_t pagesize = 0);
 
 	/**
+	 * Display shell options.
+	 */
+	static void help(void);
+
+	/**
 	 * A shell system call.  This uses the native system shell to invoke the 
 	 * command.
 	 * @param command string..

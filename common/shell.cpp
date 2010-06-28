@@ -222,6 +222,63 @@ unsigned shell::count(char **argv)
 	return count;
 }
 
+void shell::help(void)
+{
+	linked_pointer<Option> op = Option::first();
+	unsigned hp = 0;
+	while(is(op)) {
+		if(!op->help_string) {
+			op.next();
+			continue;
+		}
+		if(op->short_option && op->long_option)
+			printf("  -%c, ", op->short_option);
+		else if(op->long_option)
+			printf("     ");
+		else
+			printf("  -%c ", op->short_option);
+		hp = 5;
+		if(op->long_option && op->uses_option) {
+			printf("%s=%s", op->long_option, op->uses_option);
+			hp += strlen(op->long_option) + strlen(op->uses_option) + 1;
+		}
+		else if(op->long_option) {
+			printf("%s", op->long_option);
+			hp += strlen(op->long_option);
+		}
+		if(hp > 29) {
+			printf("\n");
+			hp = 0;
+		}
+		while(hp < 30) {
+			putchar(' ');
+			++hp;
+		} 
+		const char *hs = op->help_string;
+		while(*hs) {
+			if(*hs == '\n' || ((*hs == ' ' || *hs == '\t')) && hp > 75) {
+				printf("\n                              ");
+				hp = 30;
+			}
+			else if(*hs == '\t') {
+				if(!hp % 8) {
+					putchar(' ');
+					++hp;
+				}
+				while(hp % 8) {
+					putchar(' ');
+					++hp;
+				}
+			}
+			else
+				putchar(*hs);
+			++hs;
+		}
+		printf("\n");
+		op.next();
+	}
+}
+
 char **shell::parse(const char *string)
 {
 	assert(string != NULL);
