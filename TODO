@@ -19,6 +19,8 @@ Proposed ABI changes (3.1 or 4.0?):
 	in script engine make expression operands virtuals or expression
 	operation itself virtual.
 
+	unicode shell options?
+
 Proposed changes:
 
 	A pipe stream/process pipe handler that uses the new IOBuffer class.
@@ -50,6 +52,9 @@ Proposed changes:
 	certificate service should be changable.
 
 	PKI related functions in secure library.
+
+	shell parser support for +options, auto collating of short options to
+	remove duplicates.
 
 Rejected changes:
 
