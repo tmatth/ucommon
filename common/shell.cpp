@@ -43,7 +43,7 @@ OrderedIndex shell::Option::index;
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
 OrderedObject(&index)
 {
-	while(*longopt == '-')
+	while(longopt && *longopt == '-')
 		++longopt;
 
 	short_option = shortopt;
@@ -377,9 +377,13 @@ void shell::parse(int argc, char **argv)
 		// long option parsing...
 
 		while(is(op)) {
+			if(!op->long_option) {
+				op.next();
+				continue;
+			}
 			len = strlen(op->long_option);
 			value = NULL;
-			if(eq(op->long_option, opt, len)) {
+			if(op->long_option && eq(op->long_option, opt, len)) {
 				if(opt[len] == '=' && !op->uses_option) 			
 					errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, errmsg(shell::INVARGUMENT));
 				if(opt[len] == '=') {
