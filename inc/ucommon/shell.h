@@ -20,6 +20,11 @@
  * @file ucommon/shell.h
  */
 
+/**
+ * Example of SSL socket code.
+ * @example ssl.cpp
+ */
+
 #ifndef	_UCOMMON_STRING_H_
 #include <ucommon/string.h>
 #endif
@@ -78,7 +83,7 @@ public:
 	 * This is used to set internationalized error messages for the shell
 	 * parser.
 	 * @param id of message to set.
-	 * @param string to be used.
+	 * @param text for error message.
 	 */
 	static void errmsg(errmsg_t id, const char *text);
 
