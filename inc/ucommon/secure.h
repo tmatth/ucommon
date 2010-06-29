@@ -329,7 +329,7 @@ public:
 	 * @param size of data to add before final pad.
 	 * @return actual bytes encrypted or decrypted.
 	 */
-	size_t pad(const unsigned char *data, size_t size);
+	size_t pad(const unsigned char *address, size_t size);
 
 	/**
 	 * Process encrypted data in-place.  This assumes no need to set the
@@ -339,7 +339,7 @@ public:
 	 * @param flag if to pad data.
 	 * @return bytes processed and written back to buffer.
 	 */
-	size_t process(unsigned char *data, size_t size, bool flag = false);
+	size_t process(unsigned char *address, size_t size, bool flag = false);
 		
 	inline size_t size(void)
 		{return bufsize;};

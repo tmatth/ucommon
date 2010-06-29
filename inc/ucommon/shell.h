@@ -21,8 +21,8 @@
  */
 
 /**
- * Example of SSL socket code.
- * @example ssl.cpp
+ * Example of shell parsing.
+ * @example shell.cpp
  */
 
 #ifndef	_UCOMMON_STRING_H_
