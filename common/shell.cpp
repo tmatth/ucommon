@@ -109,6 +109,17 @@ const char *shell::stringopt::assign(const char *value)
 	return NULL;
 }
 
+char shell::stringopt::operator[](size_t index)
+{
+	if(!text)
+		return 0;
+
+	if(index >= strlen(text))
+		return 0;
+
+	return text[index];
+}
+
 shell::charopt::charopt(char short_option, const char *long_option, const char *help_string, const char *type, char def_value) :
 shell::Option(short_option, long_option, type, help_string)
 {

@@ -201,6 +201,8 @@ public:
 
 		inline const char *operator*()
 			{return text;};
+
+		char operator[](size_t index);
 	};
 
 	/**
