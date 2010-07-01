@@ -572,7 +572,8 @@ int shell::system(const char *cmd, const char **envp)
 	if(ep)
 		ep[len] = 0;
 
-	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
+	if(!GetEnvironmentVariable("SHELL", cmdspec, sizeof(cmdspec)))
+		GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
 	
 	if(!CreateProcess((CHAR *)cmdspec, (CHAR *)cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, ep, NULL, NULL, &pi)) {
 		if(ep)
@@ -581,12 +582,26 @@ int shell::system(const char *cmd, const char **envp)
 	}
 	if(ep)
 		delete[] ep;
-	
-	if(WaitForSingleObject(pi.hProcess, INFINITE) == WAIT_FAILED) {
+
+	int status = wait(pi.hProcess);
+	CloseHandle(pi.hThread);
+	return status;
+}
+
+int shell::cancel(shell::pid_t pid)
+{
+	TerminateProcess(pid);
+	return wait(pid);
+}
+
+int shell::wait(shell::pid_t pid)
+{
+	if(WaitForSingleObject(pid, INFINITE) == WAIT_FAILED) {
 		return -1;
 	}
 
-	GetExitCodeProcess(pi.hProcess, &code);
+	GetExitCodeProcess(pid, &code);
+	CloseHandle(pid);
 	return (int)code;
 }
 
@@ -640,6 +655,26 @@ int shell::system(const char *cmd, const char **envp)
 	::signal(SIGPIPE, SIG_DFL);
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
 	::exit(127);
+}
+
+int shell::wait(shell::pid_t pid)
+{
+	int status = -1;
+
+	if(pid == INVALID_PID_VALUE || ::waitpid(pid, &status, 0) != pid)
+		return -1;
+
+	if(status == -1)
+		return -1;
+
+	return WEXITSTATUS(status);
+}
+
+int shell::cancel(shell::pid_t pid)
+{
+	if(kill(pid, SIGTERM))
+		return -1;
+	return wait(pid);
 }
 
 #endif

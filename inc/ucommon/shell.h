@@ -36,6 +36,12 @@
 #ifndef	_UCOMMON_SHELL_H_
 #define	_UCOMMON_SHELL_H_
 
+#ifdef	_MSWINDOWS_
+#define	INVALID_PID_VALUE	INVALID_HANDLE_VALUE
+#else
+#define	INVALID_PID_VALUE	-1
+#endif
+
 NAMESPACE_UCOMMON
 
 /**
@@ -70,6 +76,12 @@ private:
 
 public:
 	typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, BAD_VALUE} errmsg_t;
+
+#ifdef	_MSWINDOWS_
+	typedef	HANDLE pid_t;
+#else
+	typedef	int pid_t;
+#endif
 
 	/**
 	 * This can be used to get internationalized error messages.  The internal
@@ -385,6 +397,31 @@ public:
 	 */
 	inline const char *operator[](unsigned offset)
 		{return _argv[offset];};
+
+	/**
+	 * Spawn a child process.  This creates a new child process.  If
+	 * the executable path is a pure filename, then the $PATH will be
+	 * used to find it.  The argv array may be created from a string
+	 * with the shell string parser.
+	 * @param path to executable.
+	 * @param argv list of command arguments for the child process.
+	 * @return process id of child or INVALID_PID_VALUE if fails.
+	 */
+	shell::pid_t spawn(char *path, char **argv);
+
+	/**
+	 * Wait for a child process to terminate.  This operation blocks.
+	 * @param pid of process to wait for.
+	 * @return exit code of process, -1 if fails or pid is invalid.
+	 */
+	int wait(shell::pid_t pid);
+
+	/**
+	 * Cancel a child process.
+	 * @param pid of child process to cancel.
+	 * @return exit code of process, -1 if fails or pid is invalid.
+	 */
+	int cancel(shell::pid_t pid);
 
 	/**
 	 * Return argc count.
