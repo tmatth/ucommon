@@ -1,6 +1,7 @@
 from ucommon 3.1.2 to 3.1.3
 - fixed option crash when not defining a long option.
 - improved shell header documentation.
+- shell spawn and process management functions.
 
 from ucommon 3.1.1 to 3.1.2
 - some attention to the question of padding cipher blocks.
