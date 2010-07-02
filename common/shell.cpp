@@ -617,13 +617,13 @@ shell::pid_t spawn(const char *path, char **argv, char **env)
 		pmode = true;
 
 	if(pmode && env)
-		return (shell::pid_t)spawnve(P_NOWAIT, path, argv, env);
+		return (shell::pid_t)_spawnve(P_NOWAIT, path, argv, env);
 	else if(pmode)
-		return (shell::pid_t)spawnv(P_NOWAIT, path, argv);
+		return (shell::pid_t)_spawnv(P_NOWAIT, path, argv);
 	else if(env)
-		return (shell::pid_t)spawnvpe(P_NOWAIT, path, argv, env);
+		return (shell::pid_t)_spawnvpe(P_NOWAIT, path, argv, env);
 	else
-		return (shell::pid_t)spawnvp(P_NOWAIT, path, argv);
+		return (shell::pid_t)_spawnvp(P_NOWAIT, path, argv);
 }
 
 #else

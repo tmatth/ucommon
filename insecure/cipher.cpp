@@ -31,6 +31,10 @@ Cipher::Key::Key()
 	keysize = 0;
 }
 
+Cipher::Key::~Key()
+{
+}
+
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
 {
 	bufaddr = NULL;
