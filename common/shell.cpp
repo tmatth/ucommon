@@ -605,6 +605,23 @@ int shell::wait(shell::pid_t pid)
 	return (int)code;
 }
 
+shell::pid_t spawn(const char *path, char **argv, char **env)
+{
+	bool pmode = false;
+
+	if(strchr(path, '/') || strchr(path, '\\') || strchr(path, ':'))
+		pmode = true;
+
+	if(pmode && env)
+		return spawnve(P_NOWAIT, path, argv, env);
+	else if(pmode)
+		return spawnv(P_NOWAIT, path, argv);
+	else if(env)
+		return spawnvpe(P_NOWAIT, path, argv, env);
+	else
+		return spawnvp(P_NOWAIT, path, argv);
+}
+
 #else
 
 int shell::system(const char *cmd, const char **envp)
@@ -655,6 +672,54 @@ int shell::system(const char *cmd, const char **envp)
 	::signal(SIGPIPE, SIG_DFL);
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
 	::exit(127);
+}
+
+shell::pid_t shell::spawn(const char *path, char **argv, char **envp)
+{
+	char symname[129];
+	const char *cp;
+	char *ep;
+
+	int max = sizeof(fd_set) * 8;
+#ifdef	RLIMIT_NOFILE
+	struct rlimit rlim;
+
+	if(!getrlimit(RLIMIT_NOFILE, &rlim))
+		max = rlim.rlim_max;
+#endif
+
+	pid_t pid = fork();
+	if(pid < 0)
+		return INVALID_PID_VALUE;
+
+	if(pid > 0)
+		return pid;
+
+	::signal(SIGQUIT, SIG_DFL);
+	::signal(SIGINT, SIG_DFL);
+	::signal(SIGCHLD, SIG_DFL);
+	::signal(SIGPIPE, SIG_DFL);
+
+	for(int fd = 3; fd < max; ++fd)
+		::close(fd);
+
+	while(envp && *envp) {
+		String::set(symname, sizeof(symname), *envp);
+		ep = strchr(symname, '=');
+		if(ep)
+			*ep = 0;
+		cp = strchr(*envp, '=');
+		if(cp)
+			++cp;
+		::setenv(symname, cp, 1);
+		++envp;
+	}
+
+	if(strchr(path, '/'))
+		execv(path, argv);
+	else
+		execvp(path, argv);
+	exit(-1);
 }
 
 int shell::wait(shell::pid_t pid)

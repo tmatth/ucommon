@@ -405,9 +405,10 @@ public:
 	 * with the shell string parser.
 	 * @param path to executable.
 	 * @param argv list of command arguments for the child process.
+	 * @param env of child process can be explicitly set.
 	 * @return process id of child or INVALID_PID_VALUE if fails.
 	 */
-	shell::pid_t spawn(char *path, char **argv);
+	shell::pid_t spawn(const char *path, char **argv, char **env = NULL);
 
 	/**
 	 * Wait for a child process to terminate.  This operation blocks.
