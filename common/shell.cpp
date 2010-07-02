@@ -26,7 +26,9 @@
 #endif
 #include <ctype.h>
 
-#ifndef	_MSWINDOWS_
+#ifdef	_MSWINDOWS_
+#include <process.h>
+#else
 #include <sys/wait.h>
 #include <fcntl.h>
 #endif
@@ -590,12 +592,14 @@ int shell::system(const char *cmd, const char **envp)
 
 int shell::cancel(shell::pid_t pid)
 {
-	TerminateProcess(pid);
+	TerminateProcess(pid, 7);
 	return wait(pid);
 }
 
 int shell::wait(shell::pid_t pid)
 {
+	DWORD code;
+
 	if(WaitForSingleObject(pid, INFINITE) == WAIT_FAILED) {
 		return -1;
 	}
@@ -613,13 +617,13 @@ shell::pid_t spawn(const char *path, char **argv, char **env)
 		pmode = true;
 
 	if(pmode && env)
-		return spawnve(P_NOWAIT, path, argv, env);
+		return (shell::pid_t)spawnve(P_NOWAIT, path, argv, env);
 	else if(pmode)
-		return spawnv(P_NOWAIT, path, argv);
+		return (shell::pid_t)spawnv(P_NOWAIT, path, argv);
 	else if(env)
-		return spawnvpe(P_NOWAIT, path, argv, env);
+		return (shell::pid_t)spawnvpe(P_NOWAIT, path, argv, env);
 	else
-		return spawnvp(P_NOWAIT, path, argv);
+		return (shell::pid_t)spawnvp(P_NOWAIT, path, argv);
 }
 
 #else

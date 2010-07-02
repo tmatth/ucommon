@@ -408,21 +408,21 @@ public:
 	 * @param env of child process can be explicitly set.
 	 * @return process id of child or INVALID_PID_VALUE if fails.
 	 */
-	shell::pid_t spawn(const char *path, char **argv, char **env = NULL);
+	static shell::pid_t spawn(const char *path, char **argv, char **env = NULL);
 
 	/**
 	 * Wait for a child process to terminate.  This operation blocks.
 	 * @param pid of process to wait for.
 	 * @return exit code of process, -1 if fails or pid is invalid.
 	 */
-	int wait(shell::pid_t pid);
+	static int wait(shell::pid_t pid);
 
 	/**
 	 * Cancel a child process.
 	 * @param pid of child process to cancel.
 	 * @return exit code of process, -1 if fails or pid is invalid.
 	 */
-	int cancel(shell::pid_t pid);
+	static int cancel(shell::pid_t pid);
 
 	/**
 	 * Return argc count.
