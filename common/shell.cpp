@@ -92,11 +92,10 @@ int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t siz
 
 int shell::pipeio::cancel(void)
 {
-	if(pid != INVALID_PID_VALUE) {
+	if(pid != INVALID_PID_VALUE)
 		TerminateProcess(pid, 7);
-		return wait();
-	}
-	return -1;
+	
+	return wait();
 }
 
 int shell::pipeio::wait(void)
@@ -105,9 +104,6 @@ int shell::pipeio::wait(void)
 
 	presult = -1;
 
-	if(pid == INVALID_PID_VALUE)
-		return presult;
-
 	if(input != INVALID_HANDLE_VALUE)
 		CloseHandle(input);
 
@@ -115,6 +111,9 @@ int shell::pipeio::wait(void)
 		CloseHandle(output);
 
 	input = output = INVALID_HANDLE_VALUE;
+
+	if(pid == INVALID_PID_VALUE)
+		return presult;
 
 	if(WaitForSingleObject(pid, INFINITE) == WAIT_FAILED) {
 		pid = INVALID_PID_VALUE;
@@ -167,11 +166,11 @@ int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t buf
 	pout[1] = INVALID_HANDLE_VALUE;
 	stdio[2] = 2;
 
-	if(mode == RD || mode == RDWR)
-	{
+	if(mode == RD || mode == RDWR) {
 		::pipe(pin);
 		stdio[1] = pin[1];
 	}
+
 	if(mode == WR || mode == RDWR) {
 		::pipe(pout);
 		stdio[0] = pout[0];
@@ -228,12 +227,10 @@ int shell::pipeio::wait(void)
 
 int shell::pipeio::cancel(void)
 {
-	if(pid != INVALID_PID_VALUE) {
+	if(pid != INVALID_PID_VALUE)
 		if(kill(pid, SIGTERM))
-			return -1;
-		return wait();
-	}
-	return -1;
+
+	return wait();
 }
 
 size_t shell::pipeio::read(void *address, size_t size)
@@ -264,6 +261,61 @@ size_t shell::pipeio::write(const void *address, size_t size)
 
 #endif
 
+shell::io::io(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
+IOBuffer(), shell::pipeio()
+{
+	open(path, argv, mode, size, env);
+}
+
+shell::io::io(size_t size) :
+IOBuffer(), shell::pipeio()
+{
+	if(size) {
+		pipeio::input = shell::input();
+		pipeio::output = shell::output();
+		allocate(size, BUF_RDWR);
+	}
+}
+
+shell::io::~io()
+{
+	cancel();
+}
+
+size_t shell::io::_pull(char *buf, size_t size)
+{
+	size_t result = pipeio::read(buf, size);
+	if(perror)
+		ioerror = perror;
+	return result;
+}
+
+size_t shell::io::_push(const char *buf, size_t size)
+{
+	size_t result = pipeio::write(buf, size);
+	if(perror)
+		ioerror = perror;
+	return result;
+}
+
+void shell::io::close(void)
+{
+	pipeio::wait();
+	IOBuffer::release();
+}
+
+void shell::io::cancel(void)
+{
+	pipeio::cancel();
+	IOBuffer::release();
+}
+
+void shell::io::open(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env)
+{
+	if(!pipeio::spawn(path, argv, mode, size, env))
+		IOBuffer::allocate(size, (type_t)mode);
+}
+		
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
 OrderedObject(&index)
 {
@@ -775,23 +827,23 @@ void shell::printf(const char *format, ...)
 	va_end(args);
 }
 
-int shell::cancel(shell::pipe_t *pio)
+int shell::cancel(shell::pipe_t pio)
 {
 	int status = pio->cancel();
 	delete pio;
 	return status;
 }
 
-int shell::wait(shell::pipe_t *pio)
+int shell::wait(shell::pipe_t pio)
 {
 	int status = pio->wait();
 	delete pio;
 	return status;
 }
 
-shell::pipe_t *shell::spawn(const char *path, char **argv, pmode_t mode, size_t size, char **env)
+shell::pipe_t shell::spawn(const char *path, char **argv, pmode_t mode, size_t size, char **env)
 {
-	shell::pipe_t *pio = new shell::pipe_t;
+	shell::pipe_t pio = new shell::pipeio;
 	if(pio->spawn(path, argv, mode, size, env)) {
 		delete pio;
 		return NULL;
@@ -1307,53 +1359,4 @@ int shell::cancel(shell::pid_t pid)
 
 #endif
 
-pipebuf::pipebuf() : IOBuffer(), shell::pipeio()
-{
-}
-
-pipebuf::pipebuf(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
-IOBuffer(), shell::pipeio()
-{
-	open(path, argv, mode, size, env);
-}
-
-pipebuf::~pipebuf()
-{
-	cancel();
-}
-
-size_t pipebuf::_pull(char *buf, size_t size)
-{
-	size_t result = pipeio::read(buf, size);
-	if(perror)
-		ioerror = perror;
-	return result;
-}
-
-size_t pipebuf::_push(const char *buf, size_t size)
-{
-	size_t result = pipeio::write(buf, size);
-	if(perror)
-		ioerror = perror;
-	return result;
-}
-
-void pipebuf::close(void)
-{
-	pipeio::wait();
-	IOBuffer::release();
-}
-
-void pipebuf::cancel(void)
-{
-	pipeio::cancel();
-	IOBuffer::release();
-}
-
-void pipebuf::open(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env)
-{
-	if(!pipeio::spawn(path, argv, mode, size, env))
-		IOBuffer::allocate(size, (type_t)mode);
-}
-		
 

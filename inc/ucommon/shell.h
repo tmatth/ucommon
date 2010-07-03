@@ -108,7 +108,40 @@ public:
 		int perror, presult;
 	};
 
-	typedef	pipeio pipe_t;
+	/**
+	 * Process pipe with I/O buffering.  This allows the creation and management
+	 * of a shell pipe with buffered I/O support.  This also offers a common
+	 * class to manage stdio sessions generically in the child process.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT io : public IOBuffer, protected shell::pipeio
+	{
+	protected:
+		friend class shell;
+
+		virtual size_t _push(const char *address, size_t size);
+		virtual size_t _pull(char *address, size_t size);
+
+	public:
+		io(size_t size = 0);
+		io(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+		~io();
+
+		void open(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+
+		void close(void);
+		void cancel(void);
+	};
+
+	/**
+	 * Buffered i/o type for pipes and stdio.
+	 */
+	typedef	io io_t;
+
+	/**
+	 * Convenience low level pipe object type.
+	 */
+	typedef	pipeio *pipe_t;
 
 	/**
 	 * This can be used to get internationalized error messages.  The internal
@@ -449,7 +482,7 @@ public:
 	 * @param env of child process can be explicitly set.
 	 * @return pipe object or NULL on failure.
 	 */
-	static shell::pipe_t *spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
+	static shell::pipe_t spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
 
 	/**
 	 * Create a detached process.  This creates a new child process that
@@ -482,14 +515,14 @@ public:
 	 * @param pointer to pipe of child process to wait for.
 	 * @return exit code of process, -1 if fails or pid is invalid.
 	 */
-	static int wait(shell::pipe_t *pointer);
+	static int wait(shell::pipe_t pointer);
 
 	/**
 	 * Cancel a child pipe.  If the pipe io handle is dynamic, it is deleted.
 	 * @param pointer to pipe of child process to cancel.
 	 * @return exit code of process, -1 if fails or pid is invalid.
 	 */
-	static int cancel(shell::pipe_t *pointer);
+	static int cancel(shell::pipe_t pointer);
 
 	/**
 	 * Return argc count.
@@ -504,35 +537,30 @@ public:
 	 * @return argc count of array.
 	 */
 	static unsigned count(char **argv);
+
+#ifdef	_MSWINDOWS_
+
+	static inline fd_t input(void)
+		{return GetStdHandle(GET_STD_INPUT);}; 
+
+	static inline fd_t output(void)
+		{return GetStdHandle(GET_STD_OUTPUT);}; 
+
+	static inline fd_t error(void)
+		{return GetStdHandle(GET_STD_ERROR);};
+
+#else
+	static inline fd_t input(void)
+		{return 0;};
+
+	static inline fd_t output(void)
+		{return 1;};
+
+	static inline fd_t error(void)
+		{return 2;};
+#endif
 };
-
-/**
- * Process pipe with I/O buffering.  This allows the creation and management
- * of a shell pipe with buffered I/O support.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT pipebuf : public IOBuffer, protected shell::pipeio
-{
-protected:
-	virtual size_t _push(const char *address, size_t size);
-	virtual size_t _pull(char *address, size_t size);
-
-public:
-	pipebuf();
-	pipebuf(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
-	~pipebuf();
-
-	void open(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
-
-	void close(void);
-	void cancel(void);
-};
-
-/**
- * A convenience type.
- */
-typedef	pipebuf pipe_t;
-		
+	
 END_NAMESPACE
 
 #endif
