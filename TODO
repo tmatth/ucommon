@@ -21,6 +21,8 @@ Proposed ABI changes (3.1 or 4.0?):
 
 	unicode shell options?
 
+	string read/write for Socket moved to Socket?
+
 Proposed changes:
 
 	A pipe stream/process pipe handler that uses the new IOBuffer class.
