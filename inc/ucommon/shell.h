@@ -114,7 +114,7 @@ public:
 	 * class to manage stdio sessions generically in the child process.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT io : public IOBuffer, protected shell::pipeio
+	class __EXPORT iobuf : public IOBuffer, protected shell::pipeio
 	{
 	protected:
 		friend class shell;
@@ -123,9 +123,9 @@ public:
 		virtual size_t _pull(char *address, size_t size);
 
 	public:
-		io(size_t size = 0);
-		io(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
-		~io();
+		iobuf(size_t size = 0);
+		iobuf(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+		~iobuf();
 
 		void open(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
 
@@ -136,7 +136,7 @@ public:
 	/**
 	 * Buffered i/o type for pipes and stdio.
 	 */
-	typedef	io io_t;
+	typedef	iobuf io_t;
 
 	/**
 	 * Convenience low level pipe object type.

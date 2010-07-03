@@ -271,13 +271,13 @@ size_t shell::pipeio::write(const void *address, size_t size)
 
 #endif
 
-shell::io::io(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
+shell::iobuf::iobuf(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
 IOBuffer(), shell::pipeio()
 {
 	open(path, argv, mode, size, env);
 }
 
-shell::io::io(size_t size) :
+shell::iobuf::iobuf(size_t size) :
 IOBuffer(), shell::pipeio()
 {
 	if(size) {
@@ -287,12 +287,12 @@ IOBuffer(), shell::pipeio()
 	}
 }
 
-shell::io::~io()
+shell::iobuf::~iobuf()
 {
 	cancel();
 }
 
-size_t shell::io::_pull(char *buf, size_t size)
+size_t shell::iobuf::_pull(char *buf, size_t size)
 {
 	size_t result = pipeio::read(buf, size);
 	if(perror)
@@ -300,7 +300,7 @@ size_t shell::io::_pull(char *buf, size_t size)
 	return result;
 }
 
-size_t shell::io::_push(const char *buf, size_t size)
+size_t shell::iobuf::_push(const char *buf, size_t size)
 {
 	size_t result = pipeio::write(buf, size);
 	if(perror)
@@ -308,19 +308,19 @@ size_t shell::io::_push(const char *buf, size_t size)
 	return result;
 }
 
-void shell::io::close(void)
+void shell::iobuf::close(void)
 {
 	pipeio::wait();
 	IOBuffer::release();
 }
 
-void shell::io::cancel(void)
+void shell::iobuf::cancel(void)
 {
 	pipeio::cancel();
 	IOBuffer::release();
 }
 
-void shell::io::open(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env)
+void shell::iobuf::open(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env)
 {
 	if(!pipeio::spawn(path, argv, mode, size, env))
 		IOBuffer::allocate(size, (type_t)mode);
