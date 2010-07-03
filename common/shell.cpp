@@ -98,15 +98,15 @@ int shell::pipeio::wait(void)
 
 	input = output = INVALID_HANDLE_VALUE;
 
-	if(pid == INVALID_PID_VALUE || ::waitpid(pid, &status, 0) != pid)
-		status = -1;
+	if(pid == INVALID_PID_VALUE || ::waitpid(pid, &presult, 0) != pid)
+		presult = -1;
 
 	pid = INVALID_PID_VALUE;
 
-	if(status == -1)
+	if(presult == -1)
 		return -1;
 
-	presult = WEXITSTATUS(status);
+	presult = WEXITSTATUS(presult);
 	return presult;
 }
 
