@@ -102,7 +102,7 @@ public:
 		int cancel(void);
 		size_t read(void *buffer, size_t size);
 		size_t write(const void *buffer, size_t size);
-	
+			
 		pid_t pid;
 		fd_t input, output;	// input to and output from child process...
 		int perror, presult;
@@ -431,7 +431,44 @@ public:
 	 * Print to standard output.
 	 * @param format string to use.
 	 */
-	static void printf(const char *format, ...) __PRINTF(1, 2);
+	static size_t printf(const char *format, ...) __PRINTF(1, 2);
+
+	static size_t readln(char *address, size_t size);
+
+	static size_t writes(const char *string);
+
+	static size_t read(String& string);
+
+	inline static size_t write(String& string)
+		{return writes(string.c_str());};
+
+	static unsigned scanf(const char *format, ...) __SCANF(1, 2);
+
+	/**
+	 * Print to a pipe object.
+	 * @param pipe to write to.
+	 * @param format string to use.
+	 * @return number of bytes written.
+	 */
+	static size_t printf(pipe_t pipe, const char *format, ...) __PRINTF(2, 3);
+
+	/**
+	 * Read a line from a pipe object.
+	 * @param pipe to read from.
+	 * @param buffer to save into.
+	 * @param size of buffer.
+	 * @return number of bytes read.
+	 */
+	static size_t readln(pipe_t pipe, char *buffer, size_t size);
+
+	static size_t read(pipe_t pipe, String& string);
+
+	static size_t writes(pipe_t pipe, const char *string);
+
+	static unsigned scanln(pipe_t pipe, const char *format, ...) __SCANF(2, 3);
+
+	inline static size_t write(pipe_t pipe, String& string)
+		{return writes(pipe, string.c_str());};
 
 	/**
 	 * Get saved internal argc count for items.  This may be items that

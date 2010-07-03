@@ -40,6 +40,7 @@
 #endif
 
 #include <errno.h>
+#include <stdio.h>
 
 NAMESPACE_UCOMMON
 
@@ -453,6 +454,14 @@ public:
 	 * @return address of symbol or NULL if not found.
 	 */
 	static void *find(fsys& module, const char *symbol);
+
+	static size_t printf(FILE *fp, const char *format, ...) __PRINTF(2, 3);
+	
+	static unsigned scanf(FILE *fp, const char *format, ...) __SCANF(2, 3);
+
+	static size_t writes(FILE *fp, const char *string);
+
+	static size_t readln(FILE *fp, char *address, size_t size);
 };
 	
 /**

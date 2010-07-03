@@ -1035,3 +1035,39 @@ void *fsys::find(mem_t addr, const char *sym)
 
 #endif
 
+unsigned fsys::scanf(FILE *fp, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	unsigned count = vfscanf(fp, format, args);
+	va_end(args);
+	return count;
+}
+
+size_t fsys::printf(FILE *fp, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	size_t result = vfprintf(fp, format, args);
+	va_end(args);
+	if(result == (size_t)EOF)
+		result = 0;
+	return result;
+}
+
+size_t fsys::readln(FILE *fp, char *address, size_t size)
+{
+	address[0] = 0;
+
+	if(!fgets(address, size, fp))
+		return 0;
+
+	if(address[size - 1] == '\n') {
+		--size;
+		if(address[size - 1] == '\r')
+			--size;
+	}
+	address[size] = 0;
+	return size;
+}
+

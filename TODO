@@ -22,6 +22,8 @@ Proposed ABI changes (3.1 or 4.0?):
 	unicode shell options?
 
 	string read/write for Socket moved to Socket?
+	
+	string read/write for fsys moved to fsys?
 
 Proposed changes:
 

@@ -828,13 +828,131 @@ void shell::errexit(int exitcode, const char *format, ...)
 		::exit(exitcode);
 }
 
-void shell::printf(const char *format, ...)
+size_t shell::readln(pipe_t pipe, char *buffer, size_t size)
+{
+	unsigned pos = 0;
+
+	while(pos < size - 1) {
+		if(pipe->read(buffer, 1) < 1)
+			break;
+		if(buffer[pos] == '\n')
+			break;
+		++pos;
+	}
+
+	if(pos && buffer[pos - 1] == '\r')
+		--pos;
+
+	buffer[pos] = 0;
+	return pos;
+}
+
+unsigned shell::scanln(pipe_t pipe, const char *format, ...)
+{
+	char buf[512];
+	size_t count;
+	va_list args;
+	unsigned found = 0;
+
+	va_start(args, format);
+	count = readln(buf, sizeof(buf));
+	if(count)
+		found = vsscanf(buf, format, args);
+	va_end(args);
+	return found;
+}
+
+size_t shell::printf(pipe_t pipe, const char *format, ...)
+{
+	char buf[512];
+
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+	if(buf[0])
+		return pipe->write(buf, strlen(buf));
+	return 0;
+}
+
+unsigned shell::scanf(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
-	vfprintf(stdout, format, args);
-	fflush(stdout);
+	unsigned count = vfscanf(stdin, format, args);
 	va_end(args);
+	return count;
+}
+
+size_t shell::printf(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	size_t result = vprintf(format, args);
+	va_end(args);
+	if(result == (size_t)EOF)
+		result = 0;
+	return result;
+}
+
+size_t shell::readln(char *address, size_t size)
+{
+	address[0] = 0;
+
+	if(!fgets(address, size, stdin))
+		return 0;
+
+	if(address[size - 1] == '\n') {
+		--size;
+		if(address[size - 1] == '\r')
+			--size;
+	}
+	address[size] = 0;
+	return size;
+}
+
+size_t shell::read(String& string)
+{
+	char *cp = string.c_mem();
+	size_t size = string.size();
+	size = readln(cp, size);
+	String::fix(string);
+	return size;
+}
+
+size_t shell::writes(pipe_t pipe, const char *string)
+{
+	size_t size = 0;
+
+	if(string)
+		size = strlen(string);
+
+	if(size)
+		return pipe->write(string, size);
+	
+	return 0;
+}
+
+size_t shell::writes(const char *string)
+{
+	size_t result = fputs(string, stdout);
+	if(result == ((size_t)(EOF)))
+		return 0;
+	return result;
+}
+
+size_t shell::read(pipe_t pipe, String& str)
+{
+	char *cp = str.c_mem();
+	size_t size = str.size();
+
+	if(!size)
+		return 0;
+
+	size = readln(pipe, cp, size);
+	cp[size] = 0;
+	String::fix(str);
+	return size;
 }
 
 int shell::cancel(shell::pipe_t pio)
