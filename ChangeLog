@@ -1,4 +1,4 @@
-from ucommon 3.1.2 to 3.1.3
+from ucommon 3.1.2 to 3.2.0
 - fixed option crash when not defining a long option.
 - improved shell header documentation.
 - shell spawn and process management functions.
