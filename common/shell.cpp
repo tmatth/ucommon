@@ -52,6 +52,44 @@ shell::pipeio::pipeio()
 
 #ifdef	_MSWINDOWS_
 
+int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t size, char **envp)
+{
+	SECURITY_ATTRIBUTES sa;
+	fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
+
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = TRUE;
+
+	if(mode == RD || mode == RDWR)
+		CreatePipe(&input, &stdio[1], &sa, size);
+
+	if(mode == WR || mode == RDWR)
+		CreatePipe(&stdio[0], &output, &sa, size);
+		
+	pid = shell::spawn(path, argv, envp, stdio);
+	perror = 0;
+	if(pid == INVALID_PID_VALUE) {
+		perror = fsys::remapError();
+		if(mode == RD || mode == RDWR) {
+			CloseHandle(input);
+			input = INVALID_HANDLE_VALUE;
+		}
+		if(mode == WR || mode == RDWR) {
+			CloseHandle(output);
+			output = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	if(mode == RD || mode == RDWR)
+		CloseHandle(stdio[1]);
+	if(mode == WR || mode == RDWR)
+		CloseHandle(stdio[0]);
+
+	return perror;
+}
+
+
 int shell::pipeio::cancel(void)
 {
 	TerminateProcess(pid, 7);
@@ -117,7 +155,7 @@ size_t shell::pipeio::write(const void *address, size_t size)
 int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t buffer, char **envp)
 {
 	fd_t pin[2], pout[2];
-	fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 2};
+	fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
 
 	pin[0] = INVALID_HANDLE_VALUE;
 	pout[1] = INVALID_HANDLE_VALUE;
@@ -754,6 +792,38 @@ shell::pipe_t *shell::spawn(const char *path, char **argv, pmode_t mode, size_t 
 
 #ifdef _MSWINDOWS_
 
+static void pathfinder(const char *name, char *buf, size_t size)
+{
+	char path[512];
+	char *tokbuf = NULL;
+	char *element;
+	char *ext;
+
+	String::set(buf, size, name);
+
+	if(!GetEnvironmentVariable("PATH", path, sizeof(path)))
+		goto tail;
+
+	if(strchr(name, '/') || strchr(name, '\\') || strchr(name, ':'))
+		goto tail;
+
+	while(NULL != (element = String::token(path, &tokbuf, ";"))) {
+		snprintf(buf, sizeof(buf), "%s\\%s", element, name);
+		ext = strrchr(buf, '.');
+		if(!ext || (!ieq(ext, ".exe") && !ieq(ext, ".com")))
+			String::add(buf, size, ".exe");
+		if(fsys::isfile(buf))
+			return;
+	}
+
+	String::set(buf, size, name);
+
+tail:
+	ext = strrchr(buf, '.');
+	if(!ext || (!ieq(ext, ".exe") && !ieq(ext, ".com")))
+		String::add(buf, size, ".exe");
+}	
+
 int shell::system(const char *cmd, const char **envp)
 {
 	char cmdspec[128];
@@ -802,44 +872,202 @@ int shell::wait(shell::pid_t pid)
 	return (int)code;
 }
 
-shell::pid_t spawn(const char *path, char **argv, char **env)
+shell::pid_t shell::spawn(const char *path, char **argv, char **envp, fd_t *stdio)
 {
-	bool pmode = false;
+	STARTUPINFO	si;
+	PROCESS_INFORMATION pi;
+	char filename[128];
+	int pos;
+	pid_t pid = INVALID_PID_VALUE;
+	fd_t stdfd;
+	fd_t dups[3] = 
+		{INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
 
-	if(strchr(path, '/') || strchr(path, '\\') || strchr(path, ':'))
-		pmode = true;
+	char *ep = NULL;
+	unsigned len = 0;
 
-	if(pmode && env)
-		return (shell::pid_t)_spawnve(P_NOWAIT, path, argv, env);
-	else if(pmode)
-		return (shell::pid_t)_spawnv(P_NOWAIT, path, argv);
-	else if(env)
-		return (shell::pid_t)_spawnvpe(P_NOWAIT, path, argv, env);
-	else
-		return (shell::pid_t)_spawnvp(P_NOWAIT, path, argv);
+	memset(&si, 0, sizeof(STARTUPINFO));
+	si.cb = sizeof(STARTUPINFO);
+
+	if(envp)
+		ep = new char[4096];
+
+	while(envp && *envp && len < 4090) {
+		String::set(ep + len, 4094 - len, *envp);
+		len += strlen(*(envp++)) + 1;
+	}
+
+	if(ep)
+		ep[len] = 0;
+
+	pathfinder(path, filename, sizeof(filename));
+	char *args = new char[32768];
+
+	args[0] = 0;
+	unsigned argc = 0;
+	while(argv && argv[argc]) {
+		if(!argc)
+			String::add(args, 32768, " ");
+		String::add(args, 32768, argv[argc++]);
+	}
+
+	if(stdio) {
+		for(pos = 0; pos < 3; ++pos) {
+			stdfd = INVALID_HANDLE_VALUE;
+			switch(pos) {
+			case 0:
+				if(stdio[pos] == INVALID_HANDLE_VALUE)
+					stdfd = GetStdHandle(STD_INPUT_HANDLE);
+				break;
+			case 1:
+				if(stdio[pos] == INVALID_HANDLE_VALUE)
+					stdfd = GetStdHandle(STD_OUTPUT_HANDLE);
+				break;
+			case 2:
+				if(stdio[pos] == INVALID_HANDLE_VALUE)
+					stdfd = GetStdHandle(STD_ERROR_HANDLE);
+				break;
+			}
+			if(stdfd != INVALID_HANDLE_VALUE) {
+				DuplicateHandle(GetCurrentProcess(), stdfd,
+					GetCurrentProcess(), &dups[pos], 0,
+					TRUE, DUPLICATE_SAME_ACCESS);
+				stdfd = dups[pos];
+			}
+			else
+				stdfd = stdio[pos];
+			switch(pos) {
+			case 0:
+				si.hStdInput = stdfd;
+				break;
+			case 1:
+				si.hStdOutput = stdfd;
+				break;
+			case 2:
+				si.hStdError = stdfd;
+				break;
+			}
+		}
+		si.dwFlags = STARTF_USESTDHANDLES;
+	}					
+
+	if(!CreateProcess((CHAR *)filename, (CHAR *)args, NULL, NULL, TRUE, 0, ep, NULL, &si, &pi)) 
+		goto exit;
+
+	pid = pi.hProcess;
+	CloseHandle(pi.hThread);
+
+exit:
+	if(ep)
+		delete ep;
+	delete args;
+	for(pos == 0; pos < 3; ++pos) {
+		if(dups[pos] != INVALID_HANDLE_VALUE)
+			CloseHandle(dups[pos]);
+	}
+	return pid;
 }
-
-int detach(const char *path, char **argv, char **env)
-{
-	bool pmode = false;
-	int code;
-
-	if(strchr(path, '/') || strchr(path, '\\') || strchr(path, ':'))
-		pmode = true;
-
-	if(pmode && env)
-		code = _spawnve(P_DETACH, path, argv, env);
-	else if(pmode)
-		code = _spawnv(P_DETACH, path, argv);
-	else if(env)
-		code = _spawnvpe(P_DETACH, path, argv, env);
-	else
-		code = _spawnvp(P_DETACH, path, argv);
-
-	if(code > 0)
-		code = 0;
 	
-	return code;
+int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
+{
+	STARTUPINFO	si;
+	PROCESS_INFORMATION pi;
+	char filename[128];
+	int err;
+	int pos;
+	pid_t pid = INVALID_PID_VALUE;
+	fd_t stdfd;
+	fd_t dups[3] = 
+		{INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
+
+	char *ep = NULL;
+	unsigned len = 0;
+
+	memset(&si, 0, sizeof(STARTUPINFO));
+	si.cb = sizeof(STARTUPINFO);
+
+	if(envp)
+		ep = new char[4096];
+
+	while(envp && *envp && len < 4090) {
+		String::set(ep + len, 4094 - len, *envp);
+		len += strlen(*(envp++)) + 1;
+	}
+
+	if(ep)
+		ep[len] = 0;
+
+	pathfinder(path, filename, sizeof(filename));
+	char *args = new char[32768];
+
+	args[0] = 0;
+	unsigned argc = 0;
+	while(argv && argv[argc]) {
+		if(!argc)
+			String::add(args, 32768, " ");
+		String::add(args, 32768, argv[argc++]);
+	}
+
+	if(stdio) {
+		for(pos = 0; pos < 3; ++pos) {
+			stdfd = INVALID_HANDLE_VALUE;
+			switch(pos) {
+			case 0:
+				if(stdio[pos] == INVALID_HANDLE_VALUE)
+					stdfd = GetStdHandle(STD_INPUT_HANDLE);
+				break;
+			case 1:
+				if(stdio[pos] == INVALID_HANDLE_VALUE)
+					stdfd = GetStdHandle(STD_OUTPUT_HANDLE);
+				break;
+			case 2:
+				if(stdio[pos] == INVALID_HANDLE_VALUE)
+					stdfd = GetStdHandle(STD_ERROR_HANDLE);
+				break;
+			}
+			if(stdfd != INVALID_HANDLE_VALUE) {
+				DuplicateHandle(GetCurrentProcess(), stdfd,
+					GetCurrentProcess(), &dups[pos], 0,
+					TRUE, DUPLICATE_SAME_ACCESS);
+				stdfd = dups[pos];
+			}
+			else
+				stdfd = stdio[pos];
+			switch(pos) {
+			case 0:
+				si.hStdInput = stdfd;
+				break;
+			case 1:
+				si.hStdOutput = stdfd;
+				break;
+			case 2:
+				si.hStdError = stdfd;
+				break;
+			}
+		}
+		si.dwFlags = STARTF_USESTDHANDLES;
+	}					
+
+	if(!CreateProcess((CHAR *)filename, (CHAR *)args, NULL, NULL, TRUE, DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP, ep, NULL, &si, &pi)) {
+		err = fsys::remapError();
+		goto exit;
+	}
+
+	pid = pi.hProcess;
+	CloseHandle(pi.hThread);
+
+exit:
+	if(ep)
+		delete ep;
+	delete args;
+	for(pos == 0; pos < 3; ++pos) {
+		if(dups[pos] != INVALID_HANDLE_VALUE)
+			CloseHandle(dups[pos]);
+	}
+	if(pid == INVALID_PID_VALUE)
+		return err;
+	
+	return 0;
 }
 
 #else
@@ -911,10 +1139,10 @@ int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
 
 	pid_t pid = fork();
 	if(pid < 0)
-		return INVALID_PID_VALUE;
+		return errno;
 
 	if(pid > 0)
-		return pid;
+		return 0;
 
 	::signal(SIGQUIT, SIG_DFL);
 	::signal(SIGINT, SIG_DFL);
