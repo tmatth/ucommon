@@ -541,13 +541,13 @@ public:
 #ifdef	_MSWINDOWS_
 
 	static inline fd_t input(void)
-		{return GetStdHandle(GET_STD_INPUT);}; 
+		{return GetStdHandle(STD_INPUT_HANDLE);}; 
 
 	static inline fd_t output(void)
-		{return GetStdHandle(GET_STD_OUTPUT);}; 
+		{return GetStdHandle(STD_OUTPUT_HANDLE);}; 
 
 	static inline fd_t error(void)
-		{return GetStdHandle(GET_STD_ERROR);};
+		{return GetStdHandle(STD_ERROR_HANDLE);};
 
 #else
 	static inline fd_t input(void)
