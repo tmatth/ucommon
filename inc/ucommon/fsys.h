@@ -455,11 +455,34 @@ public:
 	 */
 	static void *find(fsys& module, const char *symbol);
 
-	static size_t printf(FILE *fp, const char *format, ...) __PRINTF(2, 3);
+	/**
+	 * A convenience method to standardize file printf.  This mostly
+	 * is to assure some consistency in coding practices and return values.
+	 * @param file to write to.
+	 * @param format of printf string.
+	 * @return number of bytes written.
+	 */
+	static size_t printf(FILE *file, const char *format, ...) __PRINTF(2, 3);
 	
-	static size_t writes(FILE *fp, const char *string);
+	/**
+	 * A convenience method to standardize writing strings.  This is mostly
+	 * to assure some consistency with other common code.
+	 * @param file to write to.
+	 * @param string to write.
+	 * @return number of bytes written.
+	 */
+	static size_t writes(FILE *file, const char *string);
 
-	static size_t readln(FILE *fp, char *address, size_t size);
+	/**
+	 * A realine method for files.  This is mostly to offer behavior similar
+	 * to other readln methods, which can accept either "\n" or "\r\n" line
+	 * termination, and strip the eol from the buffer.
+	 * @param file to read from.
+	 * @param address of buffer to save string.
+	 * @param size of buffer.
+	 * @return number of bytes actually retrieved.  0 may indicate EOF.
+	 */
+	static size_t readln(FILE *file, char *address, size_t size);
 };
 	
 /**

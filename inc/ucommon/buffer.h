@@ -242,9 +242,8 @@ public:
 
 	/**
 	 * Method to read a line of input from the buffer.  This saves the result
-	 * into an allocated string object.
+	 * into an already allocated string object.
 	 * @param string buffer to use.
-	 * @param size of string buffer.
 	 * @return number of characters actually read.
 	 */
 	size_t read(String& string);

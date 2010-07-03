@@ -69,39 +69,98 @@ private:
 	};
 	
 	/**
-	 * Collapse argument list.
+	 * Collapse argument list.  This is used internally to collapse args
+	 * that are created in a pool heap when they need to be turned into
+	 * an argv style array.
 	 */
 	void collapse(LinkedObject *first);
 
 	/**
-	 * Set argv0
+	 * Set argv0.  This gets the simple filename of argv[0].
 	 */
 	void set0(char *argv0);
 
 public:
+	/**
+	 * Error table index.
+	 */
 	typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, BAD_VALUE} errmsg_t;
 
 #ifdef	_MSWINDOWS_
 	typedef	HANDLE pid_t;
 #else
+	/**
+	 * Standard type of process id for shell class.
+	 */
 	typedef	int pid_t;
 #endif
 
+	/**
+	 * Pipe I/O mode.
+	 */
 	typedef	enum {RD = IOBuffer::BUF_RD, WR = IOBuffer::BUF_WR, RDWR = IOBuffer::BUF_RDWR} pmode_t;
 
+	/**
+	 * A class to control a process that is piped.  This holds the active
+	 * file descriptors for the pipe as well as the process id.  Basic I/O
+	 * methods are provided to send and receive data with the piped child
+	 * process.  This may be used by itself with various shell methods as
+	 * a pipe_t, or to construct piped objects such as iobuf.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
 	class __EXPORT pipeio
 	{
 	protected:
 		friend class shell;
 
+		/**
+		 * Construct an empty initialized pipe for use.
+		 */
 		pipeio();
 
+		/**
+		 * Spawn and attach child process I/O through piping.  Stderr is left
+		 * attached to the console.
+		 * @param path of program to execute.  If simple file, $PATH is used.
+		 * @param argv to pass to child process.
+		 * @param mode of pipe operation; rdonly, wronly, or rdwr.
+		 * @param size of atomic pipe buffer if setable.
+		 * @param env that may optionally be given to the child process.
+		 */
 		int spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
 		
+		/**
+		 * Wait for child process to exit.  When it does, close all piping.
+		 * @return process exit code or -1 if error.
+		 */
 		int wait(void);
+
+		/**
+		 * Signal termination and wait for child process to exit.  When it
+		 * does all piping is closed.
+		 * @return process exit code or -1 if error.
+		 */
 		int cancel(void);
-		size_t read(void *buffer, size_t size);
-		size_t write(const void *buffer, size_t size);
+
+		/**
+		 * Read input from child process.  If there is an error, the result
+		 * is 0 and perror holds the error code.  If an error already
+		 * happened no further data will be read.
+		 * @param address to store input.
+		 * @param size of input to read.
+		 * @return number of bytes actually read.
+		 */
+		size_t read(void *address, size_t size);
+
+		/**
+		 * Write to the child process.  If there is an error, the result
+		 * is 0 and perror holds the error code.  If an error already
+		 * happened no further data will be written.
+		 * @param address to write data from.
+		 * @param size of data to write.
+		 * @return number of bytes actually written.
+		 */
+		size_t write(const void *address, size_t size);
 			
 		pid_t pid;
 		fd_t input, output;	// input to and output from child process...
@@ -123,13 +182,51 @@ public:
 		virtual size_t _pull(char *address, size_t size);
 
 	public:
+		/**
+		 * Construct an i/o buffer. If a non-zero size is specified, then
+		 * the object is attached to the process's stdin & stdout.  Otherwise
+		 * an un-opened object is created.
+		 */
 		iobuf(size_t size = 0);
-		iobuf(const char *path, char **argv, pmode_t pmode, size_t size = 512, char **env = NULL);
+
+		/**
+		 * Construct an i/o buffer for a child process.  This is used to
+		 * create a child process directly when the object is made.  It
+		 * essentially is the same as the open() method.
+		 * @param path of program to execute, if filename uses $PATH.
+		 * @param argv to pass to child process.
+		 * @param mode of pipe, rdonly, wronly, or rdwr.
+		 * @param size of buffering, and atomic pipe size if setable.
+		 * @param env that may be passed to child process.
+		 */
+		iobuf(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
+
+		/**
+		 * Destroy i/o buffer.  This may cancel and block waiting for a child
+		 * process to terminate.
+		 */
 		~iobuf();
 
-		void open(const char *path, char **argv, pmode_t pmode, size_t size = 512, char **env = NULL);
+		/**
+		 * Open the i/o buffer attached to a child process.
+		 * @param path of program to execute, if filename uses $PATH.
+		 * @param argv to pass to child process.
+		 * @param mode of pipe, rdonly, wronly, or rdwr.
+		 * @param size of buffering, and atomic pipe size if setable.
+		 * @param env that may be passed to child process.
+		 */
+		void open(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
 
+		/**
+		 * Close the i/o buffer. If attached to a child process it will wait
+		 * for the child to exit.
+		 */
 		void close(void);
+
+		/**
+		 * Terminate child process.  This also waits for the child process
+		 * to exit and then closes buffers.
+		 */
 		void cancel(void);
 	};
 
