@@ -742,6 +742,16 @@ int shell::wait(shell::pipe_t *pio)
 	return status;
 }
 
+shell::pipe_t *shell::spawn(const char *path, char **argv, pmode_t mode, size_t size, char **env)
+{
+	pipe_t *pio = new pipe_t;
+	if(pio->spawn(path, argv, mode, size, env)) {
+		delete pio;
+		return NULL;
+	}
+	return pio;
+}
+
 #ifdef _MSWINDOWS_
 
 int shell::system(const char *cmd, const char **envp)
