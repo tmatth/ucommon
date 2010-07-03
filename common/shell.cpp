@@ -171,12 +171,22 @@ int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t buf
 	stdio[2] = 2;
 
 	if(mode == RD || mode == RDWR) {
-		::pipe(pin);
+		if(::pipe(pin)) {
+			perror = errno;
+			return perror;
+		}
 		stdio[1] = pin[1];
 	}
 
 	if(mode == WR || mode == RDWR) {
-		::pipe(pout);
+		if(::pipe(pout)) {
+			perror = errno;
+			if(mode == RDWR) {
+				::close(pin[0]);
+				::close(pin[1]);
+			}
+			return perror;
+		}	
 		stdio[0] = pout[0];
 	}
 
@@ -238,7 +248,7 @@ int shell::pipeio::wait(void)
 int shell::pipeio::cancel(void)
 {
 	if(pid != INVALID_PID_VALUE)
-		if(kill(pid, SIGTERM))
+		kill(pid, SIGTERM);
 
 	return wait();
 }
@@ -553,7 +563,7 @@ void shell::help(void)
 		} 
 		const char *hs = op->help_string;
 		while(*hs) {
-			if(*hs == '\n' || ((*hs == ' ' || *hs == '\t')) && hp > 75) {
+			if(*hs == '\n' || (((*hs == ' ' || *hs == '\t')) && (hp > 75))) {
 				printf("\n                              ");
 				hp = 30;
 			}
