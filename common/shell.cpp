@@ -84,6 +84,34 @@ int shell::pipeio::wait(void)
 	return (int)code;
 }
 
+size_t shell::pipeio::read(void *address, size_t size)
+{
+	DWORD count;
+
+	if(input == INVALID_HANDLE_VALUE || perror)
+		return 0;
+
+	if(ReadFile(input, (LPVOID)address, (DWORD)size, &count, NULL))
+		return (size_t)count;
+	
+	perror = fsys::remapError();
+	return 0;
+}		
+
+size_t shell::pipeio::write(const void *address, size_t size)
+{
+	DWORD count;
+
+	if(output == INVALID_HANDLE_VALUE || perror)
+		return 0;
+
+	if(WriteFile(output, (LPVOID)address, (DWORD)size, &count, NULL))
+		return (size_t)count;
+	
+	perror = fsys::remapError();
+	return 0;
+}		
+
 #else
 
 int shell::pipeio::wait(void)
@@ -116,6 +144,32 @@ int shell::pipeio::cancel(void)
 		return -1;
 	return wait();
 }
+
+size_t shell::pipeio::read(void *address, size_t size)
+{
+	if(input == INVALID_HANDLE_VALUE || perror)
+		return 0;
+
+	ssize_t result = ::read(input, address, size);
+	if(result < 0) {
+		perror = fsys::remapError();
+		return 0;
+	}
+	return (size_t)result;
+}		
+
+size_t shell::pipeio::write(const void *address, size_t size)
+{
+	if(output == INVALID_HANDLE_VALUE || perror)
+		return 0;
+
+	ssize_t result = ::write(output, address, size);
+	if(result < 0) {
+		perror = fsys::remapError();
+		return 0;
+	}
+	return (size_t)result;
+}		
 
 #endif
 
@@ -734,34 +788,6 @@ int detach(const char *path, char **argv, char **env)
 	return code;
 }
 
-size_t shell::read(shell::pipe_t *pio, void *address, size_t size)
-{
-	DWORD count;
-
-	if(!pio || pio->input == INVALID_HANDLE_VALUE || pio->perror)
-		return 0;
-
-	if(ReadFile(pio->input, (LPVOID)address, (DWORD)size, &count, NULL))
-		return (size_t)count;
-	
-	pio->perror = fsys::remapError();
-	return 0;
-}		
-
-size_t shell::write(shell::pipe_t *pio, const void *address, size_t size)
-{
-	DWORD count;
-
-	if(!pio || pio->output == INVALID_HANDLE_VALUE || pio->perror)
-		return 0;
-
-	if(WriteFile(pio->output, (LPVOID)address, (DWORD)size, &count, NULL))
-		return (size_t)count;
-	
-	pio->perror = fsys::remapError();
-	return 0;
-}		
-
 #else
 
 int shell::system(const char *cmd, const char **envp)
@@ -974,31 +1000,5 @@ int shell::cancel(shell::pid_t pid)
 		return -1;
 	return wait(pid);
 }
-
-size_t shell::read(shell::pipe_t *pio, void *address, size_t size)
-{
-	if(!pio || pio->input == INVALID_HANDLE_VALUE || pio->perror)
-		return 0;
-
-	ssize_t result = ::read(pio->input, address, size);
-	if(result < 0) {
-		pio->perror = fsys::remapError();
-		return 0;
-	}
-	return (size_t)result;
-}		
-
-size_t shell::write(shell::pipe_t *pio, const void *address, size_t size)
-{
-	if(!pio || pio->output == INVALID_HANDLE_VALUE || pio->perror)
-		return 0;
-
-	ssize_t result = ::write(pio->output, address, size);
-	if(result < 0) {
-		pio->perror = fsys::remapError();
-		return 0;
-	}
-	return (size_t)result;
-}		
 
 #endif

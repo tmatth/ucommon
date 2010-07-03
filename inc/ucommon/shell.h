@@ -100,6 +100,8 @@ public:
 		
 		int wait(void);
 		int cancel(void);
+		size_t read(void *buffer, size_t size);
+		size_t write(const void *buffer, size_t size);
 	
 		pid_t pid;
 		fd_t input, output;	// input to and output from child process...
@@ -486,24 +488,6 @@ public:
 	 * @return exit code of process, -1 if fails or pid is invalid.
 	 */
 	static int cancel(shell::pipe_t *pointer);
-
-	/**
-	 * Read data from child process.
-	 * @param pointer to pipe of child process to read.
-	 * @param address of buffer to read into.
-	 * @param size of buffer to read.
-	 * @return number of bytes actually read.
-	 */
-	static size_t read(shell::pipe_t *pointer, void *buffer, size_t size);
-
-	/**
-	 * Write data to child process.
-	 * @param pointer to pipe of child process to read.
-	 * @param address of buffer to write from.
-	 * @param size of data to write.
-	 * @return number of bytes actually written.
-	 */
-	static size_t write(shell::pipe_t *pointer, const void *buffer, size_t size);
 
 	/**
 	 * Return argc count.
