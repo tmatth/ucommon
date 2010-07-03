@@ -433,7 +433,7 @@ public:
  * entropy pools and pseudo-random values.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT random
+class __EXPORT Random
 {
 public:
 	/**
@@ -502,7 +502,7 @@ public:
 	 * values.
 	 * @return true if sufficient entropy.
 	 */
-	bool status(void);
+	static bool status(void);
 };
 
 /**

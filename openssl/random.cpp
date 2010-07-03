@@ -17,13 +17,13 @@
 
 #include "local.h"
 
-void random::seed(void)
+void Random::seed(void)
 {
 	secure::init();
 	RAND_poll();
 }
 
-bool random::seed(const unsigned char *buf, size_t size)
+bool Random::seed(const unsigned char *buf, size_t size)
 {
 	secure::init();
 
@@ -31,7 +31,7 @@ bool random::seed(const unsigned char *buf, size_t size)
 	return true;
 }
 
-size_t random::key(unsigned char *buf, size_t size)
+size_t Random::key(unsigned char *buf, size_t size)
 {
 	secure::init();
 
@@ -40,7 +40,7 @@ size_t random::key(unsigned char *buf, size_t size)
 	return 0;
 }
 
-size_t random::fill(unsigned char *buf, size_t size)
+size_t Random::fill(unsigned char *buf, size_t size)
 {
 	secure::init();
 
@@ -49,7 +49,7 @@ size_t random::fill(unsigned char *buf, size_t size)
 	return 0;
 }
 
-int random::get(void)
+int Random::get(void)
 {
 	uint16_t v;;
 	fill((unsigned char *)&v, sizeof(v));
@@ -57,7 +57,7 @@ int random::get(void)
 	return (int)v;
 }
 
-int random::get(int min, int max)
+int Random::get(int min, int max)
 {
 	unsigned rand;
 	int range = max - min + 1;
@@ -75,7 +75,7 @@ int random::get(int min, int max)
 	return min + (rand % range);
 }
 
-double random::real(void)
+double Random::real(void)
 {
 	unsigned umax;
 	unsigned rand;
@@ -86,12 +86,12 @@ double random::real(void)
 	return ((double)rand) / ((double)umax);
 }
 
-double random::real(double min, double max)
+double Random::real(double min, double max)
 {
 	return real() * (max - min) + min;
 }
 
-bool random::status(void)
+bool Random::status(void)
 {
 	if(RAND_status())
 		return true;
