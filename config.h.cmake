@@ -47,6 +47,7 @@
 #cmakedefine HAVE_SYSCONF 1
 #cmakedefine HAVE_FTRUNCATE 1
 #cmakedefine HAVE_PWRITE 1
+#cmakedefine HAVE_SETPGRP 1
 #cmakedefine HAVE_SYS_FILIO_H 1
 #cmakedefine HAVE_SYS_MMAN_H 1
 #cmakedefine HAVE_SYS_POLL_H 1

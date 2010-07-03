@@ -302,7 +302,7 @@ else
 	])
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -326,6 +326,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
 	case $found in
 	shm_open)
 		AC_DEFINE(HAVE_SHM_OPEN, [1], [shared memory open])
+		;;
+	setpgrp)
+		AC_DEFINE(HAVE_SETPGRP, [1], [process group control])
 		;;
 	ftok)
 		AC_DEFINE(HAVE_FTOK, [1], [has ftok])

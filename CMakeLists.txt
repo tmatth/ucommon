@@ -198,6 +198,7 @@ check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posixtime HAVE_POSIXTIME)
 check_function_exists(ftruncate HAVE_FTRUNCATE)
 check_function_exists(pwrite HAVE_PWRITE)
+check_function_exists(setpgrp HAVE_SETPGRP)
 
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(strings.h HAVE_STRINGS_H)

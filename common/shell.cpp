@@ -30,6 +30,7 @@
 #include <process.h>
 #else
 #include <sys/wait.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #endif
 
@@ -558,7 +559,7 @@ void shell::printf(const char *format, ...)
 int shell::system(const char *cmd, const char **envp)
 {
 	char cmdspec[128];
-	DWORD code;
+	DWORD code = -1;
 	PROCESS_INFORMATION pi;
 	char *ep = NULL;
 	unsigned len = 0;
@@ -580,13 +581,13 @@ int shell::system(const char *cmd, const char **envp)
 	if(!CreateProcess((CHAR *)cmdspec, (CHAR *)cmd, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, ep, NULL, NULL, &pi)) {
 		if(ep)
 			delete[] ep;
-		return 127;
+		return -1;
 	}
 	if(ep)
 		delete[] ep;
 
-	int status = wait(pi.hProcess);
 	CloseHandle(pi.hThread);
+	int status = wait(pi.hProcess);
 	return status;
 }
 
@@ -624,6 +625,29 @@ shell::pid_t spawn(const char *path, char **argv, char **env)
 		return (shell::pid_t)_spawnvpe(P_NOWAIT, path, argv, env);
 	else
 		return (shell::pid_t)_spawnvp(P_NOWAIT, path, argv);
+}
+
+int detach(const char *path, char **argv, char **env)
+{
+	bool pmode = false;
+	int code;
+
+	if(strchr(path, '/') || strchr(path, '\\') || strchr(path, ':'))
+		pmode = true;
+
+	if(pmode && env)
+		code = _spawnve(P_DETACH, path, argv, env);
+	else if(pmode)
+		code = _spawnv(P_DETACH, path, argv);
+	else if(env)
+		code = _spawnvpe(P_DETACH, path, argv, env);
+	else
+		code = _spawnvp(P_DETACH, path, argv);
+
+	if(code > 0)
+		code = 0;
+	
+	return code;
 }
 
 #else
@@ -675,8 +699,101 @@ int shell::system(const char *cmd, const char **envp)
 	::signal(SIGCHLD, SIG_DFL);
 	::signal(SIGPIPE, SIG_DFL);
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
-	::exit(127);
+	::exit(-1);
 }
+
+int shell::detach(const char *path, char **argv, char **envp)
+{
+	char symname[129];
+	const char *cp;
+	char *ep;	
+	fd_t fd;
+
+	int max = sizeof(fd_set) * 8;
+#ifdef	RLIMIT_NOFILE
+	struct rlimit rlim;
+
+	if(!getrlimit(RLIMIT_NOFILE, &rlim))
+		max = rlim.rlim_max;
+#endif
+
+	pid_t pid = fork();
+	if(pid < 0)
+		return INVALID_PID_VALUE;
+
+	if(pid > 0)
+		return pid;
+
+	::signal(SIGQUIT, SIG_DFL);
+	::signal(SIGINT, SIG_DFL);
+	::signal(SIGCHLD, SIG_DFL);
+	::signal(SIGPIPE, SIG_DFL);
+	::signal(SIGHUP, SIG_IGN);
+
+#ifdef	SIGTTOU
+	::signal(SIGTTOU, SIG_IGN);
+#endif
+
+#ifdef	SIGTTIN
+	::signal(SIGTTIN, SIG_IGN);
+#endif
+
+#ifdef	SIGTSTP
+	::signal(SIGTSTP, SIG_IGN);
+#endif
+
+	for(int fd = 0; fd < max; ++fd)
+		::close(fd);
+
+#if defined(SIGTSTP) && defined(TIOCNOTTY)
+	if(setpgid(0, getpid()) == -1)
+		::exit(-1);
+	
+	if((fd = open("/dev/tty", O_RDWR)) >= 0) {
+		::ioctl(fd, TIOCNOTTY, NULL);
+		::close(fd);
+	}
+#else
+	
+#ifdef	HAVE_SETPGRP
+	if(setpgrp() == -1)
+		::exit(-1);
+#else
+	if(setpgid(0, getpid()) == -1)		
+		::exit(-1);
+#endif
+
+	if(getppid() != 1) {
+		if((pid = fork()) < 0)
+			::exit(-1);
+		else if(pid > 0)
+			::exit(0);
+	}
+#endif
+
+	::open("/dev/null", O_RDWR);
+	::open("/dev/null", O_RDWR);
+	::open("/dev/null", O_RDWR);
+
+	while(envp && *envp) {
+		String::set(symname, sizeof(symname), *envp);
+		ep = strchr(symname, '=');
+		if(ep)
+			*ep = 0;
+		cp = strchr(*envp, '=');
+		if(cp)
+			++cp;
+		::setenv(symname, cp, 1);
+		++envp;
+	}
+
+	if(strchr(path, '/'))
+		execv(path, argv);
+	else
+		execvp(path, argv);
+	exit(-1);
+}
+
 
 shell::pid_t shell::spawn(const char *path, char **argv, char **envp)
 {

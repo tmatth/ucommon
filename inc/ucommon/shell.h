@@ -83,6 +83,11 @@ public:
 	typedef	int pid_t;
 #endif
 
+	typedef	struct {
+		pid_t pid;
+		fd_t input, output;	// input to and output from child process...
+	}	pipe_t;
+
 	/**
 	 * This can be used to get internationalized error messages.  The internal
 	 * text for shell parser errors are passed through here.
@@ -409,6 +414,16 @@ public:
 	 * @return process id of child or INVALID_PID_VALUE if fails.
 	 */
 	static shell::pid_t spawn(const char *path, char **argv, char **env = NULL);
+
+	/**
+	 * Create a detached process.  This creates a new child process that
+	 * is completely detached from the current process.
+	 * @param path to executable.
+	 * @param argv list of command arguments for the child process.
+	 * @param env of child process can be explicity set.
+	 * @return 0 if success, -1 on error.
+	 */
+	int	detach(const char *path, char **argv, char **env = NULL);
 
 	/**
 	 * Wait for a child process to terminate.  This operation blocks.
