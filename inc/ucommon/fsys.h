@@ -73,6 +73,7 @@ protected:
 #endif
 	int		error;
 
+public:
 #ifdef	_MSWINDOWS_
 	static int remapError(void);
 #else
@@ -80,7 +81,6 @@ protected:
 		{return errno;};
 #endif
 
-public:
 	/**
 	 * Enumerated file access modes.
 	 */

@@ -33,6 +33,10 @@
 #include <ucommon/memory.h>
 #endif
 
+#ifndef	_UCOMMON_BUFFER_H_
+#include <ucommon/buffer.h>
+#endif
+
 #ifndef	_UCOMMON_SHELL_H_
 #define	_UCOMMON_SHELL_H_
 
@@ -83,10 +87,26 @@ public:
 	typedef	int pid_t;
 #endif
 
-	typedef	struct {
+	class __EXPORT pipeio
+	{
+	protected:
+		friend class shell;
+
+		pipeio();
+	
 		pid_t pid;
 		fd_t input, output;	// input to and output from child process...
-	}	pipe_t;
+		int error;
+		bool dynamic;		// tag as dynamic object...
+
+	public:
+		inline int err(void)
+			{return error;};
+	};
+
+	typedef	pipeio pipe_t;
+
+	typedef	enum {RD = IOBuffer::BUF_RD, WR = IOBuffer::BUF_WR, RDWR = IOBuffer::BUF_RDWR} pmode_t;
 
 	/**
 	 * This can be used to get internationalized error messages.  The internal
@@ -438,6 +458,39 @@ public:
 	 * @return exit code of process, -1 if fails or pid is invalid.
 	 */
 	static int cancel(shell::pid_t pid);
+
+	/**
+	 * Wait for a child pipe to terminate.  This operation blocks.  If
+	 * the pipe io handle is dynamic, it is deleted.
+	 * @param pointer to pipe of child process to wait for.
+	 * @return exit code of process, -1 if fails or pid is invalid.
+	 */
+	static int wait(shell::pipe_t *pointer);
+
+	/**
+	 * Cancel a child pipe.  If the pipe io handle is dynamic, it is deleted.
+	 * @param pointer to pipe of child process to cancel.
+	 * @return exit code of process, -1 if fails or pid is invalid.
+	 */
+	static int cancel(shell::pipe_t *pointer);
+
+	/**
+	 * Read data from child process.
+	 * @param pointer to pipe of child process to read.
+	 * @param address of buffer to read into.
+	 * @param size of buffer to read.
+	 * @return number of bytes actually read.
+	 */
+	static size_t read(shell::pipe_t *pointer, void *buffer, size_t size);
+
+	/**
+	 * Write data to child process.
+	 * @param pointer to pipe of child process to read.
+	 * @param address of buffer to write from.
+	 * @param size of data to write.
+	 * @return number of bytes actually written.
+	 */
+	static size_t write(shell::pipe_t *pointer, const void *buffer, size_t size);
 
 	/**
 	 * Return argc count.

@@ -49,7 +49,7 @@ NAMESPACE_UCOMMON
  */
 class __EXPORT IOBuffer
 {
-protected:
+public:
 	typedef enum {BUF_RD, BUF_WR, BUF_RDWR} type_t;
 
 private:
