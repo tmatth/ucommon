@@ -47,9 +47,77 @@ shell::pipeio::pipeio()
 {
 	pid = INVALID_PID_VALUE;
 	input = output = INVALID_HANDLE_VALUE;
-	dynamic = true;
-	error = 0;
+	perror = presult = 0;
 }
+
+#ifdef	_MSWINDOWS_
+
+int shell::pipeio::cancel(void)
+{
+	TerminateProcess(pid, 7);
+	return wait();
+}
+
+int shell::pipeio::wait(void)
+{
+	DWORD code;
+
+	presult = -1;
+
+	if(input != INVALID_HANDLE_VALUE)
+		CloseHandle(input);
+
+	if(output != INVALID_HANDLE_VALUE)
+		CloseHandle(output);
+
+	input = output = INVALID_HANDLE_VALUE;
+
+	if(WaitForSingleObject(pid, INFINITE) == WAIT_FAILED) {
+		pid = INVALID_PID_VALUE;
+		return -1;
+	}
+
+	GetExitCodeProcess(pid, &code);
+	CloseHandle(pid);
+	pid = INVALID_PID_VALUE;	
+	presult = code;
+	return (int)code;
+}
+
+#else
+
+int shell::pipeio::wait(void)
+{
+	presult = -1;
+
+	if(input != INVALID_HANDLE_VALUE)
+		::close(input);
+
+	if(output != INVALID_HANDLE_VALUE)
+		::close(output);
+
+	input = output = INVALID_HANDLE_VALUE;
+
+	if(pid == INVALID_PID_VALUE || ::waitpid(pid, &status, 0) != pid)
+		status = -1;
+
+	pid = INVALID_PID_VALUE;
+
+	if(status == -1)
+		return -1;
+
+	presult = WEXITSTATUS(status);
+	return presult;
+}
+
+int shell::pipeio::cancel(void)
+{
+	if(kill(pid, SIGTERM))
+		return -1;
+	return wait();
+}
+
+#endif
 
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
 OrderedObject(&index)
@@ -562,6 +630,20 @@ void shell::printf(const char *format, ...)
 	va_end(args);
 }
 
+int shell::cancel(shell::pipe_t *pio)
+{
+	int status = pio->cancel();
+	delete pio;
+	return status;
+}
+
+int shell::wait(shell::pipe_t *pio)
+{
+	int status = pio->wait();
+	delete pio;
+	return status;
+}
+
 #ifdef _MSWINDOWS_
 
 int shell::system(const char *cmd, const char **envp)
@@ -597,48 +679,6 @@ int shell::system(const char *cmd, const char **envp)
 	CloseHandle(pi.hThread);
 	int status = wait(pi.hProcess);
 	return status;
-}
-
-int shell::cancel(shell::pid_t pid)
-{
-	TerminateProcess(pid, 7);
-	return wait(pid);
-}
-
-int shell::cancel(shell::pipe_t *pio)
-{
-	TerminateProcess(pio->pid, 7);
-	return wait(pio);
-}
-
-int shell::wait(shell::pipe_t *pio)
-{
-	DWORD code;
-
-	if(pio->input != INVALID_HANDLE_VALUE)
-		CloseHandle(pio->input);
-
-	if(pio->output != INVALID_HANDLE_VALUE)
-		CloseHandle(pio->output);
-
-	pio->input = pio->output = INVALID_HANDLE_VALUE;
-
-	if(WaitForSingleObject(pio->pid, INFINITE) == WAIT_FAILED) {
-		if(pio->dynamic)
-			delete pio;
-		else
-			pio->pid = INVALID_PID_VALUE;
-		return -1;
-	}
-
-	GetExitCodeProcess(pio->pid, &code);
-	CloseHandle(pio->pid);
-	if(pio->dynamic)
-		delete pio;
-	else
-		pio->pid = INVALID_PID_VALUE;
-	
-	return (int)code;
 }
 
 int shell::wait(shell::pid_t pid)
@@ -698,13 +738,13 @@ size_t shell::read(shell::pipe_t *pio, void *address, size_t size)
 {
 	DWORD count;
 
-	if(!pio || pio->input == INVALID_HANDLE_VALUE || pio->error)
+	if(!pio || pio->input == INVALID_HANDLE_VALUE || pio->perror)
 		return 0;
 
 	if(ReadFile(pio->input, (LPVOID)address, (DWORD)size, &count, NULL))
 		return (size_t)count;
 	
-	pio->error = fsys::remapError();
+	pio->perror = fsys::remapError();
 	return 0;
 }		
 
@@ -712,13 +752,13 @@ size_t shell::write(shell::pipe_t *pio, const void *address, size_t size)
 {
 	DWORD count;
 
-	if(!pio || pio->output == INVALID_HANDLE_VALUE || pio->error)
+	if(!pio || pio->output == INVALID_HANDLE_VALUE || pio->perror)
 		return 0;
 
 	if(WriteFile(pio->output, (LPVOID)address, (DWORD)size, &count, NULL))
 		return (size_t)count;
 	
-	pio->error = fsys::remapError();
+	pio->perror = fsys::remapError();
 	return 0;
 }		
 
@@ -935,47 +975,14 @@ int shell::cancel(shell::pid_t pid)
 	return wait(pid);
 }
 
-int shell::wait(shell::pipe_t *pio)
-{
-	int status = -1;
-
-	if(pio->input != INVALID_HANDLE_VALUE)
-		::close(pio->input);
-
-	if(pio->output != INVALID_HANDLE_VALUE)
-		::close(pio->output);
-
-	pio->input = pio->output = INVALID_HANDLE_VALUE;
-
-	if(pio->pid == INVALID_PID_VALUE || ::waitpid(pio->pid, &status, 0) != pio->pid)
-		status = -1;
-
-	if(pio->dynamic)
-		delete pio;
-	else
-		pio->pid = INVALID_PID_VALUE;
-
-	if(status == -1)
-		return -1;
-
-	return WEXITSTATUS(status);
-}
-
-int shell::cancel(shell::pipe_t *pio)
-{
-	if(kill(pio->pid, SIGTERM))
-		return -1;
-	return wait(pio);
-}
-
 size_t shell::read(shell::pipe_t *pio, void *address, size_t size)
 {
-	if(!pio || pio->input == INVALID_HANDLE_VALUE || pio->error)
+	if(!pio || pio->input == INVALID_HANDLE_VALUE || pio->perror)
 		return 0;
 
 	ssize_t result = ::read(pio->input, address, size);
 	if(result < 0) {
-		pio->error = fsys::remapError();
+		pio->perror = fsys::remapError();
 		return 0;
 	}
 	return (size_t)result;
@@ -983,12 +990,12 @@ size_t shell::read(shell::pipe_t *pio, void *address, size_t size)
 
 size_t shell::write(shell::pipe_t *pio, const void *address, size_t size)
 {
-	if(!pio || pio->output == INVALID_HANDLE_VALUE || pio->error)
+	if(!pio || pio->output == INVALID_HANDLE_VALUE || pio->perror)
 		return 0;
 
 	ssize_t result = ::write(pio->output, address, size);
 	if(result < 0) {
-		pio->error = fsys::remapError();
+		pio->perror = fsys::remapError();
 		return 0;
 	}
 	return (size_t)result;

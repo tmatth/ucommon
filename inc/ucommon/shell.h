@@ -87,26 +87,26 @@ public:
 	typedef	int pid_t;
 #endif
 
+	typedef	enum {RD = IOBuffer::BUF_RD, WR = IOBuffer::BUF_WR, RDWR = IOBuffer::BUF_RDWR} pmode_t;
+
 	class __EXPORT pipeio
 	{
 	protected:
 		friend class shell;
 
 		pipeio();
+
+		int spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
+		
+		int wait(void);
+		int cancel(void);
 	
 		pid_t pid;
 		fd_t input, output;	// input to and output from child process...
-		int error;
-		bool dynamic;		// tag as dynamic object...
-
-	public:
-		inline int err(void)
-			{return error;};
+		int perror, presult;
 	};
 
 	typedef	pipeio pipe_t;
-
-	typedef	enum {RD = IOBuffer::BUF_RD, WR = IOBuffer::BUF_WR, RDWR = IOBuffer::BUF_RDWR} pmode_t;
 
 	/**
 	 * This can be used to get internationalized error messages.  The internal
@@ -434,6 +434,19 @@ public:
 	 * @return process id of child or INVALID_PID_VALUE if fails.
 	 */
 	static shell::pid_t spawn(const char *path, char **argv, char **env = NULL);
+
+	/**
+	 * Spawn a child pipe.  If the executable path is a pure filename, then 
+	 * the $PATH will be used to find it.  The argv array may be created from 
+	 * a string with the shell string parser.
+	 * @param path to executable.
+	 * @param argv list of command arguments for the child process.
+	 * @param mode of pipe, rd only, wr only, or rdwr.
+	 * @param size of pipe buffer.
+	 * @param env of child process can be explicitly set.
+	 * @return pipe object or NULL on failure.
+	 */
+	static shell::pipe_t *spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
 
 	/**
 	 * Create a detached process.  This creates a new child process that
