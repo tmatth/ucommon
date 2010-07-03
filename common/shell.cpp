@@ -114,6 +114,50 @@ size_t shell::pipeio::write(const void *address, size_t size)
 
 #else
 
+int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t buffer, char **envp)
+{
+	fd_t pin[2], pout[2];
+	fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 2};
+
+	pin[0] = INVALID_HANDLE_VALUE;
+	pout[1] = INVALID_HANDLE_VALUE;
+	stdio[2] = 2;
+
+	if(mode == RD || mode == RDWR)
+	{
+		::pipe(pin);
+		stdio[1] = pin[1];
+	}
+	if(mode == WR || mode == RDWR) {
+		::pipe(pout);
+		stdio[0] = pout[0];
+	}
+
+	pid = shell::spawn(path, argv, envp, stdio);
+
+	if(mode == RD || mode == RDWR)
+		::close(pin[1]);
+	if(mode == WR || mode == RDWR)
+		::close(pout[0]);
+
+	perror = 0;
+	if(pid == INVALID_PID_VALUE) {
+		perror = errno;
+		if(mode == RD || mode == RDWR) {
+			::close(pin[0]);
+			pin[0] = INVALID_HANDLE_VALUE;
+		}
+		if(mode == WR || mode == RDWR) {
+			::close(pout[1]);
+			pout[1] = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	input = pin[0];
+	output = pout[1];
+	return perror;
+}
+	
 int shell::pipeio::wait(void)
 {
 	presult = -1;
@@ -840,7 +884,7 @@ int shell::system(const char *cmd, const char **envp)
 	::exit(-1);
 }
 
-int shell::detach(const char *path, char **argv, char **envp)
+int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
 {
 	char symname[129];
 	const char *cp;
@@ -880,7 +924,14 @@ int shell::detach(const char *path, char **argv, char **envp)
 	::signal(SIGTSTP, SIG_IGN);
 #endif
 
-	for(int fd = 0; fd < max; ++fd)
+	for(fd = 0; fd < 3; ++fd) {
+		if(stdio && stdio[fd] != INVALID_HANDLE_VALUE)
+			::dup2(stdio[fd], fd);
+		else
+			::close(fd);
+	}
+
+	for(fd = 3; fd < max; ++fd)
 		::close(fd);
 
 #if defined(SIGTSTP) && defined(TIOCNOTTY)
@@ -933,11 +984,12 @@ int shell::detach(const char *path, char **argv, char **envp)
 }
 
 
-shell::pid_t shell::spawn(const char *path, char **argv, char **envp)
+shell::pid_t shell::spawn(const char *path, char **argv, char **envp, fd_t *stdio)
 {
 	char symname[129];
 	const char *cp;
 	char *ep;
+	int fd;
 
 	int max = sizeof(fd_set) * 8;
 #ifdef	RLIMIT_NOFILE
@@ -959,7 +1011,12 @@ shell::pid_t shell::spawn(const char *path, char **argv, char **envp)
 	::signal(SIGCHLD, SIG_DFL);
 	::signal(SIGPIPE, SIG_DFL);
 
-	for(int fd = 3; fd < max; ++fd)
+	for(fd = 0; fd < 3; ++fd) {
+		if(stdio && stdio[fd] != INVALID_HANDLE_VALUE)
+			::dup2(stdio[fd], fd);
+	}
+
+	for(fd = 3; fd < max; ++fd)
 		::close(fd);
 
 	while(envp && *envp) {

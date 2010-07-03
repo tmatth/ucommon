@@ -433,9 +433,10 @@ public:
 	 * @param path to executable.
 	 * @param argv list of command arguments for the child process.
 	 * @param env of child process can be explicitly set.
+	 * @param stdio handles for stdin, stdout, and stderr.
 	 * @return process id of child or INVALID_PID_VALUE if fails.
 	 */
-	static shell::pid_t spawn(const char *path, char **argv, char **env = NULL);
+	static shell::pid_t spawn(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
 
 	/**
 	 * Spawn a child pipe.  If the executable path is a pure filename, then 
@@ -456,9 +457,10 @@ public:
 	 * @param path to executable.
 	 * @param argv list of command arguments for the child process.
 	 * @param env of child process can be explicity set.
+	 * @param stdio handles for stdin, stdout, and stderr.
 	 * @return 0 if success, -1 on error.
 	 */
-	int	detach(const char *path, char **argv, char **env = NULL);
+	int	detach(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
 
 	/**
 	 * Wait for a child process to terminate.  This operation blocks.
