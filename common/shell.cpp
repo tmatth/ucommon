@@ -92,8 +92,11 @@ int shell::pipeio::spawn(const char *path, char **argv, pmode_t mode, size_t siz
 
 int shell::pipeio::cancel(void)
 {
-	TerminateProcess(pid, 7);
-	return wait();
+	if(pid != INVALID_PID_VALUE) {
+		TerminateProcess(pid, 7);
+		return wait();
+	}
+	return -1;
 }
 
 int shell::pipeio::wait(void)
@@ -101,6 +104,9 @@ int shell::pipeio::wait(void)
 	DWORD code;
 
 	presult = -1;
+
+	if(pid == INVALID_PID_VALUE)
+		return presult;
 
 	if(input != INVALID_HANDLE_VALUE)
 		CloseHandle(input);
@@ -222,9 +228,12 @@ int shell::pipeio::wait(void)
 
 int shell::pipeio::cancel(void)
 {
-	if(kill(pid, SIGTERM))
-		return -1;
-	return wait();
+	if(pid != INVALID_PID_VALUE) {
+		if(kill(pid, SIGTERM))
+			return -1;
+		return wait();
+	}
+	return -1;
 }
 
 size_t shell::pipeio::read(void *address, size_t size)
@@ -782,7 +791,7 @@ int shell::wait(shell::pipe_t *pio)
 
 shell::pipe_t *shell::spawn(const char *path, char **argv, pmode_t mode, size_t size, char **env)
 {
-	pipe_t *pio = new pipe_t;
+	shell::pipe_t *pio = new shell::pipe_t;
 	if(pio->spawn(path, argv, mode, size, env)) {
 		delete pio;
 		return NULL;
@@ -1297,3 +1306,54 @@ int shell::cancel(shell::pid_t pid)
 }
 
 #endif
+
+pipebuf::pipebuf() : IOBuffer(), shell::pipeio()
+{
+}
+
+pipebuf::pipebuf(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
+IOBuffer(), shell::pipeio()
+{
+	open(path, argv, mode, size, env);
+}
+
+pipebuf::~pipebuf()
+{
+	cancel();
+}
+
+size_t pipebuf::_pull(char *buf, size_t size)
+{
+	size_t result = pipeio::read(buf, size);
+	if(perror)
+		ioerror = perror;
+	return result;
+}
+
+size_t pipebuf::_push(const char *buf, size_t size)
+{
+	size_t result = pipeio::write(buf, size);
+	if(perror)
+		ioerror = perror;
+	return result;
+}
+
+void pipebuf::close(void)
+{
+	pipeio::wait();
+	IOBuffer::release();
+}
+
+void pipebuf::cancel(void)
+{
+	pipeio::cancel();
+	IOBuffer::release();
+}
+
+void pipebuf::open(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env)
+{
+	if(!pipeio::spawn(path, argv, mode, size, env))
+		IOBuffer::allocate(size, (type_t)mode);
+}
+		
+

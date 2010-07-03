@@ -505,6 +505,33 @@ public:
 	 */
 	static unsigned count(char **argv);
 };
+
+/**
+ * Process pipe with I/O buffering.  This allows the creation and management
+ * of a shell pipe with buffered I/O support.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT pipebuf : public IOBuffer, protected shell::pipeio
+{
+protected:
+	virtual size_t _push(const char *address, size_t size);
+	virtual size_t _pull(char *address, size_t size);
+
+public:
+	pipebuf();
+	pipebuf(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+	~pipebuf();
+
+	void open(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+
+	void close(void);
+	void cancel(void);
+};
+
+/**
+ * A convenience type.
+ */
+typedef	pipebuf pipe_t;
 		
 END_NAMESPACE
 
