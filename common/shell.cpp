@@ -104,6 +104,13 @@ int shell::pipeio::wait(void)
 
 	presult = -1;
 
+	// if stdio, we do not want to close stdin/out handles 
+	// instead we just mark the object to disable buffering
+	if(pid == INVALID_PID_VALUE) {
+		perror = EPIPE;
+		return presult;
+	}
+
 	if(input != INVALID_HANDLE_VALUE)
 		CloseHandle(input);
 
@@ -111,9 +118,6 @@ int shell::pipeio::wait(void)
 		CloseHandle(output);
 
 	input = output = INVALID_HANDLE_VALUE;
-
-	if(pid == INVALID_PID_VALUE)
-		return presult;
 
 	if(WaitForSingleObject(pid, INFINITE) == WAIT_FAILED) {
 		pid = INVALID_PID_VALUE;
@@ -205,6 +209,12 @@ int shell::pipeio::wait(void)
 {
 	presult = -1;
 
+	// we do not want to close our stdin/out handles
+	if(pid == INVALID_PID_VALUE) {
+		perror = EPIPE;
+		return -1;
+	}
+
 	if(input != INVALID_HANDLE_VALUE)
 		::close(input);
 
@@ -213,7 +223,7 @@ int shell::pipeio::wait(void)
 
 	input = output = INVALID_HANDLE_VALUE;
 
-	if(pid == INVALID_PID_VALUE || ::waitpid(pid, &presult, 0) != pid)
+	if(::waitpid(pid, &presult, 0) != pid)
 		presult = -1;
 
 	pid = INVALID_PID_VALUE;
