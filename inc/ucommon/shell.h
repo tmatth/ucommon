@@ -114,7 +114,7 @@ public:
 	 * class to manage stdio sessions generically in the child process.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT iobuf : public IOBuffer, protected shell::pipeio
+	class __EXPORT iobuf : public IOBuffer, protected pipeio
 	{
 	protected:
 		friend class shell;
@@ -124,10 +124,10 @@ public:
 
 	public:
 		iobuf(size_t size = 0);
-		iobuf(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+		iobuf(const char *path, char **argv, pmode_t pmode, size_t size = 512, char **env = NULL);
 		~iobuf();
 
-		void open(const char *path, char **argv, shell::pmode_t pmode, size_t size = 512, char **env = NULL);
+		void open(const char *path, char **argv, pmode_t pmode, size_t size = 512, char **env = NULL);
 
 		void close(void);
 		void cancel(void);
@@ -442,8 +442,6 @@ public:
 	inline static size_t write(String& string)
 		{return writes(string.c_str());};
 
-	static unsigned scanf(const char *format, ...) __SCANF(1, 2);
-
 	/**
 	 * Print to a pipe object.
 	 * @param pipe to write to.
@@ -464,8 +462,6 @@ public:
 	static size_t read(pipe_t pipe, String& string);
 
 	static size_t writes(pipe_t pipe, const char *string);
-
-	static unsigned scanln(pipe_t pipe, const char *format, ...) __SCANF(2, 3);
 
 	inline static size_t write(pipe_t pipe, String& string)
 		{return writes(pipe, string.c_str());};

@@ -1035,15 +1035,6 @@ void *fsys::find(mem_t addr, const char *sym)
 
 #endif
 
-unsigned fsys::scanf(FILE *fp, const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	unsigned count = vfscanf(fp, format, args);
-	va_end(args);
-	return count;
-}
-
 size_t fsys::printf(FILE *fp, const char *format, ...)
 {
 	va_list args;

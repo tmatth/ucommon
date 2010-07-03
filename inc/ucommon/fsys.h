@@ -457,8 +457,6 @@ public:
 
 	static size_t printf(FILE *fp, const char *format, ...) __PRINTF(2, 3);
 	
-	static unsigned scanf(FILE *fp, const char *format, ...) __SCANF(2, 3);
-
 	static size_t writes(FILE *fp, const char *string);
 
 	static size_t readln(FILE *fp, char *address, size_t size);

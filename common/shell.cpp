@@ -568,7 +568,7 @@ void shell::help(void)
 				hp = 30;
 			}
 			else if(*hs == '\t') {
-				if(!hp % 8) {
+				if(!(hp % 8)) {
 					putchar(' ');
 					++hp;
 				}
@@ -857,21 +857,6 @@ size_t shell::readln(pipe_t pipe, char *buffer, size_t size)
 	return pos;
 }
 
-unsigned shell::scanln(pipe_t pipe, const char *format, ...)
-{
-	char buf[512];
-	size_t count;
-	va_list args;
-	unsigned found = 0;
-
-	va_start(args, format);
-	count = readln(buf, sizeof(buf));
-	if(count)
-		found = vsscanf(buf, format, args);
-	va_end(args);
-	return found;
-}
-
 size_t shell::printf(pipe_t pipe, const char *format, ...)
 {
 	char buf[512];
@@ -883,15 +868,6 @@ size_t shell::printf(pipe_t pipe, const char *format, ...)
 	if(buf[0])
 		return pipe->write(buf, strlen(buf));
 	return 0;
-}
-
-unsigned shell::scanf(const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	unsigned count = vfscanf(stdin, format, args);
-	va_end(args);
-	return count;
 }
 
 size_t shell::printf(const char *format, ...)
@@ -1160,7 +1136,7 @@ exit:
 	if(ep)
 		delete ep;
 	delete args;
-	for(pos == 0; pos < 3; ++pos) {
+	for(pos = 0; pos < 3; ++pos) {
 		if(dups[pos] != INVALID_HANDLE_VALUE)
 			CloseHandle(dups[pos]);
 	}
@@ -1259,7 +1235,7 @@ exit:
 	if(ep)
 		delete ep;
 	delete args;
-	for(pos == 0; pos < 3; ++pos) {
+	for(pos = 0; pos < 3; ++pos) {
 		if(dups[pos] != INVALID_HANDLE_VALUE)
 			CloseHandle(dups[pos]);
 	}
