@@ -33,6 +33,10 @@
 #include <ucommon/socket.h>
 #endif
 
+#ifndef	_UCOMMON_STRING_H_
+#include <ucommon/string.h>
+#endif
+
 #ifndef	_UCOMMON_FSYS_H_
 #include <ucommon/fsys.h>
 #endif
@@ -218,6 +222,15 @@ public:
 		{return putline(string);};
 
 	/**
+	 * Method to write a string object.  This adds the current newline
+	 * character sequence to the output.
+	 * @param string to write.
+	 * @return number of characters actually written.
+	 */
+	inline size_t write(String& string)
+		{return putline(*string);};
+
+	/**
 	 * Method to read a line of input from the buffer.  This uses the current
 	 * newline character sequence to mark the end of line input.
 	 * @param address of string buffer to use.
@@ -226,6 +239,15 @@ public:
 	 */
 	inline size_t readln(char *address, size_t size)
 		{return getline(address, size);};
+
+	/**
+	 * Method to read a line of input from the buffer.  This saves the result
+	 * into an allocated string object.
+	 * @param string buffer to use.
+	 * @param size of string buffer.
+	 * @return number of characters actually read.
+	 */
+	size_t read(String& string);
 
 	/**
 	 * Method to read input data from the buffer.

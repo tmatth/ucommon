@@ -279,6 +279,20 @@ size_t IOBuffer::putline(const char *string)
 	return count;
 }
 
+size_t IOBuffer::read(String& str)
+{
+	char *cp = str.c_mem();
+	size_t size = str.size();
+
+	if(!size)
+		return 0;
+
+	*cp = 0;
+	getline(cp, size);
+	String::fix(str);
+	return str.len();
+}
+
 size_t IOBuffer::getline(char *string, size_t size)
 {
 	size_t count = 0;
