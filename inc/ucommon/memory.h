@@ -639,6 +639,14 @@ public:
 	}
 
 	/**
+	 * Test if a name exists in the pool.
+	 * @param name to test.
+	 * @return true if found.
+	 */
+	bool test(const char *name) const
+		{return NamedObject::map(idx, name, M) != NULL;};
+
+	/**
 	 * Find a typed object derived from NamedObject in the hash map by name.
 	 * If the object is not found, it is created from the pager pool.
 	 * @param name to search for.
