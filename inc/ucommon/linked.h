@@ -1760,6 +1760,14 @@ public:
 		{object.NamedObject::add(idx, name, M);};
 
 	/**
+	 * Add a typed object derived from NamedObject to the hash map by name.
+	 * @param name to add.
+	 * @param object to add.
+	 */
+	inline void add(const char *name, T *object)
+		{object->NamedObject::add(idx, name, M);};
+
+	/**
 	 * Remove a typed object derived from NamedObject to the hash map by name.
 	 * @param name to remove.
 	 * @return object removed if found or NULL.
