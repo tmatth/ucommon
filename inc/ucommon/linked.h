@@ -419,6 +419,14 @@ protected:
 
 public:
 	/**
+	 * Add object to hash indexed list.
+	 * @param hash map table to list node on.
+	 * @param name of the object we are listing.
+	 * @param size of hash map table used.
+	 */
+    void add(NamedObject **hash, char *name, unsigned size = 1);
+
+	/**
 	 * Purge a hash indexed table of named objects.
 	 * @param hash map table to purge.
 	 * @param size of hash map table used.
@@ -452,12 +460,30 @@ public:
 	static NamedObject *find(NamedObject *root, const char *name);
 
 	/**
+	 * Remove a named object from a simple list.
+	 * @param root node of named object list.
+	 * @param name of object to find.
+	 * @return object pointer or NULL if not found.
+	 */
+	static NamedObject *remove(NamedObject **root, const char *name);
+
+	/**
 	 * Find a named object through a hash map table.
 	 * @param hash map table of objects to search.
 	 * @param name of object to find.
 	 * @param size of hash map table.
+	 * @return object pointer or NULL if not found.
 	 */
 	static NamedObject *map(NamedObject **hash, const char *name, unsigned size);
+
+	/**
+	 * Remove an object from a hash map table.
+	 * @param hash map table of object to remove from.
+	 * @param name of object to remove.
+	 * @param size of hash map table.
+	 * @return object that is removed or NULL if not found.
+	 */
+	static NamedObject *remove(NamedObject **hash, const char *name, unsigned size);
 
 	/**
 	 * Iterate through a hash map table.
@@ -1710,12 +1736,36 @@ public:
 		{return M;};
 
 	/**
-	 * Find a typed object in the hash map by name.
+	 * Find a typed object derived from NamedObject in the hash map by name.
 	 * @param name to search for.
 	 * @return typed object if found through map or NULL.
 	 */
 	inline T *get(const char *name) const
 		{return static_cast<T*>(NamedObject::map(idx, name, M));};
+
+	/**
+	 * Find a typed object derived from NamedObject in the hash map by name.
+	 * @param name to search for.
+	 * @return typed object if found through map or NULL.
+	 */
+	inline T *operator[](const char *name) const
+		{return static_cast<T*>(NamedObject::map(idx, name, M));};
+
+	/**
+	 * Add a typed object derived from NamedObject to the hash map by name.
+	 * @param name to add.
+	 * @param object to add.
+	 */
+	inline void add(const char *name, T& object)
+		{object.NamedObject::add(idx, name, M);};
+
+	/**
+	 * Remove a typed object derived from NamedObject to the hash map by name.
+	 * @param name to remove.
+	 * @return object removed if found or NULL.
+	 */
+	inline T *remove(const char *name)
+		{return static_cast<T*>(NamedObject::remove(idx, name, M));};
 
 	/**
 	 * Find first typed object in hash map to iterate.

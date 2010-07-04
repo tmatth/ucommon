@@ -1,3 +1,6 @@
+from ucommon 3.2.0 to 3.2.1
+- added explicit add and remove for NamedObject to make keymap easier to use
+
 from ucommon 3.1.2 to 3.2.0
 - fixed option crash when not defining a long option.
 - improved shell header documentation.

@@ -285,6 +285,18 @@ OrderedObject()
 	assert(nid != NULL && *nid != 0);
 	assert(max > 0);
 
+	id = NULL;
+	add(root, nid, max);
+}
+
+void NamedObject::add(NamedObject **root, char *nid, unsigned max)
+{
+	assert(root != NULL);
+	assert(nid != NULL && *nid != 0);
+	assert(max > 0);
+
+	clearId();
+
 	NamedObject *node, *prev = NULL;
 
 	if(max < 2)
@@ -489,6 +501,18 @@ unsigned NamedObject::count(NamedObject **idx, unsigned max)
 	return count;
 }
 
+NamedObject *NamedObject::remove(NamedObject **idx, const char *id, unsigned max)
+{
+	assert(idx != NULL);
+	assert(id != NULL && *id != 0);
+	assert(max > 0);
+
+	if(max < 2)
+		return remove(idx, id);
+
+	return remove(&idx[keyindex(id, max)], id);
+}
+
 NamedObject *NamedObject::map(NamedObject **idx, const char *id, unsigned max)
 {
 	assert(idx != NULL);
@@ -505,13 +529,38 @@ NamedObject *NamedObject::find(NamedObject *root, const char *id)
 {
 	assert(id != NULL && *id != 0);
 
-	while(root)
-	{
+	while(root) {
 		if(root->compare(id))
 			break;
 		root = root->getNext();
 	}
 	return root;
+}
+
+NamedObject *NamedObject::remove(NamedObject **root, const char *id)
+{
+	assert(id != NULL && *id != 0);
+	assert(root != NULL);
+
+	NamedObject *prior = NULL;
+	NamedObject *node = *root;
+
+	while(node) {
+		if(node->compare(id))
+			break;
+		prior = node;
+		node = node->getNext();
+	}
+
+	if(!node)
+		return NULL;
+	
+	if(prior == NULL)
+		*root = node->getNext();
+	else
+		prior->next = node->getNext();
+
+	return node;
 }
 
 // Like in NamedObject, the nid that is used will be deleted by the
