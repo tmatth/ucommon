@@ -99,3 +99,22 @@ bool Random::status(void)
 	return false;
 }
 
+void Random::uuid(char *str)
+{
+	unsigned char buf[16];
+
+	fill(buf, sizeof(buf));
+	buf[6] &= 0x0f;
+	buf[6] |= 0x40;
+	buf[8] &= 0x3f;
+	buf[8] |= 0x80;
+	String::hexdump(buf, str, "4-2-2-2-6");
+}
+
+String Random::uuid(void)
+{
+	char buf[38];
+	uuid(buf);
+	return String(buf);
+}
+

@@ -400,7 +400,10 @@ public:
 
 	const char *c_str(void);
 
-	inline const String& str(void)
+	inline String str(void)
+		{return String(c_str());};
+
+	inline operator String()
 		{return String(c_str());};
 
 	void set(const char *id);
@@ -506,6 +509,14 @@ public:
 	 * @return true if sufficient entropy.
 	 */
 	static bool status(void);
+
+	/**
+	 * Create 36 character random uuid string.
+	 * @param string to write uuid into, must be 37 bytes or more.
+	 */
+	static void uuid(char *string);
+
+	static String uuid(void);
 };
 
 /**
