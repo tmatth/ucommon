@@ -509,6 +509,15 @@ public:
 	void parse(int argc, char **argv);
 
 	/**
+	 * Get an environment variable.  This creates a local copy of the
+	 * variable in pager memory.
+	 * @param name of symbol.
+	 * @param value of symbol if not found.
+	 * @return value of symbol.
+	 */
+	const char *getenv(const char *name, const char *value = NULL);
+
+	/**
 	 * Parse and extract the argv0 filename alone.
 	 * @param argv from main.
 	 * @return argv0 simple path name.

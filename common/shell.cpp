@@ -1036,6 +1036,16 @@ tail:
 		String::add(buf, size, ".exe");
 }	
 
+const char *shell::getenv(const char *id, const char *value)
+{
+	char buf[512];
+
+	if(!GetEnvironmentVariable(id, buf, sizeof(buf)))
+		return value;
+
+	return dup(buf);
+}
+	
 int shell::system(const char *cmd, const char **envp)
 {
 	char cmdspec[128];
@@ -1283,6 +1293,15 @@ exit:
 }
 
 #else
+
+const char *shell::getenv(const char *id, const char *value)
+{
+	const char *v = ::getenv(id);
+	if(v)
+		return v;
+
+	return value;
+}
 
 int shell::system(const char *cmd, const char **envp)
 {
