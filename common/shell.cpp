@@ -1298,7 +1298,7 @@ const char *shell::getenv(const char *id, const char *value)
 {
 	const char *v = ::getenv(id);
 	if(v)
-		return v;
+		return dup(v);
 
 	return value;
 }
