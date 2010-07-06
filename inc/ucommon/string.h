@@ -1416,6 +1416,26 @@ public:
 	 */
 	inline static long tol(const char *text, char **pointer = NULL)
 		{return strtol(text, pointer, 0);};
+
+	/**
+	 * Dump hex data to a string buffer.
+	 * @param binary memory to dump.
+	 * @param string to save into.
+	 * @param format string to convert with.
+	 * @return number of bytes processed.
+	 */
+	static unsigned hexdump(const unsigned char *binary, char *string, const char *format);
+
+	/**
+	 * Pack hex data from a string buffer.
+	 * @param binary memory to pack.
+	 * @param string to save into.
+	 * @param format string to convert with.
+	 * @return number of bytes processed.
+	 */
+	static unsigned hexpack(unsigned char *hex, const char *string, const char *format);
+
+	static unsigned hexsize(const char *format);
 };
 
 /**

@@ -1868,5 +1868,79 @@ char *string::fill(char *str, size_t size, char fill)
 	return str;
 }
 
+unsigned string::hexsize(const char *format)
+{
+	unsigned count = 0;
+	char *ep;
+	unsigned skip;
 
+	while(format && *format) {
+		while(*format && !isdigit(*format)) {
+			++format;
+			++count;
+		}
+		if(isdigit(*format)) {
+			skip = (unsigned)strtol(format, &ep, 10);
+			format = ep;
+			count += skip * 2;
+		}
+	}
+	return count;
+}
+
+unsigned string::hexdump(const unsigned char *binary, char *string, const char *format)
+{
+	unsigned count = 0;
+	char *ep;
+	unsigned skip;
+
+	while(format && *format) {
+		while(*format && !isdigit(*format)) {
+			*(string++) = *(format++);
+			++count;
+		}
+		if(isdigit(*format)) {
+			skip = (unsigned)strtol(format, &ep, 10);
+			format = ep;
+			count += skip * 2;
+			while(skip--) {
+				snprintf(string, 3, "%02x", *(binary++));
+				string += 2;
+			}
+		}
+	}
+	*string = 0;
+	return count;
+}
+
+static unsigned hex(char ch)
+{
+	if(ch >= '0' && ch <= '9')
+		return ch - '0';
+	else
+		return toupper(ch) - 'A' + 10;
+}
+
+unsigned string::hexpack(unsigned char *binary, const char *string, const char *format)
+{
+	unsigned count = 0;
+	char *ep;
+	unsigned skip;
+
+	while(format && *format) {
+		while(*format && !isdigit(*format)) {
+			if(*(string++) != *(format++))
+				return count;
+			++count;
+		}
+		if(isdigit(*format)) {
+			skip = (unsigned)strtol(format, &ep, 10);
+			format = ep;
+			count += skip * 2;
+			while(skip--)
+				*(binary++) = hex(*(string++)) * 16 + hex(*(string++));
+		}
+	}
+	return count;
+}
 

@@ -400,6 +400,9 @@ public:
 
 	const char *c_str(void);
 
+	inline const String& str(void)
+		{return String(c_str());};
+
 	void set(const char *id);
 
 	inline void operator=(const char *id)

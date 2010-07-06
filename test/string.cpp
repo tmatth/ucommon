@@ -49,4 +49,16 @@ extern "C" int main()
 	assert(count == 3);
 	assert(ieq(array[1], "is"));
 	assert(ieq(array[2], "a test"));
+
+	unsigned char core[4] = {0x01, 0x10, 0x2f, 0x45};
+	char hexbuf[12];
+
+	assert(String::hexdump(core, hexbuf, "3-1") == 9);
+	assert(eq(hexbuf, "01102f-45"));
+
+	unsigned char hcore[4];
+
+	String::hexpack(hcore, hexbuf, "3-1");
+	assert(String::hexdump(hcore, hexbuf, "3-1") == 9);
+	assert(eq(hexbuf, "01102f-45"));
 }
