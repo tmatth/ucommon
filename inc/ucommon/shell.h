@@ -302,6 +302,12 @@ public:
 			{return index.begin();};
 
 		/**
+		 * Disable a option.  Might happen if argv0 name suggests an
+		 * option is no longer actively needed.
+		 */
+		void disable(void);
+
+		/**
 		 * Used to send option into derived receiver.
 		 * @param value option that was received.
 		 * @return NULL or error string to use.
@@ -501,6 +507,22 @@ public:
 	 * @param argv from main.
 	 */
 	void parse(int argc, char **argv);
+
+	/**
+	 * Parse and extract the argv0 filename alone.
+	 * @param argv from main.
+	 * @return argv0 simple path name.
+	 */
+	char *getargv0(char **argv);
+
+	/**
+	 * Get the argument list by parsing options, and return the remaining
+	 * file arguments.  This is used by parse, and can be fed by main by
+	 * posting ++argv.
+	 * @param argv of first option.
+	 * @return argv of non-option file list.
+	 */
+	char **getargv(char **argv);
 
 	/**
 	 * Parse shell arguments directly into a shell object.

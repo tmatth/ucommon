@@ -1,3 +1,6 @@
+from ucommon 3.2.0 to 3.2.1
+- splitting shell parser so that it is possible to create tool style parsers.
+
 from ucommon 3.1.2 to 3.2.0
 - added explicit add and remove for NamedObject to make keymap easier to use.
 - created new keypager type to allocate named objects on demand.

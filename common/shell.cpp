@@ -352,6 +352,14 @@ shell::Option::~Option()
 {
 }
 
+void shell::Option::disable(void)
+{
+	short_option = 0;
+	long_option = NULL;
+	help_string = NULL;
+	uses_option = NULL;
+}
+
 shell::flagopt::flagopt(char short_option, const char *long_option, const char *help_string, bool single_use) :
 shell::Option(short_option, long_option, NULL, help_string)
 {
@@ -460,6 +468,9 @@ void shell::collapse(LinkedObject *first)
 
 void shell::set0(char *argv0)
 {
+	if(_argv0)
+		return;
+
 	_argv0 = strrchr(argv0, '/');
 #ifdef	_MSWINDOWS_
 	if(!_argv0)
@@ -471,6 +482,9 @@ void shell::set0(char *argv0)
 		_argv0 = argv0;
 	else
 		++_argv0;
+
+	if(eq(_argv0, "lt-", 3))
+		_argv0 += 3;
 
 	_argv0 = dup(_argv0);
 
@@ -484,6 +498,7 @@ void shell::set0(char *argv0)
 shell::shell(size_t pagesize) :
 mempager(pagesize)
 {
+	_argv0 = NULL;
 	_argv = NULL;
 	_argc = 0;
 }
@@ -491,12 +506,20 @@ mempager(pagesize)
 shell::shell(const char *string, size_t pagesize) :
 mempager(pagesize)
 {
+	_argv0 = NULL;
+	_argv = NULL;
+	_argc = 0;
+
 	parse(string);
 }
 
 shell::shell(int argc, char **argv, size_t pagesize) :
 mempager(pagesize)
 {
+	_argv0 = NULL;
+	_argv = NULL;
+	_argc = 0;
+
 	parse(argc, argv);
 }
 
@@ -651,18 +674,28 @@ int shell::systemf(const char *format, ...)
 
 void shell::parse(int argc, char **argv)
 {
-	int argp = 1;
+	getargv0(argv);
+	getargv(++argv);
+}
+
+char *shell::getargv0(char **argv)
+{
+	if(!argv || !argv[0])
+		errexit(-1, "*** %s\n", errmsg(shell::NOARGS));
+
+	set0(argv[0]);
+	return _argv0;
+}
+
+char **shell::getargv(char **argv)
+{
 	char *arg, *opt;
 	unsigned len;
 	const char *value;
 	const char *err;
+	unsigned argp = 0;
 
-	if(argc < 1 || !argv)
-		errexit(-1, "*** %s\n", errmsg(shell::NOARGS));
-
-	set0(argv[0]);
-
-	while(argp < argc) {
+	while(argv[argp]) {
 		if(eq(argv[argp], "--")) {
 			++argp;
 			break;
@@ -757,7 +790,11 @@ void shell::parse(int argc, char **argv)
 		}
 	}
 	_argv = &argv[argp];
-	_argc = argc - argp;
+
+	_argc = 0;
+	argv = _argv;
+	while(argv[_argc])
+		++_argc;
 
 #if defined(_MSWINDOWS_) && defined(_MSC_VER)
 	const char *fn;
