@@ -118,3 +118,33 @@ const unsigned char *Digest::get(void)
 	return buffer;
 }
 
+void Digest::uuid(char *str, const char *name, const unsigned char *ns)
+{
+	unsigned mask = 0x50;
+	const char *type = "sha1";
+	if(!is("sha1")) {
+		mask = 0x30;
+		type = "md5";
+	}
+	
+	Digest md(type);
+	if(ns)
+		md.put(ns, 16);
+	md.puts(name);
+	unsigned char *buf = (unsigned char *)md.get();
+
+	buf[6] &= 0x0f;
+	buf[6] |= mask;
+	buf[8] &= 0x3f;
+	buf[8] |= 0x80;
+
+	String::hexdump(buf, str, "4-2-2-2-6");
+}
+
+String Digest::uuid(const char *name, const unsigned char *ns)
+{
+	char buf[38];
+	uuid(buf, name, ns);
+	return String(buf);
+}
+

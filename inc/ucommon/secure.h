@@ -432,6 +432,10 @@ public:
 	 * @return true if supported, false if not.
 	 */
 	static bool is(const char *name);
+
+	static void uuid(char *string, const char *name, const unsigned char *ns = NULL);
+
+	static String uuid(const char *name, const unsigned char *ns = NULL);
 };
 
 /**
