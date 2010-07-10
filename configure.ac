@@ -127,6 +127,7 @@ AH_BOTTOM([
 #include <ucommon/export.h>
 ])
 
+threading="none"
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
@@ -134,6 +135,7 @@ AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h end
 AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h syslog.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
+	threading="msw"
 	clib="msvcrt"
 	UCOMMON_VISIBILITY="0"
 	UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -ladvapi32 -lws2_32 -lwsock32 -lkernel32"
@@ -239,67 +241,69 @@ AC_ARG_ENABLE(pth, [
 	AC_HELP_STRING([--enable-pth],[always use GNU pth for threading])
 ])
 
-if test "$enable_pth" != "yes" ; then
-	AC_CHECK_HEADER(pthread.h, [
-		PTHREAD_FLAGS="-mt -pthread -pthreads"
-		AC_CHECK_LIB(pthread,pthread_create,[
-			tlib="pthread"
-			UCOMMON_LIBS="$UCOMMON_LIBS -lpthread"
-		])
-		if test -z "$tlib" ; then
-			AC_CHECK_LIB($clib, pthread_create, [tlib="$clib"])
-		fi
-		if test -z "$tlib" ; then
-			AC_CHECK_LIB(c_r, pthread_create, [
-				tlib="c_r"
-				if test "$clib" = "c" ; then
-					AC_CHECK_LIB(c_r, malloc, [clib="c_r"])
-				fi
+if test "$threading" = "none" ; then
+	if test "$enable_pth" != "yes" ; then
+		AC_CHECK_HEADER(pthread.h, [
+			PTHREAD_FLAGS="-mt -pthread -pthreads"
+			AC_CHECK_LIB(pthread,pthread_create,[
+				tlib="pthread"
+				UCOMMON_LIBS="$UCOMMON_LIBS -lpthread"
 			])
-		fi
-		if test ! -z "$tlib" ; then
-			AC_CHECK_LIB($tlib,pthread_condattr_setclock,[
-				AC_DEFINE(HAVE_PTHREAD_CONDATTR_SETCLOCK, [1], ["pthread clocking"])
-			])
-			AC_CHECK_LIB($tlib,pthread_setconcurrency,[
-				AC_DEFINE(HAVE_PTHREAD_SETCONCURRENCY, [1], ["pthread concurrency"])
-			])
+			if test -z "$tlib" ; then
+				AC_CHECK_LIB($clib, pthread_create, [tlib="$clib"])
+			fi
+			if test -z "$tlib" ; then
+				AC_CHECK_LIB(c_r, pthread_create, [
+					tlib="c_r"
+					if test "$clib" = "c" ; then
+						AC_CHECK_LIB(c_r, malloc, [clib="c_r"])
+					fi
+				])
+			fi
+			if test ! -z "$tlib" ; then
+				AC_CHECK_LIB($tlib,pthread_condattr_setclock,[
+					AC_DEFINE(HAVE_PTHREAD_CONDATTR_SETCLOCK, [1], ["pthread clocking"])
+				])
+				AC_CHECK_LIB($tlib,pthread_setconcurrency,[
+					AC_DEFINE(HAVE_PTHREAD_SETCONCURRENCY, [1], ["pthread concurrency"])
+				])
 
-			AC_CHECK_LIB($tlib,pthread_yield,[
-				AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"],[
-					AC_CHECK_LIB($tlib,pthread_yield_np,[
-						AC_DEFINE(HAVE_PTHREAD_YIELD_NP, [1], ["pthread yield np"])
+				AC_CHECK_LIB($tlib,pthread_yield,[
+					AC_DEFINE(HAVE_PTHREAD_YIELD, [1], ["pthread yield"],[
+						AC_CHECK_LIB($tlib,pthread_yield_np,[
+							AC_DEFINE(HAVE_PTHREAD_YIELD_NP, [1], ["pthread yield np"])
+						])
 					])
 				])
-			])
 
-			AC_CHECK_LIB($tlib,pthread_delay,[
-				AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
-			])
-			AC_CHECK_LIB($tlib,pthread_delay_np,[
-				AC_DEFINE(HAVE_PTHREAD_DELAY_NP, [1], ["pthread delay np"])
-			])
-			AC_CHECK_LIB($tlib,pthread_setschedprio,[
-				AC_DEFINE(HAVE_PTHREAD_SETSCHEDPRIO, [1], ["pthread scheduling"])
-			])
-		fi		
-	],[
-		AC_CHECK_HEADER(windows.h,, [
-			AC_CHECK_HEADER(pth.h,[
-				UCOMMON_LIBS="$UCOMMON_LIBS -lpth"
-				UCOMMON_FLAGS="$UCOMMON_FLAGS -D__PTH__"
-			],[
-				AC_MSG_ERROR("pthread or GNU pth support required")
+				AC_CHECK_LIB($tlib,pthread_delay,[
+					AC_DEFINE(HAVE_PTHREAD_DELAY, [1], ["pthread delay"])
+				])
+				AC_CHECK_LIB($tlib,pthread_delay_np,[
+					AC_DEFINE(HAVE_PTHREAD_DELAY_NP, [1], ["pthread delay np"])
+				])
+				AC_CHECK_LIB($tlib,pthread_setschedprio,[
+					AC_DEFINE(HAVE_PTHREAD_SETSCHEDPRIO, [1], ["pthread scheduling"])
+				])
+			fi		
+		],[
+			AC_CHECK_HEADER(windows.h,, [
+				AC_CHECK_HEADER(pth.h,[
+					UCOMMON_LIBS="$UCOMMON_LIBS -lpth"
+					UCOMMON_FLAGS="$UCOMMON_FLAGS -D__PTH__"
+				],[
+					AC_MSG_ERROR("pthread or GNU pth support required")
+				])
 			])
 		])
-	])
-else
-	AC_CHECK_HEADER(pth.h,[
-		UCOMMON_LIBS="$UCOMMON_LIBS -lpth"
-		UCOMMON_FLAGS="$UCOMMON_FLAGS -D__PTH__"
-	],[
-		AC_MSG_ERROR("GNU pth required")
-	])
+	else
+		AC_CHECK_HEADER(pth.h,[
+			UCOMMON_LIBS="$UCOMMON_LIBS -lpth"
+			UCOMMON_FLAGS="$UCOMMON_FLAGS -D__PTH__"
+		],[
+			AC_MSG_ERROR("GNU pth required")
+		])
+	fi
 fi
 
 for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp ; do
