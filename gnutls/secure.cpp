@@ -198,16 +198,16 @@ void secure::uuid(char *str)
 	else
 		Random::fill((unsigned char *)&seq, sizeof(seq));
 
-	buf[8] = (seq >> 8) & 0xff;
-	buf[9] = seq & 0xff;
-	buf[3] = current & 0xff;
-	buf[2] = (current >> 8) & 0xff;
-	buf[1] = (current >> 16) & 0xff;
-	buf[0] = (current >> 24) & 0xff;
-	buf[5] = (current >> 32) & 0xff;
-	buf[4] = (current >> 40) & 0xff;
-	buf[7] = (current >> 48) & 0xff;
-	buf[6] = (current >> 56) & 0xff;
+	buf[8] = (unsigned char)((seq >> 8) & 0xff);
+	buf[9] = (unsigned char)(seq & 0xff);
+	buf[3] = (unsigned char)(current & 0xff);
+	buf[2] = (unsigned char)((current >> 8) & 0xff);
+	buf[1] = (unsigned char)((current >> 16) & 0xff);
+	buf[0] = (unsigned char)((current >> 24) & 0xff);
+	buf[5] = (unsigned char)((current >> 32) & 0xff);
+	buf[4] = (unsigned char)((current >> 40) & 0xff);
+	buf[7] = (unsigned char)((current >> 48) & 0xff);
+	buf[6] = (unsigned char)((current >> 56) & 0xff);
 
 	buf[6] &= 0x0f;
 	buf[6] |= 0x10;
