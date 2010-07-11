@@ -23,6 +23,10 @@ HCRYPTPROV _handle = NULL;
 END_NAMESPACE
 #endif
 
+secure::~secure()
+{
+}
+
 bool secure::init(const char *progname)
 {
 	Thread::init();
@@ -62,7 +66,47 @@ void secure::cipher(context_t context, const char *ciphers)
 {
 }
 
-secure::~secure()
+void secure::uuid(char *str)
 {
+	static mutex_t mutex;
+	static unsigned char buf[16];
+	static Timer::tick_t prior = 0l;
+	static unsigned short seq;
+	Timer::tick_t current = Timer::ticks();
+
+	mutex.lock();
+
+	// get our (random) node identifier...
+	if(!prior)	
+		Random::fill(buf + 10, 6);
+	
+	if(current == prior)
+		++seq;
+	else
+		Random::fill((unsigned char *)&seq, sizeof(seq));
+
+	buf[8] = (seq >> 8) & 0xff;
+	buf[9] = seq & 0xff;
+	buf[3] = current & 0xff;
+	buf[2] = (current >> 8) & 0xff;
+	buf[1] = (current >> 16) & 0xff;
+	buf[0] = (current >> 24) & 0xff;
+	buf[5] = (current >> 32) & 0xff;
+	buf[4] = (current >> 40) & 0xff;
+	buf[7] = (current >> 48) & 0xff;
+	buf[6] = (current >> 56) & 0xff;
+
+	buf[6] &= 0x0f;
+	buf[6] |= 0x10;
+	buf[8] |= 0x80;
+	String::hexdump(buf, str, "4-2-2-2-6");
+	mutex.unlock();
+}
+
+String secure::uuid(void)
+{
+	char buf[38];
+	uuid(buf);
+	return String(buf);
 }
 

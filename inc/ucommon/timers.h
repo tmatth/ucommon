@@ -243,6 +243,10 @@ public:
 	 */
 	static void sync(Timer &timer);
 
+	/**
+	 * Get timer ticks since uuid epoch.
+	 * @return timer ticks in 100ns resolution.
+	 */
 	static tick_t ticks(void);
 };
 	

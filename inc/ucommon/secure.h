@@ -164,6 +164,14 @@ public:
 	 */
 	inline error_t err(void)
 		{return error;};
+
+	/**
+	 * Create 36 character traditional version 1 uuid.
+	 * @param string to write uuid into, must be 37 bytes or more.
+	 */
+	static void uuid(char *string);
+
+	static String uuid(void);
 };
 
 /**
