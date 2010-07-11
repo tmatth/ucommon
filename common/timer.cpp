@@ -149,7 +149,7 @@ Timer::tick_t Timer::ticks(void)
 {
 	ULARGE_INTEGER timer;
 
-	GetSystemTimeAsFileTime((FILENAME*)&timer);
+	GetSystemTimeAsFileTime((FILETIME*)&timer);
 	timer.QuadPart +=
 		(tick_t) (6893856000000000);
 	return timer.QuadPart;
