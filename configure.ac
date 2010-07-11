@@ -553,13 +553,13 @@ AC_ARG_WITH(pkg-config,
 	PKG_CHECK_MODULES(OPENSSL, [openssl >= $OPENSSL_REQUIRES], [], [
 		OPENSSL_LIBS=""
 		AC_CHECK_HEADERS(openssl/ssl.h, [
-			OPENSSL_LIBS="-lssl -lcrypto"
+			OPENSSL_LIBS="-lssl -lcrypto -lz"
 		])
 	])
 	PKG_CHECK_MODULES(GNUTLS, [gnutls >= 2.8.0], [], [GNUTLS_LIBS=""])
 ],[
 	AC_CHECK_HEADERS(openssl/ssl.h, [
-		OPENSSL_LIBS="-lssl -lcrypto"
+		OPENSSL_LIBS="-lssl -lcrypto -lz"
 	])
 	AC_CHECK_LIB(gnutls, gnutls_init, [
 		GNUTLS_LIBS="-lgnutls -lgcrypt"
