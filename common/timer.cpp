@@ -143,6 +143,29 @@ Timer::Timer(time_t in)
 	timer.tv_sec += difftime(in);
 }
 
+#ifdef	_MSWINDOWS_
+
+Timer::tick_t Timer::ticks(void)
+{
+	ULARGE_INTEGER timer;
+
+	GetSystemTimeAsFileTime((FILENAME*)&timer);
+	timer.QuadPart +=
+		(tick_t) (6893856000000000);
+	return timer.QuadPart;
+}
+
+#else
+
+Timer::tick_t Timer::ticks(void)
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return ((tick_t)tv.tv_sec * 10000000) +
+		((tick_t)tv.tv_usec * 10) + 0x01B21DD213814000;
+}
+#endif
+
 void Timer::set(timeout_t timeout)
 {
 	set();

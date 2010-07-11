@@ -64,6 +64,12 @@ public:
 	static const timeout_t inf;	/**< A value to use for infinite time */
 	static const time_t reset;	/**< A value to use when resetting */
 
+#ifdef	_MSWINDOWS_
+	typedef	unsigned __int64 tick_t;
+#else
+	typedef uint64_t tick_t;
+#endif
+
 	/**
 	 * Construct an untriggered timer set to the time of creation.
 	 */
@@ -236,6 +242,8 @@ public:
 	 * @param timer to reference for sleep.
 	 */
 	static void sync(Timer &timer);
+
+	static tick_t ticks(void);
 };
 	
 /**
