@@ -861,7 +861,7 @@ skip:
 	}
 	collapse(arglist.begin());
 #endif
-	return __argv;
+	return _argv;
 }
 
 void shell::errexit(int exitcode, const char *format, ...)

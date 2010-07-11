@@ -1937,8 +1937,10 @@ unsigned string::hexpack(unsigned char *binary, const char *string, const char *
 			skip = (unsigned)strtol(format, &ep, 10);
 			format = ep;
 			count += skip * 2;
-			while(skip--)
-				*(binary++) = hex(*(string++)) * 16 + hex(*(string++));
+			while(skip--) {
+				*(binary++) = hex(string[0]) * 16 + hex(string[1]);
+				string += 2;
+			}
 		}
 	}
 	return count;
