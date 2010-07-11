@@ -942,6 +942,17 @@ public:
 	void set(unsigned count);
 
 	/**
+	 * Dynamically increment the number of threads required.
+	 */
+	void inc(void);
+
+	/**
+	 * Alternative prefix form of the same increment operation.
+	 * @return the current amount of threads.
+	 */
+	unsigned operator++(void);
+
+	/**
 	 * Wait at the barrier until the count of threads waiting is reached.
 	 */
 	void wait(void);

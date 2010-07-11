@@ -1560,6 +1560,31 @@ void barrier::set(unsigned limit)
 	unlock();
 }
 
+void barrier::inc(void)
+{
+	lock();
+	count++;
+	if(count <= waits) {
+		waits = 0;
+		broadcast();
+	}
+	unlock();
+}
+
+unsigned barrier::operator++(void)
+{
+	unsigned result;
+	lock();
+	count++;
+	if(count <= waits) {
+		waits = 0;
+		broadcast();
+	}
+	result = count;
+	unlock();
+	return result;
+}
+
 bool barrier::wait(timeout_t timeout)
 {
 	bool result;
