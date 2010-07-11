@@ -1,7 +1,7 @@
 from ucommon 3.2.0 to 3.2.1
 - splitting shell parser so that it is possible to create tool style parsers.
 - string hexpack and hexdump functions.
-- random and digest uuid functions.
+- traditional, random, and digest uuid functions.
 - make sure we always ignore pthread/pth if msw targets (fedora mingw32).
 - barrier patch from Leon Pollak.
 

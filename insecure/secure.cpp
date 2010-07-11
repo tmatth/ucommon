@@ -68,13 +68,12 @@ void secure::cipher(context_t context, const char *ciphers)
 
 void secure::uuid(char *str)
 {
-	static mutex_t mutex;
 	static unsigned char buf[16];
 	static Timer::tick_t prior = 0l;
 	static unsigned short seq;
 	Timer::tick_t current = Timer::ticks();
 
-	mutex.lock();
+	Mutex::protect(&buf);
 
 	// get our (random) node identifier...
 	if(!prior)	
@@ -100,7 +99,7 @@ void secure::uuid(char *str)
 	buf[6] |= 0x10;
 	buf[8] |= 0x80;
 	String::hexdump(buf, str, "4-2-2-2-6");
-	mutex.unlock();
+	Mutex::release(&buf);
 }
 
 String secure::uuid(void)
