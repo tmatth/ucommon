@@ -2475,7 +2475,7 @@ void Buffer::put(void *dbuf)
 	memcpy(tail, dbuf, objsize);
 	tail += objsize;
 	if(tail >= (buf + size))
-		tail = 0;
+		tail = buf;
 	++count;
 	signal();
 	unlock();
