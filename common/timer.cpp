@@ -161,8 +161,8 @@ Timer::tick_t Timer::ticks(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return ((tick_t)tv.tv_sec * 10000000) +
-		((tick_t)tv.tv_usec * 10) + 0x01B21DD213814000;
+	return ((tick_t)tv.tv_sec * (tick_t)10000000) +
+		((tick_t)tv.tv_usec * 10) + (((tick_t)0x01B21DD2) << 32) + (tick_t)0x13814000;
 }
 #endif
 
