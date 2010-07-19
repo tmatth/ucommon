@@ -106,7 +106,6 @@
 #include <ucommon/xml.h>
 
 #ifdef	_UCOMMON_EXTENDED_
-#include <ucommon/shell.h>
 #include <ucommon/stream.h>
 #include <ucommon/persist.h>
 #endif

@@ -24,6 +24,10 @@
 #include <ucommon/string.h>
 #endif
 
+#ifndef	_UCOMMON_BUFFER_H_
+#include <ucommon/buffer.h>
+#endif
+
 #ifndef	_UCOMMON_XML_H_
 #define	_UCOMMON_XML_H_
 
@@ -44,7 +48,7 @@ class __EXPORT XMLParser
 {
 private:
 	int ecount, dcount;
-	enum {TAG, CDATA, COMMENT, DTD, AMP, NONE} state;
+	enum {TAG, CDATA, COMMENT, DTD, AMP, NONE, END} state;
 	char *buffer;
 	unsigned bufpos, bufsize;
 	__LOCAL bool parseTag(void);
@@ -110,6 +114,24 @@ protected:
 	 * @param size of data to parse.
 	 */
 	bool parse(const char *address, size_t size);
+
+	/**
+	 * Parse a stream buffer and return parser document completion flag.
+	 * This is used to scan a stream buffer for a complete XML document.
+	 * The stream is scanned until the document is complete or EOF.
+	 * Multiple XML document instances can be scanned from a continues
+	 * XML streaming source.
+	 * @param stream buffer to parse.
+	 * @return true if parse complete, false if invalid or EOF.
+	 */
+	bool parse(IOBuffer *stream);
+
+	/**
+	 * End of document check.
+	 * @return true if end of document.
+	 */
+	bool end(void)
+		{return state == END;};
 };
 		
 END_NAMESPACE

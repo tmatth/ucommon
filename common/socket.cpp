@@ -3049,6 +3049,19 @@ int Socket::getfamily(socket_t so)
 
 #ifdef	_MSWINDOWS_
 
+FILE *Socket::open(socket_t so)
+{
+	FILE *fp = (FILE *)malloc(sizeof(FILE));
+
+	if(!fp)
+		return NULL;
+
+	memset(fp, 0, sizeof(FILE));
+	fp->_file = so;
+	fp->_flag = _IOWRT | _IOREAD;
+	return fp;
+}
+
 FILE *Socket::open(socket_t so, bool mode)
 {
 	FILE *fp = (FILE *)malloc(sizeof(FILE));
@@ -3085,6 +3098,11 @@ void Socket::close(FILE *fp)
 void Socket::close(FILE *fp)
 {
 	fclose(fp);
+}
+
+FILE *Socket::open(socket_t so)
+{
+	return fdopen(so, "rw");
 }
 
 FILE *Socket::open(socket_t so, bool mode)

@@ -1535,20 +1535,19 @@ public:
 	static void v4mapping(bool enable);
 
 	/**
-	 * Convert socket into FILE handle for reading.
+	 * Convert socket into FILE handle for reading or writing.
 	 * @param socket descriptor to convert.
 	 * @param mode of access, true for write mode.
 	 * @return file handle to use.
 	 */
-	static FILE *open(socket_t socket, bool mode = false);
+	static FILE *open(socket_t socket, bool mode);
 
 	/**
-	 * Get file handle for reading from a socket object.
-	 * @param mode of access, true for write mode.
-	 * @return file handle.
+	 * Convert socket into FILE handle for reading and writing.
+	 * @param socket descriptor to convert.
+	 * @return file handle to use.
 	 */
-	inline FILE *open(bool mode = false)
-		{return open(so, mode);};
+	static FILE *open(socket_t socket);
 
 	/**
 	 * Cleanly close a connected socket descriptor mapped to a file handle.
