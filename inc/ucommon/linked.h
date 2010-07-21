@@ -211,6 +211,11 @@ public:
 	void purge(void);
 
 	/**
+	 * Reset linked list to empty without purging.
+	 */
+	void reset(void);
+
+	/**
 	 * Used to synchronize lists managed by multiple threads.  A derived
 	 * locking method would be invoked.
 	 */

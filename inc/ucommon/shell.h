@@ -313,6 +313,9 @@ public:
 		 * @return NULL or error string to use.
 		 */
 		virtual const char *assign(const char *value) = 0;
+
+		inline static void reset(void)
+			{index.reset();};
 	};
 
 	/**

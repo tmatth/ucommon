@@ -1,6 +1,7 @@
 from ucommon 3.2.1 to 3.2.2
-- xml parser for buffered i/o objects.
+- xml parser for buffered i/o objects and files.
 - bidirectional socket descriptor to FILE.
+- OrderedIndex reset method.
 
 from ucommon 3.2.0 to 3.2.1
 - splitting shell parser so that it is possible to create tool style parsers.

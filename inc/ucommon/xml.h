@@ -127,6 +127,17 @@ protected:
 	bool parse(IOBuffer *stream);
 
 	/**
+	 * Parse a file buffer and return parser document completion flag.
+	 * This is used to scan a file buffer for a complete XML document.
+	 * The file is scanned until the document is complete or EOF.
+	 * Multiple XML document instances can be scanned from a continues
+	 * XML streaming source.
+	 * @param file buffer to parse.
+	 * @return true if parse complete, false if invalid or EOF.
+	 */
+	bool parse(FILE *file);
+
+	/**
 	 * End of document check.
 	 * @return true if end of document.
 	 */

@@ -64,6 +64,116 @@ void XMLParser::clearBuffer(void)
 	bufpos = 0;
 }
 
+bool XMLParser::parse(FILE *fp)
+{
+	state = NONE;
+	bufpos = 0;
+	ecount = dcount = 0;
+
+	int ch;
+	unsigned char cp;
+
+	while((ch = fgetc(fp)) != EOF) {
+		switch(state) {
+		case AMP:
+			if((!bufpos && ch == '#') || isElement(ch)) {
+				buffer[bufpos++] = ch;
+				break;
+			}
+			if(ch != ';')
+				return false;
+			buffer[bufpos] = 0;
+			if(buffer[0] == '#')
+				cp = atoi(buffer + 1);
+			else if(ieq(buffer, "amp"))
+				cp = '&';
+			else if(ieq(buffer, "lt"))
+				cp = '<';
+			else if(ieq(buffer, "gt"))
+				cp = '>';
+			else if(ieq(buffer, "apos"))
+				cp = '`';
+			else if(ieq(buffer, "quot"))
+				cp = '\"';
+			else
+				return false;
+			characters((caddr_t)&cp, 1);
+			bufpos = 0;
+			state = NONE;
+			break;
+		case TAG:
+			if(ch == '>') {
+				state = NONE;
+				if(!parseTag())
+					return false;
+			}
+			else if(ch == '[' && bufpos == 7 && !strncmp(buffer, "![CDATA", 7)) {
+				state = CDATA;
+			}
+			else if(ch == '-' && bufpos == 2 && !strncmp(buffer, "!-", 2)) {
+				state = COMMENT;
+				bufpos = 0;
+			}
+			else if(ch == '[' && !strncmp(buffer, "!DOCTYPE ", 9)) {
+				state = DTD;
+				bufpos = 0;
+			}
+			else
+				putBuffer(ch);
+			break;
+		case COMMENT:
+			if(ch == '>' && bufpos >= 2 && !strncmp(&buffer[bufpos - 2], "--", 2)) {
+				bufpos -= 2;
+				if(bufpos)
+					comment((caddr_t)buffer, bufpos);
+				bufpos = 0;
+				state = NONE;
+			}
+			else {
+				buffer[bufpos++] = ch;
+				if(bufpos == bufsize) {
+					comment((caddr_t)buffer, bufpos);
+					bufpos = 0;
+				}
+			}
+			break;
+		case CDATA:
+			putBuffer(ch);
+			if(bufpos > 2)
+				if(eq(&buffer[bufpos - 3], "]]>")) {
+					bufpos -= 3;
+					state = NONE;
+					clearBuffer();
+				}
+			break;
+		case DTD:
+			if(ch == '<')
+				++dcount;
+			else if(ch == '>' && dcount)
+				--dcount;
+			else if(ch == '>')
+				state = NONE;
+			break;
+		case NONE:
+			if(ch == '<') {
+				clearBuffer();
+				state = TAG;
+			}
+			else if(ecount && ch == '&') {
+				clearBuffer();
+				state = AMP;
+			}
+			else if(ecount)
+				putBuffer(ch);
+		}
+		if(state == END)
+			return true;
+	}
+	// eof before end of ducument...
+	return false;
+}
+
+
 bool XMLParser::parse(IOBuffer *io)
 {
 	state = NONE;
@@ -73,7 +183,7 @@ bool XMLParser::parse(IOBuffer *io)
 	int ch;
 	unsigned char cp;
 
-	while(ch = io->getch() != EOF) {
+	while((ch = io->getch()) != EOF) {
 		switch(state) {
 		case AMP:
 			if((!bufpos && ch == '#') || isElement(ch)) {

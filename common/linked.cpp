@@ -975,12 +975,12 @@ LinkedList::~LinkedList()
 
 OrderedIndex::OrderedIndex()
 {
-	head = tail = 0;
+	head = tail = NULL;
 }
 
 OrderedIndex::~OrderedIndex()
 {
-	head = tail = 0;
+	head = tail = NULL;
 }
 
 void OrderedIndex::operator*=(OrderedObject *object)
@@ -1016,8 +1016,13 @@ void OrderedIndex::purge(void)
 {
 	if(head) {
 		LinkedObject::purge((LinkedObject *)head);
-		head = tail = 0;
+		head = tail = NULL;
 	}
+}
+
+void OrderedIndex::reset(void)
+{
+	head = tail = NULL;
 }
 
 void OrderedIndex::lock_index(void)
