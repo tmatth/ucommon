@@ -61,4 +61,13 @@ extern "C" int main()
 	String::hexpack(hcore, hexbuf, "3-1");
 	assert(String::hexdump(hcore, hexbuf, "3-1") == 9);
 	assert(eq(hexbuf, "01102f-45"));
+
+	String numstr = "-33.5,25";
+	double num1;
+	long num2;
+
+	numstr % num1 % "," % num2;
+	assert(num1 == -33.5);
+	assert(num2 == 25);
+	assert(numstr.len() == 0);
 }

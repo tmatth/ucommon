@@ -1000,14 +1000,14 @@ string &string::operator--()
     return *this;
 }
 
-string &string::operator-=(strsize_t offset)
+string &string::operator+=(strsize_t offset)
 {
     if(str)
         str->dec(offset);
     return *this;
 }
 
-string &string::operator+=(strsize_t offset)
+string &string::operator-=(strsize_t offset)
 {
     if(str)
         str->inc(offset);
@@ -1946,3 +1946,56 @@ unsigned string::hexpack(unsigned char *binary, const char *string, const char *
 	return count;
 }
 
+string &string::operator%(long& value)
+{
+	value = 0;
+	char *ep;
+	if(!str || !str->text)
+		return *this;
+
+	value = strtol(str->text, &ep, 0);
+	if(ep)
+		set(ep);
+	else
+		set("");
+
+	return *this;
+}
+
+string &string::operator%(double& value)
+{
+	value = 0;
+	char *ep;
+	if(!str || !str->text)
+		return *this;
+
+	value = strtod(str->text, &ep);
+	if(ep)
+		set(ep);
+	else
+		set("");
+
+	return *this;
+}
+
+string &string::operator%(const char *get)
+{
+	if(!str || !str->text || !get)
+		return *this;
+
+	unsigned len = strlen(get);
+	const char *cp = str->text;
+
+	while(isspace(*cp))
+		++cp;
+
+	if(eq(cp, get, len))
+		set(cp + len);
+	else if(cp != str->text)
+		set(cp);
+
+	return *this;
+}
+
+
+	

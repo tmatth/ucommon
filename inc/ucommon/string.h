@@ -830,12 +830,34 @@ public:
 	bool operator>=(const char *text) const;
 
 	/**
+	 * Parse long integer value from a string.
+	 * @param value to store.
+	 * @return object in expression.
+	 */
+	string &operator%(long& value);
+
+	/**
+	 * Parse double value from a string.
+	 * @param value to store.
+	 * @return object in expression.
+	 */
+	string &operator%(double& value);
+
+	/**
+	 * Parse text from a string in a scan expression.
+	 * @param text to scan and bypass.
+	 * @return object in expression.
+	 */
+	string &operator%(const char *text);
+
+	/**
 	 * Scan input items from a string object.
 	 * @param object to scan from.
 	 * @param format string of input to scan.
 	 * @return number of items scanned.
 	 */
 	static int scanf(string& object, const char *format, ...) __SCANF(2, 3);
+
 
 	/**
 	 * Print formatted items into a string object.
@@ -1530,7 +1552,6 @@ protected:
 	 */
 	virtual strsize_t getStringSize(void) const = 0;
 };
-
 
 /**
  * A template to create a character array that can be manipulated as a string.
