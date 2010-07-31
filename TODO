@@ -19,6 +19,8 @@ Proposed ABI changes (3.1 or 4.0?):
 	in script engine make expression operands virtuals or expression
 	operation itself virtual.
 
+	templates that return refs rather than pointers.
+
 	unicode shell options?
 
 	string read/write for Socket moved to Socket?
