@@ -32,7 +32,7 @@ on either raw audio samples or SUN .au contained audio.  In the future .wav
 contained audio files may also be supported.
 .SH OPTIONS
 .TP
-\fB-buffer\fR \fImsecs\fR
+\fB--buffer\fR \fImsecs\fR
 Specify ``size'' of user space buffering in milliseconds.  Buffering is used
 to reduce how frequently user space audio data has to be pushed into kernel
 space file operations.  Because some codecs and conversions have fixed
@@ -41,38 +41,38 @@ multiplier of any possible codec that might be used.  The default is 120
 milliseconds, which is good for the list of suggested framing values.  This
 also allows for predictive I/O scheduling.
 .TP
-\fB-codecs\fR
+\fB--codecs\fR
 Lists codec channel encoding formats that are supported.
 .TP
-\fB-encoding\fR \fIformat\fR
+\fB--encoding\fR \fIformat\fR
 Specify the encoding format that audiotool will use for internal operations.
 Files opened in different encoding formats will be transcoded to this format
 if possible.  The default is pcmu.  The list of supported formats is shown
 with the \fI-codecs\fR option.
 .TP
-\fB-framing\fR \fImsecs\fR
+\fB--framing\fR \fImsecs\fR
 Specify audio framing in milliseconds.  Generally you
 should use values like 10, 15, 20, 30, 50, or 60 milliseconds.  If no
 framing is used, then the default requirements of the codec will be
 selected, and this is often 20 milliseconds.  Some commands are only
 supported if ulaw or linear is chosen.
 .TP
-\fB-help\fR
+\fB--help\fR
 Outputs help screen for the user.
 .TP
-\fB-note\fR \fI``text''\fR
+\fB--note\fR \fI``text''\fR
 Specify a file annotation when creating a new file.
 .TP
-\fB-output\fR \fIformat\fR
+\fB--output\fR \fIformat\fR
 Specify the output encoding that audiotool wil use for creating a new file
 such as for the \fBcreate\fR command.  This is useful when it cannot be
 determined from the file extension alone, such as when one wants to use a
 specific codec format for creating a .au file.
 .TP
-\fB-verbose\fR
+\fB--verbose\fR
 Display extra debugging information for some commands.
 .TP
-\fB-version\fR
+\fB--version\fR
 Outputs package version and copyright notice.
 .SH COMMANDS
 .TP
