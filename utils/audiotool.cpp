@@ -373,19 +373,9 @@ static void verify(const char *fn)
 	}
 }
 
-static long getvalue(const char *cp, const char *opt)
-{
-	if(!cp || !*cp) {
-		fprintf(stderr, "*** %s: missing value\n", opt);
-		exit(3);
-	}
-
-	return atol(cp);
-}
-
 int main(int argc, char **argv)
 {
-    char *cp;
+    char *cp = NULL;
 
 	shell::flagopt helpflag('h', "--help", "display this list");
 	shell::flagopt althelp('?', NULL, NULL);
