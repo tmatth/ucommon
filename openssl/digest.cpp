@@ -94,6 +94,32 @@ const char *Digest::c_str(void)
 	return text;
 }
 
+void Digest::reset(bool bin)
+{
+	unsigned size = 0;
+
+	if(!context)
+		return;
+
+	if(!bufsize)
+		EVP_DigestFinal_ex((EVP_MD_CTX *)context, buffer, &size);
+
+	EVP_DigestInit_ex((EVP_MD_CTX *)context, (const EVP_MD *)hashtype, NULL);
+	
+	if(bin)
+		EVP_DigestUpdate((EVP_MD_CTX *)context, buffer, size);
+	else {
+		unsigned count = 0;
+		while(count < size) {
+			snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+			++count;
+		}
+		EVP_DigestUpdate((EVP_MD_CTX *)context, text, size * 2);
+	}
+	bufsize = 0;
+
+}
+
 const unsigned char *Digest::get(void)
 {
 	unsigned count = 0;
