@@ -390,6 +390,7 @@ const char *shell::numericopt::assign(const char *value)
 	if(used)
 		return errmsg(shell::OPTION_USED);
 
+	used = true;
 	number = strtol(value, &endptr, 0);
 	if(!endptr || *endptr != 0)
 		return errmsg(shell::BAD_VALUE);
@@ -410,6 +411,7 @@ const char *shell::stringopt::assign(const char *value)
 		return shell::errmsg(shell::OPTION_USED);
 
 	text = value;
+	used = true;
 	return NULL;
 }
 
@@ -564,17 +566,17 @@ void shell::help(void)
 		if(op->short_option && op->long_option)
 			printf("  -%c, ", op->short_option);
 		else if(op->long_option)
-			printf("     ");
+			printf("      ");
 		else
 			printf("  -%c ", op->short_option);
 		hp = 5;
 		if(op->long_option && op->uses_option) {
-			printf("%s=%s", op->long_option, op->uses_option);
-			hp += strlen(op->long_option) + strlen(op->uses_option) + 1;
+			printf("--%s=%s", op->long_option, op->uses_option);
+			hp += strlen(op->long_option) + strlen(op->uses_option) + 3;
 		}
 		else if(op->long_option) {
-			printf("%s", op->long_option);
-			hp += strlen(op->long_option);
+			printf("--%s", op->long_option);
+			hp += strlen(op->long_option) + 2;
 		}
 		if(hp > 29) {
 			printf("\n");

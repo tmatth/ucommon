@@ -78,25 +78,17 @@ static void codecs(void)
 static void usage(void)
 {
 	printf("Usage: audiotool [options] command files...\n"
-		"Options:\n"
-		"  -buffer value         Set buffering in millisec (120 default)\n"
-		"  -codecs               List names of supported encodings\n"
-		"  -encoding codec       Specify channel encoding, default is pcmu\n"
-		"  -framing value        Set framing in millisec (20 default)\n"
-		"  -help                 Display this information\n"
-		"  -note \"text\"          Text annotation for new files\n"
-		"  -output codec         Specify format for new files, default is pcmu\n"
-		"  -verbose              Display extra debugging and stats info\n"
-		"  -version              Display release version info\n"
-		"Commands:\n"
-		"  append file files     Append audio to existing file\n"
-		"  create newfile files  Create new file from existing ones\n"
-		"  info files            Display info for specified audio files\n"
+		"Options:\n");
+	shell::help();
+	printf("Commands:\n"
+		"  append file files            Append audio to existing file\n"
+		"  create newfile files         Create new file from existing ones\n"
+		"  info files                   Display info for specified audio files\n"
 #ifndef	_MSWINDOWS_
-		"  pipe files            Pipe raw transcoded audio to stdout\n"
+		"  pipe files                   Pipe raw transcoded audio to stdout\n"
 #endif
-		"  text file             Display annotation for audio file if set\n"
-		"  verify file           Verify readability of an audio file\n"
+		"  text file                    Display annotation for audio file if set\n"
+		"  verify file                  Verify readability of an audio file\n"
 	);
 	printf("Report bugs to sipwitch-devel@gnu.org\n");
     exit(0);
@@ -395,57 +387,55 @@ int main(int argc, char **argv)
 {
     char *cp;
 
-    if(argc < 2) {
-        fprintf(stderr, "use: audiotool [options] command files...\n");
-        exit(4);
-    }
+	shell::flagopt helpflag('h', "--help", "display this list");
+	shell::flagopt althelp('?', NULL, NULL);
+		shell::numericopt bufopt('b', "--buffering", "audio buffering (120)", "msec", 120);
+	shell::flagopt codecflag('c', "--codecs", "list codecs");
+	shell::stringopt encopt('e', "--encoding", "channel encoding (pcmu)", "codec", "pcmu");
+	shell::numericopt frameopt('f', "--framing", "audio framing (20)", "msec", 20); 
+	shell::stringopt noteopt('n', "--note", "text annotation for new files", "\"text\"", "");
+	shell::stringopt outopt('o', "--output", "encoding for new files (pcmu)", "codec", "pcmu");
+	shell::flagopt vflag('v', "--verbose", "display extra debugging info");
+	shell::flagopt verflag(0, "--version", "display software version");
+	shell args(argc, argv);
 
 	audio::init();
 
-	// first check for options....
+	if(is(helpflag) || is(althelp))
+		usage();
 
-	while(NULL != (cp = *++argv)) {
-		if(!strncmp(cp, "--", 2))
-			++cp;
+	if(is(verflag))
+		version();
 
-		if(*cp != '-')
-			break;
+	if(is(codecflag))
+		codecs();
 
-		if(eq(cp, "-version"))
-			version();
-		else if(eq(cp, "-help"))
-			usage();
-		else if(eq(cp, "-codecs"))
-			codecs();
-		else if(eq(cp, "-buffer"))
-			buffering = getvalue(*(++argv), "-buffer");
-		else if(eq(cp, "-verbose"))
-			verbose = true;
-		else if(eq(cp, "-format") || eq(cp, "-encoding")) {
-			encoding = audiocodec::find(*(++argv));
-			if(!encoding) {
-				fprintf(stderr, "*** %s: unknown encoding\n", *argv);
-				codecs();
-				exit(4);
-			}
-		}
-		else if(eq(cp, "-oformat") || eq(cp, "-output")) {
-			oformat = audiocodec::find(*(++argv));
-			if(!oformat) {
-				fprintf(stderr, "*** %s: unknown encoding\n", *argv);
-				codecs();
-				exit(4);
-			}
-		}
-		else if(eq(cp, "-note"))
-			note = *(++argv);
-		else if(eq(cp, "-framing"))
-			framing = getvalue(*(++argv), "-framing");
-		else {
-			fprintf(stderr, "*** %s: unknown option\n", cp);
-			exit(4);
-		}
+	if(is(bufopt)) {
+		buffering = (timeout_t) *bufopt;
+		if(buffering < 60 || buffering % 10)
+			shell::errexit(1, "*** audiotool: --buffering: must be >= 60 msec and multiple of 10msec\n");
 	}
+
+	if(is(frameopt)) {
+		framing = (timeout_t) *frameopt;
+		if(framing % 10 || framing < 10)
+			shell::errexit(1, "*** audiotool: --framing: must be multiple of 10 msec\n");
+	}
+
+	if(is(encopt)) {
+		encoding = audiocodec::find(*encopt);
+		if(!encoding)
+			shell::errexit(1, "*** audiotool: --encoding: %s: unknown encoding\n", *encopt);
+	}
+
+	if(is(outopt)) {
+		oformat = audiocodec::find(*outopt);
+		if(!oformat)
+			shell::errexit(1, "*** audiotool: --output: %s: unknown encoding\n", *outopt);
+	}
+
+	if(is(noteopt))
+		note = *noteopt;
 
 	atexit(&stop);
 	if(!encoding)
@@ -462,6 +452,13 @@ int main(int argc, char **argv)
     signal(SIGQUIT, down);
     signal(SIGABRT, down);
 #endif	
+
+	argv = args.argv();
+
+	if(argv && *argv)
+		cp = *argv;
+	else
+		usage();
 
 	// check commands...
 

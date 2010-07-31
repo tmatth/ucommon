@@ -1,3 +1,7 @@
+from ucommon 3.2.2 to 3.2.3
+- use shell parser in audiotool code.
+- small fixes in shell option parsing.
+
 from ucommon 3.2.1 to 3.2.2
 - xml parser for buffered i/o objects and files.
 - bidirectional socket descriptor to FILE.
