@@ -439,7 +439,12 @@ public:
 	 * digest.
 	 * @param binary digest used rather than text if true.
 	 */
-	void reset(bool binary = false);
+	void recycle(bool binary = false);
+
+	/**
+	 * Reset and restart digest object.
+	 */
+	void reset(void);
 
 	/**
 	 * Test to see if a specific digest type is supported.

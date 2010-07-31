@@ -92,9 +92,21 @@ const char *Digest::c_str(void)
 	return text;
 }
 
-void Digest::reset(bool bin)
+void Digest::reset(void)
+{
+	if(!context)
+		return;
+
+	gcry_md_reset((MD_CTX)context);
+	bufsize = 0;
+}
+
+void Digest::recycle(bool bin)
 {
 	unsigned size = bufsize;
+
+	if(!context)
+		return;
 
 	if(!bufsize) {
 		gcry_md_final((MD_CTX)context);

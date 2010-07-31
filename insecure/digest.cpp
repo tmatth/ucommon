@@ -321,7 +321,22 @@ const char *Digest::c_str(void)
     return text;
 }
 
-void Digest::reset(bool bin)
+void Digest::reset(void)
+{
+	if(!context)
+		return;
+
+	switch(*((char *)hashtype)) {
+	case 'm':
+		MD5Init((MD5_CTX *)context);
+		break;
+	default:
+		break;
+	}
+	bufsize = 0;
+}
+
+void Digest::recycle(bool bin)
 {
     unsigned size = bufsize;
 

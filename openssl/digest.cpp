@@ -94,7 +94,16 @@ const char *Digest::c_str(void)
 	return text;
 }
 
-void Digest::reset(bool bin)
+void Digest::reset(void)
+{
+	if(!context)
+		return;
+
+	EVP_DigestInit_ex((EVP_MD_CTX *)context, (const EVP_MD *)hashtype, NULL);
+	bufsize = 0;
+}
+
+void Digest::recycle(bool bin)
 {
 	unsigned size = bufsize;
 
