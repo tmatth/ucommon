@@ -165,6 +165,9 @@ bool XMLParser::parse(FILE *fp)
 			}
 			else if(ecount)
 				putBuffer(ch);
+			break;
+		case END:
+			return true;
 		}
 		if(state == END)
 			return true;
@@ -275,6 +278,9 @@ bool XMLParser::parse(IOBuffer *io)
 			}
 			else if(ecount)
 				putBuffer(ch);
+			break;
+		case END:
+			return true;
 		}
 		if(state == END)
 			return true;
@@ -371,6 +377,7 @@ bool XMLParser::parse(const char *data, size_t len)
 				state = NONE;
 			break;
 		case NONE:
+		case END:
 			if(*data == '<') {
 				clearBuffer();
 				state = TAG;
