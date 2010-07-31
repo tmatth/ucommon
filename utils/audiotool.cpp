@@ -81,14 +81,14 @@ static void usage(void)
 		"Options:\n");
 	shell::help();
 	printf("Commands:\n"
-		"  append file files            Append audio to existing file\n"
-		"  create newfile files         Create new file from existing ones\n"
-		"  info files                   Display info for specified audio files\n"
+		"  append file files           Append audio to existing file\n"
+		"  create newfile files        Create new file from existing ones\n"
+		"  info files                  Display info for specified audio files\n"
 #ifndef	_MSWINDOWS_
-		"  pipe files                   Pipe raw transcoded audio to stdout\n"
+		"  pipe files                  Pipe raw transcoded audio to stdout\n"
 #endif
-		"  text file                    Display annotation for audio file if set\n"
-		"  verify file                  Verify readability of an audio file\n"
+		"  text file                   Display annotation for audio file if set\n"
+		"  verify file                 Verify readability of an audio file\n"
 	);
 	printf("Report bugs to sipwitch-devel@gnu.org\n");
     exit(0);

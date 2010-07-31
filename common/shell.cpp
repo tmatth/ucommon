@@ -563,13 +563,19 @@ void shell::help(void)
 			op.next();
 			continue;
 		}
-		if(op->short_option && op->long_option)
+		if(op->short_option && op->long_option) {
 			printf("  -%c, ", op->short_option);
-		else if(op->long_option)
-			printf("      ");
-		else
+			hp = 6;
+		}
+		else if(op->long_option) {
+			printf("  ");
+			hp = 2;
+		}
+		else {
 			printf("  -%c ", op->short_option);
-		hp = 5;
+			hp = 5;
+		}
+	
 		if(op->long_option && op->uses_option) {
 			printf("--%s=%s", op->long_option, op->uses_option);
 			hp += strlen(op->long_option) + strlen(op->uses_option) + 3;
