@@ -435,6 +435,13 @@ public:
 		{return bufsize > 0 || context != NULL;};
 
 	/**
+	 * Finalize and recycle current digest to start a new
+	 * digest.
+	 * @param binary digest used rather than text if true.
+	 */
+	void reset(bool binary = false);
+
+	/**
 	 * Test to see if a specific digest type is supported.
 	 * @param name of digest we want to check.
 	 * @return true if supported, false if not.

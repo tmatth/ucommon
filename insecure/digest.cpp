@@ -321,6 +321,36 @@ const char *Digest::c_str(void)
     return text;
 }
 
+void Digest::reset(bool bin)
+{
+    unsigned size = bufsize;
+
+    if(!context)
+        return;
+
+	switch(*((char *)hashtype)) {
+	case 'm':
+		if(!bufsize)
+			MD5Final(buffer, (MD5_CTX *)context);
+		size = 16;
+		MD5Init((MD5_CTX *)context);
+		if(bin)
+			MD5Update((MD5_CTX *)context, (const unsigned char *)buffer, size);
+		else {
+			unsigned count = 0;
+			while(count < bufsize) {
+				snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+				++count;
+			}
+			MD5Update((MD5_CTX *)context, (const unsigned char *)text, size * 2);
+		}	
+		break;
+	default:
+		break;
+	}
+	bufsize = 0;
+}
+
 const unsigned char *Digest::get(void)
 {
     unsigned count = 0;
