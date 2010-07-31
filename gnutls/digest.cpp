@@ -92,6 +92,33 @@ const char *Digest::c_str(void)
 	return text;
 }
 
+void Digest::reset(bool bin)
+{
+	unsigned size = bufsize;
+
+	if(!bufsize) {
+		gcry_md_final((MD_CTX)context);
+		size = gcry_md_get_algo_dlen(hashid);
+		memcpy(buffer, gcry_md_read((MD_CTX)context, hashid), size);
+	}
+
+	gcry_md_reset((MD_CTX)context);
+
+	if(bin) 
+		gcry_md_write((MD_CTX)context, buffer, size);
+	else {
+		unsigned count = 0;
+
+		while(count < size) {
+			snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+			++count;
+
+		}
+		gcry_md_write((MD_CTX)context, text, size * 2);
+	}
+	bufsize = 0;
+}
+
 const unsigned char *Digest::get(void)
 {
 	unsigned count = 0;
