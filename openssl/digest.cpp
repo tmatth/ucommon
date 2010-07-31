@@ -96,7 +96,7 @@ const char *Digest::c_str(void)
 
 void Digest::reset(bool bin)
 {
-	unsigned size = 0;
+	unsigned size = bufsize;
 
 	if(!context)
 		return;
