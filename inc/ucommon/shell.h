@@ -267,7 +267,7 @@ public:
 	public:
 		inline errormap(errmsg_t id, const char *text)
 			{shell::errmsg(id, text);};
-	};
+	};	
 
 	/**
 	 * A base class used to create parsable shell options.  The virtual

@@ -335,7 +335,7 @@ void shell::iobuf::open(const char *path, char **argv, shell::pmode_t mode, size
 	if(!pipeio::spawn(path, argv, mode, size, env))
 		IOBuffer::allocate(size, (type_t)mode);
 }
-		
+	
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
 OrderedObject(&index)
 {
@@ -441,6 +441,7 @@ const char *shell::charopt::assign(const char *value)
 	if(used)
 		return shell::errmsg(shell::OPTION_USED);
 
+	used = true;
 	if(value[1] == 0) {
 		code = value[0];
 		return NULL;
@@ -570,6 +571,10 @@ void shell::help(void)
 		else if(op->long_option) {
 			printf("  ");
 			hp = 2;
+		}
+		else if(op->uses_option) {
+			printf("  -%c %s", op->short_option, op->uses_option);
+			hp = 5 + strlen(op->uses_option);
 		}
 		else {
 			printf("  -%c ", op->short_option);
@@ -779,22 +784,21 @@ char **shell::getargv(char **argv)
 			
 			if(!is(op))
 				errexit(1, "*** %s: -%c: %s\n", _argv0, *arg, errmsg(shell::BADOPTION));
-			if(op->uses_option && arg[1] == 0) {
+
+			value = NULL;
+
+			if(op->uses_option && arg[1] == 0)
 				value = argv[argp++];
-				break;
-			}
-			if(op->uses_option) {
+			else if(op->uses_option)
 				value = ++arg;
+
+			if(op->uses_option && value == NULL)
+				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, errmsg(shell::NOARGUMENT));
+			err = op->assign(value);
+			if(err)
+				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
+			if(op->uses_option)
 				break;
-			}
-	
-			if(is(op)) {
-				if(op->uses_option && value == NULL)
-					errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, errmsg(shell::NOARGUMENT));
-				err = op->assign(value);
-				if(err)
-					errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
-			}
 		}
 	}
 	_argv = &argv[argp];
