@@ -1785,7 +1785,7 @@ inline bool ieq(String &s1, String &s2)
 	{return String::case_equal(s1.c_str(), s2.c_str());}
 
 template<typename T>
-class data
+class datum
 {
 public:
 	typedef struct {
@@ -1799,16 +1799,15 @@ public:
 	inline data_t *operator*()
 		{return &d;}; 
 
-	inline data(T *pointer)
+	inline datum(T *pointer)
 		{d.dptr = pointer; d.dsize = sizeof(T);};
 
-	inline data(T object)
+	inline datum(T& object)
 		{d.dptr = &object; d.dsize = sizeof(T);}
-};
 
-template<>
-inline data<char *>::data(char *s) 
-	{d.dptr = s; d.dsize = ::strlen(s);};
+	inline datum(char *s)
+		{d.dptr = s; d.dsize = strlen(s);};
+};
 
 END_NAMESPACE
 
