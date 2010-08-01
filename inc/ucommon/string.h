@@ -1784,31 +1784,6 @@ inline bool ieq(char const *s1, char const *s2, size_t size)
 inline bool ieq(String &s1, String &s2)
 	{return String::case_equal(s1.c_str(), s2.c_str());}
 
-template<typename T>
-class datum
-{
-public:
-	typedef struct {
-		char *dptr;
-		int dsize;
-	} data_t;
-
-	data_t d;
-
-public:
-	inline data_t *operator*()
-		{return &d;}; 
-
-	inline datum(T *pointer)
-		{d.dptr = pointer; d.dsize = sizeof(T);};
-
-	inline datum(T& object)
-		{d.dptr = &object; d.dsize = sizeof(T);}
-
-	inline datum(char *s)
-		{d.dptr = s; d.dsize = strlen(s);};
-};
-
 END_NAMESPACE
 
 #endif
