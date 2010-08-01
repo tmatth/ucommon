@@ -627,25 +627,6 @@ inline T& (min)(T& o1, T& o2)
 	return o1 < o2 ? o1 : o2;
 } 
 
-template<typename T>
-class data
-{
-public:
-	typedef struct {
-		char *dptr;
-		int dsize;
-	} data_t;
-
-	data_t d;
-
-public:
-	inline data_t *operator*()
-		{return &d;}; 
-
-	inline data(T& object)
-		{d.dptr = &object; d.dsize = sizeof(T);};
-};
-
 END_NAMESPACE
 
 #endif
