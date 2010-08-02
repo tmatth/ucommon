@@ -765,6 +765,11 @@ public:
 };
 
 /**
+ * Abusive compilers...
+ */
+#undef	_TEXT
+
+/**
  * Invoke translation lookup if available.  This can also be used to
  * mark	text constants that need to be translated.  It should not be
  * used with pointer variables, which should instead call shell::text
