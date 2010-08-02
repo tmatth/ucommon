@@ -48,6 +48,8 @@
 #cmakedefine HAVE_FTRUNCATE 1
 #cmakedefine HAVE_PWRITE 1
 #cmakedefine HAVE_SETPGRP 1
+#cmakedefine HAVE_SETLOCALE 1
+#cmakedefine HAVE_GETTEXT 1
 #cmakedefine HAVE_SYS_FILIO_H 1
 #cmakedefine HAVE_SYS_MMAN_H 1
 #cmakedefine HAVE_SYS_POLL_H 1
@@ -66,6 +68,7 @@
 #define STDC_HEADERS 1
 #cmakedefine VERSION "${VERSION}"
 #define	UCOMMON_PLUGINS "${UCOMMON_PLUGINS}"
+#define UCOMMON_LOCALE "${UCOMMON_LOCALE}"
 
 #include <ucommon/export.h>
 

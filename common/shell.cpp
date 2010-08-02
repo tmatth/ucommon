@@ -39,9 +39,24 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef	HAVE_SETLOCALE
+#include <locale.h>
+#else
+#define	setlocale(s, t)
+#endif
+
+#ifdef	HAVE_GETTEXT
+#include <libintl.h>
+#else
+#define	gettext(s)	s
+#define	bindtextdomain(s, t)
+#define	textdomain(s)
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 OrderedIndex shell::Option::index;
+const char *shell::domain = NULL;
 
 shell::pipeio::pipeio()
 {
@@ -496,6 +511,9 @@ void shell::set0(char *argv0)
 	if(ieq(ext, ".exe") || ieq(ext, ".com"))
 		*ext = 0;
 #endif
+
+	if(!domain)
+		bind(_argv0);
 }
 
 shell::shell(size_t pagesize) :
@@ -527,22 +545,30 @@ mempager(pagesize)
 }
 
 static const char *msgs[] = {
-	"missing command line arguments",
-	"missing argument for option",
-	"option does not have argument",
-	"unknown command option",
-	"option already used",
-	"invalid argument used",
+	_("missing command line arguments"),
+	_("missing argument for option"),
+	_("option does not have argument"),
+	_("unknown command option"),
+	_("option already used"),
+	_("invalid argument used"),
 	NULL};
 
 const char *shell::errmsg(errmsg_t id)
 {
-	return msgs[id];
+	if(domain)
+		textdomain("ucommon");
+
+	const char *msg = shell::text(gettext(msgs[id]));
+
+	if(domain)
+		textdomain(domain);
+
+	return msg;
 }
 
 void shell::errmsg(errmsg_t id, const char *text)
 {
-	msgs[id] = text;
+	msgs[id] = shell::text(text);
 }
 
 unsigned shell::count(char **argv)
@@ -597,7 +623,7 @@ void shell::help(void)
 			putchar(' ');
 			++hp;
 		} 
-		const char *hs = op->help_string;
+		const char *hs = shell::text(op->help_string);
 		while(*hs) {
 			if(*hs == '\n' || (((*hs == ' ' || *hs == '\t')) && (hp > 75))) {
 				printf("\n                              ");
@@ -1542,4 +1568,24 @@ int shell::cancel(shell::pid_t pid)
 
 #endif
 
+const char *shell::text(const char *msg)
+{
+#ifdef	HAVE_GETTEXT
+	return ::gettext(msg);
+#else
+	return msg;
+#endif
+}
+
+void shell::bind(const char *name)
+{
+	if(!domain) {
+		setlocale(LC_ALL, "");
+		bindtextdomain("ucommon", UCOMMON_LOCALE);
+	}
+
+	bindtextdomain(name, UCOMMON_LOCALE);
+	textdomain(name);
+	domain = name;
+}
 

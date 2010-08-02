@@ -377,16 +377,16 @@ int main(int argc, char **argv)
 {
     char *cp = NULL;
 
-	shell::flagopt helpflag('h', "--help", "display this list");
+	shell::flagopt helpflag('h', "--help", _("display this list"));
 	shell::flagopt althelp('?', NULL, NULL);
-		shell::numericopt bufopt('b', "--buffering", "audio buffering (120)", "msec", 120);
-	shell::flagopt codecflag('c', "--codecs", "list codecs");
-	shell::stringopt encopt('e', "--encoding", "channel encoding (pcmu)", "codec", "pcmu");
-	shell::numericopt frameopt('f', "--framing", "audio framing (20)", "msec", 20); 
-	shell::stringopt noteopt('n', "--note", "text annotation for new files", "\"text\"", "");
-	shell::stringopt outopt('o', "--output", "encoding for new files (pcmu)", "codec", "pcmu");
-	shell::flagopt vflag('v', "--verbose", "display extra debugging info");
-	shell::flagopt verflag(0, "--version", "display software version");
+		shell::numericopt bufopt('b', "--buffering", _("audio buffering (120)"), "msec", 120);
+	shell::flagopt codecflag('c', "--codecs", _("list codecs"));
+	shell::stringopt encopt('e', "--encoding", _("channel encoding (pcmu)"), "codec", "pcmu");
+	shell::numericopt frameopt('f', "--framing", _("audio framing (20)"), "msec", 20); 
+	shell::stringopt noteopt('n', "--note", _("text annotation for new files"), "\"text\"", "");
+	shell::stringopt outopt('o', "--output", _("encoding for new files (pcmu)"), "codec", "pcmu");
+	shell::flagopt vflag('v', "--verbose", _("display extra debugging info"));
+	shell::flagopt verflag(0, "--version", _("display software version"));
 	shell args(argc, argv);
 
 	audio::init();
@@ -403,25 +403,25 @@ int main(int argc, char **argv)
 	if(is(bufopt)) {
 		buffering = (timeout_t) *bufopt;
 		if(buffering < 60 || buffering % 10)
-			shell::errexit(1, "*** audiotool: --buffering: must be >= 60 msec and multiple of 10msec\n");
+			shell::errexit(1, _("*** audiotool: --buffering: must be >= 60 msec and multiple of 10msec\n"));
 	}
 
 	if(is(frameopt)) {
 		framing = (timeout_t) *frameopt;
 		if(framing % 10 || framing < 10)
-			shell::errexit(1, "*** audiotool: --framing: must be multiple of 10 msec\n");
+			shell::errexit(1, _("*** audiotool: --framing: must be multiple of 10 msec\n"));
 	}
 
 	if(is(encopt)) {
 		encoding = audiocodec::find(*encopt);
 		if(!encoding)
-			shell::errexit(1, "*** audiotool: --encoding: %s: unknown encoding\n", *encopt);
+			shell::errexit(1, _("*** audiotool: --encoding: %s: unknown encoding\n"), *encopt);
 	}
 
 	if(is(outopt)) {
 		oformat = audiocodec::find(*outopt);
 		if(!oformat)
-			shell::errexit(1, "*** audiotool: --output: %s: unknown encoding\n", *outopt);
+			shell::errexit(1, _("*** audiotool: --output: %s: unknown encoding\n"), *outopt);
 	}
 
 	if(is(noteopt))
@@ -509,15 +509,15 @@ int main(int argc, char **argv)
     }
 #endif
 
-    fprintf(stderr, "*** audiotool: %s: unknown command\n", cp);
+    fprintf(stderr, _("*** audiotool: %s: unknown command\n"), cp);
     exit(4);
 
 nofiles:
-	fprintf(stderr, "*** audiotool: %s: no file(s) to process\n", cp);
+	fprintf(stderr, _("*** audiotool: %s: no file(s) to process\n"), cp);
 	exit(4);
 
 toomany:
-	fprintf(stderr, "*** audiotool: %s: too many filenames used\n", cp);
+	fprintf(stderr, _("*** audiotool: %s: too many filenames used\n"), cp);
 	exit(4);
 
 done:

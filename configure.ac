@@ -44,6 +44,7 @@ posix4_lib=""
 rt_lib=""
 
 test -z "$plugindir" && plugindir='${libdir}/ucommon'
+test -z "$localedir" && localedir='${datadir}/locale'
 
 AC_DEFUN([AC_SUBST_DIR], [
         ifelse($2,,,$1="[$]$2")
@@ -306,7 +307,7 @@ if test "$threading" = "none" ; then
 	fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -357,6 +358,12 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
 		;;
 	pwrite)
 		AC_DEFINE(HAVE_PWRITE, [1], [can do atomic write with offset])
+		;;
+	setlocale)
+		AC_DEFINE(HAVE_SETLOCALE, [1], [can set localization])
+		;;
+	gettext)
+		AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in glibc])
 		;;
 	esac
 done
@@ -674,9 +681,11 @@ fi
 
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
 AC_SUBST_DIR(UCOMMON_PLUGINS, plugindir)
+AC_SUBST_DIR(UCOMMON_LOCALE, localedir)
 AC_SUBST_DIR(ssl_publickeys, ssl_certs)
 AC_SUBST_DIR(ssl_privatekeys, ssl_private)
 AC_DEFINE_UNQUOTED(UCOMMON_PLUGINS, "$UCOMMON_PLUGINS", [plugin path])
+AC_DEFINE_UNQUOTED(UCOMMON_LOCALE, "$UCOMMON_LOCALE", [locale path])
 AC_DEFINE_UNQUOTED(SSL_CERTS, "$ssl_publickeys", [certificate path])
 AC_DEFINE_UNQUOTED(SSL_PRIVATE, "$ssl_privatekeys", [private certificates])
 
@@ -688,6 +697,7 @@ AC_SUBST(UCOMMON_COMPONENTS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_INCLUDES)
 AC_SUBST(UCOMMON_PLUGINS)
+AC_SUBST(UCOMMON_LOCALE)
 AC_SUBST(UCOMMON_LINKED)
 AC_SUBST(UCOMMON_MODEL)
 AC_SUBST(UCOMMON_FLAGS)
@@ -702,6 +712,7 @@ AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(MATH_LIB)
 AC_SUBST(plugindir)
+AC_SUBST(localedir)
 
 AC_OUTPUT(Makefile common/Makefile audio/Makefile script/Makefile
 openssl/Makefile gnutls/Makefile insecure/Makefile utils/Makefile 

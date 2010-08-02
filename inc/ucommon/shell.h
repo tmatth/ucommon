@@ -61,6 +61,7 @@ private:
 	char **_argv;
 	unsigned _argc;
 	char *_argv0;
+	static const char *domain;
 
 	class __LOCAL args : public OrderedObject
 	{
@@ -495,6 +496,14 @@ public:
 	static int systemf(const char *format, ...) __PRINTF(1,2);
 
 	/**
+	 * Bind application to text domain for internationalization.  This
+	 * is useful if the argv0 argument can vary because of a symlinked
+	 * executable.
+	 * @param name of text domain for the application.
+	 */
+	static void bind(const char *name);
+
+	/**
 	 * Parse a string as a series of arguments for use in exec calls.
 	 * @param string to parse.
 	 * @return argument array.
@@ -696,6 +705,13 @@ public:
 		{return _argc;};
 
 	/**
+	 * Text translation and localization.
+	 * @param string to translate.
+	 * @return translation if found or original text.
+	 */
+	static const char *text(const char *string);
+
+	/**
 	 * Get argc count for an existing array.
 	 * @param argv to count items in.
 	 * @return argc count of array.
@@ -725,6 +741,9 @@ public:
 #endif
 };
 	
+inline	const char *_(const char *s)	
+	{return shell::text(s);};
+
 END_NAMESPACE
 
 #endif
