@@ -786,7 +786,7 @@ char **shell::getargv(char **argv)
 				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, errmsg(shell::NOARGUMENT));
 			err = op->assign(value);
 			if(err)
-				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, err);
+				errexit(1, "*** %s: --%s: %s\n", _argv0, op->long_option, shell::text(err));
 			continue;
 		}
 
@@ -824,7 +824,7 @@ char **shell::getargv(char **argv)
 				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, errmsg(shell::NOARGUMENT));
 			err = op->assign(value);
 			if(err)
-				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, err);
+				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, shell::text(err));
 			if(op->uses_option)
 				break;
 		}
