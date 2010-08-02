@@ -303,6 +303,10 @@ add_executable(audiotool utils/audiotool.cpp)
 add_dependencies(audiotool uccaudio ucommon)
 target_link_libraries(audiotool uccaudio ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${MATH_LIB})
 
+add_executable(args utils/args.cpp)
+add_dependencies(args ucommon)
+target_link_libraries(args ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+
 message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
 message (STATUS "CMAKE_INSTALL_PREFIX " ${CMAKE_INSTALL_PREFIX} )
@@ -326,4 +330,5 @@ endif(NOT WIN32)
 install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
 install(TARGETS ucommon uccscript uccaudio DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
 install(TARGETS audiotool DESTINATION bin)
+install(TARGETS args DESTINATION bin)
 
