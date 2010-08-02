@@ -12,10 +12,13 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@ 
 INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
-EXTRA_DIST = audiotool.1
+EXTRA_DIST = *.1
 
 man_MANS = audiotool.1
-bin_PROGRAMS = audiotool
+bin_PROGRAMS = audiotool args
 
 audiotool_SOURCES = audiotool.cpp
 audiotool_LDFLAGS = ../audio/libuccaudio.la @MATH_LIB@
+
+args_SOURCES = args.cpp
+
