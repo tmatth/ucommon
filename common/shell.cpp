@@ -48,6 +48,7 @@
 #ifdef	HAVE_GETTEXT
 #include <libintl.h>
 #else
+#define dgettext(d, s) s
 #define	gettext(s)	s
 #define	bindtextdomain(s, t)
 #define	textdomain(s)
@@ -555,17 +556,7 @@ static const char *msgs[] = {
 
 const char *shell::errmsg(errmsg_t id)
 {
-	if(domain) {
-		textdomain("ucommon");
-	}
-
-	const char *msg = shell::text(msgs[id]);
-
-	if(domain) {
-		textdomain(domain);
-	}
-
-	return msg;
+	return dgettext("ucommon", msgs[id]);
 }
 
 void shell::errmsg(errmsg_t id, const char *text)

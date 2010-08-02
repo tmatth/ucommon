@@ -517,7 +517,7 @@ public:
 	 * internationalization, this has no effect.
 	 * @param name of text domain of plugin or NULL to restore application.
 	 */
-	static void rebind(const char *name);
+	static void rebind(const char *name = NULL);
 
 	/**
 	 * Parse a string as a series of arguments for use in exec calls.
