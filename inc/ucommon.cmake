@@ -28,6 +28,9 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
 	if (BUILD_STDLIB)
 		# for now we assume only newer libstdc++ library
 		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DNEW_STDLIB)
+	elseif (BUILD_OLDLIB)
+		# for really old libstdc++ libraries...
+		set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DOLD_STDLIB)
 	else()
 		if(CMAKE_COMPILER_IS_GNUCXX)
 			set(CHECK_FLAGS ${CHECK_FLAGS} -fno-exceptions -fno-rtti -fno-enforce-eh-specs)
