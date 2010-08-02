@@ -154,6 +154,13 @@ from header files, html browsable.
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sun Aug 01 2010 - David Sugar <dyfet@gnutelephony.org> - 3.3.0-0
+- internationalization bindings with gnu gettext support.
+- reorganized utils into ucommon-bin subpackage.
+
+* Fri Jun 04 2010 - David Sugar <dyfet@gnutelephony.org> - 3.0.0-0
+- merged ccscript and ccaudio with ucommon to create single framework.
+
 * Sun Jul 19 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.6-1
 - fixed ucommon-config upstream.
 

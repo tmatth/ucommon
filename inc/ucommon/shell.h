@@ -735,6 +735,17 @@ public:
 	static const char *text(const char *string);
 
 	/**
+	 * Plural text translation and localization.  This does nothing but
+	 * return single or plural forms if no internaternationalization is
+	 * enabled.  Else it uses ngettext().
+	 * @param singular string to translate.
+	 * @param plural string to translate.
+	 * @param count of objects.
+	 * @return string to use.
+	 */
+	static const char *texts(const char *singular, const char *plural, unsigned long count);
+
+	/**
 	 * Get argc count for an existing array.
 	 * @param argv to count items in.
 	 * @return argc count of array.

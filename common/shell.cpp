@@ -1570,6 +1570,18 @@ int shell::cancel(shell::pid_t pid)
 
 #endif
 
+const char *shell::texts(const char *singular, const char *plural, unsigned long value)
+{
+#ifdef	HAVE_GETTEXT
+	return ::ngettext(singular, plural, value);
+#else
+	if(value > 1)
+		return plural;
+
+	return singular;
+#endif
+}
+
 const char *shell::text(const char *msg)
 {
 #ifdef	HAVE_GETTEXT
