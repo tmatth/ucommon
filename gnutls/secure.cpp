@@ -22,27 +22,27 @@ extern "C" {
 	static int gcrypt_mutex_init(void **mp)
 	{
 		if(mp)
-			*mp = new mutex();
+			*mp = new mutex_t();
 		return 0;
 	}
 
 	static int gcrypt_mutex_destroy(void **mp)
 	{
 		if(mp && *mp)
-			delete (mutex *)(*mp);
+			delete (mutex_t *)(*mp);
 		return 0;
 	}
 
 	static int gcrypt_mutex_lock(void **mp)
 	{
-		mutex *m = (mutex *)(*mp);
+		mutex_t *m = (mutex_t *)(*mp);
 		m->acquire();
 		return 0;
 	}
 
 	static int gcrypt_mutex_unlock(void **mp)
 	{
-		mutex *m = (mutex *)(*mp);
+		mutex_t *m = (mutex_t *)(*mp);
 		m->release();
 		return 0;
 	}

@@ -22,7 +22,7 @@ Digest::Digest()
 	hashtype = NULL;
 	context = NULL;
 	bufsize = 0;
-	text[0] = 0;
+	textbuf[0] = 0;
 }
 
 Digest::Digest(const char *type)
@@ -30,7 +30,7 @@ Digest::Digest(const char *type)
 	hashtype = NULL;
 	context = NULL;
 	bufsize = 0;
-	text[0] = 0;
+	textbuf[0] = 0;
 
 	set(type);
 }
@@ -74,7 +74,7 @@ void Digest::release(void)
 	}
 	
 	bufsize = 0;
-	text[0] = 0;
+	textbuf[0] = 0;
 }
 
 bool Digest::put(const void *address, size_t size)
@@ -91,7 +91,7 @@ const char *Digest::c_str(void)
 	if(!bufsize)
 		get();
 
-	return text;
+	return textbuf;
 }
 
 void Digest::reset(void)
@@ -120,10 +120,12 @@ void Digest::recycle(bool bin)
 	else {
 		unsigned count = 0;
 		while(count < size) {
-			snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+			snprintf(textbuf + (count * 2), 3, "%2.2x", 
+buffer[count]);
 			++count;
 		}
-		EVP_DigestUpdate((EVP_MD_CTX *)context, text, size * 2);
+		EVP_DigestUpdate((EVP_MD_CTX *)context, textbuf, size * 
+2);
 	}
 	bufsize = 0;
 
@@ -147,7 +149,8 @@ const unsigned char *Digest::get(void)
 	bufsize = size;
 
 	while(count < bufsize) {
-		snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+		snprintf(textbuf + (count * 2), 3, "%2.2x", 
+buffer[count]);
 		++count;
 	}
 	return buffer;

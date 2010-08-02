@@ -17,7 +17,7 @@
 
 #include "local.h"
 
-static mutex *locking = NULL;
+static mutex_t *locking = NULL;
 static const char *certid = "generic";
 
 extern "C" {

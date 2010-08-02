@@ -384,7 +384,7 @@ private:
 
 	unsigned bufsize;
 	unsigned char buffer[MAX_DIGEST_HASHSIZE / 8];
-	char text[MAX_DIGEST_HASHSIZE / 8 + 1];
+	char textbuf[MAX_DIGEST_HASHSIZE / 8 + 1];
 	
 protected:
 	void release(void);

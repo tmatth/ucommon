@@ -242,7 +242,7 @@ Digest::Digest()
 	hashtype = (void *)" ";
 	context = NULL;
 	bufsize = 0;
-	text[0] = 0;
+	textbuf[0] = 0;
 }
 
 Digest::Digest(const char *type)
@@ -250,7 +250,7 @@ Digest::Digest(const char *type)
     hashtype = (void *)" ";
     context = NULL;
 	bufsize = 0;
-	text[0] = 0;
+	textbuf[0] = 0;
 
 	set(type);
 }
@@ -294,7 +294,7 @@ void Digest::release(void)
 	}
 
 	bufsize = 0;
-	text[0] = 0;
+	textbuf[0] = 0;
 
 	hashtype = " ";
 }
@@ -318,7 +318,7 @@ const char *Digest::c_str(void)
     if(!bufsize)
         get();
 
-    return text;
+    return textbuf;
 }
 
 void Digest::reset(void)
@@ -354,10 +354,12 @@ void Digest::recycle(bool bin)
 		else {
 			unsigned count = 0;
 			while(count < bufsize) {
-				snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+				snprintf(textbuf + (count * 2), 3, 
+"%2.2x", buffer[count]);
 				++count;
 			}
-			MD5Update((MD5_CTX *)context, (const unsigned char *)text, size * 2);
+			MD5Update((MD5_CTX *)context, (const unsigned 
+char *)textbuf, size * 2);
 		}	
 		break;
 	default:
@@ -387,7 +389,7 @@ const unsigned char *Digest::get(void)
 	}
 
     while(count < bufsize) {
-        snprintf(text + (count * 2), 3, "%2.2x", buffer[count]);
+        snprintf(textbuf + (count * 2), 3, "%2.2x", buffer[count]);
         ++count;
     }
     return buffer;

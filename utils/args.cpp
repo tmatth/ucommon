@@ -61,20 +61,20 @@ extern "C" int main(int argc, char **argv)
 	if(!args())
 		return 0;
 
-	if(quote[0]) {
-		if(!quote[1]) {
-			prefix[0] = quote[0];
-			suffix[0] = quote[0];
+	if((*quote)[0]) {
+		if(!(*quote)[1]) {
+			prefix[0] = (*quote)[0];
+			suffix[0] = (*quote)[0];
 		}
-		else if(!quote[2]) {
-			prefix[0] = quote[0];
-			suffix[0] = quote[1];
+		else if(!(*quote)[2]) {
+			prefix[0] = (*quote)[0];
+			suffix[0] = (*quote)[1];
 		}
-		else if(quote[0] == '<') {
+		else if((*quote)[0] == '<') {
 			String::set(prefix, sizeof(prefix), *quote);
 			snprintf(suffix, sizeof(suffix), "</%s", *quote + 1);
 		}
-		else if(quote[0] == '(') {
+		else if((*quote)[0] == '(') {
 			String::set(prefix, sizeof(prefix), quote);
 			ep = strchr((char *)*quote, ')');
 			if(ep)
