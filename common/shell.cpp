@@ -555,13 +555,15 @@ static const char *msgs[] = {
 
 const char *shell::errmsg(errmsg_t id)
 {
-	if(domain)
+	if(domain) {
 		textdomain("ucommon");
+	}
 
-	const char *msg = shell::text(gettext(msgs[id]));
+	const char *msg = shell::text(msgs[id]);
 
-	if(domain)
+	if(domain) {
 		textdomain(domain);
+	}
 
 	return msg;
 }
