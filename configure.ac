@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="3.2.2"
-LT_VERSION="3:15:0"
+VERSION="3.3.0"
+LT_VERSION="3:16:0"
 OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -39,6 +39,7 @@ UCOMMON_LIBS=""
 CHECKFLAGS="$CHECKFLAGS"
 
 components="script audio utils secure"
+have_gettext="no"
 socket_lib=""
 posix4_lib=""
 rt_lib=""
@@ -364,6 +365,7 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
 		;;
 	gettext)
 		AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in glibc])
+		have_gettext="yes"
 		;;
 	esac
 done
@@ -677,6 +679,13 @@ if test -z "$ssl_private" ; then
 
 if test "$sysconfdir" = '${prefix}/etc' ; then
     sysconfdir="/etc"
+fi
+
+if test "$have_gettext" = "no" ; then
+	AC_CHECK_LIB(intl, gettext, [
+		AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in glibc])
+		UCOMMON_LIBS="$UCOMMON_LIBS -lintl"
+	])
 fi
 
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
