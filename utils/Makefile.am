@@ -14,7 +14,7 @@ INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
-man_MANS = audiotool.1
+man_MANS = audiotool.1 args.1
 bin_PROGRAMS = audiotool args
 
 audiotool_SOURCES = audiotool.cpp
