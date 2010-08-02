@@ -403,13 +403,13 @@ int main(int argc, char **argv)
 	if(is(bufopt)) {
 		buffering = (timeout_t) *bufopt;
 		if(buffering < 60 || buffering % 10)
-			shell::errexit(1, _("*** audiotool: --buffering: must be >= 60 msec and multiple of 10msec\n"));
+			shell::errexit(1, "*** audiotool: %s: %s\n", "--buffering", _("must be >= 60 msec and multiple of 10msec"));
 	}
 
 	if(is(frameopt)) {
 		framing = (timeout_t) *frameopt;
 		if(framing % 10 || framing < 10)
-			shell::errexit(1, _("*** audiotool: --framing: must be multiple of 10 msec\n"));
+			shell::errexit(1, "*** audiotool: %s: %s\n", "--framing",  _("must be multiple of 10 msec"));
 	}
 
 	if(is(encopt)) {

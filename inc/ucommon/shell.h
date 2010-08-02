@@ -742,7 +742,7 @@ public:
 };
 	
 inline	const char *_(const char *s)	
-	{return shell::text(s);};
+	{return shell::text(s);}
 
 END_NAMESPACE
 
