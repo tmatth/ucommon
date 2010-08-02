@@ -77,10 +77,10 @@ static void codecs(void)
 
 static void usage(void)
 {
-	printf("%s\n", _("Usage: audiotool [options] command files...\n"
+	printf("%s\n", _TEXT("Usage: audiotool [options] command files...\n"
 		"Options:\n"));
 	shell::help();
-	printf("%s", _("Commands:\n"
+	printf("%s", _TEXT("Commands:\n"
 		"  append file files           Append audio to existing file\n"
 		"  create newfile files        Create new file from existing ones\n"
 		"  info files                  Display info for specified audio files\n"
@@ -90,7 +90,7 @@ static void usage(void)
 		"  text file                   Display annotation for audio file if set\n"
 		"  verify file                 Verify readability of an audio file\n"
 	));
-	printf("%s\n", _("Report bugs to sipwitch-devel@gnu.org"));
+	printf("%s\n", _TEXT("Report bugs to sipwitch-devel@gnu.org"));
     exit(0);
 }
 	
@@ -379,16 +379,16 @@ int main(int argc, char **argv)
 
 	shell::bind("audiotool");
 
-	shell::flagopt helpflag('h', "--help", _("display this list"));
+	shell::flagopt helpflag('h', "--help", _TEXT("display this list"));
 	shell::flagopt althelp('?', NULL, NULL);
-		shell::numericopt bufopt('b', "--buffering", _("audio buffering (120)"), "msec", 120);
-	shell::flagopt codecflag('c', "--codecs", _("list codecs"));
-	shell::stringopt encopt('e', "--encoding", _("channel encoding (pcmu)"), "codec", "pcmu");
-	shell::numericopt frameopt('f', "--framing", _("audio framing (20)"), "msec", 20); 
-	shell::stringopt noteopt('n', "--note", _("text annotation for new files"), "\"text\"", "");
-	shell::stringopt outopt('o', "--output", _("encoding for new files (pcmu)"), "codec", "pcmu");
-	shell::flagopt vflag('v', "--verbose", _("display extra debugging info"));
-	shell::flagopt verflag(0, "--version", _("display software version"));
+		shell::numericopt bufopt('b', "--buffering", _TEXT("audio buffering (120)"), "msec", 120);
+	shell::flagopt codecflag('c', "--codecs", _TEXT("list codecs"));
+	shell::stringopt encopt('e', "--encoding", _TEXT("channel encoding (pcmu)"), "codec", "pcmu");
+	shell::numericopt frameopt('f', "--framing", _TEXT("audio framing (20)"), "msec", 20); 
+	shell::stringopt noteopt('n', "--note", _TEXT("text annotation for new files"), "\"text\"", "");
+	shell::stringopt outopt('o', "--output", _TEXT("encoding for new files (pcmu)"), "codec", "pcmu");
+	shell::flagopt vflag('v', "--verbose", _TEXT("display extra debugging info"));
+	shell::flagopt verflag(0, "--version", _TEXT("display software version"));
 	shell args(argc, argv);
 
 	audio::init();
@@ -405,25 +405,25 @@ int main(int argc, char **argv)
 	if(is(bufopt)) {
 		buffering = (timeout_t) *bufopt;
 		if(buffering < 60 || buffering % 10)
-			shell::errexit(1, "*** audiotool: %s: %s\n", "--buffering", _("must be >= 60 msec and multiple of 10msec"));
+			shell::errexit(1, "*** audiotool: %s: %s\n", "--buffering", _TEXT("must be >= 60 msec and multiple of 10msec"));
 	}
 
 	if(is(frameopt)) {
 		framing = (timeout_t) *frameopt;
 		if(framing % 10 || framing < 10)
-			shell::errexit(1, "*** audiotool: %s: %s\n", "--framing",  _("must be multiple of 10 msec"));
+			shell::errexit(1, "*** audiotool: %s: %s\n", "--framing",  _TEXT("must be multiple of 10 msec"));
 	}
 
 	if(is(encopt)) {
 		encoding = audiocodec::find(*encopt);
 		if(!encoding)
-			shell::errexit(1, _("*** audiotool: --encoding: %s: unknown encoding\n"), *encopt);
+			shell::errexit(1, _TEXT("*** audiotool: --encoding: %s: unknown encoding\n"), *encopt);
 	}
 
 	if(is(outopt)) {
 		oformat = audiocodec::find(*outopt);
 		if(!oformat)
-			shell::errexit(1, _("*** audiotool: --output: %s: unknown encoding\n"), *outopt);
+			shell::errexit(1, _TEXT("*** audiotool: --output: %s: unknown encoding\n"), *outopt);
 	}
 
 	if(is(noteopt))
@@ -511,15 +511,15 @@ int main(int argc, char **argv)
     }
 #endif
 
-    fprintf(stderr, _("*** audiotool: %s: unknown command\n"), cp);
+    fprintf(stderr, _TEXT("*** audiotool: %s: unknown command\n"), cp);
     exit(4);
 
 nofiles:
-	fprintf(stderr, _("*** audiotool: %s: no file(s) to process\n"), cp);
+	fprintf(stderr, _TEXT("*** audiotool: %s: no file(s) to process\n"), cp);
 	exit(4);
 
 toomany:
-	fprintf(stderr, _("*** audiotool: %s: too many filenames used\n"), cp);
+	fprintf(stderr, _TEXT("*** audiotool: %s: too many filenames used\n"), cp);
 	exit(4);
 
 done:

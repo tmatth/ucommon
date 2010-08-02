@@ -545,12 +545,12 @@ mempager(pagesize)
 }
 
 static const char *msgs[] = {
-	_("missing command line arguments"),
-	_("missing argument for option"),
-	_("option does not have argument"),
-	_("unknown command option"),
-	_("option already used"),
-	_("invalid argument used"),
+	_TEXT("missing command line arguments"),
+	_TEXT("missing argument for option"),
+	_TEXT("option does not have argument"),
+	_TEXT("unknown command option"),
+	_TEXT("option already used"),
+	_TEXT("invalid argument used"),
 	NULL};
 
 const char *shell::errmsg(errmsg_t id)
@@ -1589,5 +1589,13 @@ void shell::bind(const char *name)
 	bindtextdomain(name, UCOMMON_LOCALE);
 	textdomain(name);
 	domain = name;
+}
+
+void shell::rebind(const char *name)
+{
+	if(name)
+		textdomain(name);
+	else
+		textdomain(domain);
 }
 

@@ -498,10 +498,26 @@ public:
 	/**
 	 * Bind application to text domain for internationalization.  This
 	 * is useful if the argv0 argument can vary because of a symlinked
-	 * executable.
+	 * executable.  This is the name of the .po/.mo message files for
+	 * your application.  If bind is not called before shell processing,
+	 * then the argv0 is used as the bind name.  Bind can be called
+	 * multiple times to change the default message catalog name of the
+	 * application, and this usage may be needed for plugins, though it's 
+	 * generally recommended to use only once, and at the start of main().
 	 * @param name of text domain for the application.
 	 */
 	static void bind(const char *name);
+
+	/**
+	 * Rebind is used to change the text domain.  This may be needed in
+	 * applications which have separately built plugins that have thier
+	 * own message catalogs.  Normally the plugin would call bind itself
+	 * at initialization, and then use rebind to select either the
+	 * application's domain, or the plugins.  On systems without
+	 * internationalization, this has no effect.
+	 * @param name of text domain of plugin or NULL to restore application.
+	 */
+	static void rebind(const char *name);
 
 	/**
 	 * Parse a string as a series of arguments for use in exec calls.
@@ -705,7 +721,14 @@ public:
 		{return _argc;};
 
 	/**
-	 * Text translation and localization.
+	 * Text translation and localization.  This function does nothing but
+	 * return the original string if no internationalization support is
+	 * available.  If internationalization support exists, then it may
+	 * return a substituted translation based on the current locale.  This
+	 * offers a single function that can be safely used either when
+	 * internationalization support is present, or it is absent, eliminating
+	 * the need for the application to be coded differently based on
+	 * awareness of support.
 	 * @param string to translate.
 	 * @return translation if found or original text.
 	 */
@@ -740,8 +763,15 @@ public:
 		{return 2;};
 #endif
 };
-	
-inline	const char *_(const char *s)	
+
+/**
+ * Invoke translation lookup if available.  This can also be used to
+ * mark	text constants that need to be translated.  It should not be
+ * used with pointer variables, which should instead call shell::text
+ * directly.  The primary purpose is to allow extraction of text to
+ * be internationalized with xgettext "--keyword=_TEXT:1".
+ */
+inline	const char *_TEXT(const char *s)	
 	{return shell::text(s);}
 
 END_NAMESPACE
