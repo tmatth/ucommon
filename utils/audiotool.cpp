@@ -77,10 +77,10 @@ static void codecs(void)
 
 static void usage(void)
 {
-	printf("Usage: audiotool [options] command files...\n"
-		"Options:\n");
+	printf("%s\n", _("Usage: audiotool [options] command files...\n"
+		"Options:\n"));
 	shell::help();
-	printf("Commands:\n"
+	printf("%s", _("Commands:\n"
 		"  append file files           Append audio to existing file\n"
 		"  create newfile files        Create new file from existing ones\n"
 		"  info files                  Display info for specified audio files\n"
@@ -89,8 +89,8 @@ static void usage(void)
 #endif
 		"  text file                   Display annotation for audio file if set\n"
 		"  verify file                 Verify readability of an audio file\n"
-	);
-	printf("Report bugs to sipwitch-devel@gnu.org\n");
+	));
+	printf("%s\n", _("Report bugs to sipwitch-devel@gnu.org"));
     exit(0);
 }
 	
@@ -376,6 +376,8 @@ static void verify(const char *fn)
 int main(int argc, char **argv)
 {
     char *cp = NULL;
+
+	shell::bind("audiotool");
 
 	shell::flagopt helpflag('h', "--help", _("display this list"));
 	shell::flagopt althelp('?', NULL, NULL);
