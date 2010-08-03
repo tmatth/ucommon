@@ -1584,12 +1584,26 @@ const char *shell::text(const char *msg)
 
 void shell::bind(const char *name)
 {
-	if(!domain) {
-		setlocale(LC_ALL, "");
-		bindtextdomain("ucommon", UCOMMON_LOCALE);
+#ifdef	_MSWINDOWS_
+	const char *locale = "C:\\Program Files\\Common Files\\locale";
+
+	if(fsys::isdir("locale")) {
+		char prefix[256];
+		fsys::getPrefix(prefix, sizeof(prefix));
+		String::add(prefix, sizeof(prefix), "/locale");	
+		locale = strdup(prefix);
 	}
 
-	bindtextdomain(name, UCOMMON_LOCALE);
+#else
+	const char *locale = UCOMMON_LOCALE;
+#endif
+
+	if(!domain) {
+		setlocale(LC_ALL, "");
+		bindtextdomain("ucommon", locale);
+	}
+
+	bindtextdomain(name, locale);
 	textdomain(name);
 	domain = name;
 }

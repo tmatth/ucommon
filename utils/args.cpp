@@ -21,10 +21,12 @@ using namespace UCOMMON_NAMESPACE;
 
 static shell::flagopt helpflag('h',"--help",	_TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
-static shell::flagopt rflag('r',	"--reverse", _TEXT("reverse order of arguments"));
-static shell::flagopt lines('l',	"--lines", _TEXT("list arguments on separate lines"));
 static shell::charopt delim('d',	"--delim", _TEXT("set deliminter between arguments"));
+static shell::flagopt directory('D', "--directory", _TEXT("expand directory into file arguments"));
+static shell::flagopt lines('l',	"--lines", _TEXT("list arguments on separate lines"));
 static shell::stringopt quote('q',	"--quote",	_TEXT("set quote for each argument"), "string", "");
+static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
+static shell::flagopt rflag('r',	"--reverse", _TEXT("reverse order of arguments"));
 
 static char prefix[80] = {0, 0};
 static char suffix[80] = {0, 0};
@@ -37,6 +39,28 @@ static void output(bool middle, const char *arg)
 		shell::printf("%c%s%s%s", *delim, prefix, arg, suffix);
 	else
 		shell::printf("%s%s%s", prefix, arg, suffix);
+}
+
+static void dirpath(bool middle, const char *path, bool top = true)
+{
+	char filename[128];
+	char fullpath[255];
+	fsys_t dir(path, fsys::ACCESS_DIRECTORY);
+	unsigned count = 0;
+
+	while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
+		if(*filename == '.')
+			continue;
+
+		++count;
+		snprintf(fullpath, sizeof(fullpath), "%s/%s", path, filename);
+		output(middle, fullpath);
+		middle = true;
+		if(fsys::isdir(fullpath) && is(recursive))
+			dirpath(true, fullpath, false);
+	}	
+	if(top && !count)
+		output(middle, path);
 }
 
 extern "C" int main(int argc, char **argv)
@@ -90,12 +114,18 @@ extern "C" int main(int argc, char **argv)
 	if(is(rflag)) {
 		count = args();
 		while(count--) {
-			output(middle, args[count]);
+			if(fsys::isdir(args[count]) && (is(directory) || is(recursive)))
+				dirpath(middle, args[count]);
+			else
+				output(middle, args[count]);
 			middle = true;
 		}
 	}
 	else while(count < args()) {
-		output(middle, args[count++]);
+		if(fsys::isdir(args[count]) && (is(directory) || is(recursive)))
+			dirpath(middle, args[count++]);
+		else
+			output(middle, args[count++]);
 		middle = true;
 	}
 
