@@ -21,7 +21,6 @@
 #include <config.h>
 
 static const  char *delfile = NULL;
-static bool	verbose = false;
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -31,6 +30,17 @@ static const audiocodec *encoding = NULL;
 static audiobuffer *input = NULL, *output = NULL;
 static timeout_t framing = 0;
 static timeout_t buffering = 120;
+
+static shell::flagopt helpflag('h', "--help", _TEXT("display this list"));
+static shell::flagopt althelp('?', NULL, NULL);
+static shell::numericopt bufopt('b', "--buffering", _TEXT("audio buffering (120)"), "msec", 120);
+static shell::flagopt codecflag('c', "--codecs", _TEXT("list codecs"));
+static shell::stringopt encopt('e', "--encoding", _TEXT("channel encoding (pcmu)"), "codec", "pcmu");
+static shell::numericopt frameopt('f', "--framing", _TEXT("audio framing (20)"), "msec", 20); 
+static shell::stringopt noteopt('n', "--note", _TEXT("text annotation for new files"), "\"text\"", "");
+static shell::stringopt outopt('o', "--output", _TEXT("encoding for new files (pcmu)"), "codec", "pcmu");
+static shell::flagopt verbose('v', "--verbose", _TEXT("display extra debugging info"));
+static shell::flagopt version(0, "--version", _TEXT("display software version"));
 
 extern "C" {
 #ifdef  _MSWINDOWS_
@@ -94,7 +104,7 @@ static void usage(void)
     exit(0);
 }
 	
-static void version(void)
+static void versioninfo(void)
 {
 	printf("audiotool " VERSION "\n"
 		"Copyright (C) 2009-2010 David Sugar, Tycho Softworks\n"
@@ -156,7 +166,7 @@ static void info(const char *fn)
 	unsigned used = input->getBuffering() + input->getBackstore() + input->getConversion();
 	printf("audiofile %s\n", cp);
 
-	if(verbose) {
+	if(is(verbose)) {
 		printf("available %u\n", input->getAvailable());
 		printf("buffering %u\n", input->getBuffering());
 		printf("backstore %u\n", input->getBackstore());
@@ -231,7 +241,7 @@ static void append(const char *to, char **argv)
 		}
 	}
 
-	if(verbose) {
+	if(is(verbose)) {
 		printf("converted %u frames\n", count);
 		printf("reading %lu contexts\n", input->getContexts());
 		printf("writing %lu contexts\n", output->getContexts());
@@ -293,7 +303,7 @@ static void create(const char *to, char **argv)
 		}
 	}
 
-	if(verbose) {
+	if(is(verbose)) {
 		printf("converted %u frames\n", count);
 		printf("reading %lu contexts\n", input->getContexts());
 		printf("writing %lu contexts\n", output->getContexts());
@@ -360,7 +370,7 @@ static void verify(const char *fn)
 		++count;
 	}
 
-	if(verbose) {
+	if(is(verbose)) {
 		printf("read %lu frames\n", count);
 		printf("used %lu contexts\n", input->getContexts());
 	}
@@ -375,20 +385,9 @@ static void verify(const char *fn)
 
 int main(int argc, char **argv)
 {
-    char *cp = NULL;
-
 	shell::bind("audiotool");
 
-	shell::flagopt helpflag('h', "--help", _TEXT("display this list"));
-	shell::flagopt althelp('?', NULL, NULL);
-		shell::numericopt bufopt('b', "--buffering", _TEXT("audio buffering (120)"), "msec", 120);
-	shell::flagopt codecflag('c', "--codecs", _TEXT("list codecs"));
-	shell::stringopt encopt('e', "--encoding", _TEXT("channel encoding (pcmu)"), "codec", "pcmu");
-	shell::numericopt frameopt('f', "--framing", _TEXT("audio framing (20)"), "msec", 20); 
-	shell::stringopt noteopt('n', "--note", _TEXT("text annotation for new files"), "\"text\"", "");
-	shell::stringopt outopt('o', "--output", _TEXT("encoding for new files (pcmu)"), "codec", "pcmu");
-	shell::flagopt vflag('v', "--verbose", _TEXT("display extra debugging info"));
-	shell::flagopt verflag(0, "--version", _TEXT("display software version"));
+	char *cp = NULL;
 	shell args(argc, argv);
 
 	audio::init();
@@ -396,8 +395,8 @@ int main(int argc, char **argv)
 	if(is(helpflag) || is(althelp))
 		usage();
 
-	if(is(verflag))
-		version();
+	if(is(version))
+		versioninfo();
 
 	if(is(codecflag))
 		codecs();
