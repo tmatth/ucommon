@@ -1,5 +1,7 @@
 Proposed ABI changes (3.1 or 4.0?):
 
+	Do we keep FILE methods now that we have bufio?
+
 	Use of "family" in address type often no longer needed - depreciate.  Some
 	parts of Socket::address may also need rewriting.
 	
