@@ -41,10 +41,10 @@ static void output(bool middle, const char *arg)
 		shell::printf("%s%s%s", prefix, arg, suffix);
 }
 
-static void dirpath(bool middle, const char *path, bool top = true)
+static void dirpath(bool middle, String path, bool top = true)
 {
 	char filename[128];
-	char fullpath[255];
+	String subdir;
 	fsys_t dir(path, fsys::ACCESS_DIRECTORY);
 	unsigned count = 0;
 
@@ -53,11 +53,11 @@ static void dirpath(bool middle, const char *path, bool top = true)
 			continue;
 
 		++count;
-		snprintf(fullpath, sizeof(fullpath), "%s/%s", path, filename);
-		output(middle, fullpath);
+		subdir = (String)path + (String)"/" + (String)filename;
+		output(middle, subdir);
 		middle = true;
-		if(fsys::isdir(fullpath) && is(recursive))
-			dirpath(true, fullpath, false);
+		if(fsys::isdir(subdir) && is(recursive))
+			dirpath(true, subdir, false);
 	}	
 	if(top && !count)
 		output(middle, path);
@@ -115,7 +115,7 @@ extern "C" int main(int argc, char **argv)
 		count = args();
 		while(count--) {
 			if(fsys::isdir(args[count]) && (is(directory) || is(recursive)))
-				dirpath(middle, args[count]);
+				dirpath(middle, (String)args[count]);
 			else
 				output(middle, args[count]);
 			middle = true;
@@ -123,9 +123,9 @@ extern "C" int main(int argc, char **argv)
 	}
 	else while(count < args()) {
 		if(fsys::isdir(args[count]) && (is(directory) || is(recursive)))
-			dirpath(middle, args[count++]);
+			dirpath(middle, (String)args[count++]);
 		else
-			output(middle, args[count++]);
+			output(middle, (String)args[count++]);
 		middle = true;
 	}
 
