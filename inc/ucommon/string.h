@@ -263,6 +263,18 @@ public:
 	string(const StringFormat& format);
 
 	/**
+	 * Create a string from a long integer.
+	 * @param value to convert to string.
+	 */
+	string(long value);
+
+	/**
+	 * Create a string from a floating point.
+	 * @param value to convert to string.
+	 */
+	string(double value);
+
+	/**
 	 * Create an empty string with a buffer pre-allocated to a specified size.
 	 * @param size of buffer to allocate.
 	 */

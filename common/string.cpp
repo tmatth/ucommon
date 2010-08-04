@@ -298,6 +298,26 @@ string::string(strsize_t size)
 	str->retain();
 }
 
+string::string(long value)
+{
+	str = create(20);
+	str->retain();
+	snprintf(str->text, 20, "%ld", value);
+	str->len = strlen(str->text);
+	str->fix();
+}
+
+string::string(double value)
+{
+	str = create(32);
+	str->retain();
+	snprintf(str->text, 32, "%f", value);
+	str->len = strlen(str->text);
+	str->fix();
+}
+
+
+
 string::string(strsize_t size, char fill)
 {
     str = create(size, fill);
