@@ -1,5 +1,6 @@
 from ucommon 3.3.0 to 3.3.1
 - expand args to directory and recursive operations.
+- fix cstring initialization.
 
 from ucommon 3.2.2 to 3.3.0
 - internationalization bindings with gnu gettext support.
