@@ -74,7 +74,7 @@ extern "C" int main(int argc, char **argv)
 	shell args(argc, argv);
 
 	if(is(helpflag) || is(althelp)) {
-		printf(_TEXT("Usage: %s [options] arguments..."), args.argv0());
+		printf("%s\n", _TEXT("Usage: args [options] arguments..."));
 		printf("%s\n\n", _TEXT("Echo command line arguments"));
 		printf("%s\n", _TEXT("Options:"));
 		shell::help();
