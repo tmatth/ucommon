@@ -289,11 +289,13 @@ public:
 
 	/**
 	 * Create a string by printf-like formating into a pre-allocated space
-	 * of a specified size.
+	 * of a specified size.  A typical use might be in a concat function
+	 * like String x = (String)something + (String){10, "%ud", var}.
 	 * @param size of buffer to allocate.
 	 * @param format control for string.
 	 */
 	string(strsize_t size, const char *format, ...) __PRINTF(3, 4);
+
 
 	/**
 	 * Create a string from null terminated text.
