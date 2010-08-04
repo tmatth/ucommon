@@ -33,7 +33,8 @@ StringFormat::~StringFormat()
 {
 }
 
-string::cstring::cstring(strsize_t size)
+string::cstring::cstring(strsize_t size) :
+CountedObject()
 {
 	max = size;
 	len = 0;
@@ -41,7 +42,8 @@ string::cstring::cstring(strsize_t size)
 	text[0] = 0;
 }
 
-string::cstring::cstring(strsize_t size, char f)
+string::cstring::cstring(strsize_t size, char f) :
+CountedObject()
 {
 	max = size;
 	len = 0;
