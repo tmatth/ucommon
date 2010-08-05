@@ -946,11 +946,26 @@ skip:
 void shell::errexit(int exitcode, const char *format, ...)
 {
 	va_list args;
+	loglevel_t level = ERR;
 
 	va_start(args, format);
 	vfprintf(stderr, format, args);
 	fflush(stderr);
+
+	if(exitcode)
+		level = FAIL;
+
+#ifdef	HAVE_SYSLOG_H
+	if(errname && errmode != NONE && level <= errlevel) {
+		if(exitcode)
+			vsyslog(LOG_CRIT, format, args);
+		else
+			vsyslog(LOG_ERR, format, args);
+	}
+#endif
+
 	va_end(args);
+	
 	if(exitcode)
 		::exit(exitcode);
 }
@@ -1734,7 +1749,7 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
     va_list args;
 	int level= LOG_ERR;
 
-	if(!errname || errmode == NONE || level > errlevel)
+	if(!errname || errmode == NONE || loglevel > errlevel)
 		return;
 
     va_start(args, fmt);
