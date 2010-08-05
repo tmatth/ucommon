@@ -1795,7 +1795,7 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
     char buf[256];
     va_list args;
 
-	if(!errname || errmode == NONE || level > errlevel)
+	if(!errname || errmode == NONE || loglevel > errlevel)
 		return;
 
     va_start(args, fmt);
@@ -1803,12 +1803,10 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
     va_end(args);
 
 	if(loglevel >= DEBUG0) {
-        if(getppid() > 1) {
-            if(fmt[strlen(fmt) - 1] == '\n')
-                fprintf(stderr, "%s: %s", errname, buf);
-            else
-                fprintf(stderr, "%s: %s\n", errname, buf);
-        }
+		if(fmt[strlen(fmt) - 1] == '\n')
+			fprintf(stderr, "%s: %s", errname, buf);
+		else
+			fprintf(stderr, "%s: %s\n", errname, buf);
 		return;
 	}
 
