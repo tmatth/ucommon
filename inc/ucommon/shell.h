@@ -369,6 +369,9 @@ public:
 	public:
 		stringopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "text", const char *def_text = NULL);
 
+		inline void set(const char *string)
+			{text = string;};
+
 		inline operator bool()
 			{return used;};
 
@@ -403,6 +406,9 @@ public:
 	public:
 		charopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "char", char default_code = ' ');
 
+		inline void set(char value)
+			{code = value;};
+
 		inline operator bool()
 			{return used;};
 
@@ -434,6 +440,9 @@ public:
 
 	public:
 		numericopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
+
+		inline void set(long value)
+			{number = value;};
 
 		inline operator bool()
 			{return used;};
