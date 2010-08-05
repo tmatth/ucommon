@@ -63,6 +63,7 @@ using namespace UCOMMON_NAMESPACE;
 static shell::loglevel_t errlevel = shell::WARN;
 static shell::logmode_t errmode = shell::NONE;
 static const char *errname = NULL;
+static shell::logproc_t errproc = (shell::logproc_t)NULL;
 
 OrderedIndex shell::Option::index;
 const char *shell::domain = NULL;
@@ -1700,11 +1701,12 @@ void shell::priority(int level)
 
 #ifdef	HAVE_SYSLOG_H
 
-void shell::log(const char *name, loglevel_t level, logmode_t mode)
+void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t handler)
 {
 	errlevel = level;
 	errmode = mode;
 	errname = name;
+	errproc = handler;
 
 	switch(mode) {
 	case NONE:
@@ -1736,6 +1738,11 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
+
+	if(errproc != (logproc_t)NULL) {
+		if((*errproc)(loglevel, buf))
+			return;
+	}
 
 	if(loglevel >= DEBUG0) {
         if(getppid() > 1) {
@@ -1781,11 +1788,12 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
 		
 #else
 
-void shell::log(const char *name, loglevel_t level, logmode_t mode)
+void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t handler)
 {
 	errlevel = level;
 	errmode = mode;
 	errname = name;
+	errproc = handler;
 }
 
 void shell::log(loglevel_t loglevel, const char *fmt, ...)
@@ -1801,6 +1809,11 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
+
+	if(errproc != (logproc_t)NULL) {
+		if((*errproc)(loglevel, buf))
+			return;
+	}
 
 	if(loglevel >= DEBUG0) {
 		if(fmt[strlen(fmt) - 1] == '\n')

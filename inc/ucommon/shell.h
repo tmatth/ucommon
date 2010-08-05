@@ -97,6 +97,11 @@ public:
 	 */
 	typedef enum {FAIL = 0, ERR, WARN, NOTIFY, INFO, DEBUG0} loglevel_t;
 
+	/**
+	 * Log process handler.
+	 */
+	typedef bool (*logproc_t)(loglevel_t level, const char *text);
+
 #ifdef	_MSWINDOWS_
 	typedef	HANDLE pid_t;
 #else
@@ -655,8 +660,9 @@ public:
 	 * @param name of logging entity.
 	 * @param level of error conditions to log.
 	 * @param mode of logging.
+	 * @param handler for log messages.
 	 */
-	static void log(const char *name, loglevel_t level = ERR, logmode_t = USER_LOG);
+	static void log(const char *name, loglevel_t level = ERR, logmode_t = USER_LOG, logproc_t handler = (logproc_t)NULL);
 
 	/**
 	 * Print to standard output.
