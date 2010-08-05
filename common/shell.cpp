@@ -28,6 +28,7 @@
 
 #ifdef	_MSWINDOWS_
 #include <process.h>
+#include <winreg.h>
 #else
 #include <sys/wait.h>
 #include <sys/ioctl.h>
@@ -1134,11 +1135,33 @@ tail:
 const char *shell::getenv(const char *id, const char *value)
 {
 	char buf[512];
+	char path[255];
+	const char *keyid = NULL;
 
-	if(!GetEnvironmentVariable(id, buf, sizeof(buf)))
-		return value;
+	if(GetEnvironmentVariable(id, buf, sizeof(buf)))
+		return dup(buf);
 
-	return dup(buf);
+	if(errname)
+		keyid = errname;
+	else if(domain)
+		keyid = domain;
+	else if(_argv0)
+		keyid = _argv0;
+	
+	if(keyid) {
+		snprintf(path, sizeof(path), "Defaults\\%s", keyid);
+		HKEY key;
+		if(RegOpenKey(HKEY_CLASSES_ROOT, path, &key) == ERROR_SUCCESS) {
+			LONG dlen = sizeof(buf);
+			buf[0] = 0;
+			RegQueryValueA(key, id, (LPTSTR)buf, &dlen);
+			RegCloseKey(key);
+			if(buf[0])
+				return dup(buf);
+		}	
+	}
+	
+	return value;		
 }
 	
 int shell::system(const char *cmd, const char **envp)
