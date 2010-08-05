@@ -683,6 +683,16 @@ public:
 	static shell::pipe_t spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
 
 	/**
+	 * Set priority level and enable priority scheduler.  This activates the
+	 * realtime priority scheduler when a priority > 0 is requested for the
+	 * process, assuming scheduler support exists and the process is
+	 * sufficiently privileged.  Negative priorities are essentially the
+	 * same as nice.
+	 * @param priority level for process.
+	 */
+	static void priority(int level = 1);
+
+	/**
 	 * Create a detached process.  This creates a new child process that
 	 * is completely detached from the current process.
 	 * @param path to executable.

@@ -1616,3 +1616,37 @@ void shell::rebind(const char *name)
 		textdomain(domain);
 }
 
+#ifdef	_MSWINDOWS_
+void shell::priority(int level)
+{
+}
+#else
+void shell::priority(int level)
+{
+#if _POSIX_PRIORITY_SCHEDULING > 0
+    int policy = SCHED_OTHER;
+
+    if(level > 0)
+        policy = SCHED_RR;
+
+    struct sched_param sparam;
+    int min = sched_get_priority_min(policy);
+    int max = sched_get_priority_max(policy);
+    int pri = (int)level;
+
+    if(min == max)
+        pri = min;
+    else
+        pri += min;
+    if(pri > max)
+        pri = max;
+
+    setpriority(PRIO_PROCESS, 0, -level);
+    memset(&sparam, 0, sizeof(sparam));
+    sparam.sched_priority = pri;
+    sched_setscheduler(0, policy, &sparam);
+#else
+    nice(-level);
+#endif
+}
+#endif
