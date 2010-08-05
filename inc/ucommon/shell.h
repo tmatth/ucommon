@@ -87,6 +87,16 @@ public:
 	 */
 	typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, BAD_VALUE} errmsg_t;
 
+	/**
+	 * Type of error logging we are using.
+	 */
+	typedef enum {NONE = 0, CONSOLE_LOG, USER_LOG, SYSTEM_LOG} logmode_t;
+
+	/**
+	 * Level of error logging.
+	 */
+	typedef enum {FAIL = 0, ERR, WARN, NOTIFY, INFO, DEBUG0} loglevel_t;
+
 #ifdef	_MSWINDOWS_
 	typedef	HANDLE pid_t;
 #else
@@ -349,6 +359,9 @@ public:
 
 		inline unsigned operator*()
 			{return counter;};
+
+		inline void set(unsigned value = 1)
+			{counter = value;};
 	};
 
 	/**
@@ -629,6 +642,21 @@ public:
 	 * @param format string to use.
 	 */
 	static void errexit(int exitcode, const char *format = NULL, ...) __PRINTF(2, 3);
+
+	/**
+	 * Print error message at specific error level.
+	 * @param level of error condition.
+	 * @param format string to use.
+	 */
+	static void log(loglevel_t level, const char *format, ...) __PRINTF(2, 3);
+
+	/**
+	 * Set logging level and state.
+	 * @param name of logging entity.
+	 * @param level of error conditions to log.
+	 * @param mode of logging.
+	 */
+	static void log(const char *name, loglevel_t level = ERR, logmode_t = USER_LOG);
 
 	/**
 	 * Print to standard output.

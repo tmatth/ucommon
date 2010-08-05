@@ -54,7 +54,15 @@
 #define	textdomain(s)
 #endif
 
+#ifdef	HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 using namespace UCOMMON_NAMESPACE;
+
+static shell::loglevel_t errlevel = shell::WARN;
+static shell::logmode_t errmode = shell::NONE;
+static const char *errname = NULL;
 
 OrderedIndex shell::Option::index;
 const char *shell::domain = NULL;
@@ -1688,4 +1696,129 @@ void shell::priority(int level)
     nice(-level);
 #endif
 }
+#endif
+
+#ifdef	HAVE_SYSLOG_H
+
+void shell::log(const char *name, loglevel_t level, logmode_t mode)
+{
+	errlevel = level;
+	errmode = mode;
+	errname = name;
+
+	switch(mode) {
+	case NONE:
+		closelog();
+		return;
+	case CONSOLE_LOG:
+		::openlog(name, LOG_CONS, LOG_DAEMON);
+		return;
+	case USER_LOG:
+		::openlog(name, 0, LOG_USER);
+		return;
+	case SYSTEM_LOG:
+		::openlog(name, LOG_CONS, LOG_DAEMON);
+		return;
+	}
+}
+
+void shell::log(loglevel_t loglevel, const char *fmt, ...)
+{
+    assert(fmt != NULL && *fmt != 0);
+
+    char buf[256];
+    va_list args;
+	int level= LOG_ERR;
+
+	if(!errname || errmode == NONE || level > errlevel)
+		return;
+
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+
+	if(loglevel >= DEBUG0) {
+        if(getppid() > 1) {
+            if(fmt[strlen(fmt) - 1] == '\n')
+                fprintf(stderr, "%s: %s", errname, buf);
+            else
+                fprintf(stderr, "%s: %s\n", errname, buf);
+        }
+		return;
+	}
+
+	switch(loglevel) {
+	case INFO:
+		level = LOG_INFO;
+		break;
+	case NOTIFY:
+		level = LOG_NOTICE;
+		break;
+	case WARN:
+		level = LOG_WARNING;
+		break;
+	case ERR:
+		level = LOG_ERR;
+		break;
+	case FAIL:
+		level = LOG_CRIT;
+		break;
+	default:
+		level = LOG_ERR;
+	}
+
+	if(getppid() > 1) {
+		if(fmt[strlen(fmt) - 1] == '\n')
+			fprintf(stderr, "%s: %s", errname, buf);
+		else
+			fprintf(stderr, "%s: %s\n", errname, buf);
+	}
+	::syslog(level, "%s", buf);
+
+	if(level == LOG_CRIT)
+		cpr_runtime_error(buf);
+}
+		
+#else
+
+void shell::log(const char *name, loglevel_t level, logmode_t mode)
+{
+	errlevel = level;
+	errmode = mode;
+	errname = name;
+}
+
+void shell::log(loglevel_t loglevel, const char *fmt, ...)
+{
+    assert(fmt != NULL && *fmt != 0);
+
+    char buf[256];
+    va_list args;
+
+	if(!errname || errmode == NONE || level > errlevel)
+		return;
+
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+
+	if(loglevel >= DEBUG0) {
+        if(getppid() > 1) {
+            if(fmt[strlen(fmt) - 1] == '\n')
+                fprintf(stderr, "%s: %s", errname, buf);
+            else
+                fprintf(stderr, "%s: %s\n", errname, buf);
+        }
+		return;
+	}
+
+	if(fmt[strlen(fmt) - 1] == '\n')
+		fprintf(stderr, "%s: %s", errname, buf);
+	else
+		fprintf(stderr, "%s: %s\n", errname, buf);
+
+	if(loglevel == FAIL)
+		cpr_runtime_error(buf);
+}
+		
 #endif
