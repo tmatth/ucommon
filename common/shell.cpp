@@ -362,6 +362,7 @@ OrderedObject(&index)
 	long_option = longopt;
 	uses_option = value;
 	help_string = help;
+	trigger_option = false;
 }
 
 shell::Option::~Option()
@@ -402,6 +403,36 @@ shell::Option(short_option, long_option, type, help_string)
 const char *shell::numericopt::assign(const char *value)
 {
 	char *endptr = NULL;
+
+	if(used)
+		return errmsg(shell::OPTION_USED);
+
+	used = true;
+	number = strtol(value, &endptr, 0);
+	if(!endptr || *endptr != 0)
+		return errmsg(shell::BAD_VALUE);
+
+	return NULL;
+}
+
+shell::counteropt::counteropt(char short_option, const char *long_option, const char *help_string, const char *type, long def_value) :
+shell::Option(short_option, long_option, type, help_string)
+{
+	used = false;
+	number = def_value;
+	trigger_option = true;
+}
+
+const char *shell::counteropt::assign(const char *value)
+{
+	char *endptr = NULL;
+
+	// trigger option mode received...
+	if(value == NULL) {
+		++number;
+		used = true;
+		return NULL;
+	}
 
 	if(used)
 		return errmsg(shell::OPTION_USED);
@@ -583,7 +614,11 @@ void shell::help(void)
 			op.next();
 			continue;
 		}
-		if(op->short_option && op->long_option) {
+		if(op->short_option && op->long_option && op->uses_option && !op->trigger_option) {
+			printf("  -%c .., ", op->short_option);
+			hp = 9;
+		}
+		else if(op->short_option && op->long_option) {
 			printf("  -%c, ", op->short_option);
 			hp = 6;
 		}
@@ -806,6 +841,9 @@ char **shell::getargv(char **argv)
 
 			value = NULL;
 
+			if(op->trigger_option) 
+				goto trigger;
+
 			if(op->uses_option && arg[1] == 0)
 				value = argv[argp++];
 			else if(op->uses_option)
@@ -813,10 +851,11 @@ char **shell::getargv(char **argv)
 
 			if(op->uses_option && value == NULL)
 				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, errmsg(shell::NOARGUMENT));
+trigger:
 			err = op->assign(value);
 			if(err)
 				errexit(1, "*** %s: -%c: %s\n", _argv0, op->short_option, shell::text(err));
-			if(op->uses_option)
+			if(value)
 				break;
 		}
 	}

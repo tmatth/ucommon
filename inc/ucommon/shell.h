@@ -287,6 +287,7 @@ public:
 		const char *long_option;
 		const char *uses_option;
 		const char *help_string;
+		bool trigger_option;
 
 		/**
 		 * Construct a shell parser option.
@@ -440,6 +441,43 @@ public:
 
 	public:
 		numericopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
+
+		inline void set(long value)
+			{number = value;};
+
+		inline operator bool()
+			{return used;};
+
+		inline bool operator!()
+			{return !used;};
+
+		inline operator long()
+			{return number;};
+
+		inline long operator*()
+			{return number;};
+	};
+
+	/**
+	 * Counter option for shell parsing.  This offers a quick-use class
+	 * to parse a shell flag, along with a numberic value that may be
+	 * saved and a use counter, as multiple invokations is an error.  Unlike
+	 * numeric options, the short mode flag is a trigger option, and each
+	 * use of the short flag is considered a counter increment.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT counteropt : public Option
+	{
+	private:
+		bool used;
+
+	protected:
+		long number;
+
+		virtual const char *assign(const char *value);
+
+	public:
+		counteropt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
 
 		inline void set(long value)
 			{number = value;};
