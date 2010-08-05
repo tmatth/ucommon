@@ -1706,7 +1706,9 @@ void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t ha
 	errlevel = level;
 	errmode = mode;
 	errname = name;
-	errproc = handler;
+
+	if(handler != (logproc_t)NULL)
+		errproc = handler;
 
 	switch(mode) {
 	case NONE:
@@ -1793,7 +1795,9 @@ void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t ha
 	errlevel = level;
 	errmode = mode;
 	errname = name;
-	errproc = handler;
+
+	if(handler != (logproc_t)NULL)
+		errproc = handler;
 }
 
 void shell::log(loglevel_t loglevel, const char *fmt, ...)
