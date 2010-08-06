@@ -1149,7 +1149,7 @@ const char *shell::getenv(const char *id, const char *value)
 		keyid = _argv0;
 	
 	if(keyid) {
-		snprintf(path, sizeof(path), "Defaults\\%s", keyid);
+		snprintf(path, sizeof(path), "Default Environment\\%s", keyid);
 		HKEY key;
 		if(RegOpenKey(HKEY_CLASSES_ROOT, path, &key) == ERROR_SUCCESS) {
 			LONG dlen = sizeof(buf);
