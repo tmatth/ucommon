@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="3.3.1"
-LT_VERSION="3:17:0"
+VERSION="3.3.2"
+LT_VERSION="3:18:0"
 OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -308,7 +308,7 @@ if test "$threading" = "none" ; then
 	fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp ; do
 	found="no"
 	AC_CHECK_FUNC($func,[
 		found=$func
@@ -364,8 +364,11 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
 		AC_DEFINE(HAVE_SETLOCALE, [1], [can set localization])
 		;;
 	gettext)
-		AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in glibc])
+		AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in libc])
 		have_gettext="yes"
+		;;
+	execvp)
+		AC_DEFINE(HAVE_EXECVP, [1], [has execvp in libc])
 		;;
 	esac
 done

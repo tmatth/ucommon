@@ -1,5 +1,7 @@
 from ucommon 3.3.1 to 3.3.2
 - shell debug message logging output.
+- restart method to hook debuggers.
+- local thread-safe symbol space.
 
 from ucommon 3.3.0 to 3.3.1
 - expand args to directory and recursive operations.

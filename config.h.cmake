@@ -50,6 +50,7 @@
 #cmakedefine HAVE_SETPGRP 1
 #cmakedefine HAVE_SETLOCALE 1
 #cmakedefine HAVE_GETTEXT 1
+#cmakedefine HAVE_EXECVP 1
 #cmakedefine HAVE_SYS_FILIO_H 1
 #cmakedefine HAVE_SYS_MMAN_H 1
 #cmakedefine HAVE_SYS_POLL_H 1

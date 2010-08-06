@@ -65,6 +65,7 @@ static shell::loglevel_t errlevel = shell::WARN;
 static shell::logmode_t errmode = shell::NONE;
 static const char *errname = NULL;
 static shell::logproc_t errproc = (shell::logproc_t)NULL;
+static mutex_t symlock;
 
 OrderedIndex shell::Option::index;
 const char *shell::domain = NULL;
@@ -472,17 +473,6 @@ const char *shell::stringopt::assign(const char *value)
 	return NULL;
 }
 
-char shell::stringopt::operator[](size_t index)
-{
-	if(!text)
-		return 0;
-
-	if(index >= strlen(text))
-		return 0;
-
-	return text[index];
-}
-
 shell::charopt::charopt(char short_option, const char *long_option, const char *help_string, const char *type, char def_value) :
 shell::Option(short_option, long_option, type, help_string)
 {
@@ -564,6 +554,7 @@ mempager(pagesize)
 	_argv0 = NULL;
 	_argv = NULL;
 	_argc = 0;
+	_syms = NULL;
 }
 
 shell::shell(const char *string, size_t pagesize) :
@@ -572,6 +563,7 @@ mempager(pagesize)
 	_argv0 = NULL;
 	_argv = NULL;
 	_argc = 0;
+	_syms = NULL;
 
 	parse(string);
 }
@@ -609,7 +601,7 @@ unsigned shell::count(char **argv)
 {
 	unsigned count = 0;
 
-	while(argv && *argv[count])
+	while(argv && argv[count])
 		++count;
 
 	return count;
@@ -850,7 +842,6 @@ char **shell::getargv(char **argv)
 				errexit(1, "*** %s: -%c: %s\n", _argv0, *arg, errmsg(shell::BADOPTION));
 
 			value = NULL;
-
 			if(op->trigger_option) 
 				goto trigger;
 
@@ -948,16 +939,40 @@ void shell::errexit(int exitcode, const char *format, ...)
 {
 	va_list args;
 	loglevel_t level = ERR;
+	char buf[256];
+
+	String::set(buf, sizeof(buf) - 1, format);
+	size_t len = strlen(buf);
+
+	if(buf[len - 1] != '\n') {
+		buf[len] = '\n';
+		buf[len + 1] = 0;
+	}
+	else
+		--len;
+
+	format = buf;
 
 	va_start(args, format);
 	vfprintf(stderr, format, args);
 	fflush(stderr);
+
+	buf[len] = 0;
 
 	if(exitcode)
 		level = FAIL;
 
 #ifdef	HAVE_SYSLOG_H
 	if(errname && errmode != NONE && level <= errlevel) {
+		if(eq("*** ", format, 4)) {
+			format += 4;			
+			const char *cp = format;
+			while(isalnum(*cp) || *cp == '-' || *cp == '.')
+				++cp;
+			if(*cp == ':' && cp[1] == ' ')
+				format = cp + 2;
+		}
+			
 		if(exitcode)
 			vsyslog(LOG_CRIT, format, args);
 		else
@@ -1897,3 +1912,89 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
 }
 		
 #endif
+
+#ifdef	HAVE_EXECVP
+
+void shell::restart(char *argv0, char **argv, char **list)
+{
+	unsigned args = count(argv);
+	unsigned head = count(list);
+	unsigned argc = 2 + args + head;
+	char **newargs = (char **)mempager::alloc(sizeof(char **) * argc--);
+
+	memcpy(newargs, list, head * sizeof(char **));
+	newargs[head++] = argv0;
+	if(args)
+		memcpy(&newargs[head], argv, args * sizeof(char **));
+
+	newargs[argc] = NULL;
+	execvp(*list, newargs);
+	exit(-1);
+}
+
+#else
+
+void shell::restart(const char *argv0, char **argv, char **list)
+{
+	exit(-1);
+}
+
+#endif
+
+bool shell::issym(const char *name)
+{
+	symlock.acquire();
+
+	linked_pointer<syms> sp;
+
+	while(is(sp)) {
+		if(eq(sp->name, name)) {
+			symlock.release();
+			return true;
+		}
+		++sp;
+	}
+	symlock.release();
+	return false;
+}
+
+const char *shell::getsym(const char *name, const char *value)
+{
+	symlock.acquire();
+	linked_pointer<syms> sp;
+
+	while(is(sp)) {
+		if(eq(sp->name, name)) {
+			value = sp->value;
+			symlock.release();
+			return value;
+		}
+		++sp;
+	}
+
+	symlock.release();
+	return getenv(name, value);
+}
+
+void shell::setsym(const char *name, const char *value)
+{
+	symlock.acquire();
+	linked_pointer<syms> sp;
+
+	while(is(sp)) {
+		if(eq(sp->name, name)) {
+			sp->value = dup(value);
+			symlock.release();
+			return;
+		}
+		++sp;
+	}
+
+	syms *v = (syms *)mempager::alloc(sizeof(syms));
+	v->name = dup(name);
+	v->value = dup(value);
+	v->enlist(&_syms);
+	symlock.release();
+}
+
+

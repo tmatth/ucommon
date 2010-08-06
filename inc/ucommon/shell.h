@@ -61,6 +61,8 @@ private:
 	char **_argv;
 	unsigned _argc;
 	char *_argv0;
+	LinkedObject *_syms;
+
 	static const char *domain;
 
 	class __LOCAL args : public OrderedObject
@@ -68,6 +70,13 @@ private:
 	public:
 		char *item;
 	};
+
+	class __LOCAL syms : public LinkedObject
+	{
+	public:
+		const char *name;
+		const char *value;
+	};		
 	
 	/**
 	 * Collapse argument list.  This is used internally to collapse args
@@ -402,8 +411,6 @@ public:
 
 		inline const char *operator*()
 			{return text;};
-
-		char operator[](size_t index);
 	};
 
 	/**
@@ -611,6 +618,28 @@ public:
 	const char *getenv(const char *name, const char *value = NULL);
 
 	/**
+	 * Get a local symbol.  This uses getenv if no local symbol is found.
+	 * @param name of symbol.
+	 * @param value of symbol if not found.
+	 * @return value of symbol.
+	 */
+	const char *getsym(const char *name, const char *value = NULL);
+
+	/**
+	 * Set a local symbol.
+	 * @param name of symbol to set.
+	 * @param value of symbol to set.
+	 */
+	void setsym(const char *name, const char *value);
+
+	/**
+	 * Test if symbol exists.
+	 * @param name of symbol.
+	 * @return true if found.
+	 */
+	bool issym(const char *name);
+
+	/**
 	 * Parse and extract the argv0 filename alone.
 	 * @param argv from main.
 	 * @return argv0 simple path name.
@@ -625,6 +654,14 @@ public:
 	 * @return argv of non-option file list.
 	 */
 	char **getargv(char **argv);
+
+	/**
+	 * Execute front-end like gdb based on stripped first argument.
+	 * @param argv0 of our executable.
+	 * @param argv to pass to child.
+	 * @param list of arguments to execute in front of argv.
+	 */
+	void restart(char *argv0, char **argv, char **list);
 
 	/**
 	 * Parse shell arguments directly into a shell object.
@@ -872,6 +909,11 @@ public:
 		{return 2;};
 #endif
 };
+
+/**
+ * Convenience type to manage and pass shell objects.
+ */
+typedef	shell shell_t;
 
 /**
  * Abusive compilers...
