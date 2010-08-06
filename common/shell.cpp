@@ -1737,6 +1737,28 @@ void shell::priority(int level)
 }
 #endif
 
+void shell::debug(unsigned level, const char *fmt, ...)
+{
+    assert(fmt != NULL && *fmt != 0);
+
+    char buf[256];
+    va_list args;
+
+	level += (unsigned)DEBUG0;
+
+	if(!errname || level > (unsigned)errlevel)
+		return;
+
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+
+	if(fmt[strlen(fmt) - 1] == '\n')
+        fprintf(stderr, "%s: %s", errname, buf);
+    else
+        fprintf(stderr, "%s: %s\n", errname, buf);
+}
+
 #ifdef	HAVE_SYSLOG_H
 
 void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t handler)

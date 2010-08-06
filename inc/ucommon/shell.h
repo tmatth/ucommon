@@ -649,6 +649,13 @@ public:
 	static void errexit(int exitcode, const char *format = NULL, ...) __PRINTF(2, 3);
 
 	/**
+	 * Print a debug message by debug level.
+	 * @param level of debug message.
+	 * @param format string to use.
+	 */
+	static void debug(unsigned level, const char *format, ...) __PRINTF(2, 3);
+
+	/**
 	 * Print error message at specific error level.
 	 * @param level of error condition.
 	 * @param format string to use.
