@@ -773,6 +773,16 @@ public:
 		{return _argv[offset];};
 
 	/**
+	 * Detach current process to daemon.
+	 */
+	void detach(void);
+
+	/**
+	 * Make current process restartable.
+	 */
+	void restart(void);
+
+	/**
 	 * Spawn a child process.  This creates a new child process.  If
 	 * the executable path is a pure filename, then the $PATH will be
 	 * used to find it.  The argv array may be created from a string
@@ -817,7 +827,7 @@ public:
 	 * @param stdio handles for stdin, stdout, and stderr.
 	 * @return 0 if success, -1 on error.
 	 */
-	int	detach(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
+	static int	detach(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
 
 	/**
 	 * Wait for a child process to terminate.  This operation blocks.

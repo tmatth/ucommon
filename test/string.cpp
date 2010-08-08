@@ -70,4 +70,7 @@ extern "C" int main()
 	assert(num1 == -33.5);
 	assert(num2 == 25);
 	assert(numstr.len() == 0);
+
+	char *test = strdup((String)"hello" + " test");
+	assert(eq(test, "hello test"));
 }

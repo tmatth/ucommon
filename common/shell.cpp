@@ -59,6 +59,18 @@
 #include <syslog.h>
 #endif
 
+#ifndef OPEN_MAX
+#define OPEN_MAX 20
+#endif
+
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(status) ((unsigned)(status) >> 8)
+#endif
+
+#ifndef _PATH_TTY
+#define _PATH_TTY   "/dev/tty"
+#endif
+
 using namespace UCOMMON_NAMESPACE;
 
 static shell::loglevel_t errlevel = shell::WARN;
@@ -1322,6 +1334,14 @@ exit:
 	}
 	return pid;
 }
+
+void shell::detach(void)
+{
+}
+
+void shell::restart(void)
+{
+}
 	
 int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
 {
@@ -1484,6 +1504,91 @@ int shell::system(const char *cmd, const char **envp)
 	::signal(SIGPIPE, SIG_DFL);
 	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
 	::exit(-1);
+}
+
+void shell::restart(void)
+{
+	pid_t pid;
+	int status;
+
+restart:
+	pid = fork();
+	if(pid > 0) {
+		waitpid(pid, &status, 0);
+		if(WIFSIGNALED(status))
+			status = WTERMSIG(status);
+		else
+			status = WIFEXITED(status);
+		switch(status) {
+#ifdef	SIGPWR
+		case SIGPWR:
+#endif
+		case SIGINT:
+		case SIGQUIT:
+		case SIGTERM:
+		case 0:
+			exit(status);
+		default:
+			goto restart;
+		}
+	}
+}
+
+void shell::detach(void)
+{
+	const char *dev = "/dev/null";
+	pid_t pid;
+	int fd;
+
+	close(0);
+	close(1);
+	close(2);
+#ifdef	SIGTTOU
+	signal(SIGTTOU, SIG_IGN);
+#endif
+
+#ifdef	SIGTTIN
+	signal(SIGTTIN, SIG_IGN);
+#endif
+
+#ifdef	SIGTSTP
+	signal(SIGTSTP, SIG_IGN);
+#endif
+	pid = fork();
+	if(pid > 0)
+		exit(0);
+	crit(pid == 0, "detach without process");
+
+#if defined(SIGTSTP) && defined(TIOCNOTTY)
+	crit(setpgid(0, getpid()) == 0, "detach without process group");
+	if((fd = open(_PATH_TTY, O_RDWR)) >= 0) {
+		ioctl(fd, TIOCNOTTY, NULL);
+		close(fd);
+	}
+#else
+
+#ifdef HAVE_SETPGRP
+	crit(setpgrp() == 0, "detach without process group");
+#else
+	crit(setpgid(0, getpid()) == 0, "detach without process group");
+#endif
+	signal(SIGHUP, SIG_IGN);
+	pid = fork();
+	if(pid > 0)
+		exit(0);
+	crit(pid == 0, "detach without process");
+#endif
+	if(dev && *dev) {
+		fd = open(dev, O_RDWR);
+		if(fd > 0)
+			dup2(fd, 0);
+		if(fd != 1)
+			dup2(fd, 1);
+		if(fd != 2)
+			dup2(fd, 2);
+		if(fd > 2)
+			close(fd);
+	}
 }
 
 int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
