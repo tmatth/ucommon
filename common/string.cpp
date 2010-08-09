@@ -23,6 +23,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <limits.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -1968,6 +1969,55 @@ unsigned string::hexpack(unsigned char *binary, const char *string, const char *
 	return count;
 }
 
+string &string::operator%(unsigned short& value)
+{
+	unsigned long temp = USHRT_MAX + 1;
+	char *ep;
+	if(!str || !str->text)
+		return *this;
+
+	value = 0;
+	temp = strtoul(str->text, &ep, 0);
+	if(temp > USHRT_MAX)
+		goto failed;
+
+	value = (unsigned short)temp;
+
+	if(ep)
+		set(ep);
+	else
+		set("");
+
+failed:
+	return *this;	
+}
+
+string &string::operator%(short& value)
+{
+	long temp = SHRT_MAX + 1;
+	char *ep;
+	if(!str || !str->text)
+		return *this;
+
+	value = 0;
+	temp = strtol(str->text, &ep, 0);
+	if(temp < 0 && temp < SHRT_MIN)
+		goto failed;
+
+	if(temp > SHRT_MAX)
+		goto failed;
+
+	value = (short)temp;
+
+	if(ep)
+		set(ep);
+	else
+		set("");
+
+failed:
+	return *this;	
+}
+
 string &string::operator%(long& value)
 {
 	value = 0;
@@ -1976,6 +2026,22 @@ string &string::operator%(long& value)
 		return *this;
 
 	value = strtol(str->text, &ep, 0);
+	if(ep)
+		set(ep);
+	else
+		set("");
+
+	return *this;
+}
+
+string &string::operator%(unsigned long& value)
+{
+	value = 0;
+	char *ep;
+	if(!str || !str->text)
+		return *this;
+
+	value = strtoul(str->text, &ep, 0);
 	if(ep)
 		set(ep);
 	else

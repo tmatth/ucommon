@@ -71,6 +71,6 @@ extern "C" int main()
 	assert(num2 == 25);
 	assert(numstr.len() == 0);
 
-	char *test = strdup((String)"hello" + " test");
-	assert(eq(test, "hello test"));
+	char *test = strdup(str("hello") + " test" + str((short)13));
+	assert(eq(test, "hello test13"));
 }

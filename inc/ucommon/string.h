@@ -844,11 +844,32 @@ public:
 	bool operator>=(const char *text) const;
 
 	/**
+	 * Parse short integer value from a string.
+	 * @param value to store.
+	 * @return object in expression.
+	 */
+	string &operator%(short& value);
+
+	/**
+	 * Parse long integer value from a string.
+	 * @param value to store.
+	 * @return object in expression.
+	 */
+	string &operator%(unsigned short& value);
+
+	/**
 	 * Parse long integer value from a string.
 	 * @param value to store.
 	 * @return object in expression.
 	 */
 	string &operator%(long& value);
+
+	/**
+	 * Parse long integer value from a string.
+	 * @param value to store.
+	 * @return object in expression.
+	 */
+	string &operator%(unsigned long& value);
 
 	/**
 	 * Parse double value from a string.
@@ -1797,6 +1818,27 @@ inline bool ieq(char const *s1, char const *s2, size_t size)
  */
 inline bool ieq(String &s1, String &s2)
 	{return String::case_equal(s1.c_str(), s2.c_str());}
+
+inline String str(const char *string)
+	{return (String)string;};
+
+inline String str(String& string)
+	{return (String)string;};
+
+inline String str(short value)
+	{String temp(16, "%hd", value); return temp;}; 
+
+inline String str(unsigned short value)
+	{String temp(16, "%hu", value); return temp;}; 
+
+inline String str(long value)
+	{String temp(32, "%ld", value); return temp;};
+
+inline String str(unsigned long value)
+	{String temp(32, "%lu", value); return temp;};
+
+inline String str(double value)
+	{String temp(40, "%f", value); return temp;}; 
 
 END_NAMESPACE
 
