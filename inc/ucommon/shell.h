@@ -112,6 +112,11 @@ public:
 	 */
 	typedef bool (*logproc_t)(loglevel_t level, const char *text);
 
+	/**
+	 * Shutdown handler.
+	 */
+	typedef void (*downproc_t)(bool reload);
+
 #ifdef	_MSWINDOWS_
 	typedef	HANDLE pid_t;
 #else
@@ -665,6 +670,16 @@ public:
 	void restart(char *argv0, char **argv, char **list);
 
 	/**
+	 * Notify service is up.
+	 */
+	void up(void);
+
+	/**
+	 * Shutdown service.
+	 */
+	void down(void);
+
+	/**
 	 * Parse shell arguments directly into a shell object.
 	 * @param args table.
 	 * @param string to parse.
@@ -776,7 +791,7 @@ public:
 	/**
 	 * Detach current process to daemon.
 	 */
-	void detach(void);
+	void detach(downproc_t stopreload = (downproc_t)NULL);
 
 	/**
 	 * Make current process restartable.

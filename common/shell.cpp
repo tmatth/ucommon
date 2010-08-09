@@ -78,6 +78,7 @@ static shell::logmode_t errmode = shell::NONE;
 static const char *errname = NULL;
 static shell::logproc_t errproc = (shell::logproc_t)NULL;
 static mutex_t symlock;
+static shell::downproc_t downproc = (shell::downproc_t)NULL;
 
 OrderedIndex shell::Option::index;
 const char *shell::domain = NULL;
@@ -1340,12 +1341,103 @@ exit:
 	return pid;
 }
 
-void shell::detach(void)
+static SERVICE_STATUS_HANDLE hStatus;
+static SERVICE_STATUS status;
+static unsigned detaches = 0;
+
+static void WINAPI start(DWORD argc, LPSTR *argv)
 {
+    memset(&status, 0, sizeof(SERVICE_STATUS));
+    status.dwServiceType = SERVICE_WIN32;
+    status.dwCurrentState = SERVICE_START_PENDING;
+    status.dwControlsAccepted = SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_SHUTDOWN;
+
+    hStatus = ::RegisterServiceCtrlHandler("sipwitch", &control);
+    ::SetServiceStatus(hStatus, &status);
+
+	::main(argc, argv);
+}
+
+static void WINAPI control(DWORD control)
+{
+	switch(control) {
+	case 128:
+		if(downproc)
+			(*downproc)(true);
+		return;
+	case SERVICE_CONTROL_SHUTDOWN:
+	case SERVICE_CONTROL_STOP:
+        status.dwCurrentState = SERVICE_STOP_PENDING;
+        status.dwWin32ExitCode = 0;
+        status.dwCheckPoint = 0;
+        status.dwWaitHint = 6000;
+		SetServiceStatus(hStatus, &status);
+		if(downproc)
+			(*downproc)(false);
+		else
+			exit(0);
+		break;
+	default:
+		break;
+	}
+}
+
+static void WINAPI start(DWORD argc, LPSTR *argv)
+{
+	++detaches;
+	::main(argc, argv);
+}
+
+void shell::detach(downproc_t stop)
+{
+	const char *name = _argv0;
+
+	downproc = stop;
+
+	if(domainname)
+		name = domainname;
+
+	name = strdup(name);
+
+	if(detaches) {
+		memset(&status, 0, sizeof(SERVICE_STATUS));
+		status.dwServiceType = SERVICE_WIN32;
+		status.dwCurrentState = SERVICE_START_PENDING;
+		status.dwControlsAccepted = SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_SHUTDOWN;
+
+		hStatus = ::RegisterServiceCtrlHandler(name, &control);
+		return;
+	}
+
+	SERVICE_TABLE_ENTRY servicetable[] = {
+		{name, start},
+		{NULL, NULL}
+	};
+
+	if(!StartServiceCtrlDispatcher(servicetable))
+		errexit(1, "*** %s: %s\n", name, _TEXT("failed service start"));
 }
 
 void shell::restart(void)
 {
+}
+
+void shell::down(void)
+{
+	if(detaches)
+		control(SERVICE_CONTROL_STOP);
+	else if(downproc != (downproc_t)NULL)
+		(*downproc)(false);
+	else
+		::exit(0);
+}
+
+void shell::up(void)
+{
+	if(detaches) {
+		status.dwCurrentState = SERVICE_RUNNING;
+		::SetServiceStatus(hStatus, &status);
+	}
 }
 	
 int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
@@ -1511,6 +1603,18 @@ int shell::system(const char *cmd, const char **envp)
 	::exit(-1);
 }
 
+void shell::up(void)
+{
+}
+
+void shell::down(void)
+{
+	if(downproc != (downproc_t)NULL)
+		(*downproc)(false);
+	else
+		::exit(0);
+}
+
 void shell::restart(void)
 {
 	pid_t pid;
@@ -1539,11 +1643,13 @@ restart:
 	}
 }
 
-void shell::detach(void)
+void shell::detach(downproc_t stop)
 {
 	const char *dev = "/dev/null";
 	pid_t pid;
 	int fd;
+
+	downproc = stop;
 
 	close(0);
 	close(1);
