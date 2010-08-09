@@ -1039,7 +1039,7 @@ public:
  * template is found in and derived from the object_value template.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T, class O=NamedObject>
+template <typename T, class O=NamedObject>
 class named_value : public object_value<T, O>
 {
 public:
@@ -1076,7 +1076,7 @@ public:
  * template is found in and derived from the object_value template.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T, class O=OrderedObject>
+template <typename T, class O=OrderedObject>
 class linked_value : public object_value<T, O>
 {
 public:
@@ -1258,7 +1258,6 @@ public:
 		{return (T *)ObjectQueue::pop();}
 };
 
-
 /**
  * A templated smart pointer for iterating linked lists.  This class allows
  * one to access a list of single or double linked objects and iterate
@@ -1437,7 +1436,7 @@ public:
  * of class types that are data pointers.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T, unsigned P>
+template <typename T, unsigned P>
 class multimap : public MultiMap
 {
 protected:
@@ -1527,7 +1526,7 @@ public:
  * allocated with a pointer stored in pure leaf nodes.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T>
+template <typename T>
 class treemap : public NamedTree
 {
 protected:

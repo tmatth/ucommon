@@ -682,7 +682,7 @@ public:
  * a auto variable.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template<class T, vectorsize_t S>
+template<typename T, vectorsize_t S>
 class vectorbuf : public MemVector
 {
 private:

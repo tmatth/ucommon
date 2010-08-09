@@ -404,7 +404,7 @@ public:
  * the linked_value template.
  * @author David Sugar <dyfet@gnutelephony.org>
  */ 
-template <class T, class O = CountedObject>
+template <typename T, class O = CountedObject>
 class object_value : public O
 {
 protected:
@@ -599,7 +599,7 @@ inline bool isnullp(T *object)
  * @param o1 to swap.
  * @param o2 to swap.
  */
-template<class T>
+template<typename T>
 inline void swap(T& o1, T& o2)
     {cpr_memswap(&o1, &o2, sizeof(T));}
 
@@ -609,7 +609,7 @@ inline void swap(T& o1, T& o2)
  * @param o2 to check.
  * @return max object.
  */
-template<class T>
+template<typename T>
 inline T& (max)(T& o1, T& o2)
 {
     return o1 > o2 ? o1 : o2;
@@ -621,7 +621,7 @@ inline T& (max)(T& o1, T& o2)
  * @param o2 to check.
  * @return min object.
  */
-template<class T>
+template<typename T>
 inline T& (min)(T& o1, T& o2)
 {
 	return o1 < o2 ? o1 : o2;
