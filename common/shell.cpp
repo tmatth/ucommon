@@ -1413,16 +1413,6 @@ void shell::restart(void)
 {
 }
 
-void shell::down(void)
-{
-	if(detaches)
-		control(SERVICE_CONTROL_STOP);
-	else if(downproc != (downproc_t)NULL)
-		(*downproc)(false);
-	else
-		::exit(0);
-}
-
 void shell::up(void)
 {
 	if(detaches) {
@@ -1596,14 +1586,6 @@ int shell::system(const char *cmd, const char **envp)
 
 void shell::up(void)
 {
-}
-
-void shell::down(void)
-{
-	if(downproc != (downproc_t)NULL)
-		(*downproc)(false);
-	else
-		::exit(0);
 }
 
 void shell::restart(void)

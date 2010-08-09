@@ -675,11 +675,6 @@ public:
 	void up(void);
 
 	/**
-	 * Shutdown service.
-	 */
-	void down(void);
-
-	/**
 	 * Parse shell arguments directly into a shell object.
 	 * @param args table.
 	 * @param string to parse.
