@@ -565,6 +565,7 @@ mempager(pagesize)
 {
 	_argv0 = NULL;
 	_argv = NULL;
+	_orig = NULL;
 	_argc = 0;
 	_syms = NULL;
 }
@@ -574,6 +575,7 @@ mempager(pagesize)
 {
 	_argv0 = NULL;
 	_argv = NULL;
+	_orig = NULL;
 	_argc = 0;
 	_syms = NULL;
 
@@ -585,7 +587,9 @@ mempager(pagesize)
 {
 	_argv0 = NULL;
 	_argv = NULL;
+	_orig = NULL;
 	_argc = 0;
+	_syms = NULL;
 
 	parse(argc, argv);
 }
@@ -755,6 +759,7 @@ int shell::systemf(const char *format, ...)
 
 void shell::parse(int argc, char **argv)
 {
+	_orig = argv;
 	getargv0(argv);
 	getargv(++argv);
 }

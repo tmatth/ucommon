@@ -1,6 +1,7 @@
 from ucommon 3.3.2 to 3.3.3
 - process detach and restart handling.
 - more complete string to numeric conversions.
+- syms were not initialized in all shell constructors.
 
 from ucommon 3.3.1 to 3.3.2
 - shell debug message logging output.

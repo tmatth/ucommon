@@ -58,6 +58,7 @@ NAMESPACE_UCOMMON
 class __EXPORT shell : public mempager
 {
 private:
+	char **_orig;
 	char **_argv;
 	unsigned _argc;
 	char *_argv0;
