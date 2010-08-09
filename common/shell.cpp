@@ -1345,19 +1345,6 @@ static SERVICE_STATUS_HANDLE hStatus;
 static SERVICE_STATUS status;
 static unsigned detaches = 0;
 
-static void WINAPI start(DWORD argc, LPSTR *argv)
-{
-    memset(&status, 0, sizeof(SERVICE_STATUS));
-    status.dwServiceType = SERVICE_WIN32;
-    status.dwCurrentState = SERVICE_START_PENDING;
-    status.dwControlsAccepted = SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_SHUTDOWN;
-
-    hStatus = ::RegisterServiceCtrlHandler("sipwitch", &control);
-    ::SetServiceStatus(hStatus, &status);
-
-	::main(argc, argv);
-}
-
 static void WINAPI control(DWORD control)
 {
 	switch(control) {
@@ -1382,7 +1369,11 @@ static void WINAPI control(DWORD control)
 	}
 }
 
-static void WINAPI start(DWORD argc, LPSTR *argv)
+extern "C" {
+	extern int main(int argc, char **argv);
+}
+
+static void WINAPI _start(DWORD argc, LPSTR *argv)
 {
 	++detaches;
 	::main(argc, argv);
@@ -1394,8 +1385,8 @@ void shell::detach(downproc_t stop)
 
 	downproc = stop;
 
-	if(domainname)
-		name = domainname;
+	if(domain)
+		name = domain;
 
 	name = strdup(name);
 
@@ -1410,7 +1401,7 @@ void shell::detach(downproc_t stop)
 	}
 
 	SERVICE_TABLE_ENTRY servicetable[] = {
-		{name, start},
+		{(LPSTR)name, &_start},
 		{NULL, NULL}
 	};
 
@@ -2129,7 +2120,7 @@ void shell::log(loglevel_t loglevel, const char *fmt, ...)
 		
 #endif
 
-#ifdef	HAVE_EXECVP
+#ifndef _MSWINDOWS_
 
 void shell::restart(char *argv0, char **argv, char **list)
 {
@@ -2150,7 +2141,7 @@ void shell::restart(char *argv0, char **argv, char **list)
 
 #else
 
-void shell::restart(const char *argv0, char **argv, char **list)
+void shell::restart(char *argv0, char **argv, char **list)
 {
 	exit(-1);
 }
