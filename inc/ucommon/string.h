@@ -1820,25 +1820,25 @@ inline bool ieq(String &s1, String &s2)
 	{return String::case_equal(s1.c_str(), s2.c_str());}
 
 inline String str(const char *string)
-	{return (String)string;};
+	{return (String)string;}
 
 inline String str(String& string)
-	{return (String)string;};
+	{return (String)string;}
 
 inline String str(short value)
-	{String temp(16, "%hd", value); return temp;}; 
+	{String temp(16, "%hd", value); return temp;}
 
 inline String str(unsigned short value)
-	{String temp(16, "%hu", value); return temp;}; 
+	{String temp(16, "%hu", value); return temp;}
 
 inline String str(long value)
-	{String temp(32, "%ld", value); return temp;};
+	{String temp(32, "%ld", value); return temp;}
 
 inline String str(unsigned long value)
-	{String temp(32, "%lu", value); return temp;};
+	{String temp(32, "%lu", value); return temp;}
 
 inline String str(double value)
-	{String temp(40, "%f", value); return temp;}; 
+	{String temp(40, "%f", value); return temp;} 
 
 END_NAMESPACE
 
