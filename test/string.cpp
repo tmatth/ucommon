@@ -63,8 +63,8 @@ extern "C" int main()
 	assert(eq(hexbuf, "01102f-45"));
 
 	String numstr = "-33.5,25";
-	double num1;
-	long num2;
+	Real num1;
+	Unsigned num2;
 
 	numstr % num1 % "," % num2;
 	assert(num1 == -33.5);
