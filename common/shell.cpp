@@ -79,6 +79,7 @@ static const char *errname = NULL;
 static shell::logproc_t errproc = (shell::logproc_t)NULL;
 static mutex_t symlock;
 static shell::downproc_t downproc = (shell::downproc_t)NULL;
+static char **_orig = NULL;
 
 OrderedIndex shell::Option::index;
 const char *shell::domain = NULL;
@@ -566,7 +567,6 @@ mempager(pagesize)
 {
 	_argv0 = NULL;
 	_argv = NULL;
-	_orig = NULL;
 	_argc = 0;
 	_syms = NULL;
 }
@@ -576,7 +576,6 @@ mempager(pagesize)
 {
 	_argv0 = NULL;
 	_argv = NULL;
-	_orig = NULL;
 	_argc = 0;
 	_syms = NULL;
 
@@ -588,7 +587,6 @@ mempager(pagesize)
 {
 	_argv0 = NULL;
 	_argv = NULL;
-	_orig = NULL;
 	_argc = 0;
 	_syms = NULL;
 
@@ -760,7 +758,9 @@ int shell::systemf(const char *format, ...)
 
 void shell::parse(int argc, char **argv)
 {
-	_orig = argv;
+	if(!_orig)
+		_orig = argv;
+
 	getargv0(argv);
 	getargv(++argv);
 }
