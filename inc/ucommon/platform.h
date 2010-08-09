@@ -530,4 +530,8 @@ extern "C" {
 
 }
 
+typedef	long Integer;
+typedef unsigned long Unsigned;
+typedef double Real;
+
 #endif
