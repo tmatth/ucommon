@@ -1,3 +1,6 @@
+from ucommon 3.3.3 to 3.3.4
+- broken sym lookup fixed.
+
 from ucommon 3.3.2 to 3.3.3
 - process detach and restart handling.
 - more complete string to numeric conversions.
