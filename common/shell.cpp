@@ -2150,7 +2150,7 @@ bool shell::issym(const char *name)
 const char *shell::getsym(const char *name, const char *value)
 {
 	symlock.acquire();
-	linked_pointer<syms> sp;
+	linked_pointer<syms> sp = _syms;
 
 	while(is(sp)) {
 		if(eq(sp->name, name)) {
@@ -2167,6 +2167,7 @@ const char *shell::getsym(const char *name, const char *value)
 
 void shell::setsym(const char *name, const char *value)
 {
+	printf("SET %s TO %s\n", name, value);
 	symlock.acquire();
 	linked_pointer<syms> sp;
 
