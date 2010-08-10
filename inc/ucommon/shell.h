@@ -952,7 +952,7 @@ inline	const char *_TEXT(const char *s)
 	{return shell::text(s);}
 
 inline const char *_STR(String& s)
-	{return *s;};
+	{return *s;}
 
 END_NAMESPACE
 
