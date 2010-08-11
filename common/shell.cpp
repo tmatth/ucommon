@@ -46,6 +46,10 @@
 #define	setlocale(s, t)
 #endif
 
+#ifndef	HAVE_LIBINTL_H
+#undef	HAVE_GETTEXT
+#endif
+
 #ifdef	HAVE_GETTEXT
 #include <libintl.h>
 #else

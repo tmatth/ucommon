@@ -237,6 +237,7 @@ check_include_files(sys/inotify.h HAVE_SYS_INOTIFY_H)
 check_include_files(sys/event.h HAVE_SYS_EVENT_H)
 check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(openssl/ssl.h HAVE_OPENSSL)
+check_include_files(libintl.h HAVE_LIBINTL_H)
 
 # for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
