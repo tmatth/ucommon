@@ -133,7 +133,7 @@ threading="none"
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h libintl.h) 
+AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h) 
 AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h syslog.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
@@ -684,12 +684,15 @@ if test "$sysconfdir" = '${prefix}/etc' ; then
     sysconfdir="/etc"
 fi
 
-if test "$have_gettext" = "no" ; then
-	AC_CHECK_LIB(intl, gettext, [
-		AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in glibc])
-		UCOMMON_LIBS="$UCOMMON_LIBS -lintl"
-	])
-fi
+AC_CHECK_HEADER(libintl.h, [
+	AC_DEFINE(HAVE_LIBINTL_H, [1], [international headers])
+	if test "$have_gettext" = "no" ; then
+		AC_CHECK_LIB(intl, gettext, [
+			AC_DEFINE(HAVE_GETTEXT, [1], [has gettext in glibc])
+			UCOMMON_LIBS="$UCOMMON_LIBS -lintl"
+		])
+	fi
+])
 
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
 AC_SUBST_DIR(UCOMMON_PLUGINS, plugindir)
