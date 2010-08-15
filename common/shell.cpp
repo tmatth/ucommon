@@ -629,10 +629,10 @@ unsigned shell::count(char **argv)
 void shell::help(void)
 {
 	linked_pointer<Option> op = Option::first();
-	unsigned hp = 0;
+	unsigned hp = 0, count = 0;
 	while(is(op)) {
 		if(!op->help_string) {
-			op.next();
+			++op;
 			continue;
 		}
 		if(op->short_option && op->long_option && op->uses_option && !op->trigger_option) {
@@ -651,10 +651,20 @@ void shell::help(void)
 			printf("  -%c %s", op->short_option, op->uses_option);
 			hp = 5 + strlen(op->uses_option);
 		}
-		else {
+		else if(op->short_option) {
 			printf("  -%c ", op->short_option);
 			hp = 5;
 		}
+		else {		// grouping separator
+			if(count)
+				printf("\n%s:\n", op->help_string);
+			else
+				printf("%s:\n", op->help_string);
+			++op;
+			continue;
+		}
+
+		++count;
 	
 		if(op->long_option && op->uses_option) {
 			printf("--%s=%s", op->long_option, op->uses_option);
@@ -693,7 +703,7 @@ void shell::help(void)
 			++hs;
 		}
 		printf("\n");
-		op.next();
+		++op;
 	}
 }
 
