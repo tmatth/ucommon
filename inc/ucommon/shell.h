@@ -390,6 +390,9 @@ public:
 	 */
 	class __EXPORT groupopt : public Option
 	{
+	private:
+		virtual const char *assign(const char *value);
+
 	public:
 		groupopt(const char *help);
 	};

@@ -479,6 +479,11 @@ shell::Option(0, NULL, NULL, help_string)
 {
 }
 
+const char *shell::groupopt::assign(const char *value)
+{
+	return NULL;
+}
+
 shell::stringopt::stringopt(char short_option, const char *long_option, const char *help_string, const char *type, const char *def_value) :
 shell::Option(short_option, long_option, type, help_string)
 {
