@@ -384,6 +384,17 @@ public:
 	};
 
 	/**
+	 * Grouping option.  This is used to create a grouping entry in
+	 * the shell::help() listing.
+	 * @author David Sugar <dyfet@gnutelephony.org>
+	 */
+	class __EXPORT groupopt : public Option
+	{
+	public:
+		groupopt(const char *help);
+	};
+
+	/**
 	 * Text option for shell parsing.  This offers a quick-use class
 	 * to parse a shell flag, along with a numberic text that may be
 	 * saved and a use counter, as multiple invokations is an error.
