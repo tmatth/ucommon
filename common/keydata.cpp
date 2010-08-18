@@ -117,6 +117,13 @@ memalloc(pagesize), index()
 	load(path);
 }
 
+void keyfile::release(void)
+{
+	defaults = NULL;
+	index.reset();
+	memalloc::purge();
+}
+
 keydata *keyfile::get(const char *key) const
 {
 	assert(key != NULL);

@@ -179,6 +179,11 @@ public:
 	void load(const char *path);
 
 	/**
+	 * Release and re-initialize keyfile.
+	 */
+	void release(void);
+
+	/**
 	 * Get a keydata section name.
 	 * @param section name to look for.
 	 * @return keydata section object if found, NULL if not.
