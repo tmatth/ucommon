@@ -416,6 +416,13 @@ script *script::merge(const char *fn, script *root)
 	if(!root || !img)
 		return img;
 
+	merge(img, root);
+}
+
+script *script::merge(script *img, script *root)
+{
+	assert(img != NULL && root != NULL);
+
 	for(unsigned index = 0; index < script::indexing; ++index) {
 		header *prior = NULL;
 		linked_pointer<header> hp = img->scripts[index];
@@ -470,8 +477,11 @@ script *script::append(script *merge, const char *fn, script *cfg)
 	char *ep;
 	unsigned len;
 
-	if(!fp)
+	if(!fp) {
+		if(merge)
+			return merge;
 		return NULL;
+	}
 
 	if(merge)
 		img = merge;

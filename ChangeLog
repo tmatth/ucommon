@@ -1,5 +1,6 @@
 from ucommon 3.3.5 to 3.3.6
 - grouping operator for usage help.
+- script merge operation by images.
 
 from ucommon 3.3.4 to 3.3.5
 - make sure gettext is actually buildable before we build with it.

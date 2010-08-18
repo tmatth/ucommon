@@ -493,6 +493,15 @@ public:
 	static script *merge(const char *filename, script *root = NULL);
 
 	/**
+     * Merge a compiled image into an existing image.  This is part of
+	 * the operation of compile-merge.
+	 * @param image to merge.
+	 * @param root script to merge definitions with.
+	 * @return compiled script instance if successful.
+	 */
+	static script *merge(script *image, script *root);
+
+	/**
 	 * Assign new keywords from extensions and derived service.  Must
 	 * be called before any use.
 	 * @param list of keywords to add to engine.
