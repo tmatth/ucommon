@@ -416,7 +416,7 @@ script *script::merge(const char *fn, script *root)
 	if(!root || !img)
 		return img;
 
-	merge(img, root);
+	return merge(img, root);
 }
 
 script *script::merge(script *img, script *root)
