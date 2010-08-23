@@ -1,6 +1,7 @@
 from ucommon 3.3.5 to 3.3.6
 - grouping operator for usage help.
 - script merge operation by images.
+- doxygen generation now supported from cmake, from Angelo Naselli.
 
 from ucommon 3.3.4 to 3.3.5
 - make sure gettext is actually buildable before we build with it.

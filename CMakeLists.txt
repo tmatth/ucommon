@@ -309,6 +309,75 @@ add_executable(args utils/args.cpp)
 add_dependencies(args ucommon)
 target_link_libraries(args ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
+find_package(Doxygen)
+
+if (DOXYGEN_FOUND)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doxy.config.cmake
+      ${CMAKE_CURRENT_BINARY_DIR}/doxy.config
+      @ONLY )
+ 
+  seT(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/doxy.config")
+
+	#add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
+	add_custom_target(doc
+                    ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                    COMMENT "Generating API documentation with Doxygen" VERBATIM
+                   )
+  
+	#
+	# TODO an: taken from internet, to be tested
+  #
+  # create a windows help .chm file using hhc.exe
+  # HTMLHelp DLL must be in path!
+  # fallback: use hhw.exe interactively
+  IF    (WIN32)
+    FIND_PACKAGE(HTMLHelp)
+    IF   (HTML_HELP_COMPILER)      
+      SET (TMP "${CMAKE_CURRENT_BINARY_DIR}\\Doc\\html\\index.hhp")
+      STRING(REGEX REPLACE "[/]" "\\\\" HHP_FILE ${TMP} )
+      # MESSAGE(SEND_ERROR "DBG  HHP_FILE=${HHP_FILE}")
+      ADD_CUSTOM_TARGET(winhelp ${HTML_HELP_COMPILER} ${HHP_FILE})
+      ADD_DEPENDENCIES (winhelp doc)
+     
+      IF (NOT TARGET_DOC_SKIP_INSTALL)
+      # install windows help?
+      # determine useful name for output file 
+      # should be project and version unique to allow installing 
+      # multiple projects into one global directory      
+      IF   (EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
+        IF   (PROJECT_NAME)
+          SET(OUT "${PROJECT_NAME}")
+        ELSE (PROJECT_NAME)
+          SET(OUT "Documentation") # default
+        ENDIF(PROJECT_NAME)
+        IF   (${PROJECT_NAME}_VERSION_MAJOR)
+          SET(OUT "${OUT}-${${PROJECT_NAME}_VERSION_MAJOR}")
+          IF   (${PROJECT_NAME}_VERSION_MINOR)
+            SET(OUT  "${OUT}.${${PROJECT_NAME}_VERSION_MINOR}")
+            IF   (${PROJECT_NAME}_VERSION_PATCH)
+              SET(OUT "${OUT}.${${PROJECT_NAME}_VERSION_PATCH}")      
+            ENDIF(${PROJECT_NAME}_VERSION_PATCH)
+          ENDIF(${PROJECT_NAME}_VERSION_MINOR)
+        ENDIF(${PROJECT_NAME}_VERSION_MAJOR)
+        # keep suffix
+        SET(OUT  "${OUT}.chm")
+        
+        #MESSAGE("DBG ${PROJECT_BINARY_DIR}/Doc/html/index.chm \n${OUT}")
+        # create target used by install and package commands 
+        INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
+          DESTINATION "doc"
+          RENAME "${OUT}"
+        )
+      ENDIF(EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
+      ENDIF(NOT TARGET_DOC_SKIP_INSTALL)
+
+    ENDIF(HTML_HELP_COMPILER)
+    # MESSAGE(SEND_ERROR "HTML_HELP_COMPILER=${HTML_HELP_COMPILER}")
+  ENDIF (WIN32) 
+ENDIF(DOXYGEN_FOUND)
+
+
 message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
 message (STATUS "CMAKE_INSTALL_PREFIX " ${CMAKE_INSTALL_PREFIX} )
