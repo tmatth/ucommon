@@ -10,7 +10,7 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="3.3.6"
+VERSION="3.3.7"
 LT_VERSION="3:22:0"
 OPENSSL_REQUIRES="0.9.7"
 
@@ -38,7 +38,21 @@ UCOMMON_LIBS=""
 
 CHECKFLAGS="$CHECKFLAGS"
 
-components="script audio utils secure"
+case "$with_crypto" in
+ssl|openssl)
+	components="script audio openssl utils"
+	;;
+gnutls|gnu)
+	components="script audio gnutls utils"
+	;;
+none)
+	components="script audio insecure utils "
+	;;
+*)
+	components="script audio secure utils"
+	;;
+esac
+
 have_gettext="no"
 socket_lib=""
 posix4_lib=""

@@ -1,3 +1,7 @@
+from ucommon 3.3.6 to 3.3.7
+- small change in how ucommon components can be pre-set.
+- missing local header for gnutls.
+
 from ucommon 3.3.5 to 3.3.6
 - grouping operator for usage help.
 - script merge operation by images.

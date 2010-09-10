@@ -12,7 +12,7 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
 
-noinst_HEADER = local.h
+noinst_HEADERS = local.h
 
 lib_LTLIBRARIES = libuccsecure.la
 
