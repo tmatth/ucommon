@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="3.3.7"
-LT_VERSION="3:22:0"
+VERSION="3.4.0"
+LT_VERSION="3:23:0"
 OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -40,16 +40,16 @@ CHECKFLAGS="$CHECKFLAGS"
 
 case "$with_crypto" in
 ssl|openssl)
-	components="script audio openssl utils"
+	ssl="openssl"
 	;;
 gnutls|gnu)
-	components="script audio gnutls utils"
+	ssl="gnutls"
 	;;
 none|nossl)
-	components="script audio insecure utils "
+	ssl="nossl"
 	;;
 *)
-	components="script audio secure utils"
+	ssl="detect"
 	;;
 esac
 
@@ -58,7 +58,6 @@ socket_lib=""
 posix4_lib=""
 rt_lib=""
 
-test -z "$plugindir" && plugindir='${libdir}/ucommon'
 test -z "$localedir" && localedir='${datadir}/locale'
 
 AC_DEFUN([AC_SUBST_DIR], [
@@ -118,10 +117,10 @@ fi
 
 AC_MSG_CHECKING([socks proxy support])
 
-AC_ARG_WITH(components,
-	AC_HELP_STRING([--with-components=libs],[specify which libs to build]),[
-	if test x$with_components != x ; then
-		UCOMMON_COMPONENTS="${with_components}" ; fi
+AC_ARG_WITH(sslstack,
+	AC_HELP_STRING([--with-sslstack=lib],[specify which ssl stack to build]),[
+	if test x$with_sslstack != x ; then
+		ssl="${with_sslstack}" ; fi
 ])
 
 AC_ARG_WITH(libc, 
@@ -240,8 +239,6 @@ AC_CHECK_LIB($clib, dlopen,,[
 		])
 	])
 ])
-
-AC_CHECK_LIB([m], [sqrt], [MATH_LIB="-lm"])
 
 PTHREAD_FLAGS=""
 
@@ -568,8 +565,8 @@ esac
 
 UCOMMON_CLINK="$UCOMMON_CLINK $UCOMMON_LIBC"
 
-if test -z "$UCOMMON_COMPONENTS" ; then
-	UCOMMON_COMPONENTS="$components" ; fi
+if test -z "$UCOMMON_SSLSTACK" ; then
+	UCOMMON_SSLSTACK="$sslstack" ; fi
 
 OPENSSL_LIBS=""
 GNUTLS_LIBS=""
@@ -592,96 +589,40 @@ AC_ARG_WITH(pkg-config,
 	])
 ])
 	
-uses_audio=0
-uses_utils=0
-uses_script=0
-uses_secure=0
-secure=""
 
-for component in $UCOMMON_COMPONENTS ; do
-	case "$component" in
-	script)
-		uses_script=1
-		;;
-	audio)
-		uses_audio=1
-		;;
-	utils)
-		uses_utils=1
-		;;
-	secure|ssl|crypto)
-		uses_secure="1"
-		if test -z "$secure" ; then
-			if test ! -z "$GNUTLS_LIBS" ; then
-				SECURE_LIBS="$GNUTLS_LIBS"
-				secure="gnutls"
-			fi
-		fi
-		if test -z "$secure" ; then
-			if test ! -z "$OPENSSL_LIBS" ; then
-				SECURE_LIBS="$OPENSSL_LIBS"
-				secure="openssl"
-
-			fi
-		fi
-		;;
-	gnutls)
-		uses_secure="1"
-		if test -z "$secure" ; then
-			if test ! -z "$GNUTLS_LIBS" ; then
-				SECURE_LIBS="$GNUTLS_LIBS"
-				secure="gnutls"
-			fi
-		fi
-		;;
-	openssl)
-		uses_secure="1"
-		if test -z "$secure" ; then
-			if test ! -z "$OPENSSL_LIBS" ; then
-				SECURE_LIBS="$OPENSSL_LIBS"
-				secure="openssl"
-
-			fi
-		fi
-		;;
-	insecure)
-		uses_secure="1"
-		;;			
-	*)
-		AC_ERROR([Invalid component: $component.  Please choose from script and audio])
-		;;
-	esac
-done
-
-SECURE_EXPORT=""
-if test "$uses_secure" == 1 ; then
-	if test -z "$secure" ; then
-		secure="insecure"
+SECURE=""
+case "$ssl" in
+secure|any)
+	if test ! -z "$GNUTLS_LIBS" ; then
+		SECURE_LIBS="$GNUTLS_LIBS"
+		SECURE="gnutls"
 	fi
-	SECURE_EXPORT="-luccsecure $SECURE_LIBS"
-	SECURE_LOCAL="../$secure/libuccsecure.la $SECURE_LIBS"
-fi	
+	if test -z "$SECURE" ; then
+		if test ! -z "$OPENSSL_LIBS" ; then
+			SECURE_LIBS="$OPENSSL_LIBS"
+			SECURE="openssl"
+		fi
+	fi
+	;;
+gnutls|gnu)
+	if test ! -z "$GNUTLS_LIBS" ; then
+		SECURE_LIBS="$GNUTLS_LIBS"
+		SECURE="gnutls"
+	fi
+	;;
+openssl|ssl)
+	if test ! -z "$OPENSSL_LIBS" ; then
+		SECURE_LIBS="$OPENSSL_LIBS"
+		SECURE="openssl"
+	fi
+	;;
+*)
+	SECURE_LIBS=""
+	SECURE="nossl"
+	;;
+esac
 
-AM_CONDITIONAL(TEST_SCRIPT, test "$uses_script" != "0")
-AM_CONDITIONAL(TEST_AUDIO, test "$uses_audio" != "0")
-AM_CONDITIONAL(TEST_SECURE, test "$uses_secure" != "0")
-
-# make sure dependencies are fullfilled
-if test "$uses_utils" == "1" ; then
-	uses_audio="1" ; fi
-
-# make sure order of components is correct
-UCOMMON_COMPONENTS=""
-if test "$uses_script" == 1 ; then
-	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS script" ; fi
-
-if test "$uses_audio" == 1 ; then
-	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS audio" ; fi
-
-if test "$uses_utils" == 1 ; then
-	UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS utils" ; fi
-
-UCOMMON_COMPONENTS="$UCOMMON_COMPONENTS $secure"
+SECURE_LOCAL="../$SECURE/libusecure.la $SECURE_LIBS"
 
 if test "$UCOMMON_MODEL" = "CC" ; then
 	LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
@@ -709,11 +650,9 @@ AC_CHECK_HEADER(libintl.h, [
 ])
 
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
-AC_SUBST_DIR(UCOMMON_PLUGINS, plugindir)
 AC_SUBST_DIR(UCOMMON_LOCALE, localedir)
 AC_SUBST_DIR(ssl_publickeys, ssl_certs)
 AC_SUBST_DIR(ssl_privatekeys, ssl_private)
-AC_DEFINE_UNQUOTED(UCOMMON_PLUGINS, "$UCOMMON_PLUGINS", [plugin path])
 AC_DEFINE_UNQUOTED(UCOMMON_LOCALE, "$UCOMMON_LOCALE", [locale path])
 AC_DEFINE_UNQUOTED(SSL_CERTS, "$ssl_publickeys", [certificate path])
 AC_DEFINE_UNQUOTED(SSL_PRIVATE, "$ssl_privatekeys", [private certificates])
@@ -722,10 +661,8 @@ AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
 AC_SUBST(CHECKFLAGS)
 AC_SUBST(CXXFLAGS)
-AC_SUBST(UCOMMON_COMPONENTS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_INCLUDES)
-AC_SUBST(UCOMMON_PLUGINS)
 AC_SUBST(UCOMMON_LOCALE)
 AC_SUBST(UCOMMON_LINKED)
 AC_SUBST(UCOMMON_MODEL)
@@ -733,18 +670,16 @@ AC_SUBST(UCOMMON_FLAGS)
 AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(UCOMMON_LIBC)
 AC_SUBST(UCOMMON_LIBS)
-AC_SUBST(SECURE_EXPORT)
 AC_SUBST(SECURE_LOCAL)
 AC_SUBST(SECURE_LIBS)
+AC_SUBST(SECURE)
 AC_SUBST(OPENSSL_LIBS)
 AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)
-AC_SUBST(MATH_LIB)
-AC_SUBST(plugindir)
 AC_SUBST(localedir)
 
-AC_OUTPUT(Makefile common/Makefile audio/Makefile script/Makefile
-openssl/Makefile gnutls/Makefile insecure/Makefile utils/Makefile 
+AC_OUTPUT(Makefile common/Makefile 
+openssl/Makefile gnutls/Makefile nossl/Makefile utils/Makefile 
 inc/Makefile inc/ucommon/Makefile test/Makefile 
 ucommon.pc ucommon.spec ucommon-config)
 

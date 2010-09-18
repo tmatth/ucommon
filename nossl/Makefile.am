@@ -13,10 +13,8 @@ RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
 
 noinst_HEADERS = local.h
+lib_LTLIBRARIES = libusecure.la
 
-lib_LTLIBRARIES = libuccaudio.la
-
-libuccaudio_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @MATH_LIB@ @UCOMMON_CLINK@ $(RELEASE)
-libuccaudio_la_SOURCES = common.cpp g711.cpp buffer.cpp codecs.cpp \
-	files.cpp reader.cpp writer.cpp
-
+libusecure_la_LDFLAGS = ../common/libucommon.la @SECURE_LIBS@ @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
+libusecure_la_SOURCES = secure.cpp ssocket.cpp digest.cpp random.cpp \
+	cipher.cpp

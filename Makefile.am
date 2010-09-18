@@ -13,8 +13,8 @@ EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
 	ucommon-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
 	COPYRIGHT CMakeLists.txt config.h.cmake doxy.config.cmake
 
-DIST_SUBDIRS = common script audio openssl gnutls insecure utils inc test
-SUBDIRS = common @UCOMMON_COMPONENTS@ inc test
+DIST_SUBDIRS = common openssl gnutls nossl utils inc test
+SUBDIRS = common @SECURE@ inc test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ucommon.pc

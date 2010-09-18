@@ -29,33 +29,13 @@ introduces some design patterns from Objective-C, such as reference counted
 objects, memory pools, and smart pointers.  uCommon introduces some new
 concepts for handling of thread locking and synchronization.
 
-%package script
-Requires: %{name} = %{version}-%{release}
-Group: System Environment/Libraries
-Summary: ucommon framework for script extensible applications
-
-%package secure
-Requires: %{name} = %{version}-%{release}
-Requires: openssl
-Group: System Environment/Libraries
-Summary: ucommon framework for secure sockets and cryptography
-
-%package audio
-Requires: %{name} = %{version}-%{release}
-Group: System Environment/Libraries
-Summary: ucommon framework for telephonic audio support
-
 %package bin
 Requires: %{name} = %{version}-%{release}
-Requires: %{name}-audio = %{version}-%{release}
 Group: Applications/System
 Summary: ucommon system and support applications.
 
 %package devel
 Requires: %{name} = %{version}-%{release}
-Requires: %{name}-secure = %{version}-%{release}
-Requires: %{name}-script = %{version}-%{release}
-Requires: %{name}-audio = %{version}-%{release}
 Requires: %{name}-bin = %{version}-%{release}
 Requires: pkgconfig
 Group: Development/Libraries
@@ -64,22 +44,6 @@ Summary: Headers for building ucommon applications
 %package doc
 Group: Documentation
 Summary: Generated class documentation for ucommon
-
-%description script
-GNU uCommon C++ script is a highly specialized embedded scripting engine and 
-virtual execution environment for creating script "extensible" applications.  
-This system is a C++ class library which allows one to derive application
-specific dialects of the core language as needed through subclassing.
-
-%description secure
-The GNU uCommon C++ secure sockets and cryptography library offers thread-safe
-ssl sockets for building clients and servers.  The crytographic library also
-provides for random number generation, digest computation, and ciphering.
-
-%description audio
-The GNU uCommon C++ telephonic audio library covers a range of functionality 
-including tone generation and detection, streaming and transcoding of encoded 
-audio frames, accessing of audio files on disk, and phrasebook management.
 
 %description bin
 This is a collection of command line tools that use various aspects of the
@@ -117,24 +81,11 @@ from header files, html browsable.
 %defattr(-,root,root,-)
 %doc AUTHORS README COPYING COPYING.LESSER COPYRIGHT NEWS SUPPORT ChangeLog
 %{_libdir}/libucommon.so.*
-
-%files secure
-%defattr(-,root,root,-)
 %{_libdir}/libuccsecure.so.*
-
-%files script
-%defattr(-,root,root,-)
-%{_libdir}/libuccscript.so.*
-
-%files audio
-%defattr(-,root,root,-)
-%{_libdir}/libuccaudio.so.*
 
 %files bin
 %defattr(-,root,root,-)
-%{_bindir}/audiotool
 %{_bindir}/args
-%{_mandir}/man1/audiotool.*
 %{_mandir}/man1/args.*
 
 %files devel
@@ -154,6 +105,10 @@ from header files, html browsable.
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sat Sep 18 2010 - David Sugar <dyfet@gnutelephony.org> - 3.4.0-0
+- simplified packaging and better runtime focus.
+- ccscript moved to bayonne, ccaudio detached.
+
 * Sun Aug 01 2010 - David Sugar <dyfet@gnutelephony.org> - 3.3.0-0
 - internationalization bindings with gnu gettext support.
 - reorganized utils into ucommon-bin subpackage.

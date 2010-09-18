@@ -1,3 +1,9 @@
+from ucommon 3.3.7 to 3.4.0
+- simplified to better focus on core runtime mission.
+- packaging simplified.
+- ccscript moved to bayonne
+- ccaudio detached
+
 from ucommon 3.3.6 to 3.3.7
 - small change in how ucommon components can be pre-set.
 - missing local header for gnutls.

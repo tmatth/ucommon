@@ -14,9 +14,9 @@ AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
 
 noinst_HEADERS = local.h
 
-lib_LTLIBRARIES = libuccsecure.la
+lib_LTLIBRARIES = libusecure.la
 
-libuccsecure_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @OPENSSL_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
-libuccsecure_la_SOURCES = secure.cpp ssocket.cpp digest.cpp random.cpp \
+libusecure_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ @OPENSSL_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
+libusecure_la_SOURCES = secure.cpp ssocket.cpp digest.cpp random.cpp \
 	cipher.cpp
 

@@ -32,9 +32,6 @@ Known values for OPTION are:
   --libs		print library linking information
   --clink       print c model linking information
   --cflags		print pre-processor and compiler flags
-  --audiolibs   print linkage for audio libraries
-  --scripting   print linkage for scripting engine
-  --secure      print linkage for secure applications
   --includes    print framework include directory
   --plugins     print framework plugin directory
   --model       print the linking model used
@@ -107,22 +104,10 @@ while test $# -gt 0; do
 		;;
 
     --libs)
-		echo -lucommon @UCOMMON_LINKED@ 
+		echo -lucsecure -lucommon @SECURE_LIBS@ @UCOMMON_LINKED@ 
        	;;
-    --scripting)
-		echo -luccscript
-		;;
-	--secure)
-		echo @SECURE_EXPORT@
-		;;
-	--audiolibs)
-		echo -luccaudio @MATH_LIB@
-		;;
 	--includes)
 		echo @UCOMMON_INCLUDES@
-		;;
-	--plugins)
-		echo @UCOMMON_PLUGINS@
 		;;
     *)
 	usage
