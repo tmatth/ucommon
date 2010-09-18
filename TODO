@@ -31,6 +31,10 @@ Proposed ABI changes (3.1 or 4.0?):
 
 Proposed changes:
 
+	Move ccscript engine code entirely into Bayonne.
+
+	Move ccaudio out of ucommon/focus on ucommon & secure runtime mission.
+
 	A pipe stream/process pipe handler that uses the new IOBuffer class.
 	This probably will happen in shell.h as an object that can be created by
 	a future shell::spawn()/pipe/popen like method.
