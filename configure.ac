@@ -45,7 +45,7 @@ ssl|openssl)
 gnutls|gnu)
 	components="script audio gnutls utils"
 	;;
-none)
+none|nossl)
 	components="script audio insecure utils "
 	;;
 *)
