@@ -14,7 +14,7 @@ EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
 	COPYRIGHT CMakeLists.txt config.h.cmake doxy.config.cmake
 
 DIST_SUBDIRS = common openssl gnutls nossl utils inc test
-SUBDIRS = common @SECURE@ inc test
+SUBDIRS = common @SECURE@ utils inc test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ucommon.pc
