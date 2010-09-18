@@ -30,9 +30,6 @@ doxy:
 	-rm -rf doc
 	$(DOXYGEN) Doxyfile
 
-docs: doxy
-	(cd script ; make docs >/dev/null)
-
 clean-local:
 	-rm -rf doc
 

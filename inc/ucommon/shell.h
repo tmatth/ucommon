@@ -730,7 +730,7 @@ public:
 	 * @param mode of logging.
 	 * @param handler for log messages.
 	 */
-	static void log(const char *name, loglevel_t level = ERR, logmode_t = USER_LOG, logproc_t handler = (logproc_t)NULL);
+	static void log(const char *name, loglevel_t level = ERR, logmode_t mode = USER_LOG, logproc_t handler = (logproc_t)NULL);
 
 	/**
 	 * Print to standard output.
@@ -838,9 +838,9 @@ public:
 	 * process, assuming scheduler support exists and the process is
 	 * sufficiently privileged.  Negative priorities are essentially the
 	 * same as nice.
-	 * @param priority level for process.
+	 * @param pri level for process.
 	 */
-	static void priority(int level = 1);
+	static void priority(int pri = 1);
 
 	/**
 	 * Create a detached process.  This creates a new child process that

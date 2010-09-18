@@ -1490,7 +1490,7 @@ public:
 	 * @param format string to convert with.
 	 * @return number of bytes processed.
 	 */
-	static unsigned hexpack(unsigned char *hex, const char *string, const char *format);
+	static unsigned hexpack(unsigned char *binary, const char *string, const char *format);
 
 	static unsigned hexsize(const char *format);
 };
