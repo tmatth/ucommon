@@ -123,8 +123,8 @@ bool SSocket::pending(void)
 	if(ssl && SSL_pending((SSL *)ssl))
 		return true;
 
-	if(timeout && timeout != Timer::inf)
-		return Socket::wait(so, timeout);
+	if(iowait && iowait != Timer::inf)
+		return Socket::wait(so, iowait);
 
 	return Socket::wait(so, 0);
 }
@@ -134,7 +134,7 @@ size_t SSocket::_pull(char *address, size_t size)
 	if(!bio)
 		return TCPSocket::_pull(address, size);
 
-	if(SSL_pending((SSL *)ssl) == 0 && timeout && timeout != Timer::inf && !Socket::wait(so, timeout))
+	if(SSL_pending((SSL *)ssl) == 0 && iowait && iowait != Timer::inf && !Socket::wait(so, iowait))
 		return 0;
 
 	int result = SSL_read((SSL *)ssl, address, size);

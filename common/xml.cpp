@@ -177,7 +177,7 @@ bool XMLParser::parse(FILE *fp)
 }
 
 
-bool XMLParser::parse(IOBuffer *io)
+bool XMLParser::parse(BufferProtocol *io)
 {
 	state = NONE;
 	bufpos = 0;

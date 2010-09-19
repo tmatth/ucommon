@@ -24,8 +24,8 @@
 #include <ucommon/string.h>
 #endif
 
-#ifndef	_UCOMMON_BUFFER_H_
-#include <ucommon/buffer.h>
+#ifndef	_UCOMMON_PROTOCOLS_H_
+#include <ucommon/protocols.h>
 #endif
 
 #ifndef	_UCOMMON_XML_H_
@@ -124,7 +124,7 @@ protected:
 	 * @param stream buffer to parse.
 	 * @return true if parse complete, false if invalid or EOF.
 	 */
-	bool parse(IOBuffer *stream);
+	bool parse(BufferProtocol *stream);
 
 	/**
 	 * Parse a file buffer and return parser document completion flag.

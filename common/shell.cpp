@@ -327,14 +327,14 @@ size_t shell::pipeio::write(const void *address, size_t size)
 #endif
 
 shell::iobuf::iobuf(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
-IOBuffer(), shell::pipeio()
+BufferProtocol(), shell::pipeio()
 {
 	ioerror = 0;
 	open(path, argv, mode, size, env);
 }
 
 shell::iobuf::iobuf(size_t size) :
-IOBuffer(), shell::pipeio()
+BufferProtocol(), shell::pipeio()
 {
 	ioerror = 0;
 
@@ -379,19 +379,19 @@ size_t shell::iobuf::_push(const char *buf, size_t size)
 void shell::iobuf::close(void)
 {
 	pipeio::wait();
-	IOBuffer::release();
+	BufferProtocol::release();
 }
 
 void shell::iobuf::cancel(void)
 {
 	pipeio::cancel();
-	IOBuffer::release();
+	BufferProtocol::release();
 }
 
 void shell::iobuf::open(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env)
 {
 	if(!pipeio::spawn(path, argv, mode, size, env))
-		IOBuffer::allocate(size, (type_t)mode);
+		BufferProtocol::allocate(size, (type_t)mode);
 }
 	
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :

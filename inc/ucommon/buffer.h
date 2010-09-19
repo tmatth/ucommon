@@ -16,9 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A common buffered I/O class is used to stream character data without 
- * need for stdlib.  This header also includes a derived buffered socket
- * class and some related operations.
+ * Classes which use the buffer protocol to stream data.
  * @file ucommon/buffer.h
  */
 
@@ -27,6 +25,10 @@
 
 #ifndef _UCOMMON_CONFIG_H_
 #include <ucommon/platform.h>
+#endif
+
+#ifndef _UCOMMON_PROTOCOLS_H_
+#include <ucommon/protocols.h>
 #endif
 
 #ifndef	_UCOMMON_SOCKET_H_
@@ -44,331 +46,12 @@
 NAMESPACE_UCOMMON
 
 /**
- * Common buffered I/O class.  This is used to create objects which will
- * stream character data as needed.  This class can support bidirectional
- * streaming as may be needed for serial devices, sockets, and pipes.  The
- * buffering mechanisms are hidden from derived classes, and two virtuals
- * are used to communicate with the physical transport. 
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT IOBuffer 
-{
-public:
-	typedef enum {BUF_RD, BUF_WR, BUF_RDWR} type_t;
-
-private:
-	const char *eol;
-	char *buffer;
-	char *input, *output;
-	size_t bufsize, bufpos, insize, outsize;
-	bool end;
-
-protected:
-	timeout_t timeout;
-	const char *format;
-
-	/**
-	 * Construct an empty (unallocated) buffer.
-	 */
-	IOBuffer();
-
-	/**
-	 * Construct a buffer of pre-allocated size and access type.
-	 * @param size of buffer to allocate.
-	 * @param access mode of buffer.
-	 */
-	IOBuffer(size_t size, type_t access = BUF_RDWR);
-
-	/**
-	 * Destroy object by releasing buffer memory.
-	 */
-	~IOBuffer();
-
-	/**
-	 * Set end of line marker.  Normally this is set to cr & lf, which 
-	 * actually supports both lf alone and cr/lf termination of lines.
-	 * However, putline() will always add the full cr/lf if this mode is 
-	 * used.  This option only effects getline() and putline().
-	 * @param string for eol for getline and putline.
-	 */
-	inline void seteol(const char *string)
-		{eol = string;};
-
-	/**
-	 * Allocate I/O buffer(s) of specified size.  If a buffer is currently
-	 * allocated, it is released.
-	 * @param size of buffer to allocate.
-	 * @param access mode of buffer.
-	 */
-	void allocate(size_t size, type_t access = BUF_RDWR);
-
-	/**
-	 * Release (free) buffer memory.
-	 */
-	void release(void);
-
-	/**
-	 * Request workspace in output buffer.  This returns a pointer to
-	 * memory from the output buffer and advances the output position.
-	 * This is sometimes used for a form of zero copy write.
-	 * @param size of request area.
-	 * @return data pointer or NULL if not available.
-	 */
-	char *request(size_t size);
-
-	/**
-	 * Gather returns a pointer to contiguous input of specified size.
-	 * This may require moving the input data in memory.
-	 * @param size of gather space.
-	 * @return data pointer to gathered data or NULL if not available.
-	 */
-	char *gather(size_t size);
-
-	/**
-	 * Method to push buffer into physical i/o (write).  The address is
-	 * passed to this virtual since it is hidden as private.
-	 * @param address of data to push.
-	 * @param size of data to push.
-	 * @return number of bytes written, 0 on error.
-	 */
-	virtual size_t _push(const char *address, size_t size) = 0;
-
-	/**
-	 * Method to pull buffer from physical i/o (read).  The address is
-	 * passed to this virtual since it is hidden as private.
-	 * @param address of buffer to pull data into.
-	 * @param size of buffer area being pulled..
-	 * @return number of read written, 0 on error or end of data.
-	 */
-	virtual size_t _pull(char *address, size_t size) = 0;
-
-	/**
-	 * Method to get low level i/o error.
-	 * @return error from low level i/o methods.
-	 */
-	virtual int _err(void) = 0;
-
-	/**
-	 * Method to clear low level i/o error.
-	 */
-	virtual void _clear(void) = 0;
-
-	/**
-	 * Get current input position.  Sometimes used to help compute and report 
-     * a "tell" offset.
-	 * @return offset of input buffer.
-	 */
-	inline size_t _pending(void)
-		{return bufpos;};
-
-	/**
-	 * Get current output position.  Sometimes used to help compute a
-	 * "trunc" operation.
-	 */
-	inline size_t _waiting(void)
-		{return outsize;};
-
-	/**
-	 * Get size of the I/O buffer.
-	 */
-	inline size_t _buffering(void)
-		{return bufsize;};
-
-public:
-	/**
-	 * Get memory from the buffer.  This method will become "get()" in
-	 * abi 4 and may become a protected method.
-	 * @param address of characters save from buffer.
-	 * @param count of characters to get from buffer.
-	 * @return number of characters actually copied.
-	 */
-	size_t getstr(char *address, size_t count);
-
-	/**
-	 * Put memory into the buffer.  If count is 0 then put as NULL
-	 * terminated string.  This method will become "put()" in abi 4 and
-	 * may become a protected method.
-	 * @param address of characters to put into buffer.
-	 * @param count of characters to put into buffer.
-	 * @return number of characters actually written.
-	 */
-	size_t putstr(const char *address, size_t count = 0);
-
-	/**
-	 * Get a character from the buffer.  If no data is available, return EOF.
-	 * @return character from buffer or eof.
-	 */
-	int getch(void);
-
-	/**
-	 * Put a character into the buffer.
-	 * @return character put into buffer or eof.
-	 */
-	int putch(int ch);
-
-	/**
-	 * Method to write a null terminated string.
-	 * @param string to write.
-	 */
-	inline size_t writes(const char *string)
-		{return putstr(string);};
-
-	/**
-	 * Method to write memory to the buffer.
-	 * @param address of memory to write.
-	 * @param size of memory to write.
-	 * @return number of character bytes written.
-	 */
-	inline size_t write(const char *address, size_t size)
-		{return putstr(address, size);};
-
-	/**
-	 * Method to write a null terminated string.  This adds the current
-	 * newline character sequence to the output.
-	 * @param string to write.
-	 * @return number of characters actually written.
-	 */
-	inline size_t writeln(const char *string)
-		{return putline(string);};
-
-	/**
-	 * Method to write a string object.  This adds the current newline
-	 * character sequence to the output.
-	 * @param string to write.
-	 * @return number of characters actually written.
-	 */
-	inline size_t write(String& string)
-		{return putline(*string);};
-
-	/**
-	 * Method to read a line of input from the buffer.  This uses the current
-	 * newline character sequence to mark the end of line input.
-	 * @param address of string buffer to use.
-	 * @param size of string buffer.
-	 * @return number of characters actually read.
-	 */
-	inline size_t readln(char *address, size_t size)
-		{return getline(address, size);};
-
-	/**
-	 * Method to read a line of input from the buffer.  This saves the result
-	 * into an already allocated string object.
-	 * @param string buffer to use.
-	 * @return number of characters actually read.
-	 */
-	size_t read(String& string);
-
-	/**
-	 * Method to read input data from the buffer.
-	 * @param address of buffer to use.
-	 * @param size of buffer to request.
-	 * @return number of characters actually read.
-	 */
-	inline size_t read(char *address, size_t size)
-		{return getstr(address, size);};
-
-	/**
-	 * Print formatted string to the buffer.  The maximum output size is
-	 * the buffer size, and the operation flushes the buffer.
-	 * @param format string.
-	 * @return number of bytes written.
-	 */
-	size_t printf(const char *format, ...) __PRINTF(2, 3);
-
-	/**
-	 * Flush buffered memory to physical I/O.
-	 * @return true on success, false if not active or fails.
-	 */
-	virtual bool flush(void);
-
-	/**
-	 * Purge any pending input or output buffer data.
-	 */
-	void purge(void);
-
-	/**
-	 * Reset input buffer state.  Drops any pending input.
-	 */
-	void reset(void);
-
-	/**
-	 * Get a string as a line of input from the buffer.  The eol character(s)
-	 * are used to mark the end of a line.
-	 * @param string to save input into.
-	 * @param size limit of string to save.
-	 * @return count of characters read or 0 if at end of data.
-	 */
-	size_t getline(char *string, size_t size);
-
-	/**
-	 * Put a string as a line of output to the buffer.  The eol character is 
-	 * appended to the end.
-	 * @param string to write.
-	 * @return total characters successfully written, including eol chars.
-	 */
-	size_t putline(const char *string);
-
-	/**
-	 * Check if at end of input.
-	 * @return true if end of data, false if input still buffered.
-	 */
-	bool eof();
-
-	/**
-	 * See if buffer open.
-	 * @return true if buffer active.
-	 */
-	inline operator bool()
-		{return buffer != NULL;};
-
-	/**
-	 * See if buffer closed.
-	 * @return true if buffer inactive.
-	 */
-	inline bool operator!()
-		{return buffer == NULL;};
-
-	/**
-	 * See if buffer open.
-	 * @return true if buffer active.
-	 */
-	inline bool isopen(void)
-		{return buffer != NULL;};
-
-	/**
-	 * See if input active.
-	 * @return true if input active.
-	 */
-	inline bool isinput(void)
-		{return input != NULL;};
-
-	/**
-	 * See if output active.
-	 * @return true if output active.
-	 */
-	inline bool isoutput(void)
-		{return output != NULL;};
-
-	/**
-	 * Set eof flag.
-	 */
-	inline void seteof(void)
-		{end = true;};
-
-	/**
-	 * See if data is pending.
-	 * @return true if data is pending.
-	 */
-	virtual bool pending(void);
-};
-
-/**
- * A generic file streaming class built from the I/O buffer.  This can
+ * A generic file streaming class built from the buffer protocol.  This can
  * be used in place of fopen based file operations and does not require
  * libstdc++.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class fbuf : public IOBuffer, private fsys
+class fbuf : public BufferProtocol, private fsys
 {
 private:
 	offset_t	inpos, outpos;
@@ -489,7 +172,7 @@ public:
  * members.  Some additional members are added for layering ssl services.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT TCPSocket : public IOBuffer, protected Socket
+class __EXPORT TCPSocket : public BufferProtocol, protected Socket
 {
 private:
 	void _buffer(size_t size);
@@ -502,6 +185,7 @@ protected:
 	virtual size_t _pull(char *address, size_t size);
 	int _err(void);
 	void _clear(void);
+	bool _blocking(void);
 
 	/**
 	 * Get the low level socket object.
@@ -527,16 +211,6 @@ protected:
 	 */
 	inline const char *tag(void) const
 		{return servicetag;};
-
-	/**
-	 * Peek at socket input.  This might be used to get a header at
-	 * connection and to see if ssl/tls service is needed.
-	 * @param data buffer to store peek results.
-	 * @param size of data to peek.
-	 * @param timeout to wait for peek.
-	 * @return number of bytes seen.
-	 */
-	size_t peek(char *data, size_t size, timeout_t timeout = Timer::inf);
 
 public:
 	/**
@@ -585,12 +259,6 @@ public:
 	 * Close active connection.
 	 */
 	void close(void);
-
-	/**
-	 * Set timeout interval and blocking.
-	 * @param timeout to use.
-	 */
-	void blocking(timeout_t timeout = Timer::inf);	
 
 	/**
 	 * Check for pending tcp or ssl data.

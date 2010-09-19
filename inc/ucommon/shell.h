@@ -128,7 +128,7 @@ public:
 	/**
 	 * Pipe I/O mode.
 	 */
-	typedef	enum {RD = IOBuffer::BUF_RD, WR = IOBuffer::BUF_WR, RDWR = IOBuffer::BUF_RDWR} pmode_t;
+	typedef	enum {RD = BufferProtocol::BUF_RD, WR = BufferProtocol::BUF_WR, RDWR = BufferProtocol::BUF_RDWR} pmode_t;
 
 	/**
 	 * A class to control a process that is piped.  This holds the active
@@ -203,7 +203,7 @@ public:
 	 * class to manage stdio sessions generically in the child process.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT iobuf : public IOBuffer, protected pipeio
+	class __EXPORT iobuf : public BufferProtocol, protected pipeio
 	{
 	protected:
 		friend class shell;
