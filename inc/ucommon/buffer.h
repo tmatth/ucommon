@@ -51,7 +51,7 @@ NAMESPACE_UCOMMON
  * are used to communicate with the physical transport. 
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT IOBuffer
+class __EXPORT IOBuffer 
 {
 public:
 	typedef enum {BUF_RD, BUF_WR, BUF_RDWR} type_t;
@@ -64,7 +64,6 @@ private:
 	bool end;
 
 protected:
-	int ioerror;
 	timeout_t timeout;
 	const char *format;
 
@@ -132,7 +131,7 @@ protected:
 	 * @param size of data to push.
 	 * @return number of bytes written, 0 on error.
 	 */
-	virtual size_t _push(const char *address, size_t size);
+	virtual size_t _push(const char *address, size_t size) = 0;
 
 	/**
 	 * Method to pull buffer from physical i/o (read).  The address is
@@ -141,7 +140,18 @@ protected:
 	 * @param size of buffer area being pulled..
 	 * @return number of read written, 0 on error or end of data.
 	 */
-	virtual size_t _pull(char *address, size_t size);
+	virtual size_t _pull(char *address, size_t size) = 0;
+
+	/**
+	 * Method to get low level i/o error.
+	 * @return error from low level i/o methods.
+	 */
+	virtual int _err(void) = 0;
+
+	/**
+	 * Method to clear low level i/o error.
+	 */
+	virtual void _clear(void) = 0;
 
 	/**
 	 * Get current input position.  Sometimes used to help compute and report 
@@ -305,19 +315,6 @@ public:
 	bool eof();
 
 	/**
-	 * Get last error associated with a failed operation.
-	 * @return last error.
-	 */
-	inline int err(void)
-		{return ioerror;};
-
-	/**
-	 * Clear last error state.
-	 */
-	inline void clear(void)
-		{ioerror = 0;};
-
-	/**
 	 * See if buffer open.
 	 * @return true if buffer active.
 	 */
@@ -379,6 +376,8 @@ private:
 protected:
 	size_t _push(const char *address, size_t size);
 	size_t _pull(char *address, size_t size);
+	int _err(void);
+	void _clear(void);
 
 	inline fd_t getfile(void)
 		{return fd;};
@@ -501,6 +500,8 @@ private:
 protected:
 	virtual size_t _push(const char *address, size_t size);
 	virtual size_t _pull(char *address, size_t size);
+	int _err(void);
+	void _clear(void);
 
 	/**
 	 * Get the low level socket object.

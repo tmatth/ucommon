@@ -31,6 +31,10 @@
 #include <ucommon/platform.h>
 #endif
 
+#ifndef _UCOMMON_PROTOCOLS_H_
+#include <ucommon/protocols.h>
+#endif
+
 #ifndef	_UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif
@@ -62,7 +66,7 @@ typedef	void *mem_t;
  * the errno of a file operation in a threadsafe and platform independent
  * manner, including for mswindows targets.
  */
-class __EXPORT fsys
+class __EXPORT fsys 
 {
 protected:
 	fd_t	fd;
@@ -177,14 +181,6 @@ public:
 	 * @param descriptor to dup from.
 	 */
 	void operator=(fd_t descriptor);
-
-	/**
-	 * Get the error number (errno) associated with the descriptor from
-	 * the last error event from an opened file.
-	 * @return error number.
-	 */
-	inline int getError(void) const
-		{return error;};
 
 	/**
 	 * Get the native system descriptor handle of the file descriptor.
@@ -407,6 +403,13 @@ public:
 	 * Close a fsys resource.
 	 */
 	void close(void);
+
+	/**
+	 * Get last error.
+	 * @return error number.
+	 */
+	inline int err(void)
+		{return error;}
 
 	/**
 	 * Open a file or directory.

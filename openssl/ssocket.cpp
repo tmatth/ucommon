@@ -107,7 +107,7 @@ size_t SSocket::_push(const char *address, size_t size)
 	int result = SSL_write((SSL *)ssl, address, size);
 	if(result < 0) {
 		result = 0;
-		ioerror = Socket::error();
+		ioerr = Socket::error();
 	}
 	return (ssize_t)result;
 }
@@ -140,7 +140,7 @@ size_t SSocket::_pull(char *address, size_t size)
 	int result = SSL_read((SSL *)ssl, address, size);
 	if(result < 0) {
 		result = 0;
-		ioerror = Socket::error();
+		ioerr = Socket::error();
 	}
 	return (size_t) result;
 }

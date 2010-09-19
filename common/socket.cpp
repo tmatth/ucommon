@@ -1702,6 +1702,9 @@ size_t Socket::peek(void *data, size_t len) const
 	assert(data != NULL);
 	assert(len > 0);
 
+	if(iowait && iowait != Timer::inf && !Socket::wait(so, iowait))
+		return 0;
+
 	ssize_t rtn = _recv_(so, (caddr_t)data, 1, MSG_DONTWAIT | MSG_PEEK);
 	if(rtn < 1)
 		return 0;
@@ -2050,6 +2053,38 @@ int Socket::multicast(socket_t so, unsigned ttl)
 	}	
 }
 
+int Socket::join(struct addrinfo *addr)
+{
+	int rtn = Socket::join(addr);
+	if(rtn)
+		ioerr = rtn;
+	return rtn;
+}
+
+int Socket::drop(struct addrinfo *addr)
+{
+	int rtn = Socket::drop(addr);
+	if(rtn)
+		ioerr = rtn;
+	return rtn;
+}
+
+int Socket::wait(timeout_t timeout)
+{
+	bool mode = true;
+
+	if(timeout < Timer::inf)
+		mode = false;
+
+	int rtn = Socket::blocking(so, mode);
+	if(!rtn)
+		iowait = timeout;
+	else
+		ioerr = rtn;
+
+	return rtn;
+}
+
 int Socket::blocking(socket_t so, bool enable)
 {
 	if(so == INVALID_SOCKET)
@@ -2244,7 +2279,17 @@ next:
 		Socket::release(so);
 	return INVALID_SOCKET;
 }
-	
+
+int Socket::connectto(struct addrinfo *node)
+{
+	return (ioerr = connectto(so, node));
+}
+
+int Socket::disconnect(void)
+{
+	return (ioerr = disconnect(so));
+}
+
 int Socket::connectto(socket_t so, struct addrinfo *node)
 {
 	assert(node != NULL);

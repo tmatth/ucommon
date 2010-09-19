@@ -57,7 +57,7 @@ void IOBuffer::release(void)
 void IOBuffer::allocate(size_t size, type_t mode)
 {
 	release();
-	ioerror = 0;
+	_clear();
 
 	if(!size)
 		return;
@@ -352,16 +352,6 @@ bool IOBuffer::eof(void)
 	return false;
 }
 	
-size_t IOBuffer::_push(const char *address, size_t size)
-{
-	return 0;
-}
-
-size_t IOBuffer::_pull(char *address, size_t size)
-{
-	return 0;
-}
-
 bool IOBuffer::pending(void)
 {
 	if(!input)
@@ -393,6 +383,16 @@ fbuf::fbuf(const char *path, access_t access, unsigned mode, size_t size)
 fbuf::~fbuf()
 {
 	fbuf::close();
+}
+
+int fbuf::_err(void)
+{
+	return error;
+}
+
+void fbuf::_clear(void)
+{
+	error = 0;
 }
 
 void fbuf::open(const char *path, access_t mode, size_t size)
@@ -484,14 +484,12 @@ bool fbuf::trunc(offset_t offset)
 	if(!fbuf::isopen())
 		return false;
 
-	clear();
+	_clear();
 	reset();
 	flush();
 
 	seekerr = trunc(offset);
-	if(seekerr)
-		ioerror = seekerr;
-	else
+	if(!seekerr)
 		inpos = outpos = offset;
 	
 	if(err())
@@ -507,14 +505,12 @@ bool fbuf::seek(offset_t offset)
 	if(!fbuf::isopen())
 		return false;
 
-	clear();
+	_clear();
 	reset();
 	flush();
 
 	seekerr = seek(offset);
-	if(seekerr)
-		ioerror = seekerr;
-	else
+	if(!seekerr)
 		inpos = outpos = offset;
 
 	if(err())
@@ -529,19 +525,16 @@ size_t fbuf::_push(const char *buf, size_t size)
 
 	if(outpos == fsys::end) {
 		result = fsys::write(buf, size);
-		if(result < 0) {
-			ioerror = error;
+		if(result < 0)
 			result = 0;
-		}
+
 		return (size_t) result;
 	}
 
 #ifdef	HAVE_PWRITE
 	result = pwrite(getfile(), buf, size, outpos);
-	if(result < 0) {
+	if(result < 0) 
 		result = 0;
-		ioerror = error;
-	}
 	outpos += result;
 	return (size_t)result;
 #else
@@ -598,10 +591,8 @@ size_t fbuf::_pull(char *buf, size_t size)
 		mutex::release(this);
 #endif
 
-	if(result < 0) {
+	if(result < 0)
 		result = 0;
-		ioerror = error;
-	}
 	inpos += result;
 	return (size_t)result;
 }
@@ -654,10 +645,8 @@ void TCPSocket::open(const char *host, size_t size)
 
 	so = Socket::create(list, SOCK_STREAM, 0);
 	Socket::release(list);
-	if(so == INVALID_SOCKET) {
-		ioerror = Socket::error();
+	if(so == INVALID_SOCKET)
 		return;
-	}
 
 	if(getpeername(so, (struct sockaddr *)&address, &alen) == 0)
 		snprintf(serviceid, sizeof(serviceid), "%u", Socket::getservice((struct sockaddr *)&address));
@@ -669,10 +658,8 @@ void TCPSocket::open(TCPServer *server, size_t size)
 {
 	close();
 	so = server->accept();
-	if(so == INVALID_SOCKET) {
-		ioerror = Socket::error();
+	if(so == INVALID_SOCKET)
 		return;
-	}
 	
 	struct sockaddr_storage address;
 	socklen_t alen = sizeof(address);
@@ -761,13 +748,22 @@ alloc:
 	allocate(size, BUF_RDWR);
 }
 
+int TCPSocket::_err(void)
+{
+	return ioerr;
+}
+
+void TCPSocket::_clear(void)
+{
+	ioerr = 0;
+}
+
 size_t TCPSocket::_push(const char *address, size_t len)
 {
 	ssize_t result = Socket::sendto(so, address, len);
-	if(result < 0) {
+	if(result < 0)
 		result = 0;
-		ioerror = Socket::error();
-	}
+
 	return (size_t)result;
 }
 
@@ -780,10 +776,8 @@ size_t TCPSocket::_pull(char *address, size_t len)
 
 	result = Socket::recvfrom(so, address, len, 0);
 
-	if(result < 0) {
+	if(result < 0)
 		result = 0;
-		ioerror = Socket::error();
-	}
 	return (size_t)result;
 }
 

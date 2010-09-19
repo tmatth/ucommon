@@ -208,6 +208,11 @@ public:
 	protected:
 		friend class shell;
 
+		int ioerror;
+
+		int _err(void);
+		void _clear(void);
+
 		virtual size_t _push(const char *address, size_t size);
 		virtual size_t _pull(char *address, size_t size);
 

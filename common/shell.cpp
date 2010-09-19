@@ -329,12 +329,15 @@ size_t shell::pipeio::write(const void *address, size_t size)
 shell::iobuf::iobuf(const char *path, char **argv, shell::pmode_t mode, size_t size, char **env) : 
 IOBuffer(), shell::pipeio()
 {
+	ioerror = 0;
 	open(path, argv, mode, size, env);
 }
 
 shell::iobuf::iobuf(size_t size) :
 IOBuffer(), shell::pipeio()
 {
+	ioerror = 0;
+
 	if(size) {
 		pipeio::input = shell::input();
 		pipeio::output = shell::output();
@@ -345,6 +348,16 @@ IOBuffer(), shell::pipeio()
 shell::iobuf::~iobuf()
 {
 	cancel();
+}
+
+void shell::iobuf::_clear(void)
+{
+	ioerror = 0;
+}
+
+int shell::iobuf::_err(void)
+{
+	return ioerror;
 }
 
 size_t shell::iobuf::_pull(char *buf, size_t size)

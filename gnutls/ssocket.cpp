@@ -133,7 +133,7 @@ size_t SSocket::_push(const char *address, size_t size)
 	int result = gnutls_record_send((SSL)ssl, address, size);
 	if(result < 0) {
 		result = 0;
-		ioerror = errno;
+		ioerr = Socket::error();
 	}
 	return (size_t)result;
 }
@@ -146,7 +146,7 @@ size_t SSocket::_pull(char *address, size_t size)
     int result = gnutls_record_recv((SSL)ssl, address, size);
     if(result < 0) {
         result = 0;
-        ioerror = errno;
+        ioerr = Socket::error();
     }
     return (size_t)result;
 }

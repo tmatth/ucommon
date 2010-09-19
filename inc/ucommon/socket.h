@@ -30,6 +30,10 @@
 #include <ucommon/timers.h>
 #endif
 
+#ifndef _UCOMMON_PROTOCOLS_H_
+#include <ucommon/protocols.h>
+#endif
+
 #ifndef	_UCOMMON_LINKED_H_
 #include <ucommon/linked.h>
 #endif
@@ -292,14 +296,12 @@ public:
  * addressing, and additional addressing domains (such as Unix domain sockets).
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Socket 
+class __EXPORT Socket
 {
-private:
-	int ioerr;
-	timeout_t iowait;
-
 protected:
 	socket_t so;
+	int ioerr;
+	timeout_t iowait;
 
 	/**
 	 * Get an address list directly.  This is used internally by some derived
@@ -639,6 +641,12 @@ public:
 	void release(void);
 
 	/**
+	 * Get error code.
+	 */
+	inline int err(void)
+		{return ioerr;}
+
+	/**
 	 * See the number of bytes in the receive queue.
 	 * @param value to test for.
 	 * @return true if at least that many bytes waiting in receive queue.
@@ -847,35 +855,38 @@ public:
 	 * For TCP (and DCCP) sockets, the entire list may be tried.  For UDP, 
 	 * connect is only a state and the first valid entry in the list is used.
 	 * @param list of addresses to connect to.
-	 * @return 0 on success, -1 on error.
+	 * @return 0 on success or error.
 	 */
-	inline int connectto(struct addrinfo *list)
-		{return connectto(so, list);};
+	int connectto(struct addrinfo *list);
 	
 	/**
 	 * Disconnect a connected socket.  Depending on the implementation, this
 	 * might be done by connecting to AF_UNSPEC, connecting to a 0 address,
 	 * or connecting to self.
-	 * @return 0 on success, -1 on error.
+	 * @return 0 on success or error.
 	 */
-	inline int disconnect(void)
-		{return disconnect(so);};
+	int disconnect(void);
 
 	/**
 	 * Join socket to multicast group.
 	 * @param list of groups to join.
 	 * @return 0 on success, -1 on error.
 	 */
-	inline int join(struct addrinfo *list)
-		{return join(so, list);};
+	int join(struct addrinfo *list);
 
 	/**
 	 * Drop socket from multicast group.
 	 * @param list of groups to drop.
 	 * @return 0 on success, -1 on error.
 	 */
-	inline int drop(struct addrinfo *list)
-		{return drop(so, list);};
+	int drop(struct addrinfo *list);
+
+	/**
+	 * Socket i/o timer setting.
+	 * @param timeout to wait, inf for blocking, 0 pure non-blocking.
+	 * @return 0 on success or error code.
+	 */
+	int wait(timeout_t timeout = Timer::inf);
 
 	/**
 	 * Peek at data waiting in the socket receive buffer.
@@ -1662,13 +1673,6 @@ public:
 	 * @return true if entry set.
 	 */
 	static bool test(socket_t socket, set_t mask);
-
-	/**
-	 * Return last error for object.
-	 * @return last error or 0 if none.
-	 */
-	int err(void)
-		{return ioerr;}
 };
 
 /**
