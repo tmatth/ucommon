@@ -38,7 +38,8 @@ NAMESPACE_UCOMMON
 
 class __EXPORT MemoryProtocol
 {
-public:
+protected:
+	friend class MemoryRedirect;
     /**
      * Protocol to allocate memory from the pager heap.  The size of the 
 	 * request must be less than the size of the memory page used.  The
@@ -48,6 +49,7 @@ public:
      */
     virtual void *_alloc(size_t size) = 0;
 
+public:
 	/**
 	 * Convenience function.
 	 * @param size of memory request.
