@@ -48,16 +48,15 @@ Summary: Generated class documentation for ucommon
 %description bin
 This is a collection of command line tools that use various aspects of the
 ucommon library.  Some may be needed to prepare files or for development of
-applications, such as audiotool, which might be used to prepare or convert
-audio samples.
+applications.
 
 %description devel
 This package provides header and support files needed for building 
 applications that use the uCommon library and frameworks.
 
 %description doc
-Generated class documentation for GNU uCommon C++ framework
-from header files, html browsable.
+Generated class documentation for GNU uCommon library from header files,
+html browsable.
 
 %prep
 %setup -q
@@ -81,7 +80,7 @@ from header files, html browsable.
 %defattr(-,root,root,-)
 %doc AUTHORS README COPYING COPYING.LESSER COPYRIGHT NEWS SUPPORT ChangeLog
 %{_libdir}/libucommon.so.*
-%{_libdir}/libuccsecure.so.*
+%{_libdir}/libusecure.so.*
 
 %files bin
 %defattr(-,root,root,-)
