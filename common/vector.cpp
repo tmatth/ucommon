@@ -562,11 +562,10 @@ vectorsize_t Vector::size(void **list)
 }
 
 PagerReuse::PagerReuse(mempager *p, size_t objsize, unsigned c) :
-ReusableAllocator()
+MemoryRedirect(p), ReusableAllocator()
 {
 	assert(objsize > 0 && c > 0);
 
-	pager = p;
 	limit = c;
 	count = 0;
 	osize = objsize;
@@ -590,13 +589,6 @@ bool PagerReuse::avail(void)
 	return rtn;
 }
 
-ReusableObject *PagerReuse::alloc(void)
-{
-	ReusableObject *obj = (ReusableObject *)malloc(osize);
-	crit(obj != NULL, "reusable alloc failed");
-	return obj;
-}
-
 ReusableObject *PagerReuse::request(void)
 {
 	ReusableObject *obj = NULL;
@@ -607,15 +599,10 @@ ReusableObject *PagerReuse::request(void)
 			obj = freelist;
 			freelist = next(obj);
 		}
-		else if(pager) {
-			++count;
-			unlock();
-			return (ReusableObject *)pager->alloc(osize);
-		}
 		else {
 			++count;
 			unlock();
-			return alloc();
+			return (ReusableObject *)_alloc(osize);
 		}
 	}
 	unlock();
@@ -655,15 +642,10 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
 		obj = freelist;
 		freelist = next(obj);
 	}
-	else if(pager) {
-		++count;
-		unlock();
-		return (ReusableObject *)pager->alloc(osize);
-	}
 	else {
 		++count;
 		unlock();
-		return alloc();
+		return (ReusableObject *)_alloc(osize);
 	}
 	if(obj)
 		++count;

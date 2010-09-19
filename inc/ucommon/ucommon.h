@@ -83,6 +83,7 @@
 #ifndef	_UCOMMON_UCOMMON_H_
 #define	_UCOMMON_UCOMMON_H_
 #include <ucommon/platform.h>
+#include <ucommon/protocols.h>
 #include <ucommon/atomic.h>
 #include <ucommon/object.h>
 #include <ucommon/counter.h>

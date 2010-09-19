@@ -535,7 +535,7 @@ const char *shell::charopt::assign(const char *value)
 
 void shell::collapse(LinkedObject *first)
 {
-	char **argv = _argv = (char **)mempager::alloc(sizeof(char **) * (_argc + 1));
+	char **argv = _argv = (char **)mempager::_alloc(sizeof(char **) * (_argc + 1));
 	linked_pointer<args> ap = first;
 	while(is(ap)) {
 		*(argv++) = ap->item;
@@ -756,7 +756,7 @@ inactive:
 argument:
 			++_argc;
 			active = true;
-			arg = init<args>((args *)mempager::alloc(sizeof(args)));
+			arg = init<args>((args *)mempager::_alloc(sizeof(args)));
 			arg->item = (cp++);
 			arg->enlist(&arglist);
 			continue;
@@ -958,7 +958,7 @@ trigger:
 				String::set(dirname + len, sizeof(dirname) - len, fn);
 			else
 				String::set(dirname, sizeof(dirname), fn);
-			argitem = init<args>((args *)mempager::alloc(sizeof(args)));
+			argitem = init<args>((args *)mempager::_alloc(sizeof(args)));
 			argitem->item = mempager::dup(dirname);
 			argitem->enlist(&arglist);
 			++_argc;
@@ -967,7 +967,7 @@ trigger:
 		++*_argv;
 		continue;
 skip:
-		argitem = init<args>((args *)mempager::alloc(sizeof(args)));
+		argitem = init<args>((args *)mempager::_alloc(sizeof(args)));
 		argitem->item = *(_argv++);
 		argitem->enlist(&arglist);
 		++_argc;
@@ -2133,7 +2133,7 @@ void shell::restart(char *argv0, char **argv, char **list)
 	unsigned args = count(argv);
 	unsigned head = count(list);
 	unsigned argc = 2 + args + head;
-	char **newargs = (char **)mempager::alloc(sizeof(char **) * argc--);
+	char **newargs = (char **)mempager::_alloc(sizeof(char **) * argc--);
 
 	memcpy(newargs, list, head * sizeof(char **));
 	newargs[head++] = argv0;
@@ -2203,7 +2203,7 @@ void shell::setsym(const char *name, const char *value)
 		++sp;
 	}
 
-	syms *v = (syms *)mempager::alloc(sizeof(syms));
+	syms *v = (syms *)mempager::_alloc(sizeof(syms));
 	v->name = dup(name);
 	v->value = dup(value);
 	v->enlist(&_syms);

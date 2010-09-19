@@ -34,6 +34,10 @@
 #include <ucommon/platform.h>
 #endif
 
+#ifndef	_UCOMMON_PROTOCOLS_H_
+#include <ucommon/protocols.h>
+#endif
+
 #ifndef	 _UCOMMON_LINKED_H_
 #include <ucommon/linked.h>
 #endif
@@ -43,13 +47,13 @@ NAMESPACE_UCOMMON
 class PagerPool;
 
 /**
- * An alternate memory pager private heap manager.  This is used to allocate
+ * A memory protocol pager for private heap manager.  This is used to allocate
  * in an optimized manner, as it assumes no mutex locks are held or used as
  * part of it's own internal processing.  It also is designed for optimized
  * performance.
  * @author David Sugar <dyfet@gnutelephony.org>
  */ 
-class __EXPORT memalloc
+class __EXPORT memalloc : public MemoryProtocol
 {
 private:
 	size_t pagesize, align;
@@ -129,35 +133,12 @@ public:
 
 	/**
 	 * Allocate memory from the pager heap.  The size of the request must be
-	 * less than the size of the memory page used.
+	 * less than the size of the memory page used.  This implements the
+	 * memory protocol allocation method.
 	 * @param size of memory request.
 	 * @return allocated memory or NULL if not possible.
 	 */
-	virtual void *alloc(size_t size);
-
-	/**
-	 * Allocate memory from the pager heap.  The size of the request must be
-	 * less than the size of the memory page used.  The memory is initialized
-	 * to zero.
-	 * @param size of memory request.
-	 * @return allocated memory or NULL if not possible.
-	 */
-	void *zalloc(size_t size);
-
-	/**
-	 * Duplicate NULL terminated string into allocated memory.
-	 * @param string to copy into memory.
-	 * @return allocated memory with copy of string or NULL if cannot allocate.
-	 */
-	char *dup(const char *string);
-
-	/**
-	 * Duplicate existing memory block into allocated memory.
-	 * @param memory to data copy from.
-	 * @param size of memory to allocate.
-	 * @return allocated memory with copy or NULL if cannot allocate.
-	 */
-	void *dup(void *memory, size_t size);
+	virtual void *_alloc(size_t size);
 };
 
 /**
@@ -240,39 +221,13 @@ public:
 
 	/**
 	 * Allocate memory from the pager heap.  The size of the request must be
-	 * less than the size of the memory page used.  The memory pager mutex
+	 * less than the size of the memory page used.  This impliments the 
+	 * memory protocol with mutex locking for thread safety.
 	 * is locked during this operation and then released.
 	 * @param size of memory request.
 	 * @return allocated memory or NULL if not possible.
 	 */
-	void *alloc(size_t size);
-
-	/**
-	 * Allocate memory from the pager heap.  The size of the request must be
-	 * less than the size of the memory page used.  The memory pager mutex
-	 * is locked during this operation and then released.  This version
-	 * zeros memory after the mutex lock has been released.
-	 * @param size of memory request.
-	 * @return allocated memory or NULL if not possible.
-	 */
-	void *zalloc(size_t size);
-
-	/**
-	 * Duplicate NULL terminated string into allocated memory.  The mutex
-	 * lock is acquired to perform this operation and then released.
-	 * @param string to copy into memory.
-	 * @return allocated memory with copy of string or NULL if cannot allocate.
-	 */
-	char *dup(const char *string);
-
-	/**
-	 * Duplicate existing memory block into allocated memory.  The mutex
-	 * lock is acquired to perform this operation and then released.
-	 * @param memory to data copy from.
-	 * @param size of memory to allocate.
-	 * @return allocated memory with copy or NULL if cannot allocate.
-	 */
-	void *dup(void *memory, size_t size);
+	virtual void *_alloc(size_t size);
 };
 
 /**
@@ -347,18 +302,20 @@ protected:
 
 /**
  * Pager pool base class for managed memory pools.  This is a helper base
- * class for the pager template and generally is not used by itself.
+ * class for the pager template and generally is not used by itself.  If
+ * different type pools are intended to use a common memory pager then
+ * you will need to mixin a memory protocol object that performs
+ * redirection such as the MemoryRedirect class. 
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT PagerPool 
+class __EXPORT PagerPool : public MemoryProtocol
 {
 private:
-	mempager *pager;
 	LinkedObject *freelist;
 	pthread_mutex_t mutex;
 
 protected:
-	PagerPool(mempager *pager);
+	PagerPool();
 	~PagerPool();
 
 	PagerObject *get(size_t size);
@@ -568,15 +525,15 @@ public:
  * from PagerObject which can be managed through a private heap.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T>
-class pager : private PagerPool
+template <typename T>
+class pager : private MemoryRedirect, private PagerPool
 {
 public:
 	/**
 	 * Construct a pager and optionally assign a private pager heap.
 	 * @param heap pager to use.  If NULL, uses global heap.
 	 */
-	inline pager(mempager *heap = NULL) : PagerPool(heap) {};
+	inline pager(mempager *heap = NULL) : MemoryRedirect(heap), PagerPool() {};
 
 	/**
 	 * Purge managed objects.
@@ -632,7 +589,7 @@ public:
 	inline T *get(const char *name) const {
 		T *node = (static_cast<T*>(NamedObject::map(idx, name, M)));
 		if(!node) {
-			node = init<T>(static_cast<T*>(mempager::alloc(sizeof(T))));
+			node = init<T>(static_cast<T*>(mempager::_alloc(sizeof(T))));
 			node->NamedObject::add(idx, name, M);
 		}
 		return node;

@@ -73,14 +73,11 @@ protected:
  * returned for reuse.  
   * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT PagerReuse : protected ReusableAllocator
+class __EXPORT PagerReuse : protected MemoryRedirect, protected ReusableAllocator
 {
 private:
-	mempager *pager;
 	unsigned limit, count;
 	size_t osize;
-
-	ReusableObject *alloc(void);
 
 protected:
 	PagerReuse(mempager *pager, size_t objsize, unsigned count);

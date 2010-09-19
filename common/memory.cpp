@@ -134,17 +134,7 @@ use:
 	return npage;
 }
 
-void *memalloc::zalloc(size_t size)
-{
-	void *mem = alloc(size);
-
-	if(mem)
-		memset(mem, 0, size);
-
-	return mem;
-}
-
-void *memalloc::alloc(size_t size)
+void *memalloc::_alloc(size_t size)
 {
 	assert(size > 0);
 
@@ -167,26 +157,6 @@ void *memalloc::alloc(size_t size)
 	mem = ((caddr_t)(p)) + p->used;	
 	p->used += size;
 	return mem;
-}
-
-char *memalloc::dup(const char *str)
-{
-    if(!str)
-        return NULL;
-	size_t len = strlen(str) + 1;
-    char *mem = static_cast<char *>(alloc(len));
-    String::set(mem, len, str);
-    return mem;
-}
-
-void *memalloc::dup(void *obj, size_t size)
-{
-	assert(obj != NULL);
-	assert(size > 0);
-
-    char *mem = static_cast<char *>(alloc(size));
-	memcpy(mem, obj, size);
-    return mem;
 }
 
 mempager::mempager(size_t ps) :
@@ -222,49 +192,14 @@ void mempager::dealloc(void *mem)
 {
 }
 
-void *mempager::alloc(size_t size)
+void *mempager::_alloc(size_t size)
 {
 	assert(size > 0);
 
 	void *mem;
 	pthread_mutex_lock(&mutex);
-	mem = memalloc::alloc(size);
+	mem = memalloc::_alloc(size);
 	pthread_mutex_unlock(&mutex);
-	return mem;
-}
-
-void *mempager::zalloc(size_t size)
-{
-	assert(size > 0);
-
-	void *mem;
-	pthread_mutex_lock(&mutex);
-	mem = memalloc::alloc(size);
-	pthread_mutex_unlock(&mutex);
-
-	if(mem)
-		memset(mem, 0, size);
-
-	return mem;
-}
-
-char *mempager::dup(const char *str)
-{
-	if(!str)
-		return NULL;
-	size_t len = strlen(str) + 1;
-	char *mem = static_cast<char *>(alloc(len));
-	String::set(mem, len, str);
-	return mem;
-}
-
-void *mempager::dup(void *obj, size_t size)
-{
-	assert(obj != NULL);
-	assert(size > 0);
-
-	void *mem = alloc(size);
-	memcpy(mem, obj, size);
 	return mem;
 }
 
@@ -311,9 +246,8 @@ void PagerObject::release(void)
 	CountedObject::release();
 }
 
-PagerPool::PagerPool(mempager *p) 
+PagerPool::PagerPool() 
 {
-	pager = p;
 	freelist = NULL;
 	pthread_mutex_init(&mutex, NULL);
 }
@@ -344,10 +278,8 @@ PagerObject *PagerPool::get(size_t size)
 
     pthread_mutex_unlock(&mutex);
 
-	if(!ptr && pager)
-		ptr = new((caddr_t)(pager->alloc(size))) PagerObject;
-	else if(!ptr && !pager)
-		ptr = new(size - sizeof(PagerObject)) PagerObject;
+	if(!ptr)
+		ptr = new((caddr_t)(_alloc(size))) PagerObject;
 	memset(ptr, 0, size);
 	ptr->pager = this;
 	return ptr;
@@ -376,10 +308,10 @@ mempager(ps)
 	keysize = strmax;
 	count = 0;
 
-	root = (NamedObject **)alloc(sizeof(NamedObject *) * pathmax);
+	root = (NamedObject **)_alloc(sizeof(NamedObject *) * pathmax);
 	memset(root, 0, sizeof(NamedObject *) * pathmax);
 	if(keysize) {
-		list = (LinkedObject **)alloc(sizeof(LinkedObject *) * (keysize / 8));
+		list = (LinkedObject **)_alloc(sizeof(LinkedObject *) * (keysize / 8));
 		memset(list, 0, sizeof(LinkedObject *) * (keysize / 8));
 	}
 	else
@@ -467,7 +399,7 @@ bool keyassoc::create(char *id, void *data)
 		ptr = (caddr_t)obj;
 	}
 	if(ptr == NULL)
-		ptr = (caddr_t)memalloc::alloc(sizeof(keydata) + size * 8);
+		ptr = (caddr_t)memalloc::_alloc(sizeof(keydata) + size * 8);
 	kd = new(ptr) keydata(this, id, paths, 8 + size * 8);					
 	kd->data = data;
 	++count;
@@ -498,7 +430,7 @@ bool keyassoc::assign(char *id, void *data)
 			ptr = (caddr_t)obj;
 		}
 		if(ptr == NULL)
-			ptr = (caddr_t)memalloc::alloc(sizeof(keydata) + size * 8);
+			ptr = (caddr_t)memalloc::_alloc(sizeof(keydata) + size * 8);
 		kd = new(ptr) keydata(this, id, paths, 8 + size * 8);				
 		++count;	
 	}
