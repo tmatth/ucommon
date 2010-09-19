@@ -20,8 +20,8 @@
  * Private heaps often can reduce locking contention in threaded applications
  * since they do not require using the global "malloc" function.  Private
  * heaps also can be used as auto-release heaps, where all memory allocated
- * and parsled out for small objects can be automatically released all at once.
- * Pager pools are used to optimize system allocation around page boundries.
+ * and handled out for small objects can be automatically released all at once.
+ * Pager pools are used to optimize system allocation around page boundaries.
  * Associations allow private memory to be tagged and found by string
  * identifiers.
  * @file ucommon/memory.h
@@ -70,7 +70,7 @@ protected:
 
 	/**
 	 * Acquire a new page from the heap.  This is mostly used internally.
-	 * @return page structure of the newly aquired memory page.
+	 * @return page structure of the newly acquired memory page.
 	 */
 	page_t *pager(void);
 
@@ -113,7 +113,7 @@ public:
 	/**
 	 * Determine fragmentation level of acquired heap pages.  This is
 	 * represented as an average % utilization (0-100) and represents the
-	 * used portion of each allocated heap page vs the page size.  Since
+	 * used portion of each allocated heap page verse the page size.  Since
 	 * requests that cannot fit on an already allocated page are moved into
 	 * a new page, there is some unusable space left over at the end of the
 	 * page.  When utilization approaches 100, this is good.  A low utilization
@@ -163,7 +163,7 @@ public:
 /**
  * A managed private heap for small allocations.  This is used to allocate
  * a large number of small objects from a paged heap as needed and to then
- * release them together all at once.  This pattern has significiently less
+ * release them together all at once.  This pattern has significantly less
  * overhead than using malloc and offers less locking contention since the 
  * memory pager can also have it's own mutex.  Pager pool allocated memory
  * is always aligned to the optimal data size for the cpu bus and pages are
@@ -175,9 +175,9 @@ public:
  * A new page is allocated from the real heap when there is insufficient
  * space in the existing page to complete a request.  The largest single
  * memory allocation one can make is restricted by the page size used, and
- * it is best to allocate objects a significent fraction smaller than the
+ * it is best to allocate objects a significant fraction smaller than the
  * page size, as fragmentation occurs at the end of pages when there is
- * insufficent space in the current page to complete a request. 
+ * insufficient space in the current page to complete a request. 
  * @author David Sugar <dyfet@gnutelephony.org>
  */ 
 class __EXPORT mempager : public memalloc
@@ -200,7 +200,7 @@ public:
 	/**
 	 * Lock the memory pager mutex.  It will be more efficient to lock
 	 * the pager and then call the locked allocator than using alloc which
-	 * seperately locks and unlocks for each request when a large number of
+	 * separately locks and unlocks for each request when a large number of
 	 * allocation requests are being batched together.
 	 */
 	inline void lock(void)
@@ -215,7 +215,7 @@ public:
 	/**
 	 * Determine fragmentation level of acquired heap pages.  This is
 	 * represented as an average % utilization (0-100) and represents the
-	 * used portion of each allocated heap page vs the page size.  Since
+	 * used portion of each allocated heap page verse the page size.  Since
 	 * requests that cannot fit on an already allocated page are moved into
 	 * a new page, there is some unusable space left over at the end of the
 	 * page.  When utilization approaches 100, this is good.  A low utilization
@@ -233,7 +233,7 @@ public:
 	 * Return memory back to pager heap.  This actually does nothing, but
 	 * might be used in a derived class to create a memory heap that can
 	 * also receive (free) memory allocated from our heap and reuse it,
-	 * for example in a full private malloc implimentation in a derived class.
+	 * for example in a full private malloc implementation in a derived class.
 	 * @param memory to free back to private heap.
 	 */
 	virtual void dealloc(void *memory);
@@ -300,7 +300,7 @@ public:
 
 	/**
 	 * Destroy an autorelease pool and delete member objects.  This may be
-	 * used to release an existing pool programatically when desired rather
+	 * used to release an existing pool programmatically when desired rather
 	 * than requiring the object to fall out of scope.
 	 */
 	void release(void);
@@ -600,7 +600,7 @@ public:
 };
 
 /**
- * A templated class for a hash pager.  This creates objects from a pager
+ * A template class for a hash pager.  This creates objects from a pager
  * pool when they do not already exist in the hash map.
  * @author David Sugar <dyfet@gnutelephony.org>
  */

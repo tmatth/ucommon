@@ -110,7 +110,7 @@ public:
 
 	/**
 	 * How many chars requires to encode a given unicode character.
-	 * @param character tyo encode.
+	 * @param character to encode.
 	 * @return number of chars required to encode given character.
 	 */
 	static size_t chars(ucs4_t character);
@@ -143,7 +143,7 @@ public:
 	static const char *find(const char *string, ucs4_t character, size_t start = 0);
 
 	/**
-	 * Find last occurance of character in string.
+	 * Find last occurrence of character in string.
 	 * @param string to search in.
 	 * @param character code to search for.
 	 * @param end offset to start from in codepoints.
@@ -152,10 +152,10 @@ public:
 	static const char *rfind(const char *string, ucs4_t character, size_t end = (size_t)-1l);
 
 	/**
-	 * Count occurences of a unicode character in string.
+	 * Count occurrences of a unicode character in string.
 	 * @param string to search in.
 	 * @param character code to search for.
-	 * @return count of occurences.
+	 * @return count of occurrences.
 	 */
 	static unsigned ccount(const char *string, ucs4_t character);
 
@@ -218,7 +218,7 @@ protected:
 	UString(const unicode_t *text, const unicode_t *end);
 
 	/**
-	 * Construct a copy of a string object.  Our copy inherets the same 
+	 * Construct a copy of a string object.  Our copy inherits the same 
 	 * reference counted instance of cstring as in the original.
 	 * @param existing string to copy from.
 	 */
@@ -308,14 +308,14 @@ protected:
 		{return utf8::count(str->text);}
 
 	/**
-	 * Count occurences of a unicode character in string.
+	 * Count occurrences of a unicode character in string.
 	 * @param character code to search for.
-	 * @return count of occurences.
+	 * @return count of occurrences.
 	 */
 	unsigned ccount(ucs4_t character) const;
 
 	/**
-	 * Find first occurance of character in string.
+	 * Find first occurrence of character in string.
 	 * @param character code to search for.
 	 * @param start offset in string in codepoints.
 	 * @return pointer to first instance or NULL if not found.
@@ -323,7 +323,7 @@ protected:
 	const char *find(ucs4_t character, strsize_t start = 0) const;
 
 	/**
-	 * Find last occurance of character in string.
+	 * Find last occurrence of character in string.
 	 * @param character code to search for.
 	 * @param end offset to start from in codepoints.
 	 * @return pointer to last instance or NULL if not found.
@@ -488,7 +488,7 @@ public:
 typedef	UString	ustring_t;
 
 /**
- * Convience type for utf8_pointer strings.
+ * Convenience type for utf8_pointer strings.
  */
 typedef	utf8_pointer utf8_t;
 

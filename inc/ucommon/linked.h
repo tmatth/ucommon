@@ -127,7 +127,7 @@ public:
 	/**
 	 * Get member by index.
 	 * @return indexed member in linked list.
-	 * @param root pionter to list we are indexing.
+	 * @param root pointer to list we are indexing.
 	 * @param index member to find.
 	 */
 	static LinkedObject *getIndexed(LinkedObject *root, unsigned index);
@@ -168,7 +168,7 @@ public:
 /**
  * An index container for maintaining an ordered list of objects.
  * This index holds a pointer to the head and tail of an ordered list of
- * linked objects.  Fundimental methods for supporting iterators are
+ * linked objects.  Fundamental methods for supporting iterators are
  * also provided.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
@@ -410,14 +410,14 @@ protected:
 	/**
 	 * Destroy named object.  We do not always destroy named objects, since
 	 * we may use them in reusable pools or we may initialize a list that we
-	 * keep permenantly.  If we do invoke delete for something based on
+	 * keep permanently.  If we do invoke delete for something based on
 	 * NamedObject, then be aware the object id is assumed to be formed from 
-	 * a dup'd string which will also be freed unless clearId is overriden.
+	 * a dup'd string which will also be freed unless clearId is overridden.
 	 */
 	~NamedObject();
 
 	/**
-	 * The behavior of clearing id's can be overriden if they are not
+	 * The behavior of clearing id's can be overridden if they are not
 	 * assigned as strdup's from the heap...
 	 */
 	virtual void clearId(void);
@@ -531,7 +531,7 @@ public:
 
 	/**
 	 * Compare the name of our object to see if equal.  This is a virtual
-	 * so that it can be overriden when using named lists or hash lookups
+	 * so that it can be overridden when using named lists or hash lookups
 	 * that must be case insensitive.
 	 * @param name to compare our name to.
 	 * @return true if effectivily equal.
@@ -613,9 +613,9 @@ public:
 	NamedTree *find(const char *name) const;
 
 	/**
-	 * Find a subnode by a dot seperated list of node names.  If one or
+	 * Find a subnode by a dot separated list of node names.  If one or
 	 * more lead dots are used, then the search will go through parent
-	 * node levels of our node.  The dot seperated list could be thought
+	 * node levels of our node.  The dot separated list could be thought
 	 * of as a kind of pathname where dot is used like slash.  This implies
 	 * that individual nodes can never use names which contain dot's if
 	 * the path function will be used.
@@ -626,7 +626,7 @@ public:
 
 	/**
 	 * Find a child leaf node of our object with the specified name.  This
-	 * will recursivily search all our child nodes until it can find a leaf
+	 * will recursively search all our child nodes until it can find a leaf
 	 * node containing the specified id but that holds no further children.
 	 * @param name of leaf node to search for.
 	 * @return tree node object found or NULL.
@@ -916,7 +916,7 @@ public:
 	ObjectStack();
 
 	/**
-	 * Create a stack from an existing list of obejects.
+	 * Create a stack from an existing list of objects.
 	 * @param list of already linked objects.
 	 */
 	ObjectStack(LinkedObject *list);
@@ -935,7 +935,7 @@ public:
 
 	/**
 	 * Pop an object from the stack.
-	 * @return object popped from stack or NULL if empy.
+	 * @return object popped from stack or NULL if empty.
 	 */
 	inline LinkedObject *pop(void)
 		{return ObjectStack::pull();};
@@ -1033,7 +1033,7 @@ public:
 };
 	
 /**
- * Templated value class to embed data structure into a named list.
+ * Template value class to embed data structure into a named list.
  * This is used to form a class which can be searched by name and that
  * contains a member value object.  Most of the core logic for this 
  * template is found in and derived from the object_value template.
@@ -1069,7 +1069,7 @@ public:
 };
 
 /**
- * Templated value class to embed data structure into a linked list.
+ * Template value class to embed data structure into a linked list.
  * This is used to form a class which can be linked together using
  * either an ordered index or simple linked pointer chain and that
  * contains a member value object.  Most of the core logic for this 
@@ -1259,7 +1259,7 @@ public:
 };
 
 /**
- * A templated smart pointer for iterating linked lists.  This class allows
+ * A smart pointer template for iterating linked lists.  This class allows
  * one to access a list of single or double linked objects and iterate
  * through each member of a list.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -1432,7 +1432,7 @@ public:
 /**
  * Embed data objects into a multipap structured memory database.  This
  * can be used to form multi-key hash nodes.  Embedded values can either be
- * of direct types that are then stored as part of the templated object, or
+ * of direct types that are then stored as part of the template object, or
  * of class types that are data pointers.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
@@ -1511,14 +1511,14 @@ public:
 
 /**
  * Embed data objects into a tree structured memory database.  This can
- * be used to form XML documentent trees or other data structures that
+ * be used to form XML document trees or other data structures that
  * can be organized in trees.  The NamedTree class is used to manage
  * the structure of the tree, and the type specified is embedded as a
  * data value object which can be manipulated.  Name identifiers are
  * assumed to be dynamically allocated if tree node elements are deletable.
  *
  * Embedded values can either be of direct types that are then stored as
- * part of the templated object, or of class types that are data pointers.
+ * part of the template object, or of class types that are data pointers.
  * The latter might be used for trees that contain data which might be
  * parsed dynamically from a document and/or saved on a heap.  Pointer trees
  * assume that NULL pointers are for nodes that are empty, and that NULL data
@@ -1706,7 +1706,7 @@ public:
 };
 
 /**
- * A templated class for a hash map.  This provides a has map index object as
+ * A template class for a hash map.  This provides a has map index object as
  * a chain of keyindex selected linked pointers of a specified size.  This
  * is used for the index and size values for NamedObject's which are listed
  * on a hash map.
@@ -1733,7 +1733,7 @@ public:
 		{return idx;};
 
 	/**
-	 * Retreive key size to use in NamedObject constructors.
+	 * Retrieve key size to use in NamedObject constructors.
 	 * @return key size of hash map.
 	 */
 	inline unsigned limit(void) const

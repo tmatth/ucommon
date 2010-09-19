@@ -618,7 +618,7 @@ void fsys::open(const char *path, access_t access)
 		error = remapError();
 #ifdef HAVE_POSIX_FADVISE
 	else {
-		// linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
+		// Linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
 		if(access == ACCESS_STREAM)
 			posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_SEQUENTIAL);
 		else if(access == ACCESS_RANDOM)

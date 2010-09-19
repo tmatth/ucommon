@@ -610,7 +610,6 @@ public:
  * @author Marcelo Dalmas <mad@brasmap.com.br>
  * @short Integer based time class.
  */
-
 class __EXPORT DateTime : public Date, public Time
 {
 protected:
@@ -645,7 +644,7 @@ public:
 	static const size_t sz_string;
 
 	/**
-	 * Construct a date and time from C libraray time_t type.		
+	 * Construct a date and time from C library time_t type.		
 	 * @param time type to make date and time from.
 	 */
   	DateTime(time_t time);

@@ -544,21 +544,21 @@ public:
 };
 
 /**
- * Convenence function to access object retention.
+ * Convenience function to access object retention.
  * @param object we are retaining.
  */
 inline void retain(Object *object)
 	{object->retain();}
 
 /**
- * Convenence function to access object release.
+ * Convenience function to access object release.
  * @param object we are releasing.
  */
 inline void release(Object *object)
 	{object->release();}
 
 /**
- * Convenence function to access object copy.
+ * Convenience function to access object copy.
  * @param object we are copying.
  */
 inline Object *copy(Object *object)

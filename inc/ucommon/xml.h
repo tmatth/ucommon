@@ -34,9 +34,9 @@
 NAMESPACE_UCOMMON
 
 /**
- * XML streaming parser.  This class impliments a basic XML stream parser 
+ * XML streaming parser.  This class implements a basic XML stream parser 
  * that can be used to examine an XML resource thru virtual I/O methods.  
- * This class must be derived into one that can impliment the physical I/O 
+ * This class must be derived into one that can implement the physical I/O 
  * required to parse actual data.  A mixer class using XMLParser and 
  * tcpstream would be one example of this.  This can also be used to
  * parse xml content in memory buffers easily.  This parser is only concerned

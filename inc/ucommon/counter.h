@@ -160,7 +160,7 @@ protected:
 
 public:
 	/**
-	 * Create a templated auto-sequence from a list of typed pointers.
+	 * Create a template auto-sequence from a list of typed pointers.
 	 * @param array of typed values to sequence on reference.
 	 * @param size of list of typed values.
 	 */
@@ -191,7 +191,7 @@ public:
 	/**
 	 * Return a specific typed member from the sequence list.
 	 * @param offset of member to return.
-	 * @return typed value at the specified offet.
+	 * @return typed value at the specified offset.
 	 */
 	inline T& operator[](unsigned offset)
 		{return *get(offset);};

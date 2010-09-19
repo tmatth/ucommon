@@ -149,10 +149,10 @@ void PersistEngine::write(const PersistObject *object) throw(PersistException)
 	return;
   }
 
-  // First off - has this Object been serialised already?
+  // First off - has this Object been serialized already?
   ArchiveMap::const_iterator itor = myArchiveMap.find(object);
   if (itor == myArchiveMap.end()) {
-	// Unfortunately we need to serialise it - here we go ....
+	// Unfortunately we need to serialize it - here we go ....
 	uint32_t id = (uint32_t)myArchiveMap.size();
 	myArchiveMap[object] = id; // bumps id automatically for next one
 	write(id);
@@ -174,7 +174,7 @@ void PersistEngine::write(const PersistObject *object) throw(PersistException)
 	write(majik);
   }
   else {
-	// This object has been serialised, so just pop its ID out
+	// This object has been serialized, so just pop its ID out
 	write(itor->second);
   }
 }
@@ -184,7 +184,7 @@ void PersistEngine::read(PersistObject &object) throw(PersistException)
   uint32_t id = 0;
   read(id);
   if (id == NullObject)
-	throw("Object Id should not be NULL when unpersisting to a reference");
+	throw("Object Id should not be NULL when un-persisting to a reference");
 
   // Do we already have this object in memory?
   if (id < myArchiveVector.size()) {

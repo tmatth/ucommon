@@ -338,7 +338,7 @@ void NamedObject::clearId(void)
 NamedObject::~NamedObject()
 {
 	// this assumes the id is a malloc'd or strdup'd string.
-	// maybe overriden if virtual...
+	// maybe overridden if virtual...
 
 	clearId();
 }
@@ -760,7 +760,7 @@ void NamedTree::purge(void)
 	}
 
 	// this assumes the object id is a malloc'd/strdup string.
-	// may be overriden if virtual...
+	// may be overridden if virtual...
 	clearId();
 }
 

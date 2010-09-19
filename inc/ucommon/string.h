@@ -85,7 +85,7 @@ protected:
 	 * terminated or filled like a Pascal-style string, but with a user
 	 * selected fill character.  The cstring object is an overdraft
 	 * object, as the actual string text which is of unknown size follows 
-	 * immediately after the class control data.  This class is primarely
+	 * immediately after the class control data.  This class is primarily
 	 * for internal use.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
@@ -203,7 +203,7 @@ protected:
 
 	/**
 	 * Compare the values of two string.  This is a virtual so that it
-	 * can be overriden for example if we want to create strings which
+	 * can be overridden for example if we want to create strings which
 	 * ignore case, or which have special ordering rules.
 	 * @param string to compare with.
 	 * @return 0 if equal, <0 if less than, 0> if greater than.
@@ -218,13 +218,13 @@ protected:
 	bool equal(const char *string) const;
 
 	/**
-	 * Increase retention of our reference counted cstring.  May be overriden
+	 * Increase retention of our reference counted cstring.  May be overridden
 	 * for memstring which has fixed cstring object.
 	 */
 	virtual void retain(void);
 
 	/**
-	 * Decrease retention of our reference counted cstring.  May be overriden
+	 * Decrease retention of our reference counted cstring.  May be overridden
 	 * for memstring which has fixed cstring object.
 	 */
 	virtual void release(void);
@@ -502,7 +502,7 @@ public:
 	void lower(void);
 
 	/**
-	 * Count number of occurrances of characters in string.
+	 * Count number of occurrences of characters in string.
 	 * @param list of characters to find.
 	 * @return count of instances of characters in string.
 	 */
@@ -539,16 +539,16 @@ public:
 	char at(int position) const;
 
 	/**
-	 * Find last occurance of a character in the string.
+	 * Find last occurrence of a character in the string.
 	 * @param list of characters to search for.
-	 * @return pointer to last occurance from list or NULL.
+	 * @return pointer to last occurrence from list or NULL.
 	 */
 	const char *last(const char *list) const;
 
 	/**
-	 * Find first occurance of a character in the string.
+	 * Find first occurrence of a character in the string.
 	 * @param list of characters to search for.
-	 * @return pointer to first occurance from list or NULL.
+	 * @return pointer to first occurrence from list or NULL.
 	 */
 	const char *first(const char *list) const;
 
@@ -585,15 +585,15 @@ public:
 	 * Find a character in the string.
 	 * @param list of characters to search for.
 	 * @param offset to start of search.
-	 * @return pointer to first occurance of character.
+	 * @return pointer to first occurrence of character.
 	 */
 	const char *find(const char *list, strsize_t offset = 0) const;
 
 	/**
-	 * Find last occurance of character in the string.
+	 * Find last occurrence of character in the string.
 	 * @param list of characters to search for.
 	 * @param offset to start of search.  Default is end of string.
-	 * @return pointer to last occurance of character.
+	 * @return pointer to last occurrence of character.
 	 */
 	const char *rfind(const char *list, strsize_t offset = npos) const;
 
@@ -635,7 +635,7 @@ public:
 	/**
 	 * Find pointer in string where specified character last appears.
 	 * @param character to find.
-	 * @return string pointer for last occurance of character if found, 
+	 * @return string pointer for last occurrence of character if found, 
 	 * NULL if not.
 	 */
 	const char *rchr(char character) const;
@@ -1005,11 +1005,11 @@ public:
 	 * A thread-safe token parsing routine for null terminated strings.  This 
 	 * is related to strtok, but with safety checks for NULL values and a
 	 * number of enhancements including support for quoted text that may
-	 * contain token seperators within quotes.  The text string is modified 
+	 * contain token separators within quotes.  The text string is modified 
 	 * as it is parsed.
 	 * @param text string to examine for tokens.
 	 * @param last token position or set to NULL for start of string.
-	 * @param list of characters to use as token seperators.
+	 * @param list of characters to use as token separators.
 	 * @param quote pairs of characters for quoted text or NULL if not used.
 	 * @param end of line marker characters or NULL if not used.
 	 * @return token extracted from string or NULL if no more tokens found.
@@ -1179,7 +1179,7 @@ public:
 	static int case_compare(const char *text1, const char *text2, size_t size);
 
 	/**
-	 * Simple case insenstive equal test for strings.
+	 * Simple case insensitive equal test for strings.
 	 * @param text1 to test.
 	 * @param text2 to test.
 	 * @param size limit of strings to compare.
@@ -1233,7 +1233,7 @@ public:
 	static unsigned ccount(const char *text, const char *list);
 
 	/**
-	 * Find the first occurance of a character in a text buffer.
+	 * Find the first occurrence of a character in a text buffer.
 	 * @param text buffer to examine.
 	 * @param list of characters to search for.
 	 * @return pointer to first instance found or NULL.
@@ -1241,7 +1241,7 @@ public:
 	static char *find(char *text, const char *list);
 
 	/**
-	 * Find the last occurance of a character in a text buffer.
+	 * Find the last occurrence of a character in a text buffer.
 	 * @param text buffer to examine.
 	 * @param list of characters to search for.
 	 * @return pointer to last instance found or NULL.
@@ -1275,11 +1275,11 @@ public:
 	 * A thread-safe token parsing routine for strings objects.  This 
 	 * is related to strtok, but with safety checks for NULL values and a
 	 * number of enhancements including support for quoted text that may
-	 * contain token seperators within quotes.  The object is modified 
+	 * contain token separators within quotes.  The object is modified 
 	 * as it is parsed.
 	 * @param object to examine for tokens.
 	 * @param last token position or set to NULL for start of string.
-	 * @param list of characters to use as token seperators.
+	 * @param list of characters to use as token separators.
 	 * @param quote pairs of characters for quoted text or NULL if not used.
 	 * @param end of line marker characters or NULL if not used.
 	 * @return token extracted from string or NULL if no more tokens found.
@@ -1339,7 +1339,7 @@ public:
 		{object.clear();};
 
 	/**
-	 * Count number of occurrances of characters in string object.
+	 * Count number of occurrences of characters in string object.
 	 * @param object to examine.
 	 * @param list of characters to find.
 	 * @return count of instances of characters.
@@ -1406,7 +1406,7 @@ public:
 	 * Find a character in the string.
 	 * @param object to search.
 	 * @param list of characters to search for.
-	 * @return pointer to first occurance of character.
+	 * @return pointer to first occurrence of character.
 	 */
 	inline static const char *find(string& object, const char *list)
 		{return object.find(list);};
@@ -1415,7 +1415,7 @@ public:
 	 * Find last character in the string.
 	 * @param object to search.
 	 * @param list of characters to search for.
-	 * @return pointer to last occurance of character.
+	 * @return pointer to last occurrence of character.
 	 */
 	inline static const char *rfind(string& object, const char *list)
 		{return object.rfind(list);};

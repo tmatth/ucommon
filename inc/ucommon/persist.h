@@ -54,7 +54,7 @@ protected:
 };
 
 /**
- * Type manager for persistance engine.
+ * Type manager for persistence engine.
  * This class manages the types for generation of the persistent objects.
  * Its data structures are managed automatically by the system. They are
  * implicitly filled by the constructors who declare classes to the system.
@@ -66,7 +66,7 @@ class __EXPORT TypeManager
 public:
     /**
      * This manages a registration to the typemanager - attempting to
-     * remove problems with the optimisers
+     * remove problems with the optimizers
      */
     class registration
     {
@@ -129,7 +129,7 @@ class PersistEngine;
  * PersistObject
  *
  * Base class for classes that will be persistent.  This object is the base
- * for all Persistent data which is not natively serialised by the 
+ * for all Persistent data which is not natively serialized by the 
  * persistence::engine
  *
  * It registers itself with the persistence::TypeManager
@@ -148,7 +148,7 @@ class __EXPORT PersistObject
 {
 public:
     /**
-     * This constructor is used in serialisation processes.
+     * This constructor is used in serialization processes.
      * It is called in CreateNewInstance in order to create
      * an instance of the class to have Read() called on it.
      */
@@ -200,7 +200,7 @@ public:
 
 	/**
 	 * Constructs a Persistence::Engine with the specified stream in
-	 * the given mode. The stream must be initialised properly prior
+	 * the given mode. The stream must be initialized properly prior
 	 * to this call or problems will ensue.
 	 */
 	PersistEngine(std::iostream& stream, EngineMode mode) throw(PersistException);
@@ -267,7 +267,7 @@ public:
 
 	void read(std::string& str) throw(PersistException);
 
-	// Every read operation boild down to one or more of these
+	// Every read operation boiled down to one or more of these
 	void readBinary(uint8_t* data, uint32_t size) throw(PersistException);
 
 private:
@@ -374,7 +374,7 @@ inline PersistEngine& operator <<( PersistEngine& ar, bool ob)  throw(PersistExc
 #undef CCXX_WE
 
 /**
- * The following are templated classes
+ * The following are template classes
  */
 
 /**

@@ -22,7 +22,7 @@
  * The real purpose is to include our local headers in a new library
  * module with external headers referenced as imports, and then to define
  * our own interfaces in our new library as exports.  This allows native
- * contruction of new DLL's based on/that use ucommon on Microsoft Windows
+ * construction of new DLL's based on/that use ucommon on Microsoft Windows
  * and perhaps for other similarly defective legacy platforms.  Otherwise
  * this header is not used at all, and not when building applications.
  * @file ucommon/export.h

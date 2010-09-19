@@ -226,7 +226,7 @@ public:
 		 * @param path of program to execute, if filename uses $PATH.
 		 * @param argv to pass to child process.
 		 * @param mode of pipe, rdonly, wronly, or rdwr.
-		 * @param size of buffering, and atomic pipe size if setable.
+		 * @param size of buffering, and atomic pipe size if settable.
 		 * @param env that may be passed to child process.
 		 */
 		iobuf(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
@@ -242,7 +242,7 @@ public:
 		 * @param path of program to execute, if filename uses $PATH.
 		 * @param argv to pass to child process.
 		 * @param mode of pipe, rdonly, wronly, or rdwr.
-		 * @param size of buffering, and atomic pipe size if setable.
+		 * @param size of buffering, and atomic pipe size if settable.
 		 * @param env that may be passed to child process.
 		 */
 		void open(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
@@ -399,8 +399,8 @@ public:
 
 	/**
 	 * Text option for shell parsing.  This offers a quick-use class
-	 * to parse a shell flag, along with a numberic text that may be
-	 * saved and a use counter, as multiple invokations is an error.
+	 * to parse a shell flag, along with a numeric text that may be
+	 * saved and a use counter, as multiple invocations is an error.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
 	class __EXPORT stringopt : public Option
@@ -435,7 +435,7 @@ public:
 	/**
 	 * Character option for shell parsing.  This offers a quick-use class
 	 * to parse a shell flag, along with a character code that may be
-	 * saved.  Multiple invokations is an error.
+	 * saved.  Multiple invocations is an error.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
 	class __EXPORT charopt : public Option
@@ -469,8 +469,8 @@ public:
 
 	/**
 	 * Numeric option for shell parsing.  This offers a quick-use class
-	 * to parse a shell flag, along with a numberic value that may be
-	 * saved and a use counter, as multiple invokations is an error.
+	 * to parse a shell flag, along with a numeric value that may be
+	 * saved and a use counter, as multiple invocations is an error.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
 	class __EXPORT numericopt : public Option
@@ -504,8 +504,8 @@ public:
 
 	/**
 	 * Counter option for shell parsing.  This offers a quick-use class
-	 * to parse a shell flag, along with a numberic value that may be
-	 * saved and a use counter, as multiple invokations is an error.  Unlike
+	 * to parse a shell flag, along with a numeric value that may be
+	 * saved and a use counter, as multiple invocations is an error.  Unlike
 	 * numeric options, the short mode flag is a trigger option, and each
 	 * use of the short flag is considered a counter increment.
 	 * @author David Sugar <dyfet@gnutelephony.org>
@@ -541,7 +541,7 @@ public:
 
 	/**
 	 * Construct a shell argument list by parsing a simple command string.
-	 * This seperates a string into a list of command line arguments which
+	 * This separates a string into a list of command line arguments which
 	 * can be used with exec functions.
 	 * @param string to parse.
 	 * @param pagesize for local heap.
@@ -847,7 +847,7 @@ public:
 	 * is completely detached from the current process.
 	 * @param path to executable.
 	 * @param argv list of command arguments for the child process.
-	 * @param env of child process can be explicity set.
+	 * @param env of child process can be explicitly set.
 	 * @param stdio handles for stdin, stdout, and stderr.
 	 * @return 0 if success, -1 on error.
 	 */
@@ -905,7 +905,7 @@ public:
 
 	/**
 	 * Plural text translation and localization.  This does nothing but
-	 * return single or plural forms if no internaternationalization is
+	 * return single or plural forms if no internationalization is
 	 * enabled.  Else it uses ngettext().
 	 * @param singular string to translate.
 	 * @param plural string to translate.

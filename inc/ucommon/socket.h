@@ -815,7 +815,7 @@ public:
 	/**
 	 * Set the type of service field of outgoing packets.  Some useful
 	 * values include IPTOS_LOWDELAY to minimize delay for interactive 
-	 * traffic, IPTOS_THROUGHPUT to optimize thoughput, OPTOS_RELIABILITY
+	 * traffic, IPTOS_THROUGHPUT to optimize throughput, OPTOS_RELIABILITY
 	 * to optimize for reliability, and IPTOS_MINCOST for low speed use.
 	 * @param type of service value.
 	 * @return 0 on success or -1 on error.
@@ -849,7 +849,7 @@ public:
 		{return connectto(so, list);};
 	
 	/**
-	 * Disconnect a connected socket.  Depending on the implimentation, this
+	 * Disconnect a connected socket.  Depending on the implementation, this
 	 * might be done by connecting to AF_UNSPEC, connecting to a 0 address,
 	 * or connecting to self.
 	 * @return 0 on success, -1 on error.
@@ -1118,7 +1118,7 @@ public:
 
 	/**
 	 * Set tcp nodelay option on socket descriptor.
-	 * @param socket desciptor.
+	 * @param socket descriptor.
 	 * @return 0 if success, -1 if error.
 	 */
 	static int nodelay(socket_t socket);
@@ -1287,14 +1287,14 @@ public:
 	 * @param type of socket to create.
 	 * @param protocol of socket to create.
 	 * @param backlog for listener.
-	 * @return socket desciptor created or INVALID_SOCKET.
+	 * @return socket descriptor created or INVALID_SOCKET.
 	 */
 	static socket_t create(const char *iface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
 
 	/**
 	 * Create a connected socket for a service.
 	 * @param address of service for connect.
-	 * @return socket desciptor.
+	 * @return socket descriptor.
 	 */
 	static socket_t create(Socket::address &address);
 
@@ -1320,7 +1320,7 @@ public:
 	 * @param socket object to recv from.
 	 * @param buffer to recv.
 	 * @param size of buffer to recv.
-	 * @param address receving from or NULL if connected.
+	 * @param address receiving from or NULL if connected.
 	 * @return number of bytes received, -1 if error.
 	 */
 	inline static ssize_t readfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
@@ -1422,7 +1422,7 @@ public:
 	static unsigned store(struct sockaddr_internet *storage, struct sockaddr *address);
 
 	/**
-	 * Compare socket host addresses.  Test if the host addressmatches
+	 * Compare socket host addresses.  Test if the host address matches
 	 * or if there is no service, then just the host address values.
 	 * @param address1 to compare.
 	 * @param address2 to compare.
@@ -1451,7 +1451,7 @@ public:
 		{return equal((struct sockaddr *)address1, (struct sockaddr *)address2);};
 
 	/**
-	 * See if both addresses are in the same subnet.  This is only relevent
+	 * See if both addresses are in the same subnet.  This is only relevant
 	 * to IPV4 and class domain routing.
 	 * @param address1 to test.
 	 * @param address2 to test.

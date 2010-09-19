@@ -99,12 +99,12 @@ protected:
  * at runtime and for the vector to be copied by managing reference counted 
  * copies of the list of objects as needed.  
  *
- * This class is somewhat anagalous
- * to the string class, but rather than holding a string "array of chars" that
- * may be re-sized and reallocated, the Vector holds an array of Object 
- * pointers.  Since the object pointers we store in the vector are objects 
- * inherited from Object, a vector can itself act as a vector of smart 
- * pointers to  reference counted objects (derived from CountedObject).
+ * This class is somewhat analogous to the string class, but rather than 
+ * holding a string "array of chars" that may be re-sized and reallocated, 
+ * the Vector holds an array of Object pointers.  Since the object pointers
+ * we store in the vector are objects inherited from Object, a vector can 
+ * itself act as a vector of smart pointers to  reference counted objects 
+ * (derived from CountedObject).
  * @author David Sugar <dyfet@gnutelephony.org>.
  */
 class __EXPORT Vector

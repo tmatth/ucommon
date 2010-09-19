@@ -49,7 +49,7 @@ public:
 
 	/**
 	 * Atomic counter class.  Can be used to manipulate value of an
-	 * atomic counter without requring explicit thread locking.
+	 * atomic counter without requiring explicit thread locking.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
 	class __EXPORT counter

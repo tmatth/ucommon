@@ -16,7 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Various miscelanous platform specific headers and defines.
+ * Various miscellaneous platform specific headers and defines.
  * This is used to support ucommon on different platforms.  The ucommon
  * library assumes at least a real posix threading library is present or
  * will build thread support native on Microsoft Windows legacy platform.
@@ -30,7 +30,7 @@
 
 /**
  * Common namespace for all ucommon objects.
- * We are using a common namespace to easily seperate ucommon from other
+ * We are using a common namespace to easily separate ucommon from other
  * libraries.  This namespace may be changed from ucc to gnu when we
  * merge code with GNU Common C++.  In any case, it is controlled by
  * macros and so any changes will be hidden from user applications so long 
@@ -91,7 +91,7 @@
 #define	_UCOMMON_EXTENDED_
 #endif
 
-// see if targetting legacy microsoft windows platform 
+// see if targeting legacy Microsoft windows platform 
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define	_MSWINDOWS_

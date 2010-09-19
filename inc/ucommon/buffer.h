@@ -45,7 +45,7 @@ NAMESPACE_UCOMMON
 
 /**
  * Common buffered I/O class.  This is used to create objects which will
- * stream character data as needed.  This class can support bidrectionalal
+ * stream character data as needed.  This class can support bidirectional
  * streaming as may be needed for serial devices, sockets, and pipes.  The
  * buffering mechanisms are hidden from derived classes, and two virtuals
  * are used to communicate with the physical transport. 
@@ -118,7 +118,7 @@ protected:
 	char *request(size_t size);
 
 	/**
-	 * Gather returns a pointer to contigues input of specified size.
+	 * Gather returns a pointer to contiguous input of specified size.
 	 * This may require moving the input data in memory.
 	 * @param size of gather space.
 	 * @return data pointer to gathered data or NULL if not available.
@@ -453,7 +453,7 @@ public:
 
 	/**
 	 * Give the current position in the currently open file.  If we are
-	 * appending, this is alwayus seek::end.  If we have a file opened
+	 * appending, this is always seek::end.  If we have a file opened
 	 * for both read and write, this gives the read offset.
 	 * @return file offset of current i/o operations.
 	 */
@@ -462,7 +462,7 @@ public:
 
 /**
  * A generic tcp server class for TCPSocket.  This saves the service id
- * tag so that it can be propogated.
+ * tag so that it can be propagated.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT TCPServer : public ListenSocket
@@ -540,7 +540,7 @@ protected:
 public:
 	/**
 	 * Construct an unconnected tcp client and specify our service profile.
-	 * @param service identifer, usually by name.
+	 * @param service identifier, usually by name.
 	 */
 	TCPSocket(const char *service);
 

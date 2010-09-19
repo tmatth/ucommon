@@ -72,13 +72,13 @@ public:
 
 	/**
 	 * Get value of string buffer as a long integer.
-	 * @return long interger value of string buffer.
+	 * @return long integer value of string buffer.
 	 */
 	long get() const;
 
 	/**
 	 * Get value of string buffer as expression of object.
-	 * @return long interger value of string buffer.
+	 * @return long integer value of string buffer.
 	 */
 	inline long operator()()
 		{return get();};

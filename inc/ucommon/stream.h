@@ -78,7 +78,7 @@ protected:
      * This streambuf method is used for doing unbuffered reads
      * through the establish tcp socket connection when in interactive mode.
      * Also this method will handle proper use of buffers if not in
-     * interative mode.
+     * interactive mode.
      *
      * @return char from tcp socket connection, EOF if not connected.
      */

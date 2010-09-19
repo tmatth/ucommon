@@ -79,7 +79,7 @@ protected:
 
 	/**
 	 * Handler to invoke in derived class when accessing outside the
-	 * shared memory segment boundry.
+	 * shared memory segment boundary.
 	 */
 	virtual void fault(void) const;
 
@@ -166,7 +166,7 @@ public:
 	 * An API that allows "disabling" of publishing shared memory maps.
 	 * This may be useful when an app doesn't want to use shared memory
 	 * as a runtime or build option, but does not want to have to be "recoded"
-	 * exclicity for non-shared memory either.  Basically it substitutes a 
+	 * explicitly for non-shared memory either.  Basically it substitutes a 
 	 * dummy map running on the local heap.
 	 */
 	static void disable(void);
@@ -175,7 +175,7 @@ public:
 /**
  * Map a reusable allocator over a named shared memory segment.  This may be
  * used to form a resource bound fixed size managed heap in shared memory.
- * The request can either be fullfilled from the object reuse pool or from a
+ * The request can either be fulfilled from the object reuse pool or from a
  * new section of memory, and if all memory in the segment has been exhausted,
  * it can wait until more objects are returned by another thread to the reuse 
  * pool.
@@ -201,7 +201,7 @@ public:
      * read-only version of mapped reuse since the mapped segment can be read 
 	 * by another process directly as a mapped read-only vector.  The actual
 	 * mapped type will be derived from ReusableObject to meet the needs of
-	 * the reusable allocator.  The templated version should be used to
+	 * the reusable allocator.  The template version should be used to
 	 * assure type correctness rather than using this class directly.
 	 * @param name of shared memory segment.
 	 * @param size of the object type being mapped.
@@ -325,7 +325,7 @@ public:
 };
 
 /**
- * Template class to map typed resusble objects into shared memory heap.  
+ * Template class to map typed reusable objects into shared memory heap.  
  * This is used to construct a read/write heap of objects that are held in a 
  * named shared memory segment.  Member objects are allocated from a reusable
  * heap but are stored in the shared memory segment as a vector.

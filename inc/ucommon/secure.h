@@ -16,7 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This library holds basic crytographic functions and secure socket support
+ * This library holds basic cryptographic functions and secure socket support
  * for use with GNU uCommon C++.  This library might be used in conjunction
  * with openssl, gnutls, etc.  If no secure socket library is available, then
  * a stub library may be used with very basic cryptographic support.
@@ -29,7 +29,7 @@
  */
 
 /**
- * Example of crytographic digest code.
+ * Example of cryptographic digest code.
  * @example digest.cpp
  */
 
@@ -93,7 +93,7 @@ public:
 	typedef	void *session_t;
 
 	/**
-	 * Covenience type to represent a secure socket buf i/o stream.
+	 * Convenience type to represent a secure socket buf i/o stream.
 	 */
 	typedef	void *bufio_t;
 
@@ -220,7 +220,7 @@ public:
 };
 
 /**
- * A generic data ciphering class.  This is used to construct crytographic
+ * A generic data ciphering class.  This is used to construct cryptographic
  * ciphers to encode and decode data as needed.  The cipher type is specified
  * by the key object.  This class can be used to send output streaming to
  * memory or in a fixed size buffer.  If the latter is used, a push() method
@@ -367,7 +367,7 @@ public:
 };
 
 /**
- * A crytographic digest class.  This class can support md5 digests, sha1,
+ * A cryptographic digest class.  This class can support md5 digests, sha1,
  * sha256, etc, depending on what the underlying library supports.  The
  * hash class accumulates the hash in the object.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -459,7 +459,7 @@ public:
 };
 
 /**
- * Crytographically relevant random numbers.  This is used both to gather
+ * Cryptographically relevant random numbers.  This is used both to gather
  * entropy pools and pseudo-random values.
  * @author David Sugar <dyfet@gnutelephony.org>
  */

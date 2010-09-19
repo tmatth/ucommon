@@ -34,13 +34,13 @@ NAMESPACE_UCOMMON
 
 /**
  * A class to access bit fields in external bitmaps.  The actual bitmap this 
- * object manipulates may not be stored in the obect.  Bitmaps may be 
+ * object manipulates may not be stored in the object.  Bitmaps may be 
  * referenced on special memory mapped or i/o bus based devices or other 
  * structures that have varying data word sizes which may differ from the 
  * default cpu bus size.  The bitmap class can be set to the preferred memory 
  * bus size of the specific external bitmap being used.  Bitmap size may also 
  * be relevant when accessing individual bits in memory mapped device registers 
- * where performing refence and manipulations may change the state of the
+ * where performing reference and manipulations may change the state of the
  * device and hence must be aligned with the device register being effected.
  *
  * This class offers only the most basic bit manipulations, getting and

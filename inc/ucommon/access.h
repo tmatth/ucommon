@@ -18,17 +18,17 @@
 /**
  * Locking classes for member function automatic operations.
  * This header covers ucommon access related classes.  These are used to
- * provide automatic management of locks and sychronization objects through
+ * provide automatic management of locks and synchronization objects through
  * common virtual base classes which can be used with automatic objects. 
  * These classes are intended to be used much like "protocols" in conjunction
  * with smart pointer/referencing classes.  This protocol interface supports 
- * member functions to aquire a lock when entered and automatically
+ * member functions to acquire a lock when entered and automatically
  * release the lock when the member function returns that are used in
  * conjunction with special referencing smart pointers.
  * @file ucommon/access.h
  */
 
-// we do this twice because of some bizzare issue in just this file that
+// we do this twice because of some bizarre issue in just this file that
 // otherwise breaks doxygen and lists all items outside the namespace...
 #include <ucommon/platform.h>
 
@@ -44,7 +44,7 @@ NAMESPACE_UCOMMON
 /**
  * An exclusive locking protocol interface base. 
  * This is an abstract class to form objects that will operate under an 
- * exclusive lock while being activily referenced by a smart pointer.
+ * exclusive lock while being actively referenced by a smart pointer.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT Exclusive
@@ -64,7 +64,7 @@ public:
 	virtual void Unlock(void) = 0;
 
 	/**
-	 * A convience member function for accessing the exclusive lock.
+	 * A convenience member function for accessing the exclusive lock.
 	 */
 	inline void Lock(void)
 		{Exlock();};
@@ -73,7 +73,7 @@ public:
 /**
  * An exclusive locking protocol interface base. 
  * This is an abstract class to form objects that will operate under an 
- * exclusive lock while being activily referenced by a smart pointer.
+ * exclusive lock while being actively referenced by a smart pointer.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT Shared
@@ -110,7 +110,7 @@ public:
 	virtual void Exclusive(void);
 
 	/**
-	 * A convience member function for accessing the shared lock.
+	 * A convenience member function for accessing the shared lock.
 	 */
 	inline void Lock(void)
 		{Shlock();};
@@ -119,7 +119,7 @@ public:
 /**
  * A kind of smart pointer object to support exclusive locking protocol.
  * This object initiates an exclusive lock for the object being referenced when 
- * it is instanciated, and releases the exclusive lock when it is destroyed.  
+ * it is instantiated, and releases the exclusive lock when it is destroyed.  
  * You would pass the pointer an object that has the Exclusive as a base class.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
@@ -155,7 +155,7 @@ public:
 		{return lock != NULL;};
 	
 	/**
-	 * Release a held lock programatically.  This can be used to de-reference
+	 * Release a held lock programmatically.  This can be used to de-reference
 	 * the object being exclusively locked without having to wait for the
 	 * destructor to be called when the exclusive_lock falls out of scope.
 	 */
@@ -165,7 +165,7 @@ public:
 /**
  * A kind of smart pointer object to support shared locking protocol.
  * This object initiates a shared lock for the object being referenced when 
- * it is instanciated, and releases the shared lock when it is destroyed.  
+ * it is instantiated, and releases the shared lock when it is destroyed.  
  * You would pass the pointer an object that has the Shared as a base class.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
@@ -203,7 +203,7 @@ public:
 		{return lock != NULL;};
 
 	/**
-	 * Release a held lock programatically.  This can be used to de-reference
+	 * Release a held lock programmatically.  This can be used to de-reference
 	 * the object being share locked without having to wait for the
 	 * destructor to be called when the shared_lock falls out of scope.
 	 */

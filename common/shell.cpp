@@ -149,7 +149,7 @@ int shell::pipeio::wait(void)
 
 	presult = -1;
 
-	// if stdio, we do not want to close stdin/out handles 
+	// if stdio, we do not want to close stdin/stdout handles 
 	// instead we just mark the object to disable buffering
 	if(pid == INVALID_PID_VALUE) {
 		perror = EPIPE;
@@ -264,7 +264,7 @@ int shell::pipeio::wait(void)
 {
 	presult = -1;
 
-	// we do not want to close our stdin/out handles
+	// we do not want to close our stdin/stdout handles
 	if(pid == INVALID_PID_VALUE) {
 		perror = EPIPE;
 		return -1;
