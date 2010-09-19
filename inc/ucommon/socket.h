@@ -294,6 +294,10 @@ public:
  */
 class __EXPORT Socket 
 {
+private:
+	int ioerr;
+	timeout_t iowait;
+
 protected:
 	socket_t so;
 
@@ -1658,6 +1662,13 @@ public:
 	 * @return true if entry set.
 	 */
 	static bool test(socket_t socket, set_t mask);
+
+	/**
+	 * Return last error for object.
+	 * @return last error or 0 if none.
+	 */
+	int err(void)
+		{return ioerr;}
 };
 
 /**

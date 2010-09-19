@@ -1396,16 +1396,22 @@ Socket::Socket(const Socket &s)
 #else
 	so = ::dup(s.so);
 #endif
+	iowait = s.iowait;
+	ioerr = 0;
 }
 
 Socket::Socket()
 {
 	so = INVALID_SOCKET;
+	iowait = Timer::inf;
+	ioerr = 0;
 }
 
 Socket::Socket(socket_t s)
 {
 	so = s;
+	iowait = Timer::inf;
+	ioerr = 0;
 }
 
 Socket::Socket(struct addrinfo *addr)
@@ -1425,11 +1431,15 @@ Socket::Socket(struct addrinfo *addr)
 		addr = addr->ai_next;
 	}
 	so = INVALID_SOCKET;
+	iowait = Timer::inf;
+	ioerr = 0;
 }
 
 Socket::Socket(int family, int type, int protocol)
 {
 	so = create(family, type, protocol);
+	iowait = Timer::inf;
+	ioerr = 0;
 }
 
 Socket::Socket(const char *iface, const char *port, int family, int type, int protocol, int backlog)
@@ -1442,6 +1452,8 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 #endif
 	family = setfamily(family, iface);
 	so = create(iface, port, family, type, protocol, 0);
+	iowait = Timer::inf;
+	ioerr = 0;
 }
 
 socket_t Socket::create(Socket::address &address)
@@ -1584,6 +1596,8 @@ void Socket::release(void)
 #endif
 		so = INVALID_SOCKET;
 	}
+	iowait = Timer::inf;
+	ioerr = 0;
 }
 
 #ifdef	_MSWINDOWS_
@@ -1836,19 +1850,25 @@ int Socket::loopback(socket_t so, bool enable)
 		opt = 1;
 
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 
 	_getsockname_(so, addr, &len);
 	family = us.inaddr.sin_family;
 	switch(family) {
 	case AF_INET:
-		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
+		if(!setsockopt(so, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&opt, sizeof(opt)))
+			return 0;
+		break;
 #if defined(AF_INET6) && defined(IPROTO_IPV6)
 	case AF_INET6:
-		return setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&opt, sizeof(opt));
+		if(!setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&opt, sizeof(opt)))
+			return 0;
 #endif
 	}
-	return -1;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 }
 
 int Socket::ttl(socket_t so, unsigned char t)
@@ -1863,74 +1883,108 @@ int Socket::ttl(socket_t so, unsigned char t)
 	socklen_t len = sizeof(us.saddr);
 
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 
 	_getsockname_(so, addr, &len);
 	family = us.inaddr.sin_family;
 	switch(family) {
 	case AF_INET:
-		return setsockopt(so, IPPROTO_IP, IP_TTL, (char *)&t, sizeof(t));
+		if(!setsockopt(so, IPPROTO_IP, IP_TTL, (char *)&t, sizeof(t)))
+			return 0;
+		break;
 #if defined(AF_INET6) && defined(IPPROTO_IPV6)
 	case AF_INET6:
-		return setsockopt(so, IPPROTO_IPV6, IPV6_UNICAST_HOPS, (char *)&t, sizeof(t));
+		if(!setsockopt(so, IPPROTO_IPV6, IPV6_UNICAST_HOPS, (char *)&t, sizeof(t)))
+			return 0;
 #endif
 	}
-	return -1;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 }
 
 int Socket::priority(socket_t so, int pri)
 {
+	if(so == INVALID_SOCKET)
+		return EBADF;
 #ifdef	SO_PRIORITY
-	return setsockopt(so, SOL_SOCKET, SO_PRIORITY, (char *)&pri, (socklen_t)sizeof(pri));
+	if(!setsockopt(so, SOL_SOCKET, SO_PRIORITY, (char *)&pri, (socklen_t)sizeof(pri)))
+		return 0;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 #else
-	return -1;
+	return ENOSYS;
 #endif
 }
 
 int Socket::tos(socket_t so, int ts)
 {
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 
 #ifdef	SOL_IP
-	return setsockopt(so, SOL_IP, IP_TOS,(char *)&ts, (socklen_t)sizeof(ts));
+	if(!setsockopt(so, SOL_IP, IP_TOS,(char *)&ts, (socklen_t)sizeof(ts)))
+		return 0;
+
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 #else
-	return -1;
+	return ENOSYS;
 #endif
 }
 
 int Socket::broadcast(socket_t so, bool enable)
 {
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
     int opt = (enable ? 1 : 0);
-    return ::setsockopt(so, SOL_SOCKET, SO_BROADCAST,
-              (char *)&opt, (socklen_t)sizeof(opt));
+    if(!::setsockopt(so, SOL_SOCKET, SO_BROADCAST,
+              (char *)&opt, (socklen_t)sizeof(opt)))
+		return 0;
+
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 }
 
 int Socket::nodelay(socket_t so)
 {
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 #if defined(TCP_NODELAY)
 	int opt = 1;
-	return ::setsockopt(so, IPPROTO_TCP, TCP_NODELAY,
-		(char *)&opt, (socklen_t)sizeof(opt));
+	if(!::setsockopt(so, IPPROTO_TCP, TCP_NODELAY,
+			(char *)&opt, (socklen_t)sizeof(opt)))
+		return 0;
 #else
-	return -1;
+	return ENOSYS;
 #endif
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 }
 
 int Socket::keepalive(socket_t so, bool enable)
 {
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 #if defined(SO_KEEPALIVE) || defined(_MSWINDOWS_)
 	int opt = (enable ? ~0 : 0);
-	return ::setsockopt(so, SOL_SOCKET, SO_KEEPALIVE,
-		(char *)&opt, (socklen_t)sizeof(opt));
+	if(!::setsockopt(so, SOL_SOCKET, SO_KEEPALIVE, (char *)&opt, (socklen_t)sizeof(opt)))
+		return 0;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 #else
-	return -1;
+	return ENOSYS;
 #endif
 }				
 
@@ -1942,7 +1996,7 @@ int Socket::multicast(socket_t so, unsigned ttl)
 	int rtn;
 
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 
 	if(ttl)
 		enable = true;
@@ -1968,40 +2022,57 @@ int Socket::multicast(socket_t so, unsigned ttl)
 #if defined(AF_INET6) && defined(IPPROTO_IPV6)
 	case AF_INET6:
 		rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_IF, (char *)&addr.ipv6.sin6_addr, sizeof(addr.ipv6.sin6_addr));
-		if(rtn)
-			return rtn;
-		return ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&ttl, sizeof(ttl));
+		if(!rtn)
+			rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char *)&ttl, sizeof(ttl));
+		if(rtn) {
+			rtn = Socket::error();
+			if(!rtn)
+				rtn = EIO;
+		}
+		return rtn;
 #endif
 	case AF_INET:
 #ifdef	IP_MULTICAST_IF
 		rtn = ::setsockopt(so, IPPROTO_IP, IP_MULTICAST_IF, (char *)&addr.ipv4.sin_addr, sizeof(addr.ipv4.sin_addr));
-		if(rtn)
-			return rtn;
-		return setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
+		if(!rtn)
+			rtn = ::setsockopt(so, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
+		if(rtn) {
+			rtn = Socket::error();
+			if(!rtn)
+				rtn = EIO;
+		}
+		return rtn;
 #else
-		return -1;
+		return ENOSYS;
 #endif
 	default:
-		return -1;
+		return ENOSYS;
 	}	
 }
 
 int Socket::blocking(socket_t so, bool enable)
 {
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 
 #if defined(_MSWINDOWS_)
 	unsigned long flag = (enable ? 0 : 1);
-	return ioctlsocket(so, FIONBIO, &flag);
+	if(!ioctlsocket(so, FIONBIO, &flag))
+		return 0;
+	
 #else
 	long flags = fcntl(so, F_GETFL);
 	if(enable)
 		flags &=~ O_NONBLOCK;
 	else
 		flags |= O_NONBLOCK;
-	return fcntl(so, F_SETFL, flags);
+	if(!fcntl(so, F_SETFL, flags))
+		return 0;
 #endif
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 }
 
 int Socket::disconnect(socket_t so)
@@ -2025,7 +2096,14 @@ int Socket::disconnect(socket_t so)
 #endif
 	if(len > sizeof(us.saddr))
 		len = sizeof(us.saddr);
-	return _connect_(so, addr, len);
+	if(so == INVALID_SOCKET)
+		return EBADF;
+	if(!_connect_(so, addr, len))
+		return 0;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 }
 
 int Socket::join(socket_t so, struct addrinfo *node)
@@ -2040,7 +2118,7 @@ int Socket::join(socket_t so, struct addrinfo *node)
 	int rtn = 0;
 
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 	
 	_getsockname_(so, (struct sockaddr *)&addr, &len);
 	while(!rtn && node && node->ai_addr) {
@@ -2065,8 +2143,13 @@ int Socket::join(socket_t so, struct addrinfo *node)
 			break;
 #endif
 		default:
-			rtn = -1;
+			return ENOSYS;
 		}
+	}
+	if(rtn) {
+		rtn = Socket::error();
+		if(!rtn)
+			rtn = EIO;
 	}
 	return rtn;
 }
@@ -2083,7 +2166,7 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 	int rtn = 0;
 
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 	
 	_getsockname_(so, (struct sockaddr *)&addr, &len);
 	while(!rtn && node && node->ai_addr) {
@@ -2110,8 +2193,13 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 			break;
 #endif
 		default:
-			rtn = -1;
+			return ENOSYS;
 		}
+	}
+	if(rtn) {
+		rtn = Socket::error();
+		if(!rtn)
+			rtn = EIO;
 	}
 	return rtn;
 }
@@ -2165,7 +2253,7 @@ int Socket::connectto(socket_t so, struct addrinfo *node)
 	int socket_family;
 	
 	if(so == INVALID_SOCKET)
-		return -1;
+		return EBADF;
 
 	socket_family = getfamily(so);
 
@@ -2184,6 +2272,11 @@ exit:
 	if(!rtn || errno == EINPROGRESS)
 		return 0;
 #endif
+	if(rtn) {
+		rtn = Socket::error();
+		if(!rtn)
+			rtn = EIO;
+	}
 	return rtn;
 }
 
@@ -2195,7 +2288,7 @@ int Socket::error(socket_t so)
 	socklen_t slen = sizeof(opt);
 
 	if(getsockopt(so, SOL_SOCKET, SO_ERROR, (caddr_t)&opt, &slen))
-		return -1;
+		return ENOSYS;
 	
 	return opt;
 }
@@ -2205,9 +2298,14 @@ int Socket::sendwait(socket_t so, unsigned size)
 	assert(so != INVALID_SOCKET);
 
 #ifdef	SO_SNDLOWAT
-	return setsockopt(so, SOL_SOCKET, SO_SNDLOWAT, (caddr_t)&size, sizeof(size));
+	if(!setsockopt(so, SOL_SOCKET, SO_SNDLOWAT, (caddr_t)&size, sizeof(size)))
+		return 0;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 #else
-	return -1;
+	return ENOSYS;
 #endif
 }
 
@@ -2216,18 +2314,28 @@ int Socket::sendsize(socket_t so, unsigned size)
 	assert(so != INVALID_SOCKET);
 
 #ifdef	SO_SNDBUF
-	return setsockopt(so, SOL_SOCKET, SO_SNDBUF, (caddr_t)&size, sizeof(size));
+	if(!setsockopt(so, SOL_SOCKET, SO_SNDBUF, (caddr_t)&size, sizeof(size)))
+		return 0;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 #else
-	return -1;
+	return ENOSYS;
 #endif
 }
 
 int Socket::recvsize(socket_t so, unsigned size)
 {
 #ifdef	SO_RCVBUF
-	return setsockopt(so, SOL_SOCKET, SO_RCVBUF, (caddr_t)&size, sizeof(size));
+	if(!setsockopt(so, SOL_SOCKET, SO_RCVBUF, (caddr_t)&size, sizeof(size)))
+		return 0;
+	int err = Socket::error();
+	if(!err)
+		err = EIO;
+	return err;
 #else
-	return -1;
+	return ENOSYS;
 #endif
 }
 
@@ -2610,14 +2718,18 @@ exit:
 
 int Socket::bindto(socket_t so, struct sockaddr *iface)
 {
-	return _bind_(so, iface, getlen(iface));
+	if(!_bind_(so, iface, getlen(iface)))
+		return 0;
+	return Socket::error();
 }
 
 int Socket::listento(socket_t so, struct sockaddr *iface, int backlog)
 {
 	if(_bind_(so, iface, getlen(iface)))
-		return -1;
-	return _listen_(so, backlog);
+		return Socket::error();
+	if(_listen_(so, backlog))
+		return Socket::error();
+	return 0;
 }
 
 int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
@@ -2643,7 +2755,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
 #endif
 
     if(!gethint(so, &hint) || !svc)
-        return -1;
+        return ENOSYS;
 
 	hint.ai_protocol = protocol;
 	if(host && !strcmp(host, "*"))
@@ -2674,6 +2786,8 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
 exit:
 	if(res)
 		freeaddrinfo(res);
+	if(rtn)
+		rtn = Socket::error();
 	return rtn;
 }
 
@@ -2834,7 +2948,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 			rtn = _getsockname_(so, iface, &len);
 		break;
 	default:
-		return -1;
+		return ENOSYS;
 	}
 	switch(iface->sa_family) {
 	case AF_INET:
@@ -2856,6 +2970,8 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 #endif
 		so = INVALID_SOCKET;
 	}
+	if(rtn)
+		rtn = Socket::error();
 	return rtn;
 }
 
