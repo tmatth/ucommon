@@ -407,7 +407,10 @@ bool TCPSocket::_blocking(void)
 
 size_t TCPSocket::_push(const char *address, size_t len)
 {
-	ssize_t result = Socket::sendto(so, address, len);
+	if(ioerr)
+		return 0;
+
+	ssize_t result = writeto(address, len);
 	if(result < 0)
 		result = 0;
 
@@ -418,10 +421,7 @@ size_t TCPSocket::_pull(char *address, size_t len)
 {
 	ssize_t result;
 
-	if((iowait && iowait != Timer::inf) && !Socket::wait(so, iowait))
-		return 0;
-
-	result = Socket::recvfrom(so, address, len, 0);
+	result = readfrom(address, len);
 
 	if(result < 0)
 		result = 0;

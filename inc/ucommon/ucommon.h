@@ -86,6 +86,7 @@
 #include <ucommon/protocols.h>
 #include <ucommon/atomic.h>
 #include <ucommon/object.h>
+#include <ucommon/string.h>
 #include <ucommon/counter.h>
 #include <ucommon/numbers.h>
 #include <ucommon/vector.h>
@@ -94,7 +95,6 @@
 #include <ucommon/access.h>
 #include <ucommon/memory.h>
 #include <ucommon/mapped.h>
-#include <ucommon/string.h>
 #include <ucommon/unicode.h>
 #include <ucommon/datetime.h>
 #include <ucommon/keydata.h>

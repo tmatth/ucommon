@@ -1729,16 +1729,26 @@ ssize_t Socket::recvfrom(socket_t so, void *data, size_t len, int flags, struct 
 	return _recvfrom_(so, (caddr_t)data, len, flags, (struct sockaddr *)addr, &slen);
 }
 
-ssize_t Socket::get(void *data, size_t len, struct sockaddr_storage *from)
+size_t Socket::readfrom(void *data, size_t len, struct sockaddr_storage *from)
 {
 	assert(data != NULL);
 	assert(len > 0);
 
+	// wait for input by timer if possible...
+	if(iowait && iowait != Timer::inf && !Socket::wait(so, iowait))
+		return 0;
+
 	socklen_t slen = sizeof(struct sockaddr_storage);
-	return _recvfrom_(so, (caddr_t)data, len, 0, (struct sockaddr *)from, &slen);
+	ssize_t result = _recvfrom_(so, (caddr_t)data, len, 0, (struct sockaddr *)from, &slen);
+
+	if(result < 0) {
+		ioerr = Socket::error();
+		return 0;
+	}
+	return (size_t)result;		
 }
 
-ssize_t Socket::put(const void *data, size_t len, struct sockaddr *dest)
+size_t Socket::writeto(const void *data, size_t len, struct sockaddr *dest)
 {
 	assert(data != NULL);
 	assert(len > 0);
@@ -1747,7 +1757,12 @@ ssize_t Socket::put(const void *data, size_t len, struct sockaddr *dest)
 	if(dest)
 		slen = getlen(dest);
 	
-	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
+	ssize_t result = _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
+	if(result < 0) {
+		ioerr = Socket::error();
+		return 0;
+	}
+	return (size_t)result;
 }
 
 ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, struct sockaddr *dest)
@@ -1762,7 +1777,7 @@ ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, str
 	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL | flags, dest, slen);
 }
 
-ssize_t Socket::puts(const char *str, struct sockaddr *address)
+size_t Socket::writes(const char *str, struct sockaddr *address)
 {
 	if(!str)
 		return 0;
@@ -1770,23 +1785,17 @@ ssize_t Socket::puts(const char *str, struct sockaddr *address)
 	if(!*str)
 		return 0;
 
-	return put(str, strlen(str), address);
+	return writeto(str, strlen(str), address);
 }
 
-ssize_t Socket::puts(const char *str)
+size_t Socket::readline(char *data, size_t max)
 {
-	if(!str)
+	ssize_t result = Socket::readline(so, data, max, iowait);
+	if(result < 0) {
+		ioerr = Socket::error();
 		return 0;
-
-	if(!*str)
-		return 0;
-
-	return put(str, strlen(str));
-}
-
-ssize_t Socket::gets(char *data, size_t max, timeout_t timeout)
-{
-	return Socket::readline(so, data, max, timeout);
+	}
+	return (size_t)result;
 }
 
 ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)

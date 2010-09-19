@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     ssl.open("www.google.com");
     printf("open %d\n", ssl.isopen());
 
-	ssl.writes("GET /\r\n\r\n");
+	ssl.putline("GET /\r\n\r\n");
     ssl.flush();
 
     char buf[256];

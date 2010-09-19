@@ -134,7 +134,7 @@ bool BufferProtocol::_blocking(void)
 	return false;
 }
 
-size_t BufferProtocol::getstr(char *address, size_t size)
+size_t BufferProtocol::get(char *address, size_t size)
 {
 	size_t count = 0;
 
@@ -184,7 +184,7 @@ int BufferProtocol::getch(void)
 	return input[bufpos++];
 }
 
-size_t BufferProtocol::putstr(const char *address, size_t size)
+size_t BufferProtocol::put(const char *address, size_t size)
 {
 	size_t count = 0;
 
@@ -322,10 +322,10 @@ size_t BufferProtocol::putline(const char *string)
 	size_t count = 0;
 
 	if(string)
-		count += putstr(string);
+		count += put(string);
 
 	if(eol)
-		count += putstr(eol);
+		count += put(eol);
 
 	return count;
 }

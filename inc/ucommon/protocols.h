@@ -243,7 +243,7 @@ public:
 	 * @param count of characters to get from buffer.
 	 * @return number of characters actually copied.
 	 */
-	size_t getstr(char *address, size_t count);
+	size_t get(char *address, size_t count);
 
 	/**
 	 * Put memory into the buffer.  If count is 0 then put as NULL
@@ -253,7 +253,7 @@ public:
 	 * @param count of characters to put into buffer.
 	 * @return number of characters actually written.
 	 */
-	size_t putstr(const char *address, size_t count = 0);
+	size_t put(const char *address, size_t count = 0);
 
 	/**
 	 * Get a character from the buffer.  If no data is available, return EOF.
@@ -266,22 +266,6 @@ public:
 	 * @return character put into buffer or eof.
 	 */
 	int putch(int ch);
-
-	/**
-	 * Method to write a null terminated string.
-	 * @param string to write.
-	 */
-	inline size_t writes(const char *string)
-		{return putstr(string);};
-
-	/**
-	 * Method to write memory to the buffer.
-	 * @param address of memory to write.
-	 * @param size of memory to write.
-	 * @return number of character bytes written.
-	 */
-	inline size_t write(const char *address, size_t size)
-		{return putstr(address, size);};
 
 	/**
 	 * Method to write a null terminated string.  This adds the current
@@ -301,15 +285,6 @@ public:
 	 */
 	inline size_t readln(char *address, size_t size)
 		{return getline(address, size);};
-
-	/**
-	 * Method to read input data from the buffer.
-	 * @param address of buffer to use.
-	 * @param size of buffer to request.
-	 * @return number of characters actually read.
-	 */
-	inline size_t read(char *address, size_t size)
-		{return getstr(address, size);};
 
 	/**
 	 * Print formatted string to the buffer.  The maximum output size is

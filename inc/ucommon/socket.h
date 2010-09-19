@@ -897,34 +897,13 @@ public:
 	size_t peek(void *data, size_t number) const;
 
 	/**
-	 * Read data from the socket receive buffer.  This is a virtual so that
-	 * the ssl layer can override the core get method.
-	 * @param data pointer to save data in.
-	 * @param number of bytes to read.
-	 * @param address of peer data was received from.
-	 * @return number of bytes actually read, 0 if none, -1 if error.
-	 */
-	virtual ssize_t get(void *data, size_t number, struct sockaddr_storage *address = NULL);
-
-	/**
-	 * Write data to the socket send buffer.  This is a virtual so that the ssl
-	 * layer can override the core put method.
-	 * @param data pointer to write data from.
-	 * @param number of bytes to write.
-	 * @param address of peer to send data to if not connected.
-	 * @return number of bytes actually sent, 0 if none, -1 if error.
-	 */
-	virtual ssize_t put(const void *data, size_t number, struct sockaddr *address = NULL);
-
-	/**
 	 * Read data from the socket receive buffer.  This will be used in abi 4.
 	 * @param data pointer to save data in.
 	 * @param number of bytes to read.
 	 * @param address of peer data was received from.
 	 * @return number of bytes actually read, 0 if none, -1 if error.
 	 */
-	inline ssize_t readfrom(void *data, size_t number, struct sockaddr_storage *address = NULL)
-		{return get(data, number, address);};
+	size_t readfrom(void *data, size_t number, struct sockaddr_storage *address = NULL);
 
 	/**
 	 * Write data to the socket send buffer.  This will be used in abi 4.
@@ -933,8 +912,7 @@ public:
 	 * @param address of peer to send data to if not connected.
 	 * @return number of bytes actually sent, 0 if none, -1 if error.
 	 */
-	inline ssize_t writeto(const void *data, size_t number, struct sockaddr *address = NULL)
-		{return put(data, number, address);};
+	size_t writeto(const void *data, size_t number, struct sockaddr *address = NULL);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
@@ -946,7 +924,7 @@ public:
 	 * @param timeout to wait for a complete input line.
 	 * @return number of bytes read, 0 if none, -1 if error.
 	 */
-	virtual ssize_t gets(char *data, size_t size, timeout_t timeout = Timer::inf);
+	virtual size_t readline(char *data, size_t size);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
@@ -970,13 +948,6 @@ public:
 	static ssize_t printf(socket_t socket, const char *format, ...) __PRINTF(2,3);
 
 	/**
-	 * Write a null terminated string to the socket.
-	 * @param string to write.
-	 * @return number of bytes sent, 0 if none, -1 if error.
-	 */
-	ssize_t puts(const char *string);
-
-	/**
 	 * Write a null terminated string to the socket.  This exists because
 	 * we messed up consistency with the original puts() method.  In the
 	 * future there will be a single puts() that has a NULL default.
@@ -984,7 +955,7 @@ public:
 	 * @param address to write to.
 	 * @return number of bytes sent, 0 if none, -1 if error.
 	 */
-	ssize_t puts(const char *string, struct sockaddr *address);
+	size_t writes(const char *string, struct sockaddr *address = NULL);
 
 	/**
 	 * Test if socket is valid.
@@ -1327,8 +1298,8 @@ public:
 	 * @param address to send to or NULL if connected.
 	 * @return number of bytes send, -1 if error.
 	 */
-	inline static ssize_t writeto(Socket& socket, const char *buffer, size_t size, struct sockaddr *address)
-		{return socket.put(buffer, size, address);};
+	inline static size_t writeto(Socket& socket, const char *buffer, size_t size, struct sockaddr *address)
+		{return socket.writeto(buffer, size, address);};
 	
 	/**
 	 * receive from socket object.
@@ -1338,8 +1309,8 @@ public:
 	 * @param address receiving from or NULL if connected.
 	 * @return number of bytes received, -1 if error.
 	 */
-	inline static ssize_t readfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
-		{return socket.get(buffer, size, address);};
+	inline static size_t readfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
+		{return socket.readfrom(buffer, size, address);};
 
 	/**
 	 * Connect a socket.

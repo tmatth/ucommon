@@ -17,8 +17,6 @@
 
 #include <config.h>
 #include <ucommon/string.h>
-#include <ucommon/thread.h>
-#include <ucommon/socket.h>
 #include <stdarg.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -1206,7 +1204,7 @@ memstring *memstring::create(strsize_t size, char fill)
 	return new(mem) memstring(mem + sizeof(memstring), size, fill);
 }
 
-memstring *memstring::create(mempager *mpager, strsize_t size, char fill)
+memstring *memstring::create(MemoryProtocol *mpager, strsize_t size, char fill)
 {
 	assert(size > 0);
 
@@ -1335,122 +1333,6 @@ void string::swap(string &s1, string &s2)
 	string::cstring *s = s1.str;
 	s1.str = s2.str;
 	s2.str = s;
-}
-
-int string::read(Socket &so, string &s)
-{
-	int rtn;
-
-	if(!mem(s))
-		return 0;
-
-	clear(s);
-
-	rtn = so.get(mem(s), size(s));
-	if(rtn > -1) {
-		s.str->len = rtn;
-		s.str->text[rtn] = 0;
-	}
-	return rtn;
-}
-
-int string::write(Socket &so, string &s)
-{
-	if(!mem(s))
-		return 0;
-
-	return so.put(mem(s), len(s));
-}
-
-int string::read(FILE *fp, string &s)
-{
-	int rtn;
-
-	if(!mem(s))
-		return 0;
-
-	clear(s);
-
-	rtn = fread(mem(s), 1, size(s), fp);
-	if(rtn > -1) {
-		s.str->len = rtn;
-		s.str->text[rtn] = 0;
-	}
-	return rtn;
-}
-
-int string::write(FILE *fp, string &s)
-{
-	assert(fp != NULL);
-
-	if(!mem(s))
-		return 0;
-
-	return fwrite(mem(s), 1, len(s), fp);
-}
-
-bool string::putline(Socket &so, string &s)
-{
-	if(s[-1] != '\n')
-		s.add("\r\n");
-		
-	if(so.puts(mem(s)) >= 0)
-		return true;
-
-	return false;
-}
-
-bool string::putline(FILE *fp, string &s)
-{
-	assert(fp != NULL);
-
-	if(s[-1] != '\n')
-		s.add("\n");
-		
-	if(fputs(mem(s), fp) >= 0)
-		return true;
-
-	return false;
-}
-
-bool string::getline(Socket &so, string &s)
-{
-	if(!mem(s))
-		return true;
-
-	if(so.gets(mem(s), size(s)) < 0) 
-		return false;
-
-	fix(s);
-
-	if(s[-1] == '\n')
-		--s;
-
-	if(s[-1] == '\r')
-		--s;
-
-	return true;
-}
-
-bool string::getline(FILE *fp, string &s)
-{
-	assert(fp != NULL);
-
-	if(!mem(s))
-		return true;
-
-	if(!::fgets(mem(s), size(s), fp) || feof(fp)) {
-		clear(s);
-		return false;
-	}
-	fix(s);
-	if(s[-1] == '\n')
-		--s;
-
-	if(s[-1] == '\r')
-		--s;
-
-	return true;
 }
 	
 char *string::dup(const char *cp)

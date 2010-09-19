@@ -35,16 +35,16 @@
 #ifndef	_UCOMMON_STRING_H_
 #define	_UCOMMON_STRING_H_
 
-#ifndef	_UCOMMON_MEMORY_H_
-#include <ucommon/memory.h>
+#ifndef	_UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
 #endif
 
-#ifndef	_UCOMMON_TIMERS_H_
-#include <ucommon/timers.h>
+#ifndef _UCOMMON_PROTOCOLS_H_
+#include <ucommon/protocols.h>
 #endif
 
-#ifndef	_UCOMMON_SOCKET_H_
-#include <ucommon/socket.h>
+#ifndef _UCOMMON_OBJECT_H_
+#include <ucommon/object.h>
 #endif
 
 #include <stdio.h>
@@ -903,80 +903,6 @@ public:
 	static strsize_t printf(string& object, const char *format, ...) __PRINTF(2, 3);
 
 	/**
-	 * Read arbitrary binary data from socket into a string object.  The 
-	 * total number of bytes that may be read is based on the allocated
-	 * size of the object.
-	 * @param socket to read from.
-	 * @param object to save read data.
-	 * @return number of bytes read.
-	 */
-	static int read(Socket& socket, string& object);
-	
-	/**
-	 * Write the string object to a socket.
-	 * @param socket to write to.
-	 * @param object to get data from.
-	 * @return number of bytes written.
-	 */
-	static int write(Socket& socket, string& object);
-
-	/**
-	 * Read arbitrary binary data from a file into a string object.  The 
-	 * total number of bytes that may be read is based on the allocated
-	 * size of the object.
-	 * @param file to read from.
-	 * @param object to save read data.
-	 * @return number of bytes read.
-	 */
-	static int read(FILE *file, string& object);
-
-	/**
-	 * Write the string object to a file.
-	 * @param file to write to.
-	 * @param object to get data from.
-	 * @return number of bytes written.
-	 */
-	static int write(FILE *file, string& object); 
-
-	/**
-	 * Read a line of text input from a socket into the object.  The 
-	 * maximum number of bytes that may be read is based on the currently
-	 * allocated size of the object.
-	 * @param socket to read from.
-	 * @param object to save read data.
-	 * @return false if end of file.
-	 */
-	static bool getline(Socket& socket, string& object);
-
-	/**
-	 * Write string as a line of text data to a socket.  A newline will be 
-	 * appended to the end.
-	 * @param socket to print to.
-	 * @param object to get text line from.
-	 * @return true if successful.
-	 */
-	static bool putline(Socket& socket, string& object);
-
-	/**
-	 * Read a line of text input from a file into the object.  The 
-	 * maximum number of bytes that may be read is based on the currently
-	 * allocated size of the object.
-	 * @param file to read from.
-	 * @param object to save read data.
-	 * @return false if end of file.
-	 */
-	static bool getline(FILE *file, string& object);
-
-	/**
-	 * Write string as a line of text data to a file.  A newline will be 
-	 * appended to the end.
-	 * @param file to print to.
-	 * @param object to get text line to put into file.
-	 * @return true if successful.
-	 */
-	static bool putline(FILE *file, string& object);
-
-	/**
 	 * Swap the cstring references between two strings.
 	 * @param object1 to swap.
 	 * @param object2 to swap.
@@ -1556,7 +1482,7 @@ public:
 	 * @param size of string to allocate.  Automatically adds control size.
 	 * @param fill character for fixed field strings.
 	 */
-	static memstring *create(mempager *pager, strsize_t size, char fill = 0);
+	static memstring *create(MemoryProtocol *pager, strsize_t size, char fill = 0);
 };
 
 /**
