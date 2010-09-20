@@ -43,9 +43,9 @@ const size_t DateTime::sz_string = 20;
 
 #ifdef	HAVE_LOCALTIME_R
 
-struct tm *DateTime::glt(time_t *now)
+tm_t *DateTime::glt(time_t *now)
 {	
-	struct tm *result, *dt = new struct tm;
+	tm_t *result, *dt = new tm_t;
 	time_t tmp;
 
 	if(!now) {
@@ -60,9 +60,9 @@ struct tm *DateTime::glt(time_t *now)
 	return NULL;
 }
 
-struct tm *DateTime::gmt(time_t *now)
+tm_t *DateTime::gmt(time_t *now)
 {	
-	struct tm *result, *dt = new struct tm;
+	tm_t *result, *dt = new tm_t;
 	time_t tmp;
 
 	if(!now) {
@@ -77,7 +77,7 @@ struct tm *DateTime::gmt(time_t *now)
 	return NULL;
 }
 
-void DateTime::release(struct tm *dt)
+void DateTime::release(tm_t *dt)
 {
 	if(dt)
 		delete dt;
@@ -86,9 +86,9 @@ void DateTime::release(struct tm *dt)
 #else
 static mutex_t lockflag;
 
-struct tm *DateTime::glt(time_t *now)
+tm_t *DateTime::glt(time_t *now)
 {	
-	struct tm *dt;
+	tm_t *dt;
 	time_t tmp;
 
 	if(!now) {
@@ -104,9 +104,9 @@ struct tm *DateTime::glt(time_t *now)
 	return NULL;
 }
 
-struct tm *DateTime::gmt(time_t *now)
+tm_t *DateTime::gmt(time_t *now)
 {	
-	struct tm *dt;
+	tm_t *dt;
 	time_t tmp;
 
 	if(!now) {
@@ -122,7 +122,7 @@ struct tm *DateTime::gmt(time_t *now)
 	return NULL;
 }
 
-void DateTime::release(struct tm *dt)
+void DateTime::release(tm_t *dt)
 {
 	if(dt)
 		lockflag.release();
@@ -140,7 +140,7 @@ Date::Date(const Date& copy)
 	julian = copy.julian;
 }
 
-Date::Date(struct tm *dt)
+Date::Date(tm_t *dt)
 {
 	toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 }
@@ -464,7 +464,7 @@ Time::Time(const Time& copy)
 	seconds = copy.seconds;
 }
 
-Time::Time(struct tm *dt)
+Time::Time(tm_t *dt)
 {
 	toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
 }
@@ -799,7 +799,7 @@ char *DateTime::get(char *buf) const
 time_t DateTime::get(void) const
 {
 	char buf[11];
-	struct tm dt;
+	tm_t dt;
 	memset(&dt, 0, sizeof(dt));
 
 	fromJulian(buf);
@@ -1015,7 +1015,7 @@ DateTimeString::~DateTimeString()
 {
 }
 
-DateTimeString::DateTimeString(struct tm *dt) :
+DateTimeString::DateTimeString(tm_t *dt) :
 DateTime(dt)
 {
 	mode = BOTH;

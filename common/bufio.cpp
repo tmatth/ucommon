@@ -201,7 +201,6 @@ size_t fbuf::_push(const char *buf, size_t size)
 		seekerr = fsys::seek(outpos);
 		if(seekerr) {
 			mutex::release(this);
-			ioerror = seekerr;
 			return 0;
 		}
 	}
@@ -211,16 +210,13 @@ size_t fbuf::_push(const char *buf, size_t size)
 	if(isinput()) {
 		seekerr = fsys::seek(inpos);
 		mutex::release(this);
-		if(result >= 0 && seekerr) {
-			ioerror = seekerr;
+		if(result >= 0 && seekerr)
 			seteof();
-		}
 	}
 
-	if(result < 0) {
+	if(result < 0)
 		result = 0;
-		ioerror = error;
-	}
+
 	outpos += result;
 	return (size_t)result;
 #endif

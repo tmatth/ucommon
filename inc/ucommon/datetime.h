@@ -41,12 +41,19 @@
 #include <ucommon/string.h>
 #endif
 
+#include <time.h>
+
 #define	DATE_STRING_SIZE		10
 #define	DATE_BUFFER_SIZE		11
 #define	TIME_STRING_SIZE		8
 #define	TIME_BUFFER_SIZE		9
 #define	DATETIME_STRING_SIZE	19
 #define	DATETIME_BUFFER_SIZE	20
+
+/**
+ * Convenience type for struct tm.
+ */
+typedef	struct tm	tm_t;
 
 NAMESPACE_UCOMMON
 
@@ -381,7 +388,7 @@ public:
 	 * Create a time from the time portion of a date and time object.
 	 * @param object from DateTime::glt() or gmt().
 	 */
-	Time(struct tm *object);
+	Time(tm_t *object);
 
 	/**
 	 * Create a time from a hh:mm:ss formatted time string.
@@ -653,7 +660,7 @@ public:
 	 * Construct a date and time from C library time structure.
 	 * @param tm structure from C library (from glt or gmt).
 	 */
-	DateTime(struct tm *tm);
+	DateTime(tm_t *tm);
 
 	/**
 	 * Construct a date and time from ISO string buffer.
@@ -863,7 +870,7 @@ public:
 	 * @param time object or NULL if using current time.
 	 * @return locked instance of struct tm object.
 	 */
-	static struct tm *glt(time_t *time = NULL);
+	static tm_t *glt(time_t *time = NULL);
 
 	/**
 	 * Fetch an instance of time converted to gmt.  If the gmtime abi
@@ -873,13 +880,13 @@ public:
 	 * @param time object or NULL if using current time.
 	 * @return locked instance of struct tm object.
 	 */
-	static struct tm *gmt(time_t *time = NULL);
+	static tm_t *gmt(time_t *time = NULL);
 
 	/**
 	 * Release a struct tm object from glt or gmt.
 	 * @param object to release.
 	 */
-	static void release(struct tm *object);
+	static void release(tm_t *object);
 };
 
 /**
@@ -917,7 +924,7 @@ public:
 	 * Construct a date and time from C library time structure.
 	 * @param tm structure from C library (from glt or gmt).
 	 */
-	DateTimeString(struct tm *tm);
+	DateTimeString(tm_t *tm);
 
 	/**
 	 * Construct a date and time from ISO string buffer.
@@ -1025,11 +1032,6 @@ typedef	DateTimeString	datetimestring_t;
  * Convenience type for using Date object.
  */
 typedef	Date		date_t;
-
-/**
- * Convenience type for struct tm.
- */
-typedef	struct tm	tm_t;
 
 END_NAMESPACE
 
