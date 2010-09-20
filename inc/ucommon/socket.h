@@ -643,7 +643,7 @@ public:
 	/**
 	 * Get error code.
 	 */
-	inline int err(void)
+	inline int err(void) const
 		{return ioerr;}
 
 	/**

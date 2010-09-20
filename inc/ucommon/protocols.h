@@ -202,7 +202,7 @@ protected:
 	 * Method to get low level i/o error.
 	 * @return error from low level i/o methods.
 	 */
-	virtual int _err(void) = 0;
+	virtual int _err(void) const = 0;
 
 	/**
 	 * Method to clear low level i/o error.

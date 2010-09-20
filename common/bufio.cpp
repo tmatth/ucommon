@@ -40,7 +40,7 @@ fbuf::~fbuf()
 	fbuf::close();
 }
 
-int fbuf::_err(void)
+int fbuf::_err(void) const
 {
 	return error;
 }
@@ -387,7 +387,7 @@ alloc:
 	allocate(size, BUF_RDWR);
 }
 
-int TCPSocket::_err(void)
+int TCPSocket::_err(void) const
 {
 	return ioerr;
 }

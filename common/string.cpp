@@ -1917,7 +1917,8 @@ size_t StringProtocol::printf(const char *format, ...)
 String str(FILE *fp, strsize_t size)
 {
 	String temp(size);
-	fgets(temp.c_mem(), (size_t)size, fp);
+	if(fgets(temp.c_mem(), (size_t)size, fp) == NULL)
+		temp = "";
 	String::fix(temp);
 	return temp;
 }

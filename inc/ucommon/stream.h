@@ -406,8 +406,8 @@ public:
 	 * Get error flag from last i/o operation.
 	 * @return last error.
      */
-	inline int error(void) const
-		{return fd.getError();};
+	inline int err(void) const
+		{return fd.err();};
 };
 
 END_NAMESPACE

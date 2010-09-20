@@ -408,7 +408,7 @@ public:
 	 * Get last error.
 	 * @return error number.
 	 */
-	inline int err(void)
+	inline int err(void) const
 		{return error;}
 
 	/**

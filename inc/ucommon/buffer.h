@@ -59,7 +59,7 @@ private:
 protected:
 	size_t _push(const char *address, size_t size);
 	size_t _pull(char *address, size_t size);
-	int _err(void);
+	int _err(void) const;
 	void _clear(void);
 
 	inline fd_t getfile(void)
@@ -183,7 +183,7 @@ private:
 protected:
 	virtual size_t _push(const char *address, size_t size);
 	virtual size_t _pull(char *address, size_t size);
-	int _err(void);
+	int _err(void) const;
 	void _clear(void);
 	bool _blocking(void);
 
