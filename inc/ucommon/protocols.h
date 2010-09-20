@@ -215,25 +215,29 @@ protected:
 	virtual bool _blocking(void);
 
 	/**
+	 * Check if data is pending.
+	 */
+	virtual bool _pending(void);
+
+	/**
+	 * Flush buffer to physical i/o.
+	 */
+	virtual bool _flush(void);
+
+	/**
 	 * Get current input position.  Sometimes used to help compute and report 
      * a "tell" offset.
 	 * @return offset of input buffer.
 	 */
-	inline size_t _pending(void)
+	inline size_t unread(void)
 		{return bufpos;};
 
 	/**
 	 * Get current output position.  Sometimes used to help compute a
 	 * "trunc" operation.
 	 */
-	inline size_t _waiting(void)
+	inline size_t unsaved(void)
 		{return outsize;};
-
-	/**
-	 * Get size of the I/O buffer.
-	 */
-	inline size_t _buffering(void)
-		{return bufsize;};
 
 public:
 	/**
@@ -298,7 +302,8 @@ public:
 	 * Flush buffered memory to physical I/O.
 	 * @return true on success, false if not active or fails.
 	 */
-	virtual bool flush(void);
+	inline bool flush(void)
+		{return _flush();}
 
 	/**
 	 * Purge any pending input or output buffer data.
@@ -373,12 +378,6 @@ public:
 	 */
 	inline void seteof(void)
 		{end = true;};
-
-	/**
-	 * See if data is pending.
-	 * @return true if data is pending.
-	 */
-	virtual bool pending(void);
 };
 
 

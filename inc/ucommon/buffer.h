@@ -260,11 +260,12 @@ public:
 	 */
 	void close(void);
 
+protected:
 	/**
 	 * Check for pending tcp or ssl data.
 	 * @return true if data pending.
 	 */
-	bool pending(void);
+	virtual bool _pending(void);
 };
 
 /**

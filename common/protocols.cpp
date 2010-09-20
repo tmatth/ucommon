@@ -260,7 +260,7 @@ void BufferProtocol::purge(void)
 	outsize = insize = bufpos = 0;
 }
 
-bool BufferProtocol::flush(void)
+bool BufferProtocol::_flush(void)
 {
 	if(!output)
 		return false;
@@ -389,7 +389,7 @@ bool BufferProtocol::eof(void)
 	return false;
 }
 	
-bool BufferProtocol::pending(void)
+bool BufferProtocol::_pending(void)
 {
 	if(!input)
 		return false;

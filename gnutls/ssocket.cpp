@@ -66,9 +66,9 @@ SSocket::~SSocket()
 	release();
 }
 
-bool SSocket::pending(void)
+bool SSocket::_pending(void)
 {
-	return TCPSocket::pending();
+	return TCPSocket::_pending();
 }
 
 void SSocket::open(TCPServer *server, size_t size)
@@ -120,9 +120,9 @@ void SSocket::release(void)
 	}
 }
 
-bool SSocket::flush(void)
+bool SSocket::_flush(void)
 {
-	return TCPSocket::flush();
+	return TCPSocket::_flush();
 }
 
 size_t SSocket::_push(const char *address, size_t size)

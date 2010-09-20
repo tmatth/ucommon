@@ -124,12 +124,12 @@ fsys::offset_t fbuf::tell(void)
 		return 0;
 
 	if(isinput())
-		return inpos + _pending();
+		return inpos + unread();
 
 	if(outpos == fsys::end)
 		return fsys::end;
 
-	return outpos + _waiting();
+	return outpos + unsaved();
 }
 
 bool fbuf::trunc(offset_t offset)
@@ -428,9 +428,9 @@ size_t TCPSocket::_pull(char *address, size_t len)
 	return (size_t)result;
 }
 
-bool TCPSocket::pending(void)
+bool TCPSocket::_pending(void)
 {
-	if(_pending())
+	if(unread())
 		return true;
 	
 	if(isinput() && iowait && iowait != Timer::inf)

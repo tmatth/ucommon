@@ -205,15 +205,15 @@ public:
 
 	void close(void);
 
-	bool flush(void);
-
 	void release(void);
 
 	size_t _push(const char *address, size_t size);
 
 	size_t _pull(char *address, size_t size);
 
-	bool pending(void);
+	bool _flush(void);
+
+	bool _pending(void);
 
 	bool issecure(void)
 		{return bio != NULL;};

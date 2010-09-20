@@ -112,12 +112,12 @@ size_t SSocket::_push(const char *address, size_t size)
 	return (ssize_t)result;
 }
 
-bool SSocket::pending(void)
+bool SSocket::_pending(void)
 {
 	if(so == INVALID_SOCKET)
 		return false;
 
-	if(_pending())
+	if(unread())
 		return true;
 
 	if(ssl && SSL_pending((SSL *)ssl))
@@ -145,11 +145,11 @@ size_t SSocket::_pull(char *address, size_t size)
 	return (size_t) result;
 }
 
-bool SSocket::flush(void)
+bool SSocket::_flush(void)
 {
 	int result;
 
-	if(TCPSocket::flush()) {
+	if(TCPSocket::_flush()) {
 		if(bio)
 			result = BIO_flush((BIO *)bio);
 		return true;
