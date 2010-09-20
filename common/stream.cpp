@@ -95,7 +95,7 @@ tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
 	open(list);
 }
 
-tcpstream::tcpstream(ListenSocket& listener, unsigned segsize, timeout_t tv) :
+tcpstream::tcpstream(TCPServer *server, unsigned segsize, timeout_t tv) :
 	streambuf(), 
 #ifdef OLD_STDCPP
 	iostream()
@@ -105,7 +105,7 @@ tcpstream::tcpstream(ListenSocket& listener, unsigned segsize, timeout_t tv) :
 {
 	bufsize = 0;
 	gbuf = pbuf = NULL;
-	so = listener.accept();
+	so = server->accept();
 
 #ifdef OLD_STDCPP
 	init((streambuf *)this);

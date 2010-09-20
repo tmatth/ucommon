@@ -106,7 +106,7 @@ public:
 	 * @param segsize for tcp segments and buffering.
 	 * @param timeout for socket i/o operations.
 	 */
-	tcpstream(ListenSocket& listener, unsigned segsize = 536, timeout_t timeout = 0);
+	tcpstream(TCPServer *server, unsigned segsize = 536, timeout_t timeout = 0);
 
 	/**
 	 * Create an unconnected tcp stream object that is idle until opened.
