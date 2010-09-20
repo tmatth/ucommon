@@ -107,12 +107,14 @@ void keydata::set(const char *key, const char *value)
 keyfile::keyfile(size_t pagesize) :
 memalloc(pagesize), index()
 {
+	errcode = 0;
 	defaults = NULL;
 }
 
 keyfile::keyfile(const char *path, size_t pagesize) :
 memalloc(pagesize), index()
 {
+	errcode = 0;
 	defaults = NULL;
 	load(path);
 }
@@ -164,8 +166,12 @@ void keyfile::load(const char *path)
 	const char *key;
 	char *value;
 
-	if(!fp)
+	errcode = 0;
+
+	if(!fp) {
+		errcode = EBADF;
 		return;
+	}
 
 	if(!defaults) {
 		caddr_t mem = (caddr_t)alloc(sizeof(keydata));
@@ -174,8 +180,10 @@ void keyfile::load(const char *path)
 
 	for(;;) {
 		*lp = 0;
-		if(NULL == fgets(lp, size, fp))
+		if(NULL == fgets(lp, size, fp)) {
+			errcode = ferror(fp);
 			lp[0] = 0;
+		}
 		else
 			String::chop(lp, "\r\n\t ");
 		ep = lp + strlen(lp);

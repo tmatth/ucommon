@@ -153,6 +153,7 @@ private:
 	friend class keydata;
 	OrderedIndex index;
 	keydata *defaults;
+	int errcode;
 
 	keydata *create(const char *section);
 
@@ -221,6 +222,9 @@ public:
 	 * Convenience typedef for iterative pointer.
 	 */
 	typedef linked_pointer<keydata> iterator;
+
+	inline int err(void)
+		{return errcode;}
 };
 
 END_NAMESPACE
