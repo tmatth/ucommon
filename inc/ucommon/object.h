@@ -350,7 +350,7 @@ public:
 	 * @param offset in array for object.
 	 * @return pointer to typed object.
 	 */
-	inline T *operator[](unsigned offset)
+	inline T& operator[](unsigned offset)
 		{return get(offset);};
 
 private:
@@ -448,13 +448,9 @@ public:
 	 * Retrieve data value by casting reference.
 	 * @return embedded value.
 	 */
-	inline operator T() 
+	inline operator T&() 
 		{return value;};
 
-	/**
-	 * Retrieve data value by expression reference.
-	 * @return embedded value.
-	 */
 	inline T& operator()()
 		{return value;};
 

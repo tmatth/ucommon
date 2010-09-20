@@ -39,6 +39,10 @@
 #include <ucommon/thread.h>
 #endif
 
+#ifndef _UCOMMON_STRING_H_
+#include <ucommon/string.h>
+#endif
+
 #ifndef	_MSWINDOWS_
 #include <sys/stat.h>
 #endif
@@ -458,36 +462,127 @@ public:
 	 */
 	static void *find(fsys& module, const char *symbol);
 
+};
+
+/**
+ * Access standard files through character protocol.  This can also be
+ * used as an alternative means to access files that manages file pointers.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT charfile : public CharacterProtocol
+{
+private:
+	FILE *fp;
+	bool opened;
+
+	int _putch(int code);
+
+	int _getch(void);
+
+public:
 	/**
-	 * A convenience method to standardize file printf.  This mostly
-	 * is to assure some consistency in coding practices and return values.
-	 * @param file to write to.
-	 * @param format of printf string.
-	 * @return number of bytes written.
+	 * Construct a charfile from an existing FILE pointer.
+	 * @param file to use.
 	 */
-	static size_t printf(FILE *file, const char *format, ...) __PRINTF(2, 3);
-	
-	/**
-	 * A convenience method to standardize writing strings.  This is mostly
-	 * to assure some consistency with other common code.
-	 * @param file to write to.
-	 * @param string to write.
-	 * @return number of bytes written.
-	 */
-	static size_t writes(FILE *file, const char *string);
+	inline charfile(FILE *file)
+		{fp = file; opened = false;}
 
 	/**
-	 * A realine method for files.  This is mostly to offer behavior similar
-	 * to other readln methods, which can accept either "\n" or "\r\n" line
-	 * termination, and strip the eol from the buffer.
-	 * @param file to read from.
-	 * @param address of buffer to save string.
-	 * @param size of buffer.
-	 * @return number of bytes actually retrieved.  0 may indicate EOF.
+	 * Construct an open charfile based on a path and mode.
+	 * @param path of file to open.
+	 * @param mode of file.
 	 */
-	static size_t readln(FILE *file, char *address, size_t size);
+	charfile(const char *path, const char *mode);
+
+	/**
+	 * Construct an unopened file.
+	 */
+	charfile();
+
+	/**
+	 * Destroy object and close associated file.
+	 */
+	~charfile();
+
+	/**
+	 * Test if file is opened.
+	 * @return true if opened.
+	 */
+	inline operator bool()
+		{return fp != NULL;}
+
+	/**
+	 * Test if file is not opened.
+	 * @return true if not opened.
+	 */
+	inline bool operator !()
+		{return fp == NULL;}
+
+	/**
+	 * Open file path.  If a file is already opened, it is closed.
+	 * @param path of file to open.
+	 * @param mode of file to open.
+	 */
+	void open(const char *path, const char *mode);
+
+	/**
+	 * Close an open file.
+	 */
+	void close(void);
+
+	/**
+	 * Put a string into the file.
+	 * @param string to write.
+	 * @return number of characters written.
+	 */
+	size_t put(const char *string);
+
+	/**
+	 * Read a line of input from the file.  This clears the newline
+	 * character at the end and has consistent behavior with other
+	 * ucommon file routines.
+	 * @param string to write.
+	 * @param size of buffer.
+	 * @return number of bytes read from file.
+	 */
+	size_t readline(char *string, size_t size);
+
+	inline size_t readline(String& string)
+		{return readline(string.c_mem(), string.size());}
+
+	inline size_t put(const void *data, size_t size)
+		{ return fp == NULL ? 0 : fwrite(data, 1, size, fp);}
+
+	size_t get(void *data, size_t size)
+		{ return fp == NULL ? 0 : fread(data, 1, size, fp);}
+
+	inline void get(fpos_t& pos)
+		{ if(fp) fsetpos(fp, &pos);}
+
+	inline void set(fpos_t& pos)
+		{ if(fp) fgetpos(fp, &pos);}
+
+	int err(void);
+
+	bool eof(void);
+
+	inline void seek(long offset)
+		{if(fp) fseek(fp, offset, SEEK_SET);}
+
+	inline void move(long offset)
+		{if(fp) fseek(fp, offset, SEEK_CUR);}
+
+	inline void append(void)
+		{if (fp) fseek(fp, 0l, SEEK_END);}
+
+	inline void rewind(void)
+		{if(fp) ::rewind(fp);}
+
+	size_t printf(const char *format, ...) __PRINTF(2, 3);
 };
-	
+
+String str(charfile& fp, strsize_t size);
+		
 /**
  * Convience type for fsys.
  */

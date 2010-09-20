@@ -444,6 +444,9 @@ public:
 	inline T *get(int index)
 		{return static_cast<T *>(Vector::get(index));};
 
+	inline T& operator[](int index)
+		{return static_cast<T *>(Vector::get(index));};
+
 	/**
 	 * Retrieve a typed member of the vector directly.
 	 * @param position to retrieve object from.
@@ -698,6 +701,9 @@ public:
 	 */ 
 	inline T *get(int index)
 		{return static_cast<T *>(Vector::get(index));};
+
+	inline T& operator[](int index)
+		{return static_cast<T*>(Vector::get(index));};
 
 	/**
 	 * Retrieve a typed member of the fixed vector directly.

@@ -925,6 +925,9 @@ public:
 	 */
 	size_t readline(char *data, size_t size);
 
+	inline size_t readline(String& str)
+		{return readline(str.c_mem(), str.size());}
+
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
 	 * string.  This uses an optimized I/O method that takes advantage of

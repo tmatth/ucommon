@@ -1472,7 +1472,7 @@ public:
 	 * Return typed value of this node by pointer reference.
 	 * @return value of node.
 	 */
-	inline T operator*() const
+	inline T& operator*() const
 		{return value;};
 
 	/**
@@ -1752,7 +1752,7 @@ public:
 	 * @param name to search for.
 	 * @return typed object if found through map or NULL.
 	 */
-	inline T *operator[](const char *name) const
+	inline T& operator[](const char *name) const
 		{return static_cast<T*>(NamedObject::map(idx, name, M));};
 
 	/**
@@ -1878,13 +1878,19 @@ public:
     inline T *find(const char *name)
         {return static_cast<T*>(NamedObject::find(begin(), name));};
 
+	inline T *offset(unsigned offset)
+		{return static_cast<T*>(OrderedIndex::find(offset));};
+
 	/**
 	 * Retrieve a specific object by position in list.
 	 * @param offset in list for object we want.
 	 * @return type named object or NULL if past end of list.
 	 */
-    inline T *operator[](unsigned offset)
-        {return static_cast<T*>(OrderedIndex::find(offset));};
+    inline T& operator[](unsigned offset)
+        {return static_cast<T&>(OrderedIndex::find(offset));};
+
+	inline T& operator[](const char *name)
+		{return static_cast<T&>(NamedObject::find(begin(), name));};
 
 	/**
 	 * Convert our linked list into a linear object pointer array.  The

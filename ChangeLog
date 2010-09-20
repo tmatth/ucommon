@@ -5,6 +5,9 @@ from ucommon 3.4.0 to 4.0.0
 - buffer protocol created.
 - string no longer has dependency on socket.
 - ssl and tcp classes reorganized for consistent naming.
+- file handling in charfile through character protocol.
+- unicode conversions use character protocol.
+- templates updated so []'s always emit value references.
 
 from ucommon 3.3.7 to 3.4.0
 - simplified to better focus on core runtime mission.

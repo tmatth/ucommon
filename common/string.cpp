@@ -1897,19 +1897,31 @@ string &string::operator%(const char *get)
 	return *this;
 }
 
-String str(FILE *fp, strsize_t size)
+String str(CharacterProtocol *p, strsize_t size)
 {
 	String temp(size);
-	if(fgets(temp.c_mem(), (size_t)size, fp) == NULL)
-		temp = "";
-	String::fix(temp);
-	return temp;
-}
+	char *cp = temp.c_mem();
+	int ch;
+	bool cr = false;
 
-String str(BufferProtocol& p, strsize_t size)
-{
-	String temp(size);
-	p.getline(temp.c_mem(), temp.size());
+	while(--size) {
+		ch = p->get();
+		if(ch == 0 || ch == EOF || ch == '\n')
+			break;
+
+		if(cr) {
+			cr = false;
+			*(cp++) = '\r';
+		}
+
+		if(ch == '\r')
+			cr = true;
+		else
+			*(cp++) = ch;
+	}
+
+	*cp = 0;
+
 	String::fix(temp);
 	return temp;
 }

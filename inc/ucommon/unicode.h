@@ -117,21 +117,20 @@ public:
 
 	/**
 	 * Convert a unicode string into utf8.
-	 * @param string of unicode data.
-	 * @param buffer to convert into.
-	 * @param size of conversion buffer.
+	 * @param string of unicode data to pack
+	 * @param buffer of character protocol to put data into.
 	 * @return number of code points converted.
 	 */
-	static size_t convert(const unicode_t string, char *buffer, size_t size);
+	static size_t unpack(const unicode_t string, CharacterProtocol *buffer);
 
 	/**
 	 * Convert a utf8 string into a unicode data buffer.
-	 * @param string to copy.
 	 * @param unicode data buffer.
+	 * @param buffer of character protocol to pack from.
 	 * @param size of unicode data buffer in codepoints.
 	 * @return number of code points converted.
 	 */
-	static size_t extract(const char *string, unicode_t unicode, size_t size);
+	static size_t pack(unicode_t unicode, CharacterProtocol *buffer, size_t size);
 
 	/**
 	 * Find first occurance of character in string.
@@ -160,19 +159,19 @@ public:
 	static unsigned ccount(const char *string, ucs4_t character);
 
 	/**
-	 * Get a unicode character from a file stream.
-	 * @param file to get character from.
+	 * Get a unicode character from a character protocol.
+	 * @param buffer of character protocol to read from.
 	 * @return unicode character or EOF error.
 	 */
-	ucs4_t getch(FILE *file);
+	static ucs4_t get(CharacterProtocol *buffer);
 
 	/**
-	 * Push a unicode character to a file stream.
+	 * Push a unicode character to a character protocol.
 	 * @param character to push to file.
-	 * @param file to push character to.
+	 * @param buffer of character protocol to push character to.
 	 * @return unicode character or EOF on error.
 	 */
-	ucs4_t putch(ucs4_t character, FILE *file);
+	static ucs4_t put(ucs4_t character, CharacterProtocol *buffer);
 };
 
 /**
@@ -244,8 +243,7 @@ protected:
 	 * @param size of data buffer.
 	 * @return codepoints copied.
 	 */
-	inline size_t get(unicode_t unicode, size_t size) const
-		{return utf8::extract(str->text, unicode, size);};
+	size_t get(unicode_t unicode, size_t size) const;
 
 	/**
 	 * Set a utf8 encoded string based on unicode data.
@@ -273,7 +271,7 @@ protected:
 	 * @return codepoints copied.
 	 */
 	inline size_t operator()(unicode_t unicode, size_t size) const
-		{return utf8::extract(str->text, unicode, size);};
+		{return get(unicode, size);};
 
 	/**
 	 * Get a new substring through object expression.

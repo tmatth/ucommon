@@ -36,9 +36,9 @@ using namespace UCOMMON_NAMESPACE;
 const char *utf8::nil = NULL;
 const unsigned utf8::ucsize = sizeof(wchar_t);
 
-ucs4_t utf8::getch(FILE *fp)
+ucs4_t utf8::get(CharacterProtocol *cp)
 {
-	int ch = fgetc(fp);
+	int ch = cp->get();
 	unsigned count = 0;
 	ucs4_t code;
 	
@@ -72,7 +72,7 @@ ucs4_t utf8::getch(FILE *fp)
 		return EOF;
 
 	while(count--) {
-		ch = fgetc(fp);
+		ch = cp->get();
 		if(ch == EOF)
 			return EOF;
 		if((ch & 0xc0) != 0x80)
@@ -227,38 +227,32 @@ size_t utf8::chars(ucs4_t code)
 	return 6;
 }
 
-size_t utf8::extract(const char *text, unicode_t buffer, size_t len)
+size_t utf8::pack(unicode_t buffer, CharacterProtocol *cp, size_t len)
 {
 	size_t used = 0;
 	wchar_t *target = (wchar_t *)buffer;
 
 	assert(len > 0);
 
-	if(!text) {
-		*target = 0;
-		return 0;
-	}
-
 	while(--len) {
-		ucs4_t code = codepoint(text);
-		if(code < 1)
+		ucs4_t code = utf8::get(cp);
+		if(!code || code == (ucs4_t)EOF)
 			break;
-		text += size(text);
 		*(target++) = (wchar_t)code;
 		++used;
 	}
 
-	*target = 0;
+	*target = (wchar_t)0;
 	return used;
 }
 
-ucs4_t utf8::putch(ucs4_t code, FILE *fp)
+ucs4_t utf8::put(ucs4_t code, CharacterProtocol *cp)
 {
 	char buffer[8];
 	unsigned used = 0, count = 0;
 
 	if(code < 0x80)
-		return fputc(code, fp);
+		return cp->put(code);
 
 	if(code < 0x000007ff) {
 		buffer[used++] = (code >> 6) | 0xc0;
@@ -292,66 +286,24 @@ ucs4_t utf8::putch(ucs4_t code, FILE *fp)
 	}
 
 	while(count < used) {
-		if(fputc(buffer[count++], fp) == EOF)
+		if(cp->put(buffer[count++]) == EOF)
 			return EOF;
 	}
 	return code;
 }
 
-size_t utf8::convert(const unicode_t str, char *buffer, size_t size)
+size_t utf8::unpack(const unicode_t str, CharacterProtocol *cp)
 {
 	unsigned used = 0;
 	unsigned points = 0;
 	ucs4_t code;
 	const wchar_t *string = (const wchar_t *)str;
-	unsigned cs;
-	if(!str) {
-		*buffer = 0;
-		return 0;
-	}
 
 	while(0 != (code = (*(string++)))) {
-		cs = chars(code);
-		if(cs + used > (size - 1))
+		if(utf8::put(code, cp) == EOF)
 			break;
 		++points;
-		if(code < 0x80) {
-			buffer[used++] = code & 0x7f;
-			continue;
-		}
-		if(code < 0x000007ff) {
-			buffer[used++] = (code >> 6) | 0xc0;
-			buffer[used++] = (code & 0x3f) | 0x80;
-			continue;
-		}
-		if(code <= 0x0000ffff) {
-			buffer[used++] = (code >> 12) | 0xe0;
-			buffer[used++] = (code >> 6 & 0x3f) | 0x80;
-			buffer[used++] = (code & 0x3f) | 0x80;
-			continue;
-		}
-		if(code <= 0x001fffff) {
-			buffer[used++] = (code >> 18) | 0xf0;
-			buffer[used++] = (code >> 12 & 0x3f) | 0x80;
-			buffer[used++] = (code >> 6  & 0x3f) | 0x80;
-			buffer[used++] = (code & 0x3f) | 0x80;
-			continue;
-		}
-		if(code <= 0x03ffffff) {
-			buffer[used++] = (code >> 24) | 0xf8;
-			buffer[used++] = (code >> 18 & 0x3f) | 0x80;
-			buffer[used++] = (code >> 12 & 0x3f) | 0x80;
-			buffer[used++] = (code >> 6  & 0x3f) | 0x80;
-			buffer[used++] = (code & 0x3f) | 0x80;
-		}
-		buffer[used++] = (code >> 30) | 0xfc;
-		buffer[used++] = (code >> 24 & 0x3f) | 0x80;
-		buffer[used++] = (code >> 18 & 0x3f) | 0x80;
-		buffer[used++] = (code >> 12 & 0x3f) | 0x80;
-		buffer[used++] = (code >> 6  & 0x3f) | 0x80;
-		buffer[used++] = (code & 0x3f) | 0x80;
 	}
-	buffer[used++] = 0;
 	return points;
 }
 
@@ -465,8 +417,9 @@ void UString::set(const unicode_t text)
 	str = NULL;
 	str = create(size);
 	str->retain();
-	utf8::convert(text, str->text, str->max);
-	str->len = size;
+
+	charmem cp(str->text, str->max);
+	utf8::unpack(text, &cp); 
 	str->fix();
 }
 
@@ -481,8 +434,15 @@ void UString::add(const unicode_t text)
 	if(!resize(alloc))
 		return;
 
-	utf8::convert(text, str->text + str->len, size + 1);
+	charmem cp(str->text + str->len, size + 1);
+	utf8::unpack(text, &cp);
 	str->fix();
+}
+
+size_t UString::get(unicode_t output, size_t points) const
+{
+	charmem cp(str->text, str->max);
+	return utf8::pack(output, &cp, points);
 }
 
 UString UString::get(strsize_t pos, strsize_t size) const

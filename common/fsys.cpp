@@ -1035,8 +1035,44 @@ void *fsys::find(mem_t addr, const char *sym)
 
 #endif
 
-size_t fsys::printf(FILE *fp, const char *format, ...)
+charfile::charfile(const char *file, const char *mode)
 {
+	fp = NULL;
+	open(file, mode);
+}
+
+charfile::charfile()
+{
+	fp = NULL;
+	opened = false;
+}
+
+charfile::~charfile()
+{
+	close();
+}
+
+void charfile::open(const char *path, const char *mode)
+{
+	if(fp)
+		fclose(fp);
+
+	fp = fopen(path, mode);
+	opened = true;
+}
+
+void charfile::close(void)
+{
+	if(fp && opened)
+		fclose(fp);
+	fp = NULL;
+}
+
+size_t charfile::printf(const char *format, ...)
+{
+	if(!fp)
+		return 0;
+
 	va_list args;
 	va_start(args, format);
 	size_t result = vfprintf(fp, format, args);
@@ -1046,9 +1082,24 @@ size_t fsys::printf(FILE *fp, const char *format, ...)
 	return result;
 }
 
-size_t fsys::readln(FILE *fp, char *address, size_t size)
+size_t charfile::put(const char *data)
+{
+	if(!fp)
+		return 0;
+
+	int result = fputs(data, fp);
+	if(result < 0)
+		result = 0;
+
+	return (size_t)result;
+}
+
+size_t charfile::readline(char *address, size_t size)
 {
 	address[0] = 0;
+
+	if(!fp)
+		return 0;
 
 	if(!fgets(address, size, fp))
 		return 0;
@@ -1062,4 +1113,43 @@ size_t fsys::readln(FILE *fp, char *address, size_t size)
 	return size;
 }
 
+bool charfile::eof(void)
+{
+	if(!fp)
+		return false;
+
+	return feof(fp) != 0;
+}
+
+int charfile::err(void)
+{
+	if(!fp)
+		return EBADF;
+
+	return ferror(fp);
+}
+
+int charfile::_getch(void)
+{
+	if(!fp)
+		return EOF;
+
+	return fgetc(fp);
+}
+
+int charfile::_putch(int code)
+{
+	if(!fp)
+		return EOF;
+
+	return fputc(code, fp);
+}
+
+String str(charfile& so, strsize_t size)
+{
+	String s(size);
+	so.readline(s.c_mem(), s.size());
+	String::fix(s);
+	return s;
+}
 
