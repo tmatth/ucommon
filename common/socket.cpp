@@ -1777,13 +1777,7 @@ ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, str
 	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL | flags, dest, slen);
 }
 
-String Socket::_buf(void)
-{
-	stringbuf<536> temp;
-	return temp;
-}
-
-size_t Socket::_writes(const char *str)
+size_t Socket::writes(const char *str)
 {
 	if(!str)
 		return 0;
@@ -1794,7 +1788,7 @@ size_t Socket::_writes(const char *str)
 	return writeto(str, strlen(str), NULL);
 }
 
-size_t Socket::_readline(char *data, size_t max)
+size_t Socket::readline(char *data, size_t max)
 {
 	assert(data != NULL);
 	assert(max > 0);
@@ -3330,3 +3324,10 @@ void Socket::release(set_t mask)
 	free(mask);
 }
 
+String str(Socket& so, strsize_t size)
+{
+	String s(size);
+	so.readline(s.c_mem(), s.size());
+	String::fix(s);
+	return s;
+}

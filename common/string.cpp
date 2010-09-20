@@ -1897,23 +1897,6 @@ string &string::operator%(const char *get)
 	return *this;
 }
 
-size_t StringProtocol::printf(const char *format, ...)
-{
-	assert(format != NULL);
-	
-	String temp = _buf();
-	va_list args;
-
-	va_start(args, format);
-	vsnprintf(temp.c_mem(), temp.size(), format, args);
-	String::fix(temp);
-	va_end(args);
-
-	return _writes(temp.c_str());
-}
-
-
-
 String str(FILE *fp, strsize_t size)
 {
 	String temp(size);

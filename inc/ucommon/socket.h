@@ -296,7 +296,7 @@ public:
  * addressing, and additional addressing domains (such as Unix domain sockets).
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Socket : public StringProtocol
+class __EXPORT Socket
 {
 protected:
 	socket_t so;
@@ -923,7 +923,7 @@ public:
 	 * @param size of input line buffer.
 	 * @return number of bytes read, 0 if none, err() has error.
 	 */
-	size_t _readline(char *data, size_t size);
+	size_t readline(char *data, size_t size);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
@@ -954,9 +954,7 @@ public:
 	 * @param address to write to.
 	 * @return number of bytes sent, 0 if none, -1 if error.
 	 */
-	size_t _writes(const char *string);
-
-	String _buf(void);
+	size_t writes(const char *string);
 
 	/**
 	 * Test if socket is valid.
@@ -1732,6 +1730,8 @@ inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
  */
 inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
 	{return Socket::equalhost(s1, s2);}
+
+String str(Socket& so, strsize_t size);
 
 END_NAMESPACE
 

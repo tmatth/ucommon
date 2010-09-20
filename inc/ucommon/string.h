@@ -1529,38 +1529,6 @@ typedef	string string_t;
 typedef string String;
 
 /**
- * A string protocol.  This is useful for low level i/o classes which
- * may peform line oriented buffer operations.  Examples may include
- * sockets and serial consoles.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT StringProtocol
-{
-protected:
-	virtual size_t _readline(char *buffer, size_t size) = 0;
-
-	virtual size_t _writes(const char *buffer) = 0;
-
-	virtual String _buf(void) = 0;
-
-public:
-	inline size_t readline(char *buffer, size_t size)
-		{return _readline(buffer, size);};
-
-	inline size_t writes(const char *buffer)
-		{return _writes(buffer);}
-
-	inline size_t writes(String& str)
-		{return _writes(str.c_str());}
-
-	inline size_t printf(const char *format, ...) __PRINTF(2,3);
-
-	size_t readline(String& object);
-
-	String readline(strsize_t size);
-};
-
-/**
  * A string class that has a predefined string buffer.  The string class
  * and buffer are allocated together as one object.  This allows one to use
  * string objects entirely resident on the local stack as well as on the
@@ -1709,9 +1677,6 @@ inline String str(double value)
 String str(FILE *fp, strsize_t size);
 
 String str(BufferProtocol& p, strsize_t size);
-
-inline String str(StringProtocol& p, strsize_t size)
-	{return p.readline(size);}
 
 END_NAMESPACE
 
