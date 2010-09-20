@@ -328,6 +328,25 @@ public:
 	void put(PagerObject *object);
 };
 
+class __EXPORT chars : public CharacterProtocol
+{
+private:
+	const char *pos;
+
+	int _putch(int code);
+	int _getch(void);
+
+public:
+	chars();
+	chars(const char *buf);
+	
+	inline void set(const char *buf)
+		{pos = buf;}
+
+	inline chars& operator=(const char *buf)
+		{set(buf); return *this;}
+};
+
 /**
  * A class to hold memory pointers referenced by string names.  This is
  * used to form a typeless data pointer that can be associated and

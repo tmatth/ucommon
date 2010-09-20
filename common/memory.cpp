@@ -439,4 +439,27 @@ bool keyassoc::assign(char *id, void *data)
 	return true;
 }
 
+chars::chars()
+{
+	pos = NULL;
+}
+
+chars::chars(const char *buf)
+{
+	pos = buf;
+}
+
+int chars::_getch(void)
+{
+	if(!pos || !*pos)
+		return EOF;
+
+	return *(pos++);
+}
+
+int chars::_putch(int code)
+{
+	return EOF;
+}
+
 

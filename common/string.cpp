@@ -1913,4 +1913,57 @@ String str(BufferProtocol& p, strsize_t size)
 	String::fix(temp);
 	return temp;
 }
-	
+
+charmem::charmem(char *mem, size_t size)
+{
+	set(mem, size);
+}
+
+charmem::charmem(string& object)
+{
+	set(object);
+}
+
+charmem::charmem()
+{
+	buffer = NULL;
+	inp = out = size = 0;
+}
+
+void charmem::set(string& object)
+{
+	set(object.c_mem(), object.size());
+}
+
+void charmem::set(char *mem, size_t total)
+{
+	if(!mem) {
+		buffer = NULL;
+		inp = out = size = 0;
+		return;
+	}
+
+	buffer = mem;
+	size = total;
+	inp = 0;
+	out = strlen(mem);
+}
+
+int charmem::_getch(void)
+{
+	if(!buffer || inp == size || buffer[inp] == 0)
+		return EOF;
+
+	return buffer[inp++];
+}
+
+int charmem::_putch(int code)
+{
+	if(!buffer || out > size - 1)
+		return EOF;
+
+	buffer[out++] = code;
+	buffer[out] = 0;
+	return code;
+}
+
