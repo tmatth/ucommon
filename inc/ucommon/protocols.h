@@ -343,41 +343,48 @@ public:
 	 * @return true if buffer active.
 	 */
 	inline operator bool()
-		{return buffer != NULL;};
+		{return buffer != NULL;}
 
 	/**
 	 * See if buffer closed.
 	 * @return true if buffer inactive.
 	 */
 	inline bool operator!()
-		{return buffer == NULL;};
+		{return buffer == NULL;}
 
 	/**
 	 * See if buffer open.
 	 * @return true if buffer active.
 	 */
 	inline bool isopen(void)
-		{return buffer != NULL;};
+		{return buffer != NULL;}
 
 	/**
 	 * See if input active.
 	 * @return true if input active.
 	 */
 	inline bool isinput(void)
-		{return input != NULL;};
+		{return input != NULL;}
 
 	/**
 	 * See if output active.
 	 * @return true if output active.
 	 */
 	inline bool isoutput(void)
-		{return output != NULL;};
+		{return output != NULL;}
+
+	/**
+	 * See if pending input.
+	 * @return true if input pending.
+	 */
+	inline bool ispending(void)
+		{return _pending();}
 
 	/**
 	 * Set eof flag.
 	 */
 	inline void seteof(void)
-		{end = true;};
+		{end = true;}
 };
 
 
