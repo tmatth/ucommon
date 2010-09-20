@@ -294,7 +294,6 @@ ucs4_t utf8::put(ucs4_t code, CharacterProtocol *cp)
 
 size_t utf8::unpack(const unicode_t str, CharacterProtocol *cp)
 {
-	unsigned used = 0;
 	unsigned points = 0;
 	ucs4_t code;
 	const wchar_t *string = (const wchar_t *)str;
