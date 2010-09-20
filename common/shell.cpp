@@ -355,7 +355,7 @@ void shell::iobuf::_clear(void)
 	ioerror = 0;
 }
 
-int shell::iobuf::_err(void)
+int shell::iobuf::_err(void) const
 {
 	return ioerror;
 }
