@@ -1442,7 +1442,7 @@ Socket::Socket(int family, int type, int protocol)
 	ioerr = 0;
 }
 
-Socket::Socket(const char *iface, const char *port, int family, int type, int protocol, int backlog)
+Socket::Socket(const char *iface, const char *port, int family, int type, int protocol)
 {
 	assert(iface != NULL && *iface != 0);
 	assert(port != NULL && *port != 0);
@@ -1451,7 +1451,7 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
 	init();
 #endif
 	family = setfamily(family, iface);
-	so = create(iface, port, family, type, protocol, 0);
+	so = create(iface, port, family, type, protocol);
 	iowait = Timer::inf;
 	ioerr = 0;
 }
@@ -1474,7 +1474,7 @@ socket_t Socket::create(Socket::address &address)
 	return so;
 }
 
-socket_t Socket::create(const char *iface, const char *port, int family, int type, int protocol, int backlog)
+socket_t Socket::create(const char *iface, const char *port, int family, int type, int protocol)
 {
 	assert(iface != NULL && *iface != 0);
 	assert(port != NULL && *port != 0);
@@ -1511,10 +1511,6 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 			release(so);
 			return INVALID_SOCKET;
 		}
-		if(type == SOCK_STREAM && _listen_(so, backlog)) {
-			release(so);
-			return INVALID_SOCKET;
-		}
 		return so;	
 	};
 #endif
@@ -1535,12 +1531,6 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 		if(_bind_(so, res->ai_addr, res->ai_addrlen)) {
 			release(so);
 			so = INVALID_SOCKET;
-		}
-		else if(res->ai_socktype == SOCK_STREAM) {
-			if(_listen_(so, backlog)) {
-				release(so);
-				so = INVALID_SOCKET;
-			}
 		}
 	}
 	freeaddrinfo(res);
@@ -2568,44 +2558,30 @@ bool Socket::waitSending(timeout_t timeout) const
 #endif
 }
 
-ListenSocket::ListenSocket(const char *iface, const char *svc, unsigned backlog, int protocol) :
+ListenSocket::ListenSocket(const char *iface, const char *svc, unsigned backlog, int family, int type, int protocol) :
 Socket()
 {
 	assert(iface != NULL && *iface != 0);
 	assert(svc != NULL && *svc != 0);
 	assert(backlog > 0);
+	
+	so = create(iface, svc, backlog, family, SOCK_DCCP, protocol);
+}
 
-	int family = AF_INET;
+socket_t ListenSocket::create(const char *iface, const char *svc, unsigned backlog, int family, int type, int protocol)
+{
+	if(!type)
+		type = SOCK_STREAM;
 
-	if(strchr(iface, '/'))
-		family = AF_UNIX;
-#ifdef	AF_INET6
-	else if(strchr(iface, ':'))
-		family = AF_INET6;
-#endif
-
-retry:
-	if(protocol == IPPROTO_DCCP)
-		so = ::socket(family, SOCK_DCCP, protocol);
-	else
-		so = ::socket(family, SOCK_STREAM, protocol);
-
+	socket_t so = Socket::create(iface, svc, family, type, protocol);
 	if(so == INVALID_SOCKET)
-		return;
-		
-	socket_mapping(family, so);
-	if(bindto(so, iface, svc, protocol)) {
-		release();
-#ifdef	AF_INET6
-		if(family == AF_INET && !strchr(iface, '.')) {
-			family = AF_INET6;
-			goto retry;
-		}
-#endif
-		return;
+		return so;
+
+	if(_listen_(so, backlog)) {
+		release(so);
+		return INVALID_SOCKET;
 	}
-	if(_listen_(so, backlog))
-		release();
+	return so;
 }
 
 socket_t ListenSocket::accept(struct sockaddr_storage *addr)
@@ -2615,6 +2591,12 @@ socket_t ListenSocket::accept(struct sockaddr_storage *addr)
 		return _accept_(so, (struct sockaddr *)addr, &len);
 	else
 		return _accept_(so, NULL, NULL);
+}
+
+TCPServer::TCPServer(const char *service, const char *address, unsigned backlog) :
+ListenSocket(address, service, backlog)
+{
+	servicetag = service;
 }
 
 #ifdef	_MSWINDOWS_

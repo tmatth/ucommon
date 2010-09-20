@@ -143,30 +143,6 @@ public:
 };
 
 /**
- * A generic tcp server class for TCPBuffer.  This saves the service id
- * tag so that it can be propagated.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT TCPServer : public ListenSocket
-{
-private:
-	friend class TCPBuffer;
-
-	const char *servicetag;
-
-public:
-	/**
-	 * Create and bind a tcp server.  This mostly is used to preserve the
-	 * service tag for TCP Socket when derived from a server instance.
-	 * @param service tag to use.
-	 * @param address of interface to bind or "*" for all.
-	 * @param backlog size for pending connections.
-	 * @param protocol to use (normally tcpip).	
-	 */
-	TCPServer(const char *service, const char *address = "*", unsigned backlog = 5, int protocol = 0);
-};
-
-/**
  * A generic tcp socket class that offers i/o buffering.  All user i/o
  * operations are directly inherited from the IOBuffer base class public
  * members.  Some additional members are added for layering ssl services.

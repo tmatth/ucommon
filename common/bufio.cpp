@@ -252,12 +252,6 @@ size_t fbuf::_pull(char *buf, size_t size)
 	return (size_t)result;
 }
 
-TCPServer::TCPServer(const char *service, const char *address, unsigned backlog, int protocol) :
-ListenSocket(address, service, backlog, protocol)
-{
-	servicetag = service;
-}
-
 TCPBuffer::TCPBuffer(const char *service) : BufferProtocol()
 {
 	so = INVALID_SOCKET;
@@ -317,7 +311,7 @@ void TCPBuffer::open(TCPServer *server, size_t size)
 	struct sockaddr_storage address;
 	socklen_t alen = sizeof(address);
 
-	servicetag = server->servicetag;
+	servicetag = server->tag();
 
 	if(getsockname(server->getsocket(), (struct sockaddr *)&address, &alen) == 0)
 		snprintf(serviceid, sizeof(serviceid), "%u", Socket::getservice((struct sockaddr *)&address));	

@@ -609,15 +609,15 @@ public:
 	Socket(int family, int type, int protocol = 0);
 
 	/**
-	 * Create a bound socket.
-	 * @param address to bind or "*" for all
+	 * Create a bound socket.  If one wishes to listen for connections on
+	 * a protocol, then ListenSocket should be used instead.
+	 * @param address to bind or "*" for all.
 	 * @param port number of service to bind.
 	 * @param family to bind as.
 	 * @param type of socket to bind (stream, udp, etc).
 	 * @param protocol of socket to bind.
-	 * @param backlog for listening socket.
 	 */
-	Socket(const char *address, const char *port, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
+	Socket(const char *address, const char *port, int family = AF_UNSPEC, int type = 0, int protocol = 0);
 
 	/**
 	 * Shutdown, close, and destroy socket.
@@ -1274,7 +1274,7 @@ public:
 	 * @param backlog for listener.
 	 * @return socket descriptor created or INVALID_SOCKET.
 	 */
-	static socket_t create(const char *iface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0, int backlog = 0);
+	static socket_t create(const char *iface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0);
 
 	/**
 	 * Create a connected socket for a service.
@@ -1637,9 +1637,23 @@ public:
 	 * @param address to bind on or "*" for all.
 	 * @param service port to bind listener.
 	 * @param backlog size for buffering pending connections.
+	 * @param family of socket.
+	 * @param type of socket.
 	 * @param protocol for socket if not TCPIP.
 	 */
-	ListenSocket(const char *address, const char *service, unsigned backlog = 5, int protocol = 0);
+	ListenSocket(const char *address, const char *service, unsigned backlog = 5, int family = AF_UNSPEC, int type = 0, int protocol = 0);
+
+	/**
+	 * Create a listen socket directly.
+	 * @param address to bind on or "*" for all.
+	 * @param service port to bind listener.
+	 * @param backlog size for buffering pending connections.
+	 * @param family of socket.
+	 * @param type of socket.
+	 * @param protocol for socket if not TCPIP.
+	 * @return bound and listened to socket.
+	 */
+	socket_t create(const char *address, const char *service, unsigned backlog = 5, int family = AF_UNSPEC, int type = 0, int protocol = 0);
 
 	/**
 	 * Accept a socket connection.
@@ -1677,6 +1691,30 @@ public:
 	inline socket_t getsocket(void) const
 		{return so;};
 
+};
+
+/**
+ * A generic tcp server class.  This saves the service id tag so that it
+ * can be propagated.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT TCPServer : public ListenSocket
+{
+private:
+	const char *servicetag;
+
+public:
+	/**
+	 * Create and bind a tcp server.  This mostly is used to preserve the
+	 * service tag for TCP Socket when derived from a server instance.
+	 * @param service tag to use.
+	 * @param address of interface to bind or "*" for all.
+	 * @param backlog size for pending connections.
+	 */
+	TCPServer(const char *service, const char *address = "*", unsigned backlog = 5);
+
+	inline const char *tag(void)
+		{return servicetag;}
 };
 
 /**
