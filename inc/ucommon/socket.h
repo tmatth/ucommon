@@ -1769,6 +1769,8 @@ inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
 
 String str(Socket& so, strsize_t size);
 
+typedef	TCPServer	tcpserv_t;
+
 END_NAMESPACE
 
 #endif
