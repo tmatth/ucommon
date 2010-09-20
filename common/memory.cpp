@@ -506,7 +506,7 @@ int bufpager::_putch(int code)
 				return EOF;
 
 			page_t *p = page;
-			unsigned size;
+			unsigned size = 0;
 
 			while(p) {
 				size = pagesize - p->used;
