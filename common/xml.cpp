@@ -177,7 +177,7 @@ bool XMLParser::parse(FILE *fp)
 }
 
 
-bool XMLParser::parse(BufferProtocol *io)
+bool XMLParser::parse(CharacterProtocol *io)
 {
 	state = NONE;
 	bufpos = 0;
@@ -186,7 +186,7 @@ bool XMLParser::parse(BufferProtocol *io)
 	int ch;
 	unsigned char cp;
 
-	while((ch = io->getch()) != EOF) {
+	while((ch = io->get()) != EOF) {
 		switch(state) {
 		case AMP:
 			if((!bufpos && ch == '#') || isElement(ch)) {
@@ -289,7 +289,7 @@ bool XMLParser::parse(BufferProtocol *io)
 	return false;
 }
 
-bool XMLParser::parse(const char *data, size_t len)
+bool XMLParser::partial(const char *data, size_t len)
 {
 	if(state == END)
 		state = NONE;

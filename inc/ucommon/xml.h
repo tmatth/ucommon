@@ -113,7 +113,7 @@ protected:
 	 * @param address of data to parse.
 	 * @param size of data to parse.
 	 */
-	bool parse(const char *address, size_t size);
+	bool partial(const char *address, size_t size);
 
 	/**
 	 * Parse a stream buffer and return parser document completion flag.
@@ -124,7 +124,7 @@ protected:
 	 * @param stream buffer to parse.
 	 * @return true if parse complete, false if invalid or EOF.
 	 */
-	bool parse(BufferProtocol *stream);
+	bool parse(CharacterProtocol *stream);
 
 	/**
 	 * Parse a file buffer and return parser document completion flag.

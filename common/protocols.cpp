@@ -161,7 +161,7 @@ size_t BufferProtocol::get(char *address, size_t size)
 	return count;
 }
 
-int BufferProtocol::getch(void)
+int BufferProtocol::_getch(void)
 {
 	if(!input)
 		return EOF;
@@ -210,7 +210,7 @@ size_t BufferProtocol::put(const char *address, size_t size)
 	return count;
 }
 
-int BufferProtocol::putch(int ch)
+int BufferProtocol::_putch(int ch)
 {
 	if(!output)
 		return EOF;
@@ -346,7 +346,7 @@ size_t BufferProtocol::getline(char *string, size_t size)
 		return 0;
 
 	while(count < size - 1) {
-		int ch = getch();
+		int ch = BufferProtocol::_getch();
 		if(ch == EOF) {
 			eolp = 0;
 			break;

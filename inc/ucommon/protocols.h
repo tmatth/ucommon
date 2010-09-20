@@ -101,6 +101,44 @@ public:
 };
 
 /**
+ * Common character processing protocol.  This is used to access a character
+ * from some type of streaming buffer or memory object.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT CharacterProtocol
+{
+protected:
+	/**
+	 * Get the next character. 
+	 * @return next character or EOF.
+	 */
+	virtual int _getch(void) = 0;
+
+	/**
+	 * Put the next character.
+	 * @param code to put.
+	 * @return code or EOF if cannot put.
+	 */
+	virtual int _putch(int code) = 0;
+
+public:
+	/**
+	 * Get the next character. 
+	 * @return next character or EOF.
+	 */
+	inline int get(void)
+		{return _getch();};
+
+	/**
+	 * Put the next character.
+	 * @param code to put.
+	 * @return code or EOF if cannot put.
+	 */
+	inline int put(int code)
+		{return _putch(code);};
+};
+	
+/**
  * Common buffer protocol class.  This is used to create objects which will
  * stream character data as needed.  This class can support bidirectional
  * streaming as may be needed for serial devices, sockets, and pipes.  The
@@ -108,7 +146,7 @@ public:
  * are used to communicate with the physical transport. 
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT BufferProtocol 
+class __EXPORT BufferProtocol : public CharacterProtocol
 {
 public:
 	typedef enum {BUF_RD, BUF_WR, BUF_RDWR} type_t;
@@ -263,13 +301,13 @@ public:
 	 * Get a character from the buffer.  If no data is available, return EOF.
 	 * @return character from buffer or eof.
 	 */
-	int getch(void);
+	int _getch(void);
 
 	/**
 	 * Put a character into the buffer.
 	 * @return character put into buffer or eof.
 	 */
-	int putch(int ch);
+	int _putch(int ch);
 
 	/**
 	 * Method to write a null terminated string.  This adds the current
