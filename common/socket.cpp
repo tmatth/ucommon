@@ -1521,6 +1521,7 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 	getaddrinfo(iface, port, &hint, &res);
 	if(res == NULL)
 		return INVALID_SOCKET;
+
 	so = create(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if(so == INVALID_SOCKET) {
 		freeaddrinfo(res);
@@ -2561,11 +2562,14 @@ bool Socket::waitSending(timeout_t timeout) const
 ListenSocket::ListenSocket(const char *iface, const char *svc, unsigned backlog, int family, int type, int protocol) :
 Socket()
 {
+	if(!iface)
+		iface = "*";
+
 	assert(iface != NULL && *iface != 0);
 	assert(svc != NULL && *svc != 0);
 	assert(backlog > 0);
 	
-	so = create(iface, svc, backlog, family, SOCK_DCCP, protocol);
+	so = create(iface, svc, backlog, family, type, protocol);
 }
 
 socket_t ListenSocket::create(const char *iface, const char *svc, unsigned backlog, int family, int type, int protocol)
@@ -2574,6 +2578,7 @@ socket_t ListenSocket::create(const char *iface, const char *svc, unsigned backl
 		type = SOCK_STREAM;
 
 	socket_t so = Socket::create(iface, svc, family, type, protocol);
+
 	if(so == INVALID_SOCKET)
 		return so;
 
@@ -2593,7 +2598,7 @@ socket_t ListenSocket::accept(struct sockaddr_storage *addr)
 		return _accept_(so, NULL, NULL);
 }
 
-TCPServer::TCPServer(const char *service, const char *address, unsigned backlog) :
+TCPServer::TCPServer(const char *address, const char *service, unsigned backlog) :
 ListenSocket(address, service, backlog)
 {
 	servicetag = service;

@@ -1709,7 +1709,7 @@ public:
 	 * @param address of interface to bind or "*" for all.
 	 * @param backlog size for pending connections.
 	 */
-	TCPServer(const char *service, const char *address = "*", unsigned backlog = 5);
+	TCPServer(const char *address, const char *service, unsigned backlog = 5);
 
 	inline const char *tag(void)
 		{return servicetag;}

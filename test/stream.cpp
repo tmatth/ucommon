@@ -45,10 +45,10 @@ int main(int argc, char *argv[])
 	ThreadOut thread;
 
     char line[200];
-	ListenSocket sock("127.0.0.1", "9000");
+	TCPServer sock("127.0.0.1", "9000");
 	thread.start();	
     if (sock.waitConnection(1000)){
-        tcpstream tcp(sock);
+        tcpstream tcp(&sock);
         tcp.getline(line, 200);
 		assert(!strcmp(line, "pippo"));
         tcp.close();
