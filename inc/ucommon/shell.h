@@ -203,7 +203,7 @@ public:
 	 * class to manage stdio sessions generically in the child process.
 	 * @author David Sugar <dyfet@gnutelephony.org>
 	 */
-	class __EXPORT iobuf : public BufferProtocol, protected pipeio
+	class __EXPORT iobuf : public BufferProtocol, private pipeio
 	{
 	protected:
 		friend class shell;

@@ -147,7 +147,7 @@ bool fbuf::trunc(offset_t offset)
 	if(!seekerr)
 		inpos = outpos = offset;
 	
-	if(err())
+	if(fsys::err())
 		return false;
 
 	return true;
@@ -168,7 +168,7 @@ bool fbuf::seek(offset_t offset)
 	if(!seekerr)
 		inpos = outpos = offset;
 
-	if(err())
+	if(fsys::err())
 		return false;
 
 	return true;

@@ -385,6 +385,9 @@ public:
 	 */
 	inline void seteof(void)
 		{end = true;}
+
+	inline int err(void)
+		{return _err();}
 };
 
 
