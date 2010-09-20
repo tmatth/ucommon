@@ -95,7 +95,7 @@ tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
 	open(list);
 }
 
-tcpstream::tcpstream(TCPServer *server, unsigned segsize, timeout_t tv) :
+tcpstream::tcpstream(const TCPServer *server, unsigned segsize, timeout_t tv) :
 	streambuf(), 
 #ifdef OLD_STDCPP
 	iostream()

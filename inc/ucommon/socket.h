@@ -1651,14 +1651,14 @@ public:
 	 * @param protocol for socket if not TCPIP.
 	 * @return bound and listened to socket.
 	 */
-	socket_t create(const char *address, const char *service, unsigned backlog = 5, int family = AF_UNSPEC, int type = 0, int protocol = 0);
+	static socket_t create(const char *address, const char *service, unsigned backlog = 5, int family = AF_UNSPEC, int type = 0, int protocol = 0);
 
 	/**
 	 * Accept a socket connection.
 	 * @param address to save peer connecting.  
 	 * @return socket descriptor of connected socket.
 	 */
-	socket_t accept(struct sockaddr_storage *address = NULL);
+	socket_t accept(struct sockaddr_storage *address = NULL) const;
 
 	/**
 	 * Wait for a pending connection.
@@ -1711,7 +1711,7 @@ public:
 	 */
 	TCPServer(const char *address, const char *service, unsigned backlog = 5);
 
-	inline const char *tag(void)
+	inline const char *tag(void) const
 		{return servicetag;}
 };
 

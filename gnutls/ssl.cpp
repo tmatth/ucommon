@@ -38,7 +38,7 @@ static SSL session(context *ctx)
 	return ssl;
 }
 
-SSLBuffer::SSLBuffer(TCPServer *server, secure::context_t scontext, size_t size) :
+SSLBuffer::SSLBuffer(const TCPServer *server, secure::context_t scontext, size_t size) :
 TCPBuffer(server, size)
 {
 	ssl = session((context *)scontext);
@@ -71,7 +71,7 @@ bool SSLBuffer::_pending(void)
 	return TCPBuffer::_pending();
 }
 
-void SSLBuffer::open(TCPServer *server, size_t size)
+void SSLBuffer::open(const TCPServer *server, size_t size)
 {
 	close();
 

@@ -255,7 +255,7 @@ TCPBuffer::TCPBuffer(const char *service) : BufferProtocol()
 	servicetag = service;	// default tag for new connections...
 }
 
-TCPBuffer::TCPBuffer(const char *service, const char *host, size_t size) :
+TCPBuffer::TCPBuffer(const char *host, const char *service, size_t size) :
 BufferProtocol()
 {
 	so = INVALID_SOCKET;
@@ -264,7 +264,7 @@ BufferProtocol()
 	open(host, size);
 }
 
-TCPBuffer::TCPBuffer(TCPServer *server, size_t size) :
+TCPBuffer::TCPBuffer(const TCPServer *server, size_t size) :
 BufferProtocol()
 {
 	String::set(serviceid, sizeof(serviceid), "0");
@@ -297,7 +297,7 @@ void TCPBuffer::open(const char *host, size_t size)
 	_buffer(size);
 }
 
-void TCPBuffer::open(TCPServer *server, size_t size)
+void TCPBuffer::open(const TCPServer *server, size_t size)
 {
 	close();
 	so = server->accept();

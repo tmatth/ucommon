@@ -2589,7 +2589,7 @@ socket_t ListenSocket::create(const char *iface, const char *svc, unsigned backl
 	return so;
 }
 
-socket_t ListenSocket::accept(struct sockaddr_storage *addr)
+socket_t ListenSocket::accept(struct sockaddr_storage *addr) const
 {
 	socklen_t len = sizeof(struct sockaddr_storage);
 	if(addr)

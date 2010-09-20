@@ -28,7 +28,7 @@ TCPBuffer(service)
 		ssl = SSL_new(ctx->ctx);
 }
 
-SSLBuffer::SSLBuffer(TCPServer *server, secure::context_t scontext, size_t size) :
+SSLBuffer::SSLBuffer(const TCPServer *server, secure::context_t scontext, size_t size) :
 TCPBuffer(server, size)
 {
 	context *ctx = (context *)scontext;
@@ -52,7 +52,7 @@ SSLBuffer::~SSLBuffer()
 	release();
 }
 
-void SSLBuffer::open(TCPServer *server, size_t bufsize)
+void SSLBuffer::open(const TCPServer *server, size_t bufsize)
 {
 	close();
 	TCPBuffer::open(server, bufsize);

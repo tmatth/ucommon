@@ -24,7 +24,7 @@ TCPBuffer(service)
 	bio = NULL;
 }
 
-SSLBuffer::SSLBuffer(TCPServer *server, secure::context_t context, size_t size) :
+SSLBuffer::SSLBuffer(const TCPServer *server, secure::context_t context, size_t size) :
 TCPBuffer(server, size)
 {
 	ssl = NULL;
@@ -41,7 +41,7 @@ void SSLBuffer::open(const char *host, size_t bufsize)
 	TCPBuffer::open(host, bufsize);
 }
 
-void SSLBuffer::open(TCPServer *server, size_t bufsize)
+void SSLBuffer::open(const TCPServer *server, size_t bufsize)
 {
 	TCPBuffer::open(server, bufsize);
 }

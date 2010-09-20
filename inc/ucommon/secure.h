@@ -190,7 +190,7 @@ protected:
 
 public:
 	SSLBuffer(const char *service, secure::context_t context);
-	SSLBuffer(TCPServer *server, secure::context_t context, size_t size = 536);
+	SSLBuffer(const TCPServer *server, secure::context_t context, size_t size = 536);
 	~SSLBuffer();
 
 	/**
@@ -201,7 +201,7 @@ public:
 	 */
 	void open(const char *host, size_t size = 536);
 
-	void open(TCPServer *server, size_t size = 536);
+	void open(const TCPServer *server, size_t size = 536);
 
 	void close(void);
 

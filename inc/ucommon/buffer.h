@@ -200,15 +200,15 @@ public:
 	 * @param server socket we are created from.
 	 * @param size of buffer and tcp fragments.
 	 */
-	TCPBuffer(TCPServer *server, size_t size = 536);
+	TCPBuffer(const TCPServer *server, size_t size = 536);
 
 	/**
 	 * Construct a tcp client session connected to a specific host uri.
-	 * @param service identifier of our client.
 	 * @param host and optional :port we are connecting to.
+	 * @param service identifier of our client.
 	 * @param size of buffer and tcp fragments.
 	 */
-	TCPBuffer(const char *service, const char *host, size_t size = 536);
+	TCPBuffer(const char *host, const char *service, size_t size = 536);
 
 	/**
 	 * Destroy the tcp socket and release all resources.
@@ -221,7 +221,7 @@ public:
 	 * @param server we are connected from.
 	 * @param size of buffer and tcp fragments.
 	 */
-	void open(TCPServer *server, size_t size = 536);
+	void open(const TCPServer *server, size_t size = 536);
 
 	/**
 	 * Connect a tcp client session to a specific host uri.  If the socket
