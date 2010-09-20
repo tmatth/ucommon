@@ -2060,7 +2060,7 @@ int Socket::multicast(socket_t so, unsigned ttl)
 
 int Socket::join(struct addrinfo *addr)
 {
-	int rtn = Socket::join(addr);
+	int rtn = Socket::join(so, addr);
 	if(rtn)
 		ioerr = rtn;
 	return rtn;
@@ -2068,7 +2068,7 @@ int Socket::join(struct addrinfo *addr)
 
 int Socket::drop(struct addrinfo *addr)
 {
-	int rtn = Socket::drop(addr);
+	int rtn = Socket::drop(so, addr);
 	if(rtn)
 		ioerr = rtn;
 	return rtn;
