@@ -1777,7 +1777,13 @@ ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, str
 	return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL | flags, dest, slen);
 }
 
-size_t Socket::writes(const char *str, struct sockaddr *address)
+String Socket::_buf(void)
+{
+	stringbuf<536> temp;
+	return temp;
+}
+
+size_t Socket::_writes(const char *str)
 {
 	if(!str)
 		return 0;
@@ -1785,11 +1791,16 @@ size_t Socket::writes(const char *str, struct sockaddr *address)
 	if(!*str)
 		return 0;
 
-	return writeto(str, strlen(str), address);
+	return writeto(str, strlen(str), NULL);
 }
 
-size_t Socket::readline(char *data, size_t max)
+size_t Socket::_readline(char *data, size_t max)
 {
+	assert(data != NULL);
+	assert(max > 0);
+
+	*data = 0;
+
 	ssize_t result = Socket::readline(so, data, max, iowait);
 	if(result < 0) {
 		ioerr = Socket::error();

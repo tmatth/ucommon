@@ -62,8 +62,6 @@ NAMESPACE_UCOMMON
  */
 typedef	unsigned short strsize_t;
 
-class StringFormat;
-
 /**
  * A copy-on-write string class that operates by reference count.  This string
  * class anchors a counted object that is managed as a copy-on-write
@@ -77,8 +75,6 @@ class StringFormat;
 class __EXPORT string : public Object
 {
 protected:
-	friend class StringFormat;
-
 	/**
 	 * This is an internal class which contains the actual string data
 	 * along with some control fields.  The string can be either NULL
@@ -135,12 +131,6 @@ public:
 		void set(strsize_t offset, const char *text, strsize_t size);
 
 		/**
-		 * Set our string from a string formatting object.
-		 * @param format object to set from.
-		 */
-		void set(const StringFormat& format);
-
-		/**
 		 * Set our string from null terminated text up to our allocated size.
 		 * @param text to set from.
 		 */
@@ -151,12 +141,6 @@ public:
 		 * @param text to append.
 		 */
 		void add(const char *text);
-
-		/**
-		 * Append text to string buffer from formatting object.
-		 * @param format object to add from.
-		 */
-		void add(const StringFormat &format);
 
 		/**
 		 * Append a single character to our string buffer.
@@ -255,12 +239,6 @@ public:
 	 * Create a new empty string object.
 	 */
 	string();
-
-	/**
-	 * Create a string from a formatting object.
-	 * @param format object to use in creating string.
-	 */
-	string(const StringFormat& format);
 
 	/**
 	 * Create a string from a long integer.
@@ -396,12 +374,6 @@ public:
 	void set(const char *text);
 
 	/**
-	 * Set string object to text of a formatted object.
-	 * @param format object to use.
-	 */
-	void set(const StringFormat& format);
-
-	/**
 	 * Set a portion of the string object at a specified offset to a text
 	 * string.
 	 * @param offset in object string buffer.
@@ -427,13 +399,6 @@ public:
 	 * @param size of part of buffer to set with text and overflow.
 	 */
 	void rset(const char *text, char overflow, strsize_t offset, strsize_t size = 0);
-
-	/**
-	 * Append formatted object to our string buffer.
-	 * @param format object to append.
-	 */
-	void add(const StringFormat& format);
-
 
 	/**
 	 * Append null terminated text to our string buffer.
@@ -716,13 +681,6 @@ public:
 	string& operator^=(const string& object);
 
 	/**
-	 * Create new cow instance and assign value from formatted string object.
-	 * @param format object to assign from.
-	 * @return our object for expression use.
-	 */
-	string& operator^=(const StringFormat& format);
-
-	/**
 	 * Create new cow instance and assign value from null terminated text.
 	 * @param text to assign from.
 	 * @return our object for expression use.
@@ -737,13 +695,6 @@ public:
 	string& operator+(const char *text);
 
 	/**
-	 * Concatenate string formatted object to our object.  This creates a new
-	 * copy-on-write instance to hold the concatenated string.
-	 * @param format object to concatenate.
-	 */
-	string& operator+(const StringFormat& format);
-
-	/**
 	 * Concatenate null terminated text to our object.  This directly
 	 * appends the text to the string buffer and does not resize the
 	 * object if the existing cstring allocation space is fully used.
@@ -752,26 +703,12 @@ public:
 	string& operator&(const char *text);
 
 	/**
-	 * Concatenate formatted string object to our object.  This directly
-	 * appends the text to the string buffer and does not resize the
-	 * object if the existing cstring allocation space is fully used.
-	 * @param format object to concatenate.
-	 */
-	string& operator&(const StringFormat& format);
-
-	/**
 	 * Assign our string with the cstring of another object.  If we had
 	 * an active string reference, it is released.  The object now has
 	 * a duplicate reference to the cstring of the other object.
 	 * @param object to assign from.
 	 */
 	string& operator=(const string& object);
-
-	/**
-	 * Assign our string from a string formatting object.
-	 * @param format object to assign from.
-	 */
-	string& operator=(const StringFormat& format);
 
 	/**
 	 * Assign text to our existing buffer.  This performs a set method.
@@ -1486,35 +1423,6 @@ public:
 };
 
 /**
- * A string conversion class for use as a base class in objects which can
- * transform themselves into string representations.  This can be used
- * together with the string class for automatic conversions.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT StringFormat
-{
-protected:
-	friend class string;
-	friend class string::cstring;
-
-	virtual ~StringFormat();
-
-	/**
-	 * Convert derived object into a string buffer.  This may be a public
-	 * method in a derived class.
-	 * @param buffer to save representation in.
-	 * @param size of buffer to use.
-	 */
-	virtual void put(char *buffer, size_t size) const = 0;
-
-	/**
-	 * Get maximum space that might be needed for string representation.
-	 * @return space needed.
-	 */
-	virtual strsize_t getStringSize(void) const = 0;
-};
-
-/**
  * A template to create a character array that can be manipulated as a string.
  * This is a mini string/stringbuf class that supports a subset of
  * functionality but does not require a complex supporting object.  Like
@@ -1610,6 +1518,49 @@ public:
 };
 
 /**
+ * A convenience type for string.
+ */
+typedef	string string_t;
+
+/**
+ * A convenience type when mixing std::string in old compilers that are bad
+ * with namespaces...
+ */
+typedef string String;
+
+/**
+ * A string protocol.  This is useful for low level i/o classes which
+ * may peform line oriented buffer operations.  Examples may include
+ * sockets and serial consoles.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT StringProtocol
+{
+protected:
+	virtual size_t _readline(char *buffer, size_t size) = 0;
+
+	virtual size_t _writes(const char *buffer) = 0;
+
+	virtual String _buf(void) = 0;
+
+public:
+	inline size_t readline(char *buffer, size_t size)
+		{return _readline(buffer, size);};
+
+	inline size_t writes(const char *buffer)
+		{return _writes(buffer);}
+
+	inline size_t writes(String& str)
+		{return _writes(str.c_str());}
+
+	inline size_t printf(const char *format, ...) __PRINTF(2,3);
+
+	size_t readline(String& object);
+
+	String readline(strsize_t size);
+};
+
+/**
  * A string class that has a predefined string buffer.  The string class
  * and buffer are allocated together as one object.  This allows one to use
  * string objects entirely resident on the local stack as well as on the
@@ -1674,17 +1625,6 @@ extern "C" inline int strnicmp(const char *string1, const char *string2, size_t 
 	{return string::case_compare(string1, string2, max);}
 
 #endif
-
-/**
- * A convenience type for string.
- */
-typedef	string string_t;
-
-/**
- * A convenience type when mixing std::string in old compilers that are bad
- * with namespaces...
- */
-typedef string String;
 
 /**
  * Compare two null terminated strings if equal.
@@ -1765,6 +1705,13 @@ inline String str(unsigned long value)
 
 inline String str(double value)
 	{String temp(40, "%f", value); return temp;} 
+
+String str(FILE *fp, strsize_t size);
+
+String str(BufferProtocol& p, strsize_t size);
+
+inline String str(StringProtocol& p, strsize_t size)
+	{return p.readline(size);}
 
 END_NAMESPACE
 

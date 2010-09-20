@@ -28,10 +28,6 @@ using namespace UCOMMON_NAMESPACE;
 const strsize_t string::npos = (strsize_t)(-1);
 const size_t memstring::header = sizeof(cstring);
 
-StringFormat::~StringFormat()
-{
-}
-
 string::cstring::cstring(strsize_t size) :
 CountedObject()
 {
@@ -209,24 +205,6 @@ strsize_t string::len(void)
 	return str->len;
 }
 
-void string::cstring::add(const StringFormat& format)
-{
-	unfix();
-	if(len < max - 1)
-		format.put(text + len, max - len);
-	text[max - 1] = 0;
-	len = strlen(text);
-	fix();
-}
-
-void string::cstring::set(const StringFormat& format)
-{
-	format.put(text, max);
-	text[max - 1] = 0;
-	len = strlen(text);
-	fix();
-}
-
 void string::cstring::set(const char *str)
 {
 	assert(str != NULL);
@@ -271,13 +249,6 @@ string::string(const char *s)
 	str = create(size);
 	str->retain();
 	str->set(s);
-}
-
-string::string(const StringFormat& f)
-{
-	str = create(f.getStringSize());
-	str->retain();
-	str->set(f);
 }
 
 string::string(const char *s, strsize_t size)
@@ -819,13 +790,6 @@ void string::rset(const char *s, char overflow, strsize_t offset, strsize_t size
 		str->text[offset] = overflow;
 }
 
-void string::set(const StringFormat& f)
-{
-	resize(f.getStringSize());
-	assert(str);
-	str->set(f);
-}
-
 void string::set(const char *s)
 {
 	strsize_t len;
@@ -921,14 +885,6 @@ void string::cow(strsize_t size)
 		str->release();
 		str = s;
 	}
-}
-
-void string::add(const StringFormat& f)
-{
-	if(!str)
-		set(f);
-	else
-		str->add(f);
 }
 
 void string::add(const char *s)
@@ -1042,19 +998,6 @@ string &string::operator^=(const char *s)
 	return *this;
 }
 
-string &string::operator^=(const StringFormat& f)
-{
-	release();
-	set(f);
-	return *this;
-}
-
-string &string::operator=(const StringFormat& f)
-{
-	set(f);
-	return *this;
-}
-
 string &string::operator=(const char *s)
 {
 	set(s);
@@ -1153,22 +1096,9 @@ bool string::operator>=(const char *s) const
     return (compare(s) >= 0);
 }
 
-string &string::operator&(const StringFormat& f)
-{
-	add(f);
-	return *this;
-}
-
 string &string::operator&(const char *s)
 {
 	add(s);
-	return *this;
-}
-
-string &string::operator+(const StringFormat& f)
-{
-	cow(f.getStringSize());
-	add(f);
 	return *this;
 }
 
@@ -1967,5 +1897,36 @@ string &string::operator%(const char *get)
 	return *this;
 }
 
+size_t StringProtocol::printf(const char *format, ...)
+{
+	assert(format != NULL);
+	
+	String temp = _buf();
+	va_list args;
 
+	va_start(args, format);
+	vsnprintf(temp.c_mem(), temp.size(), format, args);
+	String::fix(temp);
+	va_end(args);
+
+	return _writes(temp.c_str());
+}
+
+
+
+String str(FILE *fp, strsize_t size)
+{
+	String temp(size);
+	fgets(temp.c_mem(), (size_t)size, fp);
+	String::fix(temp);
+	return temp;
+}
+
+String str(BufferProtocol& p, strsize_t size)
+{
+	String temp(size);
+	p.getline(temp.c_mem(), temp.size());
+	String::fix(temp);
+	return temp;
+}
 	

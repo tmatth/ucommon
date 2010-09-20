@@ -30,12 +30,12 @@
 #include <ucommon/timers.h>
 #endif
 
-#ifndef _UCOMMON_PROTOCOLS_H_
-#include <ucommon/protocols.h>
-#endif
-
 #ifndef	_UCOMMON_LINKED_H_
 #include <ucommon/linked.h>
+#endif
+
+#ifndef _UCOMMON_STRING_H_
+#include <ucommon/string.h>
 #endif
 
 extern "C" {
@@ -296,7 +296,7 @@ public:
  * addressing, and additional addressing domains (such as Unix domain sockets).
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Socket
+class __EXPORT Socket : public StringProtocol
 {
 protected:
 	socket_t so;
@@ -917,14 +917,13 @@ public:
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
 	 * string.  This uses an optimized I/O method that takes advantage of
-	 * socket peeking.  As such, it has to be rewritten to be used in a ssl
-	 * layer socket.
+	 * socket peeking.  This presumes a connected socket on a streamble
+	 * protocol.
 	 * @param data to save input line.
 	 * @param size of input line buffer.
-	 * @param timeout to wait for a complete input line.
-	 * @return number of bytes read, 0 if none, -1 if error.
+	 * @return number of bytes read, 0 if none, err() has error.
 	 */
-	virtual size_t readline(char *data, size_t size);
+	size_t _readline(char *data, size_t size);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated
@@ -955,7 +954,9 @@ public:
 	 * @param address to write to.
 	 * @return number of bytes sent, 0 if none, -1 if error.
 	 */
-	size_t writes(const char *string, struct sockaddr *address = NULL);
+	size_t _writes(const char *string);
+
+	String _buf(void);
 
 	/**
 	 * Test if socket is valid.
