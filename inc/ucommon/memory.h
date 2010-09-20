@@ -56,6 +56,8 @@ class PagerPool;
 class __EXPORT memalloc : public MemoryProtocol
 {
 private:
+	friend class bufpager;
+
 	size_t pagesize, align;
 	unsigned count;
 
@@ -228,6 +230,47 @@ public:
 	 * @return allocated memory or NULL if not possible.
 	 */
 	virtual void *_alloc(size_t size);
+};
+
+/**
+ * Buffered pager for storing paged strings for character protocol.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT bufpager : public memalloc, public CharacterProtocol
+{
+private:
+	typedef struct cpage {
+		struct cpage *next;
+		char *text;
+		unsigned size, used;
+	} cpage_t;
+
+	cpage_t *first, *last, *current, *freelist;
+	unsigned cpos;
+	unsigned long ccount;
+
+	virtual int _getch(void);
+	virtual int _putch(int code);
+
+public:
+	/**
+	 * Reset pager text buffer protocol.
+	 */
+	void reset(void);
+
+	/**
+	 * Rewind to start of text buffer protocol.
+	 */
+	void rewind(void);
+
+	/**
+	 * Get total size.
+	 * @return number of characters in buffer.
+	 */
+	inline unsigned long getUsed(void)
+		{return ccount;};
+
+	bufpager(size_t page = 0);
 };
 
 /**

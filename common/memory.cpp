@@ -462,4 +462,98 @@ int chars::_putch(int code)
 	return EOF;
 }
 
+bufpager::bufpager(size_t ps) :
+memalloc(ps)
+{
+	first = last = current = freelist = NULL;
+	ccount = 0;
+	cpos = 0;
+}
 
+int bufpager::_getch(void)
+{
+	if(!current)
+		current = first;
+
+	if(!current)
+		return EOF;
+
+	if(cpos >= current->used) {
+		if(!current->next)
+			return EOF;
+		current = current->next;
+		cpos = 0;
+	}
+
+	if(cpos >= current->used)
+		return EOF;
+
+	return current->text[cpos++];
+}
+
+int bufpager::_putch(int code)
+{
+	if(!last || last->used == last->size) {
+		cpage_t *next;
+
+		if(freelist) {
+			next = freelist;
+			freelist = next->next;
+		}
+		else {
+			next = (cpage_t *)_alloc(sizeof(cpage_t));
+			if(!next)
+				return EOF;
+
+			page_t *p = page;
+			unsigned size;
+
+			while(p) {
+				size = pagesize - p->used;
+				if(size)
+					break;
+				p = p->next;
+			}
+			if(!p)
+				p = pager();
+
+			if(!p)
+				return EOF;
+
+			next->text = ((char *)(p)) + p->used;
+			next->used = 0;
+			next->size = size;
+			p->used = pagesize;
+		}
+
+		if(last)
+			last->next = next;
+
+		if(!first)
+			first = next;
+		last = next;
+	}
+
+	++ccount;
+	last->text[last->used++] = code;
+	return code;
+}
+
+void bufpager::rewind(void)
+{
+	cpos = 0;
+	current = first;
+}
+
+void bufpager::reset(void)
+{
+	cpos = 0;
+	ccount = 0;
+	current = first;
+	while(current) {
+		current->used = 0;
+		current = current->next;
+	}
+	freelist = first;
+	first = last = current = NULL;
+}
