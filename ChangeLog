@@ -4,6 +4,7 @@ from ucommon 3.4.0 to 4.0.0
 - Socket int methods return errno() rather than -1 on error.
 - buffer protocol created.
 - string no longer has dependency on socket.
+- ssl and tcp classes reorganized for consistent naming.
 
 from ucommon 3.3.7 to 3.4.0
 - simplified to better focus on core runtime mission.

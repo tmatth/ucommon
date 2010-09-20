@@ -143,14 +143,14 @@ public:
 };
 
 /**
- * A generic tcp server class for TCPSocket.  This saves the service id
+ * A generic tcp server class for TCPBuffer.  This saves the service id
  * tag so that it can be propagated.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT TCPServer : public ListenSocket
 {
 private:
-	friend class TCPSocket;
+	friend class TCPBuffer;
 
 	const char *servicetag;
 
@@ -172,7 +172,7 @@ public:
  * members.  Some additional members are added for layering ssl services.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT TCPSocket : public BufferProtocol, protected Socket
+class __EXPORT TCPBuffer : public BufferProtocol, protected Socket
 {
 private:
 	void _buffer(size_t size);
@@ -217,14 +217,14 @@ public:
 	 * Construct an unconnected tcp client and specify our service profile.
 	 * @param service identifier, usually by name.
 	 */
-	TCPSocket(const char *service);
+	TCPBuffer(const char *service);
 
 	/**
 	 * Construct a tcp server session from a listening socket.
 	 * @param server socket we are created from.
 	 * @param size of buffer and tcp fragments.
 	 */
-	TCPSocket(TCPServer *server, size_t size = 536);
+	TCPBuffer(TCPServer *server, size_t size = 536);
 
 	/**
 	 * Construct a tcp client session connected to a specific host uri.
@@ -232,12 +232,12 @@ public:
 	 * @param host and optional :port we are connecting to.
 	 * @param size of buffer and tcp fragments.
 	 */
-	TCPSocket(const char *service, const char *host, size_t size = 536);
+	TCPBuffer(const char *service, const char *host, size_t size = 536);
 
 	/**
 	 * Destroy the tcp socket and release all resources.
 	 */
-	virtual ~TCPSocket();
+	virtual ~TCPBuffer();
 
 	/**
 	 * Connect a tcp socket to a client from a listener.  If the socket was
@@ -276,7 +276,7 @@ typedef	fbuf file_t;
 /**
  * Convenience type for pure tcp sockets.
  */
-typedef	TCPSocket tcp_t;
+typedef	TCPBuffer tcp_t;
 	 
 END_NAMESPACE
 

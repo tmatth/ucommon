@@ -17,62 +17,62 @@
 
 #include "local.h"
 
-SSocket::SSocket(const char *service, secure::context_t context) :
-TCPSocket(service)
+SSLBuffer::SSLBuffer(const char *service, secure::context_t context) :
+TCPBuffer(service)
 {
 	ssl = NULL;
 	bio = NULL;
 }
 
-SSocket::SSocket(TCPServer *server, secure::context_t context, size_t size) :
-TCPSocket(server, size)
+SSLBuffer::SSLBuffer(TCPServer *server, secure::context_t context, size_t size) :
+TCPBuffer(server, size)
 {
 	ssl = NULL;
 	bio = NULL;
 }
 
 
-SSocket::~SSocket()
+SSLBuffer::~SSLBuffer()
 {
 }
 
-void SSocket::open(const char *host, size_t bufsize)
+void SSLBuffer::open(const char *host, size_t bufsize)
 {
-	TCPSocket::open(host, bufsize);
+	TCPBuffer::open(host, bufsize);
 }
 
-void SSocket::open(TCPServer *server, size_t bufsize)
+void SSLBuffer::open(TCPServer *server, size_t bufsize)
 {
-	TCPSocket::open(server, bufsize);
+	TCPBuffer::open(server, bufsize);
 }
 
-void SSocket::close(void)
+void SSLBuffer::close(void)
 {
-	TCPSocket::close();
+	TCPBuffer::close();
 }
 
-void SSocket::release(void)
+void SSLBuffer::release(void)
 {
-	TCPSocket::close();
+	TCPBuffer::close();
 }
 
-size_t SSocket::_push(const char *address, size_t size)
+size_t SSLBuffer::_push(const char *address, size_t size)
 {
-	return TCPSocket::_push(address, size);
+	return TCPBuffer::_push(address, size);
 }
 
-size_t SSocket::_pull(char *address, size_t size)
+size_t SSLBuffer::_pull(char *address, size_t size)
 {
-	return TCPSocket::_pull(address, size);
+	return TCPBuffer::_pull(address, size);
 }
 
-bool SSocket::_pending(void)
+bool SSLBuffer::_pending(void)
 {
-	return TCPSocket::_pending();
+	return TCPBuffer::_pending();
 }
 
-bool SSocket::_flush(void)
+bool SSLBuffer::_flush(void)
 {
-	return TCPSocket::_flush();
+	return TCPBuffer::_flush();
 }
 

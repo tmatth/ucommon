@@ -38,8 +38,8 @@ static SSL session(context *ctx)
 	return ssl;
 }
 
-SSocket::SSocket(TCPServer *server, secure::context_t scontext, size_t size) :
-TCPSocket(server, size)
+SSLBuffer::SSLBuffer(TCPServer *server, secure::context_t scontext, size_t size) :
+TCPBuffer(server, size)
 {
 	ssl = session((context *)scontext);
 	bio = NULL;
@@ -54,28 +54,28 @@ TCPSocket(server, size)
 		bio = ssl;
 }
 
-SSocket::SSocket(const char *service, secure::context_t scontext) :
-TCPSocket(service)
+SSLBuffer::SSLBuffer(const char *service, secure::context_t scontext) :
+TCPBuffer(service)
 {
 	ssl = session((context *)scontext);
 	bio = NULL;
 }
 
-SSocket::~SSocket()
+SSLBuffer::~SSLBuffer()
 {
 	release();
 }
 
-bool SSocket::_pending(void)
+bool SSLBuffer::_pending(void)
 {
-	return TCPSocket::_pending();
+	return TCPBuffer::_pending();
 }
 
-void SSocket::open(TCPServer *server, size_t size)
+void SSLBuffer::open(TCPServer *server, size_t size)
 {
 	close();
 
-	TCPSocket::open(server, size);
+	TCPBuffer::open(server, size);
 
 	if(!isopen() || !ssl)
 		return;	
@@ -87,11 +87,11 @@ void SSocket::open(TCPServer *server, size_t size)
 		bio = ssl;
 }
 
-void SSocket::open(const char *host, size_t size)
+void SSLBuffer::open(const char *host, size_t size)
 {
 	close();
 
-	TCPSocket::open(host, size);
+	TCPBuffer::open(host, size);
 
 	if(!isopen() || !ssl)
 		return;	
@@ -103,15 +103,15 @@ void SSocket::open(const char *host, size_t size)
 		bio = ssl;
 }
 
-void SSocket::close(void)
+void SSLBuffer::close(void)
 {
 	if(bio)
 		gnutls_bye((SSL)ssl, GNUTLS_SHUT_RDWR);
 	bio = NULL;
-	TCPSocket::close();
+	TCPBuffer::close();
 }
 
-void SSocket::release(void)
+void SSLBuffer::release(void)
 {
 	close();
 	if(ssl) {
@@ -120,15 +120,15 @@ void SSocket::release(void)
 	}
 }
 
-bool SSocket::_flush(void)
+bool SSLBuffer::_flush(void)
 {
-	return TCPSocket::_flush();
+	return TCPBuffer::_flush();
 }
 
-size_t SSocket::_push(const char *address, size_t size)
+size_t SSLBuffer::_push(const char *address, size_t size)
 {
 	if(!bio)
-		return TCPSocket::_push(address, size);
+		return TCPBuffer::_push(address, size);
 
 	int result = gnutls_record_send((SSL)ssl, address, size);
 	if(result < 0) {
@@ -138,10 +138,10 @@ size_t SSocket::_push(const char *address, size_t size)
 	return (size_t)result;
 }
 
-size_t SSocket::_pull(char *address, size_t size)
+size_t SSLBuffer::_pull(char *address, size_t size)
 {
     if(!bio)
-        return TCPSocket::_pull(address, size);
+        return TCPBuffer::_pull(address, size);
 
     int result = gnutls_record_recv((SSL)ssl, address, size);
     if(result < 0) {

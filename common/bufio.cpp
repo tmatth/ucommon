@@ -258,14 +258,14 @@ ListenSocket(address, service, backlog, protocol)
 	servicetag = service;
 }
 
-TCPSocket::TCPSocket(const char *service) : BufferProtocol()
+TCPBuffer::TCPBuffer(const char *service) : BufferProtocol()
 {
 	so = INVALID_SOCKET;
 	String::set(serviceid, sizeof(serviceid), service);
 	servicetag = service;	// default tag for new connections...
 }
 
-TCPSocket::TCPSocket(const char *service, const char *host, size_t size) :
+TCPBuffer::TCPBuffer(const char *service, const char *host, size_t size) :
 BufferProtocol()
 {
 	so = INVALID_SOCKET;
@@ -274,7 +274,7 @@ BufferProtocol()
 	open(host, size);
 }
 
-TCPSocket::TCPSocket(TCPServer *server, size_t size) :
+TCPBuffer::TCPBuffer(TCPServer *server, size_t size) :
 BufferProtocol()
 {
 	String::set(serviceid, sizeof(serviceid), "0");
@@ -283,12 +283,12 @@ BufferProtocol()
 	open(server, size);
 }
 
-TCPSocket::~TCPSocket()
+TCPBuffer::~TCPBuffer()
 {
-	TCPSocket::close();
+	TCPBuffer::close();
 }
 
-void TCPSocket::open(const char *host, size_t size)
+void TCPBuffer::open(const char *host, size_t size)
 {
 	struct sockaddr_storage address;
 	socklen_t alen = sizeof(address);
@@ -307,7 +307,7 @@ void TCPSocket::open(const char *host, size_t size)
 	_buffer(size);
 }
 
-void TCPSocket::open(TCPServer *server, size_t size)
+void TCPBuffer::open(TCPServer *server, size_t size)
 {
 	close();
 	so = server->accept();
@@ -325,7 +325,7 @@ void TCPSocket::open(TCPServer *server, size_t size)
 	_buffer(size);
 }
 
-void TCPSocket::close(void)
+void TCPBuffer::close(void)
 {
 	if(so == INVALID_SOCKET)
 		return;
@@ -335,7 +335,7 @@ void TCPSocket::close(void)
 	so = INVALID_SOCKET;
 }
 
-void TCPSocket::_buffer(size_t size)
+void TCPBuffer::_buffer(size_t size)
 {
 	unsigned iobuf = 0;
 	unsigned mss = size;
@@ -387,17 +387,17 @@ alloc:
 	allocate(size, BUF_RDWR);
 }
 
-int TCPSocket::_err(void) const
+int TCPBuffer::_err(void) const
 {
 	return ioerr;
 }
 
-void TCPSocket::_clear(void)
+void TCPBuffer::_clear(void)
 {
 	ioerr = 0;
 }
 
-bool TCPSocket::_blocking(void)
+bool TCPBuffer::_blocking(void)
 {
 	if(iowait)
 		return true;
@@ -405,7 +405,7 @@ bool TCPSocket::_blocking(void)
 	return false;
 }
 
-size_t TCPSocket::_push(const char *address, size_t len)
+size_t TCPBuffer::_push(const char *address, size_t len)
 {
 	if(ioerr)
 		return 0;
@@ -417,7 +417,7 @@ size_t TCPSocket::_push(const char *address, size_t len)
 	return (size_t)result;
 }
 
-size_t TCPSocket::_pull(char *address, size_t len)
+size_t TCPBuffer::_pull(char *address, size_t len)
 {
 	ssize_t result;
 
@@ -428,7 +428,7 @@ size_t TCPSocket::_pull(char *address, size_t len)
 	return (size_t)result;
 }
 
-bool TCPSocket::_pending(void)
+bool TCPBuffer::_pending(void)
 {
 	if(unread())
 		return true;

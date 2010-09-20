@@ -178,10 +178,10 @@ public:
  * Secure socket class.  This is used to create ssl socket connections
  * for both clients and servers.  The use depends in part on the type of
  * context created and passed at construction time.  If no context is
- * passed (NULL), then this reverts to TCPSocket behavior.
+ * passed (NULL), then this reverts to TCPBuffer behavior.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT SSocket : public TCPSocket
+class __EXPORT SSLBuffer : public TCPBuffer
 {
 protected:
 	secure::session_t ssl;
@@ -189,9 +189,9 @@ protected:
 	bool verify;
 
 public:
-	SSocket(const char *service, secure::context_t context);
-	SSocket(TCPServer *server, secure::context_t context, size_t size = 536);
-	~SSocket();
+	SSLBuffer(const char *service, secure::context_t context);
+	SSLBuffer(TCPServer *server, secure::context_t context, size_t size = 536);
+	~SSLBuffer();
 
 	/**
 	 * Connect a ssl client session to a specific host uri.  If the socket
@@ -546,7 +546,7 @@ public:
 /**
  * Convenience type for secure socket.
  */
-typedef	SSocket	ssl_t;
+typedef	SSLBuffer ssl_t;
 
 /**
  * Convenience type for generic digests.

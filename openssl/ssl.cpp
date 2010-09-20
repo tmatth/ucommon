@@ -17,8 +17,8 @@
 
 #include "local.h"
 
-SSocket::SSocket(const char *service, secure::context_t scontext) :
-TCPSocket(service)
+SSLBuffer::SSLBuffer(const char *service, secure::context_t scontext) :
+TCPBuffer(service)
 {
 	context *ctx = (context *)scontext;
 	ssl = NULL;
@@ -28,8 +28,8 @@ TCPSocket(service)
 		ssl = SSL_new(ctx->ctx);
 }
 
-SSocket::SSocket(TCPServer *server, secure::context_t scontext, size_t size) :
-TCPSocket(server, size)
+SSLBuffer::SSLBuffer(TCPServer *server, secure::context_t scontext, size_t size) :
+TCPBuffer(server, size)
 {
 	context *ctx = (context *)scontext;
 	ssl = NULL;
@@ -47,15 +47,15 @@ TCPSocket(server, size)
 		bio = SSL_get_wbio((SSL *)ssl);
 }
 	
-SSocket::~SSocket()
+SSLBuffer::~SSLBuffer()
 {
 	release();
 }
 
-void SSocket::open(TCPServer *server, size_t bufsize)
+void SSLBuffer::open(TCPServer *server, size_t bufsize)
 {
 	close();
-	TCPSocket::open(server, bufsize);
+	TCPBuffer::open(server, bufsize);
 
 	if(!isopen() || !ssl)
 		return;
@@ -66,10 +66,10 @@ void SSocket::open(TCPServer *server, size_t bufsize)
 		bio = SSL_get_wbio((SSL *)ssl);
 }
 
-void SSocket::open(const char *host, size_t bufsize)
+void SSLBuffer::open(const char *host, size_t bufsize)
 {
 	close();
-	TCPSocket::open(host, bufsize);
+	TCPBuffer::open(host, bufsize);
 
 	if(!isopen() || !ssl)
 		return;
@@ -80,17 +80,17 @@ void SSocket::open(const char *host, size_t bufsize)
 		bio = SSL_get_wbio((SSL *)ssl);
 }	
 
-void SSocket::close(void)
+void SSLBuffer::close(void)
 {
 	if(bio) {
 		SSL_shutdown((SSL *)ssl);
 		bio = NULL;
 	}
 
-	TCPSocket::close();
+	TCPBuffer::close();
 }
 
-void SSocket::release(void)
+void SSLBuffer::release(void)
 {
 	close();
 	if(ssl)	{
@@ -99,10 +99,10 @@ void SSocket::release(void)
 	}
 }
 
-size_t SSocket::_push(const char *address, size_t size)
+size_t SSLBuffer::_push(const char *address, size_t size)
 {
 	if(!bio)
-		return TCPSocket::_push(address, size);
+		return TCPBuffer::_push(address, size);
 
 	int result = SSL_write((SSL *)ssl, address, size);
 	if(result < 0) {
@@ -112,7 +112,7 @@ size_t SSocket::_push(const char *address, size_t size)
 	return (ssize_t)result;
 }
 
-bool SSocket::_pending(void)
+bool SSLBuffer::_pending(void)
 {
 	if(so == INVALID_SOCKET)
 		return false;
@@ -129,10 +129,10 @@ bool SSocket::_pending(void)
 	return Socket::wait(so, 0);
 }
 
-size_t SSocket::_pull(char *address, size_t size)
+size_t SSLBuffer::_pull(char *address, size_t size)
 {
 	if(!bio)
-		return TCPSocket::_pull(address, size);
+		return TCPBuffer::_pull(address, size);
 
 	if(SSL_pending((SSL *)ssl) == 0 && iowait && iowait != Timer::inf && !Socket::wait(so, iowait))
 		return 0;
@@ -145,11 +145,11 @@ size_t SSocket::_pull(char *address, size_t size)
 	return (size_t) result;
 }
 
-bool SSocket::_flush(void)
+bool SSLBuffer::_flush(void)
 {
 	int result;
 
-	if(TCPSocket::_flush()) {
+	if(TCPBuffer::_flush()) {
 		if(bio)
 			result = BIO_flush((BIO *)bio);
 		return true;
