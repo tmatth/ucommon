@@ -1522,27 +1522,6 @@ public:
 	static void v4mapping(bool enable);
 
 	/**
-	 * Convert socket into FILE handle for reading or writing.
-	 * @param socket descriptor to convert.
-	 * @param mode of access, true for write mode.
-	 * @return file handle to use.
-	 */
-	static FILE *open(socket_t socket, bool mode);
-
-	/**
-	 * Convert socket into FILE handle for reading and writing.
-	 * @param socket descriptor to convert.
-	 * @return file handle to use.
-	 */
-	static FILE *open(socket_t socket);
-
-	/**
-	 * Cleanly close a connected socket descriptor mapped to a file handle.
-	 * @param file handle to close.
-	 */
-	static void close(FILE *file);
-
-	/**
 	 * Return error code of last socket operation,
 	 * @return errno style error code.
 	 */
