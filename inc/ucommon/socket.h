@@ -951,7 +951,6 @@ public:
 	 * we messed up consistency with the original puts() method.  In the
 	 * future there will be a single puts() that has a NULL default.
 	 * @param string to write.
-	 * @param address to write to.
 	 * @return number of bytes sent, 0 if none, -1 if error.
 	 */
 	size_t writes(const char *string);
@@ -1271,7 +1270,6 @@ public:
 	 * @param family to select or AF_UNSPEC
 	 * @param type of socket to create.
 	 * @param protocol of socket to create.
-	 * @param backlog for listener.
 	 * @return socket descriptor created or INVALID_SOCKET.
 	 */
 	static socket_t create(const char *iface, const char *service, int family = AF_UNSPEC, int type = 0, int protocol = 0);

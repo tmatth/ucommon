@@ -102,7 +102,7 @@ public:
 
 	/**
 	 * Create a stream from an existing tcp listener.
-	 * @param listener to accept connection from.
+	 * @param server to accept connection from.
 	 * @param segsize for tcp segments and buffering.
 	 * @param timeout for socket i/o operations.
 	 */
