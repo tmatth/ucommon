@@ -1674,7 +1674,7 @@ inline String str(unsigned long value)
 inline String str(double value)
 	{String temp(40, "%f", value); return temp;} 
 
-//String str(CharacterProtocol& cp, strsize_t size);
+String str(CharacterProtocol& cp, strsize_t size);
 
 END_NAMESPACE
 

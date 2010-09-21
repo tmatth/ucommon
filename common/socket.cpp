@@ -1777,7 +1777,7 @@ size_t Socket::readline(char *data, size_t max)
 	return (size_t)++result;
 }
 
-size_t Socket::readline(String& s)
+size_t Socket::readline(string& s)
 {
 	ssize_t result = Socket::readline(so, s.c_mem(), s.size() + 1, iowait);
 	if(result < 0) {

@@ -540,13 +540,23 @@ public:
 	/**
 	 * Read a line of input from the file.  This clears the newline
 	 * character at the end and has consistent behavior with other
-	 * ucommon file routines.
+	 * ucommon file routines.  Because the newline is cleared, the
+	 * string length may be shorter than the return size.
 	 * @param string to write.
 	 * @param size of buffer.
-	 * @return true if data read, false if eof.
+	 * @return true if data read, 0 if at end of file.
 	 */
 	size_t readline(char *string, size_t size);
 
+	/**
+	 * Read a string of input from the file.  This clears the newline
+	 * character at the end and has consistent behavior with other
+	 * ucommon file routines.  Because the newline is cleared, the
+	 * string length may be shorter than the return size.
+	 * @param string to write.
+	 * @param size of buffer.
+	 * @return true if data read, 0 if at end of file.
+	 */
 	size_t readline(string& string);
 
 	inline size_t put(const void *data, size_t size)

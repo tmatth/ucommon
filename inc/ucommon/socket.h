@@ -924,14 +924,29 @@ public:
 	 * Read a newline of text data from the socket and save in NULL terminated
 	 * string.  This uses an optimized I/O method that takes advantage of
 	 * socket peeking.  This presumes a connected socket on a streamble
-	 * protocol.
+	 * protocol.  Because the trailing newline is dropped, the return size
+	 * may be greater than the string length.  If there was no data read
+	 * because of eof of data, an error has occured, or timeout without
+	 * input, then 0 will be returned.
 	 * @param data to save input line.
 	 * @param size of input line buffer.
 	 * @return number of bytes read, 0 if none, err() has error.
 	 */
 	size_t readline(char *data, size_t size);
 
-	size_t readline(String& str);
+	/**
+	 * Read a string of input from the socket and strip trailing newline.  
+	 * This uses an optimized I/O method that takes advantage of
+	 * socket peeking.  This presumes a connected socket on a streamble
+	 * protocol.  Because the trailing newline is dropped, the return size
+	 * may be greater than the string length.  If there was no data read
+	 * because of eof of data, an error has occured, or timeout without
+	 * input, then 0 will be returned.
+	 * @param data to save input line.
+	 * @param size of input line buffer.
+	 * @return number of bytes read, 0 if none, err() has error.
+	 */
+	size_t readline(string& str);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated

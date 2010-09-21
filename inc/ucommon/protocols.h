@@ -351,14 +351,27 @@ public:
 	void reset(void);
 
 	/**
-	 * Get a string as a line of input from the buffer.  The eol character(s)
-	 * are used to mark the end of a line.
+	 * Get text as a line of input from the buffer.  The eol character(s)
+	 * are used to mark the end of a line.  Because the end of line character
+	 * is stripped, the length of the string may be less than the actual
+	 * count read.  If at the end of the file buffer and unable to read more
+	 * data an error occured then 0 is returned.
 	 * @param string to save input into.
 	 * @param size limit of string to save.
-	 * @return count of characters read or 0 if at end of data.
+	 * @return count of characters actually read or 0 if at end of data.
 	 */
 	size_t getline(char *string, size_t size);
 
+	/**
+	 * Get a string as a line of input from the buffer.  The eol character(s)
+	 * are used to mark the end of a line.  Because the end of line character
+	 * is stripped, the length of the string may be less than the actual
+	 * count read.  If at the end of the file buffer and unable to read more
+	 * data an error occured then 0 is returned.
+	 * @param string to save input into.
+	 * @param size limit of string to save.
+	 * @return count of characters actually read or 0 if at end of data.
+	 */
 	size_t getline(string& s);
 
 	/**
