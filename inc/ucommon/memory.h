@@ -251,6 +251,9 @@ private:
 	virtual int _getch(void);
 	virtual int _putch(int code);
 
+protected:
+	virtual void *_alloc(size_t size);
+
 public:
 	/**
 	 * Reset pager text buffer protocol.

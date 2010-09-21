@@ -535,12 +535,12 @@ int bufpager::_putch(int code)
 			freelist = next->next;
 		}
 		else {
-			_unlock();
-			next = (cpage_t *)_alloc(sizeof(cpage_t));
-			if(!next)
+			next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
+			if(!next) {
+				_unlock();
 				return EOF;
+			}
 
-			_lock();
 			page_t *p = page;
 			unsigned size = 0;
 
@@ -576,6 +576,14 @@ int bufpager::_putch(int code)
 	last->text[last->used++] = code;
 	_unlock();
 	return code;
+}
+
+void *bufpager::_alloc(size_t size)
+{
+	_lock();
+	void *ptr = memalloc::_alloc(size);
+	_unlock();
+	return ptr;
 }
 
 void bufpager::rewind(void)
