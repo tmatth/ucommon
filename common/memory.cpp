@@ -439,17 +439,17 @@ bool keyassoc::assign(char *id, void *data)
 	return true;
 }
 
-chars::chars()
+chartext::chartext()
 {
 	pos = NULL;
 }
 
-chars::chars(const char *buf)
+chartext::chartext(const char *buf)
 {
 	pos = buf;
 }
 
-int chars::_getch(void)
+int chartext::_getch(void)
 {
 	if(!pos || !*pos)
 		return EOF;
@@ -457,7 +457,7 @@ int chars::_getch(void)
 	return *(pos++);
 }
 
-int chars::_putch(int code)
+int chartext::_putch(int code)
 {
 	return EOF;
 }
@@ -557,3 +557,81 @@ void bufpager::reset(void)
 	freelist = first;
 	first = last = current = NULL;
 }
+
+charmem::charmem(char *mem, size_t size)
+{
+	dynamic = false;
+	buffer = NULL;
+	set(mem, size);
+}
+
+charmem::charmem(size_t memsize)
+{
+	buffer = NULL;
+	set(size);
+}
+
+charmem::charmem()
+{
+	buffer = NULL;
+	dynamic = false;
+	inp = out = size = 0;
+}
+
+charmem::~charmem()
+{
+	release();
+}
+
+void charmem::set(size_t total)
+{
+	release();
+	buffer = (char *)malloc(total);
+	size = total;
+	inp = out = 0;
+	buffer[0] = 0;
+}
+
+void charmem::set(char *mem, size_t total)
+{
+	release();
+
+	if(!mem) {
+		buffer = NULL;
+		inp = out = size = 0;
+		return;
+	}
+
+	buffer = mem;
+	size = total;
+	inp = 0;
+	out = strlen(mem);
+}
+
+void charmem::release(void)
+{
+	if(buffer && dynamic)
+		free(buffer);
+
+	buffer = NULL;
+	dynamic = false;
+}
+
+int charmem::_getch(void)
+{
+	if(!buffer || inp == size || buffer[inp] == 0)
+		return EOF;
+
+	return buffer[inp++];
+}
+
+int charmem::_putch(int code)
+{
+	if(!buffer || out > size - 1)
+		return EOF;
+
+	buffer[out++] = code;
+	buffer[out] = 0;
+	return code;
+}
+

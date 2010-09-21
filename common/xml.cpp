@@ -177,7 +177,7 @@ bool XMLParser::parse(FILE *fp)
 }
 
 
-bool XMLParser::parse(CharacterProtocol *io)
+bool XMLParser::parse(CharacterProtocol& io)
 {
 	state = NONE;
 	bufpos = 0;
@@ -186,7 +186,7 @@ bool XMLParser::parse(CharacterProtocol *io)
 	int ch;
 	unsigned char cp;
 
-	while((ch = io->get()) != EOF) {
+	while((ch = io.get()) != EOF) {
 		switch(state) {
 		case AMP:
 			if((!bufpos && ch == '#') || isElement(ch)) {

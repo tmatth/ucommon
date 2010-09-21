@@ -36,9 +36,9 @@ using namespace UCOMMON_NAMESPACE;
 const char *utf8::nil = NULL;
 const unsigned utf8::ucsize = sizeof(wchar_t);
 
-ucs4_t utf8::get(CharacterProtocol *cp)
+ucs4_t utf8::get(CharacterProtocol& cp)
 {
-	int ch = cp->get();
+	int ch = cp.get();
 	unsigned count = 0;
 	ucs4_t code;
 	
@@ -72,7 +72,7 @@ ucs4_t utf8::get(CharacterProtocol *cp)
 		return EOF;
 
 	while(count--) {
-		ch = cp->get();
+		ch = cp.get();
 		if(ch == EOF)
 			return EOF;
 		if((ch & 0xc0) != 0x80)
@@ -227,7 +227,7 @@ size_t utf8::chars(ucs4_t code)
 	return 6;
 }
 
-size_t utf8::pack(unicode_t buffer, CharacterProtocol *cp, size_t len)
+size_t utf8::pack(unicode_t buffer, CharacterProtocol& cp, size_t len)
 {
 	size_t used = 0;
 	wchar_t *target = (wchar_t *)buffer;
@@ -246,13 +246,13 @@ size_t utf8::pack(unicode_t buffer, CharacterProtocol *cp, size_t len)
 	return used;
 }
 
-ucs4_t utf8::put(ucs4_t code, CharacterProtocol *cp)
+ucs4_t utf8::put(ucs4_t code, CharacterProtocol& cp)
 {
 	char buffer[8];
 	unsigned used = 0, count = 0;
 
 	if(code < 0x80)
-		return cp->put(code);
+		return cp.put(code);
 
 	if(code < 0x000007ff) {
 		buffer[used++] = (code >> 6) | 0xc0;
@@ -286,13 +286,13 @@ ucs4_t utf8::put(ucs4_t code, CharacterProtocol *cp)
 	}
 
 	while(count < used) {
-		if(cp->put(buffer[count++]) == EOF)
+		if(cp.put(buffer[count++]) == EOF)
 			return EOF;
 	}
 	return code;
 }
 
-size_t utf8::unpack(const unicode_t str, CharacterProtocol *cp)
+size_t utf8::unpack(const unicode_t str, CharacterProtocol& cp)
 {
 	unsigned points = 0;
 	ucs4_t code;
@@ -418,7 +418,7 @@ void UString::set(const unicode_t text)
 	str->retain();
 
 	charmem cp(str->text, str->max);
-	utf8::unpack(text, &cp); 
+	utf8::unpack(text, cp); 
 	str->fix();
 }
 
@@ -434,14 +434,14 @@ void UString::add(const unicode_t text)
 		return;
 
 	charmem cp(str->text + str->len, size + 1);
-	utf8::unpack(text, &cp);
+	utf8::unpack(text, cp);
 	str->fix();
 }
 
 size_t UString::get(unicode_t output, size_t points) const
 {
-	charmem cp(str->text, str->max);
-	return utf8::pack(output, &cp, points);
+	chartext cp(str->text);
+	return utf8::pack(output, cp, points);
 }
 
 UString UString::get(strsize_t pos, strsize_t size) const

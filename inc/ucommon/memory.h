@@ -371,7 +371,36 @@ public:
 	void put(PagerObject *object);
 };
 
-class __EXPORT chars : public CharacterProtocol
+class __EXPORT charmem : public CharacterProtocol
+{
+protected:
+	char *buffer;
+	size_t inp, out, size;
+	bool dynamic;
+
+	int _getch(void);
+	int _putch(int code);
+
+public:
+	charmem(char *mem, size_t size);
+	charmem(size_t size);
+	charmem();
+	~charmem();
+
+	void release(void);
+	
+	void set(char *mem, size_t size);
+
+	void set(size_t size);
+
+	inline void reset(void)
+		{inp = out = 0;}
+
+	inline void rewind(void)
+		{inp = 0;}
+};
+
+class __EXPORT chartext : public CharacterProtocol
 {
 private:
 	const char *pos;
@@ -380,13 +409,13 @@ private:
 	int _getch(void);
 
 public:
-	chars();
-	chars(const char *buf);
+	chartext();
+	chartext(const char *buf);
 	
 	inline void set(const char *buf)
 		{pos = buf;}
 
-	inline chars& operator=(const char *buf)
+	inline chartext& operator=(const char *buf)
 		{set(buf); return *this;}
 };
 

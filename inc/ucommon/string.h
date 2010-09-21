@@ -1358,24 +1358,6 @@ public:
 	static unsigned hexsize(const char *format);
 };
 
-class __EXPORT charmem : public CharacterProtocol
-{
-protected:
-	char *buffer;
-	size_t inp, out, size;
-
-	int _getch(void);
-	int _putch(int code);
-
-public:
-	charmem(char *mem, size_t size);
-	charmem(string& object);
-	charmem();
-	
-	void set(char *mem, size_t size);
-	void set(string& object);
-};
-
 /**
  * A string class that uses a cstring buffer that is fixed in memory.
  * This allows one to manipulate a fixed buffer of text in memory through
@@ -1692,7 +1674,7 @@ inline String str(unsigned long value)
 inline String str(double value)
 	{String temp(40, "%f", value); return temp;} 
 
-String str(CharacterProtocol *p, strsize_t size);
+String str(CharacterProtocol& cp, strsize_t size);
 
 END_NAMESPACE
 
