@@ -303,6 +303,7 @@ protected:
 	int ioerr;
 	timeout_t iowait;
 
+public:
 	/**
 	 * Get an address list directly.  This is used internally by some derived
 	 * socket types when generic address lists would be invalid.
@@ -320,7 +321,6 @@ protected:
 	 */
 	static void release(struct addrinfo *list);
 
-public:
 	/**
 	 * External definition of fd_set type.  This is used to generate
 	 * select calls which may be wrapped through an internal function

@@ -152,6 +152,14 @@ public:
 	void open(Socket::address& address, unsigned segment = 536);
 
 	/**
+	 * Open a stream connectoion to a host and service.
+	 * @param host to connect to.
+	 * @param service to connect to by name or number as string.
+	 * @param segment buffering size to use.
+	 */
+	void open(const char *host, const char *service, unsigned segment = 536);
+
+	/**
 	 * Close an active stream connection.  This does not release the
 	 * socket but is a disconnect.
 	 */

@@ -483,6 +483,7 @@ int chartext::_putch(int code)
 	*(pos++) = code;
 	*pos = 0;
 	--max;
+	return code;
 }
 
 bufpager::bufpager(size_t ps) :

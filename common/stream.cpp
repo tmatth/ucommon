@@ -258,6 +258,24 @@ void tcpstream::open(Socket::address& list, unsigned mss)
 	allocate(mss);
 }	
 
+void tcpstream::open(const char *host, const char *service, unsigned mss)
+{
+	if(bufsize)
+		close();
+
+	struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
+	if(!list)
+		return;
+
+	if(Socket::connectto(so, list)) {
+		Socket::release(list);
+		return;
+	}
+
+	Socket::release(list);
+	allocate(mss);
+}
+
 void tcpstream::reset(void)
 {
 	if(!bufsize)
