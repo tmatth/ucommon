@@ -403,20 +403,16 @@ public:
 class __EXPORT chartext : public CharacterProtocol
 {
 private:
-	const char *pos;
+	char *pos;
+	size_t max;
 
 	int _putch(int code);
 	int _getch(void);
 
 public:
 	chartext();
-	chartext(const char *buf);
-	
-	inline void set(const char *buf)
-		{pos = buf;}
-
-	inline chartext& operator=(const char *buf)
-		{set(buf); return *this;}
+	chartext(char *buf);
+	chartext(char *buf, size_t size);	
 };
 
 /**

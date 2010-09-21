@@ -417,7 +417,7 @@ void UString::set(const unicode_t text)
 	str = create(size);
 	str->retain();
 
-	charmem cp(str->text, str->max);
+	chartext cp(str->text, str->max);
 	utf8::unpack(text, cp); 
 	str->fix();
 }
@@ -433,7 +433,7 @@ void UString::add(const unicode_t text)
 	if(!resize(alloc))
 		return;
 
-	charmem cp(str->text + str->len, size + 1);
+	chartext cp(str->text + str->len, size);
 	utf8::unpack(text, cp);
 	str->fix();
 }

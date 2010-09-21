@@ -442,16 +442,24 @@ bool keyassoc::assign(char *id, void *data)
 chartext::chartext()
 {
 	pos = NULL;
+	max = 0;
 }
 
-chartext::chartext(const char *buf)
+chartext::chartext(char *buf)
 {
 	pos = buf;
+	max = 0;
+}
+
+chartext::chartext(char *buf, size_t size)
+{
+	pos = buf;
+	max = size;
 }
 
 int chartext::_getch(void)
 {
-	if(!pos || !*pos)
+	if(!pos || !*pos || max)
 		return EOF;
 
 	return *(pos++);
@@ -459,7 +467,12 @@ int chartext::_getch(void)
 
 int chartext::_putch(int code)
 {
-	return EOF;
+	if(!pos || !max)
+		return EOF;
+
+	*(pos++) = code;
+	*pos = 0;
+	--max;
 }
 
 bufpager::bufpager(size_t ps) :
