@@ -1,45 +1,47 @@
-Proposed ABI changes (3.1 or 4.0?):
+Completed ABI changes (3.x to 4.0):
 
-	Do we keep FILE methods now that we have bufio?
+	Killed some FILE methods now that we have bufio
 
-	Use of "family" in address type often no longer needed - depreciate.  Some
-	parts of Socket::address may also need rewriting.
-	
-	tcpstream should be rewritten to use a char * address like TCPSocket.
-	tcpstream will require Socket() as base class to do this.
-
-	consolidate "Socket::puts" and inline splints for 4.0 abi.
+	Consolidate "Socket::puts" and inline splints for 4.0 abi cleanup.
 
 	redo socket return int's like fsys to return errno() on error (this
 	may not require abi change, as no linkage is effected...)
 
-	add err() method and errno info to keyfile and perhaps elsewhere.
+	add err() method and errno info everywhere needed for constency
+
+	templates that return refs rather than pointers.
+
+	string object no longer directly tied to read/write methods, fixes
+	include requirements for string.
+
+	protocols introduced as design concept.  character protocol allows
+	parsing and conversion classes (such as unicode) to operate on more
+	arbitrary objects.
+
+	bufpager allows text to be stored into and retrieved from segmented
+	storage allocated on demand.
+
+	i/o buffering becomes buffer protocol
+
+	Move ccaudio out of ucommon/focus on ucommon & secure runtime mission.
+
+	A pipe stream/process pipe handler that uses the buffer protocol.
+
+	tcpstream uses a char * address like TCPBuffer.
+
+	Reduced use of "family" in address methods as often no longer needed.  The
+	socket methods that use address lists now filter by the socket type.
+
+Proposed ABI changes (3.1 or 4.0?):
 
 	changed new operators confined to namespace for include file issues
 	with std lib.
 
-	in script engine make expression operands virtuals or expression
-	operation itself virtual.
-
-	templates that return refs rather than pointers.
-
 	unicode shell options?
-
-	string read/write for Socket moved to Socket?
-	
-	string read/write for fsys moved to fsys?
 
 	ssl socket low level methods rather than just upper level stream?
 
 Proposed changes:
-
-	Move ccscript engine code entirely into Bayonne.
-
-	Move ccaudio out of ucommon/focus on ucommon & secure runtime mission.
-
-	A pipe stream/process pipe handler that uses the new IOBuffer class.
-	This probably will happen in shell.h as an object that can be created by
-	a future shell::spawn()/pipe/popen like method.
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
 	Especially convenient with common use of NSS for future tls.  Do we
@@ -55,7 +57,7 @@ Proposed changes:
 
 	Add NSS backend for secure alongside openssl & gnutls.
 
-	SSocket does not do validation yet and peer method missing.  We should load
+	SSLBuffer does not do validation and peer methods missing.  We should load
     all ca certificates rather than depend on using a directory path for using
     multiple CA's because the latter depends on hash mapped directories for
     openssl and may not exist as a feature in gnutls.  
@@ -74,4 +76,8 @@ Rejected changes:
 
 	DetachedThread delete this into dealloc() virtual...
 		- use Thread::exit() virtual for this purpose instead
+
+	in script engine make expression operands virtuals or expression
+	operation itself virtual. - ccscript moved into bayonne
+
 

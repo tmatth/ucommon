@@ -1175,7 +1175,7 @@ char *string::token(char *text, char **token, const char *clist, const char *quo
 	}
 
 	while(**token && strchr(clist, **token))
-		++token;
+		++*token;
 
 	result = *token;
 
@@ -1925,5 +1925,4 @@ String str(CharacterProtocol *p, strsize_t size)
 	String::fix(temp);
 	return temp;
 }
-
 

@@ -36,6 +36,8 @@
 
 NAMESPACE_UCOMMON
 
+class string;
+
 class __EXPORT MemoryProtocol
 {
 protected:
@@ -324,25 +326,6 @@ public:
 	int _putch(int ch);
 
 	/**
-	 * Method to write a null terminated string.  This adds the current
-	 * newline character sequence to the output.
-	 * @param string to write.
-	 * @return number of characters actually written.
-	 */
-	inline size_t writeln(const char *string)
-		{return putline(string);};
-
-	/**
-	 * Method to read a line of input from the buffer.  This uses the current
-	 * newline character sequence to mark the end of line input.
-	 * @param address of string buffer to use.
-	 * @param size of string buffer.
-	 * @return number of characters actually read.
-	 */
-	inline size_t readln(char *address, size_t size)
-		{return getline(address, size);};
-
-	/**
 	 * Print formatted string to the buffer.  The maximum output size is
 	 * the buffer size, and the operation flushes the buffer.
 	 * @param format string.
@@ -375,6 +358,8 @@ public:
 	 * @return count of characters read or 0 if at end of data.
 	 */
 	size_t getline(char *string, size_t size);
+
+	size_t getline(string& s);
 
 	/**
 	 * Put a string as a line of output to the buffer.  The eol character is 

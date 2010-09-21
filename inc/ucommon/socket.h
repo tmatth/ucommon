@@ -345,37 +345,47 @@ public:
 
 	public:
 		/**
-		 * Construct a socket address.
+		 * Construct a socket address.  This is used to get an address to
+		 * bind a socket interface to.  The address can be specified as the
+		 * ip address of the interface or as a "hostname".  If a hostname
+		 * is used, then family should be specified for clarity.
+		 * @param family of socket address.  Needed when host names are used.
 		 * @param address or hostname.
-		 * @param family of socket address.  Needed when hostnames are used.
 		 * @param type of socket (stream, dgram, etc).
 		 * @param protocol number of socket.
 		 */
 		address(int family, const char *address, int type = SOCK_STREAM, int protocol = 0);
 
 		/**
-		 * Construct a socket address for an existing socket.
-		 * @param socket to use for family of socket address.
+		 * Construct a socket address for an existing socket.  This can be the
+		 * name of a host or to perform a lookup in a domain for a service.
+		 * Family can be used to restrict the set of results returned, however
+		 * since things like connecto() already filter by family and create
+		 * will use family from the addrinfo, in most cases AF_UNSPEC can be 
+		 * used.  This may be depreciated in favor of the constructor that
+		 * matches a set() method.
+		 * @param family of hosts to filter by or AF_UNSPEC.
 		 * @param hostname or ip address.  The socket family is used for hostnames.
 		 * @param service port or name we are referencing or NULL.
 		 */
-		address(Socket& socket, const char *hostname, const char *service = NULL);
+		address(int family, const char *hostname, const char *service = NULL);
 
 		/**
-		 * Construct a socket address for a socket descriptor.
-		 * @param socket descriptor to use for family.
-		 * @param hostname or address to use.
-		 * @param service port or name we are referencing or NULL.
+		 * Construct a socket address list for a service.
+		 * @param host address for service.
+		 * @param service name or port number.
+		 * @param type of service, stream, dgram, etc.
 		 */
-		address(socket_t socket, const char *hostname, const char *service = NULL);
+		address(const char *host, const char *service, int type = SOCK_STREAM);
 
 		/**
-		 * Construct a socket address from host and service.
+		 * Construct a socket address from host and service.  This is primarily
+		 * used to construct a list of potential service connections by pure 
+		 * port numbers or for host lookup only.
 		 * @param hostname or address to use.
 		 * @param service port or 0.
-		 * @param family of socket address.
 		 */
-		address(const char *hostname, unsigned service = 0, int family = DEFAULT_FAMILY);
+		address(const char *hostname, unsigned service = 0);
 
 		/**
 		 * Construct an empty address.
@@ -407,7 +417,7 @@ public:
 		struct sockaddr *get(int family) const;
 
 		/**
-		 * Get the family of a socket address by first entry.
+		 * Get the family of the first member in a list of services.
 		 * @return family of first socket address or 0 if none.
 		 */
 		int getfamily(void) const;
@@ -469,24 +479,23 @@ public:
 		 * Set the host addresses to form a new list.
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
-		 * @param family of hostname.
-		 * @param type of socket.
+		 * @param type of socket (stream or dgram) to filter list by.
 		 */
-		void set(const char *hostname, const char *service = NULL, int family = 0, int type = SOCK_STREAM);
+		void set(const char *hostname, const char *service = NULL, int type = SOCK_STREAM);
 
 		/**
 		 * Append additional host addresses to our list.
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
-		 * @param family of hostname.
-		 * @param type of socket.
+		 * @param family of hostnames to filter list by.
+		 * @param type of socket (stream or dgram).
 		 */
-		void add(const char *hostname, const char *service = NULL, int family = 0, int type = SOCK_STREAM);
+		void add(const char *hostname, const char *service = NULL, int type = SOCK_STREAM);
 
 		/**
 		 * Set an entry for host binding.
-		 * @param address or hostname.
 		 * @param family of socket address.  Needed when hostnames are used.
+		 * @param address or hostname.	
 		 * @param type of socket (stream, dgram, etc).
 		 * @param protocol number of socket.
 		 */
@@ -497,6 +506,20 @@ public:
 		 * @param address to add.
 		 */
 		void add(sockaddr *address);
+
+        /**
+         * Insert unique members from another socket address list to ours.
+         * @param address list to insert into list.
+         * @return count of addresses added.
+         */
+        unsigned insert(struct addrinfo *address);
+
+        /**
+         * Remove members from another socket address list from ours.
+         * @param address list to remove from list.
+         * @return count of addresses removed.
+         */
+        unsigned remove(struct addrinfo *address);
 
 		/**
 		 * Remove an individual socket address from our address list.
@@ -512,22 +535,6 @@ public:
 		 * @return true if inserted, false if duplicate.
 		 */
 		bool insert(struct sockaddr *address);
-
-		/**
-		 * Insert unique members from another socket address list to ours.
-		 * @param address list to insert into list.
-		 * @param family to scan for or 0 for all.
-		 * @return count of addresses added.
-		 */
-		unsigned insert(struct addrinfo *address, int family = 0);
-
-		/**
-		 * Remove members from another socket address list from ours.
-		 * @param address list to remove from list.
-		 * @param family to scan for or 0 for all.
-		 * @return count of addresses removed.
-		 */
-		unsigned remove(struct addrinfo *address, int family = 0);
 
 		/**
 		 * Copy an existing addrinfo into our object.  This is also used
@@ -546,9 +553,8 @@ public:
 		 * Set a socket address from host and service.
 		 * @param hostname or address to use.
 		 * @param service port or 0.
-		 * @param family of socket address.
 		 */
-		void set(const char *hostname, unsigned service = 0, int family = DEFAULT_FAMILY);
+		void set(const char *hostname, unsigned service = 0);
 
 		/**
 		 * Duplicate a socket address.
@@ -925,8 +931,7 @@ public:
 	 */
 	size_t readline(char *data, size_t size);
 
-	inline size_t readline(String& str)
-		{return readline(str.c_mem(), str.size());}
+	size_t readline(String& str);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated

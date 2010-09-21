@@ -935,33 +935,18 @@ Socket::address::address(int family, const char *a, int type, int protocol)
 	set(family, a, type, protocol);
 }
 
-Socket::address::address(const char *host, unsigned port, int family)
+Socket::address::address(const char *host, unsigned port)
 {
 	assert(host != NULL && *host != 0);
 	
-	family = setfamily(family, host);
 	list = NULL;
 #ifdef	_MSWINDOWS_
 	Socket::init();
 #endif
-	set(host, port, family);
+	set(host, port);
 }
 
-Socket::address::address(Socket &s, const char *host, const char *svc)
-{
-	assert(host != NULL && *host != 0);
-	assert(svc != NULL && *svc != 0);
-
-	list = NULL;
-
-#ifdef	_MSWINDOWS_
-	Socket::init();
-#endif
-
-	address(s.so, host, svc);
-}
-
-Socket::address::address(socket_t so, const char *host, const char *svc)
+Socket::address::address(int family, const char *host, const char *svc)
 {
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
@@ -974,11 +959,9 @@ Socket::address::address(socket_t so, const char *host, const char *svc)
 #endif
 
 	list = NULL;
-	if(so == INVALID_SOCKET)
-			return;
-
-	ah = gethint(so, &hint);
-	getaddrinfo(host, svc, ah, &list);
+	memset(&hint, 0, sizeof(hint));
+	hint.ai_family = family;
+	getaddrinfo(host, svc, &hint, &list);
 }
 
 Socket::address::address()
@@ -990,6 +973,12 @@ Socket::address::address(const address& from)
 {
 	list = NULL;
 	copy(from.list);
+}
+
+Socket::address::address(const char *host, const char *service, int type)
+{
+	list = NULL;
+	set(host, service, type);
 }
 
 Socket::address::~address()
@@ -1084,7 +1073,7 @@ struct ::addrinfo *Socket::getaddress(const char *hp, const char *svc, int type,
 	return result;
 }	
 
-void Socket::address::set(const char *host, unsigned port, int family)
+void Socket::address::set(const char *host, unsigned port)
 {
 	assert(host != NULL && *host != 0);
 	
@@ -1225,27 +1214,23 @@ bool Socket::address::remove(struct sockaddr *addr)
 	return true;
 }
 
-unsigned Socket::address::insert(struct addrinfo *alist, int family)
+unsigned Socket::address::insert(struct addrinfo *alist)
 {
 	unsigned count = 0;
 	while(alist) {
-		if(!family || alist->ai_family == family) {
-			if(insert(alist->ai_addr))
-				++count;
-		}
+		if(insert(alist->ai_addr))
+			++count;
 		alist = alist->ai_next;
 	}
 	return count;
 }
 
-unsigned Socket::address::remove(struct addrinfo *alist, int family)
+unsigned Socket::address::remove(struct addrinfo *alist)
 {
 	unsigned count = 0;
 	while(alist) {
-		if(!family || alist->ai_family == family) {
-			if(remove(alist->ai_addr))
-				++count;
-		}
+		if(remove(alist->ai_addr))
+			++count;
 		alist = alist->ai_next;
 	}
 	return count;
@@ -1339,15 +1324,13 @@ void Socket::address::add(struct sockaddr *addr)
 	add(buffer, svc, addr->sa_family);
 }
 
-void Socket::address::set(const char *host, const char *svc, int family, int socktype)
+void Socket::address::set(const char *host, const char *svc, int socktype)
 {
-	family = setfamily(family, host);
-
 	clear();
-	add(host, svc, family, socktype);
+	add(host, svc, socktype);
 }
 
-void Socket::address::add(const char *host, const char *svc, int family, int socktype)
+void Socket::address::add(const char *host, const char *svc, int socktype)
 {
 	assert(host != NULL && *host != 0);
 	assert(svc != NULL && *svc != 0);
@@ -1791,7 +1774,19 @@ size_t Socket::readline(char *data, size_t max)
 		ioerr = Socket::error();
 		return 0;
 	}
-	return (size_t)result;
+	return (size_t)++result;
+}
+
+size_t Socket::readline(String& s)
+{
+	ssize_t result = Socket::readline(so, s.c_mem(), s.size() + 1, iowait);
+	if(result < 0) {
+		ioerr = Socket::error();
+		s.clear();
+		return 0;
+	}
+	String::fix(s);
+	return (size_t)++result;
 }
 
 ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)

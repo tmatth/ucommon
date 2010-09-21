@@ -543,12 +543,11 @@ public:
 	 * ucommon file routines.
 	 * @param string to write.
 	 * @param size of buffer.
-	 * @return number of bytes read from file.
+	 * @return true if data read, false if eof.
 	 */
 	size_t readline(char *string, size_t size);
 
-	inline size_t readline(String& string)
-		{return readline(string.c_mem(), string.size());}
+	size_t readline(string& string);
 
 	inline size_t put(const void *data, size_t size)
 		{ return fp == NULL ? 0 : fwrite(data, 1, size, fp);}

@@ -1099,18 +1099,42 @@ size_t charfile::readline(char *address, size_t size)
 	address[0] = 0;
 
 	if(!fp)
+		return false;
+
+	if(!fgets(address, size, fp) || feof(fp))
 		return 0;
 
-	if(!fgets(address, size, fp))
-		return 0;
+	size_t result = size = strlen(address);
 
 	if(address[size - 1] == '\n') {
 		--size;
-		if(address[size - 1] == '\r')
+		if(size && address[size - 1] == '\r')
 			--size;
 	}
 	address[size] = 0;
-	return size;
+	return result;
+}
+
+size_t charfile::readline(string& s)
+{
+	if(!s.c_mem())
+		return true;
+
+	if(!fgets(s.c_mem(), s.size(), fp) || feof(fp)) {
+		s.clear();
+		return false;
+	}
+
+	String::fix(s);
+	size_t result = s.len();
+
+	if(s[-1] == '\n')
+		--s;
+
+	if(s[-1] == '\r')
+		--s;
+
+	return result;
 }
 
 bool charfile::eof(void)

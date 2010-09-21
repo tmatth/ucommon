@@ -330,11 +330,19 @@ size_t BufferProtocol::putline(const char *string)
 	return count;
 }
 
+size_t BufferProtocol::getline(string& s)
+{
+	size_t result = getline(s.c_mem(), s.size() + 1);
+	String::fix(s);
+	return result;
+}
+
 size_t BufferProtocol::getline(char *string, size_t size)
 {
 	size_t count = 0;
 	unsigned eolp = 0;
 	const char *eols = eol;
+	bool eof = false;
 	
 	if(!eols)
 		eols="\0";
@@ -349,6 +357,7 @@ size_t BufferProtocol::getline(char *string, size_t size)
 		int ch = BufferProtocol::_getch();
 		if(ch == EOF) {
 			eolp = 0;
+			eof = true;
 			break;
 		}
 
@@ -370,6 +379,8 @@ size_t BufferProtocol::getline(char *string, size_t size)
 	}
 	count -= eolp;
 	string[count] = 0;
+	if(!eof)
+		++count;
 	return count;
 }
 
