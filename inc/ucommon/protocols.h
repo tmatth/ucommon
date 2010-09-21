@@ -101,6 +101,20 @@ public:
 };
 
 /**
+ * Common locking protocol.  This is used for objects that may internally
+ * have sync'd functions, directly or in a derived class, that lock the 
+ * current object.  The default handlers do nothing but offer the virtuals
+ * as a stub.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT LockingProtocol
+{
+protected:
+	virtual void _lock(void);
+	virtual void _unlock(void);
+};
+
+/**
  * Common character processing protocol.  This is used to access a character
  * from some type of streaming buffer or memory object.
  * @author David Sugar <dyfet@gnutelephony.org>

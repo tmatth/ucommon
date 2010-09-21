@@ -53,7 +53,7 @@ class PagerPool;
  * performance.
  * @author David Sugar <dyfet@gnutelephony.org>
  */ 
-class __EXPORT memalloc : public MemoryProtocol
+class __EXPORT memalloc : public MemoryProtocol, protected LockingProtocol
 {
 private:
 	friend class bufpager;
@@ -168,6 +168,20 @@ class __EXPORT mempager : public memalloc
 private:
 	pthread_mutex_t mutex;
 
+protected:
+	/**
+	 * Lock the memory pager mutex.  It will be more efficient to lock
+	 * the pager and then call the locked allocator than using alloc which
+	 * separately locks and unlocks for each request when a large number of
+	 * allocation requests are being batched together.
+	 */
+	virtual void _lock(void);
+
+	/**
+	 * Unlock the memory pager mutex.
+	 */
+	virtual void _unlock(void);
+
 public:
 	/**
 	 * Construct a memory pager.
@@ -179,21 +193,6 @@ public:
 	 * Destroy a memory pager.  Release all pages back to the heap at once.
 	 */
 	virtual ~mempager();
-
-	/**
-	 * Lock the memory pager mutex.  It will be more efficient to lock
-	 * the pager and then call the locked allocator than using alloc which
-	 * separately locks and unlocks for each request when a large number of
-	 * allocation requests are being batched together.
-	 */
-	inline void lock(void)
-		{pthread_mutex_lock(&mutex);};
-
-	/**
-	 * Unlock the memory pager mutex.
-	 */
-	inline void unlock(void)
-		{pthread_mutex_unlock(&mutex);};
 
 	/**
 	 * Determine fragmentation level of acquired heap pages.  This is

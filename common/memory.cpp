@@ -171,6 +171,16 @@ mempager::~mempager()
 	pthread_mutex_destroy(&mutex);
 }
 
+void mempager::_lock(void)
+{
+	pthread_mutex_lock(&mutex);
+}
+
+void mempager::_unlock(void)
+{
+	pthread_mutex_unlock(&mutex);
+}
+
 unsigned mempager::utilization(void)
 {
 	unsigned long used;
@@ -336,9 +346,9 @@ void *keyassoc::locate(const char *id)
 
 	keydata *kd;
 
-	lock();
+	_lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
-	unlock();
+	_unlock();
 	if(!kd)
 		return NULL;
 
@@ -358,10 +368,10 @@ void *keyassoc::remove(const char *id)
 	if(!keysize || size >= keysize || !list)
 		return NULL;
 
-	lock();
+	_lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
 	if(!kd) {
-		unlock();
+		_unlock();
 		return NULL;
 	}
 	data = kd->data;
@@ -369,7 +379,7 @@ void *keyassoc::remove(const char *id)
 	obj->delist((LinkedObject**)(&root[path]));
 	obj->enlist(&list[size / 8]);
 	--count;
-	unlock();
+	_unlock();
 	return data;
 }
 
@@ -385,10 +395,10 @@ bool keyassoc::create(char *id, void *data)
 	if(keysize && size >= keysize)
 		return false;
 
-	lock();
+	_lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
 	if(kd) {
-		unlock();
+		_unlock();
 		return false;
 	}
 	caddr_t ptr = NULL;
@@ -403,7 +413,7 @@ bool keyassoc::create(char *id, void *data)
 	kd = new(ptr) keydata(this, id, paths, 8 + size * 8);					
 	kd->data = data;
 	++count;
-	unlock();
+	_unlock();
 	return true;
 }
 
@@ -419,7 +429,7 @@ bool keyassoc::assign(char *id, void *data)
 	if(keysize && size >= keysize)
 		return false;
 
-	lock();
+	_lock();
 	kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
 	if(!kd) {
 		caddr_t ptr = NULL;
@@ -435,7 +445,7 @@ bool keyassoc::assign(char *id, void *data)
 		++count;	
 	}
 	kd->data = data;
-	unlock();
+	_unlock();
 	return true;
 }
 
@@ -485,27 +495,38 @@ memalloc(ps)
 
 int bufpager::_getch(void)
 {
+	_lock();
+
 	if(!current)
 		current = first;
 
-	if(!current)
+	if(!current) {
+		_unlock();
 		return EOF;
+	}
 
 	if(cpos >= current->used) {
-		if(!current->next)
+		if(!current->next) {
+			_unlock();
 			return EOF;
+		}
 		current = current->next;
 		cpos = 0;
 	}
 
-	if(cpos >= current->used)
+	if(cpos >= current->used) {
+		_unlock();
 		return EOF;
+	}
 
-	return current->text[cpos++];
+	char ch = current->text[cpos++];
+	_unlock();
+	return ch;
 }
 
 int bufpager::_putch(int code)
 {
+	_lock();
 	if(!last || last->used == last->size) {
 		cpage_t *next;
 
@@ -514,10 +535,12 @@ int bufpager::_putch(int code)
 			freelist = next->next;
 		}
 		else {
+			_unlock();
 			next = (cpage_t *)_alloc(sizeof(cpage_t));
 			if(!next)
 				return EOF;
 
+			_lock();
 			page_t *p = page;
 			unsigned size = 0;
 
@@ -530,8 +553,10 @@ int bufpager::_putch(int code)
 			if(!p)
 				p = pager();
 
-			if(!p)
+			if(!p) {
+				_unlock();
 				return EOF;
+			}
 
 			next->text = ((char *)(p)) + p->used;
 			next->used = 0;
@@ -549,17 +574,21 @@ int bufpager::_putch(int code)
 
 	++ccount;
 	last->text[last->used++] = code;
+	_unlock();
 	return code;
 }
 
 void bufpager::rewind(void)
 {
+	_lock();
 	cpos = 0;
 	current = first;
+	_unlock();
 }
 
 void bufpager::reset(void)
 {
+	_lock();
 	cpos = 0;
 	ccount = 0;
 	current = first;
@@ -569,6 +598,7 @@ void bufpager::reset(void)
 	}
 	freelist = first;
 	first = last = current = NULL;
+	_unlock();
 }
 
 charmem::charmem(char *mem, size_t size)
