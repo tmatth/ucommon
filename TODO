@@ -32,16 +32,17 @@ Completed ABI changes (3.x to 4.0):
 	Reduced use of "family" in address methods as often no longer needed.  The
 	socket methods that use address lists now filter by the socket type.
 
-Proposed ABI changes (3.1 or 4.0?):
+	Added a "add" and "remove" method for keymap?
 
-	changed new operators confined to namespace for include file issues
-	with std lib.
+Proposed ABI changes for 4.0:
 
 	unicode shell options?
 
-	ssl socket low level methods rather than just upper level stream?
+	ssl socket low level methods and bio rather than just upper level stream.
 
-Proposed changes:
+	sslstream
+
+Proposed changes (likely deferred post 4.0.0)
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
 	Especially convenient with common use of NSS for future tls.  Do we
@@ -52,8 +53,6 @@ Proposed changes:
 	use NSPR in place of native msw threading entirely?
 
 	Add serialio and logging class?
-
-	Add a "add" and "remove" method for keymap?
 
 	Add NSS backend for secure alongside openssl & gnutls.
 
@@ -78,6 +77,9 @@ Rejected changes:
 		- use Thread::exit() virtual for this purpose instead
 
 	in script engine make expression operands virtuals or expression
-	operation itself virtual. - ccscript moved into bayonne
+	operation itself virtual. - ccscript moved into bayonne, no longer
+	needed if there, either.
 
+	changed new operators confined to namespace for include file issues
+	with std lib - build and compile issues if not global
 
