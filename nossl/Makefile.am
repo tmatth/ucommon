@@ -16,4 +16,6 @@ noinst_HEADERS = local.h
 lib_LTLIBRARIES = libusecure.la
 
 libusecure_la_LDFLAGS = ../common/libucommon.la @SECURE_LIBS@ @UCOMMON_LIBS@ @UCOMMON_CLINK@ $(RELEASE)
-libusecure_la_SOURCES = secure.cpp ssl.cpp digest.cpp random.cpp cipher.cpp
+libusecure_la_SOURCES = secure.cpp ssl.cpp digest.cpp random.cpp cipher.cpp \
+	ssocket.cpp
+

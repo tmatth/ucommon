@@ -274,8 +274,6 @@ TCPBuffer::~TCPBuffer()
 
 void TCPBuffer::open(const char *host, const char *service, size_t size)
 {
-	struct sockaddr_storage address;
-	socklen_t alen = sizeof(address);
 	struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
 	if(!list)
 		return;
@@ -295,9 +293,6 @@ void TCPBuffer::open(const TCPServer *server, size_t size)
 	if(so == INVALID_SOCKET)
 		return;
 	
-	struct sockaddr_storage address;
-	socklen_t alen = sizeof(address);
-
 	_buffer(size);
 }
 

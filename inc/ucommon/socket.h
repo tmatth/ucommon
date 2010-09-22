@@ -935,6 +935,13 @@ public:
 	size_t readline(char *data, size_t size);
 
 	/**
+	 * Print formatted string to socket.
+	 * @param format string.
+	 * @return number of bytes sent.
+	 */
+	size_t printf(const char *format, ...) __PRINTF(2,3);
+
+	/**
 	 * Read a string of input from the socket and strip trailing newline.  
 	 * This uses an optimized I/O method that takes advantage of
 	 * socket peeking.  This presumes a connected socket on a streamble

@@ -1773,11 +1773,14 @@ size_t Socket::readline(char *data, size_t max)
 		ioerr = Socket::error();
 		return 0;
 	}
-	return (size_t)++result;
+	return (size_t)result;
 }
 
 size_t Socket::readline(string& s)
 {
+	if(!s.c_mem())
+		return 0;
+
 	ssize_t result = Socket::readline(so, s.c_mem(), s.size() + 1, iowait);
 	if(result < 0) {
 		ioerr = Socket::error();
@@ -1785,7 +1788,7 @@ size_t Socket::readline(string& s)
 		return 0;
 	}
 	String::fix(s);
-	return (size_t)++result;
+	return (size_t)result;
 }
 
 ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)
@@ -1805,11 +1808,14 @@ ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)
 	while(nleft && !nl) {
 		if(timeout) {
 			if(!wait(so, timeout))
-				return -1;
+				return 0;
 		}
 		nstat = _recv_(so, data, nleft, MSG_PEEK);
-		if(nstat <= 0)
+		if(nstat < 0)
 			return -1;
+
+		if(nstat == 0)
+			return max - nleft - 1;
 		
 		for(c = 0; c < nstat; ++c) {
 			if(data[c] == '\n') {
@@ -1820,6 +1826,7 @@ ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)
 				break;
 			}
 		}
+
 		nstat = _recv_(so, (caddr_t)data, c, 0);
 		if(nstat < 0)
 			break;
@@ -1832,6 +1839,10 @@ ssize_t Socket::readline(socket_t so, char *data, size_t max, timeout_t timeout)
 		data += nstat;
 		nleft -= nstat;
 	}
+
+	if(nl)
+		--data;
+
 	*data = 0;
 	return ssize_t(max - nleft - 1);
 }
@@ -3150,6 +3161,20 @@ bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 		return true;
 	}
 	return false;
+}
+
+size_t Socket::printf(const char *format, ...)
+{
+    assert(format != NULL);
+
+    char buf[1024];
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(buf, sizeof(buf), format, args);
+    va_end(args);
+
+    return writes(buf);
 }
 
 ssize_t Socket::printf(socket_t so, const char *format, ...)

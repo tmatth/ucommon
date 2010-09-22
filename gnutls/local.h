@@ -39,6 +39,8 @@ public:
 	gnutls_dh_params_t dh;
 
 	static gnutls_priority_t priority_cache;
+
+	static gnutls_session_t session(context *ctx);
 };
 
 typedef	gnutls_session_t SSL;

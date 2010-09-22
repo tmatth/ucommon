@@ -17,31 +17,10 @@
 
 #include "local.h"
 
-static SSL session(context *ctx)
-{
-	SSL ssl = NULL;
-	if(ctx && ctx->xcred && ctx->err() == secure::OK) {
-		gnutls_init(&ssl, ctx->connect);
-		switch(ctx->connect) {
-		case GNUTLS_CLIENT:
-			gnutls_priority_set_direct(ssl, "PERFORMANCE", NULL);
-			break;
-		case GNUTLS_SERVER:
-			gnutls_priority_set(ssl, context::priority_cache);
-			gnutls_certificate_server_set_request(ssl, GNUTLS_CERT_REQUEST);
-			gnutls_session_enable_compatibility_mode(ssl);
-		default:
-			break;
-		}
-		gnutls_credentials_set(ssl, ctx->xtype, ctx->xcred);
-	}
-	return ssl;
-}
-
 SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t scontext, size_t size) :
 TCPBuffer(tcp, size)
 {
-	ssl = session((context *)scontext);
+	ssl = context::session((context *)scontext);
 	bio = NULL;
 	server = true;
 
@@ -59,7 +38,7 @@ TCPBuffer(tcp, size)
 SSLBuffer::SSLBuffer(secure::client_t scontext) :
 TCPBuffer()
 {
-	ssl = session((context *)scontext);
+	ssl = context::session((context *)scontext);
 	bio = NULL;
 	server = false;
 }
