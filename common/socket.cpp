@@ -952,7 +952,6 @@ Socket::address::address(int family, const char *host, const char *svc)
 	assert(svc != NULL && *svc != 0);
 
 	struct addrinfo hint;
-	struct addrinfo *ah;
 
 #ifdef	_MSWINDOWS_
 	Socket::init();
