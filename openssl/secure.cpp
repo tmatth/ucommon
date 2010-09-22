@@ -67,7 +67,7 @@ bool secure::init(const char *progname)
 	return true;
 }
 
-void secure::cipher(context_t scontext, const char *ciphers)
+void secure::cipher(secure *scontext, const char *ciphers)
 {
 	context *ctx = (context *)scontext; 
 	if(!ctx)
@@ -76,7 +76,7 @@ void secure::cipher(context_t scontext, const char *ciphers)
 	SSL_CTX_set_cipher_list(ctx->ctx, ciphers);
 }
 
-secure::context_t secure::client(const char *ca)
+secure::client_t secure::client(const char *ca)
 {
 	char certfile[256];
 
@@ -113,7 +113,7 @@ secure::context_t secure::client(const char *ca)
 	return ctx;
 }
 
-secure::context_t secure::server(const char *ca)
+secure::server_t secure::server(const char *ca)
 {
 	context *ctx = new(context);
 

@@ -52,17 +52,17 @@ bool secure::init(const char *progname)
 	return false;
 }
 
-secure::context_t secure::server(const char *ca)
+secure::server_t secure::server(const char *ca)
 {
 	return NULL;
 }
 
-secure::context_t secure::client(const char *ca)
+secure::client_t secure::client(const char *ca)
 {
 	return NULL;
 }
 
-void secure::cipher(context_t context, const char *ciphers)
+void secure::cipher(secure *context, const char *ciphers)
 {
 }
 

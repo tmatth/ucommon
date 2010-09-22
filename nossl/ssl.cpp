@@ -17,18 +17,20 @@
 
 #include "local.h"
 
-SSLBuffer::SSLBuffer(const char *service, secure::context_t context) :
-TCPBuffer(service)
+SSLBuffer::SSLBuffer(secure::client_t context) :
+TCPBuffer()
 {
 	ssl = NULL;
 	bio = NULL;
+	server = false;
 }
 
-SSLBuffer::SSLBuffer(const TCPServer *server, secure::context_t context, size_t size) :
-TCPBuffer(server, size)
+SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t context, size_t size) :
+TCPBuffer(tcp, size)
 {
 	ssl = NULL;
 	bio = NULL;
+	server = true;
 }
 
 
@@ -36,18 +38,23 @@ SSLBuffer::~SSLBuffer()
 {
 }
 
-void SSLBuffer::open(const char *host, size_t bufsize)
+void SSLBuffer::open(const char *host, const char *service, size_t bufsize)
 {
-	TCPBuffer::open(host, bufsize);
-}
+	if(server) {
+		ioerr = EBADF;
+		return;
+	}
 
-void SSLBuffer::open(const TCPServer *server, size_t bufsize)
-{
-	TCPBuffer::open(server, bufsize);
+	TCPBuffer::open(host, service, bufsize);
 }
 
 void SSLBuffer::close(void)
 {
+	if(server) {
+		ioerr = EBADF;
+		return;
+	}
+
 	TCPBuffer::close();
 }
 

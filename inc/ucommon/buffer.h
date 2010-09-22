@@ -150,13 +150,9 @@ public:
  */
 class __EXPORT TCPBuffer : public BufferProtocol, protected Socket
 {
-private:
+protected:
 	void _buffer(size_t size);
 
-	char serviceid[16];
-	const char *servicetag;
-
-protected:
 	virtual size_t _push(const char *address, size_t size);
 	virtual size_t _pull(char *address, size_t size);
 	int _err(void) const;
@@ -170,30 +166,12 @@ protected:
 	inline socket_t getsocket(void) const
 		{return so;};
 
-	/**
-	 * Get the effective "service" port identifier of the socket.  If the
-	 * socket was created from a listener, this will be the port number
-	 * of the listening socket, and hence can be useful to determine
-	 * which service connected and whether ssl is needed.  If this is
-	 * a client socket, it will be the service port of the peer socket.
-	 * @return service identifier associated with the socket.
-	 */
-	inline short getservice(void) const
-		{return (short)(atol(serviceid));};
-
-	/**
-	 * Get the tag used for this socket.
-	 * @return service tag associated with this socket.
-	 */
-	inline const char *tag(void) const
-		{return servicetag;};
-
 public:
 	/**
 	 * Construct an unconnected tcp client and specify our service profile.
 	 * @param service identifier, usually by name.
 	 */
-	TCPBuffer(const char *service);
+	TCPBuffer();
 
 	/**
 	 * Construct a tcp server session from a listening socket.
@@ -226,10 +204,11 @@ public:
 	/**
 	 * Connect a tcp client session to a specific host uri.  If the socket
 	 * was already connected, it is automatically closed first.
-	 * @param host and optional :port we are connecting to.
+	 * @param host we are connecting.
+	 * @param service to connect to.
 	 * @param size of buffer and tcp fragments.
 	 */
-	void open(const char *host, size_t size = 536);
+	void open(const char *host, const char *service, size_t size = 536);
 
 	/**
 	 * Close active connection.

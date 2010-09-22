@@ -38,27 +38,30 @@ static SSL session(context *ctx)
 	return ssl;
 }
 
-SSLBuffer::SSLBuffer(const TCPServer *server, secure::context_t scontext, size_t size) :
-TCPBuffer(server, size)
+SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t scontext, size_t size) :
+TCPBuffer(tcp, size)
 {
 	ssl = session((context *)scontext);
 	bio = NULL;
+	server = true;
 
 	if(!isopen() || !ssl)
-		return;
+		return;	
 
 	gnutls_transport_set_ptr((SSL)ssl, (gnutls_transport_ptr_t) so);
 	int result = gnutls_handshake((SSL)ssl);
 
 	if(result >= 0)
 		bio = ssl;
+
 }
 
-SSLBuffer::SSLBuffer(const char *service, secure::context_t scontext) :
-TCPBuffer(service)
+SSLBuffer::SSLBuffer(secure::client_t scontext) :
+TCPBuffer()
 {
 	ssl = session((context *)scontext);
 	bio = NULL;
+	server = false;
 }
 
 SSLBuffer::~SSLBuffer()
@@ -71,27 +74,16 @@ bool SSLBuffer::_pending(void)
 	return TCPBuffer::_pending();
 }
 
-void SSLBuffer::open(const TCPServer *server, size_t size)
+void SSLBuffer::open(const char *host, const char *service, size_t size)
 {
+	if(server) {
+		ioerr = EBADF;
+		return;
+	}
+
 	close();
 
-	TCPBuffer::open(server, size);
-
-	if(!isopen() || !ssl)
-		return;	
-
-	gnutls_transport_set_ptr((SSL)ssl, (gnutls_transport_ptr_t) so);
-	int result = gnutls_handshake((SSL)ssl);
-
-	if(result >= 0)
-		bio = ssl;
-}
-
-void SSLBuffer::open(const char *host, size_t size)
-{
-	close();
-
-	TCPBuffer::open(host, size);
+	TCPBuffer::open(host, service, size);
 
 	if(!isopen() || !ssl)
 		return;	
@@ -105,6 +97,11 @@ void SSLBuffer::open(const char *host, size_t size)
 
 void SSLBuffer::close(void)
 {
+	if(server) {
+		ioerr = EBADF;
+		return;
+	}
+
 	if(bio)
 		gnutls_bye((SSL)ssl, GNUTLS_SHUT_RDWR);
 	bio = NULL;
@@ -113,6 +110,7 @@ void SSLBuffer::close(void)
 
 void SSLBuffer::release(void)
 {
+	server = false;
 	close();
 	if(ssl) {
 		gnutls_deinit((SSL)ssl);

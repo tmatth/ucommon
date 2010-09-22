@@ -248,27 +248,21 @@ size_t fbuf::_pull(char *buf, size_t size)
 	return (size_t)result;
 }
 
-TCPBuffer::TCPBuffer(const char *service) : BufferProtocol()
+TCPBuffer::TCPBuffer() : BufferProtocol()
 {
 	so = INVALID_SOCKET;
-	String::set(serviceid, sizeof(serviceid), service);
-	servicetag = service;	// default tag for new connections...
 }
 
 TCPBuffer::TCPBuffer(const char *host, const char *service, size_t size) :
 BufferProtocol()
 {
 	so = INVALID_SOCKET;
-	String::set(serviceid, sizeof(serviceid), service);
-	servicetag = service;
-	open(host, size);
+	open(host, service, size);
 }
 
 TCPBuffer::TCPBuffer(const TCPServer *server, size_t size) :
 BufferProtocol()
 {
-	String::set(serviceid, sizeof(serviceid), "0");
-	servicetag = serviceid;
 	so = INVALID_SOCKET;
 	open(server, size);
 }
@@ -278,11 +272,11 @@ TCPBuffer::~TCPBuffer()
 	TCPBuffer::close();
 }
 
-void TCPBuffer::open(const char *host, size_t size)
+void TCPBuffer::open(const char *host, const char *service, size_t size)
 {
 	struct sockaddr_storage address;
 	socklen_t alen = sizeof(address);
-	struct addrinfo *list = Socket::getaddress(host, servicetag, SOCK_STREAM, 0);
+	struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
 	if(!list)
 		return;
 
@@ -290,9 +284,6 @@ void TCPBuffer::open(const char *host, size_t size)
 	Socket::release(list);
 	if(so == INVALID_SOCKET)
 		return;
-
-	if(getpeername(so, (struct sockaddr *)&address, &alen) == 0)
-		snprintf(serviceid, sizeof(serviceid), "%u", Socket::getservice((struct sockaddr *)&address));
 
 	_buffer(size);
 }
@@ -306,11 +297,6 @@ void TCPBuffer::open(const TCPServer *server, size_t size)
 	
 	struct sockaddr_storage address;
 	socklen_t alen = sizeof(address);
-
-	servicetag = server->tag();
-
-	if(getsockname(server->getsocket(), (struct sockaddr *)&address, &alen) == 0)
-		snprintf(serviceid, sizeof(serviceid), "%u", Socket::getservice((struct sockaddr *)&address));	
 
 	_buffer(size);
 }

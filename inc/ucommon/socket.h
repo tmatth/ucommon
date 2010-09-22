@@ -1721,9 +1721,6 @@ public:
  */
 class __EXPORT TCPServer : public ListenSocket
 {
-private:
-	const char *servicetag;
-
 public:
 	/**
 	 * Create and bind a tcp server.  This mostly is used to preserve the
@@ -1733,9 +1730,6 @@ public:
 	 * @param backlog size for pending connections.
 	 */
 	TCPServer(const char *address, const char *service, unsigned backlog = 5);
-
-	inline const char *tag(void) const
-		{return servicetag;}
 };
 
 /**

@@ -89,7 +89,7 @@ bool secure::init(const char *progname)
 	return true;
 }
 
-secure::context_t secure::server(const char *ca)
+secure::server_t secure::server(const char *ca)
 {
 	char certfile[256];
 	char keyfile[256];
@@ -125,7 +125,7 @@ secure::context_t secure::server(const char *ca)
 	return ctx;
 }
 
-secure::context_t secure::client(const char *ca)
+secure::client_t secure::client(const char *ca)
 {
 	char certfile[256];
 

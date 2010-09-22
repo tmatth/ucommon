@@ -17,23 +17,25 @@
 
 #include "local.h"
 
-SSLBuffer::SSLBuffer(const char *service, secure::context_t scontext) :
-TCPBuffer(service)
+SSLBuffer::SSLBuffer(secure::client_t scontext) :
+TCPBuffer()
 {
 	context *ctx = (context *)scontext;
 	ssl = NULL;
 	bio = NULL;
+	server = false;
 
 	if(ctx && ctx->ctx && ctx->err() == secure::OK)
 		ssl = SSL_new(ctx->ctx);
 }
 
-SSLBuffer::SSLBuffer(const TCPServer *server, secure::context_t scontext, size_t size) :
-TCPBuffer(server, size)
+SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t scontext, size_t size) :
+TCPBuffer(tcp, size)
 {
 	context *ctx = (context *)scontext;
 	ssl = NULL;
 	bio = NULL;
+	server = true;
 	
 	if(ctx && ctx->ctx && ctx->err() == secure::OK)
 		ssl = SSL_new(ctx->ctx);
@@ -52,24 +54,15 @@ SSLBuffer::~SSLBuffer()
 	release();
 }
 
-void SSLBuffer::open(const TCPServer *server, size_t bufsize)
+void SSLBuffer::open(const char *host, const char *service, size_t bufsize)
 {
-	close();
-	TCPBuffer::open(server, bufsize);
-
-	if(!isopen() || !ssl)
+	if(server) {
+		ioerr = EBADF;
 		return;
+	}
 
-	SSL_set_fd((SSL *)ssl, getsocket());
-	
-	if(SSL_accept((SSL *)ssl) > 0)
-		bio = SSL_get_wbio((SSL *)ssl);
-}
-
-void SSLBuffer::open(const char *host, size_t bufsize)
-{
 	close();
-	TCPBuffer::open(host, bufsize);
+	TCPBuffer::open(host, service, bufsize);
 
 	if(!isopen() || !ssl)
 		return;
@@ -82,6 +75,11 @@ void SSLBuffer::open(const char *host, size_t bufsize)
 
 void SSLBuffer::close(void)
 {
+	if(server) {
+		ioerr = EBADF;
+		return;
+	}
+
 	if(bio) {
 		SSL_shutdown((SSL *)ssl);
 		bio = NULL;
@@ -92,6 +90,7 @@ void SSLBuffer::close(void)
 
 void SSLBuffer::release(void)
 {
+	server = false;
 	close();
 	if(ssl)	{
 		SSL_free((SSL *)ssl);

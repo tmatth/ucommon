@@ -85,7 +85,9 @@ public:
 	/**
 	 * Convenience type to represent a security context.
 	 */
-	typedef	secure *context_t;
+	typedef	secure *client_t;
+
+	typedef secure *server_t;
 
 	/**
 	 * Convenience type to represent a secure socket session.
@@ -126,7 +128,7 @@ public:
 	 * @param authority path to use or NULL if none.
 	 * @return a security context that is cast from derived library.
 	 */
-	static context_t server(const char *authority = NULL);
+	static server_t server(const char *authority = NULL);
 
 	/**
 	 * Create an anonymous client context with an optional authority to 
@@ -134,7 +136,7 @@ public:
 	 * @param authority path to use or NULL if none.
 	 * @return a basic client security context.
 	 */
-	static context_t client(const char *authority = NULL);
+	static client_t client(const char *authority = NULL);
 
 	/**
 	 * Create a peer user client context.  This assumes a user certificate
@@ -142,14 +144,14 @@ public:
 	 * path to an authority is also sent.
 	 * @param authority path to use.
 	 */
-	static context_t user(const char *authority);
+	static client_t user(const char *authority);
 
 	/**
 	 * Assign a non-default cipher to the context.
 	 * @param context to set cipher for.
 	 * @param ciphers to set.
 	 */
-	static void cipher(context_t context, const char *ciphers);
+	static void cipher(secure *context, const char *ciphers);
 
 	/**
 	 * Determine if the current security context is valid.
@@ -174,8 +176,43 @@ public:
 	static String uuid(void);
 };
 
+/*
+class __EXPORT SSocket
+{
+protected:
+	secure::session_t ssl;
+	secure::bufio_t bio;
+	socket_t so;
+	bool server;
+	bool verify;
+
+public:
+	SSocket(secure::context_t context);
+	SSocket(const char *host, const char *service, secure::context_t context);
+	SSocket(const TCPServer *server, secure::context_t context);
+	~SSocket();
+
+	void connect(const char *host, const char *service);
+
+	void accept(const TCPServer *server);
+
+	void release(void);
+
+	size_t readline(char *buffer, size_t size);
+
+	size_t readline(string& object);
+
+	size_t read(char *buffer, size_t size);
+
+	size_t write(const char *buffer, size_t size);
+
+	inline size_t writes(const char *buffer)
+		{return write(buffer, strlen(buffer));}
+};
+*/
+
 /**
- * Secure socket class.  This is used to create ssl socket connections
+ * Secure socket buffer.  This is used to create ssl socket connections
  * for both clients and servers.  The use depends in part on the type of
  * context created and passed at construction time.  If no context is
  * passed (NULL), then this reverts to TCPBuffer behavior.
@@ -186,22 +223,22 @@ class __EXPORT SSLBuffer : public TCPBuffer
 protected:
 	secure::session_t ssl;
 	secure::bufio_t bio;
+	bool server;
 	bool verify;
 
 public:
-	SSLBuffer(const char *service, secure::context_t context);
-	SSLBuffer(const TCPServer *server, secure::context_t context, size_t size = 536);
+	SSLBuffer(secure::client_t context);
+	SSLBuffer(const TCPServer *server, secure::server_t context, size_t size = 536);
 	~SSLBuffer();
 
 	/**
 	 * Connect a ssl client session to a specific host uri.  If the socket
 	 * was already connected, it is automatically closed first.
-	 * @param host and optional :port we are connecting to.
+	 * @param host we are connecting to.
+	 * @param service to connect to.
 	 * @param size of buffer and tcp fragments.
 	 */
-	void open(const char *host, size_t size = 536);
-
-	void open(const TCPServer *server, size_t size = 536);
+	void open(const char *host, const char *service, size_t size = 536);
 
 	void close(void);
 

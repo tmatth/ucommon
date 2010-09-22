@@ -2595,7 +2595,6 @@ socket_t ListenSocket::accept(struct sockaddr_storage *addr) const
 TCPServer::TCPServer(const char *address, const char *service, unsigned backlog) :
 ListenSocket(address, service, backlog)
 {
-	servicetag = service;
 }
 
 #ifdef	_MSWINDOWS_
