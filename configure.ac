@@ -618,7 +618,7 @@ openssl|ssl)
 	;;
 esac
 
-if test ! -z "$SECURE" ; then
+if test -z "$SECURE" ; then
 	SECURE_LIBS=""
 	SECURE="nossl"
 fi
