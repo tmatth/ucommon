@@ -592,7 +592,7 @@ AC_ARG_WITH(pkg-config,
 
 SECURE=""
 case "$ssl" in
-secure|any)
+secure|any|detect)
 	if test ! -z "$GNUTLS_LIBS" ; then
 		SECURE_LIBS="$GNUTLS_LIBS"
 		SECURE="gnutls"
@@ -616,11 +616,12 @@ openssl|ssl)
 		SECURE="openssl"
 	fi
 	;;
-*)
+esac
+
+if test ! -z "$SECURE" ; then
 	SECURE_LIBS=""
 	SECURE="nossl"
-	;;
-esac
+fi
 
 SECURE_LOCAL="../$SECURE/libusecure.la $SECURE_LIBS"
 
