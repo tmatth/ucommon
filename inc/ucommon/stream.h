@@ -61,6 +61,12 @@ protected:
 	size_t bufsize;
 	char *gbuf, *pbuf;
 
+	virtual ssize_t _read(char *buffer, size_t size);
+
+	virtual ssize_t _write(const char *buffer, size_t size);
+
+	virtual bool _wait(timeout_t timeout);
+
 	/**
 	 * Release the tcp stream and destroy the underlying socket.
 	 */

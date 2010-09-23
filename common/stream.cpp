@@ -152,18 +152,36 @@ int tcpstream::uflow()
 #define	MSG_WAITALL	0
 #endif
 
+bool _wait(timeout_t timeout)
+{
+	if(!timeout)
+		return true;
+
+	return Socket::wait(so, timeout);
+}
+
+ssize_t _read(char *buffer, size_t size)
+{
+	Socket::recvfrom(so, buffer, size, MSG_WAITALL);
+}
+
+ssize_t _write(const char *buffer, size_t size)
+{
+	Socket::sendto(so, buffer, size);
+}
+
 int tcpstream::underflow()
 {
 	ssize_t rlen = 1;
 	unsigned char ch;
 
 	if(bufsize == 1) {
-        if(timeout && !Socket::wait(so, timeout)) {
+        if(!_wait(timeout)) {
             clear(ios::failbit | rdstate());
             return EOF;
         }
         else
-            rlen = Socket::recvfrom(so, &ch, 1, MSG_WAITALL);
+            rlen = _read(&ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
 				reset();
@@ -179,12 +197,12 @@ int tcpstream::underflow()
         return (unsigned char)*gptr();
 
     rlen = (ssize_t)((gbuf + bufsize) - eback());
-    if(timeout && !Socket::wait(so, timeout)) {
+    if(!_wait(timeout)) {
         clear(ios::failbit | rdstate());
         return EOF;
     }
     else {
-        rlen = Socket::recvfrom(so, eback(), rlen, MSG_WAITALL);
+        rlen = _read(eback(), rlen);
 	}
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
@@ -209,7 +227,7 @@ int tcpstream::overflow(int c)
             return 0;
 
 		ch = (unsigned char)(c);
-        rlen = Socket::sendto(so, &ch, 1);
+        rlen = _write(&ch, 1);
         if(rlen < 1) {
             if(rlen < 0) 
 				reset();
@@ -224,7 +242,7 @@ int tcpstream::overflow(int c)
 
     req = (ssize_t)(pptr() - pbase());
     if(req) {
-        rlen = Socket::sendto(so, pbase(), req);
+        rlen = _write(pbase(), req);
         if(rlen < 1) {
             if(rlen < 0) 
 				reset();

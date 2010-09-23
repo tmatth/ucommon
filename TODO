@@ -34,11 +34,9 @@ Completed ABI changes (3.x to 4.0):
 
 	Added a "add" and "remove" method for keymap?
 
-Proposed ABI changes for 4.0:
-
-	unicode shell options?
-
 	ssl socket low level methods and bio rather than just upper level stream.
+
+Proposed ABI changes for 4.0:
 
 	sslstream
 
@@ -70,6 +68,8 @@ Proposed changes (likely deferred post 4.0.0)
 
 	shell parser support for +options, auto collating of short options to
 	remove duplicates.
+
+	unicode shell options?
 
 Rejected changes:
 
