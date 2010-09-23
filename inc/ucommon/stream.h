@@ -65,7 +65,7 @@ protected:
 
 	virtual ssize_t _write(const char *buffer, size_t size);
 
-	virtual bool _wait(timeout_t timeout);
+	virtual bool _wait(void);
 
 	/**
 	 * Release the tcp stream and destroy the underlying socket.

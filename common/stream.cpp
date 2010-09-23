@@ -152,7 +152,7 @@ int tcpstream::uflow()
 #define	MSG_WAITALL	0
 #endif
 
-bool tcpstream::_wait(timeout_t timeout)
+bool tcpstream::_wait(void)
 {
 	if(!timeout)
 		return true;
@@ -176,7 +176,7 @@ int tcpstream::underflow()
 	unsigned char ch;
 
 	if(bufsize == 1) {
-        if(!_wait(timeout)) {
+        if(!_wait()) {
             clear(ios::failbit | rdstate());
             return EOF;
         }
@@ -197,7 +197,7 @@ int tcpstream::underflow()
         return (unsigned char)*gptr();
 
     rlen = (ssize_t)((gbuf + bufsize) - eback());
-    if(!_wait(timeout)) {
+    if(!_wait()) {
         clear(ios::failbit | rdstate());
         return EOF;
     }
