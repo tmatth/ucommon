@@ -152,7 +152,7 @@ int tcpstream::uflow()
 #define	MSG_WAITALL	0
 #endif
 
-bool _wait(timeout_t timeout)
+bool tcpstream::_wait(timeout_t timeout)
 {
 	if(!timeout)
 		return true;
@@ -160,14 +160,14 @@ bool _wait(timeout_t timeout)
 	return Socket::wait(so, timeout);
 }
 
-ssize_t _read(char *buffer, size_t size)
+ssize_t tcpstream::_read(char *buffer, size_t size)
 {
-	Socket::recvfrom(so, buffer, size, MSG_WAITALL);
+	return Socket::recvfrom(so, buffer, size, MSG_WAITALL);
 }
 
-ssize_t _write(const char *buffer, size_t size)
+ssize_t tcpstream::_write(const char *buffer, size_t size)
 {
-	Socket::sendto(so, buffer, size);
+	return Socket::sendto(so, buffer, size);
 }
 
 int tcpstream::underflow()
@@ -181,7 +181,7 @@ int tcpstream::underflow()
             return EOF;
         }
         else
-            rlen = _read(&ch, 1);
+            rlen = _read((char *)&ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
 				reset();
@@ -227,7 +227,7 @@ int tcpstream::overflow(int c)
             return 0;
 
 		ch = (unsigned char)(c);
-        rlen = _write(&ch, 1);
+        rlen = _write((const char *)&ch, 1);
         if(rlen < 1) {
             if(rlen < 0) 
 				reset();
