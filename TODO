@@ -34,8 +34,6 @@ Completed ABI changes (3.x to 4.0):
 
 	Added a "add" and "remove" method for keymap?
 
-	ssl socket low level methods and bio rather than just upper level stream.
-
 Proposed ABI changes for 4.0:
 
 	sslstream
@@ -82,4 +80,6 @@ Rejected changes:
 
 	changed new operators confined to namespace for include file issues
 	with std lib - build and compile issues if not global
+
+	ssl socket low level methods and bio rather than just upper level stream.
 
