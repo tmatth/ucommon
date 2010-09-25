@@ -440,7 +440,6 @@ public:
 		{return _err();}
 };
 
-
 END_NAMESPACE
 
 #endif

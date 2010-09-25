@@ -40,76 +40,120 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace std;
 
-tcpstream::tcpstream(const tcpstream &copy) :
-	streambuf(),
+StreamProtocol::StreamProtocol() :
+streambuf(),
 #ifdef OLD_STDCPP
-	iostream()
+    iostream()
 #else
-	iostream((streambuf *)this)
+    iostream((streambuf *)this)
 #endif
 {
 	bufsize = 0;
-	gbuf = pbuf = NULL;
-	so = Socket::create(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP);
-
+    gbuf = pbuf = NULL;
 #ifdef OLD_STDCPP
-	init((streambuf *)this);
+    init((streambuf *)this);
 #endif
+}
+
+int StreamProtocol::overflow(int code)
+{
+	return _putch(code);
+}
+
+int StreamProtocol::underflow()
+{
+	return _getch();
+}
+
+int StreamProtocol::uflow()
+{
+    int ret = underflow();
+
+    if (ret == EOF)
+        return EOF;
+
+    if (bufsize != 1)
+        gbump(1);
+
+    return ret;
+}
+
+void StreamProtocol::allocate(size_t size)
+{
+	if(gbuf)
+		delete[] gbuf;
+
+	if(pbuf)
+		delete[] pbuf;
+
+	gbuf = pbuf = NULL;
+
+	if(size < 2) {
+		bufsize = 1;
+		return;
+	}
+
+	gbuf = new char[size];
+	pbuf = new char[size];
+	assert(gbuf != NULL && pbuf != NULL);
+	bufsize = size;
+	clear();
+#if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
+    setb(gbuf, gbuf + size, 0);
+#endif
+    setg(gbuf, gbuf + size, gbuf + size);
+    setp(pbuf, pbuf + size);
+}
+
+void StreamProtocol::release(void)
+{
+	if(gbuf)
+		delete[] gbuf;
+
+	if(pbuf)
+		delete[] pbuf;
+
+	gbuf = pbuf = NULL;
+	bufsize = 0;
+	clear();
+}
+
+int StreamProtocol::sync(void)
+{
+	if(!bufsize)
+		return 0;
+
+	overflow(EOF);
+	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
+	return 0;
+}
+
+tcpstream::tcpstream(const tcpstream &copy) :
+StreamProtocol()
+{
+	so = Socket::create(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP);
 	timeout = copy.timeout;
 }
 
 tcpstream::tcpstream(int family, timeout_t tv) :
-	streambuf(), 
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-	bufsize = 0;
-	gbuf = pbuf = NULL;
 	so = Socket::create(family, SOCK_STREAM, IPPROTO_TCP);
-
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	timeout = tv;
 }
 
 tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
-	streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-	bufsize = 0;
-	gbuf = pbuf = NULL;
 	so = Socket::create(list.getfamily(), SOCK_STREAM, IPPROTO_TCP);
-
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	timeout = tv;
 	open(list);
 }
 
 tcpstream::tcpstream(const TCPServer *server, unsigned segsize, timeout_t tv) :
-	streambuf(), 
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-	bufsize = 0;
-	gbuf = pbuf = NULL;
 	so = server->accept();
-
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	timeout = tv;
 	if(so == INVALID_SOCKET) {
 		clear(ios::failbit | rdstate());
@@ -125,27 +169,8 @@ tcpstream::~tcpstream()
 
 void tcpstream::release(void)
 {
-	if(gbuf)
-		delete[] gbuf;
-
-	if(pbuf)
-		delete[] pbuf;
-
-	clear();
+	StreamProtocol::release();
 	Socket::release(so);
-}
-
-int tcpstream::uflow()
-{
-    int ret = underflow();
-
-    if (ret == EOF)
-        return EOF;
-
-    if (bufsize != 1)
-        gbump(1);
-
-    return ret;
 }
 
 #ifndef	MSG_WAITALL
@@ -171,16 +196,6 @@ ssize_t tcpstream::_write(const char *buffer, size_t size)
 }
 
 int tcpstream::_getch(void)
-{
-	return underflow();
-}
-
-int tcpstream::_putch(int code)
-{
-	return overflow(code);
-}
-
-int tcpstream::underflow()
 {
 	ssize_t rlen = 1;
 	unsigned char ch;
@@ -227,7 +242,7 @@ int tcpstream::underflow()
     return (unsigned char) *gptr();
 }
 
-int tcpstream::overflow(int c)
+int tcpstream::_putch(int c)
 {
     unsigned char ch;
     ssize_t rlen, req;
@@ -389,69 +404,17 @@ void tcpstream::allocate(unsigned mss)
 		Socket::sendwait(so, mss * 4);
 
 allocate:
-	if(gbuf)
-		delete[] gbuf;
-
-	if(pbuf)
-		delete[] pbuf;
-
-	gbuf = pbuf = NULL;
-
-	if(size < 2) {
-		bufsize = 1;
-		return;
-	}
-
-	gbuf = new char[size];
-	pbuf = new char[size];
-	assert(gbuf != NULL && pbuf != NULL);
-	bufsize = size;
-	clear();
-#if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
-    setb(gbuf, gbuf + size, 0);
-#endif
-    setg(gbuf, gbuf + size, gbuf + size);
-    setp(pbuf, pbuf + size);
-}
-
-int tcpstream::sync(void)
-{
-	if(!bufsize)
-		return 0;
-
-	overflow(EOF);
-	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
-	return 0;
+	StreamProtocol::allocate(size);
 }
 
 pipestream::pipestream() :
-streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-	bufsize = 0;
-	gbuf = pbuf = NULL;
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 }
 
 pipestream::pipestream(const char *cmd, access_t access, const char **envp, size_t size) :
-streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-bufsize = 0;
-	gbuf = pbuf = NULL;
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	open(cmd, access, envp, size);
 }
 
@@ -667,24 +630,13 @@ void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t 
 
 void pipestream::release(void)
 {
-	if(!bufsize)
-		return;
-
-	sync();
-
-	if(gbuf) {
+	if(gbuf)
 		fsys::close(rd);
-		delete[] gbuf;
-	}
 
-	if(pbuf) {
+	if(pbuf)
 		fsys::close(wr);
-		delete[] pbuf;
-	}
 
-	gbuf = pbuf = NULL;
-	bufsize = 0;
-	clear();
+	StreamProtocol::release();
 }
 
 void pipestream::allocate(size_t size, access_t mode)
@@ -718,27 +670,7 @@ void pipestream::allocate(size_t size, access_t mode)
 		setp(pbuf, pbuf + size);
 }
 
-int pipestream::sync(void)
-{
-	if(!bufsize)
-		return 0;
-
-	overflow(EOF);
-	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
-	return 0;
-}
-
 int pipestream::_getch(void)
-{
-	return underflow();
-}
-
-int pipestream::_putch(int code)
-{
-	return overflow(code);
-}
-
-int pipestream::underflow()
 {
 	ssize_t rlen = 1;
 	unsigned char ch;
@@ -777,20 +709,7 @@ int pipestream::underflow()
     return (unsigned char) *gptr();
 }
 
-int pipestream::uflow()
-{
-    int ret = underflow();
-
-    if (ret == EOF)
-        return EOF;
-
-    if (bufsize != 1)
-        gbump(1);
-
-    return ret;
-}
-
-int pipestream::overflow(int c)
+int pipestream::_putch(int c)
 {
     unsigned char ch;
     ssize_t rlen, req;
@@ -842,33 +761,13 @@ int pipestream::overflow(int c)
 }
 
 filestream::filestream() :
-streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-	bufsize = 0;
-	gbuf = pbuf = NULL;
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 }
 
 filestream::filestream(const filestream& copy) :
-streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-	bufsize = 0;
-	gbuf = pbuf = NULL;
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	if(copy.bufsize) 
 		fd = copy.fd;
 	if(is(fd))
@@ -877,34 +776,14 @@ streambuf(),
 
 
 filestream::filestream(const char *filename, fsys::access_t mode, size_t size) :
-streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-bufsize = 0;
-	gbuf = pbuf = NULL;
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	open(filename, mode, size);
 }
 
 filestream::filestream(const char *filename, fsys::access_t access, unsigned mode, size_t size) :
-streambuf(),
-#ifdef OLD_STDCPP
-	iostream()
-#else
-	iostream((streambuf *)this)
-#endif
+StreamProtocol()
 {
-bufsize = 0;
-	gbuf = pbuf = NULL;
-#ifdef OLD_STDCPP
-	init((streambuf *)this);
-#endif
 	create(filename, access, mode, size);
 }
 
@@ -923,18 +802,12 @@ void filestream::seek(fsys::offset_t offset)
 
 void filestream::close(void)
 {
-	if(bufsize) {
-		if(gbuf) {
-			delete[] gbuf;
-			gbuf = NULL;
-		}
-		if(pbuf) {
-			delete[] pbuf;
-			pbuf = NULL;
-		}
-		bufsize = 0;
+	sync();
+
+	if(bufsize) 
 		fsys::close(fd);
-	}
+
+	StreamProtocol::release();
 }
 
 void filestream::allocate(size_t size, fsys::access_t mode)
@@ -985,27 +858,7 @@ void filestream::open(const char *fname, fsys::access_t access, size_t size)
 		allocate(size, access);
 }
 
-int filestream::sync(void)
-{
-	if(!bufsize)
-		return 0;
-
-	overflow(EOF);
-	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
-	return 0;
-}
-
 int filestream::_getch(void)
-{
-	return underflow();
-}
-
-int filestream::_putch(int code)
-{
-	return overflow(code);
-}
-
-int filestream::underflow()
 {
 	ssize_t rlen = 1;
 
@@ -1033,20 +886,7 @@ int filestream::underflow()
     return (unsigned char) *gptr();
 }
 
-int filestream::uflow()
-{
-    int ret = underflow();
-
-    if (ret == EOF)
-        return EOF;
-
-    if (bufsize != 1)
-        gbump(1);
-
-    return ret;
-}
-
-int filestream::overflow(int c)
+int filestream::_putch(int c)
 {
     ssize_t rlen, req;
 

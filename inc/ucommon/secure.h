@@ -177,67 +177,6 @@ public:
 };
 
 /**
- * Low level ssl socket class.  This uses the buffering system of the
- * ssl library itself (for example, in the case of openssl, bio) and
- * has a restricted set of properties based on the use of connected
- * tcp/ssl servers and clients.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT SSocket : public CharacterProtocol
-{
-protected:
-	secure::session_t ssl;
-	secure::bufio_t wbio, rbio;
-	socket_t so;
-	bool verify;
-	int ioerr;
-
-	int _getch(void);
-
-	int _putch(int code);
-
-public:
-	SSocket();
-	SSocket(const char *host, const char *service, secure::client_t context);
-	SSocket(const TCPServer *server, secure::server_t context);
-	~SSocket();
-
-	void connect(const char *host, const char *service, secure::server_t context);
-
-	void accept(const TCPServer *server, secure::server_t context);
-
-	void release(void);
-
-	size_t printf(const char *format, ...) __PRINTF(2,3);
-
-	size_t readline(char *buffer, size_t size);
-
-	size_t readline(string& object);
-
-	size_t read(char *buffer, size_t size);
-
-	size_t write(const char *buffer, size_t size);
-
-	inline size_t writes(const char *buffer)
-		{return write(buffer, strlen(buffer));}
-
-	inline socket_t getsocket(void)
-		{return so;}
-
-	inline bool issecure(void)
-		{return rbio != NULL;}
-
-	inline operator bool()
-		{return so != INVALID_SOCKET;}
-
-	inline bool operator!()
-		{return so == INVALID_SOCKET;}
-
-	inline int err(void)
-		{return ioerr;}
-};
-
-/**
  * Secure socket buffer.  This is used to create ssl socket connections
  * for both clients and servers.  The use depends in part on the type of
  * context created and passed at construction time.  If no context is

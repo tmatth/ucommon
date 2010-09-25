@@ -34,6 +34,8 @@ Completed ABI changes (3.x to 4.0):
 
 	Added a "add" and "remove" method for keymap?
 
+	New StreamProtocol to consolidate std::iostream based classes.
+
 Proposed ABI changes for 4.0:
 
 	sslstream
