@@ -170,6 +170,16 @@ ssize_t tcpstream::_write(const char *buffer, size_t size)
 	return Socket::sendto(so, buffer, size);
 }
 
+int tcpstream::_getch(void)
+{
+	return underflow();
+}
+
+int tcpstream::_putch(int code)
+{
+	return overflow(code);
+}
+
 int tcpstream::underflow()
 {
 	ssize_t rlen = 1;
@@ -718,6 +728,16 @@ int pipestream::sync(void)
 	return 0;
 }
 
+int pipestream::_getch(void)
+{
+	return underflow();
+}
+
+int pipestream::_putch(int code)
+{
+	return overflow(code);
+}
+
 int pipestream::underflow()
 {
 	ssize_t rlen = 1;
@@ -973,6 +993,16 @@ int filestream::sync(void)
 	overflow(EOF);
 	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
 	return 0;
+}
+
+int filestream::_getch(void)
+{
+	return underflow();
+}
+
+int filestream::_putch(int code)
+{
+	return overflow(code);
 }
 
 int filestream::underflow()

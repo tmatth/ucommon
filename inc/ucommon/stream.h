@@ -49,7 +49,7 @@ NAMESPACE_UCOMMON
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT tcpstream : protected std::streambuf, public std::iostream
+class __EXPORT tcpstream : protected std::streambuf, public std::iostream, public CharacterProtocol
 {
 private:
 	__LOCAL void allocate(unsigned size);
@@ -60,6 +60,10 @@ protected:
 	timeout_t timeout;
 	size_t bufsize;
 	char *gbuf, *pbuf;
+
+	virtual int _putch(int code);
+
+	virtual int _getch(void);
 
 	virtual ssize_t _read(char *buffer, size_t size);
 
@@ -186,7 +190,7 @@ public:
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT pipestream : protected std::streambuf, public std::iostream
+class __EXPORT pipestream : protected std::streambuf, public std::iostream, public CharacterProtocol
 {
 public:
 	typedef enum {
@@ -203,6 +207,10 @@ protected:
 	pid_t pid;
 	size_t bufsize;
 	char *gbuf, *pbuf;
+
+	virtual int _getch(void);
+
+	virtual int _putch(int code);
 
 	/**
 	 * Release the stream, detach/do not wait for the process.
@@ -305,7 +313,7 @@ public:
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT filestream : protected std::streambuf, public std::iostream
+class __EXPORT filestream : protected std::streambuf, public std::iostream, public CharacterProtocol
 {
 public:
 	typedef enum {
@@ -322,6 +330,10 @@ protected:
 	fsys::access_t ac;
 	size_t bufsize;
 	char *gbuf, *pbuf;
+
+	virtual int _getch(void);
+
+	virtual int _putch(int code);
 
     /**
      * This streambuf method is used to load the input buffer
