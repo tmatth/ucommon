@@ -368,10 +368,10 @@ public:
 	 * is stripped, the length of the string may be less than the actual
 	 * count read.  If at the end of the file buffer and unable to read more
 	 * data an error occured then 0 is returned.
-	 * @param string to save input into.
+	 * @param buffer to save input into.
 	 * @return count of characters actually read or 0 if at end of data.
 	 */
-	size_t getline(string& s);
+	size_t getline(string& buffer);
 
 	/**
 	 * Put a string as a line of output to the buffer.  The eol character is 
