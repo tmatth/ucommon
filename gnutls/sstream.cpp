@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+
 sstream::sstream(secure::client_t scontext) :
 tcpstream()
 {
@@ -116,3 +118,4 @@ int sstream::sync()
 	return tcpstream::sync();
 }
 
+#endif
