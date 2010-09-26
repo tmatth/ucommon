@@ -110,6 +110,10 @@ ssize_t sstream::_read(char *address, size_t size)
 
 bool sstream::_wait(void)
 {
+	// we have no way to examine the pending queue in gnutls??
+	if(ssl)
+		return true;
+
 	return tcpstream::_wait();
 }
 

@@ -110,7 +110,7 @@ size_t SSLBuffer::_push(const char *address, size_t size)
 	int result = gnutls_record_send((SSL)ssl, address, size);
 	if(result < 0) {
 		result = 0;
-		ioerr = Socket::error();
+		ioerr = EIO;
 	}
 	return (size_t)result;
 }
@@ -123,7 +123,7 @@ size_t SSLBuffer::_pull(char *address, size_t size)
     int result = gnutls_record_recv((SSL)ssl, address, size);
     if(result < 0) {
         result = 0;
-        ioerr = Socket::error();
+        ioerr = EIO;
     }
     return (size_t)result;
 }

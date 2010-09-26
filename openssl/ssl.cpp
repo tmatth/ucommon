@@ -106,7 +106,7 @@ size_t SSLBuffer::_push(const char *address, size_t size)
 	int result = SSL_write((SSL *)ssl, address, size);
 	if(result < 0) {
 		result = 0;
-		ioerr = Socket::error();
+		ioerr = EIO;
 	}
 	return (ssize_t)result;
 }
@@ -139,7 +139,7 @@ size_t SSLBuffer::_pull(char *address, size_t size)
 	int result = SSL_read((SSL *)ssl, address, size);
 	if(result < 0) {
 		result = 0;
-		ioerr = Socket::error();
+		ioerr = EIO;
 	}
 	return (size_t) result;
 }
@@ -149,8 +149,13 @@ bool SSLBuffer::_flush(void)
 	int result;
 
 	if(TCPBuffer::_flush()) {
-		if(bio)
+		if(bio) {
 			result = BIO_flush((BIO *)bio);
+			if(result < 1) {
+				ioerr = EIO;
+				return false;
+			}
+		}
 		return true;
 	}
 
