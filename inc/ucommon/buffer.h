@@ -169,7 +169,6 @@ protected:
 public:
 	/**
 	 * Construct an unconnected tcp client and specify our service profile.
-	 * @param service identifier, usually by name.
 	 */
 	TCPBuffer();
 

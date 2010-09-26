@@ -949,11 +949,10 @@ public:
 	 * may be greater than the string length.  If there was no data read
 	 * because of eof of data, an error has occured, or timeout without
 	 * input, then 0 will be returned.
-	 * @param data to save input line.
-	 * @param size of input line buffer.
+	 * @param buffer to save input line.
 	 * @return number of bytes read, 0 if none, err() has error.
 	 */
-	size_t readline(string& str);
+	size_t readline(string& buffer);
 
 	/**
 	 * Read a newline of text data from the socket and save in NULL terminated

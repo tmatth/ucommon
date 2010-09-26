@@ -572,6 +572,14 @@ inline void zerofill(void *addr, size_t size)
 
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 
+/**
+ * Secure socket using std::iostream.  This class is similar to SSLBuffer
+ * but uses the libstdc++ library to stream i/o.  Being based on tcpstream,
+ * it also inherits the character protocol.  Like SSLBuffer, if no context
+ * is given or the handshake fails, then the stream defaults to insecure TCP 
+ * connection behavior.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT sstream : public tcpstream
 {
 protected:

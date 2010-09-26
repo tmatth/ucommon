@@ -554,7 +554,6 @@ public:
 	 * ucommon file routines.  Because the newline is cleared, the
 	 * string length may be shorter than the return size.
 	 * @param string to write.
-	 * @param size of buffer.
 	 * @return true if data read, 0 if at end of file.
 	 */
 	size_t readline(string& string);
