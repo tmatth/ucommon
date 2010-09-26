@@ -386,7 +386,7 @@ public:
 	 * Check if at end of input.
 	 * @return true if end of data, false if input still buffered.
 	 */
-	bool eof();
+	bool eof(void);
 
 	/**
 	 * See if buffer open.
