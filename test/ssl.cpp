@@ -28,11 +28,11 @@ using namespace UCOMMON_NAMESPACE;
 
 int main(int argc, char **argv)
 {
-	const char *proto = "http";
+	const char *proto = "80";
 	secure::client_t ctx = NULL;
 
 	if(secure::init()) {
-		proto = "https";
+		proto = "443";
 		ctx = secure::client();
 	}
 
@@ -45,8 +45,12 @@ int main(int argc, char **argv)
     ssl.open("www.google.com", proto);
     printf("open %d\n", ssl.isopen());
 
+	printf("SSL EOF %d\n", ssl.eof());
+
 	ssl.putline("GET /\r\n\r\n");
     ssl.flush();
+
+	printf("SSL EOF %d\n", ssl.eof());
 
     char buf[256];
 
