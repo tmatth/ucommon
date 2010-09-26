@@ -487,7 +487,6 @@ public:
 		 * Append additional host addresses to our list.
 		 * @param hostname or address to resolve.
 		 * @param service name or port number, or NULL if not used.
-		 * @param family of hostnames to filter list by.
 		 * @param type of socket (stream or dgram).
 		 */
 		void add(const char *hostname, const char *service = NULL, int type = SOCK_STREAM);
