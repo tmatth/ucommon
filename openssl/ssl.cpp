@@ -40,7 +40,7 @@ TCPBuffer(tcp, size)
 	if(ctx && ctx->ctx && ctx->err() == secure::OK)
 		ssl = SSL_new(ctx->ctx);
 
-	if(!isopen() || !ssl)
+	if(!is_open() || !ssl)
 		return;
 
 	SSL_set_fd((SSL *)ssl, getsocket());
@@ -64,7 +64,7 @@ void SSLBuffer::open(const char *host, const char *service, size_t bufsize)
 	close();
 	TCPBuffer::open(host, service, bufsize);
 
-	if(!isopen() || !ssl)
+	if(!is_open() || !ssl)
 		return;
 
 	SSL_set_fd((SSL *)ssl, getsocket());

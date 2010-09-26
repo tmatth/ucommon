@@ -87,9 +87,16 @@ public:
 	 * @return 0 on success, or error code.
 	 */
 	int sync(void);
+
+	inline bool is_open(void)
+		{return bufsize > 0;}
+
+	inline operator bool()
+		{return bufsize > 0;}
+
+	inline bool operator!()
+		{return bufsize == 0;}
 };
-
-
 
 /**
  * Streamable tcp connection between client and server.  The tcp stream
@@ -135,6 +142,9 @@ protected:
      * @return char pushed through.
      */
     int _putch(int ch);
+
+	inline socket_t getsocket(void) const
+		{return so;}
 
 public:
 	/**

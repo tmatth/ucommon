@@ -24,7 +24,7 @@ TCPBuffer(tcp, size)
 	bio = NULL;
 	server = true;
 
-	if(!isopen() || !ssl)
+	if(!is_open() || !ssl)
 		return;	
 
 	gnutls_transport_set_ptr((SSL)ssl, (gnutls_transport_ptr_t) so);
@@ -64,7 +64,7 @@ void SSLBuffer::open(const char *host, const char *service, size_t size)
 
 	TCPBuffer::open(host, service, size);
 
-	if(!isopen() || !ssl)
+	if(!is_open() || !ssl)
 		return;	
 
 	gnutls_transport_set_ptr((SSL)ssl, (gnutls_transport_ptr_t) so);

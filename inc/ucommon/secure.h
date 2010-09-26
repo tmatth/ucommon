@@ -217,7 +217,7 @@ public:
 
 	bool _pending(void);
 
-	inline bool issecure(void)
+	inline bool is_secure(void)
 		{return bio != NULL;};
 };
 
@@ -569,6 +569,44 @@ inline void zerofill(void *addr, size_t size)
 {
 	::memset(addr, 0, size);
 }
+
+#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+
+class __EXPORT sstream : public tcpstream
+{
+protected:
+	secure::session_t ssl;
+	secure::bufio_t bio;
+	bool server;
+	bool verify;
+
+public:
+	sstream(secure::client_t context);
+	sstream(const TCPServer *server, secure::server_t context, size_t size = 536);
+	~sstream();
+
+	void open(const char *host, const char *service, size_t size = 536);
+
+	void close(void);
+
+	int sync();
+
+	void release(void);
+
+	ssize_t _write(const char *address, size_t size);
+
+	ssize_t _read(char *address, size_t size);
+
+	bool _wait(void);
+
+	inline void flush(void)
+		{sync();}
+
+	inline bool is_secure(void)
+		{return bio != NULL;}
+};
+
+#endif
 
 END_NAMESPACE
 

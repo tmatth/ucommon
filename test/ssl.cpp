@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
     ssl_t ssl(ctx);
     ssl.open("www.google.com", proto);
-    printf("open %d\n", ssl.isopen());
+    printf("open %d\n", ssl.is_open());
 
 	ssl.putline("GET /\r\n\r\n");
     ssl.flush();

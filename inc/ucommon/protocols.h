@@ -406,28 +406,28 @@ public:
 	 * See if buffer open.
 	 * @return true if buffer active.
 	 */
-	inline bool isopen(void)
+	inline bool is_open(void)
 		{return buffer != NULL;}
 
 	/**
 	 * See if input active.
 	 * @return true if input active.
 	 */
-	inline bool isinput(void)
+	inline bool is_input(void)
 		{return input != NULL;}
 
 	/**
 	 * See if output active.
 	 * @return true if output active.
 	 */
-	inline bool isoutput(void)
+	inline bool is_output(void)
 		{return output != NULL;}
 
 	/**
 	 * See if pending input.
 	 * @return true if input pending.
 	 */
-	inline bool ispending(void)
+	inline bool is_pending(void)
 		{return _pending();}
 
 	/**

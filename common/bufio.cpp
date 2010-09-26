@@ -120,10 +120,10 @@ void fbuf::close()
 
 fsys::offset_t fbuf::tell(void)
 {
-	if(!fbuf::isopen())
+	if(!fbuf::is_open())
 		return 0;
 
-	if(isinput())
+	if(is_input())
 		return inpos + unread();
 
 	if(outpos == fsys::end)
@@ -136,7 +136,7 @@ bool fbuf::trunc(offset_t offset)
 {
 	int seekerr;
 
-	if(!fbuf::isopen())
+	if(!fbuf::is_open())
 		return false;
 
 	_clear();
@@ -157,7 +157,7 @@ bool fbuf::seek(offset_t offset)
 {
 	int seekerr;
 
-	if(!fbuf::isopen())
+	if(!fbuf::is_open())
 		return false;
 
 	_clear();
@@ -195,7 +195,7 @@ size_t fbuf::_push(const char *buf, size_t size)
 #else
 	int seekerr;
 
-	if(isinput()) {
+	if(is_input()) {
 		// if read & write separate threads, protect i/o reposition
 		mutex::protect(this);
 		seekerr = fsys::seek(outpos);
@@ -207,7 +207,7 @@ size_t fbuf::_push(const char *buf, size_t size)
 
 	result = fsys::write(buf, size);
 
-	if(isinput()) {
+	if(is_input()) {
 		seekerr = fsys::seek(inpos);
 		mutex::release(this);
 		if(result >= 0 && seekerr)
@@ -227,18 +227,18 @@ size_t fbuf::_pull(char *buf, size_t size)
 	ssize_t result;
 
 #ifdef	HAVE_PWRITE
-	if(isoutput()) 
+	if(is_output()) 
 		result = pread(getfile(), buf, size, inpos);
 	else
 		result = fsys::read(buf, size);
 #else
 
-	if(isoutput())
+	if(is_output())
 		mutex::protect(this);
 
 	result = fsys::read(buf, size);
 
-	if(isoutput())
+	if(is_output())
 		mutex::release(this);
 #endif
 
@@ -404,7 +404,7 @@ bool TCPBuffer::_pending(void)
 	if(unread())
 		return true;
 	
-	if(isinput() && iowait && iowait != Timer::inf)
+	if(is_input() && iowait && iowait != Timer::inf)
 		return Socket::wait(so, iowait);
 
 	return Socket::wait(so, 0);
