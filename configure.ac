@@ -10,7 +10,7 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="4.0.0"
+VERSION="4.0.1"
 LT_VERSION="4:0:0"
 OPENSSL_REQUIRES="0.9.7"
 

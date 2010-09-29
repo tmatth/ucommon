@@ -1,3 +1,6 @@
+from ucommon 4.0.0 to 4.0.1
+- fix for misnamed library in ucommon-config.
+
 from ucommon 3.4.0 to 4.0.0
 - introduction of protocols as abstract bases for mixin classes.
 - Socket class tracks last error and has iowait/blocking property.
