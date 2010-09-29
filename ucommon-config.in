@@ -104,7 +104,7 @@ while test $# -gt 0; do
 		;;
 
     --libs)
-		echo -lucsecure -lucommon @SECURE_LIBS@ @UCOMMON_LINKED@ 
+		echo -lusecure -lucommon @SECURE_LIBS@ @UCOMMON_LINKED@ 
        	;;
 	--includes)
 		echo @UCOMMON_INCLUDES@
