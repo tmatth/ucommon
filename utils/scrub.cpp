@@ -218,6 +218,8 @@ extern "C" int main(int argc, char **argv)
 	argv0 = args.argv0();
 	unsigned count = 0;
 
+	argv0 = args.argv0();
+
 	if(is(helpflag) || is(althelp)) {
 		printf("%s\n", _TEXT("Usage: scrub [options] path..."));
 		printf("%s\n\n", _TEXT("Echo command line arguments"));

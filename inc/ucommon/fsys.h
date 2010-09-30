@@ -598,5 +598,22 @@ typedef	fsys fsys_t;
 
 END_NAMESPACE
 
+#ifndef	S_ISREG
+
+#define __S_ISTYPE(mode, mask)  (((mode) & S_IFMT) == (mask))
+
+#define S_ISDIR(mode)    __S_ISTYPE((mode), S_IFDIR)
+#define S_ISCHR(mode)    __S_ISTYPE((mode), S_IFCHR)
+#define S_ISBLK(mode)    __S_ISTYPE((mode), S_IFBLK)
+#define S_ISREG(mode)    __S_ISTYPE((mode), S_IFREG)
+#ifdef __S_IFIFO
+	#define S_ISFIFO(mode)  __S_ISTYPE((mode), S_IFIFO)
+#endif
+#ifdef __S_IFLNK
+	#define S_ISLNK(mode)   __S_ISTYPE((mode), S_IFLNK)
+#endif
+
+#endif
+
 #endif
 
