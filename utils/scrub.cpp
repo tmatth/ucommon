@@ -72,12 +72,12 @@ static void report(const char *path, int code)
 
 	if(!code) {
 		if(is(verbose))
-			shell::printf(_TEXT(" removed\n"));
+			shell::printf("%s\n", _TEXT(" removed"));
 		return;
 	}
 
 	if(is(verbose))
-		shell::printf(" %s\n", err);
+		shell::printf(" - %s\n", err);
 	else
 		shell::errexit(1, "*** %s: %s\n", path, err);
 
@@ -90,17 +90,23 @@ static void scrubfile(const char *path)
 	struct stat ino;
 	unsigned char block[1024];
 	unsigned long count;
-	unsigned long pos = 0l;
+	fsys::offset_t pos = 0l;
 	unsigned dots = 0;
+	unsigned pass = 0;
 		
 	if(is(verbose))
 		shell::printf("%s", path);
 
 	fsys::stat(path, &ino);
-	count = (ino.st_size + 1024l) / 1024;
 
-	count /= (long)(*blocks);
-	count *= (long)(*blocks);
+	if(S_ISREG(ino.st_mode) == 0) {
+		report(path, fsys::remove(path));
+		return;
+	}
+
+	count = (ino.st_size + 1024l) / 1024;
+	count /= (fsys::offset_t)(*blocks);
+	count *= (fsys::offset_t)(*blocks);
 
 	fs.open(path, fsys::ACCESS_REWRITE);
 	if(!is(fs)) {
@@ -114,21 +120,49 @@ static void scrubfile(const char *path)
 			if(is(verbose))
 				shell::printf(".");
 		}
+		pass = 0;
 
+repeat:
 		fs.seek(pos);
 		if(fs.err()) {
 			report(path, fs.err());
 			fs.close();
 			return;
 		}
-		Random::fill(block, 1024);
-		fs.write(block, 1024);
+		if(pass < *passes) {
+			Random::fill(block, 1024);
+			fs.write(block, 1024);
+			if(fs.err()) {
+				report(path, fs.err());
+				fs.close();
+				return;
+			}
+			if(++pass < *passes)
+				goto repeat;
+		}
+
+		// if we don't do random fill passes, we still do zero fill...
+		if(!pass) {
+			memset(block, 0, sizeof(block));
+			fs.write(block, 1024);
+			if(fs.err()) {
+				report(path, fs.err());
+				fs.close();
+				return;
+			}
+		}
+
+		pos += 1024l;
+	}
+
+	while(is(trunc) && pos > 0l) {
+		pos -= 1024l * (fsys::offset_t)*blocks;
+		fs.trunc(pos);
 		if(fs.err()) {
 			report(path, fs.err());
 			fs.close();
 			return;
-		}		
-		pos += 1024l;
+		}
 	}
 
 	report(path, fsys::remove(path));
