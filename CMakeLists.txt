@@ -295,6 +295,10 @@ add_executable(mdsum utils/mdsum.cpp)
 add_dependencies(mdsum usecure ucommon)
 target_link_libraries(mdsum usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
+add_executable(zerofill utils/zerofill.cpp)
+add_dependencies(zerofill usecure ucommon)
+target_link_libraries(zerofill usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
+
 find_package(Doxygen)
 
 if (DOXYGEN_FOUND)
@@ -386,5 +390,5 @@ endif(NOT WIN32)
 
 install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
 install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
-install(TARGETS args scrub mdsum DESTINATION bin)
+install(TARGETS args scrub mdsum zerofill DESTINATION bin)
 
