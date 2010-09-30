@@ -22,7 +22,9 @@ using namespace UCOMMON_NAMESPACE;
 static shell::flagopt helpflag('h',"--help",	_TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::numericopt blocks('b', "--blocksize", _TEXT("size of i/o blocks in k (1-x)"), "size k", 1);
+static shell::flagopt follow('f', "--follow", _TEXT("follow symlinks"));
 static shell::numericopt passes('p', "--passes", _TEXT("passes with randomized data (0-x)"), "count", 1);
+static shell::flagopt renamefile('r', "--rename", _TEXT("rename file randomly"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
 static shell::flagopt trunc('t', "--truncate", _TEXT("decompose file by truncation"));
 static shell::flagopt verbose('v', "--verbose", _TEXT("show active status"));
@@ -99,12 +101,16 @@ static void scrubfile(const char *path)
 
 	fsys::stat(path, &ino);
 
+	if(is(follow) && S_ISLNK(ino.st_mode) != 0)
+		goto deref;
+
 	if(S_ISREG(ino.st_mode) == 0) {
 		report(path, fsys::remove(path));
 		return;
 	}
 
-	count = (ino.st_size + 1024l) / 1024;
+deref:
+	count = (ino.st_size + 1023l) / 1024;
 	count /= (fsys::offset_t)(*blocks);
 	count *= (fsys::offset_t)(*blocks);
 
