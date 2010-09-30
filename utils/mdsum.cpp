@@ -22,18 +22,16 @@ using namespace UCOMMON_NAMESPACE;
 
 static shell::flagopt helpflag('h',"--help",	_TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
-static shell::numericopt blocks('b', "--blocksize", _TEXT("size of i/o blocks in k (1-x)"), "size k", 1);
+static shell::stringopt hash('d', "--digest", _TEXT("digest method (md5)"), "method", "md5");
 static shell::flagopt follow('f', "--follow", _TEXT("follow symlinks"));
-static shell::numericopt passes('p', "--passes", _TEXT("passes with randomized data (0-x)"), "count", 1);
-static shell::flagopt renamefile('r', "--rename", _TEXT("rename file randomly"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
-static shell::flagopt trunc('t', "--truncate", _TEXT("decompose file by truncation"));
-static shell::flagopt verbose('v', "--verbose", _TEXT("show active status"));
+static shell::flagopt hidden('s', "--hidden", _TEXT("show hidden files"));
 
 static int exit_code = 0;
-static const char *argv0 = "scrub";
+static const char *argv0 = "md";
+static digest_t md;
 
-static void report(const char *path, int code)
+static void result(const char *path, int code)
 {
 	const char *err = _TEXT("i/o error");
 
@@ -69,124 +67,71 @@ static void report(const char *path, int code)
 	case EINTR:
 		err = _TEXT("operation interupted");
 		break;
+	case EISDIR:
+		err = _TEXT("is a directory");
+		break;
 	case ELOOP:
 		err = _TEXT("too many sym links");
 		break;
 	}
 
 	if(!code) {
-		if(is(verbose))
-			shell::printf("%s\n", _TEXT(" removed"));
+		if(!path)
+			path="-";
+		shell::printf("%s %s\n", *md, path);
 		return;
 	}
 
-	if(is(verbose))
-		shell::printf(" - %s\n", err);
+	if(path)
+		shell::printf("%s: %s: %s\n", argv0, path, err);
 	else
-		shell::errexit(1, "%s: %s: %s\n", argv0, path, err);
-
+		shell::errexit(1, "*** %s\n", err);
+ 
 	exit_code = 1;
 }
 
-static void scrubfile(const char *path)
+static void digest(const char *path = NULL)
 {
 	fsys_t fs;
 	struct stat ino;
-	unsigned char block[1024];
-	unsigned long count;
-	fsys::offset_t pos = 0l;
-	unsigned dots = 0;
-	unsigned pass = 0;
+	unsigned char buffer[1024];
 	
-	if(is(verbose))
-		shell::printf("%s", path);
+	if(path) {
+		int err = fsys::stat(path, &ino);
 
-	int err = fsys::stat(path, &ino);
+		if(!err && fsys::islink(&ino) && !is(follow))
+			err = EBADF;
 
-	if((err == ENOENT || fsys::islink(&ino)) && !is(follow)) {
-		report(path, fsys::remove(path));
-		return;
+		if(err) {
+			result(path, err);
+			return;
+		}
+
+		if(fsys::issys(&ino)) {
+			result(path, EBADF);
+			return;
+		}
+
+		fs.open(path, fsys::ACCESS_STREAM);
 	}
+	else
+		fs.assign(shell::input());
 
-	if(err == ENOENT || !ino.st_size || fsys::issys(&ino) || fsys::isdev(&ino)) {
-		report(path, fsys::remove(path));
-		return;
-	}
-
-	count = (ino.st_size + 1023l) / 1024;
-	count /= (fsys::offset_t)(*blocks);
-	count *= (fsys::offset_t)(*blocks);
-
-	fs.open(path, fsys::ACCESS_REWRITE);
 	if(!is(fs)) {
-		report(path, fs.err());
+		result(path, fs.err());
 		return;
 	}
 
-	while(count--) {
-		while(++dots > 16384) {
-			dots = 0;
-			if(is(verbose))
-				shell::printf(".");
-		}
-		pass = 0;
-
-repeat:
-		fs.seek(pos);
-		if(fs.err()) {
-			report(path, fs.err());
-			fs.close();
-			return;
-		}
-		if(pass < (unsigned)(*passes)) {
-			Random::fill(block, 1024);
-			fs.write(block, 1024);
-			if(fs.err()) {
-				report(path, fs.err());
-				fs.close();
-				return;
-			}
-			if(++pass < (unsigned)(*passes))
-				goto repeat;
-		}
-
-		// if we don't do random fill passes, we still do zero fill...
-		if(!pass) {
-			memset(block, 0, sizeof(block));
-			fs.write(block, 1024);
-			if(fs.err()) {
-				report(path, fs.err());
-				fs.close();
-				return;
-			}
-		}
-
-		pos += 1024l;
+	for(;;) {
+		ssize_t size = fs.read(buffer, sizeof(buffer));
+		if(size < 1)
+			break;
+		md.put(buffer, size);
 	}
-
-	while(is(trunc) && pos > 0l) {
-		pos -= 1024l * (fsys::offset_t)*blocks;
-		fs.trunc(pos);
-		if(fs.err()) {
-			report(path, fs.err());
-			fs.close();
-			return;
-		}
-	}
-
-	report(path, fsys::remove(path));
 
 	fs.close();
-	
-}
-
-static void scrubdir(const char *path)
-{
-	if(is(verbose))
-		shell::printf("%s", path);
-	
-
-	report(path, fsys::removeDir(path));
+	result(path, fs.err());
+	md.reset();
 }
 
 static void dirpath(String path, bool top = true)
@@ -199,17 +144,19 @@ static void dirpath(String path, bool top = true)
 		if(*filename == '.' && (filename[1] == '.' || !filename[1]))
 			continue;
 
+		if(*filename == '.' && !is(hidden))
+			continue;
+
 		filepath = str(path) + str("/") + str(filename);
 		if(fsys::isdir(filepath)) {
 			if(is(recursive))
 				dirpath(filepath, false);
 			else
-				scrubdir(filepath);
+				result(filepath, EISDIR);
 		}
 		else
-			scrubfile(filepath);
+			digest(filepath);
 	}	
-	scrubdir(path);
 }
 
 extern "C" int main(int argc, char **argv)
@@ -220,18 +167,10 @@ extern "C" int main(int argc, char **argv)
 	argv0 = args.argv0();
 	unsigned count = 0;
 
-	if(*blocks < 1)
-		shell::errexit(2, "%s: blocksize: %ld: %s\n",
-			argv0, *blocks, _TEXT("must be greater than zero"));
-
-	if(*passes < 0)
-		shell::errexit(2, "%s: passes: %ld: %s\n",
-			argv0, *passes, _TEXT("negative passes invalid"));
-
 	argv0 = args.argv0();
 
 	if(is(helpflag) || is(althelp)) {
-		printf("%s\n", _TEXT("Usage: scrub [options] path..."));
+		printf("%s\n", _TEXT("Usage: md [options] path..."));
 		printf("%s\n\n", _TEXT("Echo command line arguments"));
 		printf("%s\n", _TEXT("Options:"));
 		shell::help();
@@ -239,16 +178,24 @@ extern "C" int main(int argc, char **argv)
 		exit(0);
 	}
 
-	if(!args())
-		return 0;
-
 	secure::init();
+	if(!Digest::is(*hash))
+		shell::errexit(2, "%s: %s: %s\n",
+			argv0, *hash, _TEXT("unkown or unsupported digest method"));
 
-	while(count < args()) {
+	md = *hash;
+
+	// we can symlink md as md5, etc, to set alternate default digest names
+	if(!is(hash) && Digest::is(argv0))
+		md = argv0;
+
+	if(!args())
+		digest();
+	else while(count < args()) {
 		if(fsys::isdir(args[count]))
 			dirpath(str(args[count++]));
 		else
-			scrubfile(args[count++]);
+			digest(args[count++]);
 	}
 
 	return exit_code;

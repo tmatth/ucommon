@@ -86,7 +86,11 @@ html browsable.
 %files bin
 %defattr(-,root,root,-)
 %{_bindir}/args
+%{_bindir}/scrub
+%{_bindir}/mdsum
 %{_mandir}/man1/args.*
+%{_mandir}/man1/scrub.*
+%{_mandir}/man1/mdsum.*
 
 %files devel
 %defattr(-,root,root,-)

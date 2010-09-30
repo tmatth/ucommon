@@ -96,8 +96,14 @@ const char *Digest::c_str(void)
 
 void Digest::reset(void)
 {
-	if(!context)
-		return;
+	if(!context) {
+		if(hashtype) {
+			context = new EVP_MD_CTX;
+			EVP_MD_CTX_init((EVP_MD_CTX *)context);
+		}
+		else
+			return;
+	}
 
 	EVP_DigestInit_ex((EVP_MD_CTX *)context, (const EVP_MD *)hashtype, NULL);
 	bufsize = 0;

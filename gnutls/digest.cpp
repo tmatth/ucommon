@@ -94,10 +94,15 @@ const char *Digest::c_str(void)
 
 void Digest::reset(void)
 {
-	if(!context)
-		return;
+	if(!context) {
+		if(hashid == GCRY_MD_NONE)
+			return;
 
-	gcry_md_reset((MD_CTX)context);
+		gcry_md_open((MD_CTX *)&context, hashid, 0);
+	}
+	else
+		gcry_md_reset((MD_CTX)context);
+
 	bufsize = 0;
 }
 

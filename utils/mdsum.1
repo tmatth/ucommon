@@ -1,4 +1,4 @@
-.\" args - manipulate and output command arguments.
+.\" mdsum - compute file digests using any supported algorithms.
 .\" Copyright (c) 2010 David Sugar <dyfet@gnutelephony.org>
 .\"
 .\" This manual page is free software; you can redistribute it and/or modify
@@ -17,54 +17,42 @@
 .\"
 .\" This manual page is written especially for Debian GNU/Linux.
 .\"
-.TH args "1" "January 2010" "GNU uCommon" "GNU Telephony"
+.TH mdsum "1" "January 2010" "GNU uCommon" "GNU Telephony"
 .SH NAME
-args \- manipulate and output command arguments.
+mdsum \- compute file digests using any supported algorithms.
 .SH SYNOPSIS
-.B args \fI[options]\fR \fIargs...\fR 
+.B mdsum \fI[options]\fR \fI[paths...]\fR 
 .br
 .SH DESCRIPTION
-This command is used to manipulate and echo command line arguments to
-standard out.  This can include adding quotes around each argument passed
-or a seperator, or to output each argument on a separate line.  The program 
-source also offers a basic example of how to use shell argument parsing and 
-localization in ucommon.
+This command computes a message digest for one or more specified files.  If
+no files are specified, then stdin can be used.  Any digest algorithm
+available in libusecure may be selected and used.  Entire directory trees
+may also be examined and computed using the -R (--recursive) option.
 .SH OPTIONS
 .TP
-\fB--delim\fR \fIchar\fR
-Set a deliminator character, such as ',', to use between each argument when
-outputing arguments.
+\fB--digest\fR \fIname\fR
+Specify name of digest algorithm.  By default md5 will be used, unless the
+command is executed through a symlink which happens to match an algorithm
+name.
 .TP
-\fB--directory\fR
-If argument is a directory, list directory contents as arguments.
-.TP
-\fB--lines\fR
-Output each argument on a separate line.
-.TP
-\fB--quote\fR \fIchar|pair\fR
-Set a quote or special leading and trailing pair of characters to surround
-each argument with when output.  A typical use might be --quote=() to surround
-arguments in parenthesis.
+\fB--follow\fR
+Dereference and follow symlinks.  Otherwise they are ignored.
 .TP
 \fB--recursive\fR
 If argument is a directory, recursively scan directory and any subdirectory
 contents as arguments.
 .TP
-\fB--reverse\fR
-Reverse order of arguments.
-.TP
 \fB--help\fR
 Outputs help screen for the user.
 .SH AUTHOR
-.B args
+.B mdsum
 was written by David Sugar <dyfet@gnutelephony.org>.
 .SH "REPORTING BUGS"
 Report bugs to bug-commoncpp@gnu.org.
 .SH COPYRIGHT
-Copyright \(co 2009 David Sugar, Tycho Softworks.
+Copyright \(co 2010 David Sugar, Tycho Softworks.
 .br
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.
-
 

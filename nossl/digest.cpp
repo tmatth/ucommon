@@ -323,11 +323,10 @@ const char *Digest::c_str(void)
 
 void Digest::reset(void)
 {
-	if(!context)
-		return;
-
 	switch(*((char *)hashtype)) {
 	case 'm':
+		if(!context)
+			context = new MD5_CTX;
 		MD5Init((MD5_CTX *)context);
 		break;
 	default:
