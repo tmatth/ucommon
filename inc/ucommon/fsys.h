@@ -50,6 +50,36 @@
 #include <errno.h>
 #include <stdio.h>
 
+#ifndef	S_ISREG
+
+#define __S_ISTYPE(mode, mask)  (((mode) & S_IFMT) == (mask))
+
+#define S_ISDIR(mode)	__S_ISTYPE((mode), S_IFDIR)
+#define S_ISCHR(mode)	__S_ISTYPE((mode), S_IFCHR)
+#ifdef S_IFBLK
+#define S_ISBLK(mode)	__S_ISTYPE((mode), S_IFBLK)
+#else
+#define	S_ISBLK(mode)	0
+#endif
+#define S_ISREG(mode)	__S_ISTYPE((mode), S_IFREG)
+#ifdef S_IFSOCK
+#define S_ISSOCK(mode)	__S_ISTYPE((mode), S_IFSOCK)
+#else
+#define	S_ISSOCK(mode)	0
+#endif
+#ifdef S_IFIFO
+#define S_ISFIFO(mode)	__S_ISTYPE((mode), S_IFIFO)
+#else
+#define S_ISFIFO(mode)	0
+#endif
+#ifdef S_IFLNK
+#define S_ISLNK(mode)	__S_ISTYPE((mode), S_IFLNK)
+#else
+#define	S_ISLNK(mode)	0
+#endif
+
+#endif
+
 NAMESPACE_UCOMMON
 
 /**
@@ -462,6 +492,23 @@ public:
 	 */
 	static void *find(fsys& module, const char *symbol);
 
+	static inline bool isfile(struct stat *inode)
+		{return S_ISREG(inode->st_mode);}
+
+	static inline bool isdir(struct stat *inode)
+		{return S_ISDIR(inode->st_mode);}
+
+	static inline bool islink(struct stat *inode)
+		{return S_ISLNK(inode->st_mode);}
+
+	static inline bool isdev(struct stat *inode)
+		{return S_ISBLK(inode->st_mode) || S_ISCHR(inode->st_mode);}
+
+	static inline bool isdisk(struct stat *inode)
+		{return S_ISBLK(inode->st_mode);}
+
+	static inline bool issys(struct stat *inode)
+		{return S_ISSOCK(inode->st_mode) || S_ISFIFO(inode->st_mode);}
 };
 
 /**
@@ -597,23 +644,6 @@ String str(charfile& fp, strsize_t size);
 typedef	fsys fsys_t;
 
 END_NAMESPACE
-
-#ifndef	S_ISREG
-
-#define __S_ISTYPE(mode, mask)  (((mode) & S_IFMT) == (mask))
-
-#define S_ISDIR(mode)    __S_ISTYPE((mode), S_IFDIR)
-#define S_ISCHR(mode)    __S_ISTYPE((mode), S_IFCHR)
-#define S_ISBLK(mode)    __S_ISTYPE((mode), S_IFBLK)
-#define S_ISREG(mode)    __S_ISTYPE((mode), S_IFREG)
-#ifdef __S_IFIFO
-	#define S_ISFIFO(mode)  __S_ISTYPE((mode), S_IFIFO)
-#endif
-#ifdef __S_IFLNK
-	#define S_ISLNK(mode)   __S_ISTYPE((mode), S_IFLNK)
-#endif
-
-#endif
 
 #endif
 

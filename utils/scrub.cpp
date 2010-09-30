@@ -16,6 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ucommon/secure.h>
+#include <sys/stat.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -102,10 +103,10 @@ static void scrubfile(const char *path)
 
 	fsys::stat(path, &ino);
 
-	if(is(follow) && S_ISLNK(ino.st_mode) != 0)
+	if(is(follow) && fsys::islink(&ino) != 0)
 		goto deref;
 
-	if(S_ISREG(ino.st_mode) == 0) {
+	if(!fsys::isfile(&ino)) {
 		report(path, fsys::remove(path));
 		return;
 	}
@@ -136,7 +137,7 @@ repeat:
 			fs.close();
 			return;
 		}
-		if(pass < *passes) {
+		if(pass < (unsigned)(*passes)) {
 			Random::fill(block, 1024);
 			fs.write(block, 1024);
 			if(fs.err()) {
@@ -144,7 +145,7 @@ repeat:
 				fs.close();
 				return;
 			}
-			if(++pass < *passes)
+			if(++pass < (unsigned)(*passes))
 				goto repeat;
 		}
 
@@ -217,6 +218,14 @@ extern "C" int main(int argc, char **argv)
 	shell args(argc, argv);
 	argv0 = args.argv0();
 	unsigned count = 0;
+
+	if(*blocks < 1)
+		shell::errexit(2, "%s: blocksize: %ld: %s\n",
+			argv0, *blocks, _TEXT("must be greater than zero"));
+
+	if(*passes < 0)
+		shell::errexit(2, "%s: passes: %ld: %s\n",
+			argv0, *passes, _TEXT("negative passes invalid"));
 
 	argv0 = args.argv0();
 
