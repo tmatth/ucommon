@@ -14,8 +14,8 @@ INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
-man_MANS = args.1 scrub.1
-bin_PROGRAMS = args scrub mdsum
+man_MANS = args.1 scrub.1 mdsum.1 zerofill.1
+bin_PROGRAMS = args scrub mdsum zerofill
 
 args_SOURCES = args.cpp
 
@@ -24,3 +24,7 @@ scrub_LDFLAGS = @SECURE_LOCAL@
 
 mdsum_SOURCES = mdsum.cpp
 mdsum_LDFLAGS = @SECURE_LOCAL@
+
+zerofill_SOURCES = zerofill.cpp
+zerofill_LDFLAGS = @SECURE_LOCAL@
+

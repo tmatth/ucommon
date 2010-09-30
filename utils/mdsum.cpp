@@ -161,8 +161,7 @@ static void dirpath(String path, bool top = true)
 
 extern "C" int main(int argc, char **argv)
 {	
-	// default bind based on argv0, so we do not have to be explicit...
-	// shell::bind("args");
+	shell::bind("mdsum");
 	shell args(argc, argv);
 	argv0 = args.argv0();
 	unsigned count = 0;
@@ -170,7 +169,7 @@ extern "C" int main(int argc, char **argv)
 	argv0 = args.argv0();
 
 	if(is(helpflag) || is(althelp)) {
-		printf("%s\n", _TEXT("Usage: md [options] path..."));
+		printf("%s\n", _TEXT("Usage: mdsum [options] path..."));
 		printf("%s\n\n", _TEXT("Echo command line arguments"));
 		printf("%s\n", _TEXT("Options:"));
 		shell::help();

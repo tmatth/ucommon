@@ -150,15 +150,19 @@ repeat:
 				goto repeat;
 		}
 
-		// if we don't do random fill passes, we still do zero fill...
-		if(!pass) {
-			memset(block, 0, sizeof(block));
-			fs.write(block, 1024);
-			if(fs.err()) {
-				report(path, fs.err());
-				fs.close();
-				return;
-			}
+		// we followup with a zero fill always as it is friendly for many 
+		// virtual machine image formats which can later re-pack unused disk 
+		// space, and if no random passes are specified, we at least do this.
+
+		if(pass) 
+			fs.seek(pos);
+
+		memset(block, 0, sizeof(block));
+		fs.write(block, 1024);
+		if(fs.err()) {
+			report(path, fs.err());
+			fs.close();
+			return;
 		}
 
 		pos += 1024l;
@@ -214,8 +218,7 @@ static void dirpath(String path, bool top = true)
 
 extern "C" int main(int argc, char **argv)
 {	
-	// default bind based on argv0, so we do not have to be explicit...
-	// shell::bind("args");
+	shell::bind("scrub");
 	shell args(argc, argv);
 	argv0 = args.argv0();
 	unsigned count = 0;

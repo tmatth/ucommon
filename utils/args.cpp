@@ -69,8 +69,7 @@ extern "C" int main(int argc, char **argv)
 	char *ep;
 	bool middle = false;
 
-	// default bind based on argv0, so we do not have to be explicit...
-	// shell::bind("args");
+	shell::bind("args");
 	shell args(argc, argv);
 
 	if(is(helpflag) || is(althelp)) {
