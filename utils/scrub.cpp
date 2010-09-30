@@ -97,21 +97,22 @@ static void scrubfile(const char *path)
 	fsys::offset_t pos = 0l;
 	unsigned dots = 0;
 	unsigned pass = 0;
-		
+	
 	if(is(verbose))
 		shell::printf("%s", path);
 
-	fsys::stat(path, &ino);
+	int err = fsys::stat(path, &ino);
 
-	if(is(follow) && fsys::islink(&ino) != 0)
-		goto deref;
+	if(err == ENOENT && is(follow)) {
+		report(path, err);
+		return;
+	}
 
-	if(!fsys::isfile(&ino)) {
+	if(err == ENOENT || !ino.st_size || fsys::islink(&ino) || fsys::issys(&ino) || fsys::isdev(&ino)) {
 		report(path, fsys::remove(path));
 		return;
 	}
 
-deref:
 	count = (ino.st_size + 1023l) / 1024;
 	count /= (fsys::offset_t)(*blocks);
 	count *= (fsys::offset_t)(*blocks);
