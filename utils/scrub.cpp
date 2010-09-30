@@ -103,12 +103,12 @@ static void scrubfile(const char *path)
 
 	int err = fsys::stat(path, &ino);
 
-	if(err == ENOENT && is(follow)) {
-		report(path, err);
+	if((err == ENOENT || fsys::islink(&ino)) && !is(follow)) {
+		report(path, fsys::remove(path));
 		return;
 	}
 
-	if(err == ENOENT || !ino.st_size || fsys::islink(&ino) || fsys::issys(&ino) || fsys::isdev(&ino)) {
+	if(err == ENOENT || !ino.st_size || fsys::issys(&ino) || fsys::isdev(&ino)) {
 		report(path, fsys::remove(path));
 		return;
 	}
