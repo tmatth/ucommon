@@ -23,8 +23,63 @@ static shell::flagopt helpflag('h',"--help",	_TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::numericopt blocks('b', "--blocksize", _TEXT("size of i/o blocks in k (1-x)"), "size k", 1);
 static shell::numericopt passes('p', "--passes", _TEXT("passes with randomized data (0-x)"), "count", 1);
+static shell::flagopt quiet('q', "--quiet", _TEXT("supress status messages"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
 static shell::flagopt trunc('t', "--truncate", _TEXT("decompose file by truncation"));
+
+static void report(const char *path, int code)
+{
+	const char *err = _TEXT("i/o error");
+
+	switch(code) {
+	case EACCES:
+	case EPERM:
+		err = _TEXT("permission denied");
+		break;
+	case EROFS:
+		err = _TEXT("read-only file system");
+		break;
+	case ENODEV:
+	case ENOENT:
+		err = _TEXT("no such file or directory");
+		break;
+	case ENOTDIR:
+		err = _TEXT("not a directory");
+		break;
+	case ENOTEMPTY:
+		err = _TEXT("directory not empty");
+		break;
+	case ENOSPC:
+		err = _TEXT("no space left on device");
+		break;
+	case EBADF:
+	case ENAMETOOLONG:
+		err = _TEXT("bad file path");
+		break;
+	case EBUSY:
+	case EINPROGRESS:
+		err = _TEXT("file or directory busy");
+		break;
+	case EINTR:
+		err = _TEXT("operation interupted");
+		break;
+	case ELOOP:
+		err = _TEXT("too many sym links");
+		break;
+	}
+
+	if(!code) {
+		if(!is(quiet))
+			shell::printf(" removed\n");
+		return;
+	}
+
+	if(is(quiet))
+		shell::errexit(1, "%s: %s\n", path, err);
+
+	shell::printf(": %s\n", err);
+	exit(1);
+}
 
 static void scrubfile(const char *path)
 {
@@ -33,7 +88,10 @@ static void scrubfile(const char *path)
 
 static void scrubdir(const char *path)
 {
-	shell::printf("DIR  %s\n", path);
+	if(!is(quiet))
+		shell::printf("%s", path);
+
+	report(path, fsys::removeDir(path));
 }
 
 static void dirpath(String path, bool top = true)
