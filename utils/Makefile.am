@@ -15,7 +15,8 @@ LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
 man_MANS = args.1
-bin_PROGRAMS = args
+bin_PROGRAMS = args scrub
 
 args_SOURCES = args.cpp
 
+scrub_SOURCES = scrub.cpp
