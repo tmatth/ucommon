@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <ucommon/ucommon.h>
+#include <ucommon/secure.h>
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -79,14 +79,55 @@ static void report(const char *path, int code)
 	if(is(verbose))
 		shell::printf(": %s\n", err);
 	else
-		shell::errexit(1, "%s: %s\n", path, err);
+		shell::errexit(1, "*** %s: %s\n", path, err);
 
 	exit_code = 1;
 }
 
 static void scrubfile(const char *path)
 {
-	shell::printf("FILE %s\n", path);
+	fsys_t fs;
+	struct stat ino;
+	unsigned char block[1024];
+	unsigned long count;
+	unsigned long pos = 0l;
+		
+	if(is(verbose))
+		shell::printf("%s", path);
+
+	fsys::stat(path, &ino);
+	count = (ino.st_size + 1024l) / 1024;
+
+	count /= (long)(*blocks);
+	count *= (long)(*blocks);
+
+	fs.open(path, fsys::ACCESS_STREAM);
+	if(!is(fs)) {
+		report(path, fs.err());
+		return;
+	}
+
+	while(count--) {
+		fs.seek(pos);
+		if(fs.err()) {
+			report(path, fs.err());
+			fs.close();
+			return;
+		}
+		Random::fill(block, 1024);
+		fs.write(block, 1024);
+		if(fs.err()) {
+			report(path, fs.err());
+			fs.close();
+			return;
+		}		
+		pos += 1024l;
+	}
+
+	report(path, fsys::remove(path));
+
+	fs.close();
+	
 }
 
 static void scrubdir(const char *path)

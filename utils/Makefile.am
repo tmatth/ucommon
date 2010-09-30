@@ -20,3 +20,4 @@ bin_PROGRAMS = args scrub
 args_SOURCES = args.cpp
 
 scrub_SOURCES = scrub.cpp
+scrub_LDFLAGS = @SECURE_LOCAL@
