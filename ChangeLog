@@ -1,3 +1,7 @@
+from ucommon 4.0.1 to 4.0.2
+- introduction of scrub utility.
+- shell::printf always flushes output for console.
+
 from ucommon 4.0.0 to 4.0.1
 - fix for misnamed library in ucommon-config.
 

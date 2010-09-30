@@ -1081,6 +1081,7 @@ size_t shell::printf(const char *format, ...)
 	va_end(args);
 	if(result == (size_t)EOF)
 		result = 0;
+	fflush(stdout);
 	return result;
 }
 

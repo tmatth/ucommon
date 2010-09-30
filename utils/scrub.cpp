@@ -72,12 +72,12 @@ static void report(const char *path, int code)
 
 	if(!code) {
 		if(is(verbose))
-			shell::printf(" removed\n");
+			shell::printf(_TEXT(" removed\n"));
 		return;
 	}
 
 	if(is(verbose))
-		shell::printf(": %s\n", err);
+		shell::printf(" %s\n", err);
 	else
 		shell::errexit(1, "*** %s: %s\n", path, err);
 
@@ -91,6 +91,7 @@ static void scrubfile(const char *path)
 	unsigned char block[1024];
 	unsigned long count;
 	unsigned long pos = 0l;
+	unsigned dots = 0;
 		
 	if(is(verbose))
 		shell::printf("%s", path);
@@ -101,13 +102,19 @@ static void scrubfile(const char *path)
 	count /= (long)(*blocks);
 	count *= (long)(*blocks);
 
-	fs.open(path, fsys::ACCESS_STREAM);
+	fs.open(path, fsys::ACCESS_REWRITE);
 	if(!is(fs)) {
 		report(path, fs.err());
 		return;
 	}
 
 	while(count--) {
+		while(++dots > 16384) {
+			dots = 0;
+			if(is(verbose))
+				shell::printf(".");
+		}
+
 		fs.seek(pos);
 		if(fs.err()) {
 			report(path, fs.err());
@@ -134,6 +141,7 @@ static void scrubdir(const char *path)
 {
 	if(is(verbose))
 		shell::printf("%s", path);
+	
 
 	report(path, fsys::removeDir(path));
 }
