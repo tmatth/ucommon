@@ -30,6 +30,7 @@ static shell::flagopt trunc('t', "--truncate", _TEXT("decompose file by truncati
 static shell::flagopt verbose('v', "--verbose", _TEXT("show active status"));
 
 static int exit_code = 0;
+static const char *argv0 = "scrub";
 
 static void report(const char *path, int code)
 {
@@ -81,7 +82,7 @@ static void report(const char *path, int code)
 	if(is(verbose))
 		shell::printf(" - %s\n", err);
 	else
-		shell::errexit(1, "*** %s: %s\n", path, err);
+		shell::errexit(1, "%s: %s: %s\n", argv0, path, err);
 
 	exit_code = 1;
 }
@@ -191,13 +192,11 @@ static void dirpath(String path, bool top = true)
 	char filename[128];
 	String filepath;
 	fsys_t dir(path, fsys::ACCESS_DIRECTORY);
-	unsigned count = 0;
 
 	while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
 		if(*filename == '.' && (filename[1] == '.' || !filename[1]))
 			continue;
 
-		++count;
 		filepath = str(path) + str("/") + str(filename);
 		if(fsys::isdir(filepath)) {
 			if(is(recursive))
@@ -213,12 +212,11 @@ static void dirpath(String path, bool top = true)
 
 extern "C" int main(int argc, char **argv)
 {	
-	unsigned count = 0;
-	char *ep;
-
 	// default bind based on argv0, so we do not have to be explicit...
 	// shell::bind("args");
 	shell args(argc, argv);
+	argv0 = args.argv0();
+	unsigned count = 0;
 
 	if(is(helpflag) || is(althelp)) {
 		printf("%s\n", _TEXT("Usage: scrub [options] path..."));
