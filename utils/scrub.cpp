@@ -23,9 +23,11 @@ static shell::flagopt helpflag('h',"--help",	_TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::numericopt blocks('b', "--blocksize", _TEXT("size of i/o blocks in k (1-x)"), "size k", 1);
 static shell::numericopt passes('p', "--passes", _TEXT("passes with randomized data (0-x)"), "count", 1);
-static shell::flagopt quiet('q', "--quiet", _TEXT("supress status messages"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
 static shell::flagopt trunc('t', "--truncate", _TEXT("decompose file by truncation"));
+static shell::flagopt verbose('v', "--verbose", _TEXT("show active status"));
+
+static int exit_code = 0;
 
 static void report(const char *path, int code)
 {
@@ -69,16 +71,17 @@ static void report(const char *path, int code)
 	}
 
 	if(!code) {
-		if(!is(quiet))
+		if(is(verbose))
 			shell::printf(" removed\n");
 		return;
 	}
 
-	if(is(quiet))
+	if(is(verbose))
+		shell::printf(": %s\n", err);
+	else
 		shell::errexit(1, "%s: %s\n", path, err);
 
-	shell::printf(": %s\n", err);
-	exit(1);
+	exit_code = 1;
 }
 
 static void scrubfile(const char *path)
@@ -88,7 +91,7 @@ static void scrubfile(const char *path)
 
 static void scrubdir(const char *path)
 {
-	if(!is(quiet))
+	if(is(verbose))
 		shell::printf("%s", path);
 
 	report(path, fsys::removeDir(path));
@@ -147,6 +150,6 @@ extern "C" int main(int argc, char **argv)
 			scrubfile(args[count++]);
 	}
 
-	return 0;
+	return exit_code;
 }
 
