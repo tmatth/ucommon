@@ -69,9 +69,11 @@ static void report(const char *path, int code)
 	case EINTR:
 		err = _TEXT("operation interupted");
 		break;
+#ifdef	ELOOP
 	case ELOOP:
 		err = _TEXT("too many sym links");
 		break;
+#endif
 	}
 
 	if(!code) {

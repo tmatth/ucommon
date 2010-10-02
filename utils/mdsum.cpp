@@ -70,9 +70,11 @@ static void result(const char *path, int code)
 	case EISDIR:
 		err = _TEXT("is a directory");
 		break;
+#ifdef	ELOOP
 	case ELOOP:
 		err = _TEXT("too many sym links");
 		break;
+#endif
 	}
 
 	if(!code) {

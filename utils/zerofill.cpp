@@ -73,7 +73,7 @@ static void zerofill(void)
 	while(size == 65536 && live) {
 		unsigned pass = 0;
 
-		while(pass < *passes) {
+		while(pass < (unsigned)*passes) {
 			fs.seek(pos);
 			Random::fill(buffer, sizeof(buffer));
 			fs.write(buffer, sizeof(buffer));
@@ -124,7 +124,7 @@ static void zerofill(const char *devname)
 	while(size == 65536 && live) {
 		unsigned pass = 0;
 
-		while(pass < *passes) {
+		while(pass < (unsigned)*passes) {
 			fs.seek(pos);
 			Random::fill(buffer, sizeof(buffer));
 			fs.write(buffer, sizeof(buffer));
