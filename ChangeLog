@@ -1,3 +1,6 @@
+from ucommon 4.0.2 to 4.0.3
+- some changes in file stat macros.
+
 from ucommon 4.0.1 to 4.0.2
 - introduction of scrub utility for secure file deletion.
 - introduction of mdsub utility for computing file hashes.

@@ -50,34 +50,48 @@
 #include <errno.h>
 #include <stdio.h>
 
-#ifndef	S_ISREG
-
+#ifndef	__S_ISTYPE
 #define __S_ISTYPE(mode, mask)  (((mode) & S_IFMT) == (mask))
+#endif
 
+#if	!defined(S_ISDIR) && defined(S_IFDIR)
 #define S_ISDIR(mode)	__S_ISTYPE((mode), S_IFDIR)
+#endif
+
+#if	!defined(S_ISCHR) && defined(S_IFCHR)
 #define S_ISCHR(mode)	__S_ISTYPE((mode), S_IFCHR)
-#ifdef S_IFBLK
+#elif !defined(S_ISCHR)
+#define S_ISCHR(mode)	0
+#endif
+
+#if !defined(S_ISBLK) && defined(S_IFBLK)
 #define S_ISBLK(mode)	__S_ISTYPE((mode), S_IFBLK)
-#else
+#elif !defined(S_ISBLK)
 #define	S_ISBLK(mode)	0
 #endif
+
+#if	!defined(S_ISREG) && defined(S_IFREG)
 #define S_ISREG(mode)	__S_ISTYPE((mode), S_IFREG)
-#ifdef S_IFSOCK
-#define S_ISSOCK(mode)	__S_ISTYPE((mode), S_IFSOCK)
-#else
-#define	S_ISSOCK(mode)	0
-#endif
-#ifdef S_IFIFO
-#define S_ISFIFO(mode)	__S_ISTYPE((mode), S_IFIFO)
-#else
-#define S_ISFIFO(mode)	0
-#endif
-#ifdef S_IFLNK
-#define S_ISLNK(mode)	__S_ISTYPE((mode), S_IFLNK)
-#else
-#define	S_ISLNK(mode)	0
+#elif !defined(S_ISREG)
+#define	S_ISREG(mode)	1
 #endif
 
+#if !defined(S_ISSOCK) && defined(S_IFSOCK)
+#define S_ISSOCK(mode)	__S_ISTYPE((mode), S_IFSOCK)
+#elif !defined(S_ISSOCK)
+#define	S_ISSOCK(mode)	(0)
+#endif
+
+#if !defined(S_ISFIFO) && defined(S_IFIFO) 
+#define S_ISFIFO(mode)	__S_ISTYPE((mode), S_IFIFO)
+#elif !defined(S_ISFIFO)
+#define S_ISFIFO(mode)	(0)
+#endif
+
+#if !defined(S_ISLNK) && defined(S_IFLNK)
+#define S_ISLNK(mode)	__S_ISTYPE((mode), S_IFLNK)
+#elif !defined(S_ISLNK)
+#define	S_ISLNK(mode)	(0)
 #endif
 
 NAMESPACE_UCOMMON
