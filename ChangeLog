@@ -1,3 +1,6 @@
+from ucommon 4.0.3 to 4.0.4
+- component naming of binaries for combining ucommon with other subprojects.
+
 from ucommon 4.0.2 to 4.0.3
 - some changes in file stat macros.
 
@@ -277,7 +280,7 @@ From ucommon 1.8.0 to 1.8.1
 
 From ucommon 1.7.2 to 1.8.0
 - support for forced ipv4/ipv6 in init.  ipv6 unit testing.
-- new family method for query default. 
+- new family method for query default.
 - further refinement of socket api.
 - ipv6 support for opensolaris and -lnsl.
 
@@ -295,7 +298,7 @@ From ucommon 1.6.2 to 1.7.0
 - simplified TimedEvent completion port handling and new static members.
 - refactored socket api around supporting use of native socket_t.  Minimal
   api for abstract socket class used for protocol building.
-- refactored containers to use references in assignment to avoid stack frame   
+- refactored containers to use references in assignment to avoid stack frame
   constructions.
 - added stream classes for fsys (threaded i/o) and piping.
 
