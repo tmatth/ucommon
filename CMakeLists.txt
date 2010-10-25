@@ -239,7 +239,6 @@ if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
     set(HAVE_INET_NTOP True)
 endif()
 
-configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 if(NOT WIN32)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
 endif(NOT WIN32)
@@ -263,6 +262,8 @@ if(LIB_SUFFIX)
         message (FATAL_ERROR "LIB_SUFFIX must be empty (32 bits) or 64 (64 bits)")
     endif()
 endif()
+
+configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 file(GLOB common_src common/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)

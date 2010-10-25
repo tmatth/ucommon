@@ -9,16 +9,39 @@
    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+#define STDC_HEADERS 1
+
+#cmakedefine PACKAGE ${PROJECT_NAME}
+#cmakedefine VERSION "${VERSION}"
+
 #cmakedefine HAVE_CLOCK_NANOSLEEP 1
 #cmakedefine HAVE_DIRENT_H 1
 #cmakedefine HAVE_DLFCN_H 1
 #cmakedefine HAVE_ENDIAN_H 1
+#cmakedefine HAVE_INTTYPES_H 1
+#cmakedefine HAVE_LINUX_VERSION_H 1
+#cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_STDLIB_H 1
+#cmakedefine HAVE_SYS_FILIO_H 1
+#cmakedefine HAVE_SYS_MMAN_H 1
+#cmakedefine HAVE_SYS_POLL_H 1
+#cmakedefine HAVE_SYS_RESOURCE_H 1
+#cmakedefine HAVE_SYS_SHM_H 1
+#cmakedefine HAVE_SYS_STAT_H 1
+#cmakedefine HAVE_SYS_TIMEB_H 1
+#cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_UNISTD_H 1
+#cmakedefine HAVE_WCHAR_H 1
+#cmakedefine HAVE_REGEX_H 1
+#cmakedefine HAVE_SYS_INOTIFY_H 1
+#cmakedefine HAVE_SYS_EVENT_H 1
+#cmakedefine HAVE_SYSLOG_H 1
+#cmakedefine HAVE_LIBINTL_H 1
+
 #cmakedefine HAVE_FTOK 1
 #cmakedefine HAVE_GETADDRINFO 1
 #cmakedefine HAVE_GETHOSTBYNAME2 1
 #cmakedefine HAVE_INET_NTOP 1
-#cmakedefine HAVE_INTTYPES_H 1
-#cmakedefine HAVE_LINUX_VERSION_H 1
 #cmakedefine HAVE_LOCALTIME_R 1
 #cmakedefine HAVE_MACH_CLOCK_H 1
 #cmakedefine HAVE_MACH_O_DYLD_H 1
@@ -38,9 +61,7 @@
 #cmakedefine HAVE_SHL_LOAD 1
 #cmakedefine HAVE_SHM_OPEN 1
 #cmakedefine HAVE_SOCKETPAIR 1
-#define HAVE_STDEXCEPT 1		/* cannot seem to test in cmake... */
-#cmakedefine HAVE_STDINT_H 1
-#cmakedefine HAVE_STDLIB_H 1
+#define HAVE_STDEXCEPT 1        /* cannot seem to test in cmake... */
 #cmakedefine HAVE_STRICMP 1
 #cmakedefine HAVE_STRINGS_H 1
 #cmakedefine HAVE_STRISTR 1
@@ -51,26 +72,6 @@
 #cmakedefine HAVE_SETLOCALE 1
 #cmakedefine HAVE_GETTEXT 1
 #cmakedefine HAVE_EXECVP 1
-#cmakedefine HAVE_SYS_FILIO_H 1
-#cmakedefine HAVE_SYS_MMAN_H 1
-#cmakedefine HAVE_SYS_POLL_H 1
-#cmakedefine HAVE_SYS_RESOURCE_H 1
-#cmakedefine HAVE_SYS_SHM_H 1
-#cmakedefine HAVE_SYS_STAT_H 1
-#cmakedefine HAVE_SYS_TIMEB_H 1
-#cmakedefine HAVE_SYS_TYPES_H 1
-#cmakedefine HAVE_UNISTD_H 1
-#cmakedefine HAVE_WCHAR_H 1
-#cmakedefine HAVE_REGEX_H 1
-#cmakedefine HAVE_SYS_INOTIFY_H 1
-#cmakedefine HAVE_SYS_EVENT_H 1
-#cmakedefine HAVE_SYSLOG_H 1
-#cmakedefine HAVE_LIBINTL_H 1
-#cmakedefine PACKAGE ${PROJECT_NAME}
-#define STDC_HEADERS 1
-#cmakedefine VERSION "${VERSION}"
-#define	UCOMMON_PLUGINS "${UCOMMON_PLUGINS}"
-#define UCOMMON_LOCALE "${UCOMMON_LOCALE}"
 
 #include <ucommon/export.h>
 
