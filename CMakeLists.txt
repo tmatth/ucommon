@@ -251,7 +251,7 @@ link_libraries(${WITH_LIBS})
 
 # by default we build static libs for windows, shared libs for unix.
 # we may also set this from a top level cmake or -DWITH_XX_LIBS
-if(BUILD_STATIC)
+if(BUILD_STATIC AND NOT BUILD_SHARED)
     set(BUILD_LIBRARY_TYPE STATIC)
 else()
     set(BUILD_LIBRARY_TYPE SHARED)
