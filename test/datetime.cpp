@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef	DEBUG
-#define	DEBUG
+#ifndef DEBUG
+#define DEBUG
 #endif
 
 #include <ucommon/ucommon.h>
@@ -28,75 +28,75 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-	Date date = Date(2003, 1, 6);
-	int exp_year = 2003;
-	int exp_month = 1;
-	int exp_day = 6;
-	int exp_dayofweek = 1;
-	String exp_stringdate;
-	tm_t exp_dt;
-	time_t exp_ctime;
-	char buf[20];
+    Date date = Date(2003, 1, 6);
+    int exp_year = 2003;
+    int exp_month = 1;
+    int exp_day = 6;
+    int exp_dayofweek = 1;
+    String exp_stringdate;
+    tm_t exp_dt;
+    time_t exp_ctime;
+    char buf[20];
 
-	snprintf(buf, sizeof(buf),
-		"%04d-%02d-%02d", exp_year, exp_month, exp_day);
+    snprintf(buf, sizeof(buf),
+        "%04d-%02d-%02d", exp_year, exp_month, exp_day);
 
-	memset(&exp_dt, 0, sizeof(exp_dt));
-	exp_dt.tm_year = exp_year - 1900;
-	exp_dt.tm_mon = exp_month - 1;
-	exp_dt.tm_mday = exp_day;
-	exp_ctime = mktime(&exp_dt);
+    memset(&exp_dt, 0, sizeof(exp_dt));
+    exp_dt.tm_year = exp_year - 1900;
+    exp_dt.tm_mon = exp_month - 1;
+    exp_dt.tm_mday = exp_day;
+    exp_ctime = mktime(&exp_dt);
 
-	assert(exp_year == date[Date::year]);
-	assert(exp_month == date[Date::month]);
-	assert(exp_day == date[Date::day]);
-	assert(exp_dayofweek == date[Date::dow]);
+    assert(exp_year == date[Date::year]);
+    assert(exp_month == date[Date::month]);
+    assert(exp_day == date[Date::day]);
+    assert(exp_dayofweek == date[Date::dow]);
 
-	// test some conversions...
-	exp_stringdate = date();
-	assert(eq(*exp_stringdate, "2003-01-06"));
-	date.get(buf);
-	assert(eq(buf, "2003-01-06"));
-	assert(exp_ctime == date.getTime());
-	
-	// some operator tests...
-	Date aday = date;
-	Date nextday(2003, 1, 7);
-	assert(aday == date);
-	assert((++aday) == nextday);
-	assert(aday != date);
-	assert(date <= aday);
-	assert(date < aday);
+    // test some conversions...
+    exp_stringdate = date();
+    assert(eq(*exp_stringdate, "2003-01-06"));
+    date.get(buf);
+    assert(eq(buf, "2003-01-06"));
+    assert(exp_ctime == date.getTime());
 
-	// play with math and casting operators...
-	Date newday = nextday + 5l;
-	assert((long)newday == 20030112l);
-	assert((long)nextday == 20030107l);
-	assert(newday - nextday == 5);
+    // some operator tests...
+    Date aday = date;
+    Date nextday(2003, 1, 7);
+    assert(aday == date);
+    assert((++aday) == nextday);
+    assert(aday != date);
+    assert(date <= aday);
+    assert(date < aday);
 
-	// test some math...
-	assert(20030106l == date.get());
-	date -= 6;
-	assert(20021231l == date.get());
+    // play with math and casting operators...
+    Date newday = nextday + 5l;
+    assert((long)newday == 20030112l);
+    assert((long)nextday == 20030107l);
+    assert(newday - nextday == 5);
 
-	// test invalid date...
-	date = "20031306";
-	assert(!is(date));
+    // test some math...
+    assert(20030106l == date.get());
+    date -= 6;
+    assert(20021231l == date.get());
 
-	// conversion check...
-	date = "2003-08-04";
-	assert((long)date == 20030804l);
+    // test invalid date...
+    date = "20031306";
+    assert(!is(date));
 
-	DateTimeString dts("2003-02-28 23:59:55");
-	eq((const char *)dts, "2003-02-28 23:59:55");
+    // conversion check...
+    date = "2003-08-04";
+    assert((long)date == 20030804l);
 
-	DateTime tmp("2003-02-28 23:59:55");
-	snprintf(buf, sizeof(buf), "%.5f", (double)tmp);
-	assert(eq(buf, "2452699.99994"));
-	assert((long)tmp == 20030228l);
-	tmp += 5;	// add 5 seconds to force rollover...
-	assert((long)tmp == 20030301l);
+    DateTimeString dts("2003-02-28 23:59:55");
+    eq((const char *)dts, "2003-02-28 23:59:55");
 
-	return 0;
+    DateTime tmp("2003-02-28 23:59:55");
+    snprintf(buf, sizeof(buf), "%.5f", (double)tmp);
+    assert(eq(buf, "2452699.99994"));
+    assert((long)tmp == 20030228l);
+    tmp += 5;   // add 5 seconds to force rollover...
+    assert((long)tmp == 20030301l);
+
+    return 0;
 }
 

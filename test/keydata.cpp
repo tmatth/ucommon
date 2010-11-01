@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef	DEBUG
-#define	DEBUG
+#ifndef DEBUG
+#define DEBUG
 #endif
 
 #include <ucommon/ucommon.h>
@@ -27,18 +27,18 @@ using namespace UCOMMON_NAMESPACE;
 
 extern "C" int main()
 {
-	keydata *keys;
-	keyfile myfile("keydata.conf");
+    keydata *keys;
+    keyfile myfile("keydata.conf");
 
-	keys = myfile.get();
-	assert(ieq(keys->get("key2"), "value2"));
+    keys = myfile.get();
+    assert(ieq(keys->get("key2"), "value2"));
 
-	keys = myfile["section1"];
-	assert(keys != NULL);
-	assert(ieq(keys->get("key1"), "this is value 1 quoted"));
+    keys = myfile["section1"];
+    assert(keys != NULL);
+    assert(ieq(keys->get("key1"), "this is value 1 quoted"));
 
-	keys = myfile["section2"];
-	assert(keys != NULL);
-	assert(ieq(keys->get("key1"), "replaced value"));
-	return 0;
+    keys = myfile["section2"];
+    assert(keys != NULL);
+    assert(ieq(keys->get("key1"), "replaced value"));
+    return 0;
 }

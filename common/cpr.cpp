@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -18,10 +18,10 @@
 #include <config.h>
 
 #if !defined(NEW_STDCPP) && !defined(OLD_STDCPP)
-#undef	HAVE_STDEXCEPT
+#undef  HAVE_STDEXCEPT
 #endif
 
-#ifdef	HAVE_STDEXCEPT
+#ifdef  HAVE_STDEXCEPT
 #include <stdexcept>
 #endif
 
@@ -39,92 +39,92 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-#ifdef	_MSWINDOWS_
+#ifdef  _MSWINDOWS_
 int cpr_setenv(const char *sym, const char *val, int flag)
-{	
-	char buf[128];
+{
+    char buf[128];
 
-	if(!flag) {
-		if(GetEnvironmentVariable(sym, buf, sizeof(buf)) > 0)
-			return 0;
-		if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
-			return -1;
-	}
-	if(SetEnvironmentVariable(sym, val) == 0)
-		return -1;
-	return 0;
+    if(!flag) {
+        if(GetEnvironmentVariable(sym, buf, sizeof(buf)) > 0)
+            return 0;
+        if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+            return -1;
+    }
+    if(SetEnvironmentVariable(sym, val) == 0)
+        return -1;
+    return 0;
 }
 
 #endif
 
 void cpr_runtime_error(const char *str)
 {
-	assert(str != NULL);
+    assert(str != NULL);
 
-#ifdef	HAVE_STDEXCEPT
-	throw std::runtime_error(str);
+#ifdef  HAVE_STDEXCEPT
+    throw std::runtime_error(str);
 #endif
-	abort();
+    abort();
 }
 
-// just become we need to get binary types in a specific binary endian order.  
+// just become we need to get binary types in a specific binary endian order.
 
 extern "C" uint16_t lsb_getshort(uint8_t *b)
 {
-	assert(b != NULL);
-	return (b[1] * 256) + b[0];
+    assert(b != NULL);
+    return (b[1] * 256) + b[0];
 }
-	
+
 extern "C" uint32_t lsb_getlong(uint8_t *b)
 {
-	assert(b != NULL);
-	return (b[3] * 16777216l) + (b[2] * 65536l) + (b[1] * 256) + b[0];
+    assert(b != NULL);
+    return (b[3] * 16777216l) + (b[2] * 65536l) + (b[1] * 256) + b[0];
 }
 
 extern "C" uint16_t msb_getshort(uint8_t *b)
 {
-	assert(b != NULL);
-	return (b[0] * 256) + b[1];
+    assert(b != NULL);
+    return (b[0] * 256) + b[1];
 }
-	
+
 extern "C" uint32_t msb_getlong(uint8_t *b)
 {
-	assert(b != NULL);
-	return (b[0] * 16777216l) + (b[1] * 65536l) + (b[2] * 256) + b[3];
+    assert(b != NULL);
+    return (b[0] * 16777216l) + (b[1] * 65536l) + (b[2] * 256) + b[3];
 }
 
 extern "C" void lsb_setshort(uint8_t *b, uint16_t v)
 {
-	assert(b != NULL);
-	b[0] = v & 0x0ff;
-	b[1] = (v / 256) & 0xff;
+    assert(b != NULL);
+    b[0] = v & 0x0ff;
+    b[1] = (v / 256) & 0xff;
 }
 
 extern "C" void msb_setshort(uint8_t *b, uint16_t v)
 {
-	assert(b != NULL);
-	b[1] = v & 0x0ff;
-	b[0] = (v / 256) & 0xff;
+    assert(b != NULL);
+    b[1] = v & 0x0ff;
+    b[0] = (v / 256) & 0xff;
 }
 
 // oh, and we have to be able to set them in order too...
 
 extern "C" void lsb_setlong(uint8_t *b, uint32_t v)
 {
-	assert(b != NULL);
-	b[0] = (uint8_t)(v & 0x0ff);
-	b[1] = (uint8_t)((v / 256) & 0xff);
-	b[2] = (uint8_t)((v / 65536l) & 0xff);
-	b[3] = (uint8_t)((v / 16777216l) & 0xff);
+    assert(b != NULL);
+    b[0] = (uint8_t)(v & 0x0ff);
+    b[1] = (uint8_t)((v / 256) & 0xff);
+    b[2] = (uint8_t)((v / 65536l) & 0xff);
+    b[3] = (uint8_t)((v / 16777216l) & 0xff);
 }
 
 extern "C" void msb_setlong(uint8_t *b, uint32_t v)
 {
-	assert(b != NULL);
-	b[3] = (uint8_t)(v & 0x0ff);
-	b[2] = (uint8_t)((v / 256) & 0xff);
-	b[1] = (uint8_t)((v / 65536l) & 0xff);
-	b[0] = (uint8_t)((v / 16777216l) & 0xff);
+    assert(b != NULL);
+    b[3] = (uint8_t)(v & 0x0ff);
+    b[2] = (uint8_t)((v / 256) & 0xff);
+    b[1] = (uint8_t)((v / 65536l) & 0xff);
+    b[0] = (uint8_t)((v / 16777216l) & 0xff);
 }
 
 extern "C" void cpr_memswap(void *s1, void *s2, size_t size)
@@ -145,24 +145,24 @@ extern "C" void cpr_memswap(void *s1, void *s2, size_t size)
 
 extern "C" void *cpr_memalloc(size_t size)
 {
-	void *mem;
+    void *mem;
 
-	if(!size)
-		++size;
+    if(!size)
+        ++size;
 
-	mem = malloc(size);
-	crit(mem != NULL, "memory alloc failed");
-	return mem;
+    mem = malloc(size);
+    crit(mem != NULL, "memory alloc failed");
+    return mem;
 }
 
 extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 {
-	assert(addr);
-	crit((size <= max), "memory assign failed");
-	return addr;
+    assert(addr);
+    crit((size <= max), "memory assign failed");
+    return addr;
 }
 
-#ifdef	__GNUC__
+#ifdef  __GNUC__
 
 // here we have one of those magic things in gcc, and what to do when
 // we have an unimplemented virtual function if we build ucommon without
@@ -170,7 +170,7 @@ extern "C" void *cpr_memassign(size_t size, caddr_t addr, size_t max)
 
 extern "C" void __cxa_pure_virtual(void)
 {
-	abort();
+    abort();
 }
 
 #endif

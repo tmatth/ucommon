@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -24,12 +24,12 @@ using namespace UCOMMON_NAMESPACE;
 
 CountedObject::CountedObject()
 {
-	count = 0;
+    count = 0;
 }
 
 CountedObject::CountedObject(const Object &source)
 {
-	count = 0;
+    count = 0;
 }
 
 Object::~Object()
@@ -38,7 +38,7 @@ Object::~Object()
 
 void Object::release(void)
 {
-	delete this;
+    delete this;
 }
 
 void Object::retain(void)
@@ -47,8 +47,8 @@ void Object::retain(void)
 
 Object *Object::copy(void)
 {
-	retain();
-	return this;
+    retain();
+    return this;
 }
 
 Temporary::~Temporary()
@@ -57,66 +57,66 @@ Temporary::~Temporary()
 
 void CountedObject::dealloc(void)
 {
-	delete this;
+    delete this;
 }
 
 void CountedObject::retain(void)
 {
-	++count;
+    ++count;
 }
 
 void CountedObject::release(void)
 {
-	if(count > 1) {
-		--count;
-		return;
-	}
-	dealloc();
+    if(count > 1) {
+        --count;
+        return;
+    }
+    dealloc();
 }
 
 auto_delete::~auto_delete()
 {
-	if(object)
-		delete object;
+    if(object)
+        delete object;
 
-	object = 0;
+    object = 0;
 }
 
 auto_pointer::auto_pointer(Object *o)
 {
-	if(o)
-		o->retain();
+    if(o)
+        o->retain();
 
-	object = o;
+    object = o;
 }
 
 auto_pointer::auto_pointer()
 {
-	object = 0;
+    object = 0;
 }
 
 void auto_pointer::release(void)
 {
-	if(object)
-		object->release();
-	object = 0;
+    if(object)
+        object->release();
+    object = 0;
 }
 
 auto_pointer::~auto_pointer()
 {
-	release();
+    release();
 }
 
 auto_pointer::auto_pointer(const auto_pointer &from)
 {
-	object = from.object;
-	if(object)
-		object->retain();
+    object = from.object;
+    if(object)
+        object->retain();
 }
 
 bool auto_pointer::operator!() const
 {
-	return (object == 0);
+    return (object == 0);
 }
 
 auto_pointer::operator bool() const
@@ -126,79 +126,79 @@ auto_pointer::operator bool() const
 
 bool auto_pointer::operator==(Object *o) const
 {
-	assert(o != NULL);
-	return object == o;
+    assert(o != NULL);
+    return object == o;
 }
 
 bool auto_pointer::operator!=(Object *o) const
 {
-	assert(o != NULL);
-	return object != o;
+    assert(o != NULL);
+    return object != o;
 }
 
 void auto_pointer::operator=(Object *o)
 {
-	if(object == o)
-		return;
+    if(object == o)
+        return;
 
-	if(o)
-		o->retain();
-	if(object)
-		object->release();
-	object = o;
+    if(o)
+        o->retain();
+    if(object)
+        object->release();
+    object = o;
 }
 
 sparse_array::sparse_array(unsigned m)
 {
-	assert(m > 0);
-	max = m;
-	vector = new Object*[m];
-	memset(vector, 0, sizeof(Object *) * m);
+    assert(m > 0);
+    max = m;
+    vector = new Object*[m];
+    memset(vector, 0, sizeof(Object *) * m);
 }
 
 sparse_array::~sparse_array()
 {
-	purge();
+    purge();
 }
 
 void sparse_array::purge(void)
 {
-	if(!vector)
-		return;
+    if(!vector)
+        return;
 
-	for(unsigned pos = 0; pos < max; ++ pos) {
-		if(vector[pos])
-			vector[pos]->release();
-	}
-	delete[] vector;
-	vector = NULL; 
+    for(unsigned pos = 0; pos < max; ++ pos) {
+        if(vector[pos])
+            vector[pos]->release();
+    }
+    delete[] vector;
+    vector = NULL;
 }
 
 unsigned sparse_array::count(void)
 {
-	unsigned c = 0;
-	for(unsigned pos = 0; pos < max; ++pos) {
-		if(vector[pos])
-			++c;
-	}
-	return c;
+    unsigned c = 0;
+    for(unsigned pos = 0; pos < max; ++pos) {
+        if(vector[pos])
+            ++c;
+    }
+    return c;
 }
- 
+
 Object *sparse_array::get(unsigned pos)
 {
-	Object *obj;
+    Object *obj;
 
-	if(pos >= max)
-		return NULL;
+    if(pos >= max)
+        return NULL;
 
-	if(!vector[pos]) {
-		obj = create();
-		if(!obj)
-			return NULL;
-		obj->retain();
-		vector[pos] = obj;
-	}
-	return vector[pos];
+    if(!vector[pos]) {
+        obj = create();
+        if(!obj)
+            return NULL;
+        obj->retain();
+        vector[pos] = obj;
+    }
+    return vector[pos];
 }
 
 

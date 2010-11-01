@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -17,19 +17,19 @@
 
 /**
  * Top level include file for the GNU uCommon C++ core library.
- * This is the only include file you need to have in your sources; it 
+ * This is the only include file you need to have in your sources; it
  * includes the remaining header files.
  * @file ucommon/ucommon.h
  */
 
 /**
  * @short A portable C++ threading library for embedded applications.
- * GNU uCommon C++ is meant as a very light-weight library to facilitate using 
- * C++ design patterns even for very deeply embedded applications, such as for 
- * systems using uclibc along with posix threading support.  For this reason, 
- * uCommon disables language features that consume memory or introduce runtime 
- * overhead, such as rtti and exception handling, and assumes one will mostly 
- * be linking applications with other pure C based libraries rather than using 
+ * GNU uCommon C++ is meant as a very light-weight library to facilitate using
+ * C++ design patterns even for very deeply embedded applications, such as for
+ * systems using uclibc along with posix threading support.  For this reason,
+ * uCommon disables language features that consume memory or introduce runtime
+ * overhead, such as rtti and exception handling, and assumes one will mostly
+ * be linking applications with other pure C based libraries rather than using
  * the overhead of the standard C++ library and other class frameworks.
  *
  * uCommon by default does build with support for the bloated ansi standard c++
@@ -69,19 +69,19 @@
  * additional compilers. uCommon may also be built with GCC cross compiling for
  * mingw32 to build threaded applications for Microsoft Windows targets nativiely.
  *
- * The minimum platform support for uCommon is a modern and working posix 
- * pthread threading library.  I further use a subset of posix threads to assure 
+ * The minimum platform support for uCommon is a modern and working posix
+ * pthread threading library.  I further use a subset of posix threads to assure
  * wider portability by avoiding more specialized features like process shared
  * synchronization objects, pthread rwlocks and pthread semaphores, as these are
- * not implemented on all platforms that I have found.  Finally, I have 
+ * not implemented on all platforms that I have found.  Finally, I have
  * eliminated the use of posix thread cancellation.
  * @author David Sugar <dyfet@gnutelephony.org>
  * @license GNU Lesser General Public License Version 3 or later
  * @mainpage GNU uCommon C++
  */
 
-#ifndef	_UCOMMON_UCOMMON_H_
-#define	_UCOMMON_UCOMMON_H_
+#ifndef _UCOMMON_UCOMMON_H_
+#define _UCOMMON_UCOMMON_H_
 #include <ucommon/platform.h>
 #include <ucommon/atomic.h>
 #include <ucommon/object.h>
@@ -106,7 +106,7 @@
 #include <ucommon/shell.h>
 #include <ucommon/xml.h>
 
-#ifdef	_UCOMMON_EXTENDED_
+#ifdef  _UCOMMON_EXTENDED_
 #include <ucommon/stream.h>
 #include <ucommon/persist.h>
 #endif

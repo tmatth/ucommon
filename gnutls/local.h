@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -31,22 +31,22 @@ using namespace UCOMMON_NAMESPACE;
 class __LOCAL context : public secure
 {
 public:
-	~context();
+    ~context();
 
-	gnutls_connection_end_t connect;
-	gnutls_credentials_type_t xtype;
-	gnutls_certificate_credentials_t xcred;
-	gnutls_dh_params_t dh;
+    gnutls_connection_end_t connect;
+    gnutls_credentials_type_t xtype;
+    gnutls_certificate_credentials_t xcred;
+    gnutls_dh_params_t dh;
 
-	static gnutls_priority_t priority_cache;
+    static gnutls_priority_t priority_cache;
 
-	static gnutls_session_t session(context *ctx);
+    static gnutls_session_t session(context *ctx);
 };
 
-typedef	gnutls_session_t SSL;
-typedef	gcry_md_hd_t MD_CTX;
+typedef gnutls_session_t SSL;
+typedef gcry_md_hd_t MD_CTX;
 typedef gcry_cipher_hd_t CIPHER_CTX;
-typedef	context *SSL_CTX;
+typedef context *SSL_CTX;
 
 END_NAMESPACE
 

@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -34,7 +34,7 @@ _what(reason)
 
 const std::string& PersistException::getString() const
 {
-	return _what;	
+    return _what;
 }
 
 PersistException::~PersistException() throw()
@@ -113,20 +113,20 @@ TypeManager::registration::~registration()
 }
 
 PersistEngine::PersistEngine(std::iostream& stream, EngineMode mode) throw(PersistException) :
-myUnderlyingStream(stream), myOperationalMode(mode) 
+myUnderlyingStream(stream), myOperationalMode(mode)
 {
 }
 
 PersistEngine::~PersistEngine()
 {
-	if (myUnderlyingStream.good())
-		myUnderlyingStream.sync();
+    if (myUnderlyingStream.good())
+        myUnderlyingStream.sync();
 }
 
-void PersistEngine::writeBinary(const uint8_t* data, const uint32_t size) throw(PersistException) 
+void PersistEngine::writeBinary(const uint8_t* data, const uint32_t size) throw(PersistException)
 {
   if(myOperationalMode != modeWrite)
-	throw("Cannot write to an input Engine");
+    throw("Cannot write to an input Engine");
   myUnderlyingStream.write((const char *)data,size);
 }
 
@@ -134,7 +134,7 @@ void PersistEngine::writeBinary(const uint8_t* data, const uint32_t size) throw(
 void PersistEngine::readBinary(uint8_t* data, uint32_t size) throw(PersistException)
 {
   if(myOperationalMode != modeRead)
-	throw("Cannot read from an output Engine");
+    throw("Cannot read from an output Engine");
   myUnderlyingStream.read((char *)data,size);
 }
 
@@ -144,38 +144,38 @@ void PersistEngine::write(const PersistObject *object) throw(PersistException)
   // marker to say that it is null.
   // as ID's are uint32's, NullObject will do nicely for the task
   if (object == NULL) {
-	uint32_t id = NullObject;
-	write(id);
-	return;
+    uint32_t id = NullObject;
+    write(id);
+    return;
   }
 
   // First off - has this Object been serialized already?
   ArchiveMap::const_iterator itor = myArchiveMap.find(object);
   if (itor == myArchiveMap.end()) {
-	// Unfortunately we need to serialize it - here we go ....
-	uint32_t id = (uint32_t)myArchiveMap.size();
-	myArchiveMap[object] = id; // bumps id automatically for next one
-	write(id);
-	ClassMap::const_iterator classItor = myClassMap.find(object->getPersistenceID());
-	if (classItor == myClassMap.end()) {
-	  uint32_t classId = (uint32_t)myClassMap.size();
-	  myClassMap[object->getPersistenceID()] = classId;
-	  write(classId);
-	  write(static_cast<std::string>(object->getPersistenceID()));
-		}
-	else {
-	  write(classItor->second);
-		}
-	std::string majik;
-	majik = "OBST";
-	write(majik);
-	object->write(*this);
-	majik = "OBEN";
-	write(majik);
+    // Unfortunately we need to serialize it - here we go ....
+    uint32_t id = (uint32_t)myArchiveMap.size();
+    myArchiveMap[object] = id; // bumps id automatically for next one
+    write(id);
+    ClassMap::const_iterator classItor = myClassMap.find(object->getPersistenceID());
+    if (classItor == myClassMap.end()) {
+      uint32_t classId = (uint32_t)myClassMap.size();
+      myClassMap[object->getPersistenceID()] = classId;
+      write(classId);
+      write(static_cast<std::string>(object->getPersistenceID()));
+        }
+    else {
+      write(classItor->second);
+        }
+    std::string majik;
+    majik = "OBST";
+    write(majik);
+    object->write(*this);
+    majik = "OBEN";
+    write(majik);
   }
   else {
-	// This object has been serialized, so just pop its ID out
-	write(itor->second);
+    // This object has been serialized, so just pop its ID out
+    write(itor->second);
   }
 }
 
@@ -184,12 +184,12 @@ void PersistEngine::read(PersistObject &object) throw(PersistException)
   uint32_t id = 0;
   read(id);
   if (id == NullObject)
-	throw("Object Id should not be NULL when un-persisting to a reference");
+    throw("Object Id should not be NULL when un-persisting to a reference");
 
   // Do we already have this object in memory?
   if (id < myArchiveVector.size()) {
-	object = *(myArchiveVector[id]);
-	return;
+    object = *(myArchiveVector[id]);
+    return;
   }
 
   // Okay - read the identifier for the class in...
@@ -206,14 +206,14 @@ void PersistEngine::read(PersistObject *&object) throw(PersistException)
   read(id);
   // Is the ID a NULL object?
   if (id == NullObject) {
-	object = NULL;
-	return;
+    object = NULL;
+    return;
   }
 
   // Do we already have this object in memory?
   if (id < myArchiveVector.size()) {
-	object = myArchiveVector[id];
-	return;
+    object = myArchiveVector[id];
+    return;
   }
 
   // Okay - read the identifier for the class in...
@@ -221,18 +221,18 @@ void PersistEngine::read(PersistObject *&object) throw(PersistException)
 
   // is the pointer already initialized? if so then no need to reallocate
   if (object != NULL) {
-	readObject(object);
-	return;
+    readObject(object);
+    return;
   }
 
   // Create the object (of the relevant type)
   object = TypeManager::createInstanceOf(className.c_str());
   if (object) {
-	// Okay then - we can make this object
-	readObject(object);
+    // Okay then - we can make this object
+    readObject(object);
   }
   else
-	throw(PersistException(std::string("Unable to instantiate object of class ")+className));
+    throw(PersistException(std::string("Unable to instantiate object of class ")+className));
 }
 
 void PersistEngine::readObject(PersistObject* object) throw(PersistException)
@@ -242,11 +242,11 @@ void PersistEngine::readObject(PersistObject* object) throw(PersistException)
   std::string majik;
   read(majik);
   if(majik != std::string("OBST"))
-	throw( PersistException("Missing Start-of-Object marker"));
+    throw( PersistException("Missing Start-of-Object marker"));
   object->read(*this);
   read(majik);
   if(majik != std::string("OBEN"))
-	throw( PersistException("Missing End-of-Object marker"));
+    throw( PersistException("Missing End-of-Object marker"));
 }
 
 const std::string PersistEngine::readClass() throw(PersistException)
@@ -256,12 +256,12 @@ const std::string PersistEngine::readClass() throw(PersistException)
   read(classId);
   std::string className;
   if (classId < myClassVector.size()) {
-	className = myClassVector[classId];
+    className = myClassVector[classId];
   }
   else {
-	// Okay the class wasn't known yet - save its name
-	read(className);
-	myClassVector.push_back(className);
+    // Okay the class wasn't known yet - save its name
+    read(className);
+    myClassVector.push_back(className);
   }
 
   return className;

@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -23,7 +23,7 @@
  */
 
 #ifndef _UCOMMON_ATOMIC_H_
-#define	_UCOMMON_ATOMIC_H_
+#define _UCOMMON_ATOMIC_H_
 
 #ifndef _UCOMMON_CONFIG_H_
 #include <ucommon/platform.h>
@@ -42,64 +42,64 @@ NAMESPACE_UCOMMON
 class __EXPORT atomic
 {
 public:
-	/**
-	 * Set to true if atomics have to be simulated with mutexes.
-	 */
-	static const bool simulated;
+    /**
+     * Set to true if atomics have to be simulated with mutexes.
+     */
+    static const bool simulated;
 
-	/**
-	 * Atomic counter class.  Can be used to manipulate value of an
-	 * atomic counter without requiring explicit thread locking.
-	 * @author David Sugar <dyfet@gnutelephony.org>
-	 */
-	class __EXPORT counter
-	{
-	private:
-		volatile long value;
-	
-	public:
-		counter(long initial = 0);
+    /**
+     * Atomic counter class.  Can be used to manipulate value of an
+     * atomic counter without requiring explicit thread locking.
+     * @author David Sugar <dyfet@gnutelephony.org>
+     */
+    class __EXPORT counter
+    {
+    private:
+        volatile long value;
 
-		long operator++();
-		long operator--();
-		long operator+=(long offset);
-		long operator-=(long offset);
+    public:
+        counter(long initial = 0);
 
-		inline operator long()
-			{return (long)(value);};
+        long operator++();
+        long operator--();
+        long operator+=(long offset);
+        long operator-=(long offset);
 
-		inline long operator*()
-			{return value;};
-	};
+        inline operator long()
+            {return (long)(value);};
 
-	/**
-	 * Atomic spinlock class.  Used as high-performance sync lock between
-	 * threads.
-	 * @author David Sugar <dyfet@gnutelephony.org>
-	 */
-	class __EXPORT spinlock
-	{
-	private:
-		volatile long value;
+        inline long operator*()
+            {return value;};
+    };
 
-	public:
-		/**
-		 * Construct and initialize spinlock.
-		 */
-		spinlock();
+    /**
+     * Atomic spinlock class.  Used as high-performance sync lock between
+     * threads.
+     * @author David Sugar <dyfet@gnutelephony.org>
+     */
+    class __EXPORT spinlock
+    {
+    private:
+        volatile long value;
 
-		/**
-		 * Acquire the lock.  If the lock is not acquired, one "spins"
-		 * by doing something else.  One suggestion is using thread::yield.
-		 * @return true if acquired.
-		 */
-		bool acquire(void);
+    public:
+        /**
+         * Construct and initialize spinlock.
+         */
+        spinlock();
 
-		/**
-		 * Release an acquired spinlock.
-		 */
-		void release(void);
-	};
+        /**
+         * Acquire the lock.  If the lock is not acquired, one "spins"
+         * by doing something else.  One suggestion is using thread::yield.
+         * @return true if acquired.
+         */
+        bool acquire(void);
+
+        /**
+         * Release an acquired spinlock.
+         */
+        void release(void);
+    };
 };
 
 END_NAMESPACE

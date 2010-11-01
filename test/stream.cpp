@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -16,8 +16,8 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
-#ifndef	DEBUG
-#define	DEBUG
+#ifndef DEBUG
+#define DEBUG
 #endif
 
 #include <ucommon/ucommon.h>
@@ -33,7 +33,7 @@ public:
     ThreadOut() : JoinableThread() {};
 
     void run() {
-		Socket::address localhost("127.0.0.1", 9000);
+        Socket::address localhost("127.0.0.1", 9000);
         tcpstream tcp(localhost);
         tcp << "pippo" << endl << ends;
         tcp.close();
@@ -42,26 +42,26 @@ public:
 
 int main(int argc, char *argv[])
 {
-	ThreadOut thread;
+    ThreadOut thread;
 
     char line[200];
-	TCPServer sock("127.0.0.1", "9000");
-	thread.start();	
+    TCPServer sock("127.0.0.1", "9000");
+    thread.start();
     if (sock.waitConnection(1000)){
         tcpstream tcp(&sock);
         tcp.getline(line, 200);
-		assert(!strcmp(line, "pippo"));
+        assert(!strcmp(line, "pippo"));
         tcp.close();
         return 0;
     }
-	assert(0);
-	return 0;
+    assert(0);
+    return 0;
 }
 #else
 
 int main(int argc, char **argv)
 {
-	return 0;
+    return 0;
 }
 
 #endif

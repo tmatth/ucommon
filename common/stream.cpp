@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -24,7 +24,7 @@
 #include <ucommon/stream.h>
 #include <stdarg.h>
 
-#ifndef	_MSWINDOWS_
+#ifndef _MSWINDOWS_
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -32,7 +32,7 @@
 #include <fcntl.h>
 #endif
 
-#ifdef	HAVE_SYS_RESOURCE_H
+#ifdef  HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -48,7 +48,7 @@ streambuf(),
     iostream((streambuf *)this)
 #endif
 {
-	bufsize = 0;
+    bufsize = 0;
     gbuf = pbuf = NULL;
 #ifdef OLD_STDCPP
     init((streambuf *)this);
@@ -57,12 +57,12 @@ streambuf(),
 
 int StreamProtocol::overflow(int code)
 {
-	return _putch(code);
+    return _putch(code);
 }
 
 int StreamProtocol::underflow()
 {
-	return _getch();
+    return _getch();
 }
 
 int StreamProtocol::uflow()
@@ -80,24 +80,24 @@ int StreamProtocol::uflow()
 
 void StreamProtocol::allocate(size_t size)
 {
-	if(gbuf)
-		delete[] gbuf;
+    if(gbuf)
+        delete[] gbuf;
 
-	if(pbuf)
-		delete[] pbuf;
+    if(pbuf)
+        delete[] pbuf;
 
-	gbuf = pbuf = NULL;
+    gbuf = pbuf = NULL;
 
-	if(size < 2) {
-		bufsize = 1;
-		return;
-	}
+    if(size < 2) {
+        bufsize = 1;
+        return;
+    }
 
-	gbuf = new char[size];
-	pbuf = new char[size];
-	assert(gbuf != NULL && pbuf != NULL);
-	bufsize = size;
-	clear();
+    gbuf = new char[size];
+    pbuf = new char[size];
+    assert(gbuf != NULL && pbuf != NULL);
+    bufsize = size;
+    clear();
 #if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
     setb(gbuf, gbuf + size, 0);
 #endif
@@ -107,100 +107,100 @@ void StreamProtocol::allocate(size_t size)
 
 void StreamProtocol::release(void)
 {
-	if(gbuf)
-		delete[] gbuf;
+    if(gbuf)
+        delete[] gbuf;
 
-	if(pbuf)
-		delete[] pbuf;
+    if(pbuf)
+        delete[] pbuf;
 
-	gbuf = pbuf = NULL;
-	bufsize = 0;
-	clear();
+    gbuf = pbuf = NULL;
+    bufsize = 0;
+    clear();
 }
 
 int StreamProtocol::sync(void)
 {
-	if(!bufsize)
-		return 0;
+    if(!bufsize)
+        return 0;
 
-	overflow(EOF);
-	setg(gbuf, gbuf + bufsize, gbuf + bufsize);
-	return 0;
+    overflow(EOF);
+    setg(gbuf, gbuf + bufsize, gbuf + bufsize);
+    return 0;
 }
 
 tcpstream::tcpstream(const tcpstream &copy) :
 StreamProtocol()
 {
-	so = Socket::create(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP);
-	timeout = copy.timeout;
+    so = Socket::create(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP);
+    timeout = copy.timeout;
 }
 
 tcpstream::tcpstream(int family, timeout_t tv) :
 StreamProtocol()
 {
-	so = Socket::create(family, SOCK_STREAM, IPPROTO_TCP);
-	timeout = tv;
+    so = Socket::create(family, SOCK_STREAM, IPPROTO_TCP);
+    timeout = tv;
 }
 
 tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
 StreamProtocol()
 {
-	so = Socket::create(list.getfamily(), SOCK_STREAM, IPPROTO_TCP);
-	timeout = tv;
-	open(list);
+    so = Socket::create(list.getfamily(), SOCK_STREAM, IPPROTO_TCP);
+    timeout = tv;
+    open(list);
 }
 
 tcpstream::tcpstream(const TCPServer *server, unsigned segsize, timeout_t tv) :
 StreamProtocol()
 {
-	so = server->accept();
-	timeout = tv;
-	if(so == INVALID_SOCKET) {
-		clear(ios::failbit | rdstate());
-		return;
-	}
-	allocate(segsize);
+    so = server->accept();
+    timeout = tv;
+    if(so == INVALID_SOCKET) {
+        clear(ios::failbit | rdstate());
+        return;
+    }
+    allocate(segsize);
 }
 
 tcpstream::~tcpstream()
 {
-	tcpstream::release();
+    tcpstream::release();
 }
 
 void tcpstream::release(void)
 {
-	StreamProtocol::release();
-	Socket::release(so);
+    StreamProtocol::release();
+    Socket::release(so);
 }
 
-#ifndef	MSG_WAITALL
-#define	MSG_WAITALL	0
+#ifndef MSG_WAITALL
+#define MSG_WAITALL 0
 #endif
 
 bool tcpstream::_wait(void)
 {
-	if(!timeout)
-		return true;
+    if(!timeout)
+        return true;
 
-	return Socket::wait(so, timeout);
+    return Socket::wait(so, timeout);
 }
 
 ssize_t tcpstream::_read(char *buffer, size_t size)
 {
-	return Socket::recvfrom(so, buffer, size, MSG_WAITALL);
+    return Socket::recvfrom(so, buffer, size, MSG_WAITALL);
 }
 
 ssize_t tcpstream::_write(const char *buffer, size_t size)
 {
-	return Socket::sendto(so, buffer, size);
+    return Socket::sendto(so, buffer, size);
 }
 
 int tcpstream::_getch(void)
 {
-	ssize_t rlen = 1;
-	unsigned char ch;
+    ssize_t rlen = 1;
+    unsigned char ch;
 
-	if(bufsize == 1) {
+    if(bufsize == 1) {
         if(!_wait()) {
             clear(ios::failbit | rdstate());
             return EOF;
@@ -209,7 +209,7 @@ int tcpstream::_getch(void)
             rlen = _read((char *)&ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
-				reset();
+                reset();
             return EOF;
         }
         return ch;
@@ -228,11 +228,11 @@ int tcpstream::_getch(void)
     }
     else {
         rlen = _read(eback(), rlen);
-	}
+    }
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
         if(rlen < 0)
-			reset();
+            reset();
         else
             clear(ios::failbit | rdstate());
         return EOF;
@@ -251,11 +251,11 @@ int tcpstream::_putch(int c)
         if(c == EOF)
             return 0;
 
-		ch = (unsigned char)(c);
+        ch = (unsigned char)(c);
         rlen = _write((const char *)&ch, 1);
         if(rlen < 1) {
-            if(rlen < 0) 
-				reset();
+            if(rlen < 0)
+                reset();
             return EOF;
         }
         else
@@ -269,8 +269,8 @@ int tcpstream::_putch(int c)
     if(req) {
         rlen = _write(pbase(), req);
         if(rlen < 1) {
-            if(rlen < 0) 
-				reset();
+            if(rlen < 0)
+                reset();
             return EOF;
         }
         req -= rlen;
@@ -292,119 +292,119 @@ int tcpstream::_putch(int c)
 
 void tcpstream::open(Socket::address& list, unsigned mss)
 {
-	if(bufsize)
-		close();	// close if existing is open...
+    if(bufsize)
+        close();    // close if existing is open...
 
-	if(Socket::connectto(so, *list))
-		return;
+    if(Socket::connectto(so, *list))
+        return;
 
-	allocate(mss);
-}	
+    allocate(mss);
+}
 
 void tcpstream::open(const char *host, const char *service, unsigned mss)
 {
-	if(bufsize)
-		close();
+    if(bufsize)
+        close();
 
-	struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
-	if(!list)
-		return;
+    struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
+    if(!list)
+        return;
 
-	if(Socket::connectto(so, list)) {
-		Socket::release(list);
-		return;
-	}
+    if(Socket::connectto(so, list)) {
+        Socket::release(list);
+        return;
+    }
 
-	Socket::release(list);
-	allocate(mss);
+    Socket::release(list);
+    allocate(mss);
 }
 
 void tcpstream::reset(void)
 {
-	if(!bufsize)
-		return;
+    if(!bufsize)
+        return;
 
-	if(gbuf)
-		delete[] gbuf;
+    if(gbuf)
+        delete[] gbuf;
 
-	if(pbuf)
-		delete[] pbuf;
+    if(pbuf)
+        delete[] pbuf;
 
-	gbuf = pbuf = NULL;
-	bufsize = 0;
-	clear();
-	Socket::disconnect(so);
+    gbuf = pbuf = NULL;
+    bufsize = 0;
+    clear();
+    Socket::disconnect(so);
 }
 
 void tcpstream::close(void)
 {
-	if(!bufsize)
-		return;
+    if(!bufsize)
+        return;
 
-	sync();
+    sync();
 
-	if(gbuf)
-		delete[] gbuf;
+    if(gbuf)
+        delete[] gbuf;
 
-	if(pbuf)
-		delete[] pbuf;
+    if(pbuf)
+        delete[] pbuf;
 
-	gbuf = pbuf = NULL;
-	bufsize = 0;
-	clear();
-	Socket::disconnect(so);
+    gbuf = pbuf = NULL;
+    bufsize = 0;
+    clear();
+    Socket::disconnect(so);
 }
 
 void tcpstream::allocate(unsigned mss)
 {
-	unsigned size = mss;
-	unsigned max = 0;
-#ifdef	TCP_MAXSEG
-	socklen_t alen = sizeof(max);
+    unsigned size = mss;
+    unsigned max = 0;
+#ifdef  TCP_MAXSEG
+    socklen_t alen = sizeof(max);
 #endif
-	
-	if(mss == 1)
-		goto allocate;
+
+    if(mss == 1)
+        goto allocate;
 
 #ifdef  TCP_MAXSEG
-	if(mss)
-		setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, sizeof(max));
-	getsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, &alen);
+    if(mss)
+        setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, sizeof(max));
+    getsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, &alen);
 #endif
 
-	if(max && max < mss)
-		mss = max;
+    if(max && max < mss)
+        mss = max;
 
-	if(!mss) {
-		if(max)
-			mss = max;
-		else
-			mss = 536;
-		goto allocate;
-	}
+    if(!mss) {
+        if(max)
+            mss = max;
+        else
+            mss = 536;
+        goto allocate;
+    }
 
 #ifdef  TCP_MAXSEG
-	setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&mss, sizeof(mss));
+    setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&mss, sizeof(mss));
 #endif
 
-	if(mss < 80)
-		mss = 80;
+    if(mss < 80)
+        mss = 80;
 
-	if(mss * 7 < 64000u)
-		bufsize = mss * 7;
-	else if(mss * 6 < 64000u)
-		bufsize = mss * 6;
-	else
-		bufsize = mss * 5;
+    if(mss * 7 < 64000u)
+        bufsize = mss * 7;
+    else if(mss * 6 < 64000u)
+        bufsize = mss * 6;
+    else
+        bufsize = mss * 5;
 
-	Socket::sendsize(so, bufsize);
-	Socket::recvsize(so, bufsize);
+    Socket::sendsize(so, bufsize);
+    Socket::recvsize(so, bufsize);
 
-	if(mss < 512)
-		Socket::sendwait(so, mss * 4);
+    if(mss < 512)
+        Socket::sendwait(so, mss * 4);
 
 allocate:
-	StreamProtocol::allocate(size);
+    StreamProtocol::allocate(size);
 }
 
 pipestream::pipestream() :
@@ -415,274 +415,274 @@ StreamProtocol()
 pipestream::pipestream(const char *cmd, access_t access, const char **envp, size_t size) :
 StreamProtocol()
 {
-	open(cmd, access, envp, size);
+    open(cmd, access, envp, size);
 }
 
 pipestream::~pipestream()
 {
-	close();
+    close();
 }
 
-#ifdef	_MSWINDOWS_
+#ifdef  _MSWINDOWS_
 void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t size)
 {
-	PROCESS_INFORMATION pi;
-	STARTUPINFO si;
-	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-	sa.lpSecurityDescriptor = NULL;
-	sa.bInheritHandle = true;
-	HANDLE inputWriteTmp, inputRead,inputWrite;
-	HANDLE outputReadTmp, outputRead, outputWrite;
-	HANDLE errorWrite;
-	char cmdspec[128];
-	char *ep = NULL;
-	unsigned len = 0;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si;
+    SECURITY_ATTRIBUTES sa;
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = true;
+    HANDLE inputWriteTmp, inputRead,inputWrite;
+    HANDLE outputReadTmp, outputRead, outputWrite;
+    HANDLE errorWrite;
+    char cmdspec[128];
+    char *ep = NULL;
+    unsigned len = 0;
 
-	if(envp)
-		ep = new char[4096];
+    if(envp)
+        ep = new char[4096];
 
-	while(envp && *envp && len < 4090) {
-		String::set(ep + len, 4094 - len, *envp);
-		len += strlen(*(envp++)) + 1;
-	}
+    while(envp && *envp && len < 4090) {
+        String::set(ep + len, 4094 - len, *envp);
+        len += strlen(*(envp++)) + 1;
+    }
 
-	if(ep)
-		ep[len] = 0;
+    if(ep)
+        ep[len] = 0;
 
-	GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
+    GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
 
-	if(mode == WRONLY || mode == RDWR) {
-		CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
-		DuplicateHandle(GetCurrentProcess(),inputWriteTmp,
+    if(mode == WRONLY || mode == RDWR) {
+        CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
+        DuplicateHandle(GetCurrentProcess(),inputWriteTmp,
             GetCurrentProcess(), &inputWrite, 0,FALSE, DUPLICATE_SAME_ACCESS);
-		CloseHandle(&inputRead);
-	}
-	if(mode == RDONLY || mode == RDWR) {
-		CreatePipe(&outputReadTmp, &outputWrite,&sa,0);
-		DuplicateHandle(GetCurrentProcess(),outputWrite,
+        CloseHandle(&inputRead);
+    }
+    if(mode == RDONLY || mode == RDWR) {
+        CreatePipe(&outputReadTmp, &outputWrite,&sa,0);
+        DuplicateHandle(GetCurrentProcess(),outputWrite,
             GetCurrentProcess(),&errorWrite,0, TRUE,DUPLICATE_SAME_ACCESS);
-		DuplicateHandle(GetCurrentProcess(),outputReadTmp,
+        DuplicateHandle(GetCurrentProcess(),outputReadTmp,
             GetCurrentProcess(), &outputRead, 0,FALSE, DUPLICATE_SAME_ACCESS);
-		CloseHandle(&outputReadTmp);
-	}
+        CloseHandle(&outputReadTmp);
+    }
 
-	memset(&si, 0, sizeof(si));
-	si.cb = sizeof(STARTUPINFO);
-	si.dwFlags = STARTF_USESTDHANDLES;
-	
-	if(mode == RDONLY || mode == RDWR) {
-		si.hStdOutput = outputWrite;
-		si.hStdError = errorWrite;
-	}
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(STARTUPINFO);
+    si.dwFlags = STARTF_USESTDHANDLES;
 
-	if(mode == WRONLY || mode == RDWR)
-		si.hStdInput = inputRead;
+    if(mode == RDONLY || mode == RDWR) {
+        si.hStdOutput = outputWrite;
+        si.hStdError = errorWrite;
+    }
 
-	if(!CreateProcess(cmdspec, (char *)cmd, NULL, NULL, TRUE,
-		CREATE_NEW_CONSOLE, ep, NULL, &si, &pi))
-		size = 0;
-	else
-		pid = pi.dwProcessId;
+    if(mode == WRONLY || mode == RDWR)
+        si.hStdInput = inputRead;
 
-	if(ep)
-		delete[] ep;
+    if(!CreateProcess(cmdspec, (char *)cmd, NULL, NULL, TRUE,
+        CREATE_NEW_CONSOLE, ep, NULL, &si, &pi))
+        size = 0;
+    else
+        pid = pi.dwProcessId;
 
-	if(mode == WRONLY || mode == RDWR) {
-		fsys::assign(wr, &inputWrite);
-		CloseHandle(inputRead);
-	}
-	if(mode == RDONLY || mode == RDWR) {
-		fsys::assign(rd, &outputRead);
-		CloseHandle(outputWrite);
-		CloseHandle(errorWrite);
-	}
-	if(size)
-		allocate(size, mode);
-	else {
-		fsys::close(rd);
-		fsys::close(wr);
-	}
+    if(ep)
+        delete[] ep;
+
+    if(mode == WRONLY || mode == RDWR) {
+        fsys::assign(wr, &inputWrite);
+        CloseHandle(inputRead);
+    }
+    if(mode == RDONLY || mode == RDWR) {
+        fsys::assign(rd, &outputRead);
+        CloseHandle(outputWrite);
+        CloseHandle(errorWrite);
+    }
+    if(size)
+        allocate(size, mode);
+    else {
+        fsys::close(rd);
+        fsys::close(wr);
+    }
 }
 
 void pipestream::terminate(void)
 {
-	HANDLE hProc;
-	if(bufsize) {
-		hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
-		if(hProc != NULL) {
-			TerminateProcess(hProc,0);
-			CloseHandle(hProc);
-		}
-		release();
-	}
+    HANDLE hProc;
+    if(bufsize) {
+        hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
+        if(hProc != NULL) {
+            TerminateProcess(hProc,0);
+            CloseHandle(hProc);
+        }
+        release();
+    }
 }
 
 void pipestream::close(void)
 {
-	HANDLE hProc;
-	if(bufsize) {
-		release();
-		hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
-		if(hProc != NULL) {
-			WaitForSingleObject(hProc, INFINITE);
-			CloseHandle(hProc);
-		}
-	}
+    HANDLE hProc;
+    if(bufsize) {
+        release();
+        hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
+        if(hProc != NULL) {
+            WaitForSingleObject(hProc, INFINITE);
+            CloseHandle(hProc);
+        }
+    }
 }
 
 #else
 
 void pipestream::terminate(void)
 {
-	if(bufsize) {
-		kill(pid, SIGTERM);
-		close();
-	}
+    if(bufsize) {
+        kill(pid, SIGTERM);
+        close();
+    }
 }
 
 void pipestream::close(void)
 {
-	if(bufsize) {
-		release();
-		waitpid(pid, NULL, 0);
-	}
+    if(bufsize) {
+        release();
+        waitpid(pid, NULL, 0);
+    }
 }
 
 void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t size)
 {
-	int input[2], output[2];
-	int max = sizeof(fd_set) * 8;
-	char symname[129];
-	const char *cp;
-	char *ep;
+    int input[2], output[2];
+    int max = sizeof(fd_set) * 8;
+    char symname[129];
+    const char *cp;
+    char *ep;
 
-#ifdef	RLIMIT_NOFILE
-	struct rlimit rlim;
+#ifdef  RLIMIT_NOFILE
+    struct rlimit rlim;
 
-	if(!getrlimit(RLIMIT_NOFILE, &rlim))
-		max = rlim.rlim_max;
+    if(!getrlimit(RLIMIT_NOFILE, &rlim))
+        max = rlim.rlim_max;
 #endif
 
-	close();
-	
-	if(mode == RDONLY || mode == RDWR) {
-		if(pipe(input))
-			return;
-		fsys::assign(rd, input[0]);
-	}
-	else
-		input[1] = ::open("/dev/null", O_RDWR);
+    close();
 
-	if(mode == WRONLY || mode == RDWR) {
-		if(pipe(output)) {
-			if(mode == RDWR) {
-				::close(input[0]);
-				::close(input[1]);
-			}
-			return;
-		}
-		fsys::assign(wr, output[1]);
-	}
-	else
-		output[0] = ::open("/dev/null", O_RDWR);
+    if(mode == RDONLY || mode == RDWR) {
+        if(pipe(input))
+            return;
+        fsys::assign(rd, input[0]);
+    }
+    else
+        input[1] = ::open("/dev/null", O_RDWR);
 
-	pid = fork();
-	if(pid) {
-		if(mode == RDONLY || mode == RDWR)
-			::close(input[1]);
-		if(mode == WRONLY || mode == RDWR)		
-			::close(output[0]);
-		if(pid == -1) {
-			fsys::close(rd);
-			fsys::close(wr);
-		}
-		else	
-			allocate(size, mode);
-		return;
-	}
-	dup2(input[1], 1);
-	dup2(output[0], 0);
-	for(int fd = 3; fd < max; ++fd)
-		::close(fd);
+    if(mode == WRONLY || mode == RDWR) {
+        if(pipe(output)) {
+            if(mode == RDWR) {
+                ::close(input[0]);
+                ::close(input[1]);
+            }
+            return;
+        }
+        fsys::assign(wr, output[1]);
+    }
+    else
+        output[0] = ::open("/dev/null", O_RDWR);
 
-	while(envp && *envp) {
-		String::set(symname, sizeof(symname), *envp);
-		ep = strchr(symname, '=');
-		if(ep)
-			*ep = 0;
-		cp = strchr(*envp, '=');
-		if(cp)
-			++cp;
-		::setenv(symname, cp, 1);
-		++envp;
-	}
+    pid = fork();
+    if(pid) {
+        if(mode == RDONLY || mode == RDWR)
+            ::close(input[1]);
+        if(mode == WRONLY || mode == RDWR)
+            ::close(output[0]);
+        if(pid == -1) {
+            fsys::close(rd);
+            fsys::close(wr);
+        }
+        else
+            allocate(size, mode);
+        return;
+    }
+    dup2(input[1], 1);
+    dup2(output[0], 0);
+    for(int fd = 3; fd < max; ++fd)
+        ::close(fd);
 
-	::signal(SIGQUIT, SIG_DFL);
-	::signal(SIGINT, SIG_DFL);
-	::signal(SIGCHLD, SIG_DFL);
-	::signal(SIGPIPE, SIG_DFL);
-	::execlp("/bin/sh", "sh", "-c", cmd, NULL);
-	exit(127);
+    while(envp && *envp) {
+        String::set(symname, sizeof(symname), *envp);
+        ep = strchr(symname, '=');
+        if(ep)
+            *ep = 0;
+        cp = strchr(*envp, '=');
+        if(cp)
+            ++cp;
+        ::setenv(symname, cp, 1);
+        ++envp;
+    }
+
+    ::signal(SIGQUIT, SIG_DFL);
+    ::signal(SIGINT, SIG_DFL);
+    ::signal(SIGCHLD, SIG_DFL);
+    ::signal(SIGPIPE, SIG_DFL);
+    ::execlp("/bin/sh", "sh", "-c", cmd, NULL);
+    exit(127);
 }
 
 #endif
 
 void pipestream::release(void)
 {
-	if(gbuf)
-		fsys::close(rd);
+    if(gbuf)
+        fsys::close(rd);
 
-	if(pbuf)
-		fsys::close(wr);
+    if(pbuf)
+        fsys::close(wr);
 
-	StreamProtocol::release();
+    StreamProtocol::release();
 }
 
 void pipestream::allocate(size_t size, access_t mode)
 {
-	if(gbuf)
-		delete[] gbuf;
+    if(gbuf)
+        delete[] gbuf;
 
-	if(pbuf)
-		delete[] pbuf;
+    if(pbuf)
+        delete[] pbuf;
 
-	gbuf = pbuf = NULL;
+    gbuf = pbuf = NULL;
 
-	if(size < 2) {
-		bufsize = 1;
-		return;
-	}
+    if(size < 2) {
+        bufsize = 1;
+        return;
+    }
 
-	if(mode == RDONLY || mode == RDWR)
-		gbuf = new char[size];
-	if(mode == WRONLY || mode == RDWR)
-		pbuf = new char[size];
-	bufsize = size;
-	clear();
-	if(mode == RDONLY || mode == RDWR) {
+    if(mode == RDONLY || mode == RDWR)
+        gbuf = new char[size];
+    if(mode == WRONLY || mode == RDWR)
+        pbuf = new char[size];
+    bufsize = size;
+    clear();
+    if(mode == RDONLY || mode == RDWR) {
 #if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
-	    setb(gbuf, gbuf + size, 0);
+        setb(gbuf, gbuf + size, 0);
 #endif
-		setg(gbuf, gbuf + size, gbuf + size);
-	}
-	if(mode == WRONLY || mode == RDWR)
-		setp(pbuf, pbuf + size);
+        setg(gbuf, gbuf + size, gbuf + size);
+    }
+    if(mode == WRONLY || mode == RDWR)
+        setp(pbuf, pbuf + size);
 }
 
 int pipestream::_getch(void)
 {
-	ssize_t rlen = 1;
-	unsigned char ch;
+    ssize_t rlen = 1;
+    unsigned char ch;
 
-	if(!gbuf)
-		return EOF;
+    if(!gbuf)
+        return EOF;
 
-	if(bufsize == 1) {
+    if(bufsize == 1) {
         rlen = fsys::read(rd, &ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
-				close();
+                close();
             return EOF;
         }
         return ch;
@@ -695,11 +695,11 @@ int pipestream::_getch(void)
         return (unsigned char)*gptr();
 
     rlen = (ssize_t)((gbuf + bufsize) - eback());
-	rlen = fsys::read(rd, eback(), rlen);
+    rlen = fsys::read(rd, eback(), rlen);
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
         if(rlen < 0)
-			close();
+            close();
         else
             clear(ios::failbit | rdstate());
         return EOF;
@@ -714,18 +714,18 @@ int pipestream::_putch(int c)
     unsigned char ch;
     ssize_t rlen, req;
 
-	if(!pbuf)
-		return EOF;
-	
+    if(!pbuf)
+        return EOF;
+
     if(bufsize == 1) {
         if(c == EOF)
             return 0;
 
-		ch = (unsigned char)(c);
+        ch = (unsigned char)(c);
         rlen = fsys::write(wr, &ch, 1);
         if(rlen < 1) {
-            if(rlen < 0) 
-				close();
+            if(rlen < 0)
+                close();
             return EOF;
         }
         else
@@ -739,8 +739,8 @@ int pipestream::_putch(int c)
     if(req) {
         rlen = fsys::write(wr, pbase(), req);
         if(rlen < 1) {
-            if(rlen < 0) 
-				close();
+            if(rlen < 0)
+                close();
             return EOF;
         }
         req -= rlen;
@@ -768,102 +768,102 @@ StreamProtocol()
 filestream::filestream(const filestream& copy) :
 StreamProtocol()
 {
-	if(copy.bufsize) 
-		fd = copy.fd;
-	if(is(fd))
-		allocate(copy.bufsize, copy.ac);
+    if(copy.bufsize)
+        fd = copy.fd;
+    if(is(fd))
+        allocate(copy.bufsize, copy.ac);
 }
 
 
 filestream::filestream(const char *filename, fsys::access_t mode, size_t size) :
 StreamProtocol()
 {
-	open(filename, mode, size);
+    open(filename, mode, size);
 }
 
 filestream::filestream(const char *filename, fsys::access_t access, unsigned mode, size_t size) :
 StreamProtocol()
 {
-	create(filename, access, mode, size);
+    create(filename, access, mode, size);
 }
 
 filestream::~filestream()
 {
-	close();
+    close();
 }
 
 void filestream::seek(fsys::offset_t offset)
 {
-	if(bufsize) {
-		sync();
-		fsys::seek(fd, offset);
-	}
+    if(bufsize) {
+        sync();
+        fsys::seek(fd, offset);
+    }
 }
 
 void filestream::close(void)
 {
-	sync();
+    sync();
 
-	if(bufsize) 
-		fsys::close(fd);
+    if(bufsize)
+        fsys::close(fd);
 
-	StreamProtocol::release();
+    StreamProtocol::release();
 }
 
 void filestream::allocate(size_t size, fsys::access_t mode)
 {
-	if(gbuf)
-		delete[] gbuf;
+    if(gbuf)
+        delete[] gbuf;
 
-	if(pbuf)
-		delete[] pbuf;
+    if(pbuf)
+        delete[] pbuf;
 
-	gbuf = pbuf = NULL;
-	ac = mode;
+    gbuf = pbuf = NULL;
+    ac = mode;
 
-	if(size < 2) {
-		bufsize = 1;
-		return;
-	}
+    if(size < 2) {
+        bufsize = 1;
+        return;
+    }
 
-	if(mode == fsys::ACCESS_RDONLY || fsys::ACCESS_RDWR || fsys::ACCESS_SHARED || fsys::ACCESS_DIRECTORY)
-		gbuf = new char[size];
-	if(mode == fsys::ACCESS_WRONLY || fsys::ACCESS_APPEND || fsys::ACCESS_SHARED || fsys::ACCESS_RDWR)
-		pbuf = new char[size];
-	bufsize = size;
-	clear();
-	if(mode == fsys::ACCESS_RDONLY || fsys::ACCESS_RDWR || fsys::ACCESS_SHARED || fsys::ACCESS_DIRECTORY) {
+    if(mode == fsys::ACCESS_RDONLY || fsys::ACCESS_RDWR || fsys::ACCESS_SHARED || fsys::ACCESS_DIRECTORY)
+        gbuf = new char[size];
+    if(mode == fsys::ACCESS_WRONLY || fsys::ACCESS_APPEND || fsys::ACCESS_SHARED || fsys::ACCESS_RDWR)
+        pbuf = new char[size];
+    bufsize = size;
+    clear();
+    if(mode == fsys::ACCESS_RDONLY || fsys::ACCESS_RDWR || fsys::ACCESS_SHARED || fsys::ACCESS_DIRECTORY) {
 #if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
-	    setb(gbuf, gbuf + size, 0);
+        setb(gbuf, gbuf + size, 0);
 #endif
-		setg(gbuf, gbuf + size, gbuf + size);
-	}
-	if(mode == fsys::ACCESS_WRONLY || fsys::ACCESS_APPEND || fsys::ACCESS_SHARED || fsys::ACCESS_RDWR)
-		setp(pbuf, pbuf + size);
+        setg(gbuf, gbuf + size, gbuf + size);
+    }
+    if(mode == fsys::ACCESS_WRONLY || fsys::ACCESS_APPEND || fsys::ACCESS_SHARED || fsys::ACCESS_RDWR)
+        setp(pbuf, pbuf + size);
 }
 
 void filestream::create(const char *fname, fsys::access_t access, unsigned mode, size_t size)
 {
-	close();
-	fsys::create(fd, fname, access, mode);
-	if(is(fd))
-		allocate(size, access);
+    close();
+    fsys::create(fd, fname, access, mode);
+    if(is(fd))
+        allocate(size, access);
 }
 
 void filestream::open(const char *fname, fsys::access_t access, size_t size)
 {
-	close();
-	fsys::open(fd, fname, access);
-	if(is(fd))
-		allocate(size, access);
+    close();
+    fsys::open(fd, fname, access);
+    if(is(fd))
+        allocate(size, access);
 }
 
 int filestream::_getch(void)
 {
-	ssize_t rlen = 1;
+    ssize_t rlen = 1;
 
-	if(!gbuf)
-		return EOF;
+    if(!gbuf)
+        return EOF;
 
     if(!gptr())
         return EOF;
@@ -872,11 +872,11 @@ int filestream::_getch(void)
         return (unsigned char)*gptr();
 
     rlen = (ssize_t)((gbuf + bufsize) - eback());
-	rlen = fsys::read(fd, eback(), rlen);
+    rlen = fsys::read(fd, eback(), rlen);
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
         if(rlen < 0)
-			close();
+            close();
         else
             clear(ios::failbit | rdstate());
         return EOF;
@@ -890,9 +890,9 @@ int filestream::_putch(int c)
 {
     ssize_t rlen, req;
 
-	if(!pbuf)
-		return EOF;
-	
+    if(!pbuf)
+        return EOF;
+
     if(!pbase())
         return EOF;
 
@@ -900,8 +900,8 @@ int filestream::_putch(int c)
     if(req) {
         rlen = fsys::write(fd, pbase(), req);
         if(rlen < 1) {
-            if(rlen < 0) 
-				close();
+            if(rlen < 0)
+                close();
             return EOF;
         }
         req -= rlen;

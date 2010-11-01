@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -21,7 +21,7 @@
 #include <ucommon/secure.h>
 #include <errno.h>
 
-#ifdef	_MSWINDOWS_
+#ifdef  _MSWINDOWS_
 #include <wincrypt.h>
 #endif
 
@@ -31,7 +31,7 @@
 NAMESPACE_LOCAL
 using namespace UCOMMON_NAMESPACE;
 
-#ifdef	_MSWINDOWS_
+#ifdef  _MSWINDOWS_
 extern HCRYPTPROV _handle;
 #endif
 

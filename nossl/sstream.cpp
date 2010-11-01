@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -22,17 +22,17 @@
 sstream::sstream(secure::client_t context) :
 tcpstream()
 {
-	ssl = NULL;
-	bio = NULL;
-	server = false;
+    ssl = NULL;
+    bio = NULL;
+    server = false;
 }
 
 sstream::sstream(const TCPServer *tcp, secure::server_t context, size_t size) :
 tcpstream(tcp, size)
 {
-	ssl = NULL;
-	bio = NULL;
-	server = true;
+    ssl = NULL;
+    bio = NULL;
+    server = true;
 }
 
 sstream::~sstream()
@@ -41,43 +41,43 @@ sstream::~sstream()
 
 void sstream::open(const char *host, const char *service, size_t bufsize)
 {
-	if(server)
-		return;
+    if(server)
+        return;
 
-	tcpstream::open(host, service, bufsize);
+    tcpstream::open(host, service, bufsize);
 }
 
 void sstream::close(void)
 {
-	if(server)
-		return;
+    if(server)
+        return;
 
-	tcpstream::close();
+    tcpstream::close();
 }
 
 void sstream::release(void)
 {
-	tcpstream::close();
+    tcpstream::close();
 }
 
 ssize_t sstream::_write(const char *address, size_t size)
 {
-	return tcpstream::_write(address, size);
+    return tcpstream::_write(address, size);
 }
 
 ssize_t sstream::_read(char *address, size_t size)
 {
-	return tcpstream::_read(address, size);
+    return tcpstream::_read(address, size);
 }
 
 bool sstream::_wait(void)
 {
-	return tcpstream::_wait();
+    return tcpstream::_wait();
 }
 
 int sstream::sync()
 {
-	return tcpstream::sync();
+    return tcpstream::sync();
 }
 
 #endif

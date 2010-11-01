@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -24,7 +24,7 @@
  */
 
 #ifndef _UCOMMON_COUNTER_H_
-#define	_UCOMMON_COUNTER_H_
+#define _UCOMMON_COUNTER_H_
 
 #ifndef _UCOMMON_CONFIG_H_
 #include <ucommon/platform.h>
@@ -34,7 +34,7 @@ NAMESPACE_UCOMMON
 
 /**
  * Automatic integer counting class.  This is an automatic counting object
- * that is used to retrieve a new integer value between 0 and n each time 
+ * that is used to retrieve a new integer value between 0 and n each time
  * the object is referenced.  When reaching the last n value, the object
  * restarts at 0, and so is used to retrieve a sequence of values in order.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -42,52 +42,52 @@ NAMESPACE_UCOMMON
 class __EXPORT counter
 {
 private:
-	unsigned value, cycle;
+    unsigned value, cycle;
 
 public:
-	/**
-	 * Initialize integer counter of unknown size.
-	 */
-	counter();
+    /**
+     * Initialize integer counter of unknown size.
+     */
+    counter();
 
-	/**
-	 * Initialize integer counter for a range of values.
-	 * @param limit before recycling to zero.
-	 */
-	counter(unsigned limit);
+    /**
+     * Initialize integer counter for a range of values.
+     * @param limit before recycling to zero.
+     */
+    counter(unsigned limit);
 
-	/**
-	 * Get the next counter value.
-	 * @return next counter value.
-	 */
-	unsigned get(void);
+    /**
+     * Get the next counter value.
+     * @return next counter value.
+     */
+    unsigned get(void);
 
-	/**
-	 * Get the range of values before recycling.
-	 * @return counter limit.
-	 */
-	inline unsigned range(void)
-		{return cycle;};
+    /**
+     * Get the range of values before recycling.
+     * @return counter limit.
+     */
+    inline unsigned range(void)
+        {return cycle;};
 
-	/**
-	 * Reference next counter value through pointer operation.
-	 * @return next counter value.
-	 */
-	inline unsigned operator*()
-		{return get();};
+    /**
+     * Reference next counter value through pointer operation.
+     * @return next counter value.
+     */
+    inline unsigned operator*()
+        {return get();};
 
-	/**
-	 * Reference next counter value by casting to integer.
-	 * @return next counter value.
-	 */
-	inline operator unsigned()
-		{return get();};
+    /**
+     * Reference next counter value by casting to integer.
+     * @return next counter value.
+     */
+    inline operator unsigned()
+        {return get();};
 
-	/**
-	 * Assign the value of the counter.
-	 * @param value to assign.
-	 */
-	void operator=(unsigned value);
+    /**
+     * Assign the value of the counter.
+     * @param value to assign.
+     */
+    void operator=(unsigned value);
 };
 
 /**
@@ -100,25 +100,25 @@ public:
 class __EXPORT SeqCounter : protected counter
 {
 private:
-	void *item;
-	size_t offset;
-	
+    void *item;
+    size_t offset;
+
 protected:
-	SeqCounter(void *start, size_t size, unsigned count);
+    SeqCounter(void *start, size_t size, unsigned count);
 
-	void *get(void);
+    void *get(void);
 
-	void *get(unsigned idx);
+    void *get(unsigned idx);
 
 public:
-	/**
-	 * Used to directly assign sequence position in template.
-	 * @param inc_offset in sequence to reset sequencing to.
-	 */
-	inline void operator=(unsigned inc_offset)
-		{counter::operator=(inc_offset);};
+    /**
+     * Used to directly assign sequence position in template.
+     * @param inc_offset in sequence to reset sequencing to.
+     */
+    inline void operator=(unsigned inc_offset)
+        {counter::operator=(inc_offset);};
 };
-	
+
 /**
  * Automatically toggle a bool on each reference.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -126,22 +126,22 @@ public:
 class __EXPORT toggle
 {
 private:
-	bool value;
+    bool value;
 
 public:
-	inline toggle()
-		{value = false;};
+    inline toggle()
+        {value = false;};
 
-	bool get(void);
+    bool get(void);
 
-	inline bool operator*()
-		{return get();};
+    inline bool operator*()
+        {return get();};
 
-	inline void operator=(bool v)
-		{value = v;};
+    inline void operator=(bool v)
+        {value = v;};
 
-	inline operator bool()
-		{return get();};
+    inline operator bool()
+        {return get();};
 
 };
 
@@ -155,57 +155,57 @@ template <class T>
 class sequence : public SeqCounter
 {
 protected:
-	inline T *get(unsigned idx)
-		{return static_cast<T *>(SeqCounter::get(idx));};
+    inline T *get(unsigned idx)
+        {return static_cast<T *>(SeqCounter::get(idx));};
 
 public:
-	/**
-	 * Create a template auto-sequence from a list of typed pointers.
-	 * @param array of typed values to sequence on reference.
-	 * @param size of list of typed values.
-	 */
-	inline sequence(T *array, unsigned size) : 
-		SeqCounter(array, sizeof(T), size) {};
+    /**
+     * Create a template auto-sequence from a list of typed pointers.
+     * @param array of typed values to sequence on reference.
+     * @param size of list of typed values.
+     */
+    inline sequence(T *array, unsigned size) :
+        SeqCounter(array, sizeof(T), size) {};
 
-	/**
-	 * Return next typed member of the sequence.
-	 * @return next typed member of sequence.
-	 */
-	inline T* get(void)
-		{return static_cast<T *>(SeqCounter::get());};
+    /**
+     * Return next typed member of the sequence.
+     * @return next typed member of sequence.
+     */
+    inline T* get(void)
+        {return static_cast<T *>(SeqCounter::get());};
 
-	/**
-	 * Return next typed member of the sequence by pointer reference.
-	 * @return next typed member of sequence.
-	 */
-	inline T& operator*()
-		{return *get();};
+    /**
+     * Return next typed member of the sequence by pointer reference.
+     * @return next typed member of sequence.
+     */
+    inline T& operator*()
+        {return *get();};
 
-	/**
-	 * Return next typed member of the sequence by casted reference.
-	 * @return next typed member of sequence.
-	 */
-	inline operator T&()
-		{return *get();};
+    /**
+     * Return next typed member of the sequence by casted reference.
+     * @return next typed member of sequence.
+     */
+    inline operator T&()
+        {return *get();};
 
-	/**
-	 * Return a specific typed member from the sequence list.
-	 * @param offset of member to return.
-	 * @return typed value at the specified offset.
-	 */
-	inline T& operator[](unsigned offset)
-		{return *get(offset);};
+    /**
+     * Return a specific typed member from the sequence list.
+     * @param offset of member to return.
+     * @return typed value at the specified offset.
+     */
+    inline T& operator[](unsigned offset)
+        {return *get(offset);};
 };
 
 /**
  * A convenience typecast for integer counters.
  */
-typedef	counter counter_t;
+typedef counter counter_t;
 
 /**
  * A convenience typecast for auto-toggled bools.
  */
-typedef	toggle toggle_t;
+typedef toggle toggle_t;
 
 END_NAMESPACE
 

@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -23,45 +23,45 @@ using namespace UCOMMON_NAMESPACE;
 
 atomic::counter::counter(long init)
 {
-	value = init;
+    value = init;
 }
 
 atomic::spinlock::spinlock()
 {
-	value = 0;
+    value = 0;
 }
 
 #ifdef HAVE_GCC_ATOMICS
 
 long atomic::counter::operator++()
 {
-	return __sync_add_and_fetch(&value, 1);
+    return __sync_add_and_fetch(&value, 1);
 }
 
 long atomic::counter::operator--()
 {
-	return __sync_sub_and_fetch(&value, 1);
+    return __sync_sub_and_fetch(&value, 1);
 }
 
 long atomic::counter::operator+=(long change)
 {
-	return __sync_add_and_fetch(&value, change);
+    return __sync_add_and_fetch(&value, change);
 }
 
 long atomic::counter::operator-=(long change)
 {
-	return __sync_sub_and_fetch(&value, change);
+    return __sync_sub_and_fetch(&value, change);
 }
 
 bool atomic::spinlock::acquire(void)
 {
-	// if not locked by another already, then we acquired it...
-	return (__sync_lock_test_and_set(&value, 1) == 0);
+    // if not locked by another already, then we acquired it...
+    return (__sync_lock_test_and_set(&value, 1) == 0);
 }
 
 void atomic::spinlock::release(void)
 {
-	__sync_lock_release(&value);
+    __sync_lock_release(&value);
 }
 
 #else
@@ -70,58 +70,58 @@ void atomic::spinlock::release(void)
 
 long atomic::counter::operator++()
 {
-	long rval;
-	mutex::protect((void *)&value);
-	rval = (long)(++value);
-	mutex::release((void *)&value);
-	return rval;
+    long rval;
+    mutex::protect((void *)&value);
+    rval = (long)(++value);
+    mutex::release((void *)&value);
+    return rval;
 }
 
 long atomic::counter::operator--()
 {
-	long rval;
-	mutex::protect((void *)&value);
-	rval = (long)(--value);
-	mutex::release((void *)&value);
-	return rval;
+    long rval;
+    mutex::protect((void *)&value);
+    rval = (long)(--value);
+    mutex::release((void *)&value);
+    return rval;
 }
 
 long atomic::counter::operator+=(long change)
 {
-	long rval;
-	mutex::protect((void *)&value);
-	rval = (long)(value += change);
-	mutex::release((void *)&value);
-	return rval;
+    long rval;
+    mutex::protect((void *)&value);
+    rval = (long)(value += change);
+    mutex::release((void *)&value);
+    return rval;
 }
 
 long atomic::counter::operator-=(long change)
 {
-	long rval;
-	mutex::protect((void *)&value);
-	rval = (long)(value -= change);
-	mutex::release((void *)&value);
-	return rval;
+    long rval;
+    mutex::protect((void *)&value);
+    rval = (long)(value -= change);
+    mutex::release((void *)&value);
+    return rval;
 }
 
 bool atomic::spinlock::acquire(void)
 {
-	bool rtn = true;
+    bool rtn = true;
 
-	mutex::protect((void *)&value);
-	if(value == 1)
-		rtn = false;
-	else
-		value = 1;
-	mutex::release((void *)&value);
-	return rtn;
+    mutex::protect((void *)&value);
+    if(value == 1)
+        rtn = false;
+    else
+        value = 1;
+    mutex::release((void *)&value);
+    return rtn;
 }
 
 void atomic::spinlock::release(void)
 {
-	mutex::protect((void *)&value);
-	value = 0;
-	mutex::release((void *)&value);
+    mutex::protect((void *)&value);
+    value = 0;
+    mutex::release((void *)&value);
 }
 
 #endif

@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -23,9 +23,9 @@ sstream::sstream(secure::client_t scontext) :
 tcpstream()
 {
     context *ctx = (context *)scontext;
-	ssl = NULL;
-	bio = NULL;
-	server = false;
+    ssl = NULL;
+    bio = NULL;
+    server = false;
 
     if(ctx && ctx->ctx && ctx->err() == secure::OK)
         ssl = SSL_new(ctx->ctx);
@@ -35,9 +35,9 @@ sstream::sstream(const TCPServer *tcp, secure::server_t scontext, size_t size) :
 tcpstream(tcp, size)
 {
     context *ctx = (context *)scontext;
-	ssl = NULL;
-	bio = NULL;
-	server = true;
+    ssl = NULL;
+    bio = NULL;
+    server = true;
 
     if(ctx && ctx->ctx && ctx->err() == secure::OK)
         ssl = SSL_new(ctx->ctx);
@@ -53,19 +53,19 @@ tcpstream(tcp, size)
 
 sstream::~sstream()
 {
-	release();
+    release();
 }
 
 void sstream::open(const char *host, const char *service, size_t bufsize)
 {
-	if(server)
-		return;
+    if(server)
+        return;
 
-	close();
-	tcpstream::open(host, service, bufsize);
+    close();
+    tcpstream::open(host, service, bufsize);
 
-	if(!is_open() || !ssl)
-		return;
+    if(!is_open() || !ssl)
+        return;
 
     SSL_set_fd((SSL *)ssl, getsocket());
 
@@ -75,21 +75,21 @@ void sstream::open(const char *host, const char *service, size_t bufsize)
 
 void sstream::close(void)
 {
-	if(server)
-		return;
+    if(server)
+        return;
 
     if(bio) {
         SSL_shutdown((SSL *)ssl);
         bio = NULL;
     }
 
-	tcpstream::close();
+    tcpstream::close();
 }
 
 void sstream::release(void)
 {
-	server = false;
-	close();
+    server = false;
+    close();
 
     if(ssl) {
         SSL_free((SSL *)ssl);
@@ -99,38 +99,38 @@ void sstream::release(void)
 
 ssize_t sstream::_write(const char *address, size_t size)
 {
-	if(!bio)
-		return tcpstream::_write(address, size);
+    if(!bio)
+        return tcpstream::_write(address, size);
 
-	return SSL_write((SSL *)ssl, address, size);
+    return SSL_write((SSL *)ssl, address, size);
 }
 
 ssize_t sstream::_read(char *address, size_t size)
 {
-	if(!bio)
-		return tcpstream::_read(address, size);
+    if(!bio)
+        return tcpstream::_read(address, size);
 
-	return SSL_read((SSL *)ssl, address, size);
+    return SSL_read((SSL *)ssl, address, size);
 }
 
 bool sstream::_wait(void)
 {
-	if(so == INVALID_SOCKET)
-		return false;
+    if(so == INVALID_SOCKET)
+        return false;
 
-	if(ssl && SSL_pending((SSL *)ssl))
-		return true;
+    if(ssl && SSL_pending((SSL *)ssl))
+        return true;
 
-	return tcpstream::_wait();
+    return tcpstream::_wait();
 }
 
 int sstream::sync()
 {
-	int rtn = tcpstream::sync();
-	if(bio)
-		rtn = BIO_flush((BIO *)bio);
-			
-	return rtn;
+    int rtn = tcpstream::sync();
+    if(bio)
+        rtn = BIO_flush((BIO *)bio);
+
+    return rtn;
 }
 
 #endif

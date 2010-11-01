@@ -3,7 +3,7 @@
 // This file is part of GNU uCommon C++.
 //
 // GNU uCommon C++ is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published 
+// it under the terms of the GNU Lesser General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -38,47 +38,47 @@ void Shared::Share(void)
 
 shared_lock::shared_lock(Shared *obj)
 {
-	assert(obj != NULL);
-	lock = obj;
-	modify = false;
-	lock->Shlock();
+    assert(obj != NULL);
+    lock = obj;
+    modify = false;
+    lock->Shlock();
 }
 
 exclusive_lock::exclusive_lock(Exclusive *obj)
 {
-	assert(obj != NULL);
-	lock = obj;
-	lock->Exlock();
+    assert(obj != NULL);
+    lock = obj;
+    lock->Exlock();
 }
 
 shared_lock::~shared_lock()
 {
-	if(lock) {
-		if(modify)
-			lock->Share();
-		lock->Unlock();
-		lock = NULL;
-		modify = false;
-	}
+    if(lock) {
+        if(modify)
+            lock->Share();
+        lock->Unlock();
+        lock = NULL;
+        modify = false;
+    }
 }
 
 exclusive_lock::~exclusive_lock()
 {
-	if(lock) {
-		lock->Unlock();
-		lock = NULL;
-	}
+    if(lock) {
+        lock->Unlock();
+        lock = NULL;
+    }
 }
 
 void shared_lock::release()
 {
-	if(lock) {
-		if(modify)
-			lock->Share();
-		lock->Unlock();
-		lock = NULL;
-		modify = false;
-	}
+    if(lock) {
+        if(modify)
+            lock->Share();
+        lock->Unlock();
+        lock = NULL;
+        modify = false;
+    }
 }
 
 void exclusive_lock::release()
@@ -91,17 +91,17 @@ void exclusive_lock::release()
 
 void shared_lock::exclusive(void)
 {
-	if(lock && !modify) {
-		lock->Exclusive();
-		modify = true;
-	}
+    if(lock && !modify) {
+        lock->Exclusive();
+        modify = true;
+    }
 }
 
 void shared_lock::share(void)
 {
-	if(lock && modify) {
-		lock->Share();
-		modify = false;
-	}
+    if(lock && modify) {
+        lock->Share();
+        modify = false;
+    }
 }
 
