@@ -140,7 +140,7 @@ void PersistEngine::readBinary(uint8_t* data, uint32_t size) throw(PersistExcept
 
 void PersistEngine::write(const PersistObject *object) throw(PersistException)
 {
-  // Pre-step, if object is NULL, then don't serialise it - serialise a
+  // Pre-step, if object is NULL, then don't serialize it - serialize a
   // marker to say that it is null.
   // as ID's are uint32's, NullObject will do nicely for the task
   if (object == NULL) {
