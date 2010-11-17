@@ -27,7 +27,7 @@ static shell::flagopt follow('f', "--follow", _TEXT("follow symlinks"));
 static shell::numericopt passes('p', "--passes", _TEXT("passes with randomized data (0-x)"), "count", 1);
 static shell::flagopt renamefile('r', "--rename", _TEXT("rename file randomly"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
-static shell::flagopt trunc('t', "--truncate", _TEXT("decompose file by truncation"));
+static shell::flagopt truncflag('t', "--truncate", _TEXT("decompose file by truncation"));
 static shell::flagopt verbose('v', "--verbose", _TEXT("show active status"));
 
 static int exit_code = 0;
@@ -170,7 +170,7 @@ repeat:
         pos += 1024l;
     }
 
-    while(is(trunc) && pos > 0l) {
+    while(is(truncflag) && pos > 0l) {
         pos -= 1024l * (fsys::offset_t)*blocks;
         fs.trunc(pos);
         if(fs.err()) {

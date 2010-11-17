@@ -296,7 +296,9 @@ typedef char *caddr_t;
 
 #endif
 
+#ifndef _GNU_SOURCE
 typedef void (*sighandler_t)(int);  /**< Convenient typedef for signal handlers. */
+#endif
 typedef unsigned long timeout_t;    /**< Typedef for millisecond timer values. */
 
 #include <stdlib.h>
