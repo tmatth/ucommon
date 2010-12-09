@@ -17,22 +17,41 @@
 
 #include "local.h"
 
+Cipher::Key::Key(const char *cipher)
+{
+    secure::init();
+    set(cipher);
+}
+
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned rounds)
 {
-    algotype = NULL;
-    hashtype = NULL;
-    keysize = 0;
+    secure::init();
+    set(cipher);
 }
 
 Cipher::Key::Key()
 {
-    algotype = NULL;
-    hashtype = NULL;
-    keysize = 0;
+    secure::init();
+    clear();
 }
 
 Cipher::Key::~Key()
 {
+    clear();
+}
+
+void Cipher::Key::set(const char *cipher)
+{
+    clear();
+}
+
+void Cipher::Key::clear(void)
+{
+    algotype = NULL;
+    hashtype = NULL;
+    keysize = 0;
+    zerofill(keybuf, sizeof(keybuf));
+    zerofill(ivbuf, sizeof(ivbuf));
 }
 
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)

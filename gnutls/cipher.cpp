@@ -17,44 +17,26 @@
 
 #include "local.h"
 
+Cipher::Key::Key(const char *cipher)
+{
+    secure::init();
+    set(cipher);
+}
+
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
     secure::init();
-    clear();
 
     if(ieq(digest, "sha"))
         digest = "sha1";
 
-    char algoname[64];
-
-    String::set(algoname, sizeof(algoname), cipher);
-    char *fpart = strchr(algoname, '-');
-    char *lpart = strrchr(algoname, '-');
-
-    modeid = GCRY_CIPHER_MODE_CBC;
-
-    if(lpart && lpart != fpart) {
-        *(lpart++) = 0;
-        if(ieq(lpart, "cbc"))
-            modeid = GCRY_CIPHER_MODE_CBC;
-        else if(ieq(lpart, "ecb"))
-            modeid = GCRY_CIPHER_MODE_ECB;
-        else if(ieq(lpart, "cfb"))
-            modeid = GCRY_CIPHER_MODE_CFB;
-        else if(ieq(lpart, "ofb"))
-            modeid = GCRY_CIPHER_MODE_OFB;
-        else
-            modeid = GCRY_CIPHER_MODE_NONE;
-    }
-
-    algoid = gcry_cipher_map_name(algoname);
+    set(cipher);
     hashid = gcry_md_map_name(digest);
 
-    if(hashid == GCRY_MD_NONE || algoid == GCRY_CIPHER_NONE)
+    if(hashid == GCRY_MD_NONE || algoid == GCRY_CIPHER_NONE) {
+        keysize = 0;
         return;
-
-    (void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_KEYLEN, NULL, &keysize);
-    (void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_BLKLEN, NULL, &blksize);
+    }
 
     gcry_md_hd_t mdc;
     if(gcry_md_open(&mdc, hashid, 0) != 0) {
@@ -109,6 +91,40 @@ Cipher::Key::Key()
 Cipher::Key::~Key()
 {
     clear();
+}
+
+void Cipher::Key::set(const char *cipher)
+{
+    clear();
+
+    char algoname[64];
+
+    String::set(algoname, sizeof(algoname), cipher);
+    char *fpart = strchr(algoname, '-');
+    char *lpart = strrchr(algoname, '-');
+
+    modeid = GCRY_CIPHER_MODE_CBC;
+
+    if(lpart && lpart != fpart) {
+        *(lpart++) = 0;
+        if(ieq(lpart, "cbc"))
+            modeid = GCRY_CIPHER_MODE_CBC;
+        else if(ieq(lpart, "ecb"))
+            modeid = GCRY_CIPHER_MODE_ECB;
+        else if(ieq(lpart, "cfb"))
+            modeid = GCRY_CIPHER_MODE_CFB;
+        else if(ieq(lpart, "ofb"))
+            modeid = GCRY_CIPHER_MODE_OFB;
+        else
+            modeid = GCRY_CIPHER_MODE_NONE;
+    }
+
+    algoid = gcry_cipher_map_name(algoname);
+
+    if(algoid != GCRY_CIPHER_NONE) {
+        (void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_KEYLEN, NULL, &keysize);
+        (void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_BLKLEN, NULL, &blksize);
+    }
 }
 
 void Cipher::Key::clear()

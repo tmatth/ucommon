@@ -244,7 +244,7 @@ public:
      */
     class __EXPORT Key
     {
-    private:
+    protected:
         friend class Cipher;
 
         union {
@@ -265,9 +265,13 @@ public:
         // generated keysize
         size_t keysize, blksize;
 
+        Key(const char *cipher);
+        Key();
+
+        void set(const char *cipher);
+
     public:
         Key(const char *cipher, const char *digest, const char *text, size_t size = 0, const unsigned char *salt = NULL, unsigned rounds = 1);
-        Key();
         ~Key();
 
         void clear(void);
@@ -277,6 +281,12 @@ public:
 
         inline size_t iosize(void)
             {return blksize;};
+
+        inline operator bool()
+            {return keysize > 0;};
+
+        inline bool operator!()
+            {return keysize == 0;};
     };
 
     typedef Key *key_t;

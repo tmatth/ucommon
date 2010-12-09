@@ -17,25 +17,24 @@
 
 #include "local.h"
 
+Cipher::Key::Key(const char *cipher)
+{
+    secure::init();
+
+    set(cipher);
+}
+
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned rounds)
 {
     secure::init();
 
-    clear();
+    set(cipher);
 
     // never use sha0...
     if(ieq(digest, "sha"))
         digest = "sha1";
 
     char algoname[64];
-    String::set(algoname, sizeof(algoname), cipher);
-    char *fpart = strchr(algoname, '-');
-    char *lpart = strrchr(algoname, '-');
-
-    if(fpart && fpart == lpart)
-        strcpy(fpart, fpart + 1);
-
-    algotype = EVP_get_cipherbyname(algoname);
     hashtype = EVP_get_digestbyname(digest);
 
     if(!algotype || !hashtype)
@@ -44,9 +43,8 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
     if(!size)
         size = strlen((const char *)text);
 
-    keysize = EVP_BytesToKey((const EVP_CIPHER*)algotype, (const EVP_MD*)hashtype, salt, (const unsigned char *)text, size, rounds, keybuf, ivbuf);
-    if(keysize)
-        blksize = EVP_CIPHER_block_size((const EVP_CIPHER*)algotype);
+    if(EVP_BytesToKey((const EVP_CIPHER*)algotype, (const EVP_MD*)hashtype, salt, (const unsigned char *)text, size, rounds, keybuf, ivbuf) < keysize)
+        keysize = 0;
 }
 
 Cipher::Key::Key()
@@ -58,6 +56,27 @@ Cipher::Key::Key()
 Cipher::Key::~Key()
 {
     clear();
+}
+
+void Cipher::Key::set(const char *cipher)
+{
+    char algoname[64];
+
+    clear();
+    String::set(algoname, sizeof(algoname), cipher);
+    char *fpart = strchr(algoname, '-');
+    char *lpart = strrchr(algoname, '-');
+
+    if(fpart && fpart == lpart)
+        strcpy(fpart, fpart + 1);
+
+    algotype = EVP_get_cipherbyname(algoname);
+
+    if(!algotype)
+        return;
+
+    keysize = EVP_CIPHER_key_length((const EVP_CIPHER*)algotype);
+    blksize = EVP_CIPHER_block_size((const EVP_CIPHER*)algotype);
 }
 
 void Cipher::Key::clear(void)
