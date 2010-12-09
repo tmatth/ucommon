@@ -34,7 +34,6 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
     if(ieq(digest, "sha"))
         digest = "sha1";
 
-    char algoname[64];
     hashtype = EVP_get_digestbyname(digest);
 
     if(!algotype || !hashtype)
@@ -43,7 +42,7 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
     if(!size)
         size = strlen((const char *)text);
 
-    if(EVP_BytesToKey((const EVP_CIPHER*)algotype, (const EVP_MD*)hashtype, salt, (const unsigned char *)text, size, rounds, keybuf, ivbuf) < keysize)
+    if(EVP_BytesToKey((const EVP_CIPHER*)algotype, (const EVP_MD*)hashtype, salt, (const unsigned char *)text, size, rounds, keybuf, ivbuf) < (int)keysize)
         keysize = 0;
 }
 
