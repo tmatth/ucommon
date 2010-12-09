@@ -1,7 +1,5 @@
-from ucommon 4.0.4 to 4.0.5
-- make it easier to subclass cipher key for special purposes.
-
 from ucommon 4.0.3 to 4.0.4
+- make it easier to subclass cipher key for special purposes.
 - component naming of binaries for combining ucommon with other subprojects.
 
 from ucommon 4.0.2 to 4.0.3
