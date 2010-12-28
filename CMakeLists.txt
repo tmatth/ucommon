@@ -233,10 +233,23 @@ check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(openssl/ssl.h HAVE_OPENSSL)
 check_include_files(libintl.h HAVE_LIBINTL_H)
 
-# for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
     set(HAVE_GETADDRINFO True)
     set(HAVE_INET_NTOP True)
+endif()
+
+# we can mklink a build framework to top directory of a project...
+# this is done because we may have a project specific optimized build of
+# common libraries such as openssl...
+if(WIN32 AND EXISTS "${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL")
+    set(OPENSSL_FOUND 1)
+    set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/include)
+    set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/ssleay32.lib ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
+endif()
+
+# alternate we use generic cmake openssl search...
+if(NOT HAVE_OPENSSL AND NOT OPENSSL_FOUND)
+    FIND_PACKAGE(OpenSSL)
 endif()
 
 if(NOT WIN32)
@@ -271,6 +284,10 @@ file(GLOB ucommon_inc inc/ucommon/*.h)
 if(HAVE_OPENSSL)
     file(GLOB secure_src openssl/*.cpp)
     set(SECURE_LIBS ssl crypto)
+elseif(OPENSSL_FOUND > 0)
+    file(GLOB secure_src openssl/*.cpp)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+    set(SECURE_LIBS ${OPENSSL_LIBRARIES} ${OPENSSL_EAY_LIBRARIES})
 else()
     file(GLOB secure_src nossl/*.cpp)
 endif()
