@@ -23,9 +23,9 @@ set (SOVERSION 4)
 
 # project options
 if (WIN32)
-    option(BUILD_SHARED "Set to OFF to build shared libraries" OFF)
+    option(BUILD_SHARED "Set to ON to build dll libraries" OFF)
 else()
-    option(BUILD_SHARED "Set to ON to build static libraries" ON)
+    option(BUILD_SHARED "Set to OFF to build static libraries" ON)
 endif()
 
 set(STDLIB TRUE)
