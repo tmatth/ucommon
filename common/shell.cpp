@@ -84,9 +84,8 @@ static shell::logproc_t errproc = (shell::logproc_t)NULL;
 static mutex_t symlock;
 static shell::downproc_t downproc = (shell::downproc_t)NULL;
 static char **_orig = NULL;
-
-OrderedIndex shell::Option::index;
-const char *shell::domain = NULL;
+static OrderedIndex _index;
+static const char *_domain = NULL;
 
 shell::pipeio::pipeio()
 {
@@ -395,7 +394,7 @@ void shell::iobuf::open(const char *path, char **argv, shell::pmode_t mode, size
 }
 
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
-OrderedObject(&index)
+OrderedObject(&_index)
 {
     while(longopt && *longopt == '-')
         ++longopt;
@@ -409,6 +408,16 @@ OrderedObject(&index)
 
 shell::Option::~Option()
 {
+}
+
+void shell::Option::reset(void)
+{
+    _index.reset();
+}
+
+LinkedObject *shell::Option::first(void)
+{
+    return _index.begin();
 }
 
 void shell::Option::disable(void)
@@ -585,7 +594,7 @@ void shell::set0(char *argv0)
         *ext = 0;
 #endif
 
-    if(!domain)
+    if(!_domain)
         bind(_argv0);
 }
 
@@ -1214,8 +1223,8 @@ const char *shell::getenv(const char *id, const char *value)
 
     if(errname)
         keyid = errname;
-    else if(domain)
-        keyid = domain;
+    else if(_domain)
+        keyid = _domain;
     else if(_argv0)
         keyid = _argv0;
 
@@ -1407,7 +1416,7 @@ static void WINAPI control(DWORD control)
     }
 }
 
-static mainproc_t _entry = NULL;
+static shell::mainproc_t _entry = NULL;
 
 static void WINAPI _start(DWORD argc, LPSTR *argv)
 {
@@ -1422,8 +1431,8 @@ void shell::detach(downproc_t stop, mainproc_t entry)
     _entry = entry;
     downproc = stop;
 
-    if(domain)
-        name = domain;
+    if(_domain)
+        name = _domain;
 
     name = strdup(name);
 
@@ -1925,14 +1934,14 @@ void shell::bind(const char *name)
     const char *locale = UCOMMON_LOCALE;
 #endif
 
-    if(!domain) {
+    if(!_domain) {
         setlocale(LC_ALL, "");
         bindtextdomain("ucommon", locale);
     }
 
     bindtextdomain(name, locale);
     textdomain(name);
-    domain = name;
+    _domain = name;
 }
 
 void shell::rebind(const char *name)

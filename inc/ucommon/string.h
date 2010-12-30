@@ -233,7 +233,7 @@ public:
     /**
      * A constant for an invalid position value.
      */
-    static const strsize_t npos;
+    const static strsize_t npos = ((strsize_t)-1);
 
     /**
      * Create a new empty string object.
@@ -1368,7 +1368,7 @@ public:
 class __EXPORT memstring : public string
 {
 public:
-    static const size_t header;
+    const static size_t header = sizeof(string::cstring);
 
 private:
     bool resize(strsize_t size);

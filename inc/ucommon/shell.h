@@ -63,8 +63,6 @@ private:
     char *_argv0;
     LinkedObject *_syms;
 
-    static const char *domain;
-
     class __LOCAL args : public OrderedObject
     {
     public:
@@ -318,9 +316,6 @@ public:
      */
     class __EXPORT Option : public OrderedObject
     {
-    private:
-        static OrderedIndex index;
-
     public:
         char short_option;
         const char *long_option;
@@ -339,8 +334,7 @@ public:
 
         virtual ~Option();
 
-        inline static LinkedObject *first(void)
-            {return index.begin();};
+        static LinkedObject *first(void);
 
         /**
          * Disable a option.  Might happen if argv0 name suggests an
@@ -355,8 +349,7 @@ public:
          */
         virtual const char *assign(const char *value) = 0;
 
-        inline static void reset(void)
-            {index.reset();};
+        static void reset(void);
     };
 
     /**
