@@ -23,9 +23,9 @@ set (SOVERSION 4)
 
 # project options
 if (WIN32)
-    option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
+    option(BUILD_SHARED "Set to OFF to build shared libraries" OFF)
 else()
-    option(BUILD_STATIC "Set to ON to build static libraries" OFF)
+    option(BUILD_SHARED "Set to ON to build static libraries" ON)
 endif()
 
 set(STDLIB TRUE)
@@ -264,10 +264,10 @@ link_libraries(${WITH_LIBS})
 
 # by default we build static libs for windows, shared libs for unix.
 # we may also set this from a top level cmake or -DWITH_XX_LIBS
-if(BUILD_STATIC AND NOT BUILD_SHARED)
-    set(BUILD_LIBRARY_TYPE STATIC)
-else()
+if(BUILD_SHARED AND NOT WIN32)
     set(BUILD_LIBRARY_TYPE SHARED)
+else()
+    set(BUILD_LIBRARY_TYPE STATIC)
 endif()
 
 if(LIB_SUFFIX)
@@ -290,6 +290,20 @@ elseif(OPENSSL_FOUND)
     set(SECURE_LIBS ${OPENSSL_LIBRARIES})
 else()
     file(GLOB secure_src nossl/*.cpp)
+endif()
+
+# windows project we build shared as "xxx_dll" project and we also build
+# static libs for default linking.
+
+if(BUILD_SHARED AND WIN32)
+    add_library(ucommon_dll SHARED ${common_src})
+    set_target_properties(ucommon_dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+    target_link_libraries(ucommon_dll ${UCOMMON_LIBS} ${WITH_LIBS})
+
+    add_library(usecure_dll SHARED ${secure_src})
+    set_target_properties(usecure_dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+    target_link_libraries(usecure_dll ucommon_dll ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
+    add_dependencies(usecure_dll ucommon_dll)
 endif()
 
 add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
@@ -394,7 +408,7 @@ message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
 message (STATUS "CMAKE_INSTALL_PREFIX " ${CMAKE_INSTALL_PREFIX} )
 message (STATUS "LIB_SUFFIX           " ${LIB_SUFFIX})
-message (STATUS "BUILD_STATIC         " ${BUILD_STATIC})
+message (STATUS "BUILD_SHARED         " ${BUILD_SHARED})
 message (STATUS "BUILD STDLIB         " ${BUILD_STDLIB})
 message (STATUS "BUILD_TESTS          " ${BUILD_TESTS})
 message (STATUS "-------------------------------------------------------------------------------")
@@ -413,4 +427,7 @@ endif(NOT WIN32)
 install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
 install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
 install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
+if(BUILD_SHARED AND WIN32)
+    install(TARGETS ucommon_dll usecure_dll DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
+endif()
 
