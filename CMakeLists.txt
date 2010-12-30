@@ -23,9 +23,9 @@ set (SOVERSION 4)
 
 # project options
 if (WIN32)
-    option(BUILD_SHARED "Set to ON to build dll libraries" OFF)
+    option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
 else()
-    option(BUILD_SHARED "Set to OFF to build static libraries" ON)
+    option(BUILD_STATIC "Set to ON to build static libraries" OFF)
 endif()
 
 set(STDLIB TRUE)
@@ -233,6 +233,7 @@ check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(openssl/ssl.h HAVE_OPENSSL)
 check_include_files(libintl.h HAVE_LIBINTL_H)
 
+# for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
     set(HAVE_GETADDRINFO True)
     set(HAVE_INET_NTOP True)
@@ -244,7 +245,8 @@ endif()
 if(WIN32 AND EXISTS "${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL")
     set(OPENSSL_FOUND TRUE)
     set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/include)
-    set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/ssleay32.lib ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
+    set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/ssleay32.l
+ib ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
 endif()
 
 # alternate we use generic cmake openssl search...
@@ -264,10 +266,10 @@ link_libraries(${WITH_LIBS})
 
 # by default we build static libs for windows, shared libs for unix.
 # we may also set this from a top level cmake or -DWITH_XX_LIBS
-if(BUILD_SHARED AND NOT WIN32)
-    set(BUILD_LIBRARY_TYPE SHARED)
-else()
+if(BUILD_STATIC AND NOT BUILD_SHARED)
     set(BUILD_LIBRARY_TYPE STATIC)
+else()
+    set(BUILD_LIBRARY_TYPE SHARED)
 endif()
 
 if(LIB_SUFFIX)
@@ -290,21 +292,6 @@ elseif(OPENSSL_FOUND)
     set(SECURE_LIBS ${OPENSSL_LIBRARIES})
 else()
     file(GLOB secure_src nossl/*.cpp)
-endif()
-
-# In windows project we build shared library projects explicity as "xxx-dll"
-# and we also build static libs for default linking and for the utilities.
-# This means the utilities can execute stand-alone.
-
-if(BUILD_SHARED AND WIN32)
-    add_library(ucommon-dll SHARED ${common_src})
-    set_target_properties(ucommon-dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-    target_link_libraries(ucommon-dll ${UCOMMON_LIBS} ${WITH_LIBS})
-
-    add_library(usecure-dll SHARED ${secure_src})
-    set_target_properties(usecure-dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-    target_link_libraries(usecure-dll ucommon-dll ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
-    add_dependencies(usecure-dll ucommon-dll)
 endif()
 
 add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
@@ -409,7 +396,7 @@ message (STATUS)
 message (STATUS "-------------------------------------------------------------------------------")
 message (STATUS "CMAKE_INSTALL_PREFIX " ${CMAKE_INSTALL_PREFIX} )
 message (STATUS "LIB_SUFFIX           " ${LIB_SUFFIX})
-message (STATUS "BUILD_SHARED         " ${BUILD_SHARED})
+message (STATUS "BUILD_STATIC         " ${BUILD_STATIC})
 message (STATUS "BUILD STDLIB         " ${BUILD_STDLIB})
 message (STATUS "BUILD_TESTS          " ${BUILD_TESTS})
 message (STATUS "-------------------------------------------------------------------------------")
@@ -428,7 +415,4 @@ endif(NOT WIN32)
 install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
 install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
 install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
-if(BUILD_SHARED AND WIN32)
-    install(TARGETS ucommon-dll usecure-dll DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
-endif()
 
