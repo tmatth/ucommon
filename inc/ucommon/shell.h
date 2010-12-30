@@ -116,6 +116,11 @@ public:
      */
     typedef void (*downproc_t)(bool reload);
 
+    /**
+     * Main handler.
+     */
+    typedef int (*mainproc_t)(int argc, char **argv);
+
 #ifdef  _MSWINDOWS_
     typedef HANDLE pid_t;
 #else
@@ -804,7 +809,7 @@ public:
     /**
      * Detach current process to daemon.
      */
-    void detach(downproc_t stopreload = (downproc_t)NULL);
+    void detach(downproc_t stopreload = (downproc_t)NULL, mainproc_t mainentry = (mainproc_t)NULL);
 
     /**
      * Make current process restartable.

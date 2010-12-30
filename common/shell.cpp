@@ -1407,20 +1407,19 @@ static void WINAPI control(DWORD control)
     }
 }
 
-extern "C" {
-    extern int main(int argc, char **argv);
-}
+static mainproc_t _entry = NULL;
 
 static void WINAPI _start(DWORD argc, LPSTR *argv)
 {
     ++detaches;
-    ::main(argc, argv);
+    _entry(argc, argv);
 }
 
-void shell::detach(downproc_t stop)
+void shell::detach(downproc_t stop, mainproc_t entry)
 {
     const char *name = _argv0;
 
+    _entry = entry;
     downproc = stop;
 
     if(domain)
@@ -1654,7 +1653,7 @@ restart:
     }
 }
 
-void shell::detach(downproc_t stop)
+void shell::detach(downproc_t stop, mainproc_t entry)
 {
     const char *dev = "/dev/null";
     pid_t pid;
