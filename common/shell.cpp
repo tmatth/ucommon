@@ -1949,7 +1949,7 @@ void shell::rebind(const char *name)
     if(name)
         textdomain(name);
     else
-        textdomain(domain);
+        textdomain(_domain);
 }
 
 #ifdef  _MSWINDOWS_
