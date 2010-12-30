@@ -25,8 +25,11 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-//const strsize_t string::npos = (strsize_t)(-1);
-//const size_t memstring::header = sizeof(cstring);
+#if _MSC_VER > 14000        // windows broken dll linkage issue...
+#else
+const strsize_t string::npos = (strsize_t)(-1);
+const size_t memstring::header = sizeof(cstring);
+#endif
 
 string::cstring::cstring(strsize_t size) :
 CountedObject()
