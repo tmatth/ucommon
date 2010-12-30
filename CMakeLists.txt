@@ -292,18 +292,19 @@ else()
     file(GLOB secure_src nossl/*.cpp)
 endif()
 
-# windows project we build shared as "xxx_dll" project and we also build
-# static libs for default linking.
+# In windows project we build shared library projects explicity as "xxx-dll"
+# and we also build static libs for default linking and for the utilities.
+# This means the utilities can execute stand-alone.
 
 if(BUILD_SHARED AND WIN32)
-    add_library(ucommon_dll SHARED ${common_src})
-    set_target_properties(ucommon_dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-    target_link_libraries(ucommon_dll ${UCOMMON_LIBS} ${WITH_LIBS})
+    add_library(ucommon-dll SHARED ${common_src})
+    set_target_properties(ucommon-dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+    target_link_libraries(ucommon-dll ${UCOMMON_LIBS} ${WITH_LIBS})
 
-    add_library(usecure_dll SHARED ${secure_src})
-    set_target_properties(usecure_dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-    target_link_libraries(usecure_dll ucommon_dll ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
-    add_dependencies(usecure_dll ucommon_dll)
+    add_library(usecure-dll SHARED ${secure_src})
+    set_target_properties(usecure-dll PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+    target_link_libraries(usecure-dll ucommon-dll ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
+    add_dependencies(usecure-dll ucommon-dll)
 endif()
 
 add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
@@ -428,6 +429,6 @@ install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
 install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
 install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
 if(BUILD_SHARED AND WIN32)
-    install(TARGETS ucommon_dll usecure_dll DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
+    install(TARGETS ucommon-dll usecure-dll DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
 endif()
 
