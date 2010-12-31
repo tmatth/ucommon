@@ -82,7 +82,6 @@ static shell::logmode_t errmode = shell::NONE;
 static const char *errname = NULL;
 static shell::logproc_t errproc = (shell::logproc_t)NULL;
 static mutex_t symlock;
-static shell::downproc_t downproc = (shell::downproc_t)NULL;
 static char **_orig = NULL;
 static OrderedIndex _index;
 static const char *_domain = NULL;
@@ -1388,68 +1387,28 @@ exit:
     return pid;
 }
 
-static SERVICE_STATUS_HANDLE hStatus;
-static SERVICE_STATUS status;
 static unsigned detaches = 0;
-
-static void WINAPI control(DWORD control)
-{
-    switch(control) {
-    case 128:
-        if(downproc)
-            (*downproc)(true);
-        return;
-    case SERVICE_CONTROL_SHUTDOWN:
-    case SERVICE_CONTROL_STOP:
-        status.dwCurrentState = SERVICE_STOP_PENDING;
-        status.dwWin32ExitCode = 0;
-        status.dwCheckPoint = 0;
-        status.dwWaitHint = 6000;
-        SetServiceStatus(hStatus, &status);
-        if(downproc)
-            (*downproc)(false);
-        else
-            exit(0);
-        break;
-    default:
-        break;
-    }
-}
-
 static shell::mainproc_t _entry = NULL;
 
 static void WINAPI _start(DWORD argc, LPSTR *argv)
 {
     ++detaches;
-    _entry(argc, argv);
+    (*_entry)(argc, argv);
 }
 
-void shell::detach(downproc_t stop)
-{
-    cpr_runtime("requires main() for windows detach");
-}
-
-void shell::detach(downproc_t stop, mainproc_t entry)
+void shell::detach(mainproc_t entry)
 {
     const char *name = _argv0;
-
-    _entry = entry;
-    downproc = stop;
 
     if(_domain)
         name = _domain;
 
     name = strdup(name);
 
-    if(detaches) {
-        memset(&status, 0, sizeof(SERVICE_STATUS));
-        status.dwServiceType = SERVICE_WIN32;
-        status.dwCurrentState = SERVICE_START_PENDING;
-        status.dwControlsAccepted = SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_SHUTDOWN;
-
-        hStatus = ::RegisterServiceCtrlHandler(name, &control);
+    if(detaches || entry == NULL)
         return;
-    }
+
+    _entry = entry;
 
     SERVICE_TABLE_ENTRY servicetable[] = {
         {(LPSTR)name, &_start},
@@ -1462,14 +1421,6 @@ void shell::detach(downproc_t stop, mainproc_t entry)
 
 void shell::restart(void)
 {
-}
-
-void shell::up(void)
-{
-    if(detaches) {
-        status.dwCurrentState = SERVICE_RUNNING;
-        ::SetServiceStatus(hStatus, &status);
-    }
 }
 
 int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
@@ -1627,16 +1578,15 @@ int shell::system(const char *cmd, const char **envp)
         ++envp;
     }
 
+    ::signal(SIGHUP, SIG_DFL);
+    ::signal(SIGABRT, SIG_DFL);
     ::signal(SIGQUIT, SIG_DFL);
     ::signal(SIGINT, SIG_DFL);
     ::signal(SIGCHLD, SIG_DFL);
     ::signal(SIGPIPE, SIG_DFL);
+    ::signal(SIGUSR1, SIG_DFL);
     ::execlp("/bin/sh", "sh", "-c", cmd, NULL);
     ::exit(-1);
-}
-
-void shell::up(void)
-{
 }
 
 void shell::restart(void)
@@ -1667,18 +1617,11 @@ restart:
     }
 }
 
-void shell::detach(downproc_t stop)
-{
-    detach(stop, (mainproc_t)NULL);
-}
-
-void shell::detach(downproc_t stop, mainproc_t entry)
+void shell::detach(mainproc_t entry)
 {
     const char *dev = "/dev/null";
     pid_t pid;
     int fd;
-
-    downproc = stop;
 
     close(0);
     close(1);
@@ -1757,7 +1700,9 @@ int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
     ::signal(SIGINT, SIG_DFL);
     ::signal(SIGCHLD, SIG_DFL);
     ::signal(SIGPIPE, SIG_DFL);
-    ::signal(SIGHUP, SIG_IGN);
+    ::signal(SIGHUP, SIG_DFL);
+    ::signal(SIGABRT, SIG_DFL);
+    ::signal(SIGUSR1, SIG_DFL);
 
 #ifdef  SIGTTOU
     ::signal(SIGTTOU, SIG_IGN);
@@ -1857,6 +1802,9 @@ shell::pid_t shell::spawn(const char *path, char **argv, char **envp, fd_t *stdi
     ::signal(SIGINT, SIG_DFL);
     ::signal(SIGCHLD, SIG_DFL);
     ::signal(SIGPIPE, SIG_DFL);
+    ::signal(SIGHUP, SIG_DFL);
+    ::signal(SIGABRT, SIG_DFL);
+    ::signal(SIGUSR1, SIG_DFL);
 
     for(fd = 0; fd < 3; ++fd) {
         if(stdio && stdio[fd] != INVALID_HANDLE_VALUE)

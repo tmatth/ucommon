@@ -110,11 +110,6 @@ public:
     typedef bool (*logproc_t)(loglevel_t level, const char *text);
 
     /**
-     * Shutdown handler.
-     */
-    typedef void (*downproc_t)(bool reload);
-
-    /**
      * Main handler.
      */
     typedef int (*mainproc_t)(int argc, char **argv);
@@ -686,11 +681,6 @@ public:
     void restart(char *argv0, char **argv, char **list);
 
     /**
-     * Notify service is up.
-     */
-    void up(void);
-
-    /**
      * Parse shell arguments directly into a shell object.
      * @param args table.
      * @param string to parse.
@@ -800,14 +790,9 @@ public:
         {return _argv[offset];};
 
     /**
-     * Underloaded for original linkage.
+     * Detach current process to daemon for service entry.
      */
-    void detach(downproc_t stopreload = (downproc_t)NULL);
-
-    /**
-     * Detach current process to daemon.
-     */
-    void detach(downproc_t stopreload, mainproc_t mainentry);
+    void detach(mainproc_t mainentry = (mainproc_t)NULL);
 
     /**
      * Make current process restartable.
