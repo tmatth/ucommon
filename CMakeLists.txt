@@ -33,12 +33,13 @@ else()
     option(BUILD_STATIC "Set to ON to build static libraries" OFF)
 endif()
 
-set(STDLIB TRUE)
-if(MSVC60 OR MSYS OR MINGW)
-    set(STDLIB FALSE)
+if(MSCV60)
+    set(BUILD_STDLIB false)
+elseif(MSYS OR MINGW)
+    option(BUILD_STDLIB "Set to ON to build with C++ stdlib" OFF)
+else()
+    option(BUILD_STDLIB "Set to OFF to disable C++ stdlib" ON)
 endif()
-
-option(BUILD_STDLIB "Set to ON to build with C++ stdlib" ${STDLIB})
 
 option(BUILD_TESTS "Set to ON to build test programs" OFF)
 
