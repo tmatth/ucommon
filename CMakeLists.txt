@@ -34,11 +34,7 @@ else()
 endif()
 
 set(STDLIB TRUE)
-if(MSVC60)
-    set(STDLIB FALSE)
-endif()
-
-if((MSYS OR MINGW OR WIN32) AND CMAKE_COMPILER_IS_GNUCXX)
+if(MSVC60 OR MSYS OR MINGW)
     set(STDLIB FALSE)
 endif()
 
