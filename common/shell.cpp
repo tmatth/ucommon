@@ -1413,16 +1413,10 @@ static BOOL WINAPI _stop(DWORD code)
 
 void shell::exiting(exitproc_t handler)
 {
-    const char *name = _argv0;
-
-    if(_domain)
-        name = _domain;
-
-    name = strdup(name);
-
     if(!_exitproc && handler) {
         _exitproc = handler;
-        SetConsoleTitle(name);
+        if(_domain)
+            SetConsoleTitle(_domain);
         SetConsoleCtrlHandler((PHANDLER_ROUTINE)_stop, TRUE);
         atexit(exit_handler);
     }
