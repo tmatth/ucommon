@@ -23,7 +23,12 @@ set (SOVERSION 4)
 
 # project options
 if (WIN32)
-    option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
+    # too broken to build dll's with const static members...
+    if(MSCV60)
+        set(BUILD_STATIC true)
+    else()
+        option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
+    endif()
 else()
     option(BUILD_STATIC "Set to ON to build static libraries" OFF)
 endif()
