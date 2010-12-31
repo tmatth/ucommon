@@ -114,6 +114,11 @@ public:
      */
     typedef int (*mainproc_t)(int argc, char **argv);
 
+    /**
+     * Exit handler.
+     */
+    typedef void (*exitproc_t)(void);
+
 #ifdef  _MSWINDOWS_
     typedef HANDLE pid_t;
 #else
@@ -788,6 +793,8 @@ public:
      */
     inline const char *operator[](unsigned offset)
         {return _argv[offset];};
+
+    static void exiting(exitproc_t);
 
     /**
      * Detach current process to daemon for service entry.

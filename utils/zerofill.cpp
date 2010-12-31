@@ -36,25 +36,6 @@ static void cleanup(void)
     live = false;
 }
 
-#ifdef  _MSWINDOWS_
-
-static BOOL WINAPI stop(DWORD code)
-{
-    cleanup();
-    return true;
-}
-
-#else
-
-extern "C" {
-    static void stop(int signo)
-    {
-        ::exit(4);
-    }
-}
-
-#endif
-
 static void zerofill(void)
 {
     fsys::offset_t pos = 0l;
@@ -169,17 +150,7 @@ extern "C" int main(int argc, char **argv)
 
     secure::init();
 
-    atexit(cleanup);
-
-#ifdef  _MSWINDOWS_
-    SetConsoleTitle("zerofill");
-    SetConsoleCtrlHandler((PHANDLER_ROUTINE)stop, TRUE);
-#else
-    signal(SIGINT, stop);
-    signal(SIGQUIT, stop);
-    signal(SIGKILL, stop);
-    signal(SIGTERM, stop);
-#endif
+    shell::exiting(&cleanup);
 
     if(!args())
         zerofill();

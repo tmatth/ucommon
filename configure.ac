@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="4.0.4"
-LT_VERSION="4:2:0"
+VERSION="4.0.5"
+LT_VERSION="4:3:0"
 OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -319,7 +319,7 @@ if test "$threading" = "none" ; then
     fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit ; do
     found="no"
     AC_CHECK_FUNC($func,[
         found=$func

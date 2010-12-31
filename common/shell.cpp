@@ -85,6 +85,7 @@ static mutex_t symlock;
 static char **_orig = NULL;
 static OrderedIndex _index;
 static const char *_domain = NULL;
+static shell::exitproc_t _exitproc = NULL;
 
 shell::pipeio::pipeio()
 {
@@ -1396,6 +1397,39 @@ static void WINAPI _start(DWORD argc, LPSTR *argv)
     (*_entry)(argc, argv);
 }
 
+static void exit_handler(void)
+{
+    if(_exitproc) {
+        (*_exitproc)();
+        _exitproc = NULL;
+    }
+}
+
+static BOOL WINAPI _stop(DWORD code)
+{
+    exit_handler();
+    return true;
+}
+
+void shell::exiting(exitproc_t handler)
+{
+    const char *name = _argv0;
+
+    if(_domain)
+        name = _domain;
+
+    name = strdup(name);
+
+    if(!_exitproc && handler) {
+        _exitproc = handler;
+        SetConsoleTitle(name);
+        SetConsoleCtrlHandler((PHANDLER_ROUTINE)_stop, TRUE);
+        atexit(exit_handler);
+    }
+    else
+        _exitproc = handler;
+}
+
 void shell::detach(mainproc_t entry)
 {
     const char *name = _argv0;
@@ -1615,6 +1649,33 @@ restart:
             goto restart;
         }
     }
+}
+
+static void exit_handler(void)
+{
+    if(_exitproc) {
+        (*_exitproc)();
+        _exitproc = NULL;
+    }
+}
+
+static void abort_handler(int signo)
+{
+    exit_handler();
+}
+
+void shell::exiting(exitproc_t handler)
+{
+
+    if(!_exitproc && handler) {
+        _exitproc = handler;
+        ::signal(SIGABRT, abort_handler);
+#ifdef  HAVE_ATEXIT
+        ::atexit(exit_handler);
+#endif
+    }
+    else
+        _exitproc = handler;
 }
 
 void shell::detach(mainproc_t entry)

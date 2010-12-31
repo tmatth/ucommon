@@ -72,6 +72,7 @@
 #cmakedefine HAVE_SETLOCALE 1
 #cmakedefine HAVE_GETTEXT 1
 #cmakedefine HAVE_EXECVP 1
+#cmakedefine HAVE_ATEXIT 1
 
 #include <ucommon/export.h>
 
