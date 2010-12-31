@@ -25,7 +25,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-#if _MSC_VER > 14000        // windows broken dll linkage issue...
+#if _MSC_VER > 1400        // windows broken dll linkage issue...
 #else
 const strsize_t string::npos = (strsize_t)(-1);
 const size_t memstring::header = sizeof(cstring);

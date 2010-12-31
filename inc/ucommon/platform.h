@@ -105,6 +105,7 @@
 //#define   _WIN32_WINNT 0x0501
 //#endif
 
+#pragma warning(disable: 4251)
 #pragma warning(disable: 4996)
 #pragma warning(disable: 4355)
 #pragma warning(disable: 4290)

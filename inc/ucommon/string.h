@@ -233,7 +233,7 @@ public:
     /**
      * A constant for an invalid position value.
      */
-#if _MSC_VER > 14000        // windows broken dll linkage issue...
+#if _MSC_VER > 1400        // windows broken dll linkage issue...
     const static strsize_t npos = ((strsize_t)-1);
 #else
     static const strsize_t npos;
@@ -1373,7 +1373,7 @@ public:
 class __EXPORT memstring : public string
 {
 public:
-#if _MSC_VER > 14000        // windows broken dll linkage issue...
+#if _MSC_VER > 1400        // windows broken dll linkage issue...
     const static size_t header = sizeof(string::cstring);
 #else
     static const size_t header;
