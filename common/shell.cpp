@@ -1424,6 +1424,11 @@ static void WINAPI _start(DWORD argc, LPSTR *argv)
     _entry(argc, argv);
 }
 
+void shell::detach(downproc_t stop)
+{
+    cpr_runtime("requires main() for windows detach");
+}
+
 void shell::detach(downproc_t stop, mainproc_t entry)
 {
     const char *name = _argv0;
@@ -1660,6 +1665,11 @@ restart:
             goto restart;
         }
     }
+}
+
+void shell::detach(downproc_t stop)
+{
+    detach(stop, (mainproc_t)NULL);
 }
 
 void shell::detach(downproc_t stop, mainproc_t entry)

@@ -800,9 +800,14 @@ public:
         {return _argv[offset];};
 
     /**
+     * Underloaded for original linkage.
+     */
+    void detach(downproc_t stopreload = (downproc_t)NULL);
+
+    /**
      * Detach current process to daemon.
      */
-    void detach(downproc_t stopreload = (downproc_t)NULL, mainproc_t mainentry = (mainproc_t)NULL);
+    void detach(downproc_t stopreload, mainproc_t mainentry);
 
     /**
      * Make current process restartable.
