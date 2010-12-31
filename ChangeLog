@@ -1,5 +1,6 @@
 from ucommon 4.0.4 to 4.0.5
 - smarter openssl search.
+- simplified service handling.
 
 from ucommon 4.0.3 to 4.0.4
 - make it easier to subclass cipher key for special purposes.
