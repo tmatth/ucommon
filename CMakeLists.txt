@@ -244,11 +244,11 @@ endif()
 # we can mklink a build framework to top directory of a project...
 # this is done because we may have a project specific optimized build of
 # common libraries such as openssl...
-if(WIN32 AND EXISTS "${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL")
+if(WIN32 AND EXISTS "${CMAKE_BINARY_DIR}/Frameworks/OpenSSL")
     set(OPENSSL_FOUND TRUE)
-    set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/include)
-    set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/ssleay32.l
-ib ${CMAKE_SOURCE_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
+    set(OPENSSL_INCLUDE_DIR ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/include)
+    set(OPENSSL_LIBRARIES ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/lib/ssleay32.l
+ib ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
 endif()
 
 # alternate we use generic cmake openssl search...
