@@ -1,3 +1,6 @@
+from ucommon 4.0.5 to 4.0.6
+- security system logging.
+
 from ucommon 4.0.4 to 4.0.5
 - smarter openssl search.
 - simplified service handling.

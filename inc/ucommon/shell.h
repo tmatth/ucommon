@@ -715,11 +715,18 @@ public:
     static void debug(unsigned level, const char *format, ...) __PRINTF(2, 3);
 
     /**
-     * Print error message at specific error level.
+     * Print generic error message at specific error level.
      * @param level of error condition.
      * @param format string to use.
      */
     static void log(loglevel_t level, const char *format, ...) __PRINTF(2, 3);
+
+    /**
+     * Print security error message at specific error level.
+     * @param level of error condition.
+     * @param format string to use.
+     */
+    static void security(loglevel_t level, const char *format, ...) __PRINTF(2, 3);
 
     /**
      * Set logging level and state.
