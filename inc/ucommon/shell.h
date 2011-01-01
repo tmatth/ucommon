@@ -97,7 +97,7 @@ public:
     /**
      * Type of error logging we are using.
      */
-    typedef enum {NONE = 0, CONSOLE_LOG, USER_LOG, SYSTEM_LOG} logmode_t;
+    typedef enum {NONE = 0, CONSOLE_LOG, USER_LOG, SYSTEM_LOG, SECURITY_LOG} logmode_t;
 
     /**
      * Level of error logging.

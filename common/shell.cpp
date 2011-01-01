@@ -2046,6 +2046,9 @@ void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t ha
     case SYSTEM_LOG:
         ::openlog(name, LOG_CONS, LOG_DAEMON);
         return;
+    case SECURITY_LOG:
+        ::openlog(name, LOG_CONS, LOG_AUTHPRIV);
+        return;
     }
 }
 
