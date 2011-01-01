@@ -2060,27 +2060,12 @@ void shell::security(loglevel_t loglevel, const char *fmt, ...)
     va_list args;
     int level= LOG_ERR;
 
-    if(!errname || errmode == NONE || loglevel > errlevel)
+    if(!errname || errmode == NONE || loglevel >= DEBUG0)
         return;
 
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
-
-    if(errproc != (logproc_t)NULL) {
-        if((*errproc)(loglevel, buf))
-            return;
-    }
-
-    if(loglevel >= DEBUG0) {
-        if(getppid() > 1) {
-            if(fmt[strlen(fmt) - 1] == '\n')
-                fprintf(stderr, "%s: %s", errname, buf);
-            else
-                fprintf(stderr, "%s: %s\n", errname, buf);
-        }
-        return;
-    }
 
     switch(loglevel) {
     case INFO:
@@ -2102,12 +2087,6 @@ void shell::security(loglevel_t loglevel, const char *fmt, ...)
         level = LOG_ERR;
     }
 
-    if(getppid() > 1) {
-        if(fmt[strlen(fmt) - 1] == '\n')
-            fprintf(stderr, "%s: %s", errname, buf);
-        else
-            fprintf(stderr, "%s: %s\n", errname, buf);
-    }
     ::syslog(level | LOG_AUTHPRIV, "%s", buf);
 
     if(level == LOG_CRIT)
@@ -2195,25 +2174,12 @@ void shell::security(loglevel_t loglevel, const char *fmt, ...)
     char buf[256];
     va_list args;
 
-    if(!errname || errmode == NONE || loglevel > errlevel)
+    if(!errname || errmode == NONE || loglevel >= DEBUG0)
         return;
 
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
-
-    if(errproc != (logproc_t)NULL) {
-        if((*errproc)(loglevel, buf))
-            return;
-    }
-
-    if(loglevel >= DEBUG0) {
-        if(fmt[strlen(fmt) - 1] == '\n')
-            fprintf(stderr, "%s: %s", errname, buf);
-        else
-            fprintf(stderr, "%s: %s\n", errname, buf);
-        return;
-    }
 
     if(fmt[strlen(fmt) - 1] == '\n')
         fprintf(stderr, "%s: %s", errname, buf);
