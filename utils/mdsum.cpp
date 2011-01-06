@@ -87,7 +87,7 @@ static void result(const char *path, int code)
     if(path)
         shell::printf("%s: %s: %s\n", argv0, path, err);
     else
-        shell::errexit(1, "*** %s\n", err);
+        shell::errexit(1, "*** %s: %s\n", argv0, err);
 
     exit_code = 1;
 }
@@ -181,7 +181,7 @@ extern "C" int main(int argc, char **argv)
 
     secure::init();
     if(!Digest::is(*hash))
-        shell::errexit(2, "%s: %s: %s\n",
+        shell::errexit(2, "*** %s: %s: %s\n",
             argv0, *hash, _TEXT("unkown or unsupported digest method"));
 
     md = *hash;

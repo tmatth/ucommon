@@ -85,7 +85,7 @@ static void report(const char *path, int code)
     if(is(verbose))
         shell::printf(" - %s\n", err);
     else
-        shell::errexit(1, "%s: %s: %s\n", argv0, path, err);
+        shell::errexit(1, "*** %s: %s: %s\n", argv0, path, err);
 
     exit_code = 1;
 }
@@ -226,11 +226,11 @@ extern "C" int main(int argc, char **argv)
     unsigned count = 0;
 
     if(*blocks < 1)
-        shell::errexit(2, "%s: blocksize: %ld: %s\n",
+        shell::errexit(2, "*** %s: blocksize: %ld: %s\n",
             argv0, *blocks, _TEXT("must be greater than zero"));
 
     if(*passes < 0)
-        shell::errexit(2, "%s: passes: %ld: %s\n",
+        shell::errexit(2, "*** %s: passes: %ld: %s\n",
             argv0, *passes, _TEXT("negative passes invalid"));
 
     argv0 = args.argv0();

@@ -247,9 +247,16 @@ endif()
 # common libraries such as openssl...
 if(WIN32 AND EXISTS "${CMAKE_BINARY_DIR}/Frameworks/OpenSSL")
     set(OPENSSL_FOUND TRUE)
-    set(OPENSSL_INCLUDE_DIR ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/include)
-    set(OPENSSL_LIBRARIES ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/lib/ssleay32.l
-ib ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
+    if(EXISTS ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/inc32)
+        set(OPENSSL_INCLUDE_DIR ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/inc32)
+    else()
+        set(OPENSSL_INCLUDE_DIR ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/include)
+    endif()
+    if(NOT BUILD_STATIC AND EXISTS ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/out32dll)
+        set(OPENSSL_LIBRARIES ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/out32dll/ssleay32.lib ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
+    else()
+        set(OPENSSL_LIBRARIES ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/out32dll/ssleay32.lib ${CMAKE_BINARY_DIR}/Frameworks/OpenSSL/lib/libeay32.lib)
+    endif()
 endif()
 
 # alternate we use generic cmake openssl search...

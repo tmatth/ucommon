@@ -47,7 +47,7 @@ static void zerofill(void)
 
     fs.create("zerofill.tmp", fsys::ACCESS_STREAM, 0666);
     if(!is(fs))
-        shell::errexit(1, "zerofill: %s\n",
+        shell::errexit(1, "*** zerofill: %s\n",
             _TEXT("cannot create temporary file"));
 
     live = true;
@@ -74,7 +74,7 @@ static void zerofill(void)
     cleanup();
 
     if(fs.err() != ENOSPC)
-        shell::errexit(3, "zerofill: %s\n",
+        shell::errexit(3, "*** zerofill: %s\n",
             _TEXT("failed before end of space"));
 }
 
@@ -87,16 +87,16 @@ static void zerofill(const char *devname)
     fsys_t fs;
 
     if(fsys::stat(devname, &ino))
-        shell::errexit(5, "zerofill: %s: %s\n",
+        shell::errexit(5, "*** zerofill: %s: %s\n",
             devname, _TEXT("cannot access"));
 
     if(!fsys::isdisk(&ino))
-        shell::errexit(6, "zerofill: %s: %s\n",
+        shell::errexit(6, "*** zerofill: %s: %s\n",
             devname, _TEXT("not block device"));
 
     fs.open(devname, fsys::ACCESS_WRONLY);
     if(fs.err())
-        shell::errexit(5, "zerofill: %s: %s\n",
+        shell::errexit(5, "*** zerofill: %s: %s\n",
             devname, _TEXT("cannot modify"));
 
     shell::printf("%s", devname);
@@ -125,7 +125,7 @@ static void zerofill(const char *devname)
     cleanup();
 
     if(fs.err() != ENOSPC)
-        shell::errexit(3, "zerofill: %s\n",
+        shell::errexit(3, "*** zerofill: %s\n",
             _TEXT("failed before end of space"));
 }
 
@@ -136,7 +136,7 @@ extern "C" int main(int argc, char **argv)
     unsigned count = 0;
 
     if(*passes < 0)
-        shell::errexit(2, "zerofill: random: %ld: %s\n",
+        shell::errexit(2, "*** zerofill: random: %ld: %s\n",
             *passes, _TEXT("negative random passes invalid"));
 
     if(is(helpflag) || is(althelp)) {
