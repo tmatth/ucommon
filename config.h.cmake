@@ -74,5 +74,7 @@
 #cmakedefine HAVE_EXECVP 1
 #cmakedefine HAVE_ATEXIT 1
 
+#cmakedefine UCOMMON_LOCALE ${UCOMMON_LOCALE}
+
 #include <ucommon/export.h>
 
