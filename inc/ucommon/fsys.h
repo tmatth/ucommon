@@ -45,6 +45,14 @@
 
 #ifndef _MSWINDOWS_
 #include <sys/stat.h>
+#else
+#include <io.h>
+#ifndef R_OK
+#define F_OK 0
+#define X_OK 1
+#define W_OK 2
+#define R_OK 4
+#endif
 #endif
 
 #include <errno.h>
