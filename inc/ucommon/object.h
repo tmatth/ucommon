@@ -349,9 +349,8 @@ public:
     }
 
     inline void set(T* ptr) {
-        if(object != ptr)
+        if(object != ptr) {
             release();
-        if(ptr) {
             counter = new unsigned;
             *counter = 1;
             object = ptr;
@@ -359,6 +358,9 @@ public:
     }
 
     inline void set(const pointer<T> &ref) {
+        if(object == ref.object)
+            return;
+
         if(counter && --(*counter)==0) {
             delete counter;
             delete object;
@@ -400,7 +402,7 @@ public:
         return *this;
     }
 
-    inline virtual ~pointer()
+    inline ~pointer()
         {release();}
 
     inline T& operator*() const
@@ -440,7 +442,11 @@ public:
     inline temporary()
         {object = NULL;};
 
-    temporary(const temporary<T>&);
+    /**
+     * Disable copy constructor.
+     */
+    temporary(const temporary<T>&)
+        {::abort();};
 
     /**
      * Construct an assigned pointer.
@@ -449,22 +455,28 @@ public:
         {object = ptr;};
 
     /**
-     * Assign a temporary object.
+     * Assign a temporary object.  This adds a pointer to an existing
+     * type to the current temporary pointer.  If the temporary was
+     * already assigned, then it is deleted.
+     * @param temp object to assign.
      */
-    inline T& operator=(T *ptr) {
+    inline T& operator=(T *temp) {
         if(object)
             delete object;
-        object = ptr;
+        object = temp;
         return *this;
     }
 
     /**
-     * Assign a temorary object.
+     * Assign a temporary object.  This adds a pointer to an existing
+     * type to the current temporary pointer.  If the temporary was
+     * already assigned, then it is deleted.
+     * @param temp object to assign.
      */
-    inline void set(T *ptr) {
+    inline void set(T *temp) {
         if(object)
             delete object;
-        object = ptr;
+        object = temp;
     }
 
     /**
