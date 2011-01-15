@@ -51,10 +51,6 @@ Object *Object::copy(void)
     return this;
 }
 
-Temporary::~Temporary()
-{
-}
-
 void CountedObject::dealloc(void)
 {
     delete this;
@@ -74,15 +70,7 @@ void CountedObject::release(void)
     dealloc();
 }
 
-auto_delete::~auto_delete()
-{
-    if(object)
-        delete object;
-
-    object = 0;
-}
-
-auto_pointer::auto_pointer(Object *o)
+auto_object::auto_object(Object *o)
 {
     if(o)
         o->retain();
@@ -90,53 +78,53 @@ auto_pointer::auto_pointer(Object *o)
     object = o;
 }
 
-auto_pointer::auto_pointer()
+auto_object::auto_object()
 {
     object = 0;
 }
 
-void auto_pointer::release(void)
+void auto_object::release(void)
 {
     if(object)
         object->release();
     object = 0;
 }
 
-auto_pointer::~auto_pointer()
+auto_object::~auto_object()
 {
     release();
 }
 
-auto_pointer::auto_pointer(const auto_pointer &from)
+auto_object::auto_object(const auto_object &from)
 {
     object = from.object;
     if(object)
         object->retain();
 }
 
-bool auto_pointer::operator!() const
+bool auto_object::operator!() const
 {
     return (object == 0);
 }
 
-auto_pointer::operator bool() const
+auto_object::operator bool() const
 {
     return (object != 0);
 }
 
-bool auto_pointer::operator==(Object *o) const
+bool auto_object::operator==(Object *o) const
 {
     assert(o != NULL);
     return object == o;
 }
 
-bool auto_pointer::operator!=(Object *o) const
+bool auto_object::operator!=(Object *o) const
 {
     assert(o != NULL);
     return object != o;
 }
 
-void auto_pointer::operator=(Object *o)
+void auto_object::operator=(Object *o)
 {
     if(object == o)
         return;

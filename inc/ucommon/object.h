@@ -149,38 +149,6 @@ public:
 };
 
 /**
- * Used as base class for temporary objects.  Temporary objects may be
- * allocated from the heap within a method call and removed automatically
- * removed when a method call completes.  This base class is meant to be
- * used in conjunction with an auto (stack frame) object referenced through
- * the auto_delete class as managed through the temporary template.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT Temporary
-{
-protected:
-    friend class auto_delete;
-    virtual ~Temporary();
-};
-
-/**
- * A helper class for the temporary object template.  This class is assumed
- * to be created as an auto variable that will contain a pointer to an
- * object built from the Temporary base class.  When auto_delete falls out
- * of scope as a member function exits it deletes the heap based Temporary
- * object as well.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT auto_delete
-{
-protected:
-    Temporary *object;
-
-public:
-    ~auto_delete();
-};
-
-/**
  * A general purpose smart pointer helper class.  This is particularly
  * useful in conjunction with reference counted objects which can be
  * managed and automatically removed from the heap when they are no longer
@@ -190,33 +158,33 @@ public:
  * This is actually a helper class for the typed pointer template.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT auto_pointer
+class __EXPORT auto_object
 {
 protected:
     Object *object;
 
-    auto_pointer();
+    auto_object();
 
 public:
     /**
      * Construct an auto-pointer referencing an existing object.
      * @param object we point to.
      */
-    auto_pointer(Object *object);
+    auto_object(Object *object);
 
     /**
      * Construct an auto-pointer as a copy of another pointer.  The
      * retention of the object being pointed to will be increased.
      * @param pointer we are a copy of.
      */
-    auto_pointer(const auto_pointer &pointer);
+    auto_object(const auto_object &pointer);
 
     /**
      * Delete auto pointer.  When it falls out of scope, the retention
      * of the object it references is reduced.  If it falls to zero in
      * a reference counted object, then the object is auto-deleted.
      */
-    ~auto_pointer();
+    ~auto_object();
 
     /**
      * Manually release the pointer.  This reduces the retention level
@@ -359,6 +327,96 @@ private:
 };
 
 /**
+ * Generic smart pointer class.  This is the Common C++ "Pointer" class
+ * with a few additions.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class pointer
+{
+protected:
+    unsigned *counter;
+    T *object;
+
+public:
+    inline void release(void) {
+        if(counter && --(*counter)==0) {
+            delete counter;
+            delete object;
+        }
+        object = NULL;
+        counter = NULL;
+    }
+
+    inline void set(T* ptr) {
+        if(object != ptr)
+            release();
+        if(ptr) {
+            counter = new unsigned;
+            *counter = 1;
+            object = ptr;
+        }
+    }
+
+    inline void set(const pointer<T> &ref) {
+        if(counter && --(*counter)==0) {
+            delete counter;
+            delete object;
+        }
+        object = ref.object;
+        counter = ref.counter;
+        if(counter)
+            ++(*counter);
+    }
+
+    inline pointer() {
+        counter = NULL;
+        object = NULL;
+    }
+
+    inline explicit pointer(T* ptr = NULL) : object(ptr) {
+        if(object) {
+            counter = new unsigned;
+            *counter = 1;
+        }
+        else
+            counter = NULL;
+    }
+
+    inline pointer(const pointer<T> &ref) {
+        object = ref.object;
+        counter = ref.counter;
+        if(counter)
+            ++(*counter);
+    }
+
+    inline pointer& operator=(const pointer<T> &ref) {
+        set(ref);
+        return *this;
+    }
+
+    inline pointer& operator=(T *ptr) {
+        set(ptr);
+        return *this;
+    }
+
+    inline virtual ~pointer()
+        {release();}
+
+    inline T& operator*() const
+        {return *object;};
+
+    inline T* operator->() const
+        {return object;};
+
+    inline bool operator!() const
+        {return (counter == NULL);};
+
+    inline operator bool() const
+        {return counter != NULL;};
+};
+
+/**
  * Manage temporary object stored on the heap.  This is used to create a
  * object on the heap who's scope is controlled by the scope of a member
  * function call.  Sometimes we have data types and structures which cannot
@@ -371,28 +429,69 @@ private:
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 template <class T>
-class temporary : public auto_delete
+class temporary
 {
+protected:
+    T *object;
 public:
     /**
      * Construct a temporary object, create our stack frame reference.
      */
     inline temporary()
-        {object = new T;};
+        {object = NULL;};
+
+    temporary(const temporary<T>&);
+
+    /**
+     * Construct an assigned pointer.
+     */
+    inline temporary(T *ptr)
+        {object = ptr;};
+
+    /**
+     * Assign a temporary object.
+     */
+    inline T& operator=(T *ptr) {
+        if(object)
+            delete object;
+        object = ptr;
+        return *this;
+    }
+
+    /**
+     * Assign a temorary object.
+     */
+    inline void set(T *ptr) {
+        if(object)
+            delete object;
+        object = ptr;
+    }
 
     /**
      * Access heap object through our temporary directly.
      * @return reference to heap resident object.
      */
     inline T& operator*() const
-        {return *(static_cast<T*>(object));};
+        {return *object;};
 
     /**
      * Access members of our heap object through our temporary.
      * @return member reference of heap object.
      */
     inline T* operator->() const
-        {return static_cast<T*>(object);};
+        {return object;};
+
+    inline operator bool()
+        {return object != NULL;};
+
+    inline bool operator!()
+        {return object == NULL;};
+
+    inline ~temporary() {
+        if(object)
+            delete object;
+        object = NULL;
+    }
 };
 
 /**
@@ -474,20 +573,20 @@ public:
  * they are contained in remains in scope as well.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T, class P = auto_pointer>
-class pointer : public P
+template <class T, class P = auto_object>
+class object_pointer : public P
 {
 public:
     /**
      * Create a pointer with no reference.
      */
-    inline pointer() : P() {};
+    inline object_pointer() : P() {};
 
     /**
      * Create a pointer with a reference to a heap object.
      * @param object we are referencing.
      */
-    inline pointer(T* object) : P(object) {};
+    inline object_pointer(T* object) : P(object) {};
 
     /**
      * Reference object we are pointing to through pointer indirection.
@@ -537,6 +636,18 @@ public:
      */
     inline void operator=(T *typed)
         {P::operator=((Object *)typed);};
+
+    /**
+     * See if pointer is set.
+     */
+    inline operator bool()
+        {return P::object != NULL;};
+
+    /**
+     * See if pointer is not set.
+     */
+    inline bool operator!()
+        {return P::object == NULL;};
 };
 
 /**

@@ -1285,7 +1285,7 @@ class __EXPORT auto_protect
 {
 private:
     // cannot copy...
-    inline auto_protect(const auto_pointer &pointer) {};
+    inline auto_protect(const auto_object &pointer) {};
 
 protected:
     void *object;

@@ -1,7 +1,9 @@
-from ucommon 4.0.5 to 4.0.6
+from ucommon 4.0.5 to 4.1.0
 - security system logging.
 - cleanup of cmake.
 - clearer idea of what shell::errexit is.
+- cleanup of pointer templates, Object pointers now object_pointer, temporary
+  is now temporary object, new "generic" smart pointer to be added.
 
 from ucommon 4.0.4 to 4.0.5
 - smarter openssl search.
