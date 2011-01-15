@@ -398,7 +398,7 @@ extern "C" __EXPORT void cpr_memswap(void *mem1, void *mem2, size_t size);
  * @return memory allocated from heap.
  */
 inline void *operator new(size_t size)
-    {return cpr_memalloc(size);};
+    {return cpr_memalloc(size);}
 
 /**
  * Our generic new array operator.  Uses our heap memory allocator.
@@ -406,7 +406,7 @@ inline void *operator new(size_t size)
  * @return memory allocated from heap.
  */
 inline void *operator new[](size_t size)
-    {return cpr_memalloc(size);};
+    {return cpr_memalloc(size);}
 #endif
 
 #ifndef _UCOMMON_EXTENDED_
@@ -419,7 +419,7 @@ inline void *operator new[](size_t size)
  * @return memory we placed object array.
  */
 inline void *operator new[](size_t size, caddr_t address)
-    {return cpr_memassign(size, address, size);};
+    {return cpr_memassign(size, address, size);}
 
 /**
  * A placement new array operator where we know the allocated size.  We
@@ -431,7 +431,7 @@ inline void *operator new[](size_t size, caddr_t address)
  * @return memory we placed object array.
  */
 inline void *operator new[](size_t size, caddr_t address, size_t known)
-    {return cpr_memassign(size, address, known);};
+    {return cpr_memassign(size, address, known);}
 #endif
 
 /**
