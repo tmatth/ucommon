@@ -125,6 +125,102 @@ public:
 };
 
 /**
+ * Generic smart array class.  This is the Common C++ "Pointer" class
+ * with a few additions for arrays.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class array_pointer
+{
+protected:
+    unsigned *counter;
+    T *array;
+
+public:
+    inline void release(void) {
+        if(counter && --(*counter)==0) {
+            delete counter;
+            delete[] array;
+        }
+        array = NULL;
+        counter = NULL;
+    }
+
+    inline void set(T* ptr) {
+        if(array != ptr) {
+            release();
+            counter = new unsigned;
+            *counter = 1;
+            array = ptr;
+        }
+    }
+
+    inline void set(const array_pointer<T> &ref) {
+        if(array == ref.array)
+            return;
+
+        if(counter && --(*counter)==0) {
+            delete counter;
+            delete[] array;
+        }
+        array = ref.array;
+        counter = ref.counter;
+        if(counter)
+            ++(*counter);
+    }
+
+    inline array_pointer() {
+        counter = NULL;
+        array = NULL;
+    }
+
+    inline explicit array_pointer(T* ptr = NULL) : array(ptr) {
+        if(array) {
+            counter = new unsigned;
+            *counter = 1;
+        }
+        else
+            counter = NULL;
+    }
+
+    inline array_pointer(const array_pointer<T> &ref) {
+        array = ref.array;
+        counter = ref.counter;
+        if(counter)
+            ++(*counter);
+    }
+
+    inline array_pointer& operator=(const array_pointer<T> &ref) {
+        set(ref);
+        return *this;
+    }
+
+    inline array_pointer& operator=(T *ptr) {
+        set(ptr);
+        return *this;
+    }
+
+    inline ~array_pointer()
+        {release();}
+
+    inline T* operator*() const
+        {return array;};
+
+    inline T& operator[](size_t offset) const
+        {return array[offset];};
+
+
+    inline T* operator()(size_t offset) const
+        {return &array[offset];};
+
+    inline bool operator!() const
+        {return (counter == NULL);};
+
+    inline operator bool() const
+        {return counter != NULL;};
+};
+
+/**
  * Manage temporary object stored on the heap.  This is used to create a
  * object on the heap who's scope is controlled by the scope of a member
  * function call.  Sometimes we have data types and structures which cannot
@@ -198,10 +294,10 @@ public:
     inline T* operator->() const
         {return object;};
 
-    inline operator bool()
+    inline operator bool() const
         {return object != NULL;};
 
-    inline bool operator!()
+    inline bool operator!() const
         {return object == NULL;};
 
     inline ~temporary() {
@@ -252,10 +348,10 @@ public:
     temp_array(const temp_array<T>&)
         {::abort();};
 
-    inline operator bool()
+    inline operator bool() const
         {return array != NULL;};
 
-    inline bool operator!()
+    inline bool operator!() const
         {return array == NULL;};
 
     inline ~temp_array() {
@@ -265,13 +361,13 @@ public:
         size = 0;
     }
 
-    inline T& operator[](size_t offset) {
+    inline T& operator[](size_t offset) const {
         if(!array || offset >= size)
             abort();
         return array[offset];
     }
 
-    inline T* operator()(size_t offset) {
+    inline T* operator()(size_t offset) const {
         if(!array || offset >= size)
             abort();
         return &array[offset];
