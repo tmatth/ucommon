@@ -132,8 +132,7 @@ public:
  * frame size in a thread context, and yet have a dynamic object that we
  * only want to exist during the life of the method call.  Using temporary
  * allows any type to be created from the heap but have a lifespan of a
- * method's stack frame.  All types managed as temporary must have Temporary
- * as a base class.
+ * method's stack frame.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 template <class T>
@@ -209,6 +208,73 @@ public:
         if(object)
             delete object;
         object = NULL;
+    }
+};
+
+/**
+ * Manage temporary array stored on the heap.   This is used to create an
+ * array on the heap who's scope is controlled by the scope of a member
+ * function call.  Sometimes we have data types and structures which cannot
+ * themselves appear as auto variables.  We may also have a limited stack
+ * frame size in a thread context, and yet have a dynamic object that we
+ * only want to exist during the life of the method call.  Using temporary
+ * allows any type to be created from the heap but have a lifespan of a
+ * method's stack frame.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class temp_array
+{
+protected:
+    T *array;
+    size_t size;
+
+public:
+    /**
+     * Construct a temporary object, create our stack frame reference.
+     */
+    inline temp_array(size_t s)
+        {array =  new T[s]; size = s;};
+
+    /**
+     * Construct a temporary object with a copy of some initial value.
+     * @param initial object value to use.
+     */
+    inline temp_array(const T& initial, size_t s) {
+        array = new T[s];
+        for(size_t p = 0; p < s; ++p)
+            array[p] = initial;
+    }
+
+    /**
+     * Disable copy constructor.
+     */
+    temp_array(const temp_array<T>&)
+        {::abort();};
+
+    inline operator bool()
+        {return array != NULL;};
+
+    inline bool operator!()
+        {return array == NULL;};
+
+    inline ~temp_array() {
+        if(array)
+            delete[] array;
+        array = NULL;
+        size = 0;
+    }
+
+    inline T& operator[](size_t offset) {
+        if(!array || offset >= size)
+            abort();
+        return array[offset];
+    }
+
+    inline T* operator()(size_t offset) {
+        if(!array || offset >= size)
+            abort();
+        return &array[offset];
     }
 };
 
