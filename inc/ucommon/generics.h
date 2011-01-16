@@ -33,11 +33,11 @@
 NAMESPACE_UCOMMON
 
 /**
- * Generic smart pointer class.  This is the Common C++ "Pointer" class
- * with a few additions.
+ * Generic smart pointer class.  This is the original Common C++ "Pointer"
+ * class with a few additions.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T>
+template <typename T>
 class pointer
 {
 protected:
@@ -52,6 +52,11 @@ public:
         }
         object = NULL;
         counter = NULL;
+    }
+
+    inline void retain(void) {
+        if(counter)
+            ++*counter;
     }
 
     inline void set(T* ptr) {
@@ -125,11 +130,11 @@ public:
 };
 
 /**
- * Generic smart array class.  This is the Common C++ "Pointer" class
+ * Generic smart array class.  This is the original Common C++ "Pointer" class
  * with a few additions for arrays.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T>
+template <typename T>
 class array_pointer
 {
 protected:
@@ -144,6 +149,11 @@ public:
         }
         array = NULL;
         counter = NULL;
+    }
+
+    inline void retain(void) {
+        if(counter)
+            ++*counter;
     }
 
     inline void set(T* ptr) {
@@ -209,7 +219,6 @@ public:
     inline T& operator[](size_t offset) const
         {return array[offset];};
 
-
     inline T* operator()(size_t offset) const
         {return &array[offset];};
 
@@ -231,7 +240,7 @@ public:
  * method's stack frame.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T>
+template <typename T>
 class temporary
 {
 protected:
@@ -318,7 +327,7 @@ public:
  * method's stack frame.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-template <class T>
+template <typename T>
 class temp_array
 {
 protected:
