@@ -347,7 +347,25 @@ public:
      */
     inline temp_array(const T& initial, size_t s) {
         array = new T[s];
+        size = s;
         for(size_t p = 0; p < s; ++p)
+            array[p] = initial;
+    }
+
+    inline void reset(size_t s)
+        {delete[] array; array = new T[s]; size = s;};
+
+    inline void reset(const T& initial, size_t s) {
+        if(array)
+            delete[] array;
+        array = new T[s];
+        size = s;
+        for(size_t p = 0; p < s; ++p)
+            array[p] = initial;
+    }
+
+    inline void set(const T& initial) {
+        for(size_t p = 0; p < size; ++p)
             array[p] = initial;
     }
 
@@ -371,14 +389,12 @@ public:
     }
 
     inline T& operator[](size_t offset) const {
-        if(!array || offset >= size)
-            abort();
+        crit(offset < size, "array out of bound");
         return array[offset];
     }
 
     inline T* operator()(size_t offset) const {
-        if(!array || offset >= size)
-            abort();
+        crit(offset < size, "array out of bound");
         return &array[offset];
     }
 };
