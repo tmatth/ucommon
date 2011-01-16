@@ -1,0 +1,279 @@
+// Copyright (C) 2006-2010 David Sugar, Tycho Softworks.
+//
+// This file is part of GNU uCommon C++.
+//
+// GNU uCommon C++ is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// GNU uCommon C++ is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Generic templates for C++.  These are templates that do not depend
+ * on any ucommon classes.  They can be used for generic C++ programming.
+ * @file ucommon/generics.h
+ */
+
+#ifndef _UCOMMON_GENERICS_H_
+#define _UCOMMON_GENERICS_H_
+
+#ifndef _UCOMMON_CONFIG_H_
+#include <ucommon/platform.h>
+#endif
+
+#include <stdlib.h>
+
+NAMESPACE_UCOMMON
+
+/**
+ * Generic smart pointer class.  This is the Common C++ "Pointer" class
+ * with a few additions.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class pointer
+{
+protected:
+    unsigned *counter;
+    T *object;
+
+public:
+    inline void release(void) {
+        if(counter && --(*counter)==0) {
+            delete counter;
+            delete object;
+        }
+        object = NULL;
+        counter = NULL;
+    }
+
+    inline void set(T* ptr) {
+        if(object != ptr) {
+            release();
+            counter = new unsigned;
+            *counter = 1;
+            object = ptr;
+        }
+    }
+
+    inline void set(const pointer<T> &ref) {
+        if(object == ref.object)
+            return;
+
+        if(counter && --(*counter)==0) {
+            delete counter;
+            delete object;
+        }
+        object = ref.object;
+        counter = ref.counter;
+        if(counter)
+            ++(*counter);
+    }
+
+    inline pointer() {
+        counter = NULL;
+        object = NULL;
+    }
+
+    inline explicit pointer(T* ptr = NULL) : object(ptr) {
+        if(object) {
+            counter = new unsigned;
+            *counter = 1;
+        }
+        else
+            counter = NULL;
+    }
+
+    inline pointer(const pointer<T> &ref) {
+        object = ref.object;
+        counter = ref.counter;
+        if(counter)
+            ++(*counter);
+    }
+
+    inline pointer& operator=(const pointer<T> &ref) {
+        set(ref);
+        return *this;
+    }
+
+    inline pointer& operator=(T *ptr) {
+        set(ptr);
+        return *this;
+    }
+
+    inline ~pointer()
+        {release();}
+
+    inline T& operator*() const
+        {return *object;};
+
+    inline T* operator->() const
+        {return object;};
+
+    inline bool operator!() const
+        {return (counter == NULL);};
+
+    inline operator bool() const
+        {return counter != NULL;};
+};
+
+/**
+ * Manage temporary object stored on the heap.  This is used to create a
+ * object on the heap who's scope is controlled by the scope of a member
+ * function call.  Sometimes we have data types and structures which cannot
+ * themselves appear as auto variables.  We may also have a limited stack
+ * frame size in a thread context, and yet have a dynamic object that we
+ * only want to exist during the life of the method call.  Using temporary
+ * allows any type to be created from the heap but have a lifespan of a
+ * method's stack frame.  All types managed as temporary must have Temporary
+ * as a base class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <class T>
+class temporary
+{
+protected:
+    T *object;
+public:
+    /**
+     * Construct a temporary object, create our stack frame reference.
+     */
+    inline temporary()
+        {object = NULL;};
+
+    /**
+     * Disable copy constructor.
+     */
+    temporary(const temporary<T>&)
+        {::abort();};
+
+    /**
+     * Construct an assigned pointer.
+     */
+    inline temporary(T *ptr)
+        {object = ptr;};
+
+    /**
+     * Assign a temporary object.  This adds a pointer to an existing
+     * type to the current temporary pointer.  If the temporary was
+     * already assigned, then it is deleted.
+     * @param temp object to assign.
+     */
+    inline T& operator=(T *temp) {
+        if(object)
+            delete object;
+        object = temp;
+        return *this;
+    }
+
+    /**
+     * Assign a temporary object.  This adds a pointer to an existing
+     * type to the current temporary pointer.  If the temporary was
+     * already assigned, then it is deleted.
+     * @param temp object to assign.
+     */
+    inline void set(T *temp) {
+        if(object)
+            delete object;
+        object = temp;
+    }
+
+    /**
+     * Access heap object through our temporary directly.
+     * @return reference to heap resident object.
+     */
+    inline T& operator*() const
+        {return *object;};
+
+    /**
+     * Access members of our heap object through our temporary.
+     * @return member reference of heap object.
+     */
+    inline T* operator->() const
+        {return object;};
+
+    inline operator bool()
+        {return object != NULL;};
+
+    inline bool operator!()
+        {return object == NULL;};
+
+    inline ~temporary() {
+        if(object)
+            delete object;
+        object = NULL;
+    }
+};
+
+/**
+ * Convenience function to validate object assuming it is castable to bool.
+ * @param object we are testing.
+ * @return true if object valid.
+ */
+template<class T>
+inline bool is(T& object)
+    {return object.operator bool();}
+
+/**
+ * Convenience function to test pointer object.  This solves issues where
+ * some compilers get confused between bool and pointer operators.
+ * @param object we are testing.
+ * @return true if object points to NULL.
+ */
+template<class T>
+inline bool isnull(T& object)
+    {return (bool)(object.operator*() == NULL);}
+
+/**
+ * Convenience function to test pointer-pointer object.  This solves issues
+ * where some compilers get confused between bool and pointer operators.
+ * @param object we are testing.
+ * @return true if object points to NULL.
+ */
+template<class T>
+inline bool isnullp(T *object)
+    {return (bool)(object->operator*() == NULL);}
+
+/**
+ * Convenience function to swap objects.
+ * @param o1 to swap.
+ * @param o2 to swap.
+ */
+template<typename T>
+inline void swap(T& o1, T& o2)
+    {cpr_memswap(&o1, &o2, sizeof(T));}
+
+/**
+ * Convenience function to return max of two objects.
+ * @param o1 to check.
+ * @param o2 to check.
+ * @return max object.
+ */
+template<typename T>
+inline T& (max)(T& o1, T& o2)
+{
+    return o1 > o2 ? o1 : o2;
+}
+
+/**
+ * Convenience function to return min of two objects.
+ * @param o1 to check.
+ * @param o2 to check.
+ * @return min object.
+ */
+template<typename T>
+inline T& (min)(T& o1, T& o2)
+{
+    return o1 < o2 ? o1 : o2;
+}
+
+END_NAMESPACE
+
+#endif
