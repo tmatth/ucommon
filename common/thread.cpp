@@ -16,6 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
+#include <ucommon/object.h>
 #include <ucommon/thread.h>
 #include <ucommon/timers.h>
 #include <ucommon/linked.h>

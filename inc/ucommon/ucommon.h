@@ -84,6 +84,7 @@
 #define _UCOMMON_UCOMMON_H_
 #include <ucommon/platform.h>
 #include <ucommon/atomic.h>
+#include <ucommon/generics.h>
 #include <ucommon/object.h>
 #include <ucommon/protocols.h>
 #include <ucommon/string.h>
