@@ -286,6 +286,7 @@ typedef char *caddr_t;
 #include <stdio.h>
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
+#define alloca(x) _alloca(x)
 #endif
 
 #else

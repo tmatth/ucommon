@@ -400,6 +400,74 @@ public:
 };
 
 /**
+ * Manage temporary array stored on the heap.   This is used to create an
+ * array on the heap who's scope is controlled by the scope of a member
+ * function call.  Sometimes we have data types and structures which cannot
+ * themselves appear as auto variables.  We may also have a limited stack
+ * frame size in a thread context, and yet have a dynamic object that we
+ * only want to exist during the life of the method call.  Using temporary
+ * allows any type to be created from the heap but have a lifespan of a
+ * method's stack frame.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template <typename T>
+class auto_array
+{
+protected:
+    T *array;
+    size_t size;
+
+public:
+    /**
+     * Construct a temporary object, create our stack frame reference.
+     */
+    inline auto_array(size_t s)
+        {size = s; array = (T *)alloca(sizeof(T[s])); new((caddr_t)array) T[s];};
+
+    /**
+     * Construct a temporary object with a copy of some initial value.
+     * @param initial object value to use.
+     */
+    inline auto_array(const T& initial, size_t s) {
+        array = (T *)alloca(sizeof(T[s]));
+        new((caddr_t)array) T[s];
+        size = s;
+        for(size_t p = 0; p < s; ++p)
+            array[p] = initial;
+    }
+
+    inline void set(const T& initial) {
+        for(size_t p = 0; p < size; ++p)
+            array[p] = initial;
+    }
+
+    /**
+     * Disable copy constructor.
+     */
+    auto_array(const temp_array<T>&)
+        {::abort();};
+
+    inline operator bool() const
+        {return array != NULL;};
+
+    inline bool operator!() const
+        {return array == NULL;};
+
+    inline ~auto_array()
+        {}
+
+    inline T& operator[](size_t offset) const {
+        crit(offset < size, "array out of bound");
+        return array[offset];
+    }
+
+    inline T* operator()(size_t offset) const {
+        crit(offset < size, "array out of bound");
+        return &array[offset];
+    }
+};
+
+/**
  * Convenience function to validate object assuming it is castable to bool.
  * @param object we are testing.
  * @return true if object valid.
