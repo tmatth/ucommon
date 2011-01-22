@@ -161,7 +161,7 @@ static void dirpath(String path, bool top = true)
     }
 }
 
-extern "C" int main(int argc, char **argv)
+PROGRAM_MAIN(argc, argv)
 {
     shell::bind("mdsum");
     shell args(argc, argv);
@@ -176,7 +176,7 @@ extern "C" int main(int argc, char **argv)
         printf("%s\n", _TEXT("Options:"));
         shell::help();
         printf("\n%s\n", _TEXT("Report bugs to dyfet@gnu.org"));
-        exit(0);
+        PROGRAM_EXIT(0);
     }
 
     secure::init();
@@ -199,6 +199,6 @@ extern "C" int main(int argc, char **argv)
             digest(args[count++]);
     }
 
-    return exit_code;
+    PROGRAM_EXIT(exit_code);
 }
 

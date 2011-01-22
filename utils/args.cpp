@@ -78,11 +78,11 @@ PROGRAM_MAIN(argc, argv)
         printf("%s\n", _TEXT("Options:"));
         shell::help();
         printf("\n%s\n", _TEXT("Report bugs to dyfet@gnu.org"));
-        exit(0);
+        PROGRAM_EXIT(0);
     }
 
     if(!args())
-        return 0;
+        PROGRAM_EXIT(0);
 
     if(quote[0]) {
         if(!quote[1]) {

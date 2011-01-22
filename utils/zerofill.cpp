@@ -129,7 +129,7 @@ static void zerofill(const char *devname)
             _TEXT("failed before end of space"));
 }
 
-extern "C" int main(int argc, char **argv)
+PROGRAM_MAIN(argc, argv)
 {
     shell::bind("zerofill");
     shell args(argc, argv);
@@ -145,7 +145,7 @@ extern "C" int main(int argc, char **argv)
         printf("%s\n", _TEXT("Options:"));
         shell::help();
         printf("\n%s\n", _TEXT("Report bugs to dyfet@gnu.org"));
-        exit(0);
+        PROGRAM_EXIT(0);
     }
 
     secure::init();
@@ -158,6 +158,6 @@ extern "C" int main(int argc, char **argv)
     while(count < args() && live)
         zerofill(args[count++]);
 
-    return 0;
+    PROGRAM_EXIT(0);
 }
 

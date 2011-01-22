@@ -218,7 +218,7 @@ static void dirpath(String path, bool top = true)
     scrubdir(path);
 }
 
-extern "C" int main(int argc, char **argv)
+PROGRAM_MAIN(argc, argv)
 {
     shell::bind("scrub");
     shell args(argc, argv);
@@ -241,11 +241,11 @@ extern "C" int main(int argc, char **argv)
         printf("%s\n", _TEXT("Options:"));
         shell::help();
         printf("\n%s\n", _TEXT("Report bugs to dyfet@gnu.org"));
-        exit(0);
+        PROGRAM_EXIT(0);
     }
 
     if(!args())
-        return 0;
+        PROGRAM_EXIT(0);
 
     secure::init();
 
@@ -256,6 +256,6 @@ extern "C" int main(int argc, char **argv)
             scrubfile(args[count++]);
     }
 
-    return exit_code;
+    PROGRAM_EXIT(exit_code);
 }
 
