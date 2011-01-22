@@ -1427,10 +1427,8 @@ void shell::detach(mainproc_t entry)
     if(entry == NULL)
         return;
 
-    _entry = entry;
-
     SERVICE_TABLE_ENTRY servicetable[] = {
-        {(LPSTR)name, entry},
+        {(LPSTR)name, (LPSERVICE_MAIN_FUNCTION)entry},
         {NULL, NULL}
     };
 

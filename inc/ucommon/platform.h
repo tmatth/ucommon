@@ -96,8 +96,6 @@
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define _MSWINDOWS_
 
-#define SERVICE_MAIN(id, argc, argv) void WINAPI service_##id(DWORD argc, LPSTR *argv)
-typedef void WINAPI (*cpr_service_t)(DWORD argc, LPSTR *argv);
 
 //#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501
 //#undef    _WIN32_WINNT
@@ -180,6 +178,9 @@ typedef struct timespec {
 } timespec_t;
 
 extern "C" {
+
+#define SERVICE_MAIN(id, argc, argv) void WINAPI service_##id(DWORD argc, LPSTR *argv)
+typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
 
 int cpr_setenv(const char *s, const char *v, int p);
 
