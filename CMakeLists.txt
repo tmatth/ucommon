@@ -23,7 +23,7 @@ set (SOVERSION 4)
 
 # project options
 
-if(not BUILD_OPTIONS)
+if(NOT DEFINED BUILD_OPTIONS)
     if(MSYS OR MINGW OR MSCV60)
         include(inc/minimal.cmake)
     elseif(WIN32)
