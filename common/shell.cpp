@@ -1018,6 +1018,8 @@ void shell::errexit(int exitcode, const char *format, ...)
     format = buf;
 
     va_start(args, format);
+    if(!eq("*** ", format, 4))
+        fputs("*** ", stderr);
     vfprintf(stderr, format, args);
     fflush(stderr);
 

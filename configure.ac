@@ -76,8 +76,6 @@ AC_DEFUN([AC_SUBST_DIR], [
         AC_SUBST($1)
 ])
 
-AC_MSG_CHECKING([full c++ support and linking model])
-
 # for very old gcc and for minix we disable full ucommon build by default
 # we also disable for mingw32 or when no "shared" library support because
 # libstdc++ is not dll and really bloats in linkage of plugins.  Any case,
@@ -107,15 +105,14 @@ AC_ARG_ENABLE(stdcpp,
     AC_HELP_STRING([--disable-stdcpp],
         [compile without stdc++ runtime overhead]))
 
+    AC_MSG_CHECKING([full c++ support and linking model])
+
 if test "x$enable_stdcpp" = "xno" ; then
     UCOMMON_MODEL="CC"
     AC_MSG_RESULT(no)
 else
     AC_MSG_RESULT(yes)
 fi
-
-
-AC_MSG_CHECKING([socks proxy support])
 
 AC_ARG_WITH(sslstack,
     AC_HELP_STRING([--with-sslstack=lib],[specify which ssl stack to build]),[
@@ -200,18 +197,22 @@ AC_ARG_ENABLE(socks,
         [compile with socks proxy support]))
 
 if test "x$enable_socks" = "xyes" ; then
-    AC_MSG_RESULT(yes)
     enable_socks="no"
     AC_CHECK_HEADERS(socks.h, [
         enable_socks="yes"
     ])
 else
-    AC_MSG_RESULT(no)
+    enable_socks="no"
 fi
+
+AC_MSG_CHECKING([for socks proxy support])
 
 if test "x$enable_socks" = "xyes" ; then
     socket_lib="-lsocksd $socket_lib"
     AC_DEFINE(HAVE_SOCKS, [1], "Socks proxy support")
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
 fi
 
 AC_CHECK_LIB($clib, stricmp, [
