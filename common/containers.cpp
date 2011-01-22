@@ -26,7 +26,7 @@ using namespace UCOMMON_NAMESPACE;
 LinkedAllocator::LinkedAllocator() : Conditional()
 {
     freelist = NULL;
-};
+}
 
 LinkedObject *LinkedAllocator::get(void)
 {
