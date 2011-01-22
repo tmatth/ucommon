@@ -179,43 +179,44 @@ typedef struct timespec {
 
 extern "C" {
 
-#define SERVICE_MAIN(id, argc, argv) void WINAPI service_##id(DWORD argc, LPSTR *argv)
-typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
+    #define SERVICE_MAIN(id, argc, argv) void WINAPI service_##id(DWORD argc, LPSTR *argv)
 
-int cpr_setenv(const char *s, const char *v, int p);
+    typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
 
-inline int setenv(const char *s, const char *v, int overwrite)
-    {return cpr_setenv(s, v, overwrite);};
+    __EXPORT int cpr_setenv(const char *s, const char *v, int p);
 
-inline void sleep(int seconds)
-    {::Sleep((seconds * 1000l));};
+    inline int setenv(const char *s, const char *v, int overwrite)
+        {return cpr_setenv(s, v, overwrite);};
 
-inline void pthread_exit(void *p)
-    {_endthreadex((DWORD)p);};
+    inline void sleep(int seconds)
+        {::Sleep((seconds * 1000l));};
 
-inline pthread_t pthread_self(void)
-    {return (pthread_t)GetCurrentThreadId();};
+    inline void pthread_exit(void *p)
+        {_endthreadex((DWORD)p);};
 
-inline int pthread_mutex_init(pthread_mutex_t *mutex, void *x)
-    {InitializeCriticalSection(mutex); return 0;};
+    inline pthread_t pthread_self(void)
+        {return (pthread_t)GetCurrentThreadId();};
 
-inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
-    {DeleteCriticalSection(mutex);};
+    inline int pthread_mutex_init(pthread_mutex_t *mutex, void *x)
+        {InitializeCriticalSection(mutex); return 0;};
 
-inline void pthread_mutex_lock(pthread_mutex_t *mutex)
-    {EnterCriticalSection(mutex);};
+    inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
+        {DeleteCriticalSection(mutex);};
 
-inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
-    {LeaveCriticalSection(mutex);};
+    inline void pthread_mutex_lock(pthread_mutex_t *mutex)
+        {EnterCriticalSection(mutex);};
 
-inline char *strdup(const char *s)
-    {return _strdup(s);};
+    inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
+        {LeaveCriticalSection(mutex);};
 
-inline int stricmp(const char *s1, const char *s2)
-    {return _stricmp(s1, s2);};
+    inline char *strdup(const char *s)
+        {return _strdup(s);};
 
-inline int strnicmp(const char *s1, const char *s2, size_t l)
-    {return _strnicmp(s1, s2, l);};
+    inline int stricmp(const char *s1, const char *s2)
+        {return _stricmp(s1, s2);};
+
+    inline int strnicmp(const char *s1, const char *s2, size_t l)
+        {return _strnicmp(s1, s2, l);};
 };
 
 #elif defined(__PTH__)
