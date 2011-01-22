@@ -22,26 +22,16 @@ set (VERSION 4.1.0)
 set (SOVERSION 4)
 
 # project options
-if (WIN32)
-    # too broken to build dll's with const static members...
-    if(MSCV60)
-        set(BUILD_STATIC true)
+
+if(not BUILD_OPTIONS)
+    if(MSYS OR MINGW OR MSCV60)
+        include(inc/minimal.cmake)
+    elseif(WIN32)
+        include(inc/static.cmake)
     else()
-        option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
+        include(inc/shared.cmake)
     endif()
-else()
-    option(BUILD_STATIC "Set to ON to build static libraries" OFF)
 endif()
-
-if(MSCV60)
-    set(BUILD_STDLIB false)
-elseif(MSYS OR MINGW)
-    option(BUILD_STDLIB "Set to ON to build with C++ stdlib" OFF)
-else()
-    option(BUILD_STDLIB "Set to OFF to disable C++ stdlib" ON)
-endif()
-
-option(BUILD_TESTS "Set to ON to build test programs" OFF)
 
 MESSAGE( STATUS "Configuring GNU ${PROJECT_NAME} ${VERSION}...")
 include(CheckFunctionExists)

@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2010 David Sugar, Tycho Softworks.
+# Copyright (C) 2009 David Sugar, Tycho Softworks
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -8,10 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-MAINTAINERCLEANFILES = Makefile.in Makefile
-RELEASE = $(LT_VERSION) -release $(LT_RELEASE)
-AM_CXXFLAGS = $(UCOMMON_FLAGS)
-EXTRA_DIST = *.cmake
+set(BUILD_STATIC true)
+set(BUILD_STDLIB false)
+option(BUILD_TESTS "Set to ON to build test programs" OFF)
 
-SUBDIRS = ucommon
 
