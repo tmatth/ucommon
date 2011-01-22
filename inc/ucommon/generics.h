@@ -30,6 +30,20 @@
 
 #include <stdlib.h>
 
+#ifdef  NEW_STDLIB
+#include <stdexcept>
+#endif
+
+#if defined(NEW_STDLIB) || defined(OLD_STDLIB)
+#define THROW(x)    throw x
+#define THROWS(x)   throw(x)
+#define THROWS_ANY  throw()
+#else
+#define THROW(x)    ::abort()
+#define THROWS(x)
+#define THROWS_ANY
+#endif
+
 NAMESPACE_UCOMMON
 
 /**
