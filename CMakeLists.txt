@@ -23,9 +23,10 @@ set (SOVERSION 4)
 
 # project options
 
-if(MSYS OR MINGW OR MSVC60)
+if(MSVC60)
     set(BUILD_STATIC ON CACHE BOOL "static linking only" FORCE)
     set(BUILD_STDLIB OFF CACHE BOOL "disable C++ stdlib" FORCE)
+    MARK_AS_ADVANCED(FORCE BUILD_STDLIB BUILD_STATIC)
     option(BUILD_TESTS "Set to ON to build test programs" OFF)
 elseif(WIN32)
     option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
