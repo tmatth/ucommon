@@ -4,6 +4,10 @@ from ucommon 4.0.5 to 4.1.0
 - clearer idea of what shell::errexit is.
 - cleanup of pointer templates, Object pointers now object_pointer, temporary
   is now temporary object, new "generic" smart pointer to be added.
+- new containers.h to seperate use of contained resources from thread.h and
+  basic threading primitives.
+- linked_allocator template added for easy access to a free list managed
+  object pool.
 
 from ucommon 4.0.4 to 4.0.5
 - smarter openssl search.

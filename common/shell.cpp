@@ -1388,15 +1388,6 @@ exit:
     return pid;
 }
 
-static unsigned detaches = 0;
-static shell::mainproc_t _entry = NULL;
-
-static void WINAPI _start(DWORD argc, LPSTR *argv)
-{
-    ++detaches;
-    (*_entry)(argc, argv);
-}
-
 static void exit_handler(void)
 {
     if(_exitproc) {
@@ -1433,13 +1424,13 @@ void shell::detach(mainproc_t entry)
 
     name = strdup(name);
 
-    if(detaches || entry == NULL)
+    if(entry == NULL)
         return;
 
     _entry = entry;
 
     SERVICE_TABLE_ENTRY servicetable[] = {
-        {(LPSTR)name, &_start},
+        {(LPSTR)name, entry},
         {NULL, NULL}
     };
 

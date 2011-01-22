@@ -112,7 +112,7 @@ public:
     /**
      * Main handler.
      */
-    typedef int (*mainproc_t)(int argc, char **argv);
+    typedef cpr_service_t   mainproc_t;
 
     /**
      * Exit handler.

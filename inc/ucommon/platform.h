@@ -96,6 +96,9 @@
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define _MSWINDOWS_
 
+#define SERVICE_MAIN(id, argc, argv) void WINAPI service_##id(DWORD argc, LPSTR *argv)
+typedef void WINAPI (*cpr_service_t)(DWORD argc, LPSTR *argv);
+
 //#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501
 //#undef    _WIN32_WINNT
 //#define   _WIN32_WINNT 0x0501
@@ -501,6 +504,16 @@ extern "C" __EXPORT void __cxa_pure_virtual(void);
 #ifdef  NDEBUG
 #undef  NDEBUG
 #endif
+#endif
+
+#ifndef PROGRAM_MAIN
+#define PROGRAM_MAIN(argc, argv)    extern "C" int main(int argc, char **argv)
+#define PROGRAM_EXIT(code)          return code
+#endif
+
+#ifndef SERVICE_MAIN
+#define SERVICE_MAIN(id, argc, argv)    void service_##id(int argc, char **argv)
+typedef void (*cpr_service_t)(int argc, char **argv);
 #endif
 
 #include <assert.h>

@@ -63,7 +63,7 @@ static void dirpath(bool middle, String path, bool top = true)
         output(middle, path);
 }
 
-extern "C" int main(int argc, char **argv)
+PROGRAM_MAIN(argc, argv)
 {
     unsigned count = 0;
     char *ep;
@@ -131,6 +131,6 @@ extern "C" int main(int argc, char **argv)
     if(!lines)
         shell::printf("\n");
 
-    return 0;
+    PROGRAM_EXIT(0);
 }
 

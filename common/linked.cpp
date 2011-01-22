@@ -18,6 +18,7 @@
 #include <config.h>
 #include <ucommon/linked.h>
 #include <ucommon/string.h>
+#include <ucommon/thread.h>
 
 using namespace UCOMMON_NAMESPACE;
 
