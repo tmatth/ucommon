@@ -679,6 +679,31 @@ void rexlock::Unlock(void)
     release();
 }
 
+bool rexlock::lock(timeout_t timeout)
+{
+    bool result = true;
+    struct timespec ts;
+    gettimeout(timeout, &ts);
+
+    Conditional::lock();
+    while(result && lockers) {
+        if(Thread::equal(locker, pthread_self()))
+            break;
+        ++waiting;
+        result = Conditional::wait(&ts);
+        --waiting;
+    }
+    if(!lockers) {
+        result = true;
+        locker = pthread_self();
+    }
+    else
+        result = false;
+    ++lockers;
+    Conditional::unlock();
+    return result;
+}
+
 void rexlock::lock(void)
 {
     Conditional::lock();
@@ -2096,5 +2121,16 @@ void Thread::init(void)
 #endif
 }
 
+#ifdef  __PTH__
+pthread_t Thread::self(void)
+{
+    return pth_self();
+}
+#else
+pthread_t Thread::self(void)
+{
+    return pthread_self();
+}
+#endif
 
 

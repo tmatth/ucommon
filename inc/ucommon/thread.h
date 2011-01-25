@@ -487,6 +487,11 @@ public:
     void lock(void);
 
     /**
+     * Timed lock request.
+     */
+    bool lock(timeout_t timeout);
+
+    /**
      * Release or decrease locking.
      */
     void release(void);
@@ -1546,13 +1551,7 @@ public:
      * Get current thread id.
      * @return thread id.
      */
-#ifdef  __PTH__
-    inline static pthread_t self(void)
-        {return pth_self();};
-#else
-    inline static pthread_t self(void)
-        {return pthread_self();};
-#endif
+    static pthread_t self(void);
 };
 
 /**
@@ -1567,14 +1566,13 @@ public:
  */
 class __EXPORT JoinableThread : protected Thread
 {
-private:
+protected:
 #ifdef  _MSWINDOWS_
     HANDLE joining;
 #else
     volatile bool running;
 #endif
 
-protected:
     /**
      * Create a joinable thread with a known context stack size.
      * @param size of stack for thread context or 0 for default.
