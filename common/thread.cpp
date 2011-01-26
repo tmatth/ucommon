@@ -75,6 +75,16 @@ static mutex_index *mutex_table = &single_table;
 static unsigned mutex_indexing = 1;
 static unsigned rwlock_indexing = 1;
 
+#ifdef  __PTH__
+static pth_key_t threadmap;
+#else
+#ifdef  _MSWINDOWS_
+static DWORD threadmap;
+#else
+static pthread_key_t threadmap;
+#endif
+#endif
+
 mutex_index::mutex_index() : mutex()
 {
     list = NULL;
@@ -95,7 +105,6 @@ Conditional::attribute Conditional::attr;
 #endif
 
 #ifdef  __PTH__
-
 static int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *abstime)
 {
     static pth_key_t ev_key = PTH_KEY_INIT;
@@ -2108,17 +2117,51 @@ shared_release &shared_release::operator=(SharedPointer &p)
     return *this;
 }
 
-void Thread::init(void)
+void Thread::map(void)
+{
+    Thread::init();
+#ifdef  __PTH__
+    pth_key_setdata(threadmap, this);
+#else
+#ifdef  _MSWINDOWS_
+    TlsSetValue(threadmap, this);
+#else
+    pthread_setspecific(threadmap, this);
+#endif
+#endif
+}
+
+Thread *Thread::get(void)
 {
 #ifdef  __PTH__
-    static bool initialized = false;
+    return (Thread *)pth_key_setdata(threadmap);
+#else
+#ifdef  _MSWINDOWS_
+    return (Thread *)TlsGetValue(threadmap);
+#else
+    return (Thread *)pthread_getspecific(threadmap);
+#endif
+#endif
+}
+
+void Thread::init(void)
+{
+    static volatile bool initialized = false;
 
     if(!initialized) {
+#ifdef  __PTH__
         pth_init();
+        pth_key_create(&threadmap, NULL);
         atexit(pthread_shutdown);
+#else
+#ifdef  _MSWINDOWS_
+        threadmap = TlsAlloc();
+#else
+        pthread_key_create(&threadmap, NULL);
+#endif
+#endif
         initialized = true;
     }
-#endif
 }
 
 #ifdef  __PTH__

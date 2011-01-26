@@ -1480,6 +1480,12 @@ protected:
      */
     Thread(size_t stack = 0);
 
+    /**
+     * Map thread for get method.  This should be called from start of the
+     * run() method of a derived class.
+     */
+    void map(void);
+
 public:
     /**
      * Set thread priority without disrupting scheduling if possible.
@@ -1500,6 +1506,14 @@ public:
      * @param timeout to sleep for in milliseconds.
      */
     static void sleep(timeout_t timeout);
+
+    /**
+     * Get mapped thread object.  This returns the mapped base class of the
+     * thread object of the current executing context.  You will need to
+     * cast to the correct derived class to access derived thread-specific
+     * storage.  If the current thread context is not mapped NULL is returned.
+     */
+    static Thread *get(void);
 
     /**
      * Abstract interface for thread context run method.

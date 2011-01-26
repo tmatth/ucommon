@@ -99,8 +99,11 @@ extern "C" int gettimeofday(struct timeval *tv_, void *tz_)
 #endif
 #endif
 
+#if _MSC_VER > 1400        // windows broken dll linkage issue...
+#else
 const timeout_t Timer::inf = ((timeout_t)(-1));
 const time_t Timer::reset = ((time_t)0);
+#endif
 
 TimerQueue::event::event(timeout_t timeout) :
 Timer(), LinkedList()
