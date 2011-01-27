@@ -21,17 +21,17 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
     endif()
 
     if(BUILD_STATIC)
-        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_STATIC)
+        set(UCOMMON_FLAGS ${UCOMMON_FLAGS};-DUCOMMON_STATIC)
     endif()
 
     # see if we are building with or without std c++ libraries...
     if (BUILD_STDLIB)
         # for now we assume only newer libstdc++ library
-        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DNEW_STDLIB)
+        set(UCOMMON_FLAGS ${UCOMMON_FLAGS};-DNEW_STDLIB)
         MESSAGE( STATUS "Configuring full ANSI C++ runtime")
     elseif (BUILD_OLDLIB)
         # for really old libstdc++ libraries...
-        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DOLD_STDLIB)
+        set(UCOMMON_FLAGS ${UCOMMON_FLAGS};-DOLD_STDLIB)
         MESSAGE( STATUS "Configuring compatible C++ runtime")
     else()
         MESSAGE( STATUS "Configuring minimal C++ runtime")
@@ -49,7 +49,7 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
     foreach(flag ${CHECK_FLAGS})
         check_c_compiler_flag(${flag} CHECK_${flag})
         if(CHECK_${flag})
-            set(UCOMMON_FLAGS ${UCOMMON_FLAGS} "${flag}")
+            set(UCOMMON_FLAGS ${UCOMMON_FLAGS};${flag})
         endif()
     endforeach()
 
@@ -60,9 +60,9 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
     endif()
 
     if(CHECK_VISIBILITY)
-        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} ${UCOMMON_VISIBILITY_FLAG} -DUCOMMON_VISIBILITY=1)
+        set(UCOMMON_FLAGS ${UCOMMON_FLAGS};${UCOMMON_VISIBILITY_FLAG};-DUCOMMON_VISIBILITY=1)
     else()
-        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_VISIBILITY=0)
+        set(UCOMMON_FLAGS ${UCOMMON_FLAGS};-DUCOMMON_VISIBILITY=0)
     endif()
 
 endif()
