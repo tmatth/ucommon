@@ -266,7 +266,7 @@ endif(NOT WIN32)
 # common build options can be passed to cmake using WITH_CFLAGS, WITH_LIBS,
 # and WITH_INCLUDES.
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc ${WITH_INCLUDES})
-add_definitions(${UCOMMON_FLAGS} ${WITH_CFLAGS})
+add_definitions(${WITH_CFLAGS})
 link_libraries(${WITH_LIBS})
 
 # by default we build static libs for windows, shared libs for unix.
@@ -404,7 +404,6 @@ message (STATUS "LIB_SUFFIX           " ${LIB_SUFFIX})
 message (STATUS "BUILD_STATIC         " ${BUILD_STATIC})
 message (STATUS "BUILD STDLIB         " ${BUILD_STDLIB})
 message (STATUS "BUILD_TESTS          " ${BUILD_TESTS})
-message (STATUS "UCOMMON FLAGS        " ${UCOMMON_FLAGS})
 message (STATUS "-------------------------------------------------------------------------------")
 message (STATUS)
 message (STATUS "Change a value with: cmake -D<Variable>=<Value>")
