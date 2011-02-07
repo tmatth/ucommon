@@ -1,7 +1,8 @@
 from ucommon 4.1.0 to 4.1.1
-- rexlock try method and better thread inheritence.
+- rexlock try method and better thread inheritence
 - timer fix for dll linkage
 - thread specific storage
+- fix for cmake builds with openssl and intl support
 
 from ucommon 4.0.5 to 4.1.0
 - security system logging.
