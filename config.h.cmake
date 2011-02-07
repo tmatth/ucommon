@@ -74,7 +74,9 @@
 #cmakedefine HAVE_EXECVP 1
 #cmakedefine HAVE_ATEXIT 1
 
-#cmakedefine UCOMMON_LOCALE ${UCOMMON_LOCALE}
+#cmakedefine UCOMMON_LOCALE "${UCOMMON_LOCALE}"
+#define SSL_CERTS "${UCOMMON_CERTS}"
+#define SSL_PRIVATE "${UCOMMON_KEYS}"
 
 #include <ucommon/export.h>
 
