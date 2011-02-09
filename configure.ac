@@ -35,6 +35,7 @@ UCOMMON_MODEL="CXX"
 UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
+OPENSSL_LINK=""
 
 CHECKFLAGS="$CHECKFLAGS"
 
@@ -152,6 +153,7 @@ AC_CHECK_LIB(msvcrt, fopen, [
     UCOMMON_VISIBILITY="0"
     UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -ladvapi32 -luser32 -lws2_32 -lwsock32 -lkernel32"
     UCOMMON_LIBC="-lmsvcrt -lgcc"
+    OPENSSL_LINK="-lgdi32"
     AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
     AC_DEFINE(HAVE_GETADDRINFO, [1], [have getaddrinfo])
 ],[
@@ -577,13 +579,13 @@ AC_ARG_WITH(pkg-config,
     PKG_CHECK_MODULES(OPENSSL, [openssl >= $OPENSSL_REQUIRES], [], [
         OPENSSL_LIBS=""
         AC_CHECK_HEADERS(openssl/ssl.h, [
-            OPENSSL_LIBS="-lssl -lcrypto -lz"
+            OPENSSL_LIBS="-lssl -lcrypto -lz $OPENSSL_LINK"
         ])
     ])
     PKG_CHECK_MODULES(GNUTLS, [gnutls >= 2.8.0], [], [GNUTLS_LIBS=""])
 ],[
     AC_CHECK_HEADERS(openssl/ssl.h, [
-        OPENSSL_LIBS="-lssl -lcrypto -lz"
+        OPENSSL_LIBS="-lssl -lcrypto -lz $OPENSSL_LINK"
     ])
     AC_CHECK_LIB(gnutls, gnutls_init, [
         GNUTLS_LIBS="-lgnutls -lgcrypt"

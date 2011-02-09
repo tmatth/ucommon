@@ -3,6 +3,7 @@ from ucommon 4.1.0 to 4.1.1
 - timer fix for dll linkage
 - thread specific storage
 - fix for cmake builds with openssl and intl support
+- mingw32, windows header and openssl link issues
 
 from ucommon 4.0.5 to 4.1.0
 - security system logging.

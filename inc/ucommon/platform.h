@@ -287,12 +287,9 @@ typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 typedef char *caddr_t;
 
-#if defined(_MSC_VER)
 #include <stdio.h>
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
-#define alloca _alloca
-#endif
 
 #else
 
