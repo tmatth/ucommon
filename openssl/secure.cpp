@@ -17,16 +17,16 @@
 
 #include "local.h"
 
-static mutex_t *locking = NULL;
+static mutex_t *private_locks = NULL;
 static const char *certid = "generic";
 
 extern "C" {
     static void ssl_lock(int mode, int n, const char *file, int line)
     {
         if((mode & 0x03) == CRYPTO_LOCK)
-            locking[n].acquire();
+            private_locks[n].acquire();
         else if((mode & 0x03) == CRYPTO_UNLOCK)
-            locking[n].release();
+            private_locks[n].release();
     }
 
     static unsigned long ssl_self(void)
@@ -41,7 +41,7 @@ extern "C" {
 
 bool secure::init(const char *progname)
 {
-    if(locking)
+    if(private_locks)
         return true;
 
     Thread::init();
@@ -61,7 +61,7 @@ bool secure::init(const char *progname)
     if(CRYPTO_get_id_callback() != NULL)
         return false;
 
-    locking = new mutex[CRYPTO_num_locks()];
+    private_locks = new mutex[CRYPTO_num_locks()];
     CRYPTO_set_id_callback(ssl_self);
     CRYPTO_set_locking_callback(ssl_lock);
     return true;
