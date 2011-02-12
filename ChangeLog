@@ -1,8 +1,8 @@
 from ucommon 4.1.0 to 4.1.1
 - rexlock try method and better thread inheritence
-- timer fix for dll linkage
+- timer fix for dll linkage, again broken windows
 - thread specific storage
-- fix for cmake builds with openssl and intl support
+- fixes for cmake builds with openssl and intl support
 - mingw32, windows header and openssl link issues
 
 from ucommon 4.0.5 to 4.1.0
