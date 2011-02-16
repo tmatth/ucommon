@@ -48,7 +48,7 @@
 #cmakedefine HAVE_MEMORY_H 1
 #cmakedefine HAVE_NANOSLEEP 1
 #cmakedefine HAVE_POLL_H 1
-#cmakedefine HAVE_POSIXTIME 1
+#cmakedefine HAVE_CLOCK_GETTIME 1
 #cmakedefine HAVE_POSIX_FADVISE 1
 #cmakedefine HAVE_POSIX_MEMALIGN 1
 #cmakedefine HAVE_PTHREAD_CONDATTR_SETCLOCK 1

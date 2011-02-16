@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 4.1.1)
+set (VERSION 4.1.2)
 set (SOVERSION 4)
 
 # project options
@@ -212,7 +212,6 @@ check_function_exists(nanosleep HAVE_NANOSLEEP)
 check_function_exists(clock_nanosleep HAVE_CLOCK_NANOSLEEP)
 check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
 check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
-check_function_exists(posixtime HAVE_POSIXTIME)
 check_function_exists(ftruncate HAVE_FTRUNCATE)
 check_function_exists(pwrite HAVE_PWRITE)
 check_function_exists(setpgrp HAVE_SETPGRP)

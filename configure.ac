@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="4.1.1"
-LT_VERSION="4:5:0"
+VERSION="4.1.2"
+LT_VERSION="4:6:0"
 OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -363,7 +363,7 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
         AC_DEFINE(HAVE_CLOCK_NANOSLEEP, [1], [has clocked nanosleep])
         ;;
     clock_gettime)
-        AC_DEFINE(HAVE_POSIXTIME, [1], [has posix clock functions])
+        AC_DEFINE(HAVE_CLOCK_GETTIME, [1], [has posix clock functions])
         ;;
     posix_fadvise)
         AC_DEFINE(HAVE_POSIX_FADVISE, [1], [can specify access options])

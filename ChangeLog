@@ -1,3 +1,7 @@
+from ucommon 4.1.1 to 4.1.2
+- configuration clearification for posix timers
+- linkage fix for secure and sstream; no copy constructor
+
 from ucommon 4.1.0 to 4.1.1
 - rexlock try method and better thread inheritence
 - timer fix for dll linkage, again broken windows
