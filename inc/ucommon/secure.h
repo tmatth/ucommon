@@ -598,6 +598,10 @@ protected:
     bool server;
     bool verify;
 
+private:
+    // kill copy constructor
+    sstream(const sstream&);
+
 public:
     sstream(secure::client_t context);
     sstream(const TCPServer *server, secure::server_t context, size_t size = 536);
