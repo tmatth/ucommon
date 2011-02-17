@@ -183,7 +183,7 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 {
     assert(ts != NULL);
 
-#if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(_POSIX_MONOTONIC_CLOCK)
+#if _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
     clock_gettime(CLOCK_MONOTONIC, ts);
 #elif _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, ts);
