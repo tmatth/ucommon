@@ -35,6 +35,10 @@ static unsigned max_sharing = 0;
 
 using namespace UCOMMON_NAMESPACE;
 
+#if _POSIX_TIMERS > 0
+extern int _posix_clocking = CLOCK_REALTIME;
+#endif
+
 struct mutex_entry
 {
     pthread_mutex_t mutex;
@@ -183,10 +187,8 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 {
     assert(ts != NULL);
 
-#if _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
-    clock_gettime(CLOCK_MONOTONIC, ts);
-#elif _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_REALTIME, ts);
+#if _POSIX_TIMERS > 0
+    clock_gettime(_posix_clocking, ts);
 #else
     timeval tv;
     gettimeofday(&tv, NULL);
@@ -413,7 +415,8 @@ Conditional::attribute::attribute()
     pthread_condattr_init(&attr);
 #if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK)
 #if defined(_POSIX_MONOTONIC_CLOCK)
-    pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+    if(!pthread_condattr_setclock(&attr, CLOCK_MONOTONIC))
+        _posix_clocking = CLOCK_MONOTONIC;
 #else
     pthread_condattr_setclock(&attr, CLOCK_REALTIME);
 #endif

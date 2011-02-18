@@ -21,8 +21,8 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-#if _POSIX_TIMERS > 0 && defined(HAVE_MACH_CLOCK_H) && !defined(HAVE_CLOCK_GETTIME)
-// wonder what was here...??
+#if _POSIX_TIMERS > 0
+extern int _posix_clocking;
 #endif
 
 static long difftime(time_t ref)
@@ -240,10 +240,8 @@ void TimerQueue::event::detach(void)
 
 void Timer::set(void)
 {
-#if _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
-    clock_gettime(CLOCK_MONOTONIC, &timer);
-#elif _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_REALTIME, &timer);
+#if _POSIX_TIMERS > 0
+    clock_gettime(_posix_clocking, &timer);
 #else
     gettimeofday(&timer, NULL);
 #endif
@@ -286,11 +284,7 @@ timeout_t Timer::get(void) const
 #if _POSIX_TIMERS > 0
     struct timespec current;
 
-#ifdef _POSIX_MONOTONIC_CLOCK
-    clock_gettime(CLOCK_MONOTONIC, &current);
-#else
-    clock_gettime(CLOCK_REALTIME, &current);
-#endif
+    clock_gettime(_posix_clocking, &current);
     adj(&current);
     if(current.tv_sec > timer.tv_sec)
         return 0;
@@ -378,10 +372,8 @@ bool Timer::operator>=(const Timer& source)
 
 Timer& Timer::operator=(timeout_t to)
 {
-#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_MONOTONIC, &timer);
-#elif _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_REALTIME, &timer);
+#if _POSIX_TIMERS > 0
+    clock_gettime(_posix_clocking, &timer);
 #else
     gettimeofday(&timer, NULL);
 #endif
@@ -439,10 +431,8 @@ Timer& Timer::operator-=(time_t abs)
 
 Timer& Timer::operator=(time_t abs)
 {
-#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_MONOTONIC, &timer);
-#elif _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_REALTIME, &timer);
+#if _POSIX_TIMERS > 0
+    clock_gettime(_posix_clocking, &timer);
 #else
     gettimeofday(&timer, NULL);
 #endif
@@ -456,10 +446,8 @@ Timer& Timer::operator=(time_t abs)
 
 void Timer::sync(Timer &t)
 {
-#if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP)
-    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t.timer, NULL);
-#elif _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP)
-    clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &t.timer, NULL);
+#if _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP)
+    clock_nanosleep(_posix_clocking, TIMER_ABSTIME, &t.timer, NULL);
 #elif defined(_MSWINDOWS_)
     SleepEx(t.get(), FALSE);
 #else

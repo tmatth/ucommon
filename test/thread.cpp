@@ -51,6 +51,12 @@ extern "C" int main()
     assert(count == 1);
     time(&later);
     assert(later >= now + 1);
+
+    time(&now);
+    TimedEvent evt;
+    evt.wait(2000);
+    time(&later);
+    assert(later >= now + 1);
     return 0;
 }
 
