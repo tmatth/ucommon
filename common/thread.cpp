@@ -36,7 +36,8 @@ static unsigned max_sharing = 0;
 using namespace UCOMMON_NAMESPACE;
 
 #if _POSIX_TIMERS > 0
-extern int _posix_clocking = CLOCK_REALTIME;
+extern int _posix_clocking;
+int _posix_clocking = CLOCK_REALTIME;
 #endif
 
 struct mutex_entry
