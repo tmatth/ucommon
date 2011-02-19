@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 4.1.3)
+set (VERSION 4.1.4)
 set (SOVERSION 4)
 
 # project options
@@ -38,54 +38,57 @@ else()
     option(BUILD_TESTS "Set to ON to build test programs" OFF)
 endif()
 
+option(BUILD_PACKAGE "Set to OFF to disable packaging and install" ON)
 MESSAGE( STATUS "Configuring GNU ${PROJECT_NAME} ${VERSION}...")
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckIncludeFiles)
 
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME} library")
-SET(CPACK_PACKAGE_VENDOR              "David Sugar")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/README")
-SET(CPACK_RESOURCE_FILE_LICENSE       "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
-set(PACKAGE_FILE_NAME                 ${PROJECT_NAME})
-set(PACKAGE_FILE_VERSION              ${VERSION})
+if(BUILD_PACKAGE)
+    SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME} library")
+    SET(CPACK_PACKAGE_VENDOR              "David Sugar")
+    SET(CPACK_PACKAGE_DESCRIPTION_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/README")
+    SET(CPACK_RESOURCE_FILE_LICENSE       "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+    set(PACKAGE_FILE_NAME                 ${PROJECT_NAME})
+    set(PACKAGE_FILE_VERSION              ${VERSION})
 
-IF (WIN32)
-    SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
-ELSE (WIN32)
-    SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-bin-${PACKAGE_FILE_VERSION}")
-    if (NOT CPACK_GENERATOR)
-        SET(CPACK_GENERATOR "TBZ2")
-    endif()
-ENDIF (WIN32)
+    IF (WIN32)
+        SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
+    ELSE (WIN32)
+        SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-bin-${PACKAGE_FILE_VERSION}")
+        if (NOT CPACK_GENERATOR)
+            SET(CPACK_GENERATOR "TBZ2")
+        endif()
+    ENDIF (WIN32)
 
-IF(WIN32 AND NOT UNIX)
-    SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_FILE_NAME}")
+    IF(WIN32 AND NOT UNIX)
+        SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_FILE_NAME}")
 
-    # There is a bug in NSI that does not handle full unix paths properly. Make
-    # sure there is at least one set of four (4) backlasshes.
-    # SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-    # SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
-    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${PROJECT_NAME}$")
-    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.gnutelephony.org")
-    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.gnutelephony.org")
-    SET(CPACK_NSIS_CONTACT "dyfet@gnutelephony.org")
-    SET(CPACK_NSIS_MODIFY_PATH ON)
+        # There is a bug in NSI that does not handle full unix paths properly. Make
+        # sure there is at least one set of four (4) backlasshes.
+        # SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+        # SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
+        SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${PROJECT_NAME}$")
+        SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.gnutelephony.org")
+        SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.gnutelephony.org")
+        SET(CPACK_NSIS_CONTACT "dyfet@gnutelephony.org")
+        SET(CPACK_NSIS_MODIFY_PATH ON)
 
-ENDIF(WIN32 AND NOT UNIX)
+    ENDIF(WIN32 AND NOT UNIX)
 
-set(CPACK_COMPONENTS_ALL libraries headers)
-set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
-set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME   "C++ Headers")
-set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION  "Dynamic library")
-set(CPACK_COMPONENT_HEADERS_DESCRIPTION
-    "Header files needed to build applications using ucommon library")
-SET(CPACK_SOURCE_IGNORE_FILES ".bzr" "build" ".swp$" ".*~" ".svn" ".git")
-SET(CPACK_SOURCE_GENERATOR "TBZ2")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
+    set(CPACK_COMPONENTS_ALL libraries headers)
+    set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
+    set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME   "C++ Headers")
+    set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION  "Dynamic library")
+    set(CPACK_COMPONENT_HEADERS_DESCRIPTION
+        "Header files needed to build applications using ucommon library")
+    SET(CPACK_SOURCE_IGNORE_FILES ".bzr" "build" ".swp$" ".*~" ".svn" ".git")
+    SET(CPACK_SOURCE_GENERATOR "TBZ2")
+    SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
 
- # This must always be last!
-INCLUDE(CPack)
+    # This must always be last!
+    INCLUDE(CPack)
+endif()
 
 # set to true for debug and trace during CMakeLists development
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
@@ -250,6 +253,8 @@ check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(openssl/ssl.h HAVE_OPENSSL)
 check_include_files(libintl.h HAVE_LIBINTL_H)
 
+set(UCOMMON_LIBS ${UCOMMON_LIBS} ${UCOMMON_LINKING})
+
 # for some reason, normal library searches always fail on broken windows
 if (WIN32 AND NOT UNIX AND NOT MINGW AND NOT MSYS)
     set(HAVE_GETADDRINFO True)
@@ -409,10 +414,10 @@ if (DOXYGEN_FOUND)
 
         #MESSAGE("DBG ${PROJECT_BINARY_DIR}/Doc/html/index.chm \n${OUT}")
         # create target used by install and package commands
-        INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
-          DESTINATION "doc"
-          RENAME "${OUT}"
-        )
+        if(BUILD_PACKAGE)
+            INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
+                DESTINATION "doc" RENAME "${OUT}")
+        endif()
       ENDIF(EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
       ENDIF(NOT TARGET_DOC_SKIP_INSTALL)
 
@@ -438,11 +443,12 @@ if (BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-if(NOT WIN32)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
-endif(NOT WIN32)
+if(BUILD_PACKAGE)
+    if(NOT WIN32)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
+    endif(NOT WIN32)
 
-install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
-install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
-install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
-
+    install(FILES   ${ucommon_inc}  DESTINATION include/ucommon  COMPONENT headers)
+    install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
+    install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
+endif()

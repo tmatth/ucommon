@@ -1,3 +1,6 @@
+from ucommon 4.1.3 to 4.1.4
+- revised cmake for unix builds, fixed cmake bug with non-stdlib
+
 from ucommon 4.1.2 to 4.1.3
 - new check for posix timing and monotomic clocking
 - thread unit test expanded to verify timed operations
