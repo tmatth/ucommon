@@ -114,11 +114,15 @@ if (WIN32 OR MINGW OR MSYS)
     set (UCOMMON_LIBS ${UCOMMON_LIBS} advapi32 user32 ws2_32 wsock32 kernel32)
 endif()
 
-if(WITH_NOSTDLIB AND UNIX)
-    set(UCOMMON_LIBS c)
+if(UNIX AND NOT BUILD_STDLIB)
+    set(UCOMMON_LIBS ${UCOMMON_LIBS} c)
 endif()
 
-if(WITH_NOSTDLIB AND CMAKE_COMPILER_IS_GNUCXX)
+if(MSYS OR MINGW)
+    set(UCOMMON_LIBS ${UCOMMON_LIBS} msvcrt)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX AND NOT BUILD_STDLIB)
     check_library_exists(gcc __modsi3 "" HAVE_GCC_LIB)
     if(HAVE_GCC_LIB)
             set(UCOMMON_LIBS ${UCOMMON_LIBS} gcc)
