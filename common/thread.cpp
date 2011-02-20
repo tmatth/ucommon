@@ -35,7 +35,7 @@ static unsigned max_sharing = 0;
 
 using namespace UCOMMON_NAMESPACE;
 
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
 extern int _posix_clocking;
 int _posix_clocking = CLOCK_REALTIME;
 #endif
@@ -188,7 +188,7 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 {
     assert(ts != NULL);
 
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     clock_gettime(_posix_clocking, ts);
 #else
     timeval tv;
@@ -414,7 +414,7 @@ Conditional::attribute::attribute()
 {
     Thread::init();
     pthread_condattr_init(&attr);
-#if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK)
+#if _POSIX_TIMERS > 0 && defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && defined(POSIX_TIMERS)
 #if defined(_POSIX_MONOTONIC_CLOCK)
     if(!pthread_condattr_setclock(&attr, CLOCK_MONOTONIC))
         _posix_clocking = CLOCK_MONOTONIC;

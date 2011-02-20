@@ -53,7 +53,7 @@ private:
     friend class Semaphore;
     friend class Event;
 
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     timespec timer;
 #else
     timeval timer;

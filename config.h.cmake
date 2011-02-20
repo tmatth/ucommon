@@ -73,6 +73,7 @@
 #cmakedefine HAVE_GETTEXT 1
 #cmakedefine HAVE_EXECVP 1
 #cmakedefine HAVE_ATEXIT 1
+#cmakedefine POSIX_TIMERS 1
 
 #cmakedefine UCOMMON_LOCALE "${UCOMMON_LOCALE}"
 #define SSL_CERTS "${UCOMMON_CERTS}"

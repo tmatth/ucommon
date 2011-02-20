@@ -102,6 +102,14 @@ if test -z "$enable_stdcpp" ; then
     esac
 fi
 
+AC_ARG_ENABLE(posix-timers,
+    AC_HELP_STRING([--enable-posix-timers],
+        [enable posix timers]))
+
+if test "x$enable_posix_timers" = "xyes" ; then
+    UCOMMON_FLAGS="$UCOMMON_FLAGS -DPOSIX_TIMERS"
+fi
+
 AC_ARG_ENABLE(stdcpp,
     AC_HELP_STRING([--disable-stdcpp],
         [compile without stdc++ runtime overhead]))

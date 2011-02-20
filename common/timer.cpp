@@ -21,7 +21,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
 extern int _posix_clocking;
 #endif
 
@@ -33,7 +33,7 @@ static long difftime(time_t ref)
     return (long)(ref - now);
 }
 
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
 static void adj(struct timespec *ts)
 {
     assert(ts != NULL);
@@ -240,7 +240,7 @@ void TimerQueue::event::detach(void)
 
 void Timer::set(void)
 {
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     clock_gettime(_posix_clocking, &timer);
 #else
     gettimeofday(&timer, NULL);
@@ -251,7 +251,7 @@ void Timer::set(void)
 void Timer::clear(void)
 {
     timer.tv_sec = 0;
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     timer.tv_nsec = 0;
 #else
     timer.tv_usec = 0;
@@ -268,7 +268,7 @@ bool Timer::isUpdated(void)
 
 bool Timer::isExpired(void)
 {
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     if(!timer.tv_sec && !timer.tv_nsec)
         return true;
 #else
@@ -281,7 +281,7 @@ bool Timer::isExpired(void)
 timeout_t Timer::get(void) const
 {
     timeout_t diff;
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && POSIX_TIMERS
     struct timespec current;
 
     clock_gettime(_posix_clocking, &current);
@@ -372,7 +372,7 @@ bool Timer::operator>=(const Timer& source)
 
 Timer& Timer::operator=(timeout_t to)
 {
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     clock_gettime(_posix_clocking, &timer);
 #else
     gettimeofday(&timer, NULL);
@@ -387,7 +387,7 @@ Timer& Timer::operator+=(timeout_t to)
         set();
 
     timer.tv_sec += (to / 1000);
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     timer.tv_nsec += (to % 1000l) * 1000000l;
 #else
     timer.tv_usec += (to % 1000l) * 1000l;
@@ -402,7 +402,7 @@ Timer& Timer::operator-=(timeout_t to)
     if(isExpired())
         set();
     timer.tv_sec -= (to / 1000);
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     timer.tv_nsec -= (to % 1000l) * 1000000l;
 #else
     timer.tv_usec -= (to % 1000l) * 1000l;
@@ -431,7 +431,7 @@ Timer& Timer::operator-=(time_t abs)
 
 Timer& Timer::operator=(time_t abs)
 {
-#if _POSIX_TIMERS > 0
+#if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     clock_gettime(_posix_clocking, &timer);
 #else
     gettimeofday(&timer, NULL);
@@ -446,7 +446,7 @@ Timer& Timer::operator=(time_t abs)
 
 void Timer::sync(Timer &t)
 {
-#if _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP)
+#if _POSIX_TIMERS > 0 && defined(HAVE_CLOCK_NANOSLEEP) && defined(POSIX_TIMERS)
     clock_nanosleep(_posix_clocking, TIMER_ABSTIME, &t.timer, NULL);
 #elif defined(_MSWINDOWS_)
     SleepEx(t.get(), FALSE);
