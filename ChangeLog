@@ -1,3 +1,6 @@
+from ucommon 4.1.5 to 4.1.6
+- fixed permission of shared memory, now world readable if not umasked.
+
 from ucommon 4.1.4 to 4.1.5
 - posix timers have become experimental since seems broken on some platforms
 

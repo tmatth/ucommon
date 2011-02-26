@@ -56,6 +56,7 @@ private:
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     timespec timer;
 #else
+#undef  POSIX_TIMERS    // make sure not used if no support
     timeval timer;
 #endif
     bool updated;
