@@ -634,6 +634,9 @@ if test -z "$SECURE" ; then
     SECURE="nossl"
 fi
 
+AC_MSG_CHECKING([secure library mode])
+AC_MSG_RESULT([$SECURE])
+
 SECURE_LOCAL="../$SECURE/libusecure.la $SECURE_LIBS"
 
 if test "$UCOMMON_MODEL" = "CC" ; then
