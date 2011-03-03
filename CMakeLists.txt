@@ -337,7 +337,7 @@ else()
     file(GLOB secure_src nossl/*.cpp)
 endif()
 
-add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src})
+add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src} ${ucommon_inc})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
