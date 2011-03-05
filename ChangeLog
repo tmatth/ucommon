@@ -1,3 +1,6 @@
+from ucommon 4.1.6 to 4.1.7
+- small fixes in cmake to add includes to projects, etc.
+
 from ucommon 4.1.5 to 4.1.6
 - fixed permission of shared memory, now world readable if not umasked.
 
