@@ -317,6 +317,10 @@ endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
+if(NOT WIN32)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config)
+endif(NOT WIN32)
+
 file(GLOB common_src common/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
 list(REMOVE_ITEM ucommon_inc inc/ucommon/secure.h)
@@ -459,6 +463,7 @@ if(BUILD_PACKAGE)
     endif(NOT WIN32)
 
     install(FILES ${ucommon_inc} ${secure_inc} DESTINATION include/ucommon  COMPONENT headers)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION bin)
     install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
     install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
 endif()
