@@ -207,8 +207,14 @@ static void dirpath(String path, bool top = true)
 
         filepath = str(path) + str("/") + str(filename);
         if(fsys::isdir(filepath)) {
-            if(is(recursive))
-                dirpath(filepath, false);
+            if(is(recursive)) {
+                struct stat ino;
+                fsys::stat(filepath, &ino);
+                if(fsys::islink(&ino) && !is(follow))
+                    remove(filepath);
+                else
+                    dirpath(filepath, false);
+            }
             else
                 scrubdir(filepath);
         }
