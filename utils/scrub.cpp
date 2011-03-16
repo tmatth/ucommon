@@ -204,7 +204,7 @@ static void scan(String path, bool top = true)
 
         filepath = str(path) + str("/") + str(filename);
         if(fsys::isdir(filepath)) {
-            if(is(recursive) || is(altrecursive)) {
+            if(is(follow) || is(recursive) || is(altrecursive)) {
                 struct stat ino;
                 fsys::stat(filepath, &ino);
                 if(fsys::islink(&ino) && !is(follow))
