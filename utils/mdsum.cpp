@@ -23,8 +23,9 @@ using namespace UCOMMON_NAMESPACE;
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::stringopt hash('d', "--digest", _TEXT("digest method (md5)"), "method", "md5");
-static shell::flagopt follow('f', "--follow", _TEXT("follow symlinks"));
+static shell::flagopt follow('F', "--follow", _TEXT("follow symlinks"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
+static shell::flagopt altrecursive('r', NULL, NULL);
 static shell::flagopt hidden('s', "--hidden", _TEXT("show hidden files"));
 
 static int exit_code = 0;
@@ -101,9 +102,6 @@ static void digest(const char *path = NULL)
     if(path) {
         int err = fsys::stat(path, &ino);
 
-        if(!err && fsys::islink(&ino) && !is(follow))
-            err = EBADF;
-
         if(err) {
             result(path, err);
             return;
@@ -136,7 +134,7 @@ static void digest(const char *path = NULL)
     md.reset();
 }
 
-static void dirpath(String path, bool top = true)
+static void scan(String path, bool top = true)
 {
     char filename[128];
     String filepath;
@@ -151,8 +149,14 @@ static void dirpath(String path, bool top = true)
 
         filepath = str(path) + str("/") + str(filename);
         if(fsys::isdir(filepath)) {
-            if(is(recursive))
-                dirpath(filepath, false);
+            if(is(recursive) || is(altrecursive)) {
+                struct stat ino;
+                fsys::stat(filepath, &ino);
+                if(fsys::islink(&ino) && !is(follow))
+                    continue;
+
+                scan(filepath, false);
+            }
             else
                 result(filepath, EISDIR);
         }
@@ -194,7 +198,7 @@ PROGRAM_MAIN(argc, argv)
         digest();
     else while(count < args()) {
         if(fsys::isdir(args[count]))
-            dirpath(str(args[count++]));
+            scan(str(args[count++]));
         else
             digest(args[count++]);
     }

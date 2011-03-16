@@ -23,10 +23,11 @@ using namespace UCOMMON_NAMESPACE;
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::numericopt blocks('b', "--blocksize", _TEXT("size of i/o blocks in k (1-x)"), "size k", 1);
-static shell::flagopt follow('f', "--follow", _TEXT("follow symlinks"));
+static shell::flagopt follow('F', "--follow", _TEXT("follow symlinks"));
 static shell::numericopt passes('p', "--passes", _TEXT("passes with randomized data (0-x)"), "count", 1);
-static shell::flagopt renamefile('r', "--rename", _TEXT("rename file randomly"));
+static shell::flagopt renamefile('n', "--rename", _TEXT("rename file randomly"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
+static shell::flagopt altrecursive('r', NULL, NULL);
 static shell::flagopt truncflag('t', "--truncate", _TEXT("decompose file by truncation"));
 static shell::flagopt verbose('v', "--verbose", _TEXT("show active status"));
 
@@ -90,7 +91,7 @@ static void report(const char *path, int code)
     exit_code = 1;
 }
 
-static void scrubfile(const char *path)
+static void scrub(const char *path)
 {
     fsys_t fs;
     struct stat ino;
@@ -105,8 +106,13 @@ static void scrubfile(const char *path)
 
     int err = fsys::stat(path, &ino);
 
-    if((err == ENOENT || fsys::islink(&ino)) && !is(follow)) {
+    if(err == ENOENT || fsys::islink(&ino)) {
         report(path, fsys::remove(path));
+        return;
+    }
+
+    if(fsys::isdir(&ino)) {
+        report(path, fsys::removeDir(path));
         return;
     }
 
@@ -186,16 +192,7 @@ repeat:
 
 }
 
-static void scrubdir(const char *path)
-{
-    if(is(verbose))
-        shell::printf("%s", path);
-
-
-    report(path, fsys::removeDir(path));
-}
-
-static void dirpath(String path, bool top = true)
+static void scan(String path, bool top = true)
 {
     char filename[128];
     String filepath;
@@ -207,21 +204,21 @@ static void dirpath(String path, bool top = true)
 
         filepath = str(path) + str("/") + str(filename);
         if(fsys::isdir(filepath)) {
-            if(is(recursive)) {
+            if(is(recursive) || is(altrecursive)) {
                 struct stat ino;
                 fsys::stat(filepath, &ino);
                 if(fsys::islink(&ino) && !is(follow))
-                    remove(filepath);
+                    scrub(filepath);
                 else
-                    dirpath(filepath, false);
+                    scan(filepath, false);
             }
             else
-                scrubdir(filepath);
+                scrub(filepath);
         }
         else
-            scrubfile(filepath);
+            scrub(filepath);
     }
-    scrubdir(path);
+    scrub(path);
 }
 
 PROGRAM_MAIN(argc, argv)
@@ -257,9 +254,9 @@ PROGRAM_MAIN(argc, argv)
 
     while(count < args()) {
         if(fsys::isdir(args[count]))
-            dirpath(str(args[count++]));
+            scan(str(args[count++]));
         else
-            scrubfile(args[count++]);
+            scrub(args[count++]);
     }
 
     PROGRAM_EXIT(exit_code);
