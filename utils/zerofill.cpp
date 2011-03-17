@@ -141,7 +141,7 @@ PROGRAM_MAIN(argc, argv)
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: zerofill [options] path..."));
-        printf("%s\n\n", _TEXT("Echo command line arguments"));
+        printf("%s\n\n", _TEXT("Erase and fill unused space with zeros"));
         printf("%s\n", _TEXT("Options:"));
         shell::help();
         printf("\n%s\n", _TEXT("Report bugs to dyfet@gnu.org"));

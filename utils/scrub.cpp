@@ -240,7 +240,7 @@ PROGRAM_MAIN(argc, argv)
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: scrub [options] path..."));
-        printf("%s\n\n", _TEXT("Echo command line arguments"));
+        printf("%s\n\n", _TEXT("Securely erase files"));
         printf("%s\n", _TEXT("Options:"));
         shell::help();
         printf("\n%s\n", _TEXT("Report bugs to dyfet@gnu.org"));
