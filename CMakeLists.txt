@@ -178,17 +178,13 @@ endif()
 if (WITH_LIBDIR)
     set(INSTALL_LIBDIR ${WITH_LIBDIR})
 else()
-    set(INSTALL_LIBDIR lib)
+    set(INSTALL_LIBDIR lib${WITH_LIBSUFFIX})
 endif()
 
 if (WITH_BINDIR)
     set(INSTALL_BINDIR ${WITH_BINDIR})
 else()
     set(INSTALL_BINDIR bin)
-endif()
-
-if(WITH_LIBSUFFIX)
-    set(INSTALL_LIBDIR ${INSTALL_LIBDIR}${WITH_LIBSUFFIX})
 endif()
 
 if (WITH_CONFIGDIR)
