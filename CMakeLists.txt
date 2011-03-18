@@ -165,17 +165,30 @@ if(UNIX OR MSYS OR MINGW OR CYGWIN)
     endif()
 endif()
 
-# this may have to change for mswindows...
-if (WITH_PLUGINDIR)
-    set(UCOMMON_PLUGINS ${WITH_PLUGINDIR})
-else()
-    set(UCOMMON_PLUGINS ${CMAKE_INSTALL_PREFIX}/lib/ucommon)
-endif()
-
 if (WITH_LOCALEDIR)
     set(UCOMMON_LOCALE ${WITH_LOCALEDIR})
+    set(INSTALL_LOCALE ${WITH_LOCALEDIR})
 else()
+    set(INSTALL_LOCALE share/locale)
     set(UCOMMON_LOCALE ${CMAKE_INSTALL_PREFIX}/share/locale)
+endif()
+
+# when we override default install prefix, assume full path is used...
+
+if (WITH_LIBDIR)
+    set(INSTALL_LIBDIR ${WITH_LIBDIR})
+else()
+    set(INSTALL_LIBDIR lib)
+endif()
+
+if (WITH_BINDIR)
+    set(INSTALL_BINDIR ${WITH_BINDIR})
+else()
+    set(INSTALL_BINDIR bin)
+endif()
+
+if(WITH_LIBSUFFIX)
+    set(INSTALL_LIBDIR ${INSTALL_LIBDIR}${WITH_LIBSUFFIX})
 endif()
 
 if (WITH_CONFIGDIR)
@@ -307,12 +320,6 @@ if(BUILD_STATIC AND NOT BUILD_SHARED)
     set(BUILD_LIBRARY_TYPE STATIC)
 else()
     set(BUILD_LIBRARY_TYPE SHARED)
-endif()
-
-if(LIB_SUFFIX)
-    if (NOT LIB_SUFFIX EQUAL 64)
-        message (FATAL_ERROR "LIB_SUFFIX must be empty (32 bits) or 64 (64 bits)")
-    endif()
 endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
@@ -459,11 +466,11 @@ endif()
 
 if(BUILD_PACKAGE)
     if(NOT WIN32)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION bin)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION ${INSTALL_BINDIR})
     endif(NOT WIN32)
 
     install(FILES ${ucommon_inc} ${secure_inc} DESTINATION include/ucommon  COMPONENT headers)
-    install(TARGETS ucommon usecure DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
-    install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION bin)
+    install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
+    install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION ${INSTALL_BINDIR})
 endif()
