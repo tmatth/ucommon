@@ -1567,14 +1567,14 @@ public:
      * Return the typed value of this node.
      * @return reference to value of node.
      */
-    inline T& get(void) const
+    inline const T& get(void) const
         {return value;};
 
     /**
      * Return typed value of this node by pointer reference.
      * @return value of node.
      */
-    inline T& operator*() const
+    inline const T& operator*() const
         {return value;};
 
     /**
@@ -1583,7 +1583,7 @@ public:
      * @return value of node.
      */
     static inline T getPointer(treemap *node)
-        {(node == NULL) ? NULL : node->value;};
+        {return (node == NULL) ? NULL : node->value;};
 
     /**
      * Test if this node is a leaf node for a tree pointer table.
@@ -1596,14 +1596,14 @@ public:
      * Get the pointer of a pointer based value tree.
      * @return value pointer of node.
      */
-    inline T getPointer(void) const
+    inline const T getPointer(void) const
         {return value;};
 
     /**
      * Get the data value of a data based value tree.
      * @return data value of node.
      */
-    inline T& getData(void) const
+    inline const T& getData(void) const
         {return value;};
 
     /**
