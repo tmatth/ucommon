@@ -106,7 +106,7 @@ static void scrub(const char *path)
 
     int err = fsys::stat(path, &ino);
 
-    if(err == ENOENT || fsys::islink(&ino)) {
+    if(err == ENOENT || fsys::islink(path)) {
         report(path, fsys::remove(path));
         return;
     }
@@ -205,10 +205,12 @@ static void scan(String path, bool top = true)
         filepath = str(path) + str("/") + str(filename);
         if(fsys::isdir(filepath)) {
             if(is(follow) || is(recursive) || is(altrecursive)) {
-                struct stat ino;
-                fsys::stat(filepath, &ino);
-                if(fsys::islink(&ino) && !is(follow))
-                    scrub(filepath);
+                if(fsys::islink(filepath)) {
+                    if(is(follow))
+                        scan(filepath);
+                    else
+                        scrub(filepath);
+                }
                 else
                     scan(filepath, false);
             }

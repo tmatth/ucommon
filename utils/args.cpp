@@ -26,6 +26,7 @@ static shell::flagopt directory('D', "--directory", _TEXT("expand directory into
 static shell::flagopt lines('l',    "--lines", _TEXT("list arguments on separate lines"));
 static shell::stringopt quote('q',  "--quote",  _TEXT("set quote for each argument"), "string", "");
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
+static shell::flagopt follow('F', "--follow", _TEXT("follow symlinks"));
 static shell::flagopt rflag('r',    "--reverse", _TEXT("reverse order of arguments"));
 
 static char prefix[80] = {0, 0};
@@ -56,8 +57,17 @@ static void dirpath(bool middle, String path, bool top = true)
         subdir = (String)path + (String)"/" + (String)filename;
         output(middle, subdir);
         middle = true;
-        if(fsys::isdir(subdir) && is(recursive))
-            dirpath(true, subdir, false);
+
+        if(fsys::isdir(*subdir)) {
+            if(is(follow) || is(recursive)) {
+                if(fsys::islink(*subdir)) {
+                    if(is(follow))
+                        dirpath(true, subdir, false);
+                }
+                else
+                    dirpath(true, subdir, false);
+            }
+        }
     }
     if(top && !count)
         output(middle, path);
@@ -113,7 +123,7 @@ PROGRAM_MAIN(argc, argv)
     if(is(rflag)) {
         count = args();
         while(count--) {
-            if(fsys::isdir(args[count]) && (is(directory) || is(recursive)))
+            if(fsys::isdir(args[count]) && (is(directory) || is(recursive) || is(follow)))
                 dirpath(middle, (String)args[count]);
             else
                 output(middle, args[count]);
@@ -121,7 +131,7 @@ PROGRAM_MAIN(argc, argv)
         }
     }
     else while(count < args()) {
-        if(fsys::isdir(args[count]) && (is(directory) || is(recursive)))
+        if(fsys::isdir(args[count]) && (is(directory) || is(recursive) || is(follow)))
             dirpath(middle, (String)args[count++]);
         else
             output(middle, (String)args[count++]);

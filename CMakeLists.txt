@@ -236,6 +236,7 @@ check_function_exists(setlocale HAVE_SETLOCALE)
 check_function_exists(gettext HAVE_GETTEXT)
 check_function_exists(execvp HAVE_EXECVP)
 check_function_exists(atexit HAVE_ATEXIT)
+check_function_exists(lstat HAVE_LSTAT)
 
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(strings.h HAVE_STRINGS_H)

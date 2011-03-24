@@ -21,13 +21,13 @@
 .SH NAME
 args \- manipulate and output command arguments.
 .SH SYNOPSIS
-.B args \fI[options]\fR \fIargs...\fR 
+.B args \fI[options]\fR \fIargs...\fR
 .br
 .SH DESCRIPTION
 This command is used to manipulate and echo command line arguments to
 standard out.  This can include adding quotes around each argument passed
-or a seperator, or to output each argument on a separate line.  The program 
-source also offers a basic example of how to use shell argument parsing and 
+or a seperator, or to output each argument on a separate line.  The program
+source also offers a basic example of how to use shell argument parsing and
 localization in ucommon.
 .SH OPTIONS
 .TP
@@ -37,6 +37,9 @@ outputing arguments.
 .TP
 \fB--directory\fR
 If argument is a directory, list directory contents as arguments.
+.TP
+\fB--follow\fR
+If argument is a directory and a symlink, follow symlinks recursively.
 .TP
 \fB--lines\fR
 Output each argument on a separate line.

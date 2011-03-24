@@ -225,6 +225,10 @@ else
     AC_MSG_RESULT(no)
 fi
 
+AC_CHECK_LIB($clib, lstat, [
+    AC_DEFINE(HAVE_LSTAT, [1], [have lstat])
+])
+
 AC_CHECK_LIB($clib, stricmp, [
     AC_DEFINE(HAVE_STRICMP, [1], [string icmp])
 ])

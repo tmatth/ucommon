@@ -845,6 +845,23 @@ bool fsys::isfile(const char *path)
 #endif
 }
 
+bool fsys::islink(const char *path)
+{
+#ifdef  HAVE_LSTAT
+    struct stat ino;
+
+    if(::lstat(path, &ino))
+        return false;
+
+    if(S_ISLNK(ino.st_mode))
+        return true;
+
+    return false;
+#else
+    return false;
+#endif
+}
+
 bool fsys::isdir(const char *path)
 {
 #ifdef _MSWINDOWS_

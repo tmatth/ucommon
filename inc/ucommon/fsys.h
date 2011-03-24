@@ -364,6 +364,12 @@ public:
      */
     static bool isdir(const char *path);
 
+    /**
+     * Test if path is a symlink.
+     * @param path to test.
+     * @return true if exists and is symlink.
+     */
+    static bool islink(const char *path);
 
     /**
      * Read data from file descriptor or directory.
