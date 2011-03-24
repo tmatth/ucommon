@@ -205,12 +205,8 @@ static void scan(String path, bool top = true)
         filepath = str(path) + str("/") + str(filename);
         if(fsys::isdir(filepath)) {
             if(is(follow) || is(recursive) || is(altrecursive)) {
-                if(fsys::islink(filepath)) {
-                    if(is(follow))
-                        scan(filepath);
-                    else
-                        scrub(filepath);
-                }
+                if(fsys::islink(filepath) && !is(follow))
+                    scrub(filepath);
                 else
                     scan(filepath, false);
             }

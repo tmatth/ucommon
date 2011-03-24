@@ -60,11 +60,7 @@ static void dirpath(bool middle, String path, bool top = true)
 
         if(fsys::isdir(*subdir)) {
             if(is(follow) || is(recursive)) {
-                if(fsys::islink(*subdir)) {
-                    if(is(follow))
-                        dirpath(true, subdir, false);
-                }
-                else
+                if(!fsys::islink(*subdir) || is(follow))
                     dirpath(true, subdir, false);
             }
         }
