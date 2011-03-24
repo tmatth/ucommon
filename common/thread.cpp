@@ -1599,6 +1599,25 @@ void barrier::set(unsigned limit)
     unlock();
 }
 
+void barrier::dec(void)
+{
+    lock();
+    if(count)
+        --count;
+    unlock();
+}
+
+unsigned barrier::operator--(void)
+{
+    unsigned result;
+    lock();
+    if(count)
+        --count;
+    result = count;
+    unlock();
+    return result;
+}
+
 void barrier::inc(void)
 {
     lock();

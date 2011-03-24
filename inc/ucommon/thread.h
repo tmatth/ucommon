@@ -952,10 +952,17 @@ public:
     void inc(void);
 
     /**
+     * Reduce the number of threads required.
+     */
+    void dec(void);
+
+    /**
      * Alternative prefix form of the same increment operation.
      * @return the current amount of threads.
      */
     unsigned operator++(void);
+
+    unsigned operator--(void);
 
     /**
      * Wait at the barrier until the count of threads waiting is reached.

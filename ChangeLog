@@ -1,3 +1,6 @@
+from ucommon 4.2.0 to 4.2.1
+- proposed barrier dec from Leon.
+
 from ucommon 4.1.7 to 4.2.0
 - some clarification of linked object abi.
 
