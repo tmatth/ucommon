@@ -119,6 +119,14 @@ memalloc(pagesize), index()
     load(path);
 }
 
+keyfile::keyfile(const keyfile& copy, size_t pagesize) :
+memalloc(pagesize), index()
+{
+    errcode = 0;
+    defaults = NULL;
+    load(&copy);
+}
+
 void keyfile::release(void)
 {
     defaults = NULL;
@@ -153,9 +161,183 @@ keydata *keyfile::create(const char *id)
     return new(mem) keydata(this, id);
 }
 
+#ifdef _MSWINDOWS_
+
+bool keyfile::save(HKEY keys, keydata *section, const char *path)
+{
+    DWORD index = 0;
+    TCHAR keyvalue[MAX_VALUE_NAME];
+    TCHAR keyname[MAX_KEY_LENGTH];
+    DWORD size = sizeof(keyname);
+
+    if(path) {
+        size = 0;
+        if(RegCreateKeyEx(keys, path, 0L, NULL, REG_OPTION_NON_VOLATILE_KEY, KEY_ALL_ACCESS, NULL, &subkey, NULL) == ERROR_SUCCESS) {
+            save(subkey, section);
+            RegCloseKey(subkey);
+        }
+        else
+            errcode = EBADF;
+        return false;
+    }
+
+    if(!section) {
+        if(defaults)
+            save(keys, defaults);
+        linked_pointer<keydata> kp = begin();
+        while(is(kp)) {
+            if(RegCreateKeyEx(keys, kp->get(), 0L, NULL, REG_OPTION_NON_VOLATILE_KEY, KEY_ALL_ACCESS, NULL, &subkey, NULL) == ERROR_SUCCESS) {
+                save(subkey, *kp);
+                RegCloseKey(subkey);
+            }
+            kp.next();
+        }
+    } else {
+        linked_pointer<keydata::keyvalue> kv = section->begin();
+        while(is(kv)) {
+            const char *value = kv->value;
+            RegSetValueEx(hkey, kv->id, 0L, REG_SZ, value, strlen(value) + 1);
+        }
+    }
+    return true;
+}
+
+void keyfile::load(HKEY keys, keydata *section, const char *path)
+{
+    DWORD index = 0;
+    TCHAR keyvalue[MAX_VALUE_NAME];
+    TCHAR keyname[MAX_KEY_LENGTH];
+    DWORD size = sizeof(keyname);
+    DWORD vsize, vtype;
+    FILETIME fTime;
+    HKEY subkey;
+
+    if(path) {
+        if(RegOpenKeyEx(keys, path, 0, KEY_READ, &subkey) === ERROR_SUCCESS) {
+            load(subkey, section);
+            RegCloseKey(subkey);
+        }
+        else
+            errcode = EBADF;
+        return;
+    }
+
+    while(!section && RegEnumKeyEx(keys, index++, keyname, &size, NULL, NULL, NULL, &fTime) == ERROR_SUCCESS) {
+        if(RegOpenKeyEx(keys, keyname, 0, KEY_READ, &subkey) == ERROR_SUCCESS) {
+            section = create(keyname);
+            load(subkey, section);
+            RegCloseKey(subkey);
+        }
+        size = sizeof(keyname);
+    }
+    index = 0;
+    while(RegEnumValue(keys, index++, keyname, &size, NULL, &vtype, keyvalue, &vsize) == ERROR_SUCCESS && vtype = REG_SZ && keyname[0]) {
+        if(section)
+            section->set(keyname, keyvalue);
+        else
+            defaults->set(keyname, keyvalue);
+            }
+        }
+        size = sizeof(keyname);
+    }
+}
+
+#endif
+
+void keyfile::load(const keyfile *copy)
+{
+    linked_pointer<keydata::keyvalue> vp = (keydata::keyvalue*)NULL;
+
+    if(copy->defaults)
+        vp = copy->defaults->begin();
+
+    if(copy->defaults && !defaults) {
+        caddr_t mem = (caddr_t)alloc(sizeof(keydata));
+        defaults = new(mem) keydata(this);
+    }
+
+    while(is(vp)) {
+        defaults->set(vp->id, vp->value);
+        vp.next();
+    }
+
+    keydata *section;
+    linked_pointer<keydata> kp = copy->begin();
+    while(is(kp)) {
+        vp = kp->begin();
+        section = get(kp->get());
+        if(!section)
+            section = create(kp->get());
+        while(section && is(vp)) {
+            section->set(vp->id, vp->value);
+            vp.next();
+        }
+        kp.next();
+    }
+}
+
+bool keyfile::save(const char *path)
+{
+#ifdef  _MSWINDOWS_
+    if(eq(path, "~\\", 2))
+        return save(HKEY_CURRENT_USER, NULL, path);
+    else if(eq(path, "-\\", 2))
+        return save(HKEY_LOCAL_MACHINE, NULL, path);
+#endif
+
+    FILE *fp = fopen(path, "w");
+    if(!fp) {
+        errcode = EBADF;
+        return false;
+    }
+
+    linked_pointer<keydata::keyvalue> vp = (keydata::keyvalue*)NULL;
+
+    if(defaults)
+        vp = defaults->begin();
+
+    while(is(vp)) {
+        if(strchr(vp->value, '\"'))
+            fprintf(fp, "%s=%s\n", vp->id, vp->value);
+        else
+            fprintf(fp, "%s=\"%s\"\n", vp->id, vp->value);
+        vp.next();
+    }
+    fprintf(fp, "\n");
+
+    linked_pointer<keydata> kp = begin();
+    while(is(kp)) {
+        fprintf(fp, "[%s]\n", kp->get());
+        vp = kp->begin();
+        while(is(vp)) {
+            if(strchr(vp->value, '\"'))
+                fprintf(fp, "%s=%s\n", vp->id, vp->value);
+            else
+                fprintf(fp, "%s=\"%s\"\n", vp->id, vp->value);
+            vp.next();
+        }
+        fprintf(fp, "\n");
+        kp.next();
+    }
+
+    fclose(fp);
+    return true;
+}
+
 void keyfile::load(const char *path)
 {
     assert(path != NULL && path[0] != 0);
+
+#ifdef  _MSWINDOWS_
+    if(eq(path, "~\\", 2)) {
+        load(HKEY_CURRENT_USER, NULL, path);
+        return;
+    }
+    else if(eq(path, "-\\", 2)) {
+        load(HKEY_LOCAL_MACHINE, NULL, path);
+        return;
+    }
+#endif
 
     char linebuf[1024];
     char *lp = linebuf;

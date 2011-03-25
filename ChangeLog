@@ -1,6 +1,7 @@
 from ucommon 4.2.0 to 4.2.1
 - proposed barrier dec from Leon.
 - added fsys::islink symlink check function.
+- keyfile::save method added.
 
 from ucommon 4.1.7 to 4.2.0
 - some clarification of linked object abi.

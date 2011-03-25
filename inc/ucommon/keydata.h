@@ -157,6 +157,11 @@ private:
 
     keydata *create(const char *section);
 
+#ifdef  _MSWINDOWS_
+    void load(HKEY root, keydata *section = NULL, const char *path = NULL);
+    bool save(HKEY root, keydata *section = NULL, const char *path = NULL);
+#endif
+
 public:
     /**
      * Create an empty key file ready for loading.
@@ -171,6 +176,8 @@ public:
      */
     keyfile(const char *path, size_t pagesize = 0);
 
+    keyfile(const keyfile &copy, size_t pagesize = 0);
+
     /**
      * Load (overlay) another config file over the currently loaded one.
      * This is used to merge key data, such as getting default values from
@@ -178,6 +185,19 @@ public:
      * @param path to load keys from into current object.
      */
     void load(const char *path);
+
+    /**
+     * Save (write) a set of config keys to dist.
+     * @param path of file to save keys to.
+     * @return true on success.
+     */
+    bool save(const char *path);
+
+    /**
+     * Load from an existing keyfile object.
+     * @param source to copy from.
+     */
+    void load(const keyfile *source);
 
     /**
      * Release and re-initialize keyfile.
