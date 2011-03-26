@@ -165,14 +165,10 @@ keydata *keyfile::create(const char *id)
 
 bool keyfile::save(HKEY keys, keydata *section, const char *path)
 {
-    DWORD index = 0;
-    TCHAR keyvalue[MAX_VALUE_NAME];
-    TCHAR keyname[MAX_KEY_LENGTH];
-    DWORD size = sizeof(keyname);
+    HKEY subkey;
 
     if(path) {
-        size = 0;
-        if(RegCreateKeyEx(keys, path, 0L, NULL, REG_OPTION_NON_VOLATILE_KEY, KEY_ALL_ACCESS, NULL, &subkey, NULL) == ERROR_SUCCESS) {
+        if(RegCreateKeyEx(keys, path, 0L, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &subkey, NULL) == ERROR_SUCCESS) {
             save(subkey, section);
             RegCloseKey(subkey);
         }
@@ -186,7 +182,7 @@ bool keyfile::save(HKEY keys, keydata *section, const char *path)
             save(keys, defaults);
         linked_pointer<keydata> kp = begin();
         while(is(kp)) {
-            if(RegCreateKeyEx(keys, kp->get(), 0L, NULL, REG_OPTION_NON_VOLATILE_KEY, KEY_ALL_ACCESS, NULL, &subkey, NULL) == ERROR_SUCCESS) {
+            if(RegCreateKeyEx(keys, kp->get(), 0L, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &subkey, NULL) == ERROR_SUCCESS) {
                 save(subkey, *kp);
                 RegCloseKey(subkey);
             }
@@ -196,7 +192,7 @@ bool keyfile::save(HKEY keys, keydata *section, const char *path)
         linked_pointer<keydata::keyvalue> kv = section->begin();
         while(is(kv)) {
             const char *value = kv->value;
-            RegSetValueEx(hkey, kv->id, 0L, REG_SZ, value, strlen(value) + 1);
+            RegSetValueEx(keys, kv->id, 0L, REG_SZ, (const BYTE *)value, strlen(value) + 1);
         }
     }
     return true;
@@ -205,15 +201,15 @@ bool keyfile::save(HKEY keys, keydata *section, const char *path)
 void keyfile::load(HKEY keys, keydata *section, const char *path)
 {
     DWORD index = 0;
-    TCHAR keyvalue[MAX_VALUE_NAME];
-    TCHAR keyname[MAX_KEY_LENGTH];
+    TCHAR keyvalue[256];
+    TCHAR keyname[4096];
     DWORD size = sizeof(keyname);
     DWORD vsize, vtype;
     FILETIME fTime;
     HKEY subkey;
 
     if(path) {
-        if(RegOpenKeyEx(keys, path, 0, KEY_READ, &subkey) === ERROR_SUCCESS) {
+        if(RegOpenKeyEx(keys, path, 0, KEY_READ, &subkey) == ERROR_SUCCESS) {
             load(subkey, section);
             RegCloseKey(subkey);
         }
@@ -231,14 +227,18 @@ void keyfile::load(HKEY keys, keydata *section, const char *path)
         size = sizeof(keyname);
     }
     index = 0;
-    while(RegEnumValue(keys, index++, keyname, &size, NULL, &vtype, keyvalue, &vsize) == ERROR_SUCCESS && vtype = REG_SZ && keyname[0]) {
+    vsize = sizeof(keyvalue);
+    if(vsize > getAlloc() - 64)
+        vsize = getAlloc() - 64;
+    while((RegEnumValue(keys, index++, keyname, &size, NULL, &vtype, (BYTE *)keyvalue, &vsize) == ERROR_SUCCESS) && (vtype == REG_SZ) && (keyname[0] != 0)) {
         if(section)
             section->set(keyname, keyvalue);
         else
             defaults->set(keyname, keyvalue);
-            }
-        }
         size = sizeof(keyname);
+        vsize = sizeof(keyvalue);
+        if(vsize > getAlloc() - 64)
+            vsize = getAlloc() - 64;
     }
 }
 
