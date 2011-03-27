@@ -1,3 +1,6 @@
+from ucommon 4.2.1 to 4.2.2
+- reorg how we do cmake path configurations.
+
 from ucommon 4.2.0 to 4.2.1
 - proposed barrier dec from Leon.
 - added fsys::islink symlink check function.

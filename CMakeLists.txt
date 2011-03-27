@@ -21,6 +21,32 @@ PROJECT(ucommon)
 set (VERSION 4.2.1)
 set (SOVERSION 4)
 
+# when we override default install prefix, assume full path is used...
+
+set(INSTALL_INCLUDEDIR include)
+set(INSTALL_BINDIR bin)
+
+if(WIN32)
+    set(INSTALL_LOCALE locale)
+    set(INSTALL_LIBDIR bin)
+    set(SYSCONFDIR "etc" CACHE PATH "config directory")
+else()
+    set(INSTALL_LOCALE share/locale)
+    set(INSTALL_LIBDIR lib${LIB_POSTFIX})
+    set(SYSCONFDIR "/etc" CACHE PATH "config directory")
+endif()
+
+set(UCOMMON_LOCALE ${CMAKE_INSTALL_PREFIX}/${INSTALL_LOCALE})
+
+if(WIN32)
+    set(UCOMMON_CERTS ${SYSCONFDIR}/certs)
+    set(UCOMMON_KEYS ${SYSCONFDIR}/keys)
+else()
+    set(UCOMMON_CERTS ${SYSCONFDIR}/ssl/certs)
+    set(UCOMMON_KEYS ${SYSCONFDIR}/ssl/private)
+endif()
+
+
 # project options
 
 if(MSVC60)
@@ -160,48 +186,6 @@ if(UNIX OR MSYS OR MINGW OR CYGWIN)
     if (HAVE_RT_LIB)
         set(UCOMMON_LIBS ${UCOMMON_LIBS} rt)
     endif()
-endif()
-
-if (WITH_LOCALEDIR)
-    set(UCOMMON_LOCALE ${WITH_LOCALEDIR})
-    set(INSTALL_LOCALE ${WITH_LOCALEDIR})
-else()
-    set(INSTALL_LOCALE share/locale)
-    set(UCOMMON_LOCALE ${CMAKE_INSTALL_PREFIX}/share/locale)
-endif()
-
-# when we override default install prefix, assume full path is used...
-
-if (WITH_LIBDIR)
-    set(INSTALL_LIBDIR ${WITH_LIBDIR})
-else()
-    set(INSTALL_LIBDIR lib${WITH_LIBSUFFIX})
-endif()
-
-if (WITH_BINDIR)
-    set(INSTALL_BINDIR ${WITH_BINDIR})
-else()
-    set(INSTALL_BINDIR bin)
-endif()
-
-if (WITH_CONFIGDIR)
-    set(UCOMMON_CONFIGDIR ${WITH_CONFIGDIR})
-elseif(WIN32)
-    set(UCOMMON_CONFIGDIR ${CMAKE_INSTALL_PREFIX}/etc)
-else()
-    set(UCOMMON_CONFIGDIR /etc)
-endif()
-
-if (WITH_CERTIFICATES)
-    set(UCOMMON_CERTS ${WITH_CERTIFICATES})
-else()
-    set(UCOMMON_CERTS ${UCOMMON_CONFIGDIR}/ssl/certs)
-endif()
-
-if (WITH_PRIVATEKEYS)
-    set(UCOMMON_KEYS ${WITH_PRIVATEKEYS})
-else()
-    set(UCOMMON_KEYS ${UCOMMON_CONFIGDIR}/ssl/private)
 endif()
 
 set (CMAKE_REQUIRED_LIBRARIES ${UCOMMON_LIBS})
@@ -461,6 +445,6 @@ if(NOT WIN32)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION ${INSTALL_BINDIR})
 endif(NOT WIN32)
 
-install(FILES ${ucommon_inc} ${secure_inc} DESTINATION include/ucommon  COMPONENT headers)
+install(FILES ${ucommon_inc} ${secure_inc} DESTINATION ${INSTALL_INCLUDEDIR}/ucommon    COMPONENT headers)
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
 install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION ${INSTALL_BINDIR})
