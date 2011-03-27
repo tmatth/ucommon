@@ -25,27 +25,40 @@ set (SOVERSION 4)
 
 set(INSTALL_INCLUDEDIR include)
 set(INSTALL_BINDIR bin)
+set(INSTALL_SBINDIR sbin)
+set(INSTALL_DATADIR share)
 
 if(WIN32)
+    set(INSTALL_MANDIR man)
+    set(INSTALL_DOCDIR doc)
     set(INSTALL_LOCALE locale)
     set(INSTALL_LIBDIR bin)
+    set(INSTALL_INFODIR info)
     set(SYSCONFDIR "etc" CACHE PATH "config directory")
+    set(STATEDIR "var" CACHE PATH "state directory")
 else()
-    set(INSTALL_LOCALE share/locale)
+    set(INSTALL_MANDIR ${INSTALL_DATADIR}/man)
+    set(INSTALL_LOCALE ${INSTALL_DATADIR}/locale)
+    set(INSTALL_DOCDIR ${INSTALL_DATADIR}/doc/${PROJECT_NAME})
+    set(INSTALL_INFODIR ${INSTALL_DATADIR}/info)
     set(INSTALL_LIBDIR lib${LIB_POSTFIX})
     set(SYSCONFDIR "/etc" CACHE PATH "config directory")
+    set(STATEDIR "/var" CACHE PATH "state directory")
 endif()
 
 set(UCOMMON_LOCALE ${CMAKE_INSTALL_PREFIX}/${INSTALL_LOCALE})
 
 if(WIN32)
-    set(UCOMMON_CERTS ${SYSCONFDIR}/certs)
-    set(UCOMMON_KEYS ${SYSCONFDIR}/keys)
+    set(DEFAULT_CONFIGDIR "${CMAKE_INSTALL_PREFIX}/${SYSCONFDIR}")
+    set(DEFAULT_STATEDIR "${CMAKE_INSTALL_PREFIX}/${STATEDIR}")
+    set(UCOMMON_CERTS ${DEFAULT_CONFIGDIR}/certs)
+    set(UCOMMON_KEYS ${DEFAULT_CONFIGDIR}/keys)
 else()
+    set(DEFAULT_CONFIGDIR ${SYSCONFDIR})
+    set(DEFAULT_STATEDIR ${STATEDIR})
     set(UCOMMON_CERTS ${SYSCONFDIR}/ssl/certs)
     set(UCOMMON_KEYS ${SYSCONFDIR}/ssl/private)
 endif()
-
 
 # project options
 
@@ -414,7 +427,7 @@ if (DOXYGEN_FOUND)
         #MESSAGE("DBG ${PROJECT_BINARY_DIR}/Doc/html/index.chm \n${OUT}")
         # create target used by install and package commands
         INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
-            DESTINATION "doc" RENAME "${OUT}")
+            DESTINATION ${INSTALL_DOCDIR} RENAME "${OUT}")
       ENDIF(EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
       ENDIF(NOT TARGET_DOC_SKIP_INSTALL)
 
