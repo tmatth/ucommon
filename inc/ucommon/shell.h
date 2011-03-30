@@ -105,6 +105,11 @@ public:
     typedef enum {FAIL = 0, ERR, WARN, NOTIFY, INFO, DEBUG0} loglevel_t;
 
     /**
+     * Path types to retrieve.
+     */
+    typedef enum {USER_CONFIG, SYSTEM_CONFIG, USER_DEFAULTS, PUBLIC_CERTS, PRIVATE_CERTS, USER_HOME, SYSTEM_DATA, SYSTEM_TEMP, USER_CACHE, SYSTEM_CACHE, LOCAL_DATA, LOCAL_CONFIG, SYSTEM_CFG, SYSTEM_ETC, SYSTEM_VAR} path_t;
+
+    /**
      * Log process handler.
      */
     typedef bool (*logproc_t)(loglevel_t level, const char *text);
@@ -588,6 +593,14 @@ public:
      * @return error code of child process.
      */
     static int systemf(const char *format, ...) __PRINTF(1,2);
+
+    /**
+     * Get a system path.  This is used to get directories for application
+     * specific data stores and default paths for config keys.
+     * @param id of path to return.
+     * @return path string or emptry string if not supported.
+     */
+    static String path(path_t id);
 
     /**
      * Bind application to text domain for internationalization.  This

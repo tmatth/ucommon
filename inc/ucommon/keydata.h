@@ -200,6 +200,12 @@ public:
     void load(const keyfile *source);
 
     /**
+     * Load a single set of keys.
+     * @param source of keys to copy.
+     */
+    void load(const keydata *source);
+
+    /**
      * Release and re-initialize keyfile.
      */
     void release(void);

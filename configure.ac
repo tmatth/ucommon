@@ -655,8 +655,10 @@ if test -z "$ssl_private" ; then
     ssl_private='${sysconfdir}/ssl/private' ; fi
 
 if test "$sysconfdir" = '${prefix}/etc' ; then
-    sysconfdir="/etc"
-fi
+    sysconfdir="/etc" ; fi
+
+if test "$localstatedir" = '${prefix}/var' ; then
+    localstatedir="/var" ; fi
 
 AC_CHECK_HEADER(libintl.h, [
     AC_DEFINE(HAVE_LIBINTL_H, [1], [international headers])
@@ -670,8 +672,12 @@ AC_CHECK_HEADER(libintl.h, [
 
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
 AC_SUBST_DIR(UCOMMON_LOCALE, localedir)
+AC_SUBST_DIR(UCOMMON_CFGPATH, sysconfdir)
+AC_SUBST_DIR(UCOMMON_VARPATH, localstatedir)
 AC_SUBST_DIR(ssl_publickeys, ssl_certs)
 AC_SUBST_DIR(ssl_privatekeys, ssl_private)
+AC_DEFINE_UNQUOTED(UCOMMON_CFGPATH, "$UCOMMON_CFGPATH", [config path])
+AC_DEFINE_UNQUOTED(UCOMMON_VARPATH, "$UCOMMON_VARPATH", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_LOCALE, "$UCOMMON_LOCALE", [locale path])
 AC_DEFINE_UNQUOTED(SSL_CERTS, "$ssl_publickeys", [certificate path])
 AC_DEFINE_UNQUOTED(SSL_PRIVATE, "$ssl_privatekeys", [private certificates])

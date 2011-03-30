@@ -1214,6 +1214,80 @@ tail:
         String::add(buf, size, ".exe");
 }
 
+String shell::path(path_t id)
+{
+    char buf[512];
+
+    string_t result = "";
+
+    if(!_domain)
+        return result;
+
+    switch(id) {
+    case PUBLIC_CERTS:
+        result = SSL_CERTS;
+        break;
+    case PRIVATE_CERTS:
+        result = SSL_PRIVATE;
+        break;
+    case USER_CONFIG:
+        result = str("~\\Software\Applications\\") + str(_domain);
+        break;
+    case SYSTEM_CONFIG:
+        result = str("-\\SOFTWARE\Services\\") + str(_domain);
+        break;
+    case USER_DEFAULTS:
+        if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
+            result = str(buf) + str("\\") + str(_domain) + str(".ini");
+        break;
+    case USER_HOME:
+        if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf)))
+            result = str(buf);
+        break;
+    case SYSTEM_DATA:
+    case LOCAL_DATA:
+        if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
+            result = str(buf) + str("\\") + str(_domain);
+            fsys::createDir(*result, 0700);
+        }
+        break;
+    case LOCAL_CONFIG:
+        if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf)))
+            result = str(buf) + "\\Local Settings\\" + str(_domain);
+            fsys::createDir(*result, 0700);
+        }
+        break;
+    case USER_CACHE:
+    case SYSTEM_CACHE:
+        if(GetEnvironmentVariable("TEMP", buf, sizeof(buf))) {
+            result = str(buf) + str("\\") + str(_domain);
+            fsys::createDir(*result, 0700);
+            break;
+        }
+        if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
+            result = str(buf) + str("\\") + str(_domain);
+            fsys::createDir(*result, 0700);
+        }
+        break;
+    case SYSTEM_TEMP:
+        fsys::createDir("c:\\temp", 0777);
+        result = "c:\\temp";
+        break;
+    case SYSTEM_ETC:
+        if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
+            result = str(buf) + str("\\etc");
+        break;
+    case SYSTEM_CFG:
+        result = UCOMMON_CFGPATH;
+        break;
+    case SYSTEM_VAR:
+        result = UCOMMON_VARPATH;
+        break;
+    }
+
+    return result;
+}
+
 const char *shell::getenv(const char *id, const char *value)
 {
     char buf[512];
@@ -1545,6 +1619,84 @@ exit:
 }
 
 #else
+
+String shell::path(path_t id)
+{
+    string_t result = "";
+    const char *home = NULL;
+
+    if(!_domain)
+        return result;
+
+    switch(id) {
+    case PUBLIC_CERTS:
+        result = SSL_CERTS;
+        break;
+    case PRIVATE_CERTS:
+        result = SSL_PRIVATE;
+        break;
+    case USER_DEFAULTS:
+        home = ::getenv("HOME");
+        if(!home)
+            break;
+        result = str(home) + str("/.") + str(_domain) + str("rc");
+        break;
+    case USER_HOME:
+        home = ::getenv("HOME");
+        if(!home)
+            break;
+        result = str(home);
+        break;
+    case SYSTEM_DATA:
+        result = str(UCOMMON_VARPATH "/lib/") + str(_domain);
+        break;
+    case LOCAL_DATA:
+        home = ::getenv("HOME");
+        if(!home)
+            break;
+        result = str(home) + str("/.local/share/") + str(_domain);
+        break;
+    case LOCAL_CONFIG:
+        home = ::getenv("HOME");
+        if(!home)
+            break;
+        result = str(home) + str("/.config/") + str(_domain);
+        fsys::createDir(*result, 0700);
+        break;
+    case USER_CACHE:
+        home = ::getenv("HOME");
+        if(!home)
+            break;
+        result = str(home) + str("/.cache") + str(_domain);
+        break;
+    case SYSTEM_CACHE:
+        result = str(UCOMMON_VARPATH "/cache/") + str(_domain);
+        break;
+    case USER_CONFIG:
+        home = ::getenv("HOME");
+        if(!home)
+            break;
+        result = str(home) + str("/.config") + str(_domain);
+        fsys::createDir(*result, 0700);
+        result = result + str("/") + str(_domain) + str("rc");
+        break;
+    case SYSTEM_CONFIG:
+        result = str(UCOMMON_CFGPATH) + str("/") + str(_domain) + str(".conf");
+        break;
+    case SYSTEM_TEMP:
+        result = "/tmp";
+        break;
+    case SYSTEM_ETC:
+    case SYSTEM_CFG:
+        result = UCOMMON_CFGPATH;
+        break;
+    case SYSTEM_VAR:
+        result = UCOMMON_VARPATH;
+        break;
+    }
+
+    return result;
+}
 
 const char *shell::getenv(const char *id, const char *value)
 {

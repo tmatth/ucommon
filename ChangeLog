@@ -1,3 +1,6 @@
+from ucommon 4.2.2 to 4.2.3
+- shell::path added.
+
 from ucommon 4.2.1 to 4.2.2
 - reorg how we do cmake path configurations.
 

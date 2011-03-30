@@ -88,7 +88,6 @@ void keydata::clear(const char *key)
 void keydata::set(const char *key, const char *value)
 {
     assert(key != NULL);
-    assert(value != NULL);
 
     caddr_t mem = (caddr_t)root->alloc(sizeof(keydata::keyvalue));
     keydata::iterator keys = begin();
@@ -244,6 +243,19 @@ void keyfile::load(HKEY keys, keydata *section, const char *path)
 
 #endif
 
+void keyfile::load(const keydata *copy)
+{
+    keydata *section = get(copy->get());
+    if(!section)
+        section = create(copy->get());
+
+    linked_pointer<keydata::keyvalue> vp = copy->begin();
+    while(is(vp)) {
+        section->set(vp->id, vp->value);
+        vp.next();
+    }
+}
+
 void keyfile::load(const keyfile *copy)
 {
     linked_pointer<keydata::keyvalue> vp = (keydata::keyvalue*)NULL;
@@ -278,6 +290,11 @@ void keyfile::load(const keyfile *copy)
 
 bool keyfile::save(const char *path)
 {
+    assert(path != NULL);
+
+    if(!path[0])
+        return false;
+
 #ifdef  _MSWINDOWS_
     if(eq(path, "~\\", 2))
         return save(HKEY_CURRENT_USER, NULL, path);
@@ -326,7 +343,10 @@ bool keyfile::save(const char *path)
 
 void keyfile::load(const char *path)
 {
-    assert(path != NULL && path[0] != 0);
+    assert(path != NULL);
+
+    if(!path[0])
+        return;
 
 #ifdef  _MSWINDOWS_
     if(eq(path, "~\\", 2)) {
