@@ -1654,20 +1654,32 @@ String shell::path(path_t id)
         home = ::getenv("HOME");
         if(!home)
             break;
+#ifdef  __APPLE__
+        result = str(home) + str("/Library/Application Support/") + str(_domain);
+#else
         result = str(home) + str("/.local/share/") + str(_domain);
+#endif
         break;
     case LOCAL_CONFIG:
         home = ::getenv("HOME");
         if(!home)
             break;
+#ifdef  __APPLE__
+        result = str(home) + str("/Library/Preferences/") + str(_domain);
+#else
         result = str(home) + str("/.config/") + str(_domain);
+#endif
         fsys::createDir(*result, 0700);
         break;
     case USER_CACHE:
         home = ::getenv("HOME");
         if(!home)
             break;
-        result = str(home) + str("/.cache") + str(_domain);
+#ifdef  __APPLE__
+        result = str(home) + str("/Library/Caches/") + str(_domain);
+#else
+        result = str(home) + str("/.cache/") + str(_domain);
+#endif
         break;
     case SYSTEM_CACHE:
         result = str(UCOMMON_VARPATH "/cache/") + str(_domain);
@@ -1676,9 +1688,18 @@ String shell::path(path_t id)
         home = ::getenv("HOME");
         if(!home)
             break;
-        result = str(home) + str("/.config") + str(_domain);
+#ifdef  __APPLE__
+        result = str(home) + str("/Library/Preferences/") + str(_domain);
+#else
+        result = str(home) + str("/.config/") + str(_domain);
+#endif
         fsys::createDir(*result, 0700);
+
+#ifdef  __APPLE__
+        result = result + str("/") + str(_domain) + str(".conf");
+#else
         result = result + str("/") + str(_domain) + str("rc");
+#endif
         break;
     case SYSTEM_CONFIG:
         result = str(UCOMMON_CFGPATH) + str("/") + str(_domain) + str(".conf");
