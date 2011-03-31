@@ -1294,7 +1294,7 @@ String shell::path(path_t id)
         result = UCOMMON_PREFIX;
         break;
     case SYSTEM_PLUGINS:
-        result = str(UCOMMON_PREFIX) + str("\\lib");
+        result = str(UCOMMON_PREFIX) + str("\\plugins\\") + str(_domain);
         break;
     }
 
@@ -1757,7 +1757,7 @@ String shell::path(path_t id)
         result = str(system_prefix) + str("/share");
         break;
     case SYSTEM_PLUGINS:
-        result = str(system_prefix) + str("/lib");
+        result = str(system_prefix) + str("/lib/") + str(_domain);
         break;
     }
 
