@@ -107,8 +107,8 @@ public:
     /**
      * Path types to retrieve.
      */
-    typedef enum {USER_CONFIG, SYSTEM_CONFIG, USER_DEFAULTS, PUBLIC_CERTS, 
-        PRIVATE_CERTS, USER_HOME, SYSTEM_DATA, SYSTEM_TEMP, USER_CACHE, SYSTEM_CACHE, 
+    typedef enum {USER_CONFIG, SYSTEM_CONFIG, USER_DEFAULTS, PUBLIC_CERTS,
+        PRIVATE_CERTS, USER_HOME, SYSTEM_DATA, SYSTEM_TEMP, USER_CACHE, SYSTEM_CACHE,
         LOCAL_DATA, LOCAL_CONFIG, SYSTEM_CFG, SYSTEM_ETC, SYSTEM_VAR, SYSTEM_PREFIX,
         SYSTEM_SHARE, SYSTEM_PLUGINS} path_t;
 
@@ -596,6 +596,12 @@ public:
      * @return error code of child process.
      */
     static int systemf(const char *format, ...) __PRINTF(1,2);
+
+    /**
+     * Set relative prefix.  Used for OS/X relocatable applications.
+     * @param argv0 path of executable.
+     */
+    static void relocate(const char *argv0);
 
     /**
      * Get a system path.  This is used to get directories for application

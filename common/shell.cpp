@@ -1629,6 +1629,8 @@ exit:
 
 #else
 
+static const char *system_prefix = UCOMMON_PREFIX;
+
 String shell::path(path_t id)
 {
     string_t result = "";
@@ -1724,13 +1726,13 @@ String shell::path(path_t id)
         result = UCOMMON_VARPATH;
         break;
     case SYSTEM_PREFIX:
-        result = UCOMMON_PREFIX;
+        result = system_prefix;
         break;
     case SYSTEM_SHARE:
-        result = str(UCOMMON_PREFIX) + str("/share");
+        result = str(system_prefix) + str("/share");
         break;
     case SYSTEM_PLUGINS:
-        result = str(UCOMMON_PREFIX) + str("/lib");
+        result = str(system_prefix) + str("/lib");
         break;
     }
 
@@ -2115,26 +2117,14 @@ const char *shell::text(const char *msg)
 
 void shell::bind(const char *name)
 {
-#ifdef  _MSWINDOWS_
-    const char *locale = "C:\\Program Files\\Common Files\\locale";
-
-    if(fsys::isdir("locale")) {
-        char prefix[256];
-        fsys::getPrefix(prefix, sizeof(prefix));
-        String::add(prefix, sizeof(prefix), "/locale");
-        locale = strdup(prefix);
-    }
-
-#else
-    const char *locale = UCOMMON_LOCALE;
-#endif
+    string_t locale = path(SYSTEM_SHARE) + str("/locale");
 
     if(!_domain) {
         setlocale(LC_ALL, "");
-        bindtextdomain("ucommon", locale);
+        bindtextdomain("ucommon", *locale);
     }
 
-    bindtextdomain(name, locale);
+    bindtextdomain(name, *locale);
     textdomain(name);
     _domain = name;
 }
