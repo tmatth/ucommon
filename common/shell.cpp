@@ -2484,4 +2484,13 @@ void shell::setsym(const char *name, const char *value)
     symlock.release();
 }
 
+String shell::path(path_t id, const char *dir)
+{
+    string_t result;
 
+    if(*dir == '\\' || *dir == '/')
+        result = dir;
+    else
+        result = path(id) + str(dir);
+    return result;
+}

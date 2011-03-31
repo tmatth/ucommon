@@ -612,6 +612,13 @@ public:
     static String path(path_t id);
 
     /**
+     * Get a merged path.  If the path requested is a full path, then
+     * the prefix is ignored.
+     * @param directory path to merge with prefix.
+     */
+    static String path(path_t id, const char *directory);
+
+    /**
      * Bind application to text domain for internationalization.  This
      * is useful if the argv0 argument can vary because of a symlinked
      * executable.  This is the name of the .po/.mo message files for
