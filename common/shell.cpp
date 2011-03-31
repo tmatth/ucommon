@@ -1229,10 +1229,10 @@ String shell::path(path_t id)
 
     switch(id) {
     case PUBLIC_CERTS:
-        result = str(SSL_CERTS);
+        result ^= SSL_CERTS;
         break;
     case PRIVATE_CERTS:
-        result = str(SSL_PRIVATE);
+        result ^= SSL_PRIVATE;
         break;
     case USER_CONFIG:
         result = str("~\\Software\\Applications\\") + _domain;
@@ -1275,23 +1275,23 @@ String shell::path(path_t id)
         break;
     case SYSTEM_TEMP:
         fsys::createDir("c:\\temp", 0777);
-        result = str("c:\\temp");
+        result ^= "c:\\temp";
         break;
     case SYSTEM_ETC:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
             result = str(buf) + "\\etc";
         break;
     case SYSTEM_CFG:
-        result = str(UCOMMON_CFGPATH);
+        result ^= UCOMMON_CFGPATH;
         break;
     case SYSTEM_VAR:
-        result = str(UCOMMON_VARPATH);
+        result ^= UCOMMON_VARPATH;
         break;
     case SYSTEM_PREFIX:
-        result = str(UCOMMON_PREFIX);
+        result ^= UCOMMON_PREFIX;
         break;
     case SYSTEM_SHARE:
-        result = str(UCOMMON_PREFIX);
+        result ^= UCOMMON_PREFIX;
         break;
     case SYSTEM_PLUGINS:
         result = str(UCOMMON_PREFIX) + "\\plugins\\" + _domain;
@@ -1741,17 +1741,17 @@ String shell::path(path_t id)
         result = str(UCOMMON_CFGPATH) + "/" + _domain + ".conf";
         break;
     case SYSTEM_TEMP:
-        result = str("/tmp");
+        result ^= "/tmp";
         break;
     case SYSTEM_ETC:
     case SYSTEM_CFG:
-        result = str(UCOMMON_CFGPATH);
+        result ^= UCOMMON_CFGPATH;
         break;
     case SYSTEM_VAR:
-        result = str(UCOMMON_VARPATH);
+        result ^= UCOMMON_VARPATH;
         break;
     case SYSTEM_PREFIX:
-        result = str(system_prefix);
+        result ^= system_prefix;
         break;
     case SYSTEM_SHARE:
         result = str(system_prefix) + "/share";
