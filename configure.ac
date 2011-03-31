@@ -670,12 +670,19 @@ AC_CHECK_HEADER(libintl.h, [
     fi
 ])
 
+if test "$prefix" = "NONE" ; then
+    prefixdir="$ac_default_prefix"
+else
+    prefixdir="$prefix" ; fi
+
 AC_SUBST_DIR(UCOMMON_INCLUDES, includes)
 AC_SUBST_DIR(UCOMMON_LOCALE, localedir)
 AC_SUBST_DIR(UCOMMON_CFGPATH, sysconfdir)
 AC_SUBST_DIR(UCOMMON_VARPATH, localstatedir)
+AC_SUBST_DIR(UCOMMON_PREFIX, prefixdir)
 AC_SUBST_DIR(ssl_publickeys, ssl_certs)
 AC_SUBST_DIR(ssl_privatekeys, ssl_private)
+AC_DEFINE_UNQUOTED(UCOMMON_PREFIX, "$UCOMMON_PREFIX", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_CFGPATH, "$UCOMMON_CFGPATH", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_VARPATH, "$UCOMMON_VARPATH", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_LOCALE, "$UCOMMON_LOCALE", [locale path])

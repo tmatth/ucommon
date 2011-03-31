@@ -1283,6 +1283,9 @@ String shell::path(path_t id)
     case SYSTEM_VAR:
         result = UCOMMON_VARPATH;
         break;
+    case SYSTEM_PREFIX:
+        result = UCOMMON_PREFIX;
+        break;
     }
 
     return result;
@@ -1713,6 +1716,9 @@ String shell::path(path_t id)
         break;
     case SYSTEM_VAR:
         result = UCOMMON_VARPATH;
+        break;
+    case SYSTEM_PREFIX:
+        result = UCOMMON_PREFIX;
         break;
     }
 
