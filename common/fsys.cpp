@@ -335,6 +335,20 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
     unsigned flags = 0;
+
+    char *cp = strrchr(path, '\\');
+    char *cp2 = strrchr(path, '/');
+    if(cp2 > cp)
+        cp = cp2;
+
+    if(!cp)
+        cp = path;
+    else
+        ++cp;
+
+    if(*cp == '.')
+        attr = FILE_ATTRIBUTE_HIDDEN;
+
     switch(access)
     {
     case ACCESS_RDONLY:
