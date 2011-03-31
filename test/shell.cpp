@@ -30,6 +30,8 @@ extern "C" int main()
     int test_argc;
     char *test_argv[6];
 
+    shell::bind("test");
+
     test_argc = 5;
     test_argv[0] = (char *)"test";
 
@@ -49,4 +51,15 @@ extern "C" int main()
     assert(*lines == 5);
     assert(args() == 2);            // two file arguments left
     assert(eq(args[0], "a"));       // first file argument is "a"
+
+    string_t prefix, subdir, basedir;
+
+    prefix = shell::path(shell::SYSTEM_PREFIX);
+    subdir = shell::path(shell::SYSTEM_PREFIX, "test");
+    basedir = shell::path(shell::SYSTEM_PREFIX, "/test");
+
+    prefix = prefix + str("/test");
+
+    assert(eq(basedir, "/test"));
+    assert(eq(subdir, prefix));
 }

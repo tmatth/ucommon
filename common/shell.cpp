@@ -1229,10 +1229,10 @@ String shell::path(path_t id)
 
     switch(id) {
     case PUBLIC_CERTS:
-        result = SSL_CERTS;
+        result = str(SSL_CERTS);
         break;
     case PRIVATE_CERTS:
-        result = SSL_PRIVATE;
+        result = str(SSL_PRIVATE);
         break;
     case USER_CONFIG:
         result = str("~\\Software\\Applications\\") + str(_domain);
@@ -1275,23 +1275,23 @@ String shell::path(path_t id)
         break;
     case SYSTEM_TEMP:
         fsys::createDir("c:\\temp", 0777);
-        result = "c:\\temp";
+        result = str("c:\\temp");
         break;
     case SYSTEM_ETC:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
             result = str(buf) + str("\\etc");
         break;
     case SYSTEM_CFG:
-        result = UCOMMON_CFGPATH;
+        result = str(UCOMMON_CFGPATH);
         break;
     case SYSTEM_VAR:
-        result = UCOMMON_VARPATH;
+        result = str(UCOMMON_VARPATH);
         break;
     case SYSTEM_PREFIX:
-        result = UCOMMON_PREFIX;
+        result = str(UCOMMON_PREFIX);
         break;
     case SYSTEM_SHARE:
-        result = UCOMMON_PREFIX;
+        result = str(UCOMMON_PREFIX);
         break;
     case SYSTEM_PLUGINS:
         result = str(UCOMMON_PREFIX) + str("\\plugins\\") + str(_domain);
@@ -1666,10 +1666,10 @@ String shell::path(path_t id)
 
     switch(id) {
     case PUBLIC_CERTS:
-        result = SSL_CERTS;
+        result = str(SSL_CERTS);
         break;
     case PRIVATE_CERTS:
-        result = SSL_PRIVATE;
+        result = str(SSL_PRIVATE);
         break;
     case USER_DEFAULTS:
         home = ::getenv("HOME");
@@ -1741,17 +1741,17 @@ String shell::path(path_t id)
         result = str(UCOMMON_CFGPATH) + str("/") + str(_domain) + str(".conf");
         break;
     case SYSTEM_TEMP:
-        result = "/tmp";
+        result = str("/tmp");
         break;
     case SYSTEM_ETC:
     case SYSTEM_CFG:
-        result = UCOMMON_CFGPATH;
+        result = str(UCOMMON_CFGPATH);
         break;
     case SYSTEM_VAR:
-        result = UCOMMON_VARPATH;
+        result = str(UCOMMON_VARPATH);
         break;
     case SYSTEM_PREFIX:
-        result = system_prefix;
+        result = str(system_prefix);
         break;
     case SYSTEM_SHARE:
         result = str(system_prefix) + str("/share");
@@ -2142,16 +2142,19 @@ const char *shell::text(const char *msg)
 
 void shell::bind(const char *name)
 {
-    string_t locale = path(SYSTEM_SHARE) + str("/locale");
+    string_t locale;
+    const char *prior = _domain;
 
-    if(!_domain) {
+    _domain = name;
+    locale = path(SYSTEM_SHARE) + str("/locale");
+
+    if(!prior) {
         setlocale(LC_ALL, "");
         bindtextdomain("ucommon", *locale);
     }
 
     bindtextdomain(name, *locale);
     textdomain(name);
-    _domain = name;
 }
 
 void shell::rebind(const char *name)
@@ -2516,6 +2519,6 @@ String shell::path(path_t id, const char *dir)
     if(*dir == '\\' || *dir == '/')
         result = dir;
     else
-        result = path(id) + str(dir);
+        result = path(id) + str("/") + str(dir);
     return result;
 }
