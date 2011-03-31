@@ -1214,6 +1214,10 @@ tail:
         String::add(buf, size, ".exe");
 }
 
+void shell::relocate(const char *argv0)
+{
+}
+
 String shell::path(path_t id)
 {
     char buf[512];
@@ -1630,6 +1634,27 @@ exit:
 #else
 
 static const char *system_prefix = UCOMMON_PREFIX;
+
+void shell::relocate(const char *argv0)
+{
+#ifdef  HAVE_REALPATH
+    char *path0 = realpath(argv0, NULL);
+    if(!path0)
+        return;
+
+    // strip out exe name...
+    char *cp = strrchr(path0, '/');
+    if(cp) {
+        *cp = 0;
+        // strip out bin subdir...
+        cp = strrchr(path0, '/');
+        if(cp && (eq(cp, "/bin") || eq(cp, "/sbin"))) {
+            *cp = 0;
+            system_prefix = path0;
+        }
+    }
+#endif
+}
 
 String shell::path(path_t id)
 {

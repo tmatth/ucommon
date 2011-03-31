@@ -334,7 +334,7 @@ if test "$threading" = "none" ; then
     fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit realpath ; do
     found="no"
     AC_CHECK_FUNC($func,[
         found=$func
@@ -361,6 +361,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
         ;;
     setpgrp)
         AC_DEFINE(HAVE_SETPGRP, [1], [process group control])
+        ;;
+    realpath)
+        AC_DEFINE(HAVE_REALPATH, [1], [realpath support])
         ;;
     ftok)
         AC_DEFINE(HAVE_FTOK, [1], [has ftok])
