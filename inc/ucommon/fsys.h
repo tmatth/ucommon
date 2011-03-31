@@ -173,6 +173,11 @@ public:
     fsys();
 
     /**
+     * Contruct fsys from raw file handle.
+     */
+    fsys(fd_t handle);
+
+    /**
      * Copy (dup) an existing fsys descriptor.
      * @param descriptor to copy from.
      */

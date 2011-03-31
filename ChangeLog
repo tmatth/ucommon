@@ -1,5 +1,7 @@
-from ucommon 4.2.2 to 4.2.3
+from ucommon 4.2.2 to 4.3.0
 - shell::path added.
+- fsys for descriptor.
+- keyfile extended.
 
 from ucommon 4.2.1 to 4.2.2
 - reorg how we do cmake path configurations.

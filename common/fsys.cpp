@@ -1213,3 +1213,10 @@ String str(charfile& so, strsize_t size)
     return s;
 }
 
+fsys::fsys(fd_t handle)
+{
+    fd = handle;
+    ptr = NULL;
+    error = 0;
+}
+
