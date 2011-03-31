@@ -1248,7 +1248,7 @@ String shell::path(path_t id)
         if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf)))
             result = str(buf);
         break;
-    case SYSTEM_DATA:
+    case PROGRAM_DATA:
     case USER_DATA:
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
@@ -1688,7 +1688,7 @@ String shell::path(path_t id)
             break;
         result = str(home);
         break;
-    case SYSTEM_DATA:
+    case PROGRAM_DATA:
         result = str(UCOMMON_VARPATH "/lib/") + _domain;
         break;
     case USER_DATA:
