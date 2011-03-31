@@ -1231,10 +1231,10 @@ String shell::path(path_t id)
         result = SSL_PRIVATE;
         break;
     case USER_CONFIG:
-        result = str("~\\Software\Applications\\") + str(_domain);
+        result = str("~\\Software\\Applications\\") + str(_domain);
         break;
     case SYSTEM_CONFIG:
-        result = str("-\\SOFTWARE\Services\\") + str(_domain);
+        result = str("-\\SOFTWARE\\Services\\") + str(_domain);
         break;
     case USER_DEFAULTS:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
@@ -1252,7 +1252,7 @@ String shell::path(path_t id)
         }
         break;
     case LOCAL_CONFIG:
-        if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf)))
+        if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf))) {
             result = str(buf) + "\\Local Settings\\" + str(_domain);
             fsys::createDir(*result, 0700);
         }
@@ -1285,6 +1285,12 @@ String shell::path(path_t id)
         break;
     case SYSTEM_PREFIX:
         result = UCOMMON_PREFIX;
+        break;
+    case SYSTEM_SHARE:
+        result = UCOMMON_PREFIX;
+        break;
+    case SYSTEM_PLUGINS:
+        result = str(UCOMMON_PREFIX) + str("\\lib");
         break;
     }
 
@@ -1719,6 +1725,12 @@ String shell::path(path_t id)
         break;
     case SYSTEM_PREFIX:
         result = UCOMMON_PREFIX;
+        break;
+    case SYSTEM_SHARE:
+        result = str(UCOMMON_PREFIX) + str("/share");
+        break;
+    case SYSTEM_PLUGINS:
+        result = str(UCOMMON_PREFIX) + str("/lib");
         break;
     }
 
