@@ -1234,7 +1234,7 @@ String shell::path(path_t id)
     case PRIVATE_CERTS:
         result ^= SSL_PRIVATE;
         break;
-    case USER_CONFIG:
+    case PROGRAM_CONFIG:
         result = str("~\\Software\\Applications\\") + _domain;
         break;
     case SYSTEM_CONFIG:
@@ -1249,13 +1249,13 @@ String shell::path(path_t id)
             result = str(buf);
         break;
     case SYSTEM_DATA:
-    case LOCAL_DATA:
+    case USER_DATA:
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
             fsys::createDir(*result, 0700);
         }
         break;
-    case LOCAL_CONFIG:
+    case USER_CONFIG:
         if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf))) {
             result = str(buf) + "\\Local Settings\\" + _domain;
             fsys::createDir(*result, 0700);
@@ -1277,6 +1277,10 @@ String shell::path(path_t id)
         fsys::createDir("c:\\temp", 0777);
         result ^= "c:\\temp";
         break;
+    case PROGRAM_TEMP:
+        snprintf(buf, sizeof(buf), "$$%ld$$.tmp", (long)GetCurrentProcessId());
+        result = str("c:\\temp") + str(buf);
+        break;
     case SYSTEM_ETC:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
             result = str(buf) + "\\etc";
@@ -1293,7 +1297,7 @@ String shell::path(path_t id)
     case SYSTEM_SHARE:
         result ^= UCOMMON_PREFIX;
         break;
-    case SYSTEM_PLUGINS:
+    case PROGRAM_PLUGINS:
         result = str(UCOMMON_PREFIX) + "\\plugins\\" + _domain;
         break;
     }
@@ -1660,6 +1664,7 @@ String shell::path(path_t id)
 {
     string_t result = "";
     const char *home = NULL;
+    char buf[65];
 
     if(!_domain)
         return result;
@@ -1686,7 +1691,7 @@ String shell::path(path_t id)
     case SYSTEM_DATA:
         result = str(UCOMMON_VARPATH "/lib/") + _domain;
         break;
-    case LOCAL_DATA:
+    case USER_DATA:
         home = ::getenv("HOME");
         if(!home)
             break;
@@ -1696,7 +1701,7 @@ String shell::path(path_t id)
         result = str(home) + "/.local/share/" + _domain;
 #endif
         break;
-    case LOCAL_CONFIG:
+    case USER_CONFIG:
         home = ::getenv("HOME");
         if(!home)
             break;
@@ -1720,7 +1725,7 @@ String shell::path(path_t id)
     case SYSTEM_CACHE:
         result = str(UCOMMON_VARPATH "/cache/") + _domain;
         break;
-    case USER_CONFIG:
+    case PROGRAM_CONFIG:
         home = ::getenv("HOME");
         if(!home)
             break;
@@ -1743,6 +1748,10 @@ String shell::path(path_t id)
     case SYSTEM_TEMP:
         result ^= "/tmp";
         break;
+    case PROGRAM_TEMP:
+        snprintf(buf, sizeof(buf), ".$$%ld$$.tmp", (long)getpid());
+        result = str("/tmp") + str(buf);
+        break;
     case SYSTEM_ETC:
     case SYSTEM_CFG:
         result ^= UCOMMON_CFGPATH;
@@ -1756,7 +1765,7 @@ String shell::path(path_t id)
     case SYSTEM_SHARE:
         result = str(system_prefix) + "/share";
         break;
-    case SYSTEM_PLUGINS:
+    case PROGRAM_PLUGINS:
         result = str(system_prefix) + "/lib/" + _domain;
         break;
     }
