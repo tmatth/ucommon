@@ -847,7 +847,12 @@ bool fsys::isfile(const char *path)
 
 bool fsys::islink(const char *path)
 {
-#ifdef  HAVE_LSTAT
+#if defined(_MSWINDOWS_)
+    DWORD attr = GetFileAttributes(path);
+    if (attr == 0xffffffff || !(attr & FILE_ATTRIBUTE_REPARSE_POINT))
+        return false;
+    return true;
+#elif defined(HAVE_LSTAT)
     struct stat ino;
 
     if(::lstat(path, &ino))
