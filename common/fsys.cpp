@@ -1220,3 +1220,10 @@ fsys::fsys(fd_t handle)
     error = 0;
 }
 
+void fsys::set(fd_t handle)
+{
+    close();
+    fd = handle;
+    ptr = NULL;
+    error = 0;
+}

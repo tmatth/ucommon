@@ -251,6 +251,12 @@ public:
         {return fd;};
 
     /**
+     * Set with external descriptor.  Closes existing file if open.
+     * @param descriptor of open file.
+     */
+    void set(fd_t descriptor);
+
+    /**
      * Set the position of a file descriptor.
      * @param offset from start of file or "end" to append.
      * @return error number or 0 on success.
