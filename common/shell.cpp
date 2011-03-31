@@ -1235,14 +1235,14 @@ String shell::path(path_t id)
         result = str(SSL_PRIVATE);
         break;
     case USER_CONFIG:
-        result = str("~\\Software\\Applications\\") + str(_domain);
+        result = str("~\\Software\\Applications\\") + _domain;
         break;
     case SYSTEM_CONFIG:
-        result = str("-\\SOFTWARE\\Services\\") + str(_domain);
+        result = str("-\\SOFTWARE\\Services\\") + _domain;
         break;
     case USER_DEFAULTS:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
-            result = str(buf) + str("\\") + str(_domain) + str(".ini");
+            result = str(buf) + "\\" + _domain + ".ini";
         break;
     case USER_HOME:
         if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf)))
@@ -1251,25 +1251,25 @@ String shell::path(path_t id)
     case SYSTEM_DATA:
     case LOCAL_DATA:
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
-            result = str(buf) + str("\\") + str(_domain);
+            result = str(buf) + "\\" + _domain;
             fsys::createDir(*result, 0700);
         }
         break;
     case LOCAL_CONFIG:
         if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf))) {
-            result = str(buf) + "\\Local Settings\\" + str(_domain);
+            result = str(buf) + "\\Local Settings\\" + _domain;
             fsys::createDir(*result, 0700);
         }
         break;
     case USER_CACHE:
     case SYSTEM_CACHE:
         if(GetEnvironmentVariable("TEMP", buf, sizeof(buf))) {
-            result = str(buf) + str("\\") + str(_domain);
+            result = str(buf) + "\\" + _domain;
             fsys::createDir(*result, 0700);
             break;
         }
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
-            result = str(buf) + str("\\") + str(_domain);
+            result = str(buf) + "\\" + _domain;
             fsys::createDir(*result, 0700);
         }
         break;
@@ -1279,7 +1279,7 @@ String shell::path(path_t id)
         break;
     case SYSTEM_ETC:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
-            result = str(buf) + str("\\etc");
+            result = str(buf) + "\\etc";
         break;
     case SYSTEM_CFG:
         result = str(UCOMMON_CFGPATH);
@@ -1294,7 +1294,7 @@ String shell::path(path_t id)
         result = str(UCOMMON_PREFIX);
         break;
     case SYSTEM_PLUGINS:
-        result = str(UCOMMON_PREFIX) + str("\\plugins\\") + str(_domain);
+        result = str(UCOMMON_PREFIX) + "\\plugins\\" + _domain;
         break;
     }
 
@@ -1675,7 +1675,7 @@ String shell::path(path_t id)
         home = ::getenv("HOME");
         if(!home)
             break;
-        result = str(home) + str("/.") + str(_domain) + str("rc");
+        result = str(home) + "/." + _domain + "rc";
         break;
     case USER_HOME:
         home = ::getenv("HOME");
@@ -1684,16 +1684,16 @@ String shell::path(path_t id)
         result = str(home);
         break;
     case SYSTEM_DATA:
-        result = str(UCOMMON_VARPATH "/lib/") + str(_domain);
+        result = str(UCOMMON_VARPATH "/lib/") + _domain;
         break;
     case LOCAL_DATA:
         home = ::getenv("HOME");
         if(!home)
             break;
 #ifdef  __APPLE__
-        result = str(home) + str("/Library/Application Support/") + str(_domain);
+        result = str(home) + "/Library/Application Support/" + _domain;
 #else
-        result = str(home) + str("/.local/share/") + str(_domain);
+        result = str(home) + "/.local/share/" + _domain;
 #endif
         break;
     case LOCAL_CONFIG:
@@ -1701,9 +1701,9 @@ String shell::path(path_t id)
         if(!home)
             break;
 #ifdef  __APPLE__
-        result = str(home) + str("/Library/Preferences/") + str(_domain);
+        result = str(home) + "/Library/Preferences/" + _domain;
 #else
-        result = str(home) + str("/.config/") + str(_domain);
+        result = str(home) + "/.config/" + _domain;
 #endif
         fsys::createDir(*result, 0700);
         break;
@@ -1712,33 +1712,33 @@ String shell::path(path_t id)
         if(!home)
             break;
 #ifdef  __APPLE__
-        result = str(home) + str("/Library/Caches/") + str(_domain);
+        result = str(home) + "/Library/Caches/" + _domain;
 #else
-        result = str(home) + str("/.cache/") + str(_domain);
+        result = str(home) + "/.cache/" + _domain;
 #endif
         break;
     case SYSTEM_CACHE:
-        result = str(UCOMMON_VARPATH "/cache/") + str(_domain);
+        result = str(UCOMMON_VARPATH "/cache/") + _domain;
         break;
     case USER_CONFIG:
         home = ::getenv("HOME");
         if(!home)
             break;
 #ifdef  __APPLE__
-        result = str(home) + str("/Library/Preferences/") + str(_domain);
+        result = str(home) + "/Library/Preferences/" + _domain;
 #else
-        result = str(home) + str("/.config/") + str(_domain);
+        result = str(home) + "/.config/" + _domain;
 #endif
         fsys::createDir(*result, 0700);
 
 #ifdef  __APPLE__
-        result = result + str("/") + str(_domain) + str(".conf");
+        result = result + "/" + _domain + ".conf";
 #else
-        result = result + str("/") + str(_domain) + str("rc");
+        result = result + "/" + _domain + "rc";
 #endif
         break;
     case SYSTEM_CONFIG:
-        result = str(UCOMMON_CFGPATH) + str("/") + str(_domain) + str(".conf");
+        result = str(UCOMMON_CFGPATH) + "/" + _domain + ".conf";
         break;
     case SYSTEM_TEMP:
         result = str("/tmp");
@@ -1754,10 +1754,10 @@ String shell::path(path_t id)
         result = str(system_prefix);
         break;
     case SYSTEM_SHARE:
-        result = str(system_prefix) + str("/share");
+        result = str(system_prefix) + "/share";
         break;
     case SYSTEM_PLUGINS:
-        result = str(system_prefix) + str("/lib/") + str(_domain);
+        result = str(system_prefix) + "/lib/" + _domain;
         break;
     }
 
@@ -2519,6 +2519,6 @@ String shell::path(path_t id, const char *dir)
     if(*dir == '\\' || *dir == '/')
         result = dir;
     else
-        result = path(id) + str("/") + str(dir);
+        result = path(id) + "/" + dir;
     return result;
 }

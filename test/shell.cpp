@@ -58,7 +58,7 @@ extern "C" int main()
     subdir = shell::path(shell::SYSTEM_PREFIX, "test");
     basedir = shell::path(shell::SYSTEM_PREFIX, "/test");
 
-    prefix = prefix + str("/test");
+    prefix = prefix + "/test";
 
     assert(eq(basedir, "/test"));
     assert(eq(subdir, prefix));

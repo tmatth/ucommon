@@ -835,7 +835,6 @@ public:
      */
     static int scanf(string& object, const char *format, ...) __SCANF(2, 3);
 
-
     /**
      * Print formatted items into a string object.
      * @param object to print into.
