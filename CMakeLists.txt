@@ -28,7 +28,7 @@ set(INSTALL_BINDIR bin)
 
 if(WIN32)
     set(INSTALL_MANDIR man)
-    set(INSTALL_DOCDIR doc)
+    set(INSTALL_DOCDIR doc/${PROJECT_NAME})
     set(INSTALL_LOCALE locale)
     set(INSTALL_LIBDIR bin)
     set(INSTALL_SBINDIR bin)
