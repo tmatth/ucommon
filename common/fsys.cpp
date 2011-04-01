@@ -800,6 +800,110 @@ fsys::~fsys()
     close();
 }
 
+int fsys::link(const char *path, char *buffer, size_t size)
+{
+#if defined(_MSWINDOWS_)
+    HANDLE h;
+    char reparse[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+    char *part;
+    DWORD rsize;
+
+    if(!fsys::islink(path))
+        return EINVAL;
+
+    h = CreateFile(target, GENERIC_READ, 0, 0, OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
+
+    if(h == INVALID_FILE_HANDLE)
+        return EINVAL;
+
+    memset(reparse, 0, sizeof(reparse));
+    TMN_REPARSE_DATA_BUFFER& rb = *(TMN_REPARSE_DATA_BUFFER*)reparse;
+
+    if(!DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, NULL, 0, (LPVOID *)&rb, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &rsize, 0) || !IsReparseTagValid(rb.ReparseTag)) {
+        CloseHandle(h);
+        return remapError();
+    }
+
+#ifdef  UNICODE
+    String::set(buffer, size, rb.PathBuffer);
+#else
+    WideCharToMultiByte(CP_THREAD_ACP, 0, rb.PathBuffer, rb.SubstitutionNameLength / sizeof(WCHAR) + 1, buffer, size, "", FALSE);
+#endif
+    CloseHandle(h);
+    return 0;
+#elif defined(HAVE_READLINK)
+    if(::readlink(path, buffer, size))
+        return remapError();
+    return 0;
+#else
+    return EINVAL;
+#endif
+}
+
+int fsys::link(const char *path, const char *target)
+{
+#if defined(_MSWINDOWS_)
+    TCHAR dest[512];
+    HANDLE h;
+    char reparse[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+    char *part;
+    DWORD size;
+
+    lstrcpy(dest, "\\??\\");
+    if(!GetFullPathName(path, sizeof(dest) - (4 * sizeof(TCHAR)), &dest[4], &part) || GetFileAttributes(&dest[4]) == -1)
+        return remapError();
+
+    memset(reparse, 0, sizeof(reparse));
+    TMN_REPARSE_DATA_BUFFER& rb = *(TMN_REPARSE_DATA_BUFFER*)reparse;
+    rb.Init(dest);
+    h = CreateFile(target, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
+    if(h == INVALID_HANDLE_VALUE)
+        return remapError();
+    if(!DeviceIoControl(h, FSCTL_SET_REPARSE_POINT, (LPVOID)&rb,
+        rb.BytesForIoControl(), NULL, 0, size, 0)) {
+        CloseHandle(h);
+        return remapError();
+    }
+    CloseHandle(h);
+    return 0;
+#elif defined(HAVE_SYMLINK)
+    if(::symlink(path, target))
+        return remapError();
+    return 0;
+#else
+    if(::link(path, target))
+        return remapError();
+    return 0;
+#endif
+}
+
+int fsys::unlink(const char *path)
+{
+#ifdef  _MSWINDOWS_
+    HANDLE h = INVALID_HANDLE_VALUE;
+    if(islink(path))
+        h = CreateFile(path, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
+            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
+    if(h != INVALID_HANDLE_VALUE) {
+        REPARSE_GUID_DATA_BUFFER rb;
+        memset(&rb, 0, sizeof(rb));
+        DWORD size;
+        rb.ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
+        if(!DeviceIoControl(h, FSCNTL_DELETE_REPARSE_POINT, &rb,
+            REPEASE_GUID_DATA_BUFFER_HEADER_SIZE, NULL, 0, &size, 0)) {
+            CloseHandle(h);
+            return remapError();
+        }
+        CloseHandle(h);
+        ::remove(path);
+        return 0;
+    }
+#endif
+    return fsys::remove(path);
+}
+
 int fsys::remove(const char *path)
 {
     if(::remove(path))

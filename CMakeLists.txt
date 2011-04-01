@@ -236,6 +236,8 @@ check_function_exists(execvp HAVE_EXECVP)
 check_function_exists(atexit HAVE_ATEXIT)
 check_function_exists(lstat HAVE_LSTAT)
 check_function_exists(realpath HAVE_REALPATH)
+check_function_exists(symlink HAVE_SYMLINK)
+check_function_exists(readlink HAVE_READLINK)
 
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(strings.h HAVE_STRINGS_H)

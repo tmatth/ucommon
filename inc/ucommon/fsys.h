@@ -466,6 +466,31 @@ public:
     static int removeDir(const char *path);
 
     /**
+     * Remove a symbolic link explicitly.  Other kinds of files are also
+     * deleted.  This should be used when uncertain about symlinks requiring
+     * special support.
+     * @param path to remove.
+     * @return error number or 0 on success.
+     */
+    static int unlink(const char *path);
+
+    /**
+     * Create a symbolic link.
+     * @param path to create.
+     * @param target of link.
+     * @return error number or 0 on success.
+     */
+    static int link(const char *path, const char *target);
+
+    /**
+     * Read a symbolic link to get it's target.
+     * @param path of link.
+     * @param buffer to save target into.
+     * @param size of buffer.
+     */
+    static int link(const char *path, char *buffer, size_t size);
+
+    /**
      * Close a file descriptor or directory directly.
      * @param descriptor to close.
      */

@@ -74,6 +74,9 @@
 #cmakedefine HAVE_EXECVP 1
 #cmakedefine HAVE_ATEXIT 1
 #cmakedefine HAVE_LSTAT 1
+#cmakedefine HAVE_REALPATH 1
+#cmakedefine HAVE_SYMLINK 1
+#cmakedefine HAVE_READLINK 1
 #cmakedefine POSIX_TIMERS 1
 
 #cmakedefine UCOMMON_LOCALE "${UCOMMON_LOCALE}"
