@@ -107,7 +107,7 @@ static void scrub(const char *path)
     int err = fsys::stat(path, &ino);
 
     if(err == ENOENT || fsys::islink(path)) {
-        report(path, fsys::remove(path));
+        report(path, fsys::unlink(path));
         return;
     }
 
