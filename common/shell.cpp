@@ -1228,16 +1228,16 @@ String shell::path(path_t id)
         return result;
 
     switch(id) {
-    case PUBLIC_CERTS:
+    case SYSTEM_CERTIFICATES:
         result ^= SSL_CERTS;
         break;
-    case PRIVATE_CERTS:
+    case SYSTEM_KEYS:
         result ^= SSL_PRIVATE;
         break;
     case PROGRAM_CONFIG:
         result = str("~\\Software\\Applications\\") + _domain;
         break;
-    case SYSTEM_CONFIG:
+    case SERVICE_CONFIG:
         result = str("-\\SOFTWARE\\Services\\") + _domain;
         break;
     case USER_DEFAULTS:
@@ -1248,7 +1248,7 @@ String shell::path(path_t id)
         if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf)))
             result = str(buf);
         break;
-    case PROGRAM_DATA:
+    case SERVICE_DATA:
     case USER_DATA:
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
@@ -1262,7 +1262,7 @@ String shell::path(path_t id)
         }
         break;
     case USER_CACHE:
-    case SYSTEM_CACHE:
+    case SERVICE_CACHE:
         if(GetEnvironmentVariable("TEMP", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
             fsys::createDir(*result, 0700);
@@ -1670,10 +1670,10 @@ String shell::path(path_t id)
         return result;
 
     switch(id) {
-    case PUBLIC_CERTS:
+    case SYSTEM_CERTIFICATES:
         result = str(SSL_CERTS);
         break;
-    case PRIVATE_CERTS:
+    case SYSTEM_KEYS:
         result = str(SSL_PRIVATE);
         break;
     case USER_DEFAULTS:
@@ -1688,7 +1688,7 @@ String shell::path(path_t id)
             break;
         result = str(home);
         break;
-    case PROGRAM_DATA:
+    case SERVICE_DATA:
         result = str(UCOMMON_VARPATH "/lib/") + _domain;
         break;
     case USER_DATA:
@@ -1722,7 +1722,7 @@ String shell::path(path_t id)
         result = str(home) + "/.cache/" + _domain;
 #endif
         break;
-    case SYSTEM_CACHE:
+    case SERVICE_CACHE:
         result = str(UCOMMON_VARPATH "/cache/") + _domain;
         break;
     case PROGRAM_CONFIG:
@@ -1742,7 +1742,7 @@ String shell::path(path_t id)
         result = result + "/" + _domain + "rc";
 #endif
         break;
-    case SYSTEM_CONFIG:
+    case SERVICE_CONFIG:
         result = str(UCOMMON_CFGPATH) + "/" + _domain + ".conf";
         break;
     case SYSTEM_TEMP:
