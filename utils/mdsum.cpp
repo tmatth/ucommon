@@ -95,11 +95,11 @@ static void result(const char *path, int code)
 static void digest(const char *path = NULL)
 {
     fsys_t fs;
-    struct stat ino;
+    fsys::fileinfo_t ino;
     unsigned char buffer[1024];
 
     if(path) {
-        int err = fsys::stat(path, &ino);
+        int err = fsys::fileinfo(path, &ino);
 
         if(err) {
             result(path, err);

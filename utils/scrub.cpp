@@ -94,7 +94,7 @@ static void report(const char *path, int code)
 static void scrub(const char *path)
 {
     fsys_t fs;
-    struct stat ino;
+    fsys::fileinfo_t ino;
     unsigned char block[1024];
     unsigned long count;
     fsys::offset_t pos = 0l;
@@ -104,7 +104,7 @@ static void scrub(const char *path)
     if(is(verbose))
         shell::printf("%s", path);
 
-    int err = fsys::stat(path, &ino);
+    int err = fsys::fileinfo(path, &ino);
 
     if(err == ENOENT || fsys::islink(path)) {
         report(path, fsys::unlink(path));

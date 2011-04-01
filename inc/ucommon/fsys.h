@@ -114,8 +114,6 @@ typedef void *dir_t;
  */
 typedef void *mem_t;
 
-typedef struct stat info_t;
-
 /**
  * A container for generic and o/s portable threadsafe file system functions.
  * These are based roughly on their posix equivilents.  For libpth, the
@@ -137,6 +135,8 @@ protected:
     int     error;
 
 public:
+    typedef struct stat fileinfo_t;
+
 #ifdef  _MSWINDOWS_
     static int remapError(void);
 #else
@@ -295,7 +295,7 @@ public:
      */
     int stat(struct stat *buffer);
 
-    inline int fileinfo(info_t *buffer)
+    inline int fileinfo(fileinfo_t *buffer)
         {return stat(buffer);};
 
     /**
@@ -335,7 +335,7 @@ public:
      */
     static int stat(const char *path, struct stat *buffer);
 
-    inline int fileinfo(const char *path, info_t *buffer)
+    static inline int fileinfo(const char *path, fileinfo_t *buffer)
         {return stat(path, buffer);};
 
     /**

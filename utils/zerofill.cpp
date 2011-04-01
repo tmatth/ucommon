@@ -80,13 +80,13 @@ static void zerofill(void)
 
 static void zerofill(const char *devname)
 {
-    struct stat ino;
+    fsys::fileinfo_t ino;
     fsys::offset_t pos = 0l;
     ssize_t size = 65536;
     unsigned long count = 0;
     fsys_t fs;
 
-    if(fsys::stat(devname, &ino))
+    if(fsys::fileinfo(devname, &ino))
         shell::errexit(5, "*** zerofill: %s: %s\n",
             devname, _TEXT("cannot access"));
 
