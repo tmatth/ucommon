@@ -391,6 +391,13 @@ public:
     static bool islink(const char *path);
 
     /**
+     * Test if path is a hidden file.
+     * @param path to test.
+     * @return true if exists and is hidden.
+     */
+    static bool ishidden(const char *path);
+
+    /**
      * Read data from file descriptor or directory.
      * @param descriptor to read from.
      * @param buffer to read into.

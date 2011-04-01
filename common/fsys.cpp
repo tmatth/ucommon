@@ -1175,6 +1175,29 @@ void *fsys::find(mem_t addr, const char *sym)
 
 #endif
 
+bool fsys::ishidden(const char *path)
+{
+#ifdef  _MSWINDOWS_
+    DWORD attr = GetFileAttributes(path);
+    if(attr == (DWORD)~0l)
+        return false;
+
+    return (attr & FILE_ATTRIBUTE_HIDDEN);
+}
+#else
+    const char *cp = strrchr(path, '/');
+    if(cp)
+        ++cp;
+    else
+        cp = path;
+
+    if(*cp == '.')
+        return true;
+
+    return false;
+#endif
+}
+
 charfile::charfile(const char *file, const char *mode)
 {
     fp = NULL;
