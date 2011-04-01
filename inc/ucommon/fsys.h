@@ -488,7 +488,7 @@ public:
      * @param buffer to save target into.
      * @param size of buffer.
      */
-    static int link(const char *path, char *buffer, size_t size);
+    static int linkinfo(const char *path, char *buffer, size_t size);
 
     /**
      * Close a file descriptor or directory directly.

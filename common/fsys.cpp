@@ -800,7 +800,7 @@ fsys::~fsys()
     close();
 }
 
-int fsys::link(const char *path, char *buffer, size_t size)
+int fsys::linkinfo(const char *path, char *buffer, size_t size)
 {
 #if defined(_MSWINDOWS_)
     HANDLE h;
