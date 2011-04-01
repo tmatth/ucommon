@@ -336,8 +336,8 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
     unsigned flags = 0;
 
-    char *cp = strrchr(path, '\\');
-    char *cp2 = strrchr(path, '/');
+    const char *cp = strrchr(path, '\\');
+    const char *cp2 = strrchr(path, '/');
     if(cp2 > cp)
         cp = cp2;
 
