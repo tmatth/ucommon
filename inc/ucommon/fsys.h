@@ -114,6 +114,8 @@ typedef void *dir_t;
  */
 typedef void *mem_t;
 
+typedef struct stat info_t;
+
 /**
  * A container for generic and o/s portable threadsafe file system functions.
  * These are based roughly on their posix equivilents.  For libpth, the
@@ -293,6 +295,9 @@ public:
      */
     int stat(struct stat *buffer);
 
+    inline int fileinfo(info_t *buffer)
+        {return stat(buffer);};
+
     /**
      * Truncate file to specified length.  The file pointer is positioned
      * to the new end of file.
@@ -329,6 +334,9 @@ public:
      * @return error number or 0 on success.
      */
     static int stat(const char *path, struct stat *buffer);
+
+    inline int fileinfo(const char *path, info_t *buffer)
+        {return stat(path, buffer);};
 
     /**
      * Remove a file.
