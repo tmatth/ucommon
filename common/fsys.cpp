@@ -48,6 +48,7 @@
 
 #ifdef _MSWINDOWS_
 #include <direct.h>
+#include <winioctl.h>
 #endif
 
 #ifdef  HAVE_SYS_INOTIFY_H
@@ -63,6 +64,21 @@ using namespace UCOMMON_NAMESPACE;
 const fsys::offset_t fsys::end = (size_t)(-1);
 
 #ifdef  _MSWINDOWS_
+
+// removed from some sdk versions...
+struct LOCAL_REPARSE_DATA_BUFFER
+{
+    DWORD  ReparseTag;
+    WORD   ReparseDataLength;
+    WORD   Reserved;
+    
+    // IO_REPARSE_TAG_MOUNT_POINT specifics follow
+    WORD   SubstituteNameOffset;
+    WORD   SubstituteNameLength;
+    WORD   PrintNameOffset;
+    WORD   PrintNameLength;
+    WCHAR  PathBuffer[1];    
+};
 
 int fsys::remapError(void)
 {
@@ -805,22 +821,21 @@ int fsys::linkinfo(const char *path, char *buffer, size_t size)
 #if defined(_MSWINDOWS_)
     HANDLE h;
     char reparse[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
-    char *part;
     DWORD rsize;
 
     if(!fsys::islink(path))
         return EINVAL;
 
-    h = CreateFile(target, GENERIC_READ, 0, 0, OPEN_EXISTING,
+    h = CreateFile(path, GENERIC_READ, 0, 0, OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
 
-    if(h == INVALID_FILE_HANDLE)
+    if(!h || h == INVALID_HANDLE_VALUE)
         return EINVAL;
 
     memset(reparse, 0, sizeof(reparse));
-    TMN_REPARSE_DATA_BUFFER& rb = *(TMN_REPARSE_DATA_BUFFER*)reparse;
+    LOCAL_REPARSE_DATA_BUFFER *rb = (LOCAL_REPARSE_DATA_BUFFER*)&reparse;
 
-    if(!DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, NULL, 0, (LPVOID *)&rb, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &rsize, 0) || !IsReparseTagValid(rb.ReparseTag)) {
+    if(!DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, NULL, 0, (LPVOID *)rb, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &rsize, 0)) {
         CloseHandle(h);
         return remapError();
     }
@@ -828,7 +843,7 @@ int fsys::linkinfo(const char *path, char *buffer, size_t size)
 #ifdef  UNICODE
     String::set(buffer, size, rb.PathBuffer);
 #else
-    WideCharToMultiByte(CP_THREAD_ACP, 0, rb.PathBuffer, rb.SubstitutionNameLength / sizeof(WCHAR) + 1, buffer, size, "", FALSE);
+    WideCharToMultiByte(CP_THREAD_ACP, 0, rb->PathBuffer, rb->SubstituteNameLength / sizeof(WCHAR) + 1, buffer, size, "", FALSE);
 #endif
     CloseHandle(h);
     return 0;
@@ -849,20 +864,28 @@ int fsys::link(const char *path, const char *target)
     char reparse[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
     char *part;
     DWORD size;
+    WORD len;
 
     lstrcpy(dest, "\\??\\");
     if(!GetFullPathName(path, sizeof(dest) - (4 * sizeof(TCHAR)), &dest[4], &part) || GetFileAttributes(&dest[4]) == -1)
         return remapError();
 
     memset(reparse, 0, sizeof(reparse));
-    TMN_REPARSE_DATA_BUFFER& rb = *(TMN_REPARSE_DATA_BUFFER*)reparse;
-    rb.Init(dest);
+    LOCAL_REPARSE_DATA_BUFFER *rb = (LOCAL_REPARSE_DATA_BUFFER*)&reparse;
+    
+    if(!MultiByteToWideChar(CP_THREAD_ACP, MB_PRECOMPOSED, dest, lstrlenA(dest) + 1, rb->PathBuffer, lstrlenA(dest) + 1))
+        return remapError();
+    
+    len = lstrlenW(rb->PathBuffer) * 2;
+    rb->ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
+    rb->ReparseDataLength = len + 12;
+    rb->SubstituteNameLength = len;
+    rb->PrintNameOffset = len + 2;
     h = CreateFile(target, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
-    if(h == INVALID_HANDLE_VALUE)
+    if(!h || h == INVALID_HANDLE_VALUE)
         return remapError();
-    if(!DeviceIoControl(h, FSCTL_SET_REPARSE_POINT, (LPVOID)&rb,
-        rb.BytesForIoControl(), NULL, 0, size, 0)) {
+    if(!DeviceIoControl(h, FSCTL_SET_REPARSE_POINT, (LPVOID)rb, rb->ReparseDataLength + FIELD_OFFSET(LOCAL_REPARSE_DATA_BUFFER, SubstituteNameOffset), NULL, 0, &size, 0)) {
         CloseHandle(h);
         return remapError();
     }
@@ -886,13 +909,13 @@ int fsys::unlink(const char *path)
     if(islink(path))
         h = CreateFile(path, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
             FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
-    if(h != INVALID_HANDLE_VALUE) {
+    if(!h || h != INVALID_HANDLE_VALUE) {
         REPARSE_GUID_DATA_BUFFER rb;
         memset(&rb, 0, sizeof(rb));
         DWORD size;
         rb.ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
-        if(!DeviceIoControl(h, FSCNTL_DELETE_REPARSE_POINT, &rb,
-            REPEASE_GUID_DATA_BUFFER_HEADER_SIZE, NULL, 0, &size, 0)) {
+        if(!DeviceIoControl(h, FSCTL_DELETE_REPARSE_POINT, &rb,
+            REPARSE_GUID_DATA_BUFFER_HEADER_SIZE, NULL, 0, &size, 0)) {
             CloseHandle(h);
             return remapError();
         }
@@ -1182,8 +1205,7 @@ bool fsys::ishidden(const char *path)
     if(attr == (DWORD)~0l)
         return false;
 
-    return (attr & FILE_ATTRIBUTE_HIDDEN);
-}
+    return ((attr & FILE_ATTRIBUTE_HIDDEN) != 0);
 #else
     const char *cp = strrchr(path, '/');
     if(cp)
