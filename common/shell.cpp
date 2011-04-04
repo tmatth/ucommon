@@ -1286,10 +1286,10 @@ String shell::path(path_t id)
             result = str(buf) + "\\etc";
         break;
     case SYSTEM_CFG:
-        result ^= UCOMMON_CFGPATH;
+        result = path(SYSTEM_PREFIX, UCOMMON_CFGPATH);
         break;
     case SYSTEM_VAR:
-        result ^= UCOMMON_VARPATH;
+        result = path(SYSTEM_PREFIX, UCOMMON_VARPATH);
         break;
     case SYSTEM_PREFIX:
         result ^= UCOMMON_PREFIX;
@@ -1671,10 +1671,10 @@ String shell::path(path_t id)
 
     switch(id) {
     case SYSTEM_CERTIFICATES:
-        result = str(SSL_CERTS);
+        result = path(SYSTEM_PREFIX, SSL_CERTS);
         break;
     case SYSTEM_KEYS:
-        result = str(SSL_PRIVATE);
+        result = path(SYSTEM_PREFIX, SSL_PRIVATE);
         break;
     case USER_DEFAULTS:
         home = ::getenv("HOME");
@@ -1689,7 +1689,7 @@ String shell::path(path_t id)
         result = str(home);
         break;
     case SERVICE_DATA:
-        result = str(UCOMMON_VARPATH "/lib/") + _domain;
+        result = path(SYSTEM_PREFIX, UCOMMON_VARPATH "/lib/") + _domain;
         break;
     case USER_DATA:
         home = ::getenv("HOME");
@@ -1723,7 +1723,7 @@ String shell::path(path_t id)
 #endif
         break;
     case SERVICE_CACHE:
-        result = str(UCOMMON_VARPATH "/cache/") + _domain;
+        result = path(SYSTEM_PREFIX, UCOMMON_VARPATH "/cache/") + _domain;
         break;
     case PROGRAM_CONFIG:
         home = ::getenv("HOME");
@@ -1743,7 +1743,7 @@ String shell::path(path_t id)
 #endif
         break;
     case SERVICE_CONFIG:
-        result = str(UCOMMON_CFGPATH) + "/" + _domain + ".conf";
+        result = path(SYSTEM_PREFIX, UCOMMON_CFGPATH "/") + _domain + ".conf";
         break;
     case SYSTEM_TEMP:
         result ^= "/tmp";
@@ -1754,10 +1754,10 @@ String shell::path(path_t id)
         break;
     case SYSTEM_ETC:
     case SYSTEM_CFG:
-        result ^= UCOMMON_CFGPATH;
+        result = path(SYSTEM_PREFIX, UCOMMON_CFGPATH);
         break;
     case SYSTEM_VAR:
-        result ^= UCOMMON_VARPATH;
+        result = path(SYSTEM_PREFIX, UCOMMON_VARPATH);
         break;
     case SYSTEM_PREFIX:
         result ^= system_prefix;
@@ -2155,7 +2155,7 @@ void shell::bind(const char *name)
     const char *prior = _domain;
 
     _domain = name;
-    locale = path(SYSTEM_SHARE) + str("/locale");
+    locale = path(SYSTEM_SHARE) + "/locale";
 
     if(!prior) {
         setlocale(LC_ALL, "");
