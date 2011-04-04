@@ -872,10 +872,10 @@ int fsys::link(const char *path, const char *target)
 
     memset(reparse, 0, sizeof(reparse));
     LOCAL_REPARSE_DATA_BUFFER *rb = (LOCAL_REPARSE_DATA_BUFFER*)&reparse;
-    
+
     if(!MultiByteToWideChar(CP_THREAD_ACP, MB_PRECOMPOSED, dest, lstrlenA(dest) + 1, rb->PathBuffer, lstrlenA(dest) + 1))
         return remapError();
-    
+
     len = lstrlenW(rb->PathBuffer) * 2;
     rb->ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
     rb->ReparseDataLength = len + 12;
@@ -1375,4 +1375,14 @@ void fsys::set(fd_t handle)
     fd = handle;
     ptr = NULL;
     error = 0;
+}
+
+fd_t fsys::release(void)
+{
+    fd_t save = fd;
+
+    fd = INVALID_HANDLE_VALUE;
+    ptr = NULL;
+    error = 0;
+    return save;
 }

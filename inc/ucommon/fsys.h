@@ -259,6 +259,12 @@ public:
     void set(fd_t descriptor);
 
     /**
+     * Release descriptor, do not close.
+     * @return handle being released.
+     */
+    fd_t release(void);
+
+    /**
      * Set the position of a file descriptor.
      * @param offset from start of file or "end" to append.
      * @return error number or 0 on success.
