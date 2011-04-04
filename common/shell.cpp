@@ -1340,7 +1340,7 @@ String shell::path(path_t id)
         break;
     case PROGRAM_TEMP:
         snprintf(buf, sizeof(buf), "$$%ld$$.tmp", (long)GetCurrentProcessId());
-        result = str("c:\\temp") + str(buf);
+        result = str("c:\\temp\\") + str(buf);
         break;
     case SYSTEM_ETC:
         if(GetEnvironmentVariable("SystemRoot", buf, sizeof(buf)))
@@ -1821,7 +1821,7 @@ String shell::path(path_t id)
         break;
     case PROGRAM_TEMP:
         snprintf(buf, sizeof(buf), ".$$%ld$$.tmp", (long)getpid());
-        result = str("/tmp") + str(buf);
+        result = str("/tmp/") + str(buf);
         break;
     case SYSTEM_ETC:
     case SYSTEM_CFG:
