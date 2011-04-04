@@ -155,6 +155,7 @@ private:
     keydata *defaults;
     int errcode;
 
+protected:
     keydata *create(const char *section);
 
 #ifdef  _MSWINDOWS_
