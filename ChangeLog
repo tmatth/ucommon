@@ -1,5 +1,6 @@
 from ucommon 4.3.0 to 4.3.1
 - fix for access to keyfile::create().
+- new -xxx and +xxx numeric parser option.
 
 from ucommon 4.2.2 to 4.3.0
 - shell::path added.

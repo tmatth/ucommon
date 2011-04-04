@@ -86,6 +86,8 @@ static char **_orig = NULL;
 static OrderedIndex _index;
 static const char *_domain = NULL;
 static shell::exitproc_t _exitproc = NULL;
+static shell::numeric_t numeric_mode = shell::NO_NUMERIC;
+static long numeric_value = 0l;
 
 shell::pipeio::pipeio()
 {
@@ -636,6 +638,7 @@ static const char *msgs[] = {
     _TEXT("unknown command option"),
     _TEXT("option already used"),
     _TEXT("invalid argument used"),
+    _TEXT("numeric value already set"),
     NULL};
 
 const char *shell::errmsg(errmsg_t id)
@@ -646,6 +649,17 @@ const char *shell::errmsg(errmsg_t id)
 void shell::errmsg(errmsg_t id, const char *text)
 {
     msgs[id] = shell::text(text);
+}
+
+void shell::setNumeric(numeric_t mode)
+{
+    numeric_mode = mode;
+    numeric_value = 0l;
+}
+
+long shell::getNumeric(void)
+{
+    return numeric_value;
 }
 
 unsigned shell::count(char **argv)
@@ -827,13 +841,51 @@ char **shell::getargv(char **argv)
     const char *value;
     const char *err;
     unsigned argp = 0;
+    bool skip;
 
     while(argv[argp]) {
+        skip = false;
         if(eq(argv[argp], "--")) {
             ++argp;
             break;
         }
         arg = opt = argv[argp];
+
+        switch(numeric_mode) {
+        case shell::NUMERIC_DASH:
+        case shell::NUMERIC_ALL:
+            if(opt[0] == '-' && opt[1] >= '0' && opt[1] <= '9') {
+                if(numeric_value)
+                    shell::errexit(1, "*** %s: %s: %s\n",
+                        _argv0, opt, errmsg(shell::NUMERIC_SET));
+                numeric_value = atol(opt);
+                skip = true;
+            }
+            break;
+        default:
+            break;
+        }
+
+        switch(numeric_mode) {
+        case shell::NUMERIC_PLUS:
+        case shell::NUMERIC_ALL:
+            if(opt[0] == '+' && opt[1] >= '0' && opt[1] <= '9') {
+                if(numeric_value)
+                    shell::errexit(1, "*** %s: %s: %s\n",
+                        _argv0, opt, errmsg(shell::NUMERIC_SET));
+                numeric_value = atol(++opt);
+                skip = true;
+            }
+            break;
+        default:
+            break;
+        }
+
+        if(skip) {
+            ++argp;
+            continue;
+        }
+
         if(*arg != '-')
             break;
 

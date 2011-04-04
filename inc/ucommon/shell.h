@@ -92,7 +92,7 @@ public:
     /**
      * Error table index.
      */
-    typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, BAD_VALUE} errmsg_t;
+    typedef enum {NOARGS = 0, NOARGUMENT, INVARGUMENT, BADOPTION, OPTION_USED, BAD_VALUE, NUMERIC_SET} errmsg_t;
 
     /**
      * Type of error logging we are using.
@@ -103,6 +103,11 @@ public:
      * Level of error logging.
      */
     typedef enum {FAIL = 0, ERR, WARN, NOTIFY, INFO, DEBUG0} loglevel_t;
+
+    /**
+     * Numeric mode of parser.
+     */
+    typedef enum {NO_NUMERIC, NUMERIC_PLUS, NUMERIC_DASH, NUMERIC_ALL} numeric_t;
 
     /**
      * Path types to retrieve.
@@ -576,6 +581,10 @@ public:
      * @param pagesize for local heap.
      */
     shell(size_t pagesize = 0);
+
+    static void setNumeric(numeric_t);
+
+    static long getNumeric(void);
 
     /**
      * Display shell options.
