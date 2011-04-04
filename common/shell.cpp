@@ -1270,6 +1270,15 @@ void shell::relocate(const char *argv0)
 {
 }
 
+String shell::userid(void)
+{
+    char buf[128];
+
+    String::set(buf, sizeof(buf), "nobody");
+    GetUserName(buf, sizeof(buf));
+    return str(buf);
+}
+
 String shell::path(path_t id)
 {
     char buf[512];
@@ -1710,6 +1719,16 @@ void shell::relocate(const char *argv0)
         }
     }
 #endif
+}
+
+String shell::userid(void)
+{
+    const char *id = ::getenv("LOGNAME");
+
+    if(!id)
+        id = "nobody";
+
+    return str(id);
 }
 
 String shell::path(path_t id)

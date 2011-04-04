@@ -623,6 +623,12 @@ public:
     static String path(path_t id);
 
     /**
+     * Get the system login id.
+     * @return login id.
+     */
+    static String userid(void);
+
+    /**
      * Get a merged path.  If the path requested is a full path, then
      * the prefix is ignored.
      * @param directory path to merge with prefix.
