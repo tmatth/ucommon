@@ -856,6 +856,19 @@ int fsys::linkinfo(const char *path, char *buffer, size_t size)
 #endif
 }
 
+int fsys::hardlink(const char *path, const char *target)
+{
+#ifdef _MSWINDOWS_
+    if(!CreateHardLink(target, path, NULL))
+        return remapError();
+    return 0;
+#else
+    if(::link(path, target))
+        return remapError();
+    return 0;
+#endif
+}
+
 int fsys::link(const char *path, const char *target)
 {
 #if defined(_MSWINDOWS_)
@@ -884,10 +897,10 @@ int fsys::link(const char *path, const char *target)
     h = CreateFile(target, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
     if(!h || h == INVALID_HANDLE_VALUE)
-        return remapError();
+        return hardlink(path, target);
     if(!DeviceIoControl(h, FSCTL_SET_REPARSE_POINT, (LPVOID)rb, rb->ReparseDataLength + FIELD_OFFSET(LOCAL_REPARSE_DATA_BUFFER, SubstituteNameOffset), NULL, 0, &size, 0)) {
         CloseHandle(h);
-        return remapError();
+        return hardlink(path, target);
     }
     CloseHandle(h);
     return 0;

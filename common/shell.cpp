@@ -1273,9 +1273,10 @@ void shell::relocate(const char *argv0)
 String shell::userid(void)
 {
     char buf[128];
+    DWORD size = sizeof(buf);
 
     String::set(buf, sizeof(buf), "nobody");
-    GetUserName(buf, sizeof(buf));
+    GetUserName(buf, &size);
     return str(buf);
 }
 

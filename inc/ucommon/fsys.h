@@ -504,6 +504,14 @@ public:
     static int link(const char *path, const char *target);
 
     /**
+     * Create a hard link.
+     * @param path to create link to.
+     * @param target of link.
+     * @return error number or 0 on success.
+     */
+    static int hardlink(const char *path, const char *target);
+
+    /**
      * Read a symbolic link to get it's target.
      * @param path of link.
      * @param buffer to save target into.
