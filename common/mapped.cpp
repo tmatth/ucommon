@@ -432,6 +432,18 @@ void *MappedMemory::sbrk(size_t len)
     return mp;
 }
 
+void MappedMemory::copy(size_t offset, void *buffer, size_t bufsize) const
+{
+    if(offset + bufsize >= size)
+        fault();
+
+    const void *member = (const void *)(map + offset);
+
+    do {
+        memcpy(buffer, member, bufsize);
+    } while(memcmp(buffer, member, bufsize));
+}
+
 void *MappedMemory::offset(size_t offset) const
 {
     if(offset >= size)

@@ -149,6 +149,15 @@ public:
     void *offset(size_t offset) const;
 
     /**
+     * Copy memory from specific offset within the mapped memory segment.
+     * This function assures the copy is not in the middle of being modified.
+     * @param offset from start of segment.
+     * @param buffer to copy into.
+     * @param size of object to copy.
+     */
+    void copy(size_t offset, void *buffer, size_t size) const;
+
+    /**
      * Get size of mapped segment.
      * @return size of mapped segment.
      */
@@ -477,6 +486,12 @@ public:
      */
     inline volatile const T &operator[](unsigned member)
         {return *(operator()(member));};
+
+    inline volatile const T *get(unsigned member)
+        {return static_cast<const T*>(offset(member * sizeof(T)));};
+
+    inline void copy(unsigned member, T *buffer)
+        {MappedMemory::copy(member * sizeof(T), buffer, sizeof(T));};
 
     /**
      * Get count of typed member objects held in this map.
