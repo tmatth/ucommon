@@ -55,6 +55,9 @@
 #include <dirent.h>
 #endif
 
+#define PGP_B64_WIDTH   64
+#define MIME_B64_WIDTH  76
+
 NAMESPACE_UCOMMON
 
 /**
@@ -1341,9 +1344,40 @@ public:
     inline static long tol(const char *text, char **pointer = NULL)
         {return strtol(text, pointer, 0);};
 
+    /**
+     * Standard radix 64 encoding.
+     * @param string of encoded text save into.
+     * @param binary data to encode.
+     * @param size of binary data to encode.
+     * @param width of string buffer for data if partial supported.
+     * @return number of bytes encoded.
+     */
     static size_t b64encode(char *string, const uint8_t *binary, size_t size, size_t width = 0);
 
+    /**
+     * Standard radix 64 decoding.
+     * @param binary data to save.
+     * @param string of encoded text.
+     * @param size of destination buffer.
+     * @return number of bytes actually decoded.
+     */
     static size_t b64decode(uint8_t *binary, const char *string, size_t size);
+
+    /**
+     * 24 bit crc as used in openpgp.
+     * @param binary data to sum.
+     * @param size of binary data to sum.
+     * @return 24 bit crc of data.
+     */
+    static unsigned long crc24(uint8_t *binary, size_t size);
+
+    /**
+     * ccitt 16 bit crc for binary data.
+     * @param binary data to sum.
+     * @param size of binary data to sum.
+     * @return 16 bit crc.
+     */
+    static unsigned short crc16(uint8_t *binary, size_t size);
 
     /**
      * Dump hex data to a string buffer.

@@ -2032,3 +2032,39 @@ size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
     return count;
 }
 
+#define CRC24_INIT 0xb704ceL
+#define CRC24_POLY 0x1864cfbL
+
+unsigned long string::crc24(uint8_t *binary, size_t size)
+{
+    unsigned long crc = CRC24_INIT;
+    unsigned i;
+
+    while (size--) {
+        crc ^= (*binary++) << 16;
+        for (i = 0; i < 8; i++) {
+            crc <<= 1;
+            if (crc & 0x1000000)
+                crc ^= CRC24_POLY;
+        }
+    }
+    return crc & 0xffffffL;
+}
+
+unsigned short string::crc16(uint8_t *binary, size_t size)
+{
+    unsigned short crc = 0xffff;
+    unsigned i;
+
+    while (size--) {
+        crc ^= (*binary++);
+        for (i = 0; i < 8; i++) {
+            if(crc & 1)
+                crc = (crc >> 1) ^ 0xa001;
+            else
+                crc = (crc >> 1);
+        }
+    }
+    return crc & 0xffff;
+}
+

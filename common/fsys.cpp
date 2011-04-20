@@ -962,6 +962,8 @@ int fsys::copy(const char *oldpath, const char *newpath, size_t size)
         goto end;
     }
 
+    remove(newpath);
+
     src.open(oldpath, fsys::ACCESS_STREAM);
     if(!is(src))
         goto end;
@@ -993,6 +995,9 @@ end:
 
     if(buffer)
         delete[] buffer;
+
+    if(result != 0)
+        remove(newpath);
 
     return result;
 }
