@@ -631,9 +631,17 @@ public:
     /**
      * Get a merged path.  If the path requested is a full path, then
      * the prefix is ignored.
+     * @param id of prefix.
      * @param directory path to merge with prefix.
      */
     static String path(path_t id, const char *directory);
+
+    /**
+     * Join a prefix with a path.
+     * @param prefix to merge with.
+     * @param directory or file path to merge.
+     */
+    static String path(String& prefix, const char *directory);
 
     /**
      * Bind application to text domain for internationalization.  This

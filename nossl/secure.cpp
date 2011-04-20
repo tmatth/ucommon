@@ -57,6 +57,11 @@ String secure::path(path_t id)
     return str("");
 }
 
+int secure::oscerts(const char *path)
+{
+    return ENOSYS;
+}
+
 secure::server_t secure::server(const char *ca)
 {
     return NULL;

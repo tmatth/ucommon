@@ -135,6 +135,74 @@ String secure::path(path_t id)
     }
 }
 
+#if defined(_MSWINDOWS_)
+static void cexport(HCERTSTORE ca, FILE *fp)
+{
+    PCCERT_CONTEXT cert = NULL;
+    DWORD err;
+    const uint8_t *cp;
+    char buf[80];
+
+    while ((cert = CertEnumCertificatesInStore(ca, cert)) != NULL) {
+        fprintf(fp, "-----BEGIN CERTIFICATE-----\n");
+        size_t total = cert->cbCertEncoded;
+        size_t count;
+        cp = (const uint8_t *)cert->pbCertEncoded;
+        while(total) {
+            count = String::b64encode(buf, cp, total, 64);
+            if(count)
+                fprintf(fp, "%s\n", buf);
+            total -= count;
+        }
+        fprintf(fp, "-----END CERTIFICATE-----\n");
+    }
+}
+
+int secure::oscerts(const char *pathname)
+{
+    bool caset;
+    string_t target = shell::path(shell::USER_CONFIG) + pathname;
+    FILE *fp = fopen(*target, "wt");
+
+    if(!fp)
+        return ENOSYS;
+
+    HCERTSTORE ca = CertOpenSystemStoreA((HCRYPTPROV_LEGACY)NULL, "ROOT");
+    if(ca) {
+        caset = true;
+        cexport(ca, fp);
+        CertCloseStore(ca, 0);
+    }
+
+    ca = CertOpenSystemStoreA((HCRYPTPROV_LEGACY)NULL, "CA");
+    if(ca) {
+        caset = true;
+        cexport(ca, fp);
+        CertCloseStore(ca, 0);
+    }
+
+    fclose(fp);
+
+    if(!caset) {
+        remove(*target);
+        return ENOSYS;
+    }
+    return 0;
+}
+
+#else
+int secure::oscerts(const char *pathname)
+{
+    string_t source = path(SYSTEM_CERTIFICATES) + "/ca-certificates.crt";
+    string_t target = shell::path(shell::USER_CONFIG) + pathname;
+
+    if(!*source || !*target)
+        return ENOSYS;
+
+    return fsys::copy(*source, *target);
+}
+#endif
+
 secure::client_t secure::client(const char *ca)
 {
     char certfile[256];

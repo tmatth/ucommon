@@ -123,6 +123,13 @@ public:
     static String path(path_t id);
 
     /**
+     * Copy system certificates to a local path.
+     * @param path to copy to.
+     * @return 0 or error number on failure.
+     */
+    static int oscerts(const char *path);
+
+    /**
      * Verify a certificate chain through your certificate authority.
      * This uses the ca loaded as an optional argument for client and
      * server.  Optionally the hostname of the connection can also be

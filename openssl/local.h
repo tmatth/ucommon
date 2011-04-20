@@ -23,6 +23,10 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
+#ifdef  _MSWINDOWS_
+#include <Wincrypt.h>
+#endif
+
 #define NAMESPACE_LOCAL namespace __secure__ {
 #define LOCAL_NAMESPACE __secure__
 
