@@ -1369,7 +1369,7 @@ public:
      * @param size of binary data to sum.
      * @return 24 bit crc of data.
      */
-    static unsigned long crc24(uint8_t *binary, size_t size);
+    static uint32_t crc24(uint8_t *binary, size_t size);
 
     /**
      * ccitt 16 bit crc for binary data.
@@ -1377,7 +1377,7 @@ public:
      * @param size of binary data to sum.
      * @return 16 bit crc.
      */
-    static unsigned short crc16(uint8_t *binary, size_t size);
+    static uint16_t crc16(uint8_t *binary, size_t size);
 
     /**
      * Dump hex data to a string buffer.

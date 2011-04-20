@@ -2035,9 +2035,9 @@ size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
 #define CRC24_INIT 0xb704ceL
 #define CRC24_POLY 0x1864cfbL
 
-unsigned long string::crc24(uint8_t *binary, size_t size)
+uint32_t string::crc24(uint8_t *binary, size_t size)
 {
-    unsigned long crc = CRC24_INIT;
+    uint32_t crc = CRC24_INIT;
     unsigned i;
 
     while (size--) {
@@ -2051,9 +2051,9 @@ unsigned long string::crc24(uint8_t *binary, size_t size)
     return crc & 0xffffffL;
 }
 
-unsigned short string::crc16(uint8_t *binary, size_t size)
+uint16_t string::crc16(uint8_t *binary, size_t size)
 {
-    unsigned short crc = 0xffff;
+    uint16_t crc = 0xffff;
     unsigned i;
 
     while (size--) {
@@ -2065,6 +2065,6 @@ unsigned short string::crc16(uint8_t *binary, size_t size)
                 crc = (crc >> 1);
         }
     }
-    return crc & 0xffff;
+    return crc;
 }
 
