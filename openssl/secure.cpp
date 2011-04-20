@@ -96,6 +96,7 @@ static void cexport(HCERTSTORE ca, FILE *fp)
             if(count)
                 fprintf(fp, "%s\n", buf);
             total -= count;
+            bp += count;
         }
         fprintf(fp, "-----END CERTIFICATE-----\n");
     }
