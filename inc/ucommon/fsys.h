@@ -629,6 +629,8 @@ private:
     int _getch(void);
 
 public:
+    typedef ::fpos_t bookmark_t;
+
     static charfile input, output, error;
 
     /**
@@ -715,10 +717,10 @@ public:
     size_t get(void *data, size_t size)
         { return fp == NULL ? 0 : fread(data, 1, size, fp);}
 
-    inline void get(fpos_t& pos)
+    inline void get(bookmark_t& pos)
         { if(fp) fsetpos(fp, &pos);}
 
-    inline void set(fpos_t& pos)
+    inline void set(bookmark_t& pos)
         { if(fp) fgetpos(fp, &pos);}
 
     int err(void);
