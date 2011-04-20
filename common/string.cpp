@@ -1929,3 +1929,106 @@ String str(CharacterProtocol *p, strsize_t size)
     return temp;
 }
 
+static const unsigned char alphabet[65] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+size_t string::b64encode(char *dest, const uint8_t *bin, size_t size, size_t dsize)
+{
+    assert(dest != NULL && bin != NULL);
+
+    size_t count = 0;
+
+    if(!dsize)
+        dsize = size * 4 / 3;
+
+    if (!dsize || !size)
+        goto end;
+
+    unsigned bits;
+
+    while(size >= 3 && dsize > 4) {
+        bits = (((unsigned)bin[0])<<16) | (((unsigned)bin[1])<<8)
+            | ((unsigned)bin[2]);
+        bin += 3;
+        size -= 3;
+        count += 3;
+        *(dest++) = alphabet[bits >> 18];
+        *(dest++) = alphabet[(bits >> 12) & 0x3f];
+        *(dest++) = alphabet[(bits >> 6) & 0x3f];
+        *(dest++) = alphabet[bits & 0x3f];
+        dsize -= 4;
+    }
+
+    if (size && dsize > 4) {
+        bits = ((unsigned)bin[0])<<16;
+        *(dest++) = alphabet[bits >> 18];
+        ++count;
+        if (size == 1) {
+            *(dest++) = alphabet[(bits >> 12) & 0x3f];
+            *(dest++) = '=';
+        }
+        else {
+            ++count;
+            bits |= ((unsigned)bin[1])<<8;
+            *(dest++) = alphabet[(bits >> 12) & 0x3f];
+            *(dest++) = alphabet[(bits >> 6) & 0x3f];
+        }
+        *(dest++) = '=';
+    }
+
+end:
+    *dest = 0;
+    return count;
+}
+
+size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
+{
+    char decoder[256];
+    unsigned long bits;
+    uint8_t c;
+    unsigned i;
+    size_t count = 0;
+
+    for (i = 0; i < 256; ++i)
+        decoder[i] = 64;
+
+    for (i = 0; i < 64 ; ++i)
+        decoder[alphabet[i]] = i;
+
+    bits = 1;
+
+    while(*src) {
+        c = (uint8_t)(*(src++));
+        if (c == '=') {
+            if (bits & 0x40000) {
+                if (size < 2)
+                    break;
+                *(dest++) = (bits >> 10);
+                *(dest++) = (bits >> 2) & 0xff;
+                count += 2;
+                break;
+            }
+            if ((bits & 0x1000) && size) {
+                *(dest++) = (bits >> 4);
+                ++count;
+            }
+            break;
+        }
+        // end on invalid chars
+        if (decoder[c] == 64)
+            break;
+        bits = (bits << 6) + decoder[c];
+        if (bits & 0x1000000) {
+            if (size < 3)
+                break;
+            *(dest++) = (bits >> 16);
+            *(dest++) = (bits >> 8) & 0xff;
+            *(dest++) = (bits & 0xff);
+            bits = 1;
+            size -= 3;
+            count += 3;
+        }
+    }
+    return count;
+}
+

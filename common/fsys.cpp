@@ -62,6 +62,9 @@
 using namespace UCOMMON_NAMESPACE;
 
 const fsys::offset_t fsys::end = (size_t)(-1);
+charfile input(stdin);
+charfile output(stdout);
+charfile error(stderr);
 
 #ifdef  _MSWINDOWS_
 
@@ -71,13 +74,13 @@ struct LOCAL_REPARSE_DATA_BUFFER
     DWORD  ReparseTag;
     WORD   ReparseDataLength;
     WORD   Reserved;
-    
+
     // IO_REPARSE_TAG_MOUNT_POINT specifics follow
     WORD   SubstituteNameOffset;
     WORD   SubstituteNameLength;
     WORD   PrintNameOffset;
     WORD   PrintNameLength;
-    WCHAR  PathBuffer[1];    
+    WCHAR  PathBuffer[1];
 };
 
 int fsys::remapError(void)
@@ -945,6 +948,53 @@ int fsys::remove(const char *path)
     if(::remove(path))
         return remapError();
     return 0;
+}
+
+int fsys::copy(const char *oldpath, const char *newpath, size_t size)
+{
+    int result = 0;
+    char *buffer = new char[size];
+    fsys src, dest;
+    ssize_t count = size;
+
+    if(!buffer) {
+        result = ENOMEM;
+        goto end;
+    }
+
+    src.open(oldpath, fsys::ACCESS_STREAM);
+    if(!is(src))
+        goto end;
+
+    dest.create(newpath, fsys::ACCESS_STREAM, 0664);
+    if(!is(dest))
+        goto end;
+
+    while(count > 0) {
+        count = src.read(buffer, size);
+        if(count < 0) {
+            result = src.err();
+            goto end;
+        }
+        if(count > 0)
+            count = dest.write(buffer, size);
+        if(count < 0) {
+            result = dest.err();
+            goto end;
+        }
+    }
+
+end:
+    if(is(src))
+        src.close();
+
+    if(is(dest))
+        dest.close();
+
+    if(buffer)
+        delete[] buffer;
+
+    return result;
 }
 
 int fsys::rename(const char *oldpath, const char *newpath)

@@ -1341,6 +1341,10 @@ public:
     inline static long tol(const char *text, char **pointer = NULL)
         {return strtol(text, pointer, 0);};
 
+    static size_t b64encode(char *string, const uint8_t *binary, size_t size, size_t width = 0);
+
+    static size_t b64decode(uint8_t *binary, const char *string, size_t size);
+
     /**
      * Dump hex data to a string buffer.
      * @param binary memory to dump.

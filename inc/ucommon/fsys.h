@@ -352,6 +352,15 @@ public:
     static int remove(const char *path);
 
     /**
+     * Copy a file.
+     * @param source file.
+     * @param target file.
+     * @param size of buffer.
+     * @return error number or 0 on success.
+     */
+    static int copy(const char *source, const char *target, size_t size = 1024);
+
+    /**
      * Rename a file.
      * @param oldpath to rename from.
      * @param newpath to rename to.
@@ -620,6 +629,8 @@ private:
     int _getch(void);
 
 public:
+    static charfile input, output, error;
+
     /**
      * Construct a charfile from an existing FILE pointer.
      * @param file to use.
