@@ -67,6 +67,12 @@ public:
      */
     typedef enum {OK=0, INVALID, MISSING_CERTIFICATE, MISSING_PRIVATEKEY, INVALID_CERTIFICATE, INVALID_AUTHORITY, INVALID_PEERNAME, INVALID_CIPHER} error_t;
 
+    /**
+     * Path types to retrieve.
+     */
+    typedef enum {
+        SYSTEM_CERTIFICATES, SYSTEM_KEYS} path_t;
+
 protected:
     /**
      * Last error flagged for this context.
@@ -107,6 +113,14 @@ public:
      * @return true if ssl support is available, false if not.
      */
     static bool init(const char *program = NULL);
+
+    /**
+     * Get a certificate path.  This is used to get directories for application
+     * specific certificate stores.
+     * @param id of path to return.
+     * @return path string or emptry string if not supported.
+     */
+    static String path(path_t id);
 
     /**
      * Verify a certificate chain through your certificate authority.

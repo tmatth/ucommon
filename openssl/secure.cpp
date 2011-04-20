@@ -67,6 +67,16 @@ bool secure::init(const char *progname)
     return true;
 }
 
+String secure::path(path_t id)
+{
+    switch(id) {
+    case SYSTEM_CERTIFICATES:
+        return str(SSL_CERTS);
+    case SYSTEM_KEYS:
+        return str(SSL_PRIVATE);
+    }
+}
+
 void secure::cipher(secure *scontext, const char *ciphers)
 {
     context *ctx = (context *)scontext;

@@ -125,6 +125,16 @@ secure::server_t secure::server(const char *ca)
     return ctx;
 }
 
+String secure::path(path_t id)
+{
+    switch(id) {
+    case SYSTEM_CERTIFICATES:
+        return str(SSL_CERTS);
+    case SYSTEM_KEYS:
+        return str(SSL_PRIVATE);
+    }
+}
+
 secure::client_t secure::client(const char *ca)
 {
     char certfile[256];

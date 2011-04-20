@@ -52,6 +52,11 @@ bool secure::init(const char *progname)
     return false;
 }
 
+String secure::path(path_t id)
+{
+    return str("");
+}
+
 secure::server_t secure::server(const char *ca)
 {
     return NULL;

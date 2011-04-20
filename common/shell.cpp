@@ -1290,12 +1290,6 @@ String shell::path(path_t id)
         return result;
 
     switch(id) {
-    case SYSTEM_CERTIFICATES:
-        result ^= SSL_CERTS;
-        break;
-    case SYSTEM_KEYS:
-        result ^= SSL_PRIVATE;
-        break;
     case PROGRAM_CONFIG:
         result = str("~\\Software\\Applications\\") + _domain;
         break;
@@ -1742,12 +1736,6 @@ String shell::path(path_t id)
         return result;
 
     switch(id) {
-    case SYSTEM_CERTIFICATES:
-        result = path(SYSTEM_PREFIX, SSL_CERTS);
-        break;
-    case SYSTEM_KEYS:
-        result = path(SYSTEM_PREFIX, SSL_PRIVATE);
-        break;
     case USER_DEFAULTS:
         home = ::getenv("HOME");
         if(!home)
