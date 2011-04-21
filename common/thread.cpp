@@ -312,6 +312,43 @@ bool Thread::equal(pthread_t t1, pthread_t t2)
     return t1 == t2;
 }
 
+#ifdef  _MSCONDITIONAL_
+
+Conditional::Conditional()
+{
+    InitializeCriticalSection(&mutex);
+    InitializeConditionVariable(&cond);
+}
+
+Conditional::~Conditional()
+{
+    DeleteCriticalSection(&mutex);
+}
+
+void Conditional::wait(void)
+{
+    SleepConditionVariableCS(&cond, &mutex, INFINITE);
+}
+
+bool Conditional::wait(timeout_t timeout)
+{
+    if(SleepConditionVariableCS(&cond, &mutex, timeout))
+        return true;
+
+    return false;
+}
+
+void Conditional::signal(void)
+{
+    WakeConditionVariable(&cond);
+}
+
+void Conditional::broadcast(void)
+{
+    WakeAllConditionVariable(&cond);
+}
+
+#else
 void Conditional::wait(void)
 {
     int result;
@@ -389,6 +426,7 @@ bool Conditional::wait(timeout_t timeout)
     EnterCriticalSection(&mutex);
     return rtn;
 }
+#endif
 
 bool Conditional::wait(struct timespec *ts)
 {
@@ -465,7 +503,53 @@ bool Conditional::wait(struct timespec *ts)
 #endif
 
 
-#ifdef  _MSWINDOWS_
+#if defined(_MSCONDITIONAL_)
+
+ConditionalAccess::ConditionalAccess()
+{
+    waiting = pending = sharing = 0;
+    InitializeConditionVariable(&bcast);
+}
+
+ConditionalAccess::~ConditionalAccess()
+{
+}
+
+bool ConditionalAccess::waitBroadcast(timeout_t timeout)
+{
+    assert(ts != NULL);
+
+    if(SleepConditionVariableCS(&bcast, &mutex, timeout))
+        return true;
+
+    return false;
+}
+
+bool ConditionalAccess::waitSignal(timeout_t timeout)
+{
+    assert(ts != NULL);
+
+    if(SleepConditionVariableCS(&cond, &mutex, timeout))
+        return true;
+
+    return false;
+}
+
+bool ConditionalAccess::waitBroadcast(struct timespec *ts)
+{
+    assert(ts != NULL);
+
+    return waitBroadcast((timeout_t)(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l)));
+}
+
+bool ConditionalAccess::waitSignal(struct timespec *ts)
+{
+    assert(ts != NULL);
+
+    return waitSignal((timeout_t)(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l)));
+}
+
+#elif defined(_MSWINDOWS_)
 
 void ConditionalAccess::waitSignal(void)
 {
