@@ -2,6 +2,7 @@ from ucommon 4.3.1 to 4.3.2
 - cmake unit tests added and automated.
 - extensions to mapping, copy and mapped_view get.
 - certificate paths now part of usecure.
+- sorting and named list issues resolved.
 
 from ucommon 4.3.0 to 4.3.1
 - fix for access to keyfile::create().

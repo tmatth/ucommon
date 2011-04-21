@@ -301,7 +301,7 @@ void NamedObject::add(NamedObject **root, char *nid, unsigned max)
     NamedObject *node, *prev = NULL;
 
     if(max < 2)
-        max = 1;
+        max = 0;
     else
         max = keyindex(nid, max);
 
@@ -321,7 +321,7 @@ void NamedObject::add(NamedObject **root, char *nid, unsigned max)
         node = node->getNext();
     }
 
-    if(!prev) {
+    if(!node) {
         next = root[max];
         root[max] = this;
     }
@@ -413,19 +413,20 @@ extern "C" {
         assert(o2 != NULL);
         const NamedObject * const *n1 = static_cast<const NamedObject * const*>(o1);
         const NamedObject * const*n2 = static_cast<const NamedObject * const*>(o2);
-        return (*n1)->compare((*n2)->getId());
+        return strcmp((*n1)->getId(), (*n2)->getId());
     }
 }
 
-NamedObject **NamedObject::sort(NamedObject **list, size_t count)
+NamedObject **NamedObject::sort(NamedObject **list, size_t size)
 {
     assert(list != NULL);
 
-    if(!count) {
-        while(list[count])
-            ++count;
+    if(!size) {
+        while(list[size])
+            ++size;
     }
-    qsort(static_cast<void *>(list), count, sizeof(NamedObject *), &ncompare);
+
+    qsort(static_cast<void *>(list), size, sizeof(NamedObject *), &ncompare);
     return list;
 }
 
@@ -473,7 +474,7 @@ void NamedObject::purge(NamedObject **idx, unsigned max)
     LinkedObject *root;
 
     if(max < 2)
-        max = 1;
+        max = 0;
 
     while(max--) {
         root = idx[max];
