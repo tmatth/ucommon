@@ -75,6 +75,7 @@ String secure::path(path_t id)
     case SYSTEM_KEYS:
         return str(SSL_PRIVATE);
     }
+    return str("");
 }
 
 #if defined(_MSWINDOWS_)
@@ -82,7 +83,6 @@ String secure::path(path_t id)
 static void cexport(HCERTSTORE ca, FILE *fp)
 {
     PCCERT_CONTEXT cert = NULL;
-    DWORD err;
     const uint8_t *cp;
     char buf[80];
 
@@ -96,7 +96,7 @@ static void cexport(HCERTSTORE ca, FILE *fp)
             if(count)
                 fprintf(fp, "%s\n", buf);
             total -= count;
-            bp += count;
+            cp += count;
         }
         fprintf(fp, "-----END CERTIFICATE-----\n");
     }
@@ -128,7 +128,7 @@ int secure::oscerts(const char *pathname)
     fclose(fp);
 
     if(!caset) {
-        remove(*target);
+        fsys::remove(*target);
         return ENOSYS;
     }
     return 0;
