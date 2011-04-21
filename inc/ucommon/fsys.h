@@ -631,8 +631,6 @@ private:
 public:
     typedef ::fpos_t bookmark_t;
 
-    static charfile input, output, error;
-
     /**
      * Construct a charfile from an existing FILE pointer.
      * @param file to use.
@@ -748,6 +746,8 @@ String str(charfile& fp, strsize_t size);
  * Convience type for fsys.
  */
 typedef fsys fsys_t;
+
+extern charfile cstdin, cstdout, cstderr;
 
 END_NAMESPACE
 

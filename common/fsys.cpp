@@ -62,9 +62,9 @@
 using namespace UCOMMON_NAMESPACE;
 
 const fsys::offset_t fsys::end = (size_t)(-1);
-charfile input(stdin);
-charfile output(stdout);
-charfile error(stderr);
+charfile cstdin(stdin);
+charfile cstdout(stdout);
+charfile cstderr(stderr);
 
 #ifdef  _MSWINDOWS_
 

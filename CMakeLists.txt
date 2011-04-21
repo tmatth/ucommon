@@ -146,7 +146,7 @@ if ((WIN32 AND CMAKE_COMPILER_IS_GNUCXX) OR MINGW OR MSYS)
 endif()
 
 if (WIN32 OR MINGW OR MSYS)
-    set (UCOMMON_LIBS ${UCOMMON_LIBS} advapi32 user32 ws2_32 wsock32 kernel32)
+    set (UCOMMON_LIBS ${UCOMMON_LIBS} crypt32 advapi32 user32 ws2_32 wsock32 kernel32)
 endif()
 
 if(UNIX AND NOT BUILD_STDLIB)
