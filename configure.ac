@@ -159,7 +159,7 @@ AC_CHECK_LIB(msvcrt, fopen, [
     threading="msw"
     clib="msvcrt"
     UCOMMON_VISIBILITY="0"
-    UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -ladvapi32 -luser32 -lws2_32 -lwsock32 -lkernel32"
+    UCOMMON_LIBS="--enable-stdcall-fixup $UCOMMON_LIBS -lmingwex -lmingw32 -lcrypt32 -ladvapi32 -luser32 -lws2_32 -lwsock32 -lkernel32"
     UCOMMON_LIBC="-lmsvcrt -lgcc"
     OPENSSL_LINK="-lgdi32"
     AC_DEFINE(HAVE_INET_NTOP, [1], [have inet_ntop])
