@@ -24,7 +24,7 @@
 #include <openssl/rand.h>
 
 #ifdef  _MSWINDOWS_
-#include <Wincrypt.h>
+#include <wincrypt.h>
 #endif
 
 #define NAMESPACE_LOCAL namespace __secure__ {
