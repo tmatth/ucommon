@@ -96,14 +96,14 @@ int secure::oscerts(const char *pathname)
     if(!fp)
         return ENOSYS;
 
-    HCERTSTORE ca = CertOpenSystemStoreA((HCRYPTPROV_LEGACY)NULL, "ROOT");
+    HCERTSTORE ca = CertOpenSystemStoreA(NULL, "ROOT");
     if(ca) {
         caset = true;
         cexport(ca, fp);
         CertCloseStore(ca, 0);
     }
 
-    ca = CertOpenSystemStoreA((HCRYPTPROV_LEGACY)NULL, "CA");
+    ca = CertOpenSystemStoreA(NULL, "CA");
     if(ca) {
         caset = true;
         cexport(ca, fp);

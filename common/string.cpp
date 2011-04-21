@@ -2003,13 +2003,13 @@ size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
             if (bits & 0x40000) {
                 if (size < 2)
                     break;
-                *(dest++) = (bits >> 10) & 0xff;
-                *(dest++) = (bits >> 2) & 0xff;
+                *(dest++) = (uint8_t)((bits >> 10) & 0xff);
+                *(dest++) = (uint8_t)((bits >> 2) & 0xff);
                 count += 2;
                 break;
             }
             if ((bits & 0x1000) && size) {
-                *(dest++) = (bits >> 4) & 0xff;
+                *(dest++) = (uint8_t)((bits >> 4) & 0xff);
                 ++count;
             }
             break;
@@ -2021,9 +2021,9 @@ size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
         if (bits & 0x1000000) {
             if (size < 3)
                 break;
-            *(dest++) = (bits >> 16) & 0xff;
-            *(dest++) = (bits >> 8) & 0xff;
-            *(dest++) = (bits & 0xff);
+            *(dest++) = (uint8_t)((bits >> 16) & 0xff);
+            *(dest++) = (uint8_t)((bits >> 8) & 0xff);
+            *(dest++) = (uint8_t)((bits & 0xff));
             bits = 1;
             size -= 3;
             count += 3;
