@@ -49,6 +49,7 @@
 #ifdef _MSWINDOWS_
 #include <direct.h>
 #include <winioctl.h>
+#include <io.h>
 #endif
 
 #ifdef  HAVE_SYS_INOTIFY_H
@@ -221,6 +222,19 @@ int fsys::access(const char *path, unsigned mode)
     if(_access(path, mode))
         return remapError();
     return 0;
+}
+
+bool fsys::istty(void)
+{
+    error = 0;
+    if(fd == INVALID_HANDLE_VALUE)
+        return false;
+    DWORD type = GetFileType(fd);
+    if(!type)
+        error = rampError();
+    if(type == FILE_TYPE_CHAR)
+        return true;
+    return false;
 }
 
 void fsys::close(void)
@@ -542,6 +556,13 @@ ssize_t fsys::write(const void *buf, size_t len)
     if(rtn < 0)
         error = remapError();
     return rtn;
+}
+
+bool fsys::istty(void)
+{
+    if(isatty(fd))
+        return true;
+    return false;
 }
 
 void fsys::close(void)
@@ -1303,6 +1324,18 @@ charfile::charfile()
 charfile::~charfile()
 {
     close();
+}
+
+bool charfile::istty(void)
+{
+#ifdef  _MSWINDOWS_
+    if(_isatty(_fileno(fp)))
+        return true;
+#else
+    if(isatty(fileno(fp)))
+        return true;
+#endif
+    return false;
 }
 
 void charfile::open(const char *path, const char *mode)

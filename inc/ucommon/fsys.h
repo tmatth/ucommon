@@ -279,6 +279,12 @@ public:
     int drop(offset_t size = 0);
 
     /**
+     * See if current file stream is a device.
+     * @return true if device.
+     */
+    bool istty(void);
+
+    /**
      * Read data from descriptor or scan directory.
      * @param buffer to read into.
      * @param count of bytes to read.
@@ -606,6 +612,9 @@ public:
     static inline bool isdev(struct stat *inode)
         {return S_ISBLK(inode->st_mode) || S_ISCHR(inode->st_mode);}
 
+    static inline bool istty(struct stat *inode)
+        {return S_ISCHR(inode->st_mode);}
+
     static inline bool isdisk(struct stat *inode)
         {return S_ISBLK(inode->st_mode);}
 
@@ -738,6 +747,8 @@ public:
         {if(fp) ::rewind(fp);}
 
     size_t printf(const char *format, ...) __PRINTF(2, 3);
+
+    bool istty(void);
 };
 
 String str(charfile& fp, strsize_t size);
