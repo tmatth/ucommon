@@ -279,10 +279,16 @@ public:
     int drop(offset_t size = 0);
 
     /**
-     * See if current file stream is a device.
+     * See if current file stream is a tty device.
      * @return true if device.
      */
     bool istty(void);
+
+    /**
+     * See if the file handle is a tty device.
+     * @return true if device.
+     */
+    static bool istty(fd_t fd);
 
     /**
      * Read data from descriptor or scan directory.
@@ -612,7 +618,7 @@ public:
     static inline bool isdev(struct stat *inode)
         {return S_ISBLK(inode->st_mode) || S_ISCHR(inode->st_mode);}
 
-    static inline bool istty(struct stat *inode)
+    static inline bool ischar(struct stat *inode)
         {return S_ISCHR(inode->st_mode);}
 
     static inline bool isdisk(struct stat *inode)

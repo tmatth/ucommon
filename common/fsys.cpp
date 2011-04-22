@@ -224,6 +224,16 @@ int fsys::access(const char *path, unsigned mode)
     return 0;
 }
 
+bool fsys::istty(fd_t fd)
+{
+    if(fd == INVALID_HANDLE_VALUE)
+        return false;
+    DWORD type = GetFileType(fd);
+    if(type == FILE_TYPE_CHAR)
+        return true;
+    return false;
+}
+
 bool fsys::istty(void)
 {
     error = 0;
@@ -556,6 +566,13 @@ ssize_t fsys::write(const void *buf, size_t len)
     if(rtn < 0)
         error = remapError();
     return rtn;
+}
+
+bool fsys::istty(fd_t fd)
+{
+    if(isatty(fd))
+        return true;
+    return false;
 }
 
 bool fsys::istty(void)
