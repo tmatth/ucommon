@@ -42,14 +42,16 @@ static queueof<myobject> mycache(&pool, 10);
 
 extern "C" int main()
 {
+	unsigned i;
+
     myobject *x;
-    for(unsigned i = 0; i < 10; ++i) {
+    for(i = 0; i < 10; ++i) {
         x = myobjects.create();
         mycache.post(x);
     }
     assert(x->count == 10);
 
-    for(unsigned i = 0; i < 3; ++i) {
+    for(i = 0; i < 3; ++i) {
         x = mycache.lifo();
         assert(x != NULL);
     }
@@ -58,7 +60,7 @@ extern "C" int main()
     init<myobject>(x);
     assert(x->count == 11);
 
-    for(unsigned i = 0; i < 3; ++i) {
+    for(i = 0; i < 3; ++i) {
         x = mycache.lifo();
         assert(x != NULL);
         myobjects.release(x);

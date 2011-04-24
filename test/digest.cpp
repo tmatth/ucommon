@@ -25,7 +25,6 @@
 #include <stdio.h>
 
 using namespace UCOMMON_NAMESPACE;
-using namespace std;
 
 int main(int argc, char **argv)
 {

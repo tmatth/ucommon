@@ -36,4 +36,6 @@ extern "C" int main()
     assert(utf8::count(u2) == 1);
     assert(utf8::codepoint(u1) == 0x00a9);
     assert(utf8::codepoint(u2) == 0x2260);
+
+	return 0;
 }
