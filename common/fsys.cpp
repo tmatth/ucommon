@@ -241,7 +241,7 @@ bool fsys::istty(void)
         return false;
     DWORD type = GetFileType(fd);
     if(!type)
-        error = rampError();
+        error = remapError();
     if(type == FILE_TYPE_CHAR)
         return true;
     return false;
