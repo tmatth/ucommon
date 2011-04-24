@@ -534,9 +534,17 @@ public:
      * so that it can be overridden when using named lists or hash lookups
      * that must be case insensitive.
      * @param name to compare our name to.
-     * @return true if effectivily equal.
+     * @return 0 if effectivily equal, used for sorting keys.
      */
-    virtual bool compare(const char *name) const;
+    virtual int compare(const char *name) const;
+
+    /**
+     * Equal function which calls compare.
+     * @param name to compare our name to.
+     * @return true if equal.
+     */
+    inline bool equal(const char *name) const
+        {return (compare(name) == 0);};
 
     /**
      * Comparison operator between our name and a string.
@@ -979,7 +987,7 @@ protected:
      * @param size of key to check or 0 if NULL terminated string.
      * @return true if matches key.
      */
-    virtual bool compare(unsigned path, caddr_t key, size_t size) const;
+    virtual bool equal(unsigned path, caddr_t key, size_t size) const;
 
 public:
     /**

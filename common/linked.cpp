@@ -111,8 +111,7 @@ void MultiMap::enlist(unsigned path, MultiMap **root, caddr_t key, unsigned max,
     links[path].key = key;
 }
 
-// this probably should be called "equal"...
-bool MultiMap::compare(unsigned path, caddr_t key, size_t keysize) const
+bool MultiMap::equal(unsigned path, caddr_t key, size_t keysize) const
 {
     assert(path < paths);
     assert(key != NULL);
@@ -163,7 +162,7 @@ MultiMap *MultiMap::find(unsigned path, MultiMap **root, caddr_t key, unsigned m
     MultiMap *node = root[keyindex(key, max, keysize)];
 
     while(node) {
-        if(node->compare(path, key, keysize))
+        if(node->equal(path, key, keysize))
             break;
         node = node->next(path);
     }
@@ -254,7 +253,7 @@ OrderedObject()
     NamedObject *node = static_cast<NamedObject*>(root->head), *prev = NULL;
 
     while(node) {
-        if(node->compare(nid)) {
+        if(node->equal(nid)) {
             if(prev)
                 prev->next = node->getNext();
             else
@@ -307,7 +306,7 @@ void NamedObject::add(NamedObject **root, char *nid, unsigned max)
 
     node = root[max];
     while(node) {
-        if(node && node->compare(nid)) {
+        if(node && node->equal(nid)) {
             if(prev) {
                 prev->next = this;
                 next = node->next;
@@ -395,14 +394,11 @@ unsigned NamedObject::keyindex(const char *id, unsigned max)
     return val % max;
 }
 
-bool NamedObject::compare(const char *cid) const
+int NamedObject::compare(const char *cid) const
 {
     assert(cid != NULL && *cid != 0);
 
-    if(!strcmp(id, cid))
-        return true;
-
-    return false;
+    return strcmp(id, cid);
 }
 
 extern "C" {
@@ -413,7 +409,7 @@ extern "C" {
         assert(o2 != NULL);
         const NamedObject * const *n1 = static_cast<const NamedObject * const*>(o1);
         const NamedObject * const*n2 = static_cast<const NamedObject * const*>(o2);
-        return strcmp((*n1)->getId(), (*n2)->getId());
+        return ((*n1)->compare((*n2)->getId()));
     }
 }
 
@@ -532,7 +528,7 @@ NamedObject *NamedObject::find(NamedObject *root, const char *id)
     assert(id != NULL && *id != 0);
 
     while(root) {
-        if(root->compare(id))
+        if(root->equal(id))
             break;
         root = root->getNext();
     }
@@ -548,7 +544,7 @@ NamedObject *NamedObject::remove(NamedObject **root, const char *id)
     NamedObject *node = *root;
 
     while(node) {
-        if(node->compare(id))
+        if(node->equal(id))
             break;
         prior = node;
         node = node->getNext();
