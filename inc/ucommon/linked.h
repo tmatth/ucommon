@@ -552,7 +552,7 @@ public:
      * @return true if equal.
      */
     inline bool operator==(const char *name) const
-        {return compare(name);};
+        {return compare(name) == 0;};
 
     /**
      * Comparison operator between our name and a string.
@@ -560,7 +560,7 @@ public:
      * @return true if not equal.
      */
     inline bool operator!=(const char *name) const
-        {return !compare(name);};
+        {return compare(name) != 0;};
 };
 
 /**
