@@ -88,7 +88,10 @@ class __EXPORT Conditional
 private:
     friend class ConditionalAccess;
 
-#ifdef  _MSWINDOWS_
+#if defined(_MSCONDITIONAL_)
+    CRITICAL_SECTION mutex;
+    CONDITION_VARIABLE cond;
+#elif defined(_MSWINDOWS_)
     enum {SIGNAL = 0, BROADCAST = 1};
     HANDLE events[2];
     unsigned waiting;
@@ -210,7 +213,9 @@ public:
 class __EXPORT ConditionalAccess : private Conditional
 {
 private:
-#ifndef _MSWINDOWS_
+#if defined _MSCONDITIONAL_
+    CONDITION_VARIABLE bcast;
+#elif !defined(_MSWINDOWS_)
     pthread_cond_t bcast;
 #endif
 

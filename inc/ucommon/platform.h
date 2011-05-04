@@ -96,6 +96,12 @@
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define _MSWINDOWS_
 
+#if defined(_M_X64) || defined(_M_ARM)
+#define _MSCONDITIONALS_
+#ifndef _WIN32_WINNT    0x0600
+#define _WIN32_WINNT
+#endif
+#endif
 
 //#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0501
 //#undef    _WIN32_WINNT

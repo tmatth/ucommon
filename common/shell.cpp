@@ -1290,6 +1290,9 @@ String shell::path(path_t id)
         return result;
 
     switch(id) {
+    case SERVICE_CONTROL:
+        result = str("~\\SOFTWARE\\Services\\Control");
+        break;
     case PROGRAM_CONFIG:
         result = str("~\\Software\\Applications\\") + _domain;
         break;
@@ -1784,6 +1787,13 @@ String shell::path(path_t id)
         break;
     case SERVICE_CACHE:
         result = path(SYSTEM_PREFIX, UCOMMON_VARPATH "/cache/") + _domain;
+        break;
+    case SERVICE_CONTROL:
+#ifdef  __APPLE__
+        result = str(home) + "/Library/Caches";
+#else
+        result = str(home) + "/.cache";
+#endif
         break;
     case PROGRAM_CONFIG:
         home = ::getenv("HOME");
@@ -2586,6 +2596,9 @@ String shell::path(String& prefix, const char *dir)
     if(*dir == '\\' || *dir == '/')
         return str(dir);
 
+    if(strchr(prefix, '\\'))
+        return prefix + "\\" + dir;
+
     return prefix + "/" + dir;
 }
 
@@ -2595,7 +2608,12 @@ String shell::path(path_t id, const char *dir)
 
     if(*dir == '\\' || *dir == '/')
         result = dir;
-    else
-        result = path(id) + "/" + dir;
+    else {
+        result = path(id);
+        if(strchr(*result, '\\'))
+            result = result + "\\" + dir;
+        else
+            result = result + "/" + dir;
+    }
     return result;
 }
