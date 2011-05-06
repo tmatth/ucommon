@@ -769,7 +769,7 @@ fsys::fsys(const fsys& copy)
     error = 0;
 
     if(copy.fd != INVALID_HANDLE_VALUE)
-        fd = dup(copy.fd);
+        fd = ::dup(copy.fd);
     else
         fd = INVALID_HANDLE_VALUE;
     error = 0;
@@ -780,7 +780,7 @@ void fsys::operator=(fd_t from)
 {
     close();
     if(fd == INVALID_HANDLE_VALUE && from != INVALID_HANDLE_VALUE) {
-        fd = dup(from);
+        fd = ::dup(from);
         if(fd == INVALID_HANDLE_VALUE)
             error = remapError();
     }
@@ -790,7 +790,7 @@ void fsys::operator=(const fsys& from)
 {
     close();
     if(fd == INVALID_HANDLE_VALUE && from.fd != INVALID_HANDLE_VALUE) {
-        fd = dup(from.fd);
+        fd = ::dup(from.fd);
         if(fd == INVALID_HANDLE_VALUE)
             error = remapError();
     }

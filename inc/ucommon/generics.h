@@ -443,6 +443,15 @@ inline bool isnullp(T *object)
     {return (bool)(object->operator*() == NULL);}
 
 /**
+ * Convenience function to duplicate object pointer to heap.
+ * @param object we are duping.
+ * @return heap pointer instance.
+ */
+template<class T>
+inline T* dup(T *object)
+    {T *tmp = new T; memcpy(tmp, object, sizeof(T)); return tmp;}
+
+/**
  * Convenience function to swap objects.
  * @param o1 to swap.
  * @param o2 to swap.
