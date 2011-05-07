@@ -29,6 +29,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef  NEW_STDLIB
 #include <stdexcept>
@@ -428,7 +429,7 @@ inline bool is(T& object)
  * @param object we are testing.
  * @return true if object points to NULL.
  */
-template<class T>
+template<typename T>
 inline bool isnull(T& object)
     {return (bool)(object.operator*() == NULL);}
 
@@ -438,7 +439,7 @@ inline bool isnull(T& object)
  * @param object we are testing.
  * @return true if object points to NULL.
  */
-template<class T>
+template<typename T>
 inline bool isnullp(T *object)
     {return (bool)(object->operator*() == NULL);}
 
@@ -447,9 +448,13 @@ inline bool isnullp(T *object)
  * @param object we are duping.
  * @return heap pointer instance.
  */
-template<class T>
-inline T* dup(T *object)
-    {T *tmp = new T; memcpy(tmp, object, sizeof(T)); return tmp;}
+template<typename T>
+inline T* dup(const T& object)
+    {return new T(object);}
+
+template<>
+inline char *dup<char>(const char& object)
+    {return strdup(&object);}
 
 /**
  * Convenience function to swap objects.
