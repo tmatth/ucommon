@@ -1,5 +1,6 @@
 from ucommon 4.3.2 to 4.3.3
-- service control added for dropfile info.
+- service control path added for dropfile info.
+- generics dup template added.
 
 from ucommon 4.3.1 to 4.3.2
 - cmake unit tests added and automated.
