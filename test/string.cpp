@@ -74,5 +74,8 @@ extern "C" int main()
     char *test = strdup(str("hello") + " test" + str((short)13));
     assert(eq(test, "hello test13"));
 
-	return 0;
+    char *cdup = dup<char>(test[6]);
+    assert(eq(cdup, "test13"));
+
+    return 0;
 }
