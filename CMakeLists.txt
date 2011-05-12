@@ -18,8 +18,8 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 4.3.3)
-set (SOVERSION 4)
+set (VERSION 5.0.0)
+set (SOVERSION 5)
 
 # when we override default install prefix, assume full path is used...
 
@@ -348,25 +348,37 @@ set_target_properties(usecure PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSIO
 target_link_libraries(usecure ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
 add_dependencies(usecure ucommon)
 
+if(WIN32 AND NOT BUILD_STATIC)
+    add_library(static-ucommon ${BUILD_LIBRARY_TYPE} ${common_src} ${ucommon_inc})
+
+    add_library(static-usecure ${BUILD_LIBRARY_TYPE} ${secure_src} ${secure_inc})
+    add_dependencies(static-usecure static-ucommon)
+    set(UCOMMON_DEPEND "static-ucommon")
+    set(USECURE_DEPEND "static-usecure")
+else()
+    set(UCOMMON_DEPEND "ucommon")
+    set(USECURE_DEPEND "usecure")
+endif()
+
 add_executable(ucommon-args utils/args.cpp)
-add_dependencies(ucommon-args ucommon)
+add_dependencies(ucommon-args ${UCOMMON_DEPEND})
 set_target_properties(ucommon-args PROPERTIES OUTPUT_NAME args)
-target_link_libraries(ucommon-args ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+target_link_libraries(ucommon-args ${UCOMMON_DEPEND} ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-scrub utils/scrub.cpp)
-add_dependencies(usecure-scrub usecure ucommon)
+add_dependencies(usecure-scrub ${USECURE_DEPEND} ${UCOMMON_DEPEND})
 set_target_properties(usecure-scrub PROPERTIES OUTPUT_NAME scrub)
-target_link_libraries(usecure-scrub usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
+target_link_libraries(usecure-scrub ${USECURE_DEPEND} ${UCOMMON_DEPEND} ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-mdsum utils/mdsum.cpp)
-add_dependencies(usecure-mdsum usecure ucommon)
+add_dependencies(usecure-mdsum ${USECURE_DEPEND} ${UCOMMON_DEPEND})
 set_target_properties(usecure-mdsum PROPERTIES OUTPUT_NAME mdsum)
-target_link_libraries(usecure-mdsum usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
+target_link_libraries(usecure-mdsum ${USECURE_DEPEND} ${UCOMMON_DEPEND} ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-zerofill utils/zerofill.cpp)
-add_dependencies(usecure-zerofill usecure ucommon)
+add_dependencies(usecure-zerofill ${USECURE_DEPEND} ${UCOMMON_DEPEND})
 set_target_properties(usecure-zerofill PROPERTIES OUTPUT_NAME zerofill)
-target_link_libraries(usecure-zerofill usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
+target_link_libraries(usecure-zerofill ${USECURE_DEPEND} ${UCOMMON_DEPEND} ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
 find_package(Doxygen)
 
