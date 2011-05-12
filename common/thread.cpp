@@ -696,6 +696,26 @@ bool ConditionalAccess::waitSignal(struct timespec *ts)
 
 #endif
 
+// abstract class never runs...
+bool Thread::isRunning(void)
+{
+    return false;
+}
+
+bool JoinableThread::isRunning(void)
+{
+#ifdef  _MSWINDOWS_
+    return (running != INVALID_HANDLE_VALUE) && !joining;
+#else
+    return running && !joining;
+#endif
+}
+
+bool DetachedThread::isRunning(void)
+{
+    return running;
+}
+
 void ConditionalAccess::modify(void)
 {
     lock();
@@ -1933,8 +1953,10 @@ JoinableThread::JoinableThread(size_t size)
 {
 #ifdef  _MSWINDOWS_
     canecellor = INVALID_HANDLE_VALUE;
-    joining = INVALID_HANDLE_VALUE;
+    running = INVALID_HANDLE_VALUE;
+    joining = false;
 #else
+    joining = false;
     running = false;
     cancellor = NULL;
 #endif
@@ -1948,6 +1970,7 @@ DetachedThread::DetachedThread(size_t size)
 #else
     cancellor = NULL;
 #endif
+    running = false;
     stack = size;
 }
 
@@ -2031,7 +2054,7 @@ extern "C" {
 #ifdef  _MSWINDOWS_
 void JoinableThread::start(int adj)
 {
-    if(joining != INVALID_HANDLE_VALUE)
+    if(running != INVALID_HANDLE_VALUE)
         return;
 
     priority = adj;
@@ -2039,9 +2062,10 @@ void JoinableThread::start(int adj)
     if(stack == 1)
         stack = 1024;
 
-    joining = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
-    if(!joining)
-        joining = INVALID_HANDLE_VALUE;
+    joining = false;
+    running = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
+    if(!running)
+        running = INVALID_HANDLE_VALUE;
 }
 
 void DetachedThread::start(int adj)
@@ -2054,6 +2078,8 @@ void DetachedThread::start(int adj)
         stack = 1024;
 
     hThread = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
+    if(hThread != INVALID_HANDLE_VALUE)
+        running = true;
     CloseHandle(hThread);
 }
 
@@ -2062,17 +2088,18 @@ void JoinableThread::join(void)
     pthread_t self = pthread_self();
     int rc;
 
-    if(joining && equal(tid, self))
+    if(running && equal(tid, self))
         Thread::exit();
 
     // already joined, so we ignore...
-    if(joining == INVALID_HANDLE_VALUE)
+    if(running == INVALID_HANDLE_VALUE)
         return;
 
-    rc = WaitForSingleObject(joining, INFINITE);
+    joining = true;
+    rc = WaitForSingleObject(running, INFINITE);
     if(rc == WAIT_OBJECT_0 || rc == WAIT_ABANDONED) {
-        CloseHandle(joining);
-        joining = INVALID_HANDLE_VALUE;
+        CloseHandle(running);
+        running = INVALID_HANDLE_VALUE;
     }
 }
 
@@ -2085,6 +2112,7 @@ void JoinableThread::start(int adj)
     if(running)
         return;
 
+    joining = false;
     priority = adj;
 
 #ifndef __PTH__
@@ -2140,6 +2168,7 @@ void DetachedThread::start(int adj)
     pthread_create(&tid, &attr, &exec_thread, this);
     pthread_attr_destroy(&attr);
 #endif
+    running = true;
 }
 
 void JoinableThread::join(void)
@@ -2152,6 +2181,8 @@ void JoinableThread::join(void)
     // already joined, so we ignore...
     if(!running)
         return;
+
+    joining = true;
 
 #ifdef  __PTH__
     if(pth_join(tid, NULL))

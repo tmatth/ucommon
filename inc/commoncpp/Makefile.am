@@ -11,7 +11,10 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = $(LT_VERSION) -release $(LT_RELEASE)
 AM_CXXFLAGS = $(UCOMMON_FLAGS)
-EXTRA_DIST = *.cmake
 
-SUBDIRS = ucommon commoncpp
+pkgincludedir = $(includedir)/commoncpp
+pkginclude_HEADERS = config.h export.h string.h exception.h thread.h \
+	slog.h applog.h address.h socket.h tcp.h udp.h dccp.h \
+	process.h pointer.h commoncpp.h
+
 

@@ -1686,6 +1686,10 @@ inline bool eq(String &s1, String &s2)
  * @param s2 string to compare.
  * @return true if equal.
  */
+inline bool case_eq(char const *s1, char const *s2)
+    {return String::case_equal(s1, s2);}
+
+// to be depreciated...
 inline bool ieq(char const *s1, char const *s2)
     {return String::case_equal(s1, s2);}
 

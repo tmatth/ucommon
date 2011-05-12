@@ -1786,6 +1786,10 @@ inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
  * @param s2 socket address to compare.
  * @return true if addresses same.
  */
+inline bool host_eq(struct sockaddr *s1, struct sockaddr *s2)
+    {return Socket::equalhost(s1, s2);}
+
+// to be depreciated...
 inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
     {return Socket::equalhost(s1, s2);}
 

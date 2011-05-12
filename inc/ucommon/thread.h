@@ -1589,6 +1589,11 @@ public:
      * @return thread id.
      */
     static pthread_t self(void);
+
+    /**
+     * Check if running.
+     */
+    virtual bool isRunning(void);
 };
 
 /**
@@ -1605,10 +1610,11 @@ class __EXPORT JoinableThread : protected Thread
 {
 protected:
 #ifdef  _MSWINDOWS_
-    HANDLE joining;
+    HANDLE running;
 #else
     volatile bool running;
 #endif
+    volatile bool joining;
 
     /**
      * Create a joinable thread with a known context stack size.
@@ -1630,17 +1636,7 @@ protected:
     void join(void);
 
 public:
-#ifdef  _MSWINDOWS_
-    inline bool isRunning(void)
-        {return (joining != INVALID_HANDLE_VALUE);};
-#else
-    /**
-     * Test if thread is currently running.
-     * @return true while thread is running.
-     */
-    inline bool isRunning(void)
-        {return running;};
-#endif
+    bool isRunning(void);
 
     /**
      * Start execution of child context.  This must be called after the
@@ -1670,6 +1666,8 @@ public:
 class __EXPORT DetachedThread : protected Thread
 {
 protected:
+    bool running;
+
     /**
      * Create a detached thread with a known context stack size.
      * @param size of stack for thread context or 0 for default.
@@ -1701,6 +1699,8 @@ public:
      * @param priority to start thread with.
      */
     void start(int priority = 0);
+
+    bool isRunning(void);
 };
 
 /**

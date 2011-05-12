@@ -319,6 +319,7 @@ endif(NOT WIN32)
 
 file(GLOB common_src common/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
+file(GLOB commoncpp_inc inc/commoncpp/*.h)
 list(REMOVE_ITEM ucommon_inc inc/ucommon/secure.h)
 
 if(HAVE_OPENSSL)
@@ -470,5 +471,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION ${INSTALL_B
 endif(NOT WIN32)
 
 install(FILES ${ucommon_inc} ${secure_inc} DESTINATION ${INSTALL_INCLUDEDIR}/ucommon    COMPONENT headers)
+install(FILES ${commoncpp_inc} DESTINATION ${INSTALL_INCLUDEDIR}/commoncpp  COMPONENT headers)
+
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
 install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION ${INSTALL_BINDIR})
