@@ -713,7 +713,7 @@ bool JoinableThread::isRunning(void)
 
 bool DetachedThread::isRunning(void)
 {
-    return running;
+    return active;
 }
 
 void ConditionalAccess::modify(void)
@@ -1970,7 +1970,7 @@ DetachedThread::DetachedThread(size_t size)
 #else
     cancellor = NULL;
 #endif
-    running = false;
+    active = false;
     stack = size;
 }
 
@@ -2168,7 +2168,7 @@ void DetachedThread::start(int adj)
     pthread_create(&tid, &attr, &exec_thread, this);
     pthread_attr_destroy(&attr);
 #endif
-    running = true;
+    active = true;
 }
 
 void JoinableThread::join(void)

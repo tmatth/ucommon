@@ -1669,7 +1669,7 @@ public:
 class __EXPORT DetachedThread : protected Thread
 {
 protected:
-    bool running;
+    bool active;
 
     /**
      * Create a detached thread with a known context stack size.
