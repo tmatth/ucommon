@@ -61,7 +61,7 @@ bool secure::init(const char *progname)
     if(CRYPTO_get_id_callback() != NULL)
         return false;
 
-    private_locks = new mutex[CRYPTO_num_locks()];
+    private_locks = new Mutex[CRYPTO_num_locks()];
     CRYPTO_set_id_callback(ssl_self);
     CRYPTO_set_locking_callback(ssl_lock);
     return true;

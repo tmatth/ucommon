@@ -48,7 +48,7 @@ struct mutex_entry
     unsigned count;
 };
 
-class __LOCAL rwlock_entry : public rwlock
+class __LOCAL rwlock_entry : public ThreadLock
 {
 public:
     rwlock_entry();
@@ -57,7 +57,7 @@ public:
     unsigned count;
 };
 
-class __LOCAL mutex_index : public mutex
+class __LOCAL mutex_index : public Mutex
 {
 public:
     struct mutex_entry *list;
@@ -65,7 +65,7 @@ public:
     mutex_index();
 };
 
-class __LOCAL rwlock_index : public mutex
+class __LOCAL rwlock_index : public Mutex
 {
 public:
     rwlock_entry *list;
@@ -90,17 +90,17 @@ static pthread_key_t threadmap;
 #endif
 #endif
 
-mutex_index::mutex_index() : mutex()
+mutex_index::mutex_index() : Mutex()
 {
     list = NULL;
 }
 
-rwlock_index::rwlock_index() : mutex()
+rwlock_index::rwlock_index() : Mutex()
 {
     list = NULL;
 }
 
-rwlock_entry::rwlock_entry() : rwlock()
+rwlock_entry::rwlock_entry() : ThreadLock()
 {
     count = 0;
 }
@@ -204,7 +204,7 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
     }
 }
 
-semaphore::semaphore(unsigned limit) :
+Semaphore::Semaphore(unsigned limit) :
 Conditional()
 {
     assert(limit > 0);
@@ -214,17 +214,17 @@ Conditional()
     used = 0;
 }
 
-void semaphore::Shlock(void)
+void Semaphore::Shlock(void)
 {
     wait();
 }
 
-void semaphore::Unlock(void)
+void Semaphore::Unlock(void)
 {
     release();
 }
 
-unsigned semaphore::getUsed(void)
+unsigned Semaphore::getUsed(void)
 {
     unsigned rtn;
     lock();
@@ -233,7 +233,7 @@ unsigned semaphore::getUsed(void)
     return rtn;
 }
 
-unsigned semaphore::getCount(void)
+unsigned Semaphore::getCount(void)
 {
     unsigned rtn;
     lock();
@@ -242,7 +242,7 @@ unsigned semaphore::getCount(void)
     return rtn;
 }
 
-bool semaphore::wait(timeout_t timeout)
+bool Semaphore::wait(timeout_t timeout)
 {
     bool result = true;
     struct timespec ts;
@@ -260,7 +260,7 @@ bool semaphore::wait(timeout_t timeout)
     return result;
 }
 
-void semaphore::wait(void)
+void Semaphore::wait(void)
 {
     lock();
     if(used >= count) {
@@ -272,7 +272,7 @@ void semaphore::wait(void)
     unlock();
 }
 
-void semaphore::release(void)
+void Semaphore::release(void)
 {
     lock();
     if(used)
@@ -282,7 +282,7 @@ void semaphore::release(void)
     unlock();
 }
 
-void semaphore::set(unsigned value)
+void Semaphore::set(unsigned value)
 {
     assert(value > 0);
 
@@ -741,14 +741,14 @@ void ConditionalAccess::release(void)
     unlock();
 }
 
-rexlock::rexlock() :
+RecursiveMutex::RecursiveMutex() :
 Conditional()
 {
     lockers = 0;
     waiting = 0;
 }
 
-unsigned rexlock::getWaiting(void)
+unsigned RecursiveMutex::getWaiting(void)
 {
     unsigned count;
     Conditional::lock();
@@ -757,7 +757,7 @@ unsigned rexlock::getWaiting(void)
     return count;
 }
 
-unsigned rexlock::getLocking(void)
+unsigned RecursiveMutex::getLocking(void)
 {
     unsigned count;
     Conditional::lock();
@@ -766,17 +766,17 @@ unsigned rexlock::getLocking(void)
     return count;
 }
 
-void rexlock::Exlock(void)
+void RecursiveMutex::Exlock(void)
 {
     lock();
 }
 
-void rexlock::Unlock(void)
+void RecursiveMutex::Unlock(void)
 {
     release();
 }
 
-bool rexlock::lock(timeout_t timeout)
+bool RecursiveMutex::lock(timeout_t timeout)
 {
     bool result = true;
     struct timespec ts;
@@ -801,7 +801,7 @@ bool rexlock::lock(timeout_t timeout)
     return result;
 }
 
-void rexlock::lock(void)
+void RecursiveMutex::lock(void)
 {
     Conditional::lock();
     while(lockers) {
@@ -818,7 +818,7 @@ void rexlock::lock(void)
     return;
 }
 
-void rexlock::release(void)
+void RecursiveMutex::release(void)
 {
     Conditional::lock();
     --lockers;
@@ -827,13 +827,13 @@ void rexlock::release(void)
     Conditional::unlock();
 }
 
-rwlock::rwlock() :
+ThreadLock::ThreadLock() :
 ConditionalAccess()
 {
     writers = 0;
 }
 
-unsigned rwlock::getAccess(void)
+unsigned ThreadLock::getAccess(void)
 {
     unsigned count;
     lock();
@@ -842,7 +842,7 @@ unsigned rwlock::getAccess(void)
     return count;
 }
 
-unsigned rwlock::getModify(void)
+unsigned ThreadLock::getModify(void)
 {
     unsigned count;
     lock();
@@ -851,7 +851,7 @@ unsigned rwlock::getModify(void)
     return count;
 }
 
-unsigned rwlock::getWaiting(void)
+unsigned ThreadLock::getWaiting(void)
 {
     unsigned count;
     lock();
@@ -860,22 +860,22 @@ unsigned rwlock::getWaiting(void)
     return count;
 }
 
-void rwlock::Exlock(void)
+void ThreadLock::Exlock(void)
 {
     modify();
 }
 
-void rwlock::Shlock(void)
+void ThreadLock::Shlock(void)
 {
     access();
 }
 
-void rwlock::Unlock(void)
+void ThreadLock::Unlock(void)
 {
     release();
 }
 
-bool rwlock::modify(timeout_t timeout)
+bool ThreadLock::modify(timeout_t timeout)
 {
     bool rtn = true;
     struct timespec ts;
@@ -906,7 +906,7 @@ bool rwlock::modify(timeout_t timeout)
     return rtn;
 }
 
-bool rwlock::access(timeout_t timeout)
+bool ThreadLock::access(timeout_t timeout)
 {
     struct timespec ts;
     bool rtn = true;
@@ -932,7 +932,7 @@ bool rwlock::access(timeout_t timeout)
     return rtn;
 }
 
-void rwlock::release(void)
+void ThreadLock::release(void)
 {
     lock();
     assert(sharing || writers);
@@ -967,7 +967,7 @@ auto_protect::auto_protect(void *obj)
 {
     object = obj;
     if(object)
-        mutex::protect(obj);
+        Mutex::protect(obj);
 }
 
 auto_protect::~auto_protect()
@@ -978,7 +978,7 @@ auto_protect::~auto_protect()
 void auto_protect::release()
 {
     if(object) {
-        mutex::release(object);
+        Mutex::release(object);
         object = NULL;
     }
 }
@@ -991,43 +991,43 @@ void auto_protect::operator=(void *obj)
     release();
     object = obj;
     if(object)
-        mutex::protect(object);
+        Mutex::protect(object);
 }
 
-mutex::gaurd::gaurd()
+Mutex::gaurd::gaurd()
 {
     object = NULL;
 }
 
-mutex::gaurd::gaurd(void *obj)
+Mutex::gaurd::gaurd(void *obj)
 {
     object = obj;
     if(obj)
-        mutex::protect(object);
+        Mutex::protect(object);
 }
 
-mutex::gaurd::~gaurd()
+Mutex::gaurd::~gaurd()
 {
     release();
 }
 
-void mutex::gaurd::set(void *obj)
+void Mutex::gaurd::set(void *obj)
 {
     release();
     object = obj;
     if(obj)
-        mutex::protect(object);
+        Mutex::protect(object);
 }
 
-void mutex::gaurd::release(void)
+void Mutex::gaurd::release(void)
 {
     if(object) {
-        mutex::release(object);
+        Mutex::release(object);
         object = NULL;
     }
 }
 
-mutex::mutex()
+Mutex::Mutex()
 {
 #ifdef  __PTH__
     pth_mutex_init(&mlock);
@@ -1036,12 +1036,12 @@ mutex::mutex()
 #endif
 }
 
-mutex::~mutex()
+Mutex::~Mutex()
 {
     pthread_mutex_destroy(&mlock);
 }
 
-void mutex::indexing(unsigned index)
+void Mutex::indexing(unsigned index)
 {
     if(index > 1) {
         mutex_table = new mutex_index[index];
@@ -1049,7 +1049,7 @@ void mutex::indexing(unsigned index)
     }
 }
 
-void rwlock::indexing(unsigned index)
+void ThreadLock::indexing(unsigned index)
 {
     if(index > 1) {
         rwlock_table = new rwlock_index[index];
@@ -1057,77 +1057,77 @@ void rwlock::indexing(unsigned index)
     }
 }
 
-rwlock::gaurd_reader::gaurd_reader()
+ThreadLock::gaurd_reader::gaurd_reader()
 {
     object = NULL;
 }
 
-rwlock::gaurd_reader::gaurd_reader(void *obj)
+ThreadLock::gaurd_reader::gaurd_reader(void *obj)
 {
     object = obj;
     if(obj)
-        if(!rwlock::reader(object))
+        if(!ThreadLock::reader(object))
             object = NULL;
 }
 
-rwlock::gaurd_reader::~gaurd_reader()
+ThreadLock::gaurd_reader::~gaurd_reader()
 {
     release();
 }
 
-void rwlock::gaurd_reader::set(void *obj)
+void ThreadLock::gaurd_reader::set(void *obj)
 {
     release();
     object = obj;
     if(obj)
-        if(!rwlock::reader(object))
+        if(!ThreadLock::reader(object))
             object = NULL;
 }
 
-void rwlock::gaurd_reader::release(void)
+void ThreadLock::gaurd_reader::release(void)
 {
     if(object) {
-        rwlock::release(object);
+        ThreadLock::release(object);
         object = NULL;
     }
 }
 
-rwlock::gaurd_writer::gaurd_writer()
+ThreadLock::gaurd_writer::gaurd_writer()
 {
     object = NULL;
 }
 
-rwlock::gaurd_writer::gaurd_writer(void *obj)
+ThreadLock::gaurd_writer::gaurd_writer(void *obj)
 {
     object = obj;
     if(obj)
-        if(!rwlock::writer(object))
+        if(!ThreadLock::writer(object))
             object = NULL;
 }
 
-rwlock::gaurd_writer::~gaurd_writer()
+ThreadLock::gaurd_writer::~gaurd_writer()
 {
     release();
 }
 
-void rwlock::gaurd_writer::set(void *obj)
+void ThreadLock::gaurd_writer::set(void *obj)
 {
     release();
     object = obj;
     if(obj)
-        if(!rwlock::writer(object))
+        if(!ThreadLock::writer(object))
             object = NULL;
 }
 
-void rwlock::gaurd_writer::release(void)
+void ThreadLock::gaurd_writer::release(void)
 {
     if(object) {
-        rwlock::release(object);
+        ThreadLock::release(object);
         object = NULL;
     }
 }
 
-bool rwlock::reader(void *ptr, timeout_t timeout)
+bool ThreadLock::reader(void *ptr, timeout_t timeout)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry, *empty = NULL;
@@ -1164,7 +1164,7 @@ bool rwlock::reader(void *ptr, timeout_t timeout)
     return false;
 }
 
-bool rwlock::writer(void *ptr, timeout_t timeout)
+bool ThreadLock::writer(void *ptr, timeout_t timeout)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry, *empty = NULL;
@@ -1201,7 +1201,7 @@ bool rwlock::writer(void *ptr, timeout_t timeout)
     return false;
 }
 
-void mutex::protect(void *ptr)
+void Mutex::protect(void *ptr)
 {
     mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
     mutex_entry *entry, *empty = NULL;
@@ -1236,7 +1236,7 @@ void mutex::protect(void *ptr)
     pthread_mutex_lock(&entry->mutex);
 }
 
-void rwlock::release(void *ptr)
+void ThreadLock::release(void *ptr)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry;
@@ -1260,7 +1260,7 @@ void rwlock::release(void *ptr)
     index->release();
 }
 
-void mutex::release(void *ptr)
+void Mutex::release(void *ptr)
 {
     mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
     mutex_entry *entry;
@@ -1285,12 +1285,12 @@ void mutex::release(void *ptr)
     index->release();
 }
 
-void mutex::Exlock(void)
+void Mutex::Exlock(void)
 {
     pthread_mutex_lock(&mlock);
 }
 
-void mutex::Unlock(void)
+void Mutex::Unlock(void)
 {
     pthread_mutex_unlock(&mlock);
 }
@@ -1839,6 +1839,11 @@ Thread::Thread(size_t size)
 {
     stack = size;
     priority = 0;
+#ifdef  _MSWINDOWS_
+    cancellor = INVALID_HANDLE;
+#else
+    cancellor = NULL;
+#endif
     init();
 }
 
@@ -1912,15 +1917,22 @@ void Thread::policy(int polid)
 JoinableThread::JoinableThread(size_t size)
 {
 #ifdef  _MSWINDOWS_
+    canecellor = INVALID_HANDLE_VALUE;
     joining = INVALID_HANDLE_VALUE;
 #else
     running = false;
+    cancellor = NULL;
 #endif
     stack = size;
 }
 
 DetachedThread::DetachedThread(size_t size)
 {
+#ifdef  _MSWINDOWS_
+    cancellor = INVALID_HANDLE_VALUE;
+#else
+    cancellor = NULL;
+#endif
     stack = size;
 }
 

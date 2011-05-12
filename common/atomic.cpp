@@ -71,36 +71,36 @@ void atomic::spinlock::release(void)
 long atomic::counter::operator++()
 {
     long rval;
-    mutex::protect((void *)&value);
+    Mutex::protect((void *)&value);
     rval = (long)(++value);
-    mutex::release((void *)&value);
+    Mutex::release((void *)&value);
     return rval;
 }
 
 long atomic::counter::operator--()
 {
     long rval;
-    mutex::protect((void *)&value);
+    Mutex::protect((void *)&value);
     rval = (long)(--value);
-    mutex::release((void *)&value);
+    Mutex::release((void *)&value);
     return rval;
 }
 
 long atomic::counter::operator+=(long change)
 {
     long rval;
-    mutex::protect((void *)&value);
+    Mutex::protect((void *)&value);
     rval = (long)(value += change);
-    mutex::release((void *)&value);
+    Mutex::release((void *)&value);
     return rval;
 }
 
 long atomic::counter::operator-=(long change)
 {
     long rval;
-    mutex::protect((void *)&value);
+    Mutex::protect((void *)&value);
     rval = (long)(value -= change);
-    mutex::release((void *)&value);
+    Mutex::release((void *)&value);
     return rval;
 }
 
@@ -108,20 +108,20 @@ bool atomic::spinlock::acquire(void)
 {
     bool rtn = true;
 
-    mutex::protect((void *)&value);
+    Mutex::protect((void *)&value);
     if(value == 1)
         rtn = false;
     else
         value = 1;
-    mutex::release((void *)&value);
+    Mutex::release((void *)&value);
     return rtn;
 }
 
 void atomic::spinlock::release(void)
 {
-    mutex::protect((void *)&value);
+    Mutex::protect((void *)&value);
     value = 0;
-    mutex::release((void *)&value);
+    Mutex::release((void *)&value);
 }
 
 #endif

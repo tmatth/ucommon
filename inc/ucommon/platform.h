@@ -26,21 +26,20 @@
 
 #ifndef _UCOMMON_PLATFORM_H_
 #define _UCOMMON_PLATFORM_H_
-#define UCOMMON_ABI 4
+#define UCOMMON_ABI 5
 
 /**
  * Common namespace for all ucommon objects.
  * We are using a common namespace to easily separate ucommon from other
- * libraries.  This namespace may be changed from ucc to gnu when we
- * merge code with GNU Common C++.  In any case, it is controlled by
- * macros and so any changes will be hidden from user applications so long
+ * libraries.  This namespace usage is set to the package name and controlled
+ * by macros so future changes will be hidden from user applications so long
  * as the namespace macros (UCOMMON_NAMESPACE, NAMESPACE_UCOMMON,
  * END_NAMESPACE) are used in place of direct namespace declarations.
- * @namespace ucc
+ * @namespace ucommon
  */
 
-#define UCOMMON_NAMESPACE   ucc
-#define NAMESPACE_UCOMMON   namespace ucc {
+#define UCOMMON_NAMESPACE   ucommon
+#define NAMESPACE_UCOMMON   namespace ucommon {
 #define END_NAMESPACE       }
 
 #ifndef _REENTRANT

@@ -212,14 +212,13 @@ public:
  */
 class __EXPORT ConditionalAccess : private Conditional
 {
-private:
+protected:
 #if defined _MSCONDITIONAL_
     CONDITION_VARIABLE bcast;
 #elif !defined(_MSWINDOWS_)
     pthread_cond_t bcast;
 #endif
 
-protected:
     unsigned pending, waiting, sharing;
 
     /**
@@ -470,21 +469,21 @@ public:
  * style mutex locking.  The exclusive protocol is implimented to support
  * exclusive_lock referencing.
  */
-class __EXPORT rexlock : private Conditional, public Exclusive
+class __EXPORT RecursiveMutex : private Conditional, public Exclusive
 {
-private:
+protected:
     unsigned waiting;
     unsigned lockers;
     pthread_t locker;
 
-    __LOCAL void Exlock(void);
-    __LOCAL void Unlock(void);
+    void Exlock(void);
+    void Unlock(void);
 
 public:
     /**
      * Create rexlock.
      */
-    rexlock();
+    RecursiveMutex();
 
     /**
      * Acquire or increase locking.
@@ -517,14 +516,14 @@ public:
      * Convenience method to lock a recursive lock.
      * @param rex lock to lock.
      */
-    inline static void lock(rexlock& rex)
+    inline static void lock(RecursiveMutex& rex)
         {rex.lock();};
 
     /**
      * Convenience method to unlock a recursive lock.
      * @param rex lock to release.
      */
-    inline static void release(rexlock& rex)
+    inline static void release(RecursiveMutex& rex)
         {rex.release();};
 };
 
@@ -540,15 +539,15 @@ public:
  * shared_lock referencing.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT rwlock : private ConditionalAccess, public Exclusive, public Shared
+class __EXPORT ThreadLock : private ConditionalAccess, public Exclusive, public Shared
 {
-private:
+protected:
     unsigned writers;
     pthread_t writeid;
 
-    __LOCAL void Exlock(void);
-    __LOCAL void Shlock(void);
-    __LOCAL void Unlock(void);
+    void Exlock(void);
+    void Shlock(void);
+    void Unlock(void);
 
 public:
     /**
@@ -656,7 +655,7 @@ public:
     /**
      * Create an instance of a rwlock.
      */
-    rwlock();
+    ThreadLock();
 
     /**
      * Request modify (write) access through the lock.
@@ -733,7 +732,7 @@ public:
      * @param timeout to wait for lock.
      * @return true if successful, false if timeout.
      */
-    inline static bool modify(rwlock& lock, timeout_t timeout = Timer::inf)
+    inline static bool modify(ThreadLock& lock, timeout_t timeout = Timer::inf)
         {return lock.modify(timeout);};
 
     /**
@@ -742,14 +741,14 @@ public:
      * @param timeout to wait for lock.
      * @return true if successful, false if timeout.
      */
-    inline static bool access(rwlock& lock, timeout_t timeout = Timer::inf)
+    inline static bool access(ThreadLock& lock, timeout_t timeout = Timer::inf)
         {return lock.access(timeout);};
 
     /**
      * Convenience function to release a rwlock.
      * @param lock to release.
      */
-    inline static void release(rwlock& lock)
+    inline static void release(ThreadLock& lock)
         {lock.release();};
 };
 
@@ -801,7 +800,7 @@ protected:
  */
 class __EXPORT ConditionalLock : protected ConditionalAccess, public Shared
 {
-private:
+protected:
     class Context : public LinkedObject
     {
     public:
@@ -813,11 +812,11 @@ private:
 
     LinkedObject *contexts;
 
-    __LOCAL void Shlock(void);
-    __LOCAL void Unlock(void);
-    __LOCAL void Exclusive(void);
-    __LOCAL void Share(void);
-    __LOCAL Context *getContext(void);
+    void Shlock(void);
+    void Unlock(void);
+    void Exclusive(void);
+    void Share(void);
+    Context *getContext(void);
 
 public:
     /**
@@ -1016,19 +1015,19 @@ public:
  * implements the shared_lock protocol.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT semaphore : public Shared, private Conditional
+class __EXPORT Semaphore : public Shared, protected Conditional
 {
-private:
+protected:
     unsigned count, waits, used;
 
-    __LOCAL void Shlock(void);
-    __LOCAL void Unlock(void);
+    void Shlock(void);
+    void Unlock(void);
 
 public:
     /**
      * Construct a semaphore with an initial count of threads to permit.
      */
-    semaphore(unsigned count = 0);
+    Semaphore(unsigned count = 0);
 
     /**
      * Wait until the semphore usage count is less than the thread limit.
@@ -1084,7 +1083,7 @@ public:
      * Convenience class to wait on a semaphore.
      * @param sync object to wait on.
      */
-    inline static void wait(semaphore& sync)
+    inline static void wait(Semaphore& sync)
         {sync.wait();};
 
     /**
@@ -1093,14 +1092,14 @@ public:
      * @param timeout in milliseconds.
      * @return if success, false if timeout.
      */
-    inline static bool wait(semaphore& sync, timeout_t timeout)
+    inline static bool wait(Semaphore& sync, timeout_t timeout)
         {return sync.wait(timeout);};
 
     /**
      * Convenience class to release a semaphore.
      * @param sync object to release.
      */
-    inline static void release(semaphore& sync)
+    inline static void release(Semaphore& sync)
         {sync.release();};
 };
 
@@ -1117,13 +1116,13 @@ public:
  * access by reducing the chance for collisions on the primary index mutex.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT mutex : public Exclusive
+class __EXPORT Mutex : public Exclusive
 {
-private:
+protected:
     pthread_mutex_t mlock;
 
-    __LOCAL void Exlock(void);
-    __LOCAL void Unlock(void);
+    void Exlock(void);
+    void Unlock(void);
 
 public:
     /**
@@ -1181,12 +1180,12 @@ public:
     /**
      * Create a mutex lock.
      */
-    mutex();
+    Mutex();
 
     /**
      * Destroy mutex lock, release waiting threads.
      */
-    ~mutex();
+    ~Mutex();
 
     /**
      * Acquire mutex lock.  This is a blocking operation.
@@ -1216,28 +1215,28 @@ public:
      * Convenience function to acquire a mutex lock.
      * @param lock to acquire.
      */
-    inline static void acquire(mutex& lock)
+    inline static void acquire(Mutex& lock)
         {pthread_mutex_lock(&lock.mlock);};
 
     /**
      * Convenience function to acquire a mutex lock.
      * @param lock to acquire.
      */
-    inline static void lock(mutex& lock)
+    inline static void lock(Mutex& lock)
         {pthread_mutex_lock(&lock.mlock);};
 
     /**
      * Convenience function to release an aquired mutex lock.
      * @param lock to acquire.
      */
-    inline static void unlock(mutex& lock)
+    inline static void unlock(Mutex& lock)
         {pthread_mutex_unlock(&lock.mlock);};
 
     /**
      * Convenience function to release an aquired mutex lock.
      * @param lock to acquire.
      */
-    inline static void release(mutex& lock)
+    inline static void release(Mutex& lock)
         {pthread_mutex_unlock(&lock.mlock);};
 
     /**
@@ -1481,6 +1480,13 @@ protected:
 class __EXPORT Thread
 {
 protected:
+// may be used in future if we need cancelable threads...
+#ifdef  _MSWINDOWS_
+    HANDLE cancellor;
+#else
+    void *cancellor;
+#endif
+
     pthread_t tid;
     size_t stack;
     int priority;
@@ -2061,28 +2067,22 @@ typedef TimedEvent timedevent_t;
 /**
  * Convenience type for using exclusive mutex locks.
  */
-typedef mutex mutex_t;
-
-/**
- * Convenience type for using exclusive mutex on systems which define
- * "mutex" (solaris) already to avoid type confusion.
- */
-typedef mutex Mutex;
+typedef Mutex mutex_t;
 
 /**
  * Convenience type for using read/write locks.
  */
-typedef rwlock rwlock_t;
+typedef ThreadLock rwlock_t;
 
 /**
  * Convenience type for using recursive exclusive locks.
  */
-typedef rexlock rexlock_t;
+typedef RecursiveMutex rexlock_t;
 
 /**
  * Convenience type for using counting semaphores.
  */
-typedef semaphore semaphore_t;
+typedef Semaphore semaphore_t;
 
 /**
  * Convenience type for using thread barriers.
