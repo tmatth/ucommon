@@ -39,6 +39,10 @@
 #include <ucommon/platform.h>
 #endif
 
+#ifndef _UCOMMON_GENERICS_H_
+#include <ucommon/generics.h>
+#endif
+
 #ifndef _UCOMMON_PROTOCOLS_H_
 #include <ucommon/protocols.h>
 #endif
@@ -1728,6 +1732,10 @@ inline String str(double value)
     {String temp(40, "%f", value); return temp;}
 
 String str(CharacterProtocol& cp, strsize_t size);
+
+template<>
+inline void swap<string_t>(string_t& s1, string_t& s2)
+    {String::swap(s1, s2);}
 
 END_NAMESPACE
 
