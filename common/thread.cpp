@@ -1374,6 +1374,11 @@ bool TimedEvent::wait(timeout_t timer)
     return false;
 }
 
+void TimedEvent::wait(void)
+{
+    WaitForSingleObject(event, INFINITE);
+}
+
 #else
 
 TimedEvent::TimedEvent() :
@@ -1463,6 +1468,16 @@ bool TimedEvent::sync(void)
 
     signalled = false;
     return true;
+}
+
+void TimedEvent::wait(void)
+{
+    pthread_mutex_lock(&mutex);
+    if(signalled)
+        signalled = false;
+    else
+        pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
 }
 
 bool TimedEvent::wait(timeout_t timeout)

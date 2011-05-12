@@ -1115,6 +1115,16 @@ string &string::operator+(const char *s)
     return *this;
 }
 
+string &string::operator+=(const char *s)
+{
+    if(!s || !*s)
+        return *this;
+
+    cow(strlen(s));
+    add(s);
+    return *this;
+}
+
 memstring::memstring(void *mem, strsize_t size, char fill)
 {
     assert(mem != NULL);

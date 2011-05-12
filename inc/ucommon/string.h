@@ -689,6 +689,13 @@ public:
     string& operator^=(const string& object);
 
     /**
+     * Concatenate text to an existing string object.
+     * @param text to add.
+     * @return our object for expression use.
+     */
+    string& operator+=(const char *text);
+
+    /**
      * Create new cow instance and assign value from null terminated text.
      * @param text to assign from.
      * @return our object for expression use.

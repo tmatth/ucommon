@@ -434,6 +434,11 @@ public:
     bool wait(timeout_t timeout);
 
     /**
+     * A simple wait until triggered.
+     */
+    void wait(void);
+
+    /**
      * Reset triggered conditional.
      */
     void reset(void);
