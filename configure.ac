@@ -735,5 +735,5 @@ AC_SUBST(localedir)
 AC_OUTPUT(Makefile core/Makefile commoncpp/Makefile
 openssl/Makefile gnutls/Makefile nossl/Makefile utils/Makefile
 inc/Makefile inc/ucommon/Makefile inc/commoncpp/Makefile test/Makefile
-ucommon.pc ucommon.spec ucommon-config)
+commoncpp.pc ucommon.pc ucommon.spec ucommon-config commoncpp-config)
 

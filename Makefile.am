@@ -10,21 +10,22 @@
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
-    ucommon-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
+    *-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
     COPYRIGHT \
     CMakeLists.txt ucommon-config.cmake ucommon.pc.cmake \
+    commoncpp-config.cmake commoncpp.pc.cmake \
     config.h.cmake doxy.config.cmake
 
 DIST_SUBDIRS = core commoncpp openssl gnutls nossl utils inc test
 SUBDIRS = core @SECURE@ @COMPAT@ utils inc test
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = ucommon.pc
+pkgconfig_DATA = ucommon.pc commoncpp.pc
 
 scriptdir = $(bindir)
-script_SCRIPTS = ucommon-config
+script_SCRIPTS = ucommon-config commoncpp-config
 
-man_MANS = ucommon-config.1
+man_MANS = ucommon-config.1 commoncpp-config.1
 
 .phony: doxy
 

@@ -52,7 +52,7 @@ ucommon library.  Some may be needed to prepare files or for development of
 applications.
 
 %description devel
-This package provides header and support files needed for building 
+This package provides header and support files needed for building
 applications that use the uCommon library and frameworks.
 
 %description doc
@@ -77,11 +77,12 @@ html browsable.
 %clean
 %{__rm} -rf %{buildroot}
 
-%files 
+%files
 %defattr(-,root,root,-)
 %doc AUTHORS README COPYING COPYING.LESSER COPYRIGHT NEWS SUPPORT ChangeLog
 %{_libdir}/libucommon.so.*
 %{_libdir}/libusecure.so.*
+%{_libdir}/libcommoncpp.so.*
 
 %files bin
 %defattr(-,root,root,-)
@@ -98,6 +99,7 @@ html browsable.
 %defattr(-,root,root,-)
 %{_libdir}/*.so
 %{_includedir}/ucommon/
+%{_includedir}/commoncpp/
 %{_libdir}/pkgconfig/*.pc
 %{_bindir}/ucommon-config
 %{_mandir}/man1/ucommon-config.*

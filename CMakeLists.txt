@@ -301,7 +301,10 @@ if(NOT HAVE_OPENSSL AND NOT OPENSSL_FOUND)
 endif()
 
 if(NOT WIN32)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
+    if(BUILD_COMPAT)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/commoncpp.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/commoncpp.pc)
+    endif()
 endif(NOT WIN32)
 
 # common build options can be passed to cmake using WITH_CFLAGS, WITH_LIBS,
@@ -321,7 +324,10 @@ endif()
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 if(NOT WIN32)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config)
+    if(BUILD_COMPAT)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/commoncpp-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/commoncpp-config)
+    endif()
 endif(NOT WIN32)
 
 file(GLOB common_src core/*.cpp)
@@ -490,7 +496,11 @@ endif()
 
 if(NOT WIN32)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION ${INSTALL_BINDIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION ${INSTALL_BINDIR})
+    if(BUILD_COMPAT)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/commoncpp-config DESTINATION ${INSTALL_BINDIR})
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/commoncpp.pc DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
+    endif()
 endif(NOT WIN32)
 
 install(FILES ${ucommon_inc} ${secure_inc} DESTINATION ${INSTALL_INCLUDEDIR}/ucommon    COMPONENT headers)
