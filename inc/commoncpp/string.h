@@ -29,7 +29,7 @@
 
 NAMESPACE_COMMONCPP
 
-typedef ucc::String String;
+typedef ucommon::String String;
 
 __EXPORT char *lsetField(char *target, size_t size, const char *src, const char fill = 0);
 __EXPORT char *rsetField(char *target, size_t size, const char *src, const char fill = 0);

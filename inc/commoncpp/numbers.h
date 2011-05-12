@@ -9,11 +9,11 @@
 #include <commoncpp/string.h>
 #endif
 
-typedef ucc::Date Date;
-typedef ucc::Time Time;
-typedef ucc::DateTime DateTime;
-typedef ucc::DateTimeString DateTimeString;
-typedef ucc::DateNumber DateNumber;
+typedef ucommon::Date Date;
+typedef ucommon::Time Time;
+typedef ucommon::DateTime DateTime;
+typedef ucommon::DateTimeString DateTimeString;
+typedef ucommon::DateNumber DateNumber;
 
 #endif
 

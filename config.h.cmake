@@ -30,6 +30,7 @@
 #cmakedefine HAVE_SYS_STAT_H 1
 #cmakedefine HAVE_SYS_TIMEB_H 1
 #cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_SYS_WAIT_H 1
 #cmakedefine HAVE_UNISTD_H 1
 #cmakedefine HAVE_WCHAR_H 1
 #cmakedefine HAVE_REGEX_H 1
@@ -37,6 +38,8 @@
 #cmakedefine HAVE_SYS_EVENT_H 1
 #cmakedefine HAVE_SYSLOG_H 1
 #cmakedefine HAVE_LIBINTL_H 1
+#cmakedefine HAVE_NETINET_IN_H 1
+#cmakedefine HAVE_NET_IF_H 1
 
 #cmakedefine HAVE_FTOK 1
 #cmakedefine HAVE_GETADDRINFO 1
@@ -77,6 +80,9 @@
 #cmakedefine HAVE_REALPATH 1
 #cmakedefine HAVE_SYMLINK 1
 #cmakedefine HAVE_READLINK 1
+#cmakedefine HAVE_WAITPID 1
+#cmakedefine HAVE_WAIT4 1
+
 #cmakedefine POSIX_TIMERS 1
 
 #cmakedefine UCOMMON_LOCALE "${UCOMMON_LOCALE}"

@@ -1594,6 +1594,9 @@ public:
      * Check if running.
      */
     virtual bool isRunning(void);
+
+    inline operator bool()
+        {return isRunning();}
 };
 
 /**

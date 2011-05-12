@@ -84,7 +84,7 @@ NAMESPACE_COMMONCPP
 
 typedef socket_t    SOCKET;
 
-class __EXPORT Socket : protected ucc::Socket
+class __EXPORT Socket : protected ucommon::Socket
 {
 public:
     enum State {

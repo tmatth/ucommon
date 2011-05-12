@@ -11,7 +11,7 @@
 #define CCXX_NAMESPACES
 #define COMMONCPP_NAMESPACE ost
 #define NAMESPACE_COMMONCPP namespace ost {
-#define TIMEOUT_INF ucc::Timer::inf
+#define TIMEOUT_INF ucommon::Timer::inf
 
 #ifdef  _UCOMMON_EXTENDED_
 #define CCXX_EXCEPTIONS

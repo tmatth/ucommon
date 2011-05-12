@@ -141,7 +141,7 @@ public:
 class __EXPORT ThreadLock : protected ucommon::ThreadLock
 {
 public:
-    inline ThreadLock() : rwlock() {};
+    inline ThreadLock() : ucommon::ThreadLock() {};
 
     inline void readLock(void)
         {ucommon::ThreadLock::access();};
@@ -340,7 +340,7 @@ private:
     friend class Slog;
 
     Throw exceptions;
-    bool detached;
+    bool detached, terminated;
     Thread *parent;
     size_t msgpos;
     char msgbuf[128];

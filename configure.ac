@@ -110,6 +110,9 @@ if test "x$enable_posix_timers" = "xyes" ; then
     UCOMMON_FLAGS="$UCOMMON_FLAGS -DPOSIX_TIMERS"
 fi
 
+AC_HELP_STRING([--disable-commoncpp],
+    [compile without common c++ compatibility library])
+
 AC_ARG_ENABLE(stdcpp,
     AC_HELP_STRING([--disable-stdcpp],
         [compile without stdc++ runtime overhead]))
@@ -122,6 +125,10 @@ if test "x$enable_stdcpp" = "xno" ; then
 else
     AC_MSG_RESULT(yes)
 fi
+
+COMPAT=""
+if test "x$enable_commoncpp" != "xno" ; then
+    COMPAT="commoncpp" ; fi
 
 AC_ARG_WITH(sslstack,
     AC_HELP_STRING([--with-sslstack=lib],[specify which ssl stack to build]),[
@@ -152,8 +159,8 @@ threading="none"
 clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
-AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h)
-AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h syslog.h)
+AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h netinet/in.h net/if.h)
+AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h syslog.h sys/wait.h)
 
 AC_CHECK_LIB(msvcrt, fopen, [
     threading="msw"
@@ -334,7 +341,7 @@ if test "$threading" = "none" ; then
     fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit realpath symlink readlink ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit realpath symlink readlink waitpid wait4 ; do
     found="no"
     AC_CHECK_FUNC($func,[
         found=$func
@@ -404,6 +411,12 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime localtime_r po
         ;;
     readlink)
         AC_DEFINE(HAVE_READLINK, [1], [has readlink in libc])
+        ;;
+    waitpid)
+        AC_DEFINE(HAVE_WAITPID, [1], [has waitpid in libc])
+        ;;
+    wait4)
+        AC_DEFINE(HAVE_WAIT4, [1], [has wait4 in libc])
         ;;
     esac
 done
@@ -719,7 +732,7 @@ AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(localedir)
 
-AC_OUTPUT(Makefile common/Makefile
+AC_OUTPUT(Makefile core/Makefile commoncpp/Makefile
 openssl/Makefile gnutls/Makefile nossl/Makefile utils/Makefile
 inc/Makefile inc/ucommon/Makefile inc/commoncpp/Makefile test/Makefile
 ucommon.pc ucommon.spec ucommon-config)
