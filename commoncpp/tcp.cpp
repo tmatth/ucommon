@@ -966,7 +966,7 @@ void TCPStream::allocate(size_t size)
     bufsize = size;
     iostream::clear();
 
-#if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(WIN32) && !defined(STLPORT)
+#if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(_MSWINDOWS_) && !defined(STLPORT)
     setb(gbuf, gbuf + size, 0);
 #endif
     setg(gbuf, gbuf + size, gbuf + size);

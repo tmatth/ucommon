@@ -575,7 +575,7 @@ void DCCPSocket::connect(const IPV6Host &host, tpport_t port, timeout_t timeout)
             break;
         }
 
-#ifndef WIN32
+#ifndef _MSWINDOWS_
         if(errno == EINPROGRESS)
 #else
             if(WSAGetLastError() == WSAEINPROGRESS)

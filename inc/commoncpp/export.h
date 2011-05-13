@@ -28,7 +28,7 @@
  * @file ucommon/export.h
  */
 
-#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
+#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32) || defined(_MSWINDOWS_)
 #ifdef  __EXPORT
 #undef  __EXPORT
 #endif

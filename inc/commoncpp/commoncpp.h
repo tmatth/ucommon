@@ -16,6 +16,7 @@
 #include <commoncpp/numbers.h>
 #include <commoncpp/process.h>
 #include <commoncpp/mime.h>
-
+#include <commoncpp/serial.h>
+#include <commoncpp/tokenizer.h>
 #endif
 

@@ -343,7 +343,7 @@ protected:
     struct in_addr * ipaddr;
     size_t addr_count;
     mutable char* hostname;  // hostname for ipaddr[0]. Used by getHostname
-#if defined(WIN32)
+#if defined(_MSWINDOWS_)
     static MutexCounter counter;
 #else
     static Mutex mutex;
@@ -746,7 +746,7 @@ protected:
     struct in6_addr * ipaddr;
     size_t addr_count;
     mutable char* hostname;  // hostname for ipaddr[0]. Used by getHostname
-#if defined(WIN32)
+#if defined(_MSWINDOWS_)
     static MutexCounter counter;
 #else
     static Mutex mutex;

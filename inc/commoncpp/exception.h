@@ -56,6 +56,7 @@
 // it for the rest of the system.
 
 #if defined(CCXX_EXCEPTIONS)
+#define COMMONCPP_EXCEPTIONS
 
 #include <exception>
 #include <stdexcept>

@@ -18,5 +18,5 @@ lib_LTLIBRARIES = libcommoncpp.la
 libcommoncpp_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ $(RELEASE)
 libcommoncpp_la_SOURCES = strchar.cpp slog.cpp exception.cpp thread.cpp \
     address.cpp socket.cpp tcp.cpp udp.cpp dccp.cpp applog.cpp mime.cpp \
-    numbers.cpp process.cpp
+    numbers.cpp process.cpp serial.cpp tokenizer.cpp
 
