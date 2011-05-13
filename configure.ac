@@ -732,7 +732,7 @@ AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(localedir)
 
-AC_OUTPUT(Makefile core/Makefile commoncpp/Makefile
+AC_OUTPUT(Makefile corelib/Makefile commoncpp/Makefile
 openssl/Makefile gnutls/Makefile nossl/Makefile utils/Makefile
 inc/Makefile inc/ucommon/Makefile inc/commoncpp/Makefile test/Makefile
 commoncpp.pc ucommon.pc ucommon.spec ucommon-config commoncpp-config)
