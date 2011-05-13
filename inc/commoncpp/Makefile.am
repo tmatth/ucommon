@@ -14,7 +14,7 @@ AM_CXXFLAGS = $(UCOMMON_FLAGS)
 
 pkgincludedir = $(includedir)/commoncpp
 pkginclude_HEADERS = config.h export.h string.h exception.h thread.h \
-	slog.h applog.h address.h socket.h tcp.h udp.h dccp.h \
-	process.h pointer.h commoncpp.h
+    slog.h applog.h address.h socket.h tcp.h udp.h dccp.h mime.h \
+    process.h pointer.h commoncpp.h
 
 

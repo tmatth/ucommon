@@ -9,14 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-RELEASE = -version-info $(LT_VERSION) 
+RELEASE = -version-info $(LT_VERSION)
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS)
 LIBTOOL = @LT_GENERIC@
 
-lib_LTLIBRARIES = libcommoncpp.la 
+lib_LTLIBRARIES = libcommoncpp.la
 
-libcommoncpp_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ $(RELEASE) 
+libcommoncpp_la_LDFLAGS = ../common/libucommon.la @UCOMMON_LIBS@ $(RELEASE)
 libcommoncpp_la_SOURCES = strchar.cpp slog.cpp exception.cpp thread.cpp \
-	address.cpp socket.cpp tcp.cpp udp.cpp dccp.cpp applog.cpp \
-	numbers.cpp process.cpp
+    address.cpp socket.cpp tcp.cpp udp.cpp dccp.cpp applog.cpp mime.cpp \
+    numbers.cpp process.cpp
 

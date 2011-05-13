@@ -15,6 +15,7 @@
 #include <commoncpp/dccp.h>
 #include <commoncpp/numbers.h>
 #include <commoncpp/process.h>
+#include <commoncpp/mime.h>
 
 #endif
 
