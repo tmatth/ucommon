@@ -330,7 +330,7 @@ if(NOT WIN32)
     endif()
 endif(NOT WIN32)
 
-file(GLOB common_src core/*.cpp)
+file(GLOB common_src corelib/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
 file(GLOB commoncpp_src commoncpp/*.cpp)
 file(GLOB commoncpp_inc inc/commoncpp/*.h)
