@@ -10,12 +10,12 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc $(UCOMMON_FLAGS) $(CHECKFLAGS)
-LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
+LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.cpp keydata.conf
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
-	ucommonKeydata ucommonStream ucommonUnicode ucommonQueue \
-	ucommonDatetime ucommonShell ucommonDigest ucommonCipher
+    ucommonKeydata ucommonStream ucommonUnicode ucommonQueue \
+    ucommonDatetime ucommonShell ucommonDigest ucommonCipher
 
 noinst_PROGRAMS = demoSSL
 demoSSL_SOURCES = ssl.cpp
@@ -41,5 +41,5 @@ ucommonCipher_SOURCES = cipher.cpp
 ucommonCipher_LDFLAGS = @SECURE_LOCAL@
 
 # test using full stdc++ linkage...
-stdcpp:	stdcpp.cpp
-	$(CXX) @UCOMMON_FLAGS@ -o stdcpp -I../inc -L../src/.libs -lucommon stdcpp.cpp @UCOMMON_LIBS@
+stdcpp: stdcpp.cpp
+    $(CXX) @UCOMMON_FLAGS@ -o stdcpp -I../inc -L../src/.libs -lucommon stdcpp.cpp @UCOMMON_LIBS@
