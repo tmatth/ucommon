@@ -666,6 +666,7 @@ AC_MSG_RESULT([$SECURE])
 
 SECURE_LOCAL="../$SECURE/libusecure.la $SECURE_LIBS"
 
+LT_GENERIC="${LIBTOOL}"
 if test "$UCOMMON_MODEL" = "CC" ; then
     LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
@@ -732,6 +733,7 @@ AC_SUBST(COMPAT)
 AC_SUBST(OPENSSL_LIBS)
 AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)
+AC_SUBST(LT_GENERIC)
 AC_SUBST(localedir)
 
 AC_OUTPUT(Makefile corelib/Makefile commoncpp/Makefile
