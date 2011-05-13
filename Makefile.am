@@ -30,9 +30,9 @@ man_MANS = ucommon-config.1 commoncpp-config.1
 .phony: doxy
 
 doxy:
-    -rm -rf doc
-    $(DOXYGEN) Doxyfile
+	-rm -rf doc
+	$(DOXYGEN) Doxyfile
 
 clean-local:
-    -rm -rf doc
+	-rm -rf doc
 
