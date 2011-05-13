@@ -9,9 +9,9 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@ 
+AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
 INCLUDES = -I$(top_srcdir)/inc
-LDADD = ../common/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
+LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
 man_MANS = args.1 scrub.1 mdsum.1 zerofill.1
