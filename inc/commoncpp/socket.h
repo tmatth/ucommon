@@ -58,6 +58,10 @@
 #include <commoncpp/address.h>
 #endif
 
+#ifndef COMMONCPP_EXCEPTION_H_
+#include <commoncpp/exception.h>
+#endif
+
 #ifndef MSG_DONTWAIT
 #define MSG_DONTWAIT    0
 #endif
@@ -621,6 +625,8 @@ public:
 
 };
 
+#if defined(CCXX_EXCEPTIONS)
+
 class __EXPORT SockException : public IOException
 {
 private:
@@ -633,6 +639,8 @@ public:
     inline Socket::Error getSocketError() const
     { return _socketError; }
 };
+
+#endif
 
 END_NAMESPACE
 

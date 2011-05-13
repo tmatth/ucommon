@@ -190,6 +190,8 @@ AppLog alog;
 LevelName AppLogPrivate::_assoc(_values, sizeof AppLogPrivate::_values / sizeof *AppLogPrivate::_values);
 map<string, Slog::Level> *AppLog::assoc = &AppLogPrivate::_assoc;
 
+#if defined(CCXX_EXCEPTIONS)
+
 HEXdump::HEXdump(const unsigned char *buffer, int len, int max_len) : _str()
 {
   std::stringstream sstr;
@@ -279,6 +281,8 @@ HEXdump::HEXdump(const unsigned char *buffer, int len, int max_len) : _str()
 
   _str = sstr.str();
 }
+
+#endif
 
 // class logger
 logger::logger(const char* logFileName, bool usePipe)  : ThreadQueue(NULL, 0, 0), _usePipe(usePipe)
