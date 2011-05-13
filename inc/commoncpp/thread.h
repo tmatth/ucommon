@@ -247,6 +247,7 @@ public:
     inline Conditional() : ucommon::Conditional() {};
 
     bool wait(timeout_t timeout, bool locked = false);
+
     void signal(bool broadcast);
 
     inline void enterMutex(void)

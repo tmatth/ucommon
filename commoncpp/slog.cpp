@@ -61,7 +61,7 @@ using std::ios;
 
 using namespace COMMONCPP_NAMESPACE;
 
-Slog slog;
+Slog ost::slog;
 
 Slog::Slog(void) :
 streambuf()

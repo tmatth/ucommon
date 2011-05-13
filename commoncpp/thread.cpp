@@ -301,6 +301,14 @@ void Thread::setException(Thread::Throw _throw)
         th->exceptions = _throw;
 }
 
+void Conditional::signal(bool broadcast)
+{
+    if(broadcast)
+        ucommon::Conditional::broadcast();
+    else
+        ucommon::Conditional::signal();
+}
+
 bool Conditional::wait(timeout_t timeout, bool locked)
 {
     bool result;
