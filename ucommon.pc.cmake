@@ -5,6 +5,6 @@ includedir=${CMAKE_INSTALL_PREFIX}/include
 Name: ${PROJECT_NAME}
 Description: ${PROJECT_NAME} library
 Version: ${PACKAGE_FILE_VERSION}
-Libs: -l${PROJECT_NAME}
-Cflags: 
+Libs: -lusecure -lucommon ${ADDITIONAL_LIBS} ${PACKAGE_LIBS}
+Cflags: ${PACKAGE_FLAGS}
 

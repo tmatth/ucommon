@@ -21,16 +21,16 @@ Usage: ucommon-config [OPTION]
 
 Known values for OPTION are:
 
-  --prefix=DIR		change ucommon prefix [default $prefix]
-  --exec-prefix=DIR	change ucommon exec prefix [default $exec_prefix]
-  --libs		print library linking information
+  --prefix=DIR      change ucommon prefix [default $prefix]
+  --exec-prefix=DIR change ucommon exec prefix [default $exec_prefix]
+  --libs        print library linking information
   --clink       print c model linking information
-  --cflags		print pre-processor and compiler flags
+  --cflags      print pre-processor and compiler flags
   --includes    print framework include directory
   --plugins     print framework plugin directory
   --model       print the linking model used
-  --help		display this help and exit
-  --version		output version information
+  --help        display this help and exit
+  --version     output version information
 EOF
 
     exit $1
@@ -51,14 +51,14 @@ while test $# -gt 0; do
 
     case "$1" in
     --prefix=*)
-	prefix=$optarg
-	includedir=$prefix/include
-	libdir=$prefix/lib
-	;;
+    prefix=$optarg
+    includedir=$prefix/include
+    libdir=$prefix/lib
+    ;;
 
     --prefix)
-	echo $prefix
-	;;
+    echo $prefix
+    ;;
 
     --exec-prefix=*)
       exec_prefix=$optarg
@@ -70,43 +70,43 @@ while test $# -gt 0; do
       ;;
 
     --version)
-	echo @VERSION@
-	exit 0
-	;;
+    echo ${PACKAGE_FILE_VERSION}
+    exit 0
+    ;;
 
     --help)
-	usage 0
-	;;
+    usage 0
+    ;;
 
     --cflags)
-       	echo @UCOMMON_FLAGS@
-       	;;
+        echo ${PACKAGE_FLAGS}
+        ;;
 
     --libtool-libs)
-	if [ -r ${libdir}/libucommon.la ]
-	then
-	    echo ${libdir}/libucommon.la
-	fi
+    if [ -r ${libdir}/libucommon.la ]
+    then
+        echo ${libdir}/libucommon.la
+    fi
         ;;
 
     --model)
-       	echo @UCOMMON_MODEL@
-       	;;
+        echo CXX
+        ;;
 
-	--clink)
-		echo @UCOMMON_CLINK@
-		;;
+    --clink)
+        echo -lc
+        ;;
 
     --libs)
-		echo -lusecure -lucommon @SECURE_LIBS@ @UCOMMON_LINKED@ 
-       	;;
-	--includes)
-		echo @UCOMMON_INCLUDES@
-		;;
+        echo -lusecure -lucommon ${ADDITIONAL_LIBS} ${PACKAGE_LIBS}
+        ;;
+    --includes)
+        echo ${CMAKE_INSTALL_PREFIX}/include
+        ;;
     *)
-	usage
-	exit 1
-	;;
+    usage
+    exit 1
+    ;;
     esac
     shift
 done

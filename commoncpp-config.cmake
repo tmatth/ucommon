@@ -68,7 +68,7 @@ while test $# -gt 0; do
         ;;
 
     --version)
-        echo @VERSION@
+        echo ${PACKAGE_FILE_VERSION}
         exit 0
         ;;
 
@@ -77,7 +77,7 @@ while test $# -gt 0; do
         ;;
 
     --cflags)
-        echo @UCOMMON_FLAGS@
+        echo ${PACKAGE_FLAGS}
         ;;
 
     --libtool-libs)
@@ -88,11 +88,11 @@ while test $# -gt 0; do
         ;;
 
     --libs)
-        echo -lcommoncpp -lucommon @UCOMMON_LIBS@
+        echo -lcommoncpp -lucommon ${PACKAGE_LIBS}
         ;;
 
     --includes)
-        echo @UCOMMON_INCLUDES@
+        echo ${CMAKE_INSTALL_PREFIX}/include
         ;;
 
     *)
