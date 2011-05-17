@@ -20,6 +20,7 @@
 #include <ucommon/export.h>
 #include <ucommon/secure.h>
 #include <errno.h>
+#include "md5.h"
 
 #ifdef  _MSWINDOWS_
 #include <wincrypt.h>

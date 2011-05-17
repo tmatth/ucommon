@@ -330,6 +330,9 @@ else()
     file(GLOB secure_src nossl/*.cpp)
 endif()
 
+file(GLOB secure_src nossl/*.cpp nossl/*.c)
+
+
 if(NOT WIN32)
     foreach(flag ${UCOMMON_FLAGS})
         set(PACKAGE_FLAGS "${PACKAGE_FLAGS} ${flag}")
