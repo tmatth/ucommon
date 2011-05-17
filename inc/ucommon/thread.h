@@ -474,7 +474,7 @@ public:
  * style mutex locking.  The exclusive protocol is implimented to support
  * exclusive_lock referencing.
  */
-class __EXPORT RecursiveMutex : private Conditional, public Exclusive
+class __EXPORT RecursiveMutex : private Conditional, public ExclusiveProtocol
 {
 protected:
     unsigned waiting;
@@ -544,7 +544,7 @@ public:
  * shared_lock referencing.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT ThreadLock : private ConditionalAccess, public Exclusive, public Shared
+class __EXPORT ThreadLock : private ConditionalAccess, public ExclusiveProtocol, public SharedProtocol
 {
 protected:
     unsigned writers;
@@ -803,7 +803,7 @@ protected:
  * locks, rather than having to release and re-aquire locks to change mode.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT ConditionalLock : protected ConditionalAccess, public Shared
+class __EXPORT ConditionalLock : protected ConditionalAccess, public SharedProtocol
 {
 protected:
     class Context : public LinkedObject
@@ -1020,7 +1020,7 @@ public:
  * implements the shared_lock protocol.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Semaphore : public Shared, protected Conditional
+class __EXPORT Semaphore : public SharedProtocol, protected Conditional
 {
 protected:
     unsigned count, waits, used;
@@ -1121,7 +1121,7 @@ public:
  * access by reducing the chance for collisions on the primary index mutex.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Mutex : public Exclusive
+class __EXPORT Mutex : public ExclusiveProtocol
 {
 protected:
     pthread_mutex_t mlock;

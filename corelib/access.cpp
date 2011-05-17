@@ -20,23 +20,23 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-Shared::~Shared()
+SharedProtocol::~SharedProtocol()
 {
 }
 
-Exclusive::~Exclusive()
+ExclusiveProtocol::~ExclusiveProtocol()
 {
 }
 
-void Shared::Exclusive(void)
+void SharedProtocol::Exclusive(void)
 {
 }
 
-void Shared::Share(void)
+void SharedProtocol::Share(void)
 {
 }
 
-shared_lock::shared_lock(Shared *obj)
+shared_lock::shared_lock(SharedProtocol *obj)
 {
     assert(obj != NULL);
     lock = obj;
@@ -44,7 +44,7 @@ shared_lock::shared_lock(Shared *obj)
     lock->Shlock();
 }
 
-exclusive_lock::exclusive_lock(Exclusive *obj)
+exclusive_lock::exclusive_lock(ExclusiveProtocol *obj)
 {
     assert(obj != NULL);
     lock = obj;

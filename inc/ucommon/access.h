@@ -47,10 +47,10 @@ NAMESPACE_UCOMMON
  * exclusive lock while being actively referenced by a smart pointer.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Exclusive
+class __EXPORT ExclusiveProtocol
 {
 protected:
-    virtual ~Exclusive();
+    virtual ~ExclusiveProtocol();
 
 public:
     /**
@@ -76,10 +76,10 @@ public:
  * exclusive lock while being actively referenced by a smart pointer.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Shared
+class __EXPORT SharedProtocol
 {
 protected:
-    virtual ~Shared();
+    virtual ~SharedProtocol();
 
 public:
     /**
@@ -126,14 +126,14 @@ public:
 class __EXPORT exclusive_lock
 {
 private:
-    Exclusive *lock;
+    ExclusiveProtocol *lock;
 
 public:
     /**
      * Create an instance of an exclusive object reference.
      * @param object containing Exclusive base class protocol to lock.
      */
-    exclusive_lock(Exclusive *object);
+    exclusive_lock(ExclusiveProtocol *object);
 
     /**
      * Destroy reference to exclusively locked object, release lock.
@@ -172,7 +172,7 @@ public:
 class __EXPORT shared_lock
 {
 private:
-    Shared *lock;
+    SharedProtocol *lock;
     int state;
     bool modify;
 
@@ -181,7 +181,7 @@ public:
      * Create an instance of an exclusive object reference.
      * @param object containing Exclusive base class protocol to lock.
      */
-    shared_lock(Shared *object);
+    shared_lock(SharedProtocol *object);
 
     /**
      * Destroy reference to shared locked object, release lock.
@@ -224,42 +224,42 @@ public:
  * Convenience function to exclusively lock an object through it's protocol.
  * @param object to lock.
  */
-inline void lock(Exclusive *object)
+inline void lock(ExclusiveProtocol *object)
     {object->Exlock();}
 
 /**
  * Convenience function to unlock an exclusive object through it's protocol.
  * @param object to unlock.
  */
-inline void unlock(Exclusive *object)
+inline void unlock(ExclusiveProtocol *object)
     {object->Unlock();}
 
 /**
  * Convenience function to access (lock) shared object through it's protocol.
  * @param object to share lock.
  */
-inline void access(Shared *object)
+inline void access(SharedProtocol *object)
     {object->Shlock();}
 
 /**
  * Convenience function to unlock shared object through it's protocol.
  * @param object to unlock.
  */
-inline void release(Shared *object)
+inline void release(SharedProtocol *object)
     {object->Unlock();}
 
 /**
  * Convenience function to exclusive lock shared object through it's protocol.
  * @param object to exclusive lock.
  */
-inline void exclusive(Shared *object)
+inline void exclusive(SharedProtocol *object)
     {object->Exclusive();}
 
 /**
  * Convenience function to restore shared locking for object through it's protocol.
  * @param object to restore shared locking.
  */
-inline void share(Shared *object)
+inline void share(SharedProtocol *object)
     {object->Share();}
 
 /**
