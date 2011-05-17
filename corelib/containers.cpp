@@ -280,7 +280,7 @@ bool Buffer::operator!()
     return rtn;
 }
 
-queue::member::member(queue *q, Object *o) :
+queue::member::member(queue *q, ObjectProtocol *o) :
 OrderedObject(q)
 {
     assert(o != NULL);
@@ -323,7 +323,7 @@ queue::~queue()
     }
 }
 
-bool queue::remove(Object *o)
+bool queue::remove(ObjectProtocol *o)
 {
     assert(o != NULL);
 
@@ -347,12 +347,12 @@ bool queue::remove(Object *o)
     return rtn;
 }
 
-Object *queue::lifo(timeout_t timeout)
+ObjectProtocol *queue::lifo(timeout_t timeout)
 {
     struct timespec ts;
     bool rtn = true;
     member *member;
-    Object *obj = NULL;
+    ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
         gettimeout(timeout, &ts);
@@ -379,12 +379,12 @@ Object *queue::lifo(timeout_t timeout)
     return obj;
 }
 
-Object *queue::fifo(timeout_t timeout)
+ObjectProtocol *queue::fifo(timeout_t timeout)
 {
     bool rtn = true;
     struct timespec ts;
     linked_pointer<member> node;
-    Object *obj = NULL;
+    ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
         gettimeout(timeout, &ts);
@@ -414,7 +414,7 @@ Object *queue::fifo(timeout_t timeout)
     return obj;
 }
 
-bool queue::post(Object *object, timeout_t timeout)
+bool queue::post(ObjectProtocol *object, timeout_t timeout)
 {
     assert(object != NULL);
 
@@ -471,7 +471,7 @@ size_t queue::getCount(void)
 }
 
 
-stack::member::member(stack *S, Object *o) :
+stack::member::member(stack *S, ObjectProtocol *o) :
 LinkedObject((&S->usedlist))
 {
     assert(o != NULL);
@@ -514,7 +514,7 @@ stack::~stack()
     }
 }
 
-bool stack::remove(Object *o)
+bool stack::remove(ObjectProtocol *o)
 {
     assert(o != NULL);
 
@@ -538,12 +538,12 @@ bool stack::remove(Object *o)
     return rtn;
 }
 
-Object *stack::pull(timeout_t timeout)
+ObjectProtocol *stack::pull(timeout_t timeout)
 {
     bool rtn = true;
     struct timespec ts;
     member *member;
-    Object *obj = NULL;
+    ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
         gettimeout(timeout, &ts);
@@ -573,7 +573,7 @@ Object *stack::pull(timeout_t timeout)
     return obj;
 }
 
-bool stack::push(Object *object, timeout_t timeout)
+bool stack::push(ObjectProtocol *object, timeout_t timeout)
 {
     assert(object != NULL);
 

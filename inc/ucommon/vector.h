@@ -112,14 +112,14 @@ public:
     public:
 #pragma pack(1)
         vectorsize_t max, len;
-        Object *list[1];
+        ObjectProtocol *list[1];
 #pragma pack()
 
         array(vectorsize_t size);
         void dealloc(void);
-        void set(Object **items);
-        void add(Object **list);
-        void add(Object *obj);
+        void set(ObjectProtocol **items);
+        void add(ObjectProtocol **list);
+        void add(ObjectProtocol *obj);
         void purge(void);
         void inc(vectorsize_t adj);
         void dec(vectorsize_t adj);
@@ -132,7 +132,7 @@ protected:
 
     virtual void release(void);
     virtual void cow(vectorsize_t adj = 0);
-    Object **list(void) const;
+    ObjectProtocol **list(void) const;
 
     friend class Vector::array;
 
@@ -162,7 +162,7 @@ public:
      * @param items to place into the vector.
      * @param size of the vector to create, or use NULL item for end.
      */
-    Vector(Object **items, vectorsize_t size = 0);
+    Vector(ObjectProtocol **items, vectorsize_t size = 0);
 
     /**
      * Destroy the current reference counted vector of object pointers.
@@ -187,7 +187,7 @@ public:
      * @param index of member pointer to return.  Negative values from end.
      * @return object pointer of member.
      */
-    Object *get(int index) const;
+    ObjectProtocol *get(int index) const;
 
     /**
      * Copy the vector to an external pointer array.
@@ -202,14 +202,14 @@ public:
      * in iterations.
      * @return first object pointer.
      */
-    Object *begin(void) const;
+    ObjectProtocol *begin(void) const;
 
     /**
      * Get the last object pointer contained in the vector.  Typically used
      * in iterations.
      * @return last object pointer.
      */
-    Object *end(void) const;
+    ObjectProtocol *end(void) const;
 
     /**
      * Find the first instance of a specific pointer in the vector.
@@ -217,7 +217,7 @@ public:
      * @param offset to start searching in vector.
      * @return position of pointer in vector or npos if not found.
      */
-    vectorsize_t find(Object *pointer, vectorsize_t offset = 0) const;
+    vectorsize_t find(ObjectProtocol *pointer, vectorsize_t offset = 0) const;
 
     /**
      * Split the vector at a specified offset.  All members after the split
@@ -240,25 +240,25 @@ public:
      * @param position in vector to place object pointer.
      * @param pointer to place in vector.
      */
-    void set(vectorsize_t position, Object *pointer);
+    void set(vectorsize_t position, ObjectProtocol *pointer);
 
     /**
      * Set the vector to a list of objects terminated by a NULL pointer.
      * @param list of object pointers.
      */
-    void set(Object **list);
+    void set(ObjectProtocol **list);
 
     /**
      * Add (append) a NULL terminated list of objects to the vector.
      * @param list of object pointers to add.
      */
-    void add(Object **list);
+    void add(ObjectProtocol **list);
 
     /**
      * Add (append) a single object pointer to the vector.
      * @param pointer to add to vector.
      */
-    void add(Object *pointer);
+    void add(ObjectProtocol *pointer);
 
     /**
      * De-reference and remove all pointers from the vector.
@@ -289,7 +289,7 @@ public:
      * Return a pointer from the vector by array reference.
      * @param index of vector member pointer to return.
      */
-    inline Object *operator[](int index)
+    inline ObjectProtocol *operator[](int index)
         {return get(index);};
 
     /**
@@ -297,7 +297,7 @@ public:
      * @param position to assign.
      * @param pointer to object to assign to vector.
      */
-    inline void operator()(vectorsize_t position, Object *pointer)
+    inline void operator()(vectorsize_t position, ObjectProtocol *pointer)
         {set(position, pointer);};
 
     /**
@@ -305,14 +305,14 @@ public:
      * @param position to retrieve object from.
      * @return object pointer retrieved from vector.
      */
-    inline Object *operator()(vectorsize_t position)
+    inline ObjectProtocol *operator()(vectorsize_t position)
         {return get(position);};
 
     /**
      * Append a member to the vector directly.
      * @param pointer to object to add to vector.
      */
-    inline void operator()(Object *pointer)
+    inline void operator()(ObjectProtocol *pointer)
         {add(pointer);};
 
     /**

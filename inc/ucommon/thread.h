@@ -1370,7 +1370,7 @@ class __EXPORT LockedPointer
 private:
     friend class locked_release;
     pthread_mutex_t mutex;
-    Object *pointer;
+    ObjectProtocol *pointer;
 
 protected:
     /**
@@ -1382,19 +1382,19 @@ protected:
      * Replace existing object with a new one for next request.
      * @param object to register with pointer.
      */
-    void replace(Object *object);
+    void replace(ObjectProtocol *object);
 
     /**
      * Create a duplicate reference counted instance of the current object.
      * @return duplicate reference counted object.
      */
-    Object *dup(void);
+    ObjectProtocol *dup(void);
 
     /**
      * Replace existing object through assignment.
      * @param object to assign.
      */
-    inline void operator=(Object *object)
+    inline void operator=(ObjectProtocol *object)
         {replace(object);};
 };
 
@@ -1717,7 +1717,7 @@ public:
 class __EXPORT locked_release
 {
 protected:
-    Object *object; /**< locked object protected by locked_release */
+    ObjectProtocol *object; /**< locked object protected by locked_release */
 
     /**
      * Create an unassigned locked object pointer base.

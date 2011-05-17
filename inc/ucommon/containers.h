@@ -210,8 +210,8 @@ private:
     class __LOCAL member : public OrderedObject
     {
     public:
-        member(queue *q, Object *obj);
-        Object *object;
+        member(queue *q, ObjectProtocol *obj);
+        ObjectProtocol *object;
     };
 
     friend class member;
@@ -241,7 +241,7 @@ public:
      * @param object to remove.
      * @return true if object was removed, false if not found.
      */
-    bool remove(Object *object);
+    bool remove(ObjectProtocol *object);
 
     /**
      * Post an object into the queue by it's pointer.  This can wait for
@@ -251,7 +251,7 @@ public:
      * @param timeout to wait if queue is full in milliseconds.
      * @return true if object posted, false if queue full and timeout expired.
      */
-    bool post(Object *object, timeout_t timeout = 0);
+    bool post(ObjectProtocol *object, timeout_t timeout = 0);
 
     /**
      * Get and remove last object posted to the queue.  This can wait for
@@ -260,7 +260,7 @@ public:
      * @param timeout to wait if empty in milliseconds.
      * @return object from queue or NULL if empty and timed out.
      */
-    Object *fifo(timeout_t timeout = 0);
+    ObjectProtocol *fifo(timeout_t timeout = 0);
 
     /**
      * Get and remove first object posted to the queue.  This can wait for
@@ -269,7 +269,7 @@ public:
      * @param timeout to wait if empty in milliseconds.
      * @return object from queue or NULL if empty and timed out.
      */
-    Object *lifo(timeout_t timeout = 0);
+    ObjectProtocol *lifo(timeout_t timeout = 0);
 
     /**
      * Get number of object points currently in the queue.
@@ -283,7 +283,7 @@ public:
      * @param object to remove.
      * @return true if removed, false if not found.
      */
-    static bool remove(queue& queue, Object *object)
+    static bool remove(queue& queue, ObjectProtocol *object)
         {return queue.remove(object);};
 
     /**
@@ -293,7 +293,7 @@ public:
      * @param timeout to wait if full.
      * @return true if posted, false if timed out while full.
      */
-    static bool post(queue& queue, Object *object, timeout_t timeout = 0)
+    static bool post(queue& queue, ObjectProtocol *object, timeout_t timeout = 0)
         {return queue.post(object, timeout);};
 
     /**
@@ -302,7 +302,7 @@ public:
      * @param timeout to wait if empty.
      * @return first object or NULL if timed out empty.
      */
-    static Object *fifo(queue& queue, timeout_t timeout = 0)
+    static ObjectProtocol *fifo(queue& queue, timeout_t timeout = 0)
         {return queue.fifo(timeout);};
 
     /**
@@ -311,7 +311,7 @@ public:
      * @param timeout to wait if empty.
      * @return last object or NULL if timed out empty.
      */
-    static Object *lifo(queue& queue, timeout_t timeout = 0)
+    static ObjectProtocol *lifo(queue& queue, timeout_t timeout = 0)
         {return queue.lifo(timeout);};
 
     /**
@@ -341,8 +341,8 @@ private:
     class __LOCAL member : public LinkedObject
     {
     public:
-        member(stack *s, Object *obj);
-        Object *object;
+        member(stack *s, ObjectProtocol *obj);
+        ObjectProtocol *object;
     };
 
     friend class member;
@@ -371,7 +371,7 @@ public:
      * @param object to remove.
      * @return true if object was removed, false if not found.
      */
-    bool remove(Object *object);
+    bool remove(ObjectProtocol *object);
 
     /**
      * Push an object into the stack by it's pointer.  This can wait for
@@ -381,7 +381,7 @@ public:
      * @param timeout to wait if stack is full in milliseconds.
      * @return true if object pushed, false if stack full and timeout expired.
      */
-    bool push(Object *object, timeout_t timeout = 0);
+    bool push(ObjectProtocol *object, timeout_t timeout = 0);
 
     /**
      * Get and remove last object pushed on the stack.  This can wait for
@@ -390,7 +390,7 @@ public:
      * @param timeout to wait if empty in milliseconds.
      * @return object pulled from stack or NULL if empty and timed out.
      */
-    Object *pull(timeout_t timeout = 0);
+    ObjectProtocol *pull(timeout_t timeout = 0);
 
     /**
      * Get number of object points currently in the stack.
@@ -404,7 +404,7 @@ public:
      * @param object to remove.
      * @return true if removed, false if not found.
      */
-    static inline bool remove(stack& stack, Object *object)
+    static inline bool remove(stack& stack, ObjectProtocol *object)
         {return stack.remove(object);};
 
     /**
@@ -414,7 +414,7 @@ public:
      * @param timeout to wait if full.
      * @return true if pusheded, false if timed out while full.
      */
-    static inline bool push(stack& stack, Object *object, timeout_t timeout = 0)
+    static inline bool push(stack& stack, ObjectProtocol *object, timeout_t timeout = 0)
         {return stack.push(object, timeout);};
 
     /**
@@ -423,7 +423,7 @@ public:
      * @param timeout to wait if empty.
      * @return last object or NULL if timed out empty.
      */
-    static inline Object *pull(stack& stack, timeout_t timeout = 0)
+    static inline ObjectProtocol *pull(stack& stack, timeout_t timeout = 0)
         {return stack.pull(timeout);};
 
     /**
@@ -666,7 +666,7 @@ typedef queue fifo_t;
  * @param stack to push into.
  * @param object to push.
  */
-inline void push(stack_t &stack, Object *object)
+inline void push(stack_t &stack, ObjectProtocol *object)
     {stack.push(object);}
 
 /**
@@ -675,7 +675,7 @@ inline void push(stack_t &stack, Object *object)
  * @param timeout to wait to pull.
  * @return object pulled.
  */
-inline Object *pull(stack_t &stack, timeout_t timeout = Timer::inf)
+inline ObjectProtocol *pull(stack_t &stack, timeout_t timeout = Timer::inf)
     {return stack.pull(timeout);}
 
 /**
@@ -683,7 +683,7 @@ inline Object *pull(stack_t &stack, timeout_t timeout = Timer::inf)
  * @param stack to remove from.
  * @param object to remove.
  */
-inline void remove(stack_t &stack, Object *object)
+inline void remove(stack_t &stack, ObjectProtocol *object)
     {stack.remove(object);}
 
 /**
@@ -691,7 +691,7 @@ inline void remove(stack_t &stack, Object *object)
  * @param fifo to push into.
  * @param object to push.
  */
-inline void push(fifo_t &fifo, Object *object)
+inline void push(fifo_t &fifo, ObjectProtocol *object)
     {fifo.post(object);}
 
 /**
@@ -700,7 +700,7 @@ inline void push(fifo_t &fifo, Object *object)
  * @param timeout to wait to pull.
  * @return object pulled.
  */
-inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
+inline ObjectProtocol *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
     {return fifo.fifo(timeout);}
 
 /**
@@ -708,7 +708,7 @@ inline Object *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
  * @param fifo to remove from.
  * @param object to remove.
  */
-inline void remove(fifo_t &fifo, Object *object)
+inline void remove(fifo_t &fifo, ObjectProtocol *object)
     {fifo.remove(object);}
 
 END_NAMESPACE

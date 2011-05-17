@@ -1814,7 +1814,7 @@ LockedPointer::LockedPointer()
     pointer = NULL;
 }
 
-void LockedPointer::replace(Object *obj)
+void LockedPointer::replace(ObjectProtocol *obj)
 {
     assert(obj != NULL);
 
@@ -1826,9 +1826,9 @@ void LockedPointer::replace(Object *obj)
     pthread_mutex_unlock(&mutex);
 }
 
-Object *LockedPointer::dup(void)
+ObjectProtocol *LockedPointer::dup(void)
 {
-    Object *temp;
+    ObjectProtocol *temp;
     pthread_mutex_lock(&mutex);
     temp = pointer;
     if(temp)

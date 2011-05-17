@@ -27,25 +27,16 @@ CountedObject::CountedObject()
     count = 0;
 }
 
-CountedObject::CountedObject(const Object &source)
+CountedObject::CountedObject(const ObjectProtocol &source)
 {
     count = 0;
 }
 
-Object::~Object()
+ObjectProtocol::~ObjectProtocol()
 {
 }
 
-void Object::release(void)
-{
-    delete this;
-}
-
-void Object::retain(void)
-{
-}
-
-Object *Object::copy(void)
+ObjectProtocol *ObjectProtocol::copy(void)
 {
     retain();
     return this;
@@ -70,7 +61,7 @@ void CountedObject::release(void)
     dealloc();
 }
 
-auto_object::auto_object(Object *o)
+auto_object::auto_object(ObjectProtocol *o)
 {
     if(o)
         o->retain();
@@ -112,19 +103,19 @@ auto_object::operator bool() const
     return (object != 0);
 }
 
-bool auto_object::operator==(Object *o) const
+bool auto_object::operator==(ObjectProtocol *o) const
 {
     assert(o != NULL);
     return object == o;
 }
 
-bool auto_object::operator!=(Object *o) const
+bool auto_object::operator!=(ObjectProtocol *o) const
 {
     assert(o != NULL);
     return object != o;
 }
 
-void auto_object::operator=(Object *o)
+void auto_object::operator=(ObjectProtocol *o)
 {
     if(object == o)
         return;
@@ -140,8 +131,8 @@ sparse_array::sparse_array(unsigned m)
 {
     assert(m > 0);
     max = m;
-    vector = new Object*[m];
-    memset(vector, 0, sizeof(Object *) * m);
+    vector = new ObjectProtocol *[m];
+    memset(vector, 0, sizeof(ObjectProtocol *) * m);
 }
 
 sparse_array::~sparse_array()
@@ -172,9 +163,9 @@ unsigned sparse_array::count(void)
     return c;
 }
 
-Object *sparse_array::get(unsigned pos)
+ObjectProtocol *sparse_array::get(unsigned pos)
 {
-    Object *obj;
+    ObjectProtocol *obj;
 
     if(pos >= max)
         return NULL;

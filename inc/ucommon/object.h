@@ -48,28 +48,28 @@ NAMESPACE_UCOMMON
  * all inherited object types.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Object
+class __EXPORT ObjectProtocol
 {
 public:
     /**
      * Method to retain (or increase retention) of an object.
      */
-    virtual void retain(void);
+    virtual void retain(void) = 0;
 
     /**
      * Method to release (or decrease retention) of an object.
      */
-    virtual void release(void);
+    virtual void release(void) = 0;
 
     /**
      * Required virtual destructor.
      */
-    virtual ~Object();
+    virtual ~ObjectProtocol();
 
     /**
      * Retain (increase retention of) object when copying.
      */
-    Object *copy(void);
+    ObjectProtocol *copy(void);
 
     /**
      * Increase retention operator.
@@ -91,7 +91,7 @@ public:
  * automatic heap management when used in conjunction with smart pointers.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT CountedObject : public Object
+class __EXPORT CountedObject : public ObjectProtocol
 {
 private:
     volatile unsigned count;
@@ -108,7 +108,7 @@ protected:
      * retain the original and we do reset our count to mark as
      * initially unreferenced.
      */
-    CountedObject(const Object &ref);
+    CountedObject(const ObjectProtocol &ref);
 
     /**
      * Dealloc object no longer referenced.  The dealloc routine would commonly
@@ -165,7 +165,7 @@ public:
 class __EXPORT auto_object
 {
 protected:
-    Object *object;
+    ObjectProtocol *object;
 
     auto_object();
 
@@ -174,7 +174,7 @@ public:
      * Construct an auto-pointer referencing an existing object.
      * @param object we point to.
      */
-    auto_object(Object *object);
+    auto_object(ObjectProtocol *object);
 
     /**
      * Construct an auto-pointer as a copy of another pointer.  The
@@ -213,14 +213,14 @@ public:
      * @param object we compare to.
      * @return true if this is the object our pointer references.
      */
-    bool operator==(Object *object) const;
+    bool operator==(ObjectProtocol *object) const;
 
     /**
      * test if the object being referenced is not the same as the object we specify.
      * @param object we compare to.
      * @return true if this is not the object our pointer references.
      */
-    bool operator!=(Object *object) const;
+    bool operator!=(ObjectProtocol *object) const;
 
     /**
      * Set our pointer to a specific object.  If the pointer currently
@@ -228,7 +228,7 @@ public:
      * references our new object and that new object is retained.
      * @param object to assign to.
      */
-    void operator=(Object *object);
+    void operator=(ObjectProtocol *object);
 };
 
 /**
@@ -245,7 +245,7 @@ public:
 class __EXPORT sparse_array
 {
 private:
-    Object **vector;
+    ObjectProtocol **vector;
     unsigned max;
 
 protected:
@@ -254,7 +254,7 @@ protected:
      * are initially requested.
      * @return new object.
      */
-    virtual Object *create(void) = 0;
+    virtual ObjectProtocol *create(void) = 0;
 
     /**
      * Purge the array by deleting all created objects.
@@ -266,7 +266,7 @@ protected:
      * @param offset in array.
      * @return new or existing object.
      */
-    Object *get(unsigned offset);
+    ObjectProtocol *get(unsigned offset);
 
     /**
      * Create a sparse array of known size.  No member objects are
@@ -326,7 +326,7 @@ public:
         {return get(offset);};
 
 private:
-    __LOCAL Object *create(void)
+    __LOCAL ObjectProtocol *create(void)
         {return new T;};
 };
 
@@ -471,7 +471,7 @@ public:
      * @param typed object to assign.
      */
     inline void operator=(T *typed)
-        {P::operator=((Object *)typed);};
+        {P::operator=((ObjectProtocol *)typed);};
 
     /**
      * See if pointer is set.
@@ -490,21 +490,21 @@ public:
  * Convenience function to access object retention.
  * @param object we are retaining.
  */
-inline void retain(Object *object)
+inline void retain(ObjectProtocol *object)
     {object->retain();}
 
 /**
  * Convenience function to access object release.
  * @param object we are releasing.
  */
-inline void release(Object *object)
+inline void release(ObjectProtocol *object)
     {object->release();}
 
 /**
  * Convenience function to access object copy.
  * @param object we are copying.
  */
-inline Object *copy(Object *object)
+inline ObjectProtocol *copy(ObjectProtocol *object)
     {return object->copy();}
 
 END_NAMESPACE

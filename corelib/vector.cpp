@@ -86,7 +86,7 @@ void Vector::array::inc(vectorsize_t offset)
     list[len] = 0;
 }
 
-void Vector::array::set(Object **items)
+void Vector::array::set(ObjectProtocol **items)
 {
     assert(items != NULL);
 
@@ -94,7 +94,7 @@ void Vector::array::set(Object **items)
     add(items);
 }
 
-void Vector::array::add(Object **items)
+void Vector::array::add(ObjectProtocol **items)
 {
     assert(items != NULL);
 
@@ -116,7 +116,7 @@ void Vector::array::add(Object **items)
     list[len] = 0;
 }
 
-void Vector::array::add(Object *obj)
+void Vector::array::add(ObjectProtocol *obj)
 {
     assert(obj);
 
@@ -149,7 +149,7 @@ Vector::Vector()
     data = NULL;
 }
 
-Vector::Vector(Object **items, vectorsize_t limit)
+Vector::Vector(ObjectProtocol **items, vectorsize_t limit)
 {
     assert(items);
 
@@ -174,7 +174,7 @@ Vector::~Vector()
     release();
 }
 
-Object **Vector::list(void) const
+ObjectProtocol **Vector::list(void) const
 {
     if(!data)
         return NULL;
@@ -182,7 +182,7 @@ Object **Vector::list(void) const
     return data->list;
 }
 
-Object *Vector::get(int offset) const
+ObjectProtocol *Vector::get(int offset) const
 {
     if(!data || !data->len)
         return NULL;
@@ -229,7 +229,7 @@ void Vector::release(void)
     data = NULL;
 }
 
-Object *Vector::begin(void) const
+ObjectProtocol *Vector::begin(void) const
 {
     if(!data)
         return NULL;
@@ -237,7 +237,7 @@ Object *Vector::begin(void) const
     return data->list[0];
 }
 
-Object *Vector::end(void) const
+ObjectProtocol *Vector::end(void) const
 {
     if(!data || !data->len)
         return NULL;
@@ -245,7 +245,7 @@ Object *Vector::end(void) const
     return data->list[data->len - 1];
 }
 
-vectorsize_t Vector::find(Object *obj, vectorsize_t pos) const
+vectorsize_t Vector::find(ObjectProtocol *obj, vectorsize_t pos) const
 {
     assert(obj != NULL);
 
@@ -290,7 +290,7 @@ void Vector::rsplit(vectorsize_t pos)
     data->list[head] = NULL;
 }
 
-void Vector::set(Object **list)
+void Vector::set(ObjectProtocol **list)
 {
     assert(list);
 
@@ -302,7 +302,7 @@ void Vector::set(Object **list)
         data->set(list);
 }
 
-void Vector::set(vectorsize_t pos, Object *obj)
+void Vector::set(vectorsize_t pos, ObjectProtocol *obj)
 {
     assert(obj != NULL);
 
@@ -320,7 +320,7 @@ void Vector::set(vectorsize_t pos, Object *obj)
     obj->retain();
 }
 
-void Vector::add(Object **list)
+void Vector::add(ObjectProtocol **list)
 {
     assert(list);
 
@@ -328,7 +328,7 @@ void Vector::add(Object **list)
         data->add(list);
 }
 
-void Vector::add(Object *obj)
+void Vector::add(ObjectProtocol *obj)
 {
     assert(obj);
 
@@ -370,7 +370,7 @@ void Vector::cow(vectorsize_t size)
     if(!data || !data->max || data->isCopied() || size > data->max) {
         array *a = create(size);
         a->len = data->len;
-        memcpy(a->list, data->list, data->len * sizeof(Object *));
+        memcpy(a->list, data->list, data->len * sizeof(ObjectProtocol *));
         a->list[a->len] = 0;
         a->retain();
         data->release();

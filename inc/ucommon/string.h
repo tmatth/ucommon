@@ -79,7 +79,7 @@ typedef unsigned short strsize_t;
  * manipulate ordinary null terminated character arrays directly in memory.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT string : public Object
+class __EXPORT string : public ObjectProtocol
 {
 protected:
     /**
