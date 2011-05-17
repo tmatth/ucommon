@@ -7,6 +7,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 link_directories(${CMAKE_CURRENT_BINARY_DIR}
          ${CMAKE_CURRENT_BINARY_DIR}/../src)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/keydata.conf ${CMAKE_CURRENT_BINARY_DIR}/keydata.conf COPYONLY)
+
 add_executable(test-ucommonLinked linked.cpp)
 target_link_libraries(test-ucommonLinked ${UCOMMON_DEPEND})
 add_test(NAME ucommonLinked COMMAND test-ucommonLinked)
