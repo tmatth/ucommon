@@ -17,8 +17,6 @@
 
 #include "local.h"
 
-#define MAX_DIGEST_SIZE 20
-
 Digest::Digest()
 {
     hashtype = (void *)" ";
