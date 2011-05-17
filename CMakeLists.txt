@@ -306,14 +306,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc 
 add_definitions(${UCOMMON_FLAGS} ${WITH_CFLAGS})
 link_libraries(${WITH_LIBS})
 
-# by default we build static libs for windows, shared libs for unix.
-# we may also set this from a top level cmake or -DWITH_XX_LIBS
-if(BUILD_STATIC AND NOT BUILD_SHARED)
-    set(BUILD_LIBRARY_TYPE STATIC)
-else()
-    set(BUILD_LIBRARY_TYPE SHARED)
-endif()
-
 file(GLOB common_src corelib/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
 file(GLOB commoncpp_src commoncpp/*.cpp)
@@ -382,10 +374,12 @@ if(WIN32 AND NOT BUILD_STATIC)
 
     add_library(static-usecure STATIC ${secure_src} ${secure_inc})
     add_dependencies(static-usecure static-ucommon)
+    install(targets static-ucommon static-usecure destination ${install_libdir} component libraries)
 
     if(BUILD_COMPAT)
         add_library(static-commoncpp STATIC ${commoncpp_src} ${commoncpp_inc})
         add_dependencies(static-commoncpp static-ucommon)
+        install(targets static-commoncpp destination ${install_libdir} component libraries)
     endif()
 
     set(UCOMMON_DEPEND "static-ucommon")
