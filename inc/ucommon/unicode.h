@@ -491,16 +491,16 @@ public:
 };
 
 inline ucs4_t *strudup(const char *string)
-    {return utf8::udup(string);};
+    {return utf8::udup(string);}
 
 inline ucs2_t *strwdup(const char *string)
-    {return utf8::wdup(string);};
+    {return utf8::wdup(string);}
 
 inline void strwfree(ucs2_t *str)
-    {::free(str);};
+    {::free(str);}
 
 inline void strufree(ucs4_t *str)
-    {::free(str);};
+    {::free(str);}
 
 /**
  * Convenience type for utf8 encoded strings.

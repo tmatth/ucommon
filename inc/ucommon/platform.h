@@ -560,6 +560,6 @@ typedef double Real;
  * @param string to delete.
  */
 inline void strfree(char *string)
-    {free(string);};
+    {free(string);}
 
 #endif
