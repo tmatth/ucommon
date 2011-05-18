@@ -43,6 +43,10 @@
 #include <commoncpp/exception.h>
 #include <commoncpp/thread.h>
 
+#ifdef  _MSWINDOWS_
+#define MAX_SEM_VALUE 1000000
+#endif
+
 using namespace COMMONCPP_NAMESPACE;
 
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
@@ -195,15 +199,15 @@ void Thread::notify(Thread *thread)
 
 void Thread::start(void)
 {
-    if(joining != INVALID_HANDLE_VALUE)
+    if(running != INVALID_HANDLE_VALUE)
         return;
 
     if(stack == 1)
         stack = 1024;
 
-    joining = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
-    if(!joining)
-        joining = INVALID_HANDLE_VALUE;
+    running = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
+    if(!running)
+        running = INVALID_HANDLE_VALUE;
     else
         terminated = false;
 }
@@ -690,7 +694,7 @@ size_t Buffer::wait(void *buf, timeout_t timeout)
 
     if(!timeout)
             timeout = INFINITE;
-    if(Thread::waitThread(sem_head, timeout) != WAIT_OBJECT_0)
+    if(WaitForSingleObject(sem_head, timeout) != WAIT_OBJECT_0)
         return Buffer::timeout;
     enterMutex();
     rc = onWait(buf);
@@ -707,7 +711,7 @@ size_t Buffer::post(void *buf, timeout_t timeout)
     if(!timeout)
             timeout = INFINITE;
 
-    if(Thread::waitThread(sem_tail, timeout) != WAIT_OBJECT_0)
+    if(WaitForSingleObject(sem_tail, timeout) != WAIT_OBJECT_0)
         return Buffer::timeout;
     enterMutex();
     rc = onPost(buf);

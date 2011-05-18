@@ -1875,7 +1875,7 @@ Thread::Thread(size_t size)
     stack = size;
     priority = 0;
 #ifdef  _MSWINDOWS_
-    cancellor = INVALID_HANDLE;
+    cancellor = INVALID_HANDLE_VALUE;
 #else
     cancellor = NULL;
 #endif
@@ -1952,7 +1952,7 @@ void Thread::policy(int polid)
 JoinableThread::JoinableThread(size_t size)
 {
 #ifdef  _MSWINDOWS_
-    canecellor = INVALID_HANDLE_VALUE;
+    cancellor = INVALID_HANDLE_VALUE;
     running = INVALID_HANDLE_VALUE;
     joining = false;
 #else
@@ -2079,7 +2079,7 @@ void DetachedThread::start(int adj)
 
     hThread = (HANDLE)_beginthreadex(NULL, stack, &exec_thread, this, 0, (unsigned int *)&tid);
     if(hThread != INVALID_HANDLE_VALUE)
-        running = true;
+        active = true;
     CloseHandle(hThread);
 }
 

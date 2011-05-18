@@ -197,10 +197,10 @@ size_t fbuf::_push(const char *buf, size_t size)
 
     if(is_input()) {
         // if read & write separate threads, protect i/o reposition
-        mutex::protect(this);
+        Mutex::protect(this);
         seekerr = fsys::seek(outpos);
         if(seekerr) {
-            mutex::release(this);
+            Mutex::release(this);
             return 0;
         }
     }
@@ -209,7 +209,7 @@ size_t fbuf::_push(const char *buf, size_t size)
 
     if(is_input()) {
         seekerr = fsys::seek(inpos);
-        mutex::release(this);
+        Mutex::release(this);
         if(result >= 0 && seekerr)
             seteof();
     }
@@ -234,12 +234,12 @@ size_t fbuf::_pull(char *buf, size_t size)
 #else
 
     if(is_output())
-        mutex::protect(this);
+        Mutex::protect(this);
 
     result = fsys::read(buf, size);
 
     if(is_output())
-        mutex::release(this);
+        Mutex::release(this);
 #endif
 
     if(result < 0)

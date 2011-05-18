@@ -911,7 +911,6 @@ bool Serial::isPending(Pending pending, timeout_t timeout)
         }
         }
     else {
-        Thread::Cancel save = Thread::enterCancel();
         OVERLAPPED ol;
         DWORD dwMask;
         DWORD dwEvents = 0;
@@ -948,7 +947,6 @@ bool Serial::isPending(Pending pending, timeout_t timeout)
         if(ol.hEvent != INVALID_HANDLE_VALUE)
             CloseHandle(ol.hEvent);
 
-        Thread::exitCancel(save);
         if(suc == FALSE)
                 return false;
         return true;
