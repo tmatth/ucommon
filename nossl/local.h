@@ -21,6 +21,7 @@
 #include <ucommon/secure.h>
 #include <errno.h>
 #include "md5.h"
+#include "sha1.h"
 
 #ifdef  _MSWINDOWS_
 #include <wincrypt.h>
