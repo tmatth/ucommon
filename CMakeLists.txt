@@ -374,12 +374,12 @@ if(WIN32 AND NOT BUILD_STATIC)
 
     add_library(static-usecure STATIC ${secure_src} ${secure_inc})
     add_dependencies(static-usecure static-ucommon)
-    install(targets static-ucommon static-usecure destination ${install_libdir} component libraries)
+    install(TARGETS static-ucommon static-usecure DESTINATION ${INSTALL_LIBDIR} COMPONENTS libraries)
 
     if(BUILD_COMPAT)
         add_library(static-commoncpp STATIC ${commoncpp_src} ${commoncpp_inc})
         add_dependencies(static-commoncpp static-ucommon)
-        install(targets static-commoncpp destination ${install_libdir} component libraries)
+        install(TARGETS static-commoncpp DESTINATION ${INSTALL_LIBDIR} COMPONENTS libraries)
     endif()
 
     set(UCOMMON_DEPEND "static-ucommon")
