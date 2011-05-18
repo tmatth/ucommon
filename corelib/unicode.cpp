@@ -292,6 +292,46 @@ ucs4_t utf8::put(ucs4_t code, CharacterProtocol& cp)
     return code;
 }
 
+ucs4_t *utf8::udup(const char *string)
+{
+    if(!string)
+        return NULL;
+
+    unsigned len = count(string);
+    unsigned pos = 0;
+    ucs4_t *out = (ucs4_t *)malloc(sizeof(ucs4_t) * (++len));
+
+    while(*string) {
+        out[pos++] = utf8::codepoint(string);
+        string += utf8::size(string);
+    }
+    out[pos] = 0;
+    return out;
+}
+
+ucs2_t *utf8::wdup(const char *string)
+{
+    if(!string)
+        return NULL;
+
+    unsigned len = count(string);
+    unsigned pos = 0;
+    ucs2_t *out = (ucs2_t *)malloc(sizeof(ucs2_t) * (++len));
+    ucs4_t ch;
+
+    while(*string) {
+        ch = utf8::codepoint(string);
+        if(ch >= 0x10000 || ch < 0) {
+            free(out);
+            return NULL;
+        }
+        out[pos++] = (ucs2_t)ch;
+        string += utf8::size(string);
+    }
+    out[pos] = 0;
+    return out;
+}
+
 size_t utf8::unpack(const unicode_t str, CharacterProtocol& cp)
 {
     unsigned points = 0;

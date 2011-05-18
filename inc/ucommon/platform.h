@@ -555,4 +555,11 @@ typedef long Integer;
 typedef unsigned long Unsigned;
 typedef double Real;
 
+/**
+ * Delete a string from the heap.  Used in response to strdup.
+ * @param string to delete.
+ */
+inline void strfree(char *string)
+    {free(string);};
+
 #endif

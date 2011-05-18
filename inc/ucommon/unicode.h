@@ -133,6 +133,16 @@ public:
     static size_t pack(unicode_t unicode, CharacterProtocol& buffer, size_t size);
 
     /**
+     * Dup a utf8 string into a ucs4_t string.
+     */
+    static ucs4_t *udup(const char *string);
+
+    /**
+     * Dup a utf8 string into a ucs2_t representation.
+     */
+    static ucs2_t *wdup(const char *string);
+
+    /**
      * Find first occurance of character in string.
      * @param string to search in.
      * @param character code to search for.
@@ -479,6 +489,18 @@ public:
     inline size_t len(void) const
         {return utf8::count((const char *)text);};
 };
+
+inline ucs4_t *strudup(const char *string)
+    {return utf8::udup(string);};
+
+inline ucs2_t *strwdup(const char *string)
+    {return utf8::wdup(string);};
+
+inline void strwfree(ucs2_t *str)
+    {::free(str);};
+
+inline void strufree(ucs4_t *str)
+    {::free(str);};
 
 /**
  * Convenience type for utf8 encoded strings.

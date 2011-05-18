@@ -63,7 +63,7 @@ if(MSVC60)
     MARK_AS_ADVANCED(FORCE BUILD_STDLIB BUILD_STATIC POSIX_TIMERS)
 #   option(BUILD_TESTS "Set to ON to build test programs" OFF)
 elseif(WIN32)
-    option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
+    option(BUILD_STATIC "Set to OFF to build shared libraries" OFF)
     option(BUILD_STDLIB "Set to OFF to disable C++ stdlib" ON)
 #   option(BUILD_TESTS "Set to ON to build test programs" OFF)
     set(POSIX_TIMERS OFF CACHE BOOL "does not use posix timers" FORCE)
@@ -305,6 +305,15 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc ${WITH_INCLUDES})
 add_definitions(${UCOMMON_FLAGS} ${WITH_CFLAGS})
 link_libraries(${WITH_LIBS})
+
+# by default we build static libs for windows, shared libs for unix.
+# we may also set this from a top level cmake or -DWITH_XX_LIBS
+
+if(BUILD_STATIC)
+    set(BUILD_LIBRARY_TYPE STATIC)
+else()
+    set(BUILD_LIBRARY_TYPE SHARED)
+endif()
 
 file(GLOB common_src corelib/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
