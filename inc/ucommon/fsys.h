@@ -311,10 +311,7 @@ public:
      * @param buffer to save status info in.
      * @return error number or 0 on success.
      */
-    int stat(struct stat *buffer);
-
-    inline int fileinfo(fileinfo_t *buffer)
-        {return stat(buffer);};
+    int fileinfo(fileinfo_t *buffer);
 
     /**
      * Truncate file to specified length.  The file pointer is positioned
@@ -351,10 +348,7 @@ public:
      * @param buffer to save stat info.
      * @return error number or 0 on success.
      */
-    static int stat(const char *path, struct stat *buffer);
-
-    static inline int fileinfo(const char *path, fileinfo_t *buffer)
-        {return stat(path, buffer);};
+    static int fileinfo(const char *path, fileinfo_t *buffer);
 
     /**
      * Remove a file.

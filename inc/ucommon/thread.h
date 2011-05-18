@@ -1492,6 +1492,7 @@ protected:
     void *cancellor;
 #endif
 
+    enum {} reserved;   // cancel mode?
     pthread_t tid;
     size_t stack;
     int priority;

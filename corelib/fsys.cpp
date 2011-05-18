@@ -167,7 +167,7 @@ int fsys::removeDir(const char *path)
     return 0;
 }
 
-int fsys::stat(const char *path, struct stat *buf)
+int fsys::fileinfo(const char *path, struct stat *buf)
 {
     if(_stat(path, (struct _stat *)(buf)))
         return remapError();
@@ -185,7 +185,7 @@ int fsys::trunc(offset_t offset)
     return remapError();
 }
 
-int fsys::stat(struct stat *buf)
+int fsys::fileinfo(struct stat *buf)
 {
     int fn = _open_osfhandle((long int)(fd), _O_RDONLY);
 
@@ -698,7 +698,7 @@ void fsys::open(const char *path, access_t access)
 #endif
 }
 
-int fsys::stat(const char *path, struct stat *ino)
+int fsys::fileinfo(const char *path, struct stat *ino)
 {
     if(::stat(path, ino))
         return remapError();
@@ -725,7 +725,7 @@ int fsys::trunc(offset_t offset)
 }
 #endif
 
-int fsys::stat(struct stat *ino)
+int fsys::fileinfo(struct stat *ino)
 {
     if(::fstat(fd, ino)) {
         error = remapError();
