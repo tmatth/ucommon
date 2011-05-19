@@ -25,18 +25,10 @@ typedef struct MD5Context {
     uint8_t buffer[MD5_BLOCK_LENGTH];  /* input buffer */
 } MD5_CTX;
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 void     MD5Init(MD5_CTX *);
 void     MD5Update(MD5_CTX *, const uint8_t *, size_t);
 void     MD5Pad(MD5_CTX *);
 void     MD5Final(uint8_t [MD5_DIGEST_LENGTH], MD5_CTX *);
 void     MD5Transform(uint32_t [4], const uint8_t [MD5_BLOCK_LENGTH]);
-
-#ifdef  __cplusplus
-};
-#endif
 
 #endif /* _MD5_H_ */
