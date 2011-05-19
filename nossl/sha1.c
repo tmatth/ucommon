@@ -14,7 +14,6 @@
  *   34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F
  */
 
-#include <sys/param.h>
 #include <string.h>
 #include "sha1.h"
 
