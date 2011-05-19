@@ -570,8 +570,20 @@ void shell::collapse(LinkedObject *first)
 
 void shell::set0(char *argv0)
 {
+    char prefix[256];
+
     if(_argv0)
         return;
+
+    if(*argv0 != '/' && *argv0 != '\\' && argv0[1] != ':') {
+        fsys::getPrefix(prefix, sizeof(prefix));
+        String::add(prefix, sizeof(prefix), "/");
+        String::add(prefix, sizeof(prefix), argv0);
+    }
+    else
+        String::set(prefix, sizeof(prefix), argv0);
+
+    argv0 = _exedir = dup(prefix);
 
     _argv0 = strrchr(argv0, '/');
 #ifdef  _MSWINDOWS_
@@ -583,12 +595,12 @@ void shell::set0(char *argv0)
     if(!_argv0)
         _argv0 = argv0;
     else
-        ++_argv0;
+        (*_argv0++) = 0;
 
     if(eq(_argv0, "lt-", 3))
         _argv0 += 3;
 
-    _argv0 = dup(_argv0);
+//  _argv0 = dup(_argv0);
 
 #ifdef  _MSWINDOWS_
     char *ext = strrchr(_argv0, '.');

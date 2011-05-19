@@ -61,6 +61,7 @@ private:
     char **_argv;
     unsigned _argc;
     char *_argv0;
+    char *_exedir;
     LinkedObject *_syms;
 
     class __LOCAL args : public OrderedObject
@@ -746,13 +747,19 @@ public:
      * @return argument array.
      */
     inline static char **parse(shell &args, const char *string)
-        {return args.parse(string);};
+        {return args.parse(string);}
 
     /**
      * Get program name (argv0).
      */
     inline const char *argv0() const
-        {return _argv0;};
+        {return _argv0;}
+
+    /**
+     * Get the exec directory.
+     */
+    inline const char *execdir() const
+        {return _exedir;}
 
     /**
      * Print error message and exit.
