@@ -44,11 +44,15 @@
 #ifndef COMMONCPP_SERIAL_H_
 #define COMMONCPP_SERIAL_H_
 
+#ifndef COMMONCPP_CONFIG_H_
+#include <commoncpp/config.h>
+#endif
+
 #ifndef COMMONCPP_THREAD_H_
 #include <commoncpp/thread.h>
 #endif
 
-#ifndef COMMONCPP_EXCEPTION_H_
+#ifndef COMMMONCPP_EXCEPTION_H_
 #include <commoncpp/exception.h>
 #endif
 

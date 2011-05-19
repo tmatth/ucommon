@@ -44,8 +44,16 @@
 #ifndef COMMONCPP_TOKENIZER_H_
 #define COMMONCPP_TOKENIZER_H_
 
+#ifndef COMMONCPP_CONFIG_H_
+#include <commoncpp/config.h>
+#endif
+
 #ifndef COMMONCPP_THREAD_H_
 #include <commoncpp/thread.h>
+#endif
+
+#ifndef COMMMONCPP_EXCEPTION_H_
+#include <commoncpp/exception.h>
 #endif
 
 NAMESPACE_COMMONCPP
