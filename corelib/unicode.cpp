@@ -227,6 +227,13 @@ size_t utf8::chars(ucs4_t code)
     return 6;
 }
 
+unicode_t unidup(const char *string)
+{
+    if(sizeof(wchar_t) < 4)
+        return (unicode_t) utf8::wdup(string);
+    return (unicode_t) utf8::udup(string);
+}
+
 size_t utf8::pack(unicode_t buffer, CharacterProtocol& cp, size_t len)
 {
     size_t used = 0;

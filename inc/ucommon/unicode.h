@@ -496,11 +496,19 @@ inline ucs4_t *strudup(const char *string)
 inline ucs2_t *strwdup(const char *string)
     {return utf8::wdup(string);}
 
-inline void strwfree(ucs2_t *str)
-    {::free(str);}
+__EXPORT unicode_t unidup(const char *string);
 
-inline void strufree(ucs4_t *str)
-    {::free(str);}
+template<>
+inline void dupfree<ucs2_t*>(ucs2_t *string)
+    {::free(string);}
+
+template<>
+inline void dupfree<ucs4_t*>(ucs4_t *string)
+    {::free(string);}
+
+template<>
+inline void dupfree<unicode_t>(unicode_t string)
+    {::free(string);}
 
 /**
  * Convenience type for utf8 encoded strings.

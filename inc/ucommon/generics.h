@@ -452,9 +452,17 @@ template<typename T>
 inline T* dup(const T& object)
     {return new T(object);}
 
+template<typename T>
+inline void dupfree(T object)
+    {delete object;}
+
 template<>
 inline char *dup<char>(const char& object)
     {return strdup(&object);}
+
+template<>
+inline void dupfree<char*>(char* object)
+    {::free(object);}
 
 /**
  * Convenience function to swap objects.
