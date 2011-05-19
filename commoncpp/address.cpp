@@ -42,6 +42,7 @@
 #endif
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
+#include <commoncpp/thread.h>
 #include <commoncpp/address.h>
 #include <cstdlib>
 

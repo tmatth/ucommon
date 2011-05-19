@@ -34,6 +34,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
+#include <config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/thread.h>
 #include <commoncpp/slog.h>
