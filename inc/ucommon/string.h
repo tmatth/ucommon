@@ -1701,6 +1701,9 @@ inline bool ieq(char const *s1, char const *s2)
  * @param size of string to compare.
  * @return true if equal.
  */
+inline bool case_eq(char const *s1, char const *s2, size_t size)
+    {return String::case_equal(s1, s2, size);}
+
 inline bool ieq(char const *s1, char const *s2, size_t size)
     {return String::case_equal(s1, s2, size);}
 
