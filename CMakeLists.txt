@@ -315,6 +315,10 @@ else()
     set(BUILD_LIBRARY_TYPE SHARED)
 endif()
 
+if(NOT BUILD_RUNTIME_TYPE)
+    set(BUILD_RUNTIME_TYPE ${BUILD_LIBRARY_TYPE})
+endif()
+
 file(GLOB common_src corelib/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
 file(GLOB commoncpp_src commoncpp/*.cpp)
@@ -362,7 +366,7 @@ endif(NOT WIN32)
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-add_library(ucommon ${BUILD_LIBRARY_TYPE} ${common_src} ${ucommon_inc})
+add_library(ucommon ${BUILD_RUNTIME_TYPE} ${common_src} ${ucommon_inc})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
