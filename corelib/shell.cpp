@@ -615,6 +615,7 @@ void shell::set0(char *argv0)
 shell::shell(size_t pagesize) :
 mempager(pagesize)
 {
+    _exedir = NULL;
     _argv0 = NULL;
     _argv = NULL;
     _argc = 0;
