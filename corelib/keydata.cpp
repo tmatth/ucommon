@@ -63,7 +63,7 @@ const char *keydata::get(const char *key) const
     iterator keys = begin();
 
     while(is(keys)) {
-        if(ieq(key, keys->id))
+        if(case_eq(key, keys->id))
             return keys->value;
         keys.next();
     }
@@ -77,7 +77,7 @@ void keydata::clear(const char *key)
     iterator keys = begin();
 
     while(is(keys)) {
-        if(ieq(key, keys->id)) {
+        if(case_eq(key, keys->id)) {
             keys->delist(&index);
             return;
         }
@@ -93,7 +93,7 @@ void keydata::set(const char *key, const char *value)
     keydata::iterator keys = begin();
 
     while(is(keys)) {
-        if(ieq(key, keys->id)) {
+        if(case_eq(key, keys->id)) {
             keys->delist(&index);
             break;
         }
@@ -140,7 +140,7 @@ keydata *keyfile::get(const char *key) const
     iterator keys = begin();
 
     while(is(keys)) {
-        if(ieq(key, keys->name))
+        if(case_eq(key, keys->name))
             return *keys;
         keys.next();
     }

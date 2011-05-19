@@ -85,15 +85,15 @@ bool XMLParser::parse(FILE *fp)
             buffer[bufpos] = 0;
             if(buffer[0] == '#')
                 cp = atoi(buffer + 1);
-            else if(ieq(buffer, "amp"))
+            else if(eq(buffer, "amp"))
                 cp = '&';
-            else if(ieq(buffer, "lt"))
+            else if(eq(buffer, "lt"))
                 cp = '<';
-            else if(ieq(buffer, "gt"))
+            else if(eq(buffer, "gt"))
                 cp = '>';
-            else if(ieq(buffer, "apos"))
+            else if(eq(buffer, "apos"))
                 cp = '`';
-            else if(ieq(buffer, "quot"))
+            else if(eq(buffer, "quot"))
                 cp = '\"';
             else
                 return false;
@@ -198,15 +198,15 @@ bool XMLParser::parse(CharacterProtocol& io)
             buffer[bufpos] = 0;
             if(buffer[0] == '#')
                 cp = atoi(buffer + 1);
-            else if(ieq(buffer, "amp"))
+            else if(eq(buffer, "amp"))
                 cp = '&';
-            else if(ieq(buffer, "lt"))
+            else if(eq(buffer, "lt"))
                 cp = '<';
-            else if(ieq(buffer, "gt"))
+            else if(eq(buffer, "gt"))
                 cp = '>';
-            else if(ieq(buffer, "apos"))
+            else if(eq(buffer, "apos"))
                 cp = '`';
-            else if(ieq(buffer, "quot"))
+            else if(eq(buffer, "quot"))
                 cp = '\"';
             else
                 return false;
@@ -307,15 +307,15 @@ bool XMLParser::partial(const char *data, size_t len)
             buffer[bufpos] = 0;
             if(buffer[0] == '#')
                 cp = atoi(buffer + 1);
-            else if(ieq(buffer, "amp"))
+            else if(eq(buffer, "amp"))
                 cp = '&';
-            else if(ieq(buffer, "lt"))
+            else if(eq(buffer, "lt"))
                 cp = '<';
-            else if(ieq(buffer, "gt"))
+            else if(eq(buffer, "gt"))
                 cp = '>';
-            else if(ieq(buffer, "apos"))
+            else if(eq(buffer, "apos"))
                 cp = '`';
-            else if(ieq(buffer, "quot"))
+            else if(eq(buffer, "quot"))
                 cp = '\"';
             else
                 return false;

@@ -604,7 +604,7 @@ void shell::set0(char *argv0)
 
 #ifdef  _MSWINDOWS_
     char *ext = strrchr(_argv0, '.');
-    if(ieq(ext, ".exe") || ieq(ext, ".com"))
+    if(case_eq(ext, ".exe") || case_eq(ext, ".com"))
         *ext = 0;
 #endif
 
@@ -1265,7 +1265,7 @@ static void pathfinder(const char *name, char *buf, size_t size)
     while(NULL != (element = String::token(path, &tokbuf, ";"))) {
         snprintf(buf, sizeof(buf), "%s\\%s", element, name);
         ext = strrchr(buf, '.');
-        if(!ext || (!ieq(ext, ".exe") && !ieq(ext, ".com")))
+        if(!ext || (!case_eq(ext, ".exe") && !case_eq(ext, ".com")))
             String::add(buf, size, ".exe");
         if(fsys::isfile(buf))
             return;
@@ -1275,7 +1275,7 @@ static void pathfinder(const char *name, char *buf, size_t size)
 
 tail:
     ext = strrchr(buf, '.');
-    if(!ext || (!ieq(ext, ".exe") && !ieq(ext, ".com")))
+    if(!ext || (!case_eq(ext, ".exe") && !case_eq(ext, ".com")))
         String::add(buf, size, ".exe");
 }
 

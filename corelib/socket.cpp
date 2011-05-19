@@ -597,7 +597,7 @@ void Socket::init(const char *progname)
 
     String::set(path, sizeof(path), progname);
     const char *ext = strrchr(path, '.');
-    if(ext && (ieq(ext, ".exe") || ieq(ext, ".com")))
+    if(ext && (case_eq(ext, ".exe") || case_eq(ext, ".com")))
         *ext = 0;
     progname = path;
 #else
