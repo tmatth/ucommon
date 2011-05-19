@@ -27,7 +27,7 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 {
     secure::init();
 
-    if(ieq(digest, "sha"))
+    if(case_eq(digest, "sha"))
         digest = "sha1";
 
     set(cipher);
@@ -107,13 +107,13 @@ void Cipher::Key::set(const char *cipher)
 
     if(lpart && lpart != fpart) {
         *(lpart++) = 0;
-        if(ieq(lpart, "cbc"))
+        if(case_eq(lpart, "cbc"))
             modeid = GCRY_CIPHER_MODE_CBC;
-        else if(ieq(lpart, "ecb"))
+        else if(case_eq(lpart, "ecb"))
             modeid = GCRY_CIPHER_MODE_ECB;
-        else if(ieq(lpart, "cfb"))
+        else if(case_eq(lpart, "cfb"))
             modeid = GCRY_CIPHER_MODE_CFB;
-        else if(ieq(lpart, "ofb"))
+        else if(case_eq(lpart, "ofb"))
             modeid = GCRY_CIPHER_MODE_OFB;
         else
             modeid = GCRY_CIPHER_MODE_NONE;

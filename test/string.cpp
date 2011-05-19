@@ -38,17 +38,17 @@ extern "C" int main()
     String::fill(buff, 32, ' ');
     stringbuf<128> mystr;
     mystr = (string_t)"hello" + (string_t)" this is a test";
-    assert(ieq("hello this is a test", *mystr));
-    assert(ieq("second test", *testing));
-    assert(ieq(" is a test", mystr(-10)));
+    assert(case_eq("hello this is a test", *mystr));
+    assert(case_eq("second test", *testing));
+    assert(case_eq(" Is a test", mystr(-10)));
     mystr = "  abc 123 \n  ";
-    assert(ieq("abc 123", String::strip(mystr.c_mem(), " \n")));
+    assert(case_eq("abc 123", String::strip(mystr.c_mem(), " \n")));
     String::set(buff, sizeof(buff), "this is \"a test\"");
     while(NULL != (tp = String::token(buff, &tokens, " ", "\"\"")) && count < 4)
         array[count++] = tp;
     assert(count == 3);
-    assert(ieq(array[1], "is"));
-    assert(ieq(array[2], "a test"));
+    assert(case_eq(array[1], "is"));
+    assert(case_eq(array[2], "a test"));
 
     unsigned char core[4] = {0x01, 0x10, 0x2f, 0x45};
     char hexbuf[12];

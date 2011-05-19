@@ -57,7 +57,7 @@ void Digest::set(const char *type)
 
     release();
 
-    if(ieq(type, "sha"))
+    if(case_eq(type, "sha"))
         type = "sha1";
 
     hashid = gcry_md_map_name(type);
@@ -69,7 +69,7 @@ void Digest::set(const char *type)
 
 bool Digest::is(const char *type)
 {
-    if(ieq(type, "sha"))
+    if(case_eq(type, "sha"))
         type = "sha1";
 
     return gcry_md_map_name(type) != GCRY_MD_NONE;

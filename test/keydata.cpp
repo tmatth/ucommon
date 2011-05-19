@@ -31,14 +31,14 @@ extern "C" int main()
     keyfile myfile("keydata.conf");
 
     keys = myfile.get();
-    assert(ieq(keys->get("key2"), "value2"));
+    assert(case_eq(keys->get("key2"), "value2"));
 
     keys = myfile["section1"];
     assert(keys != NULL);
-    assert(ieq(keys->get("key1"), "this is value 1 quoted"));
+    assert(case_eq(keys->get("key1"), "this is value 1 quoted"));
 
     keys = myfile["section2"];
     assert(keys != NULL);
-    assert(ieq(keys->get("key1"), "replaced value"));
+    assert(case_eq(keys->get("key1"), "replaced value"));
     return 0;
 }

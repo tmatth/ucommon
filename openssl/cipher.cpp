@@ -31,7 +31,7 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
     set(cipher);
 
     // never use sha0...
-    if(ieq(digest, "sha"))
+    if(case_eq(digest, "sha"))
         digest = "sha1";
 
     hashtype = EVP_get_digestbyname(digest);

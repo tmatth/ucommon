@@ -266,7 +266,7 @@ secure::error_t secure::verify(session_t session, const char *peername)
     X509_NAME_get_text_by_NID(
         X509_get_subject_name(peer),
         NID_commonName, peer_cn, sizeof(peer_cn));
-    if(!ieq(peer_cn, peername))
+    if(!case_eq(peer_cn, peername))
         return secure::INVALID_PEERNAME;
 
     return secure::OK;
