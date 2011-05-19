@@ -336,9 +336,8 @@ elseif(OPENSSL_FOUND)
     include_directories(${OPENSSL_INCLUDE_DIR})
     set(SECURE_LIBS ${OPENSSL_LIBRARIES})
 else()
-    file(GLOB secure_src nossl/*.cpp nossl/*.c nossl/*.h)
+    file(GLOB secure_src nossl/*.cpp nossl/*.h)
 endif()
-
 
 if(NOT WIN32)
     foreach(flag ${UCOMMON_FLAGS})
