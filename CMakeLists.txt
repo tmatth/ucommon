@@ -36,6 +36,11 @@ if(WIN32)
     set(SYSCONFDIR "etc" CACHE PATH "config directory")
     set(STATEDIR "var" CACHE PATH "state directory")
 else()
+    if (NOT LIB_SUFFIX)
+        if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+            set(LIB_SUFFIX 64)
+        endif()
+    endif()
     set(INSTALL_SBINDIR sbin)
     set(INSTALL_MANDIR share/man)
     set(INSTALL_LOCALE share/locale)
@@ -120,7 +125,26 @@ set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME   "C++ Headers")
 set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION  "Dynamic library")
 set(CPACK_COMPONENT_HEADERS_DESCRIPTION
     "Header files needed to build applications using ucommon library")
-SET(CPACK_SOURCE_IGNORE_FILES ".bzr" "build" ".swp$" ".*~" ".svn" ".git")
+
+# The following components are regex's to match anywhere (unless anchored)
+# in absolute path + filename to find files or directories to be excluded
+# from source tarball.
+SET (CPACK_SOURCE_IGNORE_FILES
+#svn, git files
+"\\\\.svn/" "\\\\.cvsignore$" "/\\\\.git/"
+# temporary files 
+"\\\\.swp$" 
+# backup files
+"~$"
+# eclipse, kdevelop and othe IDE files
+"\\\\.cdtproject$" "\\\\.cproject$" "\\\\.project$" "\\\\.settings/" "\\\\.kdev4/" "\\\\.kdev4$"
+# others
+"\\\\.#" "/#"
+# don't copy build and other dirs used for building
+"/build/" "/autom4te\\\\.cache/" "/_build/"
+# used before
+"/CVS/" "/\\\\.libs/" "/\\\\.deps/" "\\\\.o$" "\\\\.lo$" "\\\\.la$" "\\\\.sh$" "Makefile\\\\.in$")
+
 SET(CPACK_SOURCE_GENERATOR "TBZ2")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}-${PACKAGE_FILE_VERSION}")
 
@@ -357,6 +381,7 @@ if(NOT WIN32)
     endforeach()
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.spec.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.spec @ONLY)
 
     if(BUILD_COMPAT)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/commoncpp.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/commoncpp.pc)
