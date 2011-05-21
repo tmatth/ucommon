@@ -72,7 +72,7 @@ cmake -DCMAKE_INSTALL_PREFIX=%{_prefix} \
       -DCMAKE_VERBOSE_MAKEFILE=TRUE \
       -DCMAKE_C_FLAGS_RELEASE:STRING="$RPM_OPT_FLAGS" \
       -DCMAKE_CXX_FLAGS_RELEASE:STRING="$RPM_OPT_FLAGS" \
-      ..  
+      ..
 %{__make} %{?_smp_mflags}
 
 %install
@@ -80,6 +80,7 @@ cd build
 %{__rm} -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 %{__chmod} 0755 %{buildroot}%{_bindir}/ucommon-config
+%{__chmod} 0755 %{buildroot}%{_bindir}/commoncpp-config
 %{__rm} -rf %{buildroot}%{_libdir}/*.la
 
 %clean
@@ -98,7 +99,6 @@ make install DESTDIR=%{buildroot}
 %{_bindir}/scrub
 %{_bindir}/mdsum
 %{_bindir}/zerofill
-%{_bindir}/commoncpp-config
 # %{_mandir}/man1/args.*
 # %{_mandir}/man1/scrub.*
 # %{_mandir}/man1/mdsum.*
@@ -111,6 +111,7 @@ make install DESTDIR=%{buildroot}
 %{_includedir}/commoncpp/
 %{_libdir}/pkgconfig/*.pc
 %{_bindir}/ucommon-config
+%{_bindir}/commoncpp-config
 # %{_mandir}/man1/ucommon-config.*
 
 %files doc
