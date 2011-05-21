@@ -27,7 +27,7 @@ script_SCRIPTS = ucommon-config commoncpp-config
 
 man_MANS = ucommon-config.1 commoncpp-config.1
 
-.phony: doxy
+.phony:	doxy
 
 doxy:
 	-rm -rf doc

@@ -41,5 +41,5 @@ ucommonCipher_SOURCES = cipher.cpp
 ucommonCipher_LDFLAGS = @SECURE_LOCAL@
 
 # test using full stdc++ linkage...
-stdcpp: stdcpp.cpp
+stdcpp:	stdcpp.cpp
 	$(CXX) @UCOMMON_FLAGS@ -o stdcpp -I../inc -L../src/.libs -lucommon stdcpp.cpp @UCOMMON_LIBS@
