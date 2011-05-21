@@ -72,6 +72,7 @@ html browsable.
 %{__rm} -rf %{buildroot}
 %{__make} DESTDIR=%{buildroot} INSTALL="install -p" install
 %{__chmod} 0755 %{buildroot}%{_bindir}/ucommon-config
+%{__chmod} 0755 %{buildroot}%{_bindir}/commoncpp-config
 %{__rm} %{buildroot}%{_libdir}/*.la
 
 %clean
@@ -102,7 +103,9 @@ html browsable.
 %{_includedir}/commoncpp/
 %{_libdir}/pkgconfig/*.pc
 %{_bindir}/ucommon-config
+%{_bindir}/commoncpp-config
 %{_mandir}/man1/ucommon-config.*
+%{_mandir}/man1/commoncpp-config.*
 
 %files doc
 %defattr(-,root,root,-)
