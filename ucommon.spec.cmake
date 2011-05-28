@@ -99,10 +99,10 @@ make install DESTDIR=%{buildroot}
 %{_bindir}/scrub
 %{_bindir}/mdsum
 %{_bindir}/zerofill
-# %{_mandir}/man1/args.*
-# %{_mandir}/man1/scrub.*
-# %{_mandir}/man1/mdsum.*
-# %{_mandir}/man1/zerofill.*
+%{_mandir}/man1/args.*
+%{_mandir}/man1/scrub.*
+%{_mandir}/man1/mdsum.*
+%{_mandir}/man1/zerofill.*
 
 %files devel
 %defattr(-,root,root,-)
