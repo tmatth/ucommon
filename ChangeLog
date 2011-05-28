@@ -1,3 +1,6 @@
+from ucommon 5.0.0 to 5.0.1
+- missing commoncpp/numbers.h header.
+
 from ucommon 4.3.3 to 5.0.0
 - thread objects fully inheritable.
 
