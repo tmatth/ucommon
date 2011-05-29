@@ -37,8 +37,10 @@ if(WIN32)
     set(STATEDIR "var" CACHE PATH "state directory")
 else()
     if (NOT LIB_SUFFIX)
-        if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-            set(LIB_SUFFIX 64)
+        if (EXISTS /usr/lib64)
+            if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+                set(LIB_SUFFIX 64)
+            endif()
         endif()
     endif()
     set(INSTALL_SBINDIR sbin)
@@ -132,8 +134,8 @@ set(CPACK_COMPONENT_HEADERS_DESCRIPTION
 SET (CPACK_SOURCE_IGNORE_FILES
 #svn, git files
 "\\\\.svn/" "\\\\.cvsignore$" "/\\\\.git/"
-# temporary files 
-"\\\\.swp$" 
+# temporary files
+"\\\\.swp$"
 # backup files
 "~$"
 # eclipse, kdevelop and othe IDE files
