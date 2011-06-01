@@ -1801,8 +1801,7 @@ static void echo(int fd)
 {
 #if defined(HAVE_TERMIOS_H)
     tcsetattr(fd, TCSAFLUSH, &io_prior);
-#endif
-#if defined(HAVE_TERMIO_H)
+#elif defined(HAVE_TERMIO_H)
     ioctl(fd, TCSETA, &io_prior);
 #endif
 }
