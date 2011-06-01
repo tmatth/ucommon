@@ -1014,6 +1014,9 @@ public:
     static int inkey(const char *prompt = NULL);
 
     static char *getpass(const char *prompt, char *buffer, size_t size);
+
+    static char *getline(const char *prompt, char *buffer, size_t size);
+
 };
 
 /**

@@ -1736,10 +1736,40 @@ char *shell::getpass(const char *prompt, char *buffer, size_t size)
 
 static int inkey(const char *prompt)
 {
-    if(prompt)
+    if(prompt && fsys::istty(input()))
         fputs(prompt, stdout);
+    else
+        return 0;
 
     return (char)getch();
+}
+
+static char *getline(const char *prompt, char *buffer, size_t size)
+{
+    unsigned pos = 0;
+
+    if(!fsys::istty(input()))
+        return fgets(buffer, size, stdin);
+
+    fputs(prompt, stdout);
+
+    while(pos < size - 1) {
+        buffer[pos] = (char)getch();
+        if(buffer[pos] == '\r' || buffer[pos] == '\n')
+            break;
+        else if(buffer[pos] == '\b' && pos) {
+            fputs("\b \b", stdout);
+            --pos;
+        }
+        else {
+            fputc(buffer[pos], stdout);
+            ++pos;
+        }
+        fflush(stdout);
+    }
+    printf("\n");
+    buffer[pos] = 0;
+    return buffer;
 }
 
 #else
@@ -1777,6 +1807,38 @@ static void echo(int fd)
 #endif
 }
 
+char *shell::getline(const char *prompt, char *buffer, size_t size)
+{
+    size_t pos = 0;
+
+    if(!fsys::istty(input()))
+        return fgets(buffer, size, stdin);
+
+    noecho(1);
+    fputs(prompt, stdout);
+
+    while(pos < size - 1) {
+        buffer[pos] = ::getchar();
+        if(buffer[pos] == '\r' || buffer[pos] == '\n')
+            break;
+        else if(buffer[pos] == '\b' && pos) {
+            fputs("\b \b", stdout);
+            --pos;
+        }
+        else {
+            fputc(buffer[pos], stdout);
+            ++pos;
+        }
+        fflush(stdout);
+    }
+    printf("\n");
+    buffer[pos] = 0;
+    echo(1);
+    return buffer;
+}
+
+
+
 char *shell::getpass(const char *prompt, char *buffer, size_t size)
 {
     size_t count;
@@ -1802,6 +1864,9 @@ char *shell::getpass(const char *prompt, char *buffer, size_t size)
 
 int shell::inkey(const char *prompt)
 {
+    if(!fsys::istty(1))
+        return 0;
+
     noecho(1);
     if(prompt)
         fputs(prompt, stdout);
