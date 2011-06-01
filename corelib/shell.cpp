@@ -29,10 +29,19 @@
 #ifdef  _MSWINDOWS_
 #include <process.h>
 #include <winreg.h>
+#include <conio.h>
 #else
 #include <sys/wait.h>
 #include <sys/ioctl.h>
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef  HAVE_TERMIOS_H
+#include <termios.h>
+#endif
+#ifdef  HAVE_TERMIO_H
+#include <termio.h>
+#endif
 #endif
 
 #ifdef  HAVE_SYS_RESOURCE_H
@@ -1707,9 +1716,100 @@ exit:
     return 0;
 }
 
+char *shell::getpass(const char *prompt, char *buffer, size_t size)
+{
+    size_t pos = 0;
+    fputs(prompt, stderr);
+
+    while(pos < size - 1) {
+        buffer[pos] = (char)getch();
+        if(buffer[pos] == '\r' || buffer[pos] == '\n')
+            break;
+        else if(buffer[pos] == '\b' && pos)
+            --pos;
+        else
+            ++pos;
+    }
+    buffer[pos] = 0;
+    return buffer;
+}
+
+static int inkey(const char *prompt)
+{
+    if(prompt)
+        fputs(prompt, stdout);
+
+    return (char)getch();
+}
+
 #else
 
 static const char *system_prefix = UCOMMON_PREFIX;
+
+#if defined(HAVE_TERMIOS_H)
+static struct termios io_prior, io_current;
+#elif defined(HAVE_TERMIO_H)
+static struct termio io_prior, io_current;
+#endif
+
+static void noecho(int fd)
+{
+#if defined(HAVE_TERMIOS_H)
+    tcgetattr(fd, &io_prior);
+    tcgetattr(fd, &io_current);
+    io_current.c_lflag &= ~ECHO;
+    tcsetattr(fd, TCSAFLUSH, &io_current);
+#elif defined(HAVE_TERMIO_H)
+    ioctl(fd, TCGETA, &io_prior);
+    ioctl(fd, TCGETA, &io_current);
+    io_current.c_lflag &= ~ECHO;
+    ioctl(fd, TCSETA, &io_current);
+#endif
+}
+
+static void echo(int fd)
+{
+#if defined(HAVE_TERMIOS_H)
+    tcsetattr(fd, TCSAFLUSH, &io_prior);
+#endif
+#if defined(HAVE_TERMIO_H)
+    ioctl(fd, TCSETA, &io_prior);
+#endif
+}
+
+char *shell::getpass(const char *prompt, char *buffer, size_t size)
+{
+    size_t count;
+    int fd = ::open("/dev/tty", O_RDONLY);
+    if(-1 == fd)
+        fd = 1;
+
+    noecho(fd);
+    fputs(prompt, stderr);
+    count = ::read(fd, buffer, size);
+    if(count)
+        --count;
+    buffer[count] = 0;
+
+#if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
+    fputs("\n", stderr);
+#endif
+    echo(fd);
+    if(fd != 1)
+        ::close(fd);
+    return buffer;
+}
+
+int shell::inkey(const char *prompt)
+{
+    noecho(1);
+    if(prompt)
+        fputs(prompt, stdout);
+    int ch = ::getchar();
+    echo(1);
+
+    return ch;
+}
 
 void shell::relocate(const char *argv0)
 {

@@ -23,7 +23,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <stdio.h>
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 #ifdef  HAVE_WCHAR_H
 #include <wchar.h>

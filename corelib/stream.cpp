@@ -29,7 +29,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #endif
 
 #ifdef  HAVE_SYS_RESOURCE_H

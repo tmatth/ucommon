@@ -26,7 +26,9 @@
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #endif
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <errno.h>
 
 #if defined(HAVE_SOCKS)

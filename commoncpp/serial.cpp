@@ -66,7 +66,9 @@
 #include <io.h>
 #else
 #include <sys/ioctl.h>
+#ifdef  HAVE_TERMIOS_H
 #include <termios.h>
+#endif
 #endif
 
 #include <fcntl.h>
@@ -120,12 +122,16 @@ Serial::Serial(const char *fname)
 {
     initSerial();
 
+#if defined(_MSWINDOWS_) || defined(HAVE_TERMIOS_H)
     open(fname);
+#endif
 
 #ifdef  _MSWINDOWS_
     if(dev == INVALID_HANDLE_VALUE)
-#else
+#elif defined(HAVE_TERMIOS_H)
     if(dev < 0)
+#else
+    if(1)
 #endif
     {
         error(errOpenFailed);
@@ -147,7 +153,7 @@ Serial::Serial(const char *fname)
 
     SetCommTimeouts(dev, &CommTimeOuts) ;
 
-#else
+#elif defined(HAVE_TERMIOS_H)
 
     if(!isatty(dev)) {
         Serial::close();
@@ -198,7 +204,7 @@ void Serial::initConfig(void)
 
     SetCommState(dev, attr);
 
-#else
+#elif defined(HAVE_TERMIOS_H)
     struct termios *attr = (struct termios *)current;
     struct termios *orig = (struct termios *)original;
     long ioflags = fcntl(dev, F_GETFL);
@@ -241,7 +247,7 @@ void Serial::restore(void)
 #ifdef  _MSWINDOWS_
     memcpy(current, original, sizeof(DCB));
     SetCommState(dev, (DCB *)current);
-#else
+#elif defined(HAVE_TERMIOS_H)
     memcpy(current, original, sizeof(struct termios));
     tcsetattr(dev, TCSANOW, (struct termios *)current);
 #endif
@@ -258,7 +264,7 @@ void Serial::initSerial(void)
 #ifdef  _MSWINDOWS_
     current = new DCB;
     original = new DCB;
-#else
+#elif defined(HAVE_TERMIOS_H)
     current = new struct termios;
     original = new struct termios;
 #endif
@@ -275,7 +281,7 @@ void Serial::endSerial(void)
 
     if(original)
         delete (DCB *)original;
-#else
+#elif defined(HAVE_TERMIOS_H)
     if(dev < 0 && original)
         tcsetattr(dev, TCSANOW, (struct termios *)original);
 
@@ -323,7 +329,7 @@ int Serial::setPacketInput(int size, unsigned char btimer)
 #ifdef  _MSWINDOWS_
     //  Still to be done......
     return 0;
-#else
+#elif defined(HAVE_TERMIOS_H)
 
 #ifdef  _PC_MAX_INPUT
     int max = fpathconf(dev, _PC_MAX_INPUT);
@@ -350,7 +356,7 @@ int Serial::setLineInput(char newline, char nl1)
 #ifdef  _MSWINDOWS_
     //  Still to be done......
     return 0;
-#else
+#elif defined(HAVE_TERMIOS_H)
 
     struct termios *attr = (struct termios *)current;
     attr->c_cc[VMIN] = attr->c_cc[VTIME] = 0;
@@ -371,7 +377,7 @@ void Serial::flushInput(void)
 {
 #ifdef  _MSWINDOWS_
     PurgeComm(dev, PURGE_RXABORT | PURGE_RXCLEAR);
-#else
+#elif defined(HAVE_TERMIOS_H)
     tcflush(dev, TCIFLUSH);
 #endif
 }
@@ -380,7 +386,7 @@ void Serial::flushOutput(void)
 {
 #ifdef  _MSWINDOWS_
     PurgeComm(dev, PURGE_TXABORT | PURGE_TXCLEAR);
-#else
+#elif defined(HAVE_TERMIOS_H)
     tcflush(dev, TCOFLUSH);
 #endif
 }
@@ -389,7 +395,7 @@ void Serial::waitOutput(void)
 {
 #ifdef  _MSWINDOWS_
 
-#else
+#elif defined(HAVE_TERMIOS_H)
     tcdrain(dev);
 #endif
 }
@@ -410,7 +416,7 @@ Serial &Serial::operator=(const Serial &ser)
         memcpy(current, ser.current, sizeof(DCB));
         memcpy(original, ser.original, sizeof(DCB));
     }
-#else
+#elif defined(HAVE_TERMIOS_H)
     dev = dup(ser.dev);
 
     memcpy(current, ser.current, sizeof(struct termios));
@@ -428,7 +434,7 @@ void Serial::open(const char * fname)
     dev = ::open(fname, cflags);
     if(dev > -1)
         initConfig();
-#else
+#elif defined(HAVE_TERMIOS_H)
     // open COMM device
     dev = CreateFile(fname,
         GENERIC_READ | GENERIC_WRITE,

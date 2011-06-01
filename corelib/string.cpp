@@ -20,7 +20,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <stdio.h>
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <limits.h>
 
 using namespace UCOMMON_NAMESPACE;

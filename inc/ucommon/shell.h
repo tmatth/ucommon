@@ -1010,6 +1010,10 @@ public:
     static inline fd_t error(void)
         {return 2;};
 #endif
+
+    static int inkey(const char *prompt = NULL);
+
+    static char *getpass(const char *prompt, char *buffer, size_t size);
 };
 
 /**

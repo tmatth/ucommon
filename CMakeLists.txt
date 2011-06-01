@@ -295,6 +295,9 @@ check_include_files(openssl/ssl.h HAVE_OPENSSL)
 check_include_files(libintl.h HAVE_LIBINTL_H)
 check_include_files(netinet/in.h HAVE_NETINET_IN_H)
 check_include_files(net/if.h HAVE_NET_IF_H)
+check_include_files(fcntl.h HAVE_FNCTL_H)
+check_include_files(termios.h HAVE_TERMIOS_H)
+check_include_files(termio.h HAVE_TERMIO_H)
 
 set(UCOMMON_LIBS ${UCOMMON_LIBS} ${UCOMMON_LINKING})
 

@@ -38,7 +38,9 @@
 #endif
 
 #include <stdio.h>
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <errno.h>
 #include <string.h>
 

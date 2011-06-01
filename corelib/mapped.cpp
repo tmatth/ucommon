@@ -18,7 +18,9 @@
 #include <config.h>
 #include <ucommon/mapped.h>
 
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
