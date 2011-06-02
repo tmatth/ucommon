@@ -228,20 +228,34 @@ static void final(void)
 
 static void process(void)
 {
+    string_t path;
+    char *cp;
     switch(decoder) {
     case d_init:
         decoder = d_scan;
         return;
     case d_scan:
         cipher.put(frame, sizeof(frame));
-        if(!cbuf[4]) {  // if message
+        if(cbuf[4] == 0xff) // header...
+            break;
+        if(!cbuf[4]) {      // if message
             fwrite(cbuf + 6, sizeof(frame) - 6, 1, output);
             decoder = d_text;
             break;
         }
         decoder = d_file;
         frames = lsb_getlong(cbuf) / sizeof(frame);
-        printf("FILE %s\n", cbuf + 6);
+        path = str((char *)(cbuf + 6));
+        cp = strrchr((char *)(cbuf + 6), '/');
+        if(cp) {
+            *cp = 0;
+            fsys::createDir((char *)(cbuf + 6), 0640);
+        }
+        output = fopen(*path, "w");
+        if(!output)
+            shell::errexit(8, "*** %s: %s: %s\n",
+                argv0, *path, _TEXT("cannot create"));
+        printf("decoding %s...\n", *path);
         break;
     case d_file:
         if(!frames) {
