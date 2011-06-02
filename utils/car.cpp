@@ -138,7 +138,6 @@ static bool encode(const char *path, FILE *fp, size_t offset = 0)
 static void encodestream(void)
 {
 
-    binary = false;
     size_t offset = 6;
 
     if(fsys::istty(shell::input()))
@@ -269,6 +268,36 @@ static void process(void)
     }
 }
 
+static void binarydecode(FILE *fp, const char *path)
+{
+    char buffer[48];
+
+    memset(frame, 0, sizeof(frame));
+    memset(buffer, 0, sizeof(buffer));
+    fread(frame, sizeof(frame), 1, fp);
+    if(!eq((char *)frame, ".car", 4) || (frame[4] != 0xff))
+        shell::errexit(6, "*** %s: %s: %s\n",
+            argv0, path, _TEXT("not a cryptographic archive"));
+
+    for(;;) {
+        if(feof(fp)) {
+            final();
+            return;
+        }
+
+        if(ferror(fp)) {
+            exit_code = errno;
+            report(path, exit_code);
+            return;
+        }
+
+        if(fread(buffer, sizeof(buffer), 1, fp) < 1)
+            continue;
+        process();
+        memcpy(frame, buffer, sizeof(frame));
+    }
+}
+
 static void streamdecode(FILE *fp, const char *path)
 {
     char buffer[128];
@@ -298,7 +327,9 @@ static void streamdecode(FILE *fp, const char *path)
             return;
         }
 
-        fgets(buffer, sizeof(buffer), fp);
+        if(fgets(buffer, sizeof(buffer), fp) == NULL)
+            continue;
+
         if(eq("-----END CAR STREAM-----\n", buffer)) {
             final();
             return;
@@ -404,8 +435,22 @@ PROGRAM_MAIN(argc, argv)
         goto end;
     }
 
-//  if(is(decode))
-//      ;;
+    if(is(decode) && args() > 1)
+        shell::errexit(3, "*** %s: %s\n", argv0, _TEXT("specify only one file for decoder"));
+
+    if(is(decode)) {
+        FILE *fp = fopen(args[0], "r");
+        if(!fp)
+            shell::errexit(7, "*** %s: %s: %s\n",
+                argv0, args[0], _TEXT("cannot open or access"));
+
+        const char *ext = strrchr(args[0], '.');
+        if(case_eq(ext, ".car"))
+            binarydecode(fp, args[0]);
+        else
+            streamdecode(fp, args[0]);
+        goto end;
+    }
 
     if(!eq(*out, "-")) {
         output = fopen(*out, "w");
