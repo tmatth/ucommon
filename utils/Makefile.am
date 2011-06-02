@@ -15,7 +15,7 @@ LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
 man_MANS = args.1 scrub.1 mdsum.1 zerofill.1
-bin_PROGRAMS = args scrub mdsum zerofill
+bin_PROGRAMS = args scrub mdsum zerofill car
 
 args_SOURCES = args.cpp
 
@@ -28,3 +28,5 @@ mdsum_LDFLAGS = @SECURE_LOCAL@
 zerofill_SOURCES = zerofill.cpp
 zerofill_LDFLAGS = @SECURE_LOCAL@
 
+car_SOURCES = car.cpp
+car_LDFLAGS = @SECURE_LOCAL@

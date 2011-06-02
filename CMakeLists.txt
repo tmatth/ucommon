@@ -417,6 +417,11 @@ add_dependencies(ucommon-args ucommon)
 set_target_properties(ucommon-args PROPERTIES OUTPUT_NAME args)
 target_link_libraries(ucommon-args ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
+add_executable(usecure-car utils/car.cpp)
+add_dependencies(usecure-car usecure ucommon)
+set_target_properties(usecure-car PROPERTIES OUTPUT_NAME scrub)
+target_link_libraries(usecure-car usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
+
 add_executable(usecure-scrub utils/scrub.cpp)
 add_dependencies(usecure-scrub usecure ucommon)
 set_target_properties(usecure-scrub PROPERTIES OUTPUT_NAME scrub)
@@ -533,4 +538,4 @@ if(BUILD_COMPAT)
 endif()
 
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
-install(TARGETS ucommon-args usecure-scrub usecure-mdsum usecure-zerofill DESTINATION ${INSTALL_BINDIR})
+install(TARGETS ucommon-args usecure-car usecure-scrub usecure-mdsum usecure-zerofill DESTINATION ${INSTALL_BINDIR})

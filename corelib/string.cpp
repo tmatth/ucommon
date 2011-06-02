@@ -1951,7 +1951,7 @@ size_t string::b64encode(char *dest, const uint8_t *bin, size_t size, size_t dsi
     size_t count = 0;
 
     if(!dsize)
-        dsize = size * 4 / 3;
+        dsize = (size * 4 / 3) + 1;
 
     if (!dsize || !size)
         goto end;
