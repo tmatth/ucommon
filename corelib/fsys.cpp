@@ -38,9 +38,7 @@
 #endif
 
 #include <stdio.h>
-#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #include <errno.h>
 #include <string.h>
 
@@ -189,7 +187,7 @@ int fsys::trunc(offset_t offset)
 
 int fsys::fileinfo(struct stat *buf)
 {
-    int fn = _open_osfhandle((long int)(fd), _O_RDONLY);
+    int fn = _open_osfhandle((long int)(fd), O_RDONLY);
 
     int rtn = _fstat(fn, (struct _stat *)(buf));
     _close(fn);
