@@ -28,9 +28,11 @@ static shell::flagopt decode('d', "--decode", _TEXT("decode archive"));
 static shell::stringopt hash('h', "--digest", _TEXT("digest method (sha)"), "method", "sha");
 static shell::flagopt noheader('n', "--no-header", _TEXT("without wrapper"));
 static shell::stringopt out('o', "--output", _TEXT("output file"), "filename", "-");
+static shell::flagopt quiet('q', "--quiet", _TEXT("quiet operation"));
 static shell::flagopt recursive('R', "--recursive", _TEXT("recursive directory scan"));
 static shell::flagopt altrecursive('r', NULL, NULL);
 static shell::flagopt hidden('s', "--hidden", _TEXT("include hidden files"));
+static shell::flagopt yes('y', "--overwrite", _TEXT("overwrite existing files"));
 
 static bool binary = false;
 static int exit_code = 0;
@@ -228,7 +230,9 @@ static void final(void)
 static void process(void)
 {
     string_t path;
+    int key;
     char *cp;
+
     switch(decoder) {
     case d_init:
         decoder = d_scan;
@@ -250,11 +254,36 @@ static void process(void)
             *cp = 0;
             fsys::createDir((char *)(cbuf + 6), 0640);
         }
+        if(fsys::isdir(*path))
+            shell::errexit(8, "*** %s: %s: %s\n",
+                argv0, *path, _TEXT("output is directory"));
+
+        if(fsys::isfile(*path) && !is(yes)) {
+            string_t prompt = str("overwrite ") + path + " <y/n>? ";
+            if(is(quiet))
+                key = 0;
+            else
+                key = shell::inkey(prompt);
+            switch(key)
+            {
+            case 'y':
+            case 'Y':
+                printf("y\n");
+                break;
+            default:
+                printf("n\n");
+            case 0:
+                shell::errexit(8, "*** %s: %s: %s\n",
+                    argv0, *path, _TEXT("will not overwrite"));
+            }
+        }
+
         output = fopen(*path, "w");
         if(!output)
             shell::errexit(8, "*** %s: %s: %s\n",
                 argv0, *path, _TEXT("cannot create"));
-        printf("decoding %s...\n", *path);
+        if(!is(quiet))
+            printf("decoding %s...\n", *path);
         break;
     case d_file:
         if(!frames) {
