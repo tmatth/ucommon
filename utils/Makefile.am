@@ -14,7 +14,7 @@ INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
-man_MANS = args.1 scrub.1 mdsum.1 zerofill.1
+man_MANS = args.1 scrub.1 mdsum.1 zerofill.1 car.1
 bin_PROGRAMS = args scrub mdsum zerofill car
 
 args_SOURCES = args.cpp

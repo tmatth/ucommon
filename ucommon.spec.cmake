@@ -96,10 +96,12 @@ make install DESTDIR=%{buildroot}
 %files bin
 %defattr(-,root,root,-)
 %{_bindir}/args
+%{_bindir}/car
 %{_bindir}/scrub
 %{_bindir}/mdsum
 %{_bindir}/zerofill
 %{_mandir}/man1/args.*
+%{_mandir}/man1/car.*
 %{_mandir}/man1/scrub.*
 %{_mandir}/man1/mdsum.*
 %{_mandir}/man1/zerofill.*
