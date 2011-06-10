@@ -17,16 +17,31 @@
 
 #include "local.h"
 
+static const unsigned char *_salt = NULL;
+static unsigned _rounds = 1;
+
 Cipher::Key::Key(const char *cipher)
 {
     secure::init();
     set(cipher);
 }
 
+Cipher::Key::Key(const char *cipher, const char *digest)
+{
+    secure::init();
+    set(cipher, digest);
+}
+
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned rounds)
 {
     secure::init();
-    set(cipher);
+    set(cipher, digest);
+    assign(text, size, salt, rounds);
+}
+
+void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned rounds)
+{
+    keysize = 0;
 }
 
 Cipher::Key::Key()
@@ -45,6 +60,16 @@ void Cipher::Key::set(const char *cipher)
     clear();
 }
 
+void Cipher::Key::set(const char *cipher, const char *digest)
+{
+    set(cipher);
+}
+
+void Cipher::Key::assign(const char *text, size_t size)
+{
+    assign(text, size, _salt, _rounds);
+}
+
 void Cipher::Key::clear(void)
 {
     algotype = NULL;
@@ -52,6 +77,12 @@ void Cipher::Key::clear(void)
     keysize = 0;
     zerofill(keybuf, sizeof(keybuf));
     zerofill(ivbuf, sizeof(ivbuf));
+}
+
+void Cipher::Key::options(const unsigned char *salt, unsigned rounds)
+{
+    _salt = salt;
+    _rounds = rounds;
 }
 
 Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)

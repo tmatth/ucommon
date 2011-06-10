@@ -17,22 +17,30 @@
 
 #include "local.h"
 
+static const unsigned char *_salt = NULL;
+static unsigned _rounds = 1;
+
 Cipher::Key::Key(const char *cipher)
 {
     secure::init();
     set(cipher);
 }
 
+Cipher::Key::Key(const char *cipher, const char *digest)
+{
+    secure::init();
+    set(cipher, digest);
+}
+
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
     secure::init();
+    set(cipher, digest);
+    assign(text, size, salt, count);
+}
 
-    if(case_eq(digest, "sha"))
-        digest = "sha1";
-
-    set(cipher);
-    hashid = gcry_md_map_name(digest);
-
+void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned count)
+{
     if(hashid == GCRY_MD_NONE || algoid == GCRY_CIPHER_NONE) {
         keysize = 0;
         return;
@@ -51,6 +59,12 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
     char previous[MAX_DIGEST_HASHSIZE / 8];
     unsigned prior = 0;
     unsigned loop;
+
+    if(!salt)
+        salt = _salt;
+
+    if(!count)
+        count = _rounds;
 
     do {
         gcry_md_reset(mdc);
@@ -82,6 +96,11 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
     gcry_md_close(mdc);
 }
 
+void Cipher::Key::assign(const char *text, size_t size)
+{
+    assign(text, size, _salt, _rounds);
+}
+
 Cipher::Key::Key()
 {
     secure::init();
@@ -91,6 +110,22 @@ Cipher::Key::Key()
 Cipher::Key::~Key()
 {
     clear();
+}
+
+void Cipher::Key::options(const unsigned char *salt, unsigned rounds)
+{
+    _salt = salt;
+    _rounds = rounds;
+}
+
+void Cipher::Key::set(const char *cipher, const char *digest)
+{
+    set(cipher);
+
+    if(case_eq(digest, "sha"))
+        digest = "sha1";
+
+    hashid = gcry_md_map_name(digest);
 }
 
 void Cipher::Key::set(const char *cipher)

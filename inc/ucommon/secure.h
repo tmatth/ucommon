@@ -291,9 +291,18 @@ public:
 
         void set(const char *cipher);
 
+        void set(const char *cipher, const char *digest);
+
+        void assign(const char *key, size_t size, const unsigned char *salt, unsigned rounds);
+
     public:
         Key(const char *cipher, const char *digest, const char *text, size_t size = 0, const unsigned char *salt = NULL, unsigned rounds = 1);
+
+        Key(const char *cipher, const char *digest);
+
         ~Key();
+
+        void assign(const char *key, size_t size = 0);
 
         void clear(void);
 
@@ -308,6 +317,11 @@ public:
 
         inline bool operator!()
             {return keysize == 0;};
+
+        inline Key& operator=(const char *pass)
+            {assign(pass); return *this;};
+
+        static void options(const unsigned char *salt = NULL, unsigned rounds = 1);
     };
 
     typedef Key *key_t;

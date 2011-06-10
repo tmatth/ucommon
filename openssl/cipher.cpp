@@ -17,6 +17,9 @@
 
 #include "local.h"
 
+static const unsigned char *_salt = NULL;
+static unsigned _rounds = 1;
+
 Cipher::Key::Key(const char *cipher)
 {
     secure::init();
@@ -24,26 +27,41 @@ Cipher::Key::Key(const char *cipher)
     set(cipher);
 }
 
+Cipher::Key::Key(const char *cipher, const char *digest)
+{
+    secure::init();
+    set(cipher, digest);
+}
+
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned rounds)
 {
     secure::init();
 
-    set(cipher);
+    set(cipher, digest);
+    assign(text, size, salt, rounds);
+}
 
-    // never use sha0...
-    if(case_eq(digest, "sha"))
-        digest = "sha1";
-
-    hashtype = EVP_get_digestbyname(digest);
-
+void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned rounds)
+{
     if(!algotype || !hashtype)
         return;
 
     if(!size)
         size = strlen((const char *)text);
 
+    if(!rounds)
+        rounds = _rounds;
+
+    if(!salt)
+        salt = _salt;
+
     if(EVP_BytesToKey((const EVP_CIPHER*)algotype, (const EVP_MD*)hashtype, salt, (const unsigned char *)text, size, rounds, keybuf, ivbuf) < (int)keysize)
         keysize = 0;
+}
+
+void Cipher::Key::assign(const char *text, size_t size)
+{
+    assign(text, size, _salt, _rounds);
 }
 
 Cipher::Key::Key()
@@ -55,6 +73,23 @@ Cipher::Key::Key()
 Cipher::Key::~Key()
 {
     clear();
+}
+
+void Cipher::Key::options(const unsigned char *salt, unsigned rounds)
+{
+    _salt = salt;
+    _rounds = rounds;
+}
+
+void Cipher::Key::set(const char *cipher, const char *digest)
+{
+    set(cipher);
+
+    // never use sha0...
+    if(case_eq(digest, "sha"))
+        digest = "sha1";
+
+    hashtype = EVP_get_digestbyname(digest);
 }
 
 void Cipher::Key::set(const char *cipher)
