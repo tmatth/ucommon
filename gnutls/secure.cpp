@@ -64,6 +64,11 @@ static const char *certid = "generic";
 
 gnutls_priority_t context::priority_cache;
 
+bool secure::fipsinit(const char *progname)
+{
+    return false;
+}
+
 bool secure::init(const char *progname)
 {
     static bool initialized = false;

@@ -115,6 +115,15 @@ public:
     static bool init(const char *program = NULL);
 
     /**
+     * Initialize secure stack with fips support.  If fips support is not
+     * successfully enabled, the secure stack is also not initialized.  Hence
+     * init() can be used for non-fips certified operation if fips fails.
+     * @param program name we are initializing for.
+     * @return true if fips support enabled and stack initialized.
+     */
+    static bool fipsinit(const char *program = NULL);
+
+    /**
      * Get a certificate path.  This is used to get directories for application
      * specific certificate stores.
      * @param id of path to return.

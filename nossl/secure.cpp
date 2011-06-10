@@ -27,6 +27,11 @@ secure::~secure()
 {
 }
 
+bool secure::fipsinit(const char *progname)
+{
+    return false;
+}
+
 bool secure::init(const char *progname)
 {
     Thread::init();

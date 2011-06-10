@@ -17,6 +17,10 @@
 
 #include "local.h"
 
+#ifdef  HAVE_OPENSSL_FIPS_H
+#include <openssl/fips.h>
+#endif
+
 static mutex_t *private_locks = NULL;
 static const char *certid = "generic";
 
@@ -37,6 +41,18 @@ extern "C" {
         return (long)Thread::self();
 #endif
     }
+}
+
+bool secure::fipsinit(const char *progname)
+{
+#ifdef  HAVE_OPENSSL_FIPS_H
+    if(!FIPS_mode_set(1))
+        return false;
+
+    return init(progname);
+#else
+    return false;
+#endif
 }
 
 bool secure::init(const char *progname)
