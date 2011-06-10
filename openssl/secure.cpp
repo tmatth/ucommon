@@ -43,9 +43,14 @@ extern "C" {
     }
 }
 
-bool secure::fipsinit(const char *progname)
+bool secure::fips(const char *progname)
 {
 #ifdef  HAVE_OPENSSL_FIPS_H
+
+    // must always be first init function called...
+    if(private_locks)
+        return false;
+
     if(!FIPS_mode_set(1))
         return false;
 

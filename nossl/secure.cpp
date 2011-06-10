@@ -27,7 +27,7 @@ secure::~secure()
 {
 }
 
-bool secure::fipsinit(const char *progname)
+bool secure::fips(const char *progname)
 {
     return false;
 }

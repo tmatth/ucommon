@@ -121,7 +121,7 @@ public:
      * @param program name we are initializing for.
      * @return true if fips support enabled and stack initialized.
      */
-    static bool fipsinit(const char *program = NULL);
+    static bool fips(const char *program = NULL);
 
     /**
      * Get a certificate path.  This is used to get directories for application
