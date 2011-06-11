@@ -1734,7 +1734,7 @@ char *shell::getpass(const char *prompt, char *buffer, size_t size)
     return buffer;
 }
 
-static int inkey(const char *prompt)
+int shell::inkey(const char *prompt)
 {
     if(prompt && fsys::istty(shell::input()))
         fputs(prompt, stdout);
@@ -1744,7 +1744,7 @@ static int inkey(const char *prompt)
     return (char)getch();
 }
 
-static char *getline(const char *prompt, char *buffer, size_t size)
+char *shell::getline(const char *prompt, char *buffer, size_t size)
 {
     unsigned pos = 0;
 
