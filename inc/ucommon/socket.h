@@ -1737,11 +1737,11 @@ public:
     TCPServer(const char *address, const char *service, unsigned backlog = 5);
 };
 
-struct addrinfo *_nextaddrinfo(struct addrinfo *addrinfo);
-struct sockaddr *_getaddrinfo(struct addrinfo *addrinfo);
+__EXPORT struct addrinfo *_nextaddrinfo(struct addrinfo *addrinfo);
+__EXPORT struct sockaddr *_getaddrinfo(struct addrinfo *addrinfo);
 
 template <>
-class __EXPORT linked_pointer<struct sockaddr>
+class linked_pointer<struct sockaddr>
 {
 private:
     struct addrinfo *ptr;
@@ -1776,6 +1776,27 @@ public:
      */
     inline operator bool() const
         {return ptr != NULL;};
+
+    /**
+     * Assign our pointer from an address list.
+     * @param pointer of linked list.
+     */
+    inline void operator=(struct addrinfo *list)
+        {ptr = list;};
+
+    /**
+     * Assign our pointer from an address list.
+     * @param pointer of linked list.
+     */
+    inline void operator=(Socket::address& list)
+        {ptr = list.getList();};
+
+    /**
+     * Return member from typed object our pointer references.
+     * @return evaluated member of object we point to.
+     */
+    inline struct sockaddr* operator->() const
+        {return _getaddrinfo(ptr);};
 
     /**
      * Test if we have no address list.
