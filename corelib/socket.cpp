@@ -3338,3 +3338,17 @@ String str(Socket& so, strsize_t size)
     String::fix(s);
     return s;
 }
+
+struct sockaddr *_getaddrinfo(struct addrinfo *list)
+{
+    return list->ai_addr;
+}
+
+struct addrinfo *_nextaddrinfo(struct addrinfo *list)
+{
+    if(!list)
+        return NULL;
+
+    return list->ai_next;
+}
+

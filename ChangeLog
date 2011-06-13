@@ -1,3 +1,6 @@
+from ucommon 5.0.2 to 5.0.3
+- specialization to use linked_pointer<struct sockaddr> to walk address lists.
+
 from ucommon 5.0.1 to 5.0.2
 - fix for termios support.
 - shell getpass and inkey methods.

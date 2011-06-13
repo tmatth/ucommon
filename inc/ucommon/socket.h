@@ -1737,6 +1737,57 @@ public:
     TCPServer(const char *address, const char *service, unsigned backlog = 5);
 };
 
+struct addrinfo *_nextaddrinfo(struct addrinfo *addrinfo);
+struct sockaddr *_getaddrinfo(struct addrinfo *addrinfo);
+
+template <>
+class __EXPORT linked_pointer<struct sockaddr>
+{
+private:
+    struct addrinfo *ptr;
+
+public:
+    inline linked_pointer(struct addrinfo *list)
+        {ptr = list;}
+
+    inline linked_pointer()
+        {ptr = NULL;}
+
+    inline linked_pointer(Socket::address& list)
+        {ptr = list.getList();};
+
+    /**
+     * Get the full socket address list by casted reference.
+     * @return addrinfo list we resolved or NULL if none.
+     */
+    inline operator struct sockaddr *() const
+        {return _getaddrinfo(ptr);};
+
+    /**
+     * Return the full socket address list by pointer reference.
+     * @return addrinfo list we resolved or NULL if none.
+     */
+    inline struct sockaddr *operator*() const
+        {return _getaddrinfo(ptr);};
+
+    /**
+     * Test if the address list is valid.
+     * @return true if we have an address list.
+     */
+    inline operator bool() const
+        {return ptr != NULL;};
+
+    /**
+     * Test if we have no address list.
+     * @return true if we have no address list.
+     */
+    inline bool operator!() const
+        {return ptr == NULL;};
+
+    inline void next(void)
+        {ptr = _nextaddrinfo(ptr);};
+};
+
 /**
  * A convenience class for socket.
  */
@@ -1796,6 +1847,7 @@ inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
 String str(Socket& so, strsize_t size);
 
 typedef TCPServer   tcpserv_t;
+
 
 END_NAMESPACE
 
