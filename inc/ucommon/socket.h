@@ -1737,9 +1737,21 @@ public:
     TCPServer(const char *address, const char *service, unsigned backlog = 5);
 };
 
+/**
+ * Helper function for linked_pointer<struct sockaddr>.
+ */
 __EXPORT struct addrinfo *_nextaddrinfo(struct addrinfo *addrinfo);
+
+/**
+ * Helper function for linked_pointer<struct sockaddr>.
+ */
 __EXPORT struct sockaddr *_getaddrinfo(struct addrinfo *addrinfo);
 
+/**
+ * Linked pointer for address lists.  This can be used to iterate through
+ * the list of a Socket::address object using the linked_pointer method.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 template <>
 class linked_pointer<struct sockaddr>
 {
@@ -1790,6 +1802,21 @@ public:
      */
     inline void operator=(Socket::address& list)
         {ptr = list.getList();};
+
+    /**
+     * Assign our pointer from an address list.
+     * @param pointer of linked list.
+     */
+    inline void set(struct addrinfo *list)
+        {ptr = list;};
+
+    /**
+     * Assign our pointer from an address list.
+     * @param pointer of linked list.
+     */
+    inline void set(Socket::address& list)
+        {ptr = list.getList();};
+
 
     /**
      * Return member from typed object our pointer references.
