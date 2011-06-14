@@ -3339,6 +3339,8 @@ String str(Socket& so, strsize_t size)
     return s;
 }
 
+NAMESPACE_UCOMMON
+
 struct sockaddr *_getaddrinfo(struct addrinfo *list)
 {
     return list->ai_addr;
@@ -3359,4 +3361,6 @@ socket_t _getaddrsock(struct addrinfo *list)
 
     return ::socket(list->ai_family, list->ai_socktype, list->ai_protocol);
 }
+
+END_NAMESPACE
 

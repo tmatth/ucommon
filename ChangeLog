@@ -1,5 +1,7 @@
 from ucommon 5.0.2 to 5.0.3
 - specialization to use linked_pointer<struct sockaddr> to walk address lists.
+- fix for cmake build of car.
+- sockaddr util added to show address resolution lists.
 
 from ucommon 5.0.1 to 5.0.2
 - fix for termios support.

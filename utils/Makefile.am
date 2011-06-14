@@ -14,10 +14,12 @@ INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
-man_MANS = args.1 scrub.1 mdsum.1 zerofill.1 car.1
-bin_PROGRAMS = args scrub mdsum zerofill car
+man_MANS = args.1 scrub.1 mdsum.1 zerofill.1 car.1 sockaddr.1
+bin_PROGRAMS = args scrub mdsum zerofill car sockaddr
 
 args_SOURCES = args.cpp
+
+sockaddr_SOURCES = sockaddr.cpp
 
 scrub_SOURCES = scrub.cpp
 scrub_LDFLAGS = @SECURE_LOCAL@

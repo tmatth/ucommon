@@ -420,8 +420,13 @@ target_link_libraries(ucommon-args ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-car utils/car.cpp)
 add_dependencies(usecure-car usecure ucommon)
-set_target_properties(usecure-car PROPERTIES OUTPUT_NAME scrub)
+set_target_properties(usecure-car PROPERTIES OUTPUT_NAME car)
 target_link_libraries(usecure-car usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
+
+add_executable(ucommon-sockaddr utils/sockaddr.cpp)
+add_dependencies(ucommon-sockaddr ucommon)
+set_target_properties(ucommon-sockaddr PROPERTIES OUTPUT_NAME sockaddr)
+target_link_libraries(ucommon-sockaddr ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-scrub utils/scrub.cpp)
 add_dependencies(usecure-scrub usecure ucommon)
