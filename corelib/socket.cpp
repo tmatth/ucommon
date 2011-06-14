@@ -3352,4 +3352,11 @@ struct addrinfo *_nextaddrinfo(struct addrinfo *list)
     return list->ai_next;
 }
 
+socket_t _getaddrsock(struct addrinfo *list)
+{
+    if(!list)
+        return INVALID_SOCKET;
+
+    return ::socket(list->ai_family, list->ai_socktype, list->ai_protocol);
+}
 

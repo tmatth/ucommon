@@ -72,6 +72,8 @@ extern "C" {
 
 struct sockaddr_internet;
 
+typedef struct sockaddr *sockaddr_t;
+
 /**
  * An object that holds ipv4 or ipv6 binary encoded host addresses.
  */
@@ -1748,6 +1750,11 @@ __EXPORT struct addrinfo *_nextaddrinfo(struct addrinfo *addrinfo);
 __EXPORT struct sockaddr *_getaddrinfo(struct addrinfo *addrinfo);
 
 /**
+ * Helper function for linked_pointer<struct sockaddr>.
+ */
+__EXPORT socket_t _getaddrsock(struct addrinfo *addrinfo);
+
+/**
  * Linked pointer for address lists.  This can be used to iterate through
  * the list of a Socket::address object using the linked_pointer method.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -1781,6 +1788,26 @@ public:
      */
     inline struct sockaddr *operator*() const
         {return _getaddrinfo(ptr);};
+
+    inline operator struct sockaddr_in *() const
+        {return (struct sockaddr_in *)_getaddrinfo(ptr);};
+
+    inline struct sockaddr_in *in(void) const
+        {return (struct sockaddr_in *)_getaddrinfo(ptr);};
+
+#ifdef  AF_INET6
+    inline operator struct sockaddr_in6 *() const
+        {return (struct sockaddr_in6 *)_getaddrinfo(ptr);};
+
+    inline struct sockaddr_in6 *in6(void) const
+        {return (struct sockaddr_in6 *)_getaddrinfo(ptr);};
+#endif
+
+    /**
+     * Get socket as expression operator.
+     */
+    inline socket_t operator()(void) const
+        {return _getaddrsock(ptr);};
 
     /**
      * Test if the address list is valid.
