@@ -26,10 +26,6 @@ static shell::flagopt udp('u', "--udp", _TEXT("lookup udp service"));
 PROGRAM_MAIN(argc, argv)
 {
     unsigned type = SOCK_STREAM;
-    struct sockaddr_in *ipv4;
-#ifdef  AF_INET6
-    struct sockaddr_in6 *ipv6;
-#endif
     unsigned port;
     char buffer[256];
 
