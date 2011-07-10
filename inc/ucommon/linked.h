@@ -1064,7 +1064,7 @@ public:
      * @param typed_value to assign.
      */
     inline void operator=(const T& typed_value)
-        {set(typed_value);};
+        {this->set(typed_value);};
 
     /**
      * Find embedded object in chain by name.
@@ -1113,7 +1113,7 @@ public:
      * @param typed_value to assign.
      */
     inline linked_value(LinkedObject **root, const T& typed_value)
-        {LinkedObject::enlist(root); set(typed_value);};
+        {LinkedObject::enlist(root); this->set(typed_value);};
 
     /**
      * Assign embedded value from related type and add to list.
@@ -1121,14 +1121,14 @@ public:
      * @param typed_value to assign.
      */
     inline linked_value(OrderedIndex *index, const T& typed_value)
-        {O::enlist(index); set(typed_value);};
+        {O::enlist(index); this->set(typed_value);};
 
     /**
      * Assign embedded value from related type.
      * @param typed_value to assign.
      */
     inline void operator=(const T& typed_value)
-        {set(typed_value);};
+        {this->set(typed_value);};
 };
 
 /**

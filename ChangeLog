@@ -1,3 +1,6 @@
+from ucommon 5.0.3 to 5.0.4
+- set without explicit this in templates conflicts with std inherited classes.
+
 from ucommon 5.0.2 to 5.0.3
 - specialization to use linked_pointer<struct sockaddr> to walk address lists.
 - fix for cmake build of car.

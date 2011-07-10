@@ -119,12 +119,12 @@ public:
     }
 
     inline pointer& operator=(const pointer<T> &ref) {
-        set(ref);
+        this->set(ref);
         return *this;
     }
 
     inline pointer& operator=(T *ptr) {
-        set(ptr);
+        this->set(ptr);
         return *this;
     }
 
@@ -216,12 +216,12 @@ public:
     }
 
     inline array_pointer& operator=(const array_pointer<T> &ref) {
-        set(ref);
+        this->set(ref);
         return *this;
     }
 
     inline array_pointer& operator=(T *ptr) {
-        set(ptr);
+        this->set(ptr);
         return *this;
     }
 
