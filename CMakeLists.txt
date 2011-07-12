@@ -544,4 +544,4 @@ if(BUILD_COMPAT)
 endif()
 
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
-install(TARGETS ucommon-args usecure-car usecure-scrub usecure-mdsum usecure-zerofill DESTINATION ${INSTALL_BINDIR})
+install(TARGETS ucommon-args usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
