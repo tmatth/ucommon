@@ -2130,15 +2130,15 @@ int Socket::disconnect(socket_t so)
     } us;
 
     struct sockaddr *addr = (struct sockaddr *)&us.saddr;
-    int family;
     socklen_t len = sizeof(us.saddr);
 
-    _getsockname_(so, addr, &len);
-    family = us.inaddr.sin_family;
-    memset(addr, 0, sizeof(us.saddr));
 #if defined(_MSWINDOWS_)
+    _getsockname_(so, addr, &len);
+    int family = us.inaddr.sin_family;
+    memset(addr, 0, sizeof(us.saddr));
     us.inaddr.sin_family = family;
 #else
+    memset(addr, 0, sizeof(us.saddr));
     us.inaddr.sin_family = AF_UNSPEC;
 #endif
     if(len > sizeof(us.saddr))

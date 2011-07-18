@@ -420,7 +420,6 @@ bool queue::post(ObjectProtocol *object, timeout_t timeout)
 
     bool rtn = true;
     struct timespec ts;
-    member *node;
     LinkedObject *mem;
 
     if(timeout && timeout != Timer::inf)
@@ -446,14 +445,14 @@ bool queue::post(ObjectProtocol *object, timeout_t timeout)
         mem = freelist;
         freelist = freelist->getNext();
         unlock();
-        node = new((caddr_t)mem) member(this, object);
+        new((caddr_t)mem) member(this, object);
     }
     else {
         unlock();
         if(pager)
-            node = new((caddr_t)(pager->alloc(sizeof(member)))) member(this, object);
+            new((caddr_t)(pager->alloc(sizeof(member)))) member(this, object);
         else
-            node = new member(this, object);
+            new member(this, object);
     }
     lock();
     signal();
@@ -579,7 +578,6 @@ bool stack::push(ObjectProtocol *object, timeout_t timeout)
 
     bool rtn = true;
     struct timespec ts;
-    member *node;
     LinkedObject *mem;
 
     if(timeout && timeout != Timer::inf)
@@ -605,16 +603,16 @@ bool stack::push(ObjectProtocol *object, timeout_t timeout)
         mem = freelist;
         freelist = freelist->getNext();
         unlock();
-        node = new((caddr_t)mem) member(this, object);
+        new((caddr_t)mem) member(this, object);
     }
     else {
         unlock();
         if(pager) {
             caddr_t ptr = (caddr_t)pager->alloc(sizeof(member));
-            node = new(ptr) member(this, object);
+            new(ptr) member(this, object);
         }
         else
-            node = new member(this, object);
+            new member(this, object);
     }
     lock();
     signal();

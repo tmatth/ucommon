@@ -1976,14 +1976,17 @@ DetachedThread::DetachedThread(size_t size)
 
 void Thread::sleep(timeout_t timeout)
 {
-    timespec ts;
-    ts.tv_sec = timeout / 1000l;
-    ts.tv_nsec = (timeout % 1000l) * 1000000l;
 #if defined(__PTH__)
     pth_usleep(timeout * 1000);
 #elif defined(HAVE_PTHREAD_DELAY)
+    timespec ts;
+    ts.tv_sec = timeout / 1000l;
+    ts.tv_nsec = (timeout % 1000l) * 1000000l;
     pthread_delay(&ts);
 #elif defined(HAVE_PTHREAD_DELAY_NP)
+    timespec ts;
+    ts.tv_sec = timeout / 1000l;
+    ts.tv_nsec = (timeout % 1000l) * 1000000l;
     pthread_delay_np(&ts);
 #elif defined(_MSWINDOWS_)
     ::Sleep(timeout);
