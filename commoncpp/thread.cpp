@@ -125,6 +125,8 @@ Thread::Thread(int pri, size_t stack) : ucommon::JoinableThread(stack)
     }
     else {
         parent = Thread::get();
+        if(!parent)
+            parent = &_mainthread;
         exceptions = parent->exceptions;
     }
 }

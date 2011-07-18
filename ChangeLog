@@ -1,3 +1,6 @@
+from ucommon 5.0.4 to 5.0.5
+- fix for commoncpp emulation when no direct parent commoncpp thread.
+
 from ucommon 5.0.3 to 5.0.4
 - set without explicit this in templates conflicts with std inherited classes.
 
