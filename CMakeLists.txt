@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 5.0.4)
+set (VERSION 5.0.5)
 set (SOVERSION 5)
 
 # when we override default install prefix, assume full path is used...
@@ -353,6 +353,8 @@ file(GLOB common_src corelib/*.cpp)
 file(GLOB ucommon_inc inc/ucommon/*.h)
 file(GLOB commoncpp_src commoncpp/*.cpp)
 file(GLOB commoncpp_inc inc/commoncpp/*.h)
+file(GLOB ucommon_man utils/*.1)
+set(ucommon_man commoncpp-config.1 ucommon-config.1 ${ucommon_man})
 list(REMOVE_ITEM ucommon_inc inc/ucommon/secure.h)
 
 if(HAVE_OPENSSL)
@@ -545,3 +547,6 @@ endif()
 
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
 install(TARGETS ucommon-args usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
+install(FILES ${ucommon_man} DESTINATION ${INSTALL_MANDIR}/man1)
+
+
