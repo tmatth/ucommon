@@ -1,4 +1,4 @@
-.\" scrub - securely erase files by filling with random data first.
+.\" scrub-files - securely erase files by filling with random data first.
 .\" Copyright (c) 2010 David Sugar <dyfet@gnutelephony.org>
 .\"
 .\" This manual page is free software; you can redistribute it and/or modify
@@ -17,11 +17,11 @@
 .\"
 .\" This manual page is written especially for Debian GNU/Linux.
 .\"
-.TH scrub "1" "January 2010" "GNU uCommon" "GNU Telephony"
+.TH scrub-files "1" "January 2010" "GNU uCommon" "GNU Telephony"
 .SH NAME
-scrub \- securely erase files by filling with random data first.
+scrub\-files \- securely erase files by filling with random data first.
 .SH SYNOPSIS
-.B scrub \fI[options]\fR \fIpaths...\fR 
+.B scrub \fI[options]\fR \fIpaths...\fR
 .br
 .SH DESCRIPTION
 This command is used to securely erase files.  This is accomplished by
@@ -29,13 +29,13 @@ filling the file with random data in pre-sized chunks.  Multiple passes
 of random data may also be used.  The pre-sized chunks are used to remove
 information about exact original file size.  Other options include random
 renaming of the original file before deletion and the use of truncation to
-break down meta-data on what blocks in the file system were originally 
-associated with a securely deleted file.  This is specifically intended to 
+break down meta-data on what blocks in the file system were originally
+associated with a securely deleted file.  This is specifically intended to
 make it harder to perform forensic analysis on securely erased files.
 .SH OPTIONS
 .TP
 \fB--blocksize\fR \fIsize\fR
-Set the default block size (in 1 k increments) for scrub to use when
+Set the default block size (in 1 k increments) for scrub\-files to use when
 writing random data.  This effects both the final file length, which will
 be aligned to the specified size, and the way the truncate option decomposes
 files.  The default is 1k.
@@ -62,7 +62,7 @@ Display each file being processed to the console.
 \fB--help\fR
 Outputs help screen for the user.
 .SH AUTHOR
-.B scrub
+.B scrub\-files
 was written by David Sugar <dyfet@gnutelephony.org>.
 .SH "REPORTING BUGS"
 Report bugs to bug-commoncpp@gnu.org.

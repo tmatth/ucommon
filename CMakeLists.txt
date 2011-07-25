@@ -432,7 +432,7 @@ target_link_libraries(ucommon-sockaddr ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-scrub utils/scrub.cpp)
 add_dependencies(usecure-scrub usecure ucommon)
-set_target_properties(usecure-scrub PROPERTIES OUTPUT_NAME scrub)
+set_target_properties(usecure-scrub PROPERTIES OUTPUT_NAME scrub-files)
 target_link_libraries(usecure-scrub usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_executable(usecure-mdsum utils/mdsum.cpp)
