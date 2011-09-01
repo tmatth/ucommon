@@ -415,6 +415,32 @@ public:
 };
 
 /**
+ * Save and restore global objects in function call stack frames.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template<typename T>
+class save_restore
+{
+private:
+    T *original;
+    T temp;
+
+public:
+    /**
+     * Save object into local copy and keep reference to the original object.
+     * @param object to save.
+     */
+    inline save_restore(T& object)
+        {original = &object; temp = object;};
+
+    /**
+     * Restore original when stack frame is released.
+     */
+    inline ~save_restore()
+        {*original = temp;};
+};
+
+/**
  * Convenience function to validate object assuming it is castable to bool.
  * @param object we are testing.
  * @return true if object valid.
