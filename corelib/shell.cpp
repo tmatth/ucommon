@@ -1073,10 +1073,9 @@ skip:
     return _argv;
 }
 
-void shell::errexit(int exitcode, const char *format, ...)
+void shell::error(const char *format, ...)
 {
     va_list args;
-    loglevel_t level = ERR;
     char buf[256];
 
     String::set(buf, sizeof(buf) - 1, format);
@@ -1099,11 +1098,8 @@ void shell::errexit(int exitcode, const char *format, ...)
 
     buf[len] = 0;
 
-    if(exitcode)
-        level = FAIL;
-
 #ifdef  HAVE_SYSLOG_H
-    if(errname && errmode != NONE && level <= errlevel) {
+    if(errname && errmode != NONE && (ERR <= errlevel)) {
         if(eq("*** ", format, 4)) {
             format += 4;
             const char *cp = format;
@@ -1112,18 +1108,56 @@ void shell::errexit(int exitcode, const char *format, ...)
             if(*cp == ':' && cp[1] == ' ')
                 format = cp + 2;
         }
+        vsyslog(LOG_ERR, format, args);
+    }
+#endif
+    va_end(args);
+}
 
-        if(exitcode)
-            vsyslog(LOG_CRIT, format, args);
-        else
-            vsyslog(LOG_ERR, format, args);
+void shell::errexit(int exitcode, const char *format, ...)
+{
+    if(!exitcode)
+        return;
+
+    va_list args;
+    char buf[256];
+
+    String::set(buf, sizeof(buf) - 1, format);
+    size_t len = strlen(buf);
+
+    if(buf[len - 1] != '\n') {
+        buf[len] = '\n';
+        buf[len + 1] = 0;
+    }
+    else
+        --len;
+
+    format = buf;
+
+    va_start(args, format);
+    if(!eq("*** ", format, 4))
+        fputs("*** ", stderr);
+    vfprintf(stderr, format, args);
+    fflush(stderr);
+
+    buf[len] = 0;
+
+#ifdef  HAVE_SYSLOG_H
+    if(errname && errmode != NONE && (FAIL <= errlevel)) {
+        if(eq("*** ", format, 4)) {
+            format += 4;
+            const char *cp = format;
+            while(isalnum(*cp) || *cp == '-' || *cp == '.')
+                ++cp;
+            if(*cp == ':' && cp[1] == ' ')
+                format = cp + 2;
+        }
+        vsyslog(LOG_CRIT, format, args);
     }
 #endif
 
     va_end(args);
-
-    if(exitcode)
-        ::exit(exitcode);
+    ::exit(exitcode);
 }
 
 size_t shell::readln(pipe_t pipe, char *buffer, size_t size)

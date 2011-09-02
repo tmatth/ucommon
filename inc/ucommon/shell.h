@@ -762,11 +762,26 @@ public:
         {return _exedir;}
 
     /**
-     * Print error message and exit.
+     * Print error message and continue.
+     * @param format string to use.
+     */
+    static void error(const char *format, ...) __PRINTF(1, 2);
+
+    /**
+     * Print error message and exit.  Ignored if exitcode == 0.
      * @param exitcode to return to parent process.
      * @param format string to use.
      */
     static void errexit(int exitcode, const char *format = NULL, ...) __PRINTF(2, 3);
+
+
+    /**
+     * Convert condition to exit code if true.
+     * @param test condition.
+     * @param exitcode to use if true.
+     */
+    static inline int condition(bool test, int exitcode)
+        { return (test) ? exitcode : 0;};
 
     /**
      * Print a debug message by debug level.
