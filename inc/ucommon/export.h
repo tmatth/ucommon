@@ -33,10 +33,21 @@
 #undef  __EXPORT
 #endif
 
+#ifdef  __SHARED
+#undef  __SHARED
+#endif
+
 #ifdef  UCOMMON_STATIC
 #define __EXPORT
 #else
 #define __EXPORT __declspec(dllexport)
 #endif
+
+#if defined(UCOMMON_STATIC) || defined(UCOMMON_RUNTIME)
+#define __SHARED
+#else
+#define __SHARED __declspec(dllexport)
+#endif
+
 #endif
 

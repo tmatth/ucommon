@@ -156,12 +156,22 @@ typedef int pid_t;
 #endif
 #endif
 #define __LOCAL
+
+// if runtime mode then non-runtime libraries are static on windows...
+#if defined(UCOMMON_RUNTIME) || defined(UCOMMON_STATIC)
+#define __SHARED
+#else
+#define __SHARED __EXPORT
+#endif
+
 #elif UCOMMON_VISIBILITY > 0
 #define __EXPORT    __attribute__ ((visibility("default")))
 #define __LOCAL     __attribute__ ((visibility("hidden")))
+#define __SHARED    __attribute__ ((visibility("default")))
 #else
 #define __EXPORT
 #define __LOCAL
+#define __SHARED
 #endif
 
 #ifdef  _MSWINDOWS_

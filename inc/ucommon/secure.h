@@ -59,7 +59,7 @@ NAMESPACE_UCOMMON
  * secure/ssl socket support code.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT secure
+class __SHARED secure
 {
 public:
     /**
@@ -213,7 +213,7 @@ public:
  * passed (NULL), then this reverts to TCPBuffer behavior.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT SSLBuffer : public TCPBuffer
+class __SHARED SSLBuffer : public TCPBuffer
 {
 protected:
     secure::session_t ssl;
@@ -260,7 +260,7 @@ public:
  * are used, buffers should be aligned to the block size.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Cipher
+class __SHARED Cipher
 {
 public:
     typedef enum {ENCRYPT = 1, DECRYPT = 0} mode_t;
@@ -272,7 +272,7 @@ public:
      * supplied.
      * @author David Sugar <dyfet@gnutelephony.org>
      */
-    class __EXPORT Key
+    class __SHARED Key
     {
     protected:
         friend class Cipher;
@@ -428,7 +428,7 @@ public:
  * hash class accumulates the hash in the object.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Digest
+class __SHARED Digest
 {
 private:
     void *context;
@@ -519,7 +519,7 @@ public:
  * entropy pools and pseudo-random values.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Random
+class __SHARED Random
 {
 public:
     /**
@@ -634,7 +634,7 @@ inline void zerofill(void *addr, size_t size)
  * connection behavior.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT sstream : public tcpstream
+class __SHARED sstream : public tcpstream
 {
 protected:
     secure::session_t ssl;

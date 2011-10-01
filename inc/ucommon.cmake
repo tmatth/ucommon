@@ -20,8 +20,12 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
         endif()
     endif()
 
-    if(BUILD_STATIC)
-        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_STATIC)
+    if(BUILD_RUNTIME)
+        set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_RUNTIME)
+    else()
+        if(BUILD_STATIC)
+            set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_STATIC)
+        endif()
     endif()
 
     # see if we are building with or without std c++ libraries...
