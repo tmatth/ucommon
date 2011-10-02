@@ -47,7 +47,7 @@
 #include <cerrno>
 #include <csignal>
 
-#ifdef	HAVE_FCNTL_H
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
@@ -529,10 +529,13 @@ void Process::setScheduler(const char *pol)
 {
 #ifdef  _POSIX_PRIORITY_SCHEDULING
     struct sched_param p;
-    int policy;
+    int policy, orig;
+    pthread_t ptid = pthread_self();
 
-    sched_getparam(0, &p);
+    if(pthread_getschedparam(ptid, &policy, &p))
+        return;
 
+    orig = policy;
     if(pol) {
 #if defined(SCHED_TS)
         policy = SCHED_TS;
@@ -566,7 +569,7 @@ void Process::setScheduler(const char *pol)
 #endif
     }
     else
-        policy = sched_getscheduler(0);
+        policy = orig;
 
     int min = sched_get_priority_min(policy);
     int max = sched_get_priority_max(policy);
@@ -576,7 +579,7 @@ void Process::setScheduler(const char *pol)
     else if(p.sched_priority > max)
         p.sched_priority = max;
 
-    sched_setscheduler(0, policy, &p);
+    pthread_setschedparam(ptid, policy, &p);
 #endif
 }
 
@@ -584,18 +587,20 @@ void Process::setPriority(int pri)
 {
 #ifdef  _POSIX_PRIORITY_SCHEDULING
     struct sched_param p;
-    int policy = sched_getscheduler(0);
+    int policy;
+    pthread_t ptid = pthread_self();
+
+    pthread_getschedparam(ptid, &policy, &p);
+
     int min = sched_get_priority_min(policy);
     int max = sched_get_priority_max(policy);
-
-    sched_getparam(0, &p);
 
     if(pri < min)
         pri = min;
     if(pri > max)
         pri = max;
     p.sched_priority = pri;
-    sched_setparam(0, &p);
+    pthread_setschedparam(ptid, policy, &p);
 #else
     if(pri < -20)
         pri = -20;
