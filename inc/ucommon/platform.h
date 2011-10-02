@@ -198,9 +198,6 @@ extern "C" {
 
     typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
 
-    inline int setenv(const char *s, const char *v, int overwrite)
-        {return cpr_setenv(s, v, overwrite);};
-
     inline void sleep(int seconds)
         {::Sleep((seconds * 1000l));};
 

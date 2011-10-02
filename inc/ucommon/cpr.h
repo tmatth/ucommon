@@ -33,6 +33,9 @@
 
 extern "C" {
     __EXPORT int cpr_setenv(const char *s, const char *v, int p);
+
+    inline int setenv(const char *s, const char *v, int overwrite)
+        {return cpr_setenv(s, v, overwrite);};
 };
 
 #endif
