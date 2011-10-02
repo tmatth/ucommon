@@ -30,6 +30,7 @@
 #endif
 
 #ifdef HAVE_SYS_MMAN_H
+#undef  __EXTENSIONS__
 #define __EXTENSIONS__
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200112L
