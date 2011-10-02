@@ -352,7 +352,7 @@ public:
 
     Cipher(key_t key, mode_t mode, unsigned char *address = NULL, size_t size = 0);
 
-    ~Cipher();
+    virtual ~Cipher();
 
     void set(unsigned char *address, size_t size = 0);
 

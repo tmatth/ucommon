@@ -108,7 +108,7 @@ socket_t Socket::dupSocket(socket_t so, enum Socket::State state)
 }
 # define DUP_SOCK(s,state) dupSocket(s,state)
 #else
-socket_t Socket::dupSocket(socket_t so, enum Socket::State state)
+socket_t Socket::dupSocket(socket_t so, State state)
 {
     return dup(so);
 }
