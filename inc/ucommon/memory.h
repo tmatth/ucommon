@@ -361,7 +361,7 @@ private:
 
 protected:
     PagerPool();
-    ~PagerPool();
+    virtual ~PagerPool();
 
     PagerObject *get(size_t size);
 
@@ -387,7 +387,7 @@ public:
     charmem(char *mem, size_t size);
     charmem(size_t size);
     charmem();
-    ~charmem();
+    virtual ~charmem();
 
     void release(void);
 
@@ -415,6 +415,7 @@ public:
     chartext();
     chartext(char *buf);
     chartext(char *buf, size_t size);
+    virtual ~chartext();
 };
 
 /**

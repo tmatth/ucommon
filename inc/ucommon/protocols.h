@@ -52,6 +52,8 @@ protected:
     virtual void *_alloc(size_t size) = 0;
 
 public:
+    virtual ~MemoryProtocol();
+
     /**
      * Convenience function.
      * @param size of memory request.
@@ -114,6 +116,9 @@ class __EXPORT LockingProtocol
 protected:
     virtual void _lock(void);
     virtual void _unlock(void);
+
+public:
+    virtual ~LockingProtocol();
 };
 
 /**
@@ -138,6 +143,8 @@ protected:
     virtual int _putch(int code) = 0;
 
 public:
+    virtual ~CharacterProtocol();
+
     /**
      * Get the next character.
      * @return next character or EOF.
@@ -192,7 +199,7 @@ protected:
     /**
      * Destroy object by releasing buffer memory.
      */
-    ~BufferProtocol();
+    virtual ~BufferProtocol();
 
     /**
      * Set end of line marker.  Normally this is set to cr & lf, which

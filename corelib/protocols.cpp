@@ -57,6 +57,10 @@ void *MemoryProtocol::zalloc(size_t size)
     return mem;
 }
 
+MemoryProtocol::~MemoryProtocol()
+{
+}
+
 MemoryRedirect::MemoryRedirect(MemoryProtocol *protocol)
 {
     target = protocol;
@@ -420,3 +424,10 @@ void LockingProtocol::_unlock(void)
 {
 }
 
+LockingProtocol::~LockingProtocol()
+{
+}
+
+CharacterProtocol::~CharacterProtocol()
+{
+}

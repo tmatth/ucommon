@@ -468,6 +468,10 @@ chartext::chartext(char *buf, size_t size)
     max = size;
 }
 
+chartext::~chartext()
+{
+}
+
 int chartext::_getch(void)
 {
     if(!pos || !*pos || max)
