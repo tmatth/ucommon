@@ -75,6 +75,10 @@ typedef int socklen_t;
 #include <netinet/in.h>
 #endif
 
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>
+#endif
+
 #if defined(__hpux)
 #define _XOPEN_SOURCE_EXTENDED
 #endif

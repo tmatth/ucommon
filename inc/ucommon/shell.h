@@ -46,6 +46,10 @@
 #define INVALID_PID_VALUE   -1
 #endif
 
+#ifdef	ERR
+#undef	ERR
+#endif
+
 NAMESPACE_UCOMMON
 
 /**

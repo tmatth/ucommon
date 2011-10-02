@@ -2515,6 +2515,10 @@ void shell::debug(unsigned level, const char *fmt, ...)
 
 #ifdef  HAVE_SYSLOG_H
 
+#ifndef	LOG_AUTHPRIV
+#define	LOG_AUTHPRIV	LOG_AUTH
+#endif
+
 void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t handler)
 {
     errlevel = level;

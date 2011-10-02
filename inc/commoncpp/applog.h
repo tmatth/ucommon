@@ -174,7 +174,7 @@ class __EXPORT AppLog : protected streambuf, public ostream
     // d pointer
     AppLogPrivate *d;
     void writeLog(bool endOfLine = true);
-    static map<string, Slog::Level> *assoc;
+    static std::map<string, Slog::Level> *assoc;
 
   public:
     /**
@@ -505,9 +505,8 @@ class __EXPORT AppLog : protected streambuf, public ostream
      */
     static Slog::Level levelTranslate(string name)
     {
-      map<string, Slog::Level>::iterator  it = assoc->find(name);
-
-      return (it != assoc->end()) ? it->second : Slog::levelEmergency;
+	std::map<string, Slog::Level>::iterator  it = assoc->find(name);
+	return (it != assoc->end()) ? it->second : Slog::levelEmergency;
     }
 
 };

@@ -99,7 +99,7 @@ struct levelNamePair
 template class std::map<string, Slog::Level >;
 #endif
 
-class LevelName : public map<string, Slog::Level>
+class LevelName : public std::map<string, Slog::Level>
 {
   public:
 
@@ -136,9 +136,9 @@ class logger : public ost::ThreadQueue
 
 
 // mapping thread ID <-> logStruct (buffer)
-typedef map <cctid_t, logStruct> LogPrivateData;
+typedef std::map <cctid_t, logStruct> LogPrivateData;
 // map ident <-> levels
-typedef map <string, Slog::Level> IdentLevel;
+typedef std::map <string, Slog::Level> IdentLevel;
 
 
 NAMESPACE_COMMONCPP
@@ -189,7 +189,7 @@ const levelNamePair AppLogPrivate::_values[] =
 AppLog alog;
 
 LevelName AppLogPrivate::_assoc(_values, sizeof AppLogPrivate::_values / sizeof *AppLogPrivate::_values);
-map<string, Slog::Level> *AppLog::assoc = &AppLogPrivate::_assoc;
+std::map<string, Slog::Level> *AppLog::assoc = &AppLogPrivate::_assoc;
 
 #if defined(CCXX_EXCEPTIONS)
 

@@ -47,6 +47,10 @@
 #include <cerrno>
 #include <csignal>
 
+#ifdef	HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 #ifdef  MACOSX
 #undef  _POSIX_PRIORITY_SCHEDULING
 #endif
@@ -461,7 +465,6 @@ void    Process::detach(void)
 void    Process::attach(const char *dev)
 {
     int pid;
-    int fd;
 
     if(getppid() == 1)
         return;
@@ -489,6 +492,7 @@ void    Process::attach(const char *dev)
 
 
 #if defined(SIGTSTP) && defined(TIOCNOTTY)
+    int fd;
     if(setpgid(0, getpid()) == -1)
         THROW(-1);
 
