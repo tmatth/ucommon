@@ -30,8 +30,8 @@
 #ifndef _UCOMMON_PROTOCOLS_H_
 #define _UCOMMON_PROTOCOLS_H_
 
-#ifndef _UCOMMON_CONFIG_H_
-#include <ucommon/platform.h>
+#ifndef _UCOMMON_CPR_H_
+#include <ucommon/cpr.h>
 #endif
 
 NAMESPACE_UCOMMON

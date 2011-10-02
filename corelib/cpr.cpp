@@ -15,8 +15,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <ucommon/export.h>     // override for platform.h as it has exports...
 #include <config.h>
+#include <ucommon/export.h>
+#include <ucommon/cpr.h>
 
 #if !defined(NEW_STDCPP) && !defined(OLD_STDCPP)
 #undef  HAVE_STDEXCEPT

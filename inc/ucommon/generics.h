@@ -24,8 +24,8 @@
 #ifndef _UCOMMON_GENERICS_H_
 #define _UCOMMON_GENERICS_H_
 
-#ifndef _UCOMMON_CONFIG_H_
-#include <ucommon/platform.h>
+#ifndef _UCOMMON_CPR_H_
+#include <ucommon/cpr.h>
 #endif
 
 #include <stdlib.h>
