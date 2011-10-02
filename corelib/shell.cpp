@@ -1852,7 +1852,7 @@ char *shell::getline(const char *prompt, char *buffer, size_t size)
     fputs(prompt, stdout);
 
     while(pos < size - 1) {
-        buffer[pos] = ::getchar();
+        buffer[pos] = getc(stdin);
         if(buffer[pos] == '\r' || buffer[pos] == '\n')
             break;
         else if(buffer[pos] == '\b' && pos) {
@@ -1904,7 +1904,7 @@ int shell::inkey(const char *prompt)
     noecho(1);
     if(prompt)
         fputs(prompt, stdout);
-    int ch = ::getchar();
+    int ch = getc(stdin);
     echo(1);
 
     return ch;

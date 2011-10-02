@@ -1933,7 +1933,7 @@ void Thread::setPriority(void)
 }
 
 #else
-void Thread::setPriority(void) {};
+void Thread::setPriority(void) {}
 #endif
 
 void Thread::concurrency(int level)
