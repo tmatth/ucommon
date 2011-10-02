@@ -43,6 +43,12 @@
 #include <errno.h>
 #include <string.h>
 
+#ifdef  HAVE_POSIX_FADVISE
+#ifndef POSIX_FADV_RANDOM
+#undef  HAVE_POSIX_FADVISE
+#endif
+#endif
+
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif
