@@ -25,7 +25,7 @@
  * construction of new DLL's based on/that use ucommon on Microsoft Windows
  * and perhaps for other similarly defective legacy platforms.  Otherwise
  * this header is not used at all, and not when building applications.
- * @file ucommon/export.h
+ * @file commoncpp/export.h
  */
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32) || defined(_MSWINDOWS_)
@@ -33,7 +33,7 @@
 #undef  __EXPORT
 #endif
 
-#ifdef  UCOMMON_STATIC
+#if defined(UCOMMON_STATIC) || defined(UCOMMON_RUNTIME)
 #define __EXPORT
 #else
 #define __EXPORT __declspec(dllexport)

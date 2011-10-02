@@ -5,6 +5,12 @@
 #include <ucommon/ucommon.h>
 #endif
 
+#ifdef  __EXPORT
+#undef  __EXPORT
+#endif
+
+#define __EXPORT    __SHARED
+
 #include <streambuf>
 #include <iostream>
 
