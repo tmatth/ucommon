@@ -96,5 +96,5 @@
 #define SSL_CERTS "${UCOMMON_CERTS}"
 #define SSL_PRIVATE "${UCOMMON_KEYS}"
 
-#include <ucommon/export.h>
+#include <ucommon/platform.h>
 

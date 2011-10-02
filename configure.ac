@@ -153,7 +153,7 @@ elif test $enable_debug = "yes" ; then
 fi
 
 AH_BOTTOM([
-#include <ucommon/export.h>
+#include <ucommon/platform.h>
 ])
 
 threading="none"

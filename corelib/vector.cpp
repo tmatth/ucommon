@@ -16,6 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
+#include <ucommon/export.h>
 #include <ucommon/vector.h>
 #include <ucommon/thread.h>
 #include <string.h>

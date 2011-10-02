@@ -19,7 +19,7 @@
 #if !defined(_MSC_VER) || _MSC_VER >= 1400
 
 #include <config.h>
-#include <ucommon/platform.h>
+#include <ucommon/export.h>
 #include <ucommon/persist.h>
 
 using namespace UCOMMON_NAMESPACE;

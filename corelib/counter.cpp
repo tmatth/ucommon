@@ -16,6 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
+#include <ucommon/export.h>
 #include <ucommon/counter.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H

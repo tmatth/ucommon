@@ -25,6 +25,7 @@
 #include <stdexcept>
 #endif
 
+#include <ucommon/export.h>
 #include <ucommon/string.h>
 #include <ucommon/socket.h>
 #include <errno.h>

@@ -17,6 +17,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
+#include <ucommon/export.h>
 #include <ucommon/numbers.h>
 #include <ucommon/datetime.h>
 #include <ucommon/thread.h>

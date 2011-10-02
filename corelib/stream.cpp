@@ -18,6 +18,7 @@
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 
 #include <config.h>
+#include <ucommon/export.h>
 #include <ucommon/thread.h>
 #include <ucommon/socket.h>
 #include <ucommon/string.h>
