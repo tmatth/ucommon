@@ -198,8 +198,6 @@ extern "C" {
 
     typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
 
-    __EXPORT int cpr_setenv(const char *s, const char *v, int p);
-
     inline int setenv(const char *s, const char *v, int overwrite)
         {return cpr_setenv(s, v, overwrite);};
 
@@ -412,20 +410,6 @@ typedef void (*cpr_service_t)(int argc, char **argv);
 template<class T>
 inline T *init(T *memory)
     {return ((memory) ? new(((caddr_t)memory)) T : NULL);}
-
-extern "C" {
-
-    __EXPORT uint16_t lsb_getshort(uint8_t *b);
-    __EXPORT uint32_t lsb_getlong(uint8_t *b);
-    __EXPORT uint16_t msb_getshort(uint8_t *b);
-    __EXPORT uint32_t msb_getlong(uint8_t *b);
-
-    __EXPORT void lsb_setshort(uint8_t *b, uint16_t v);
-    __EXPORT void lsb_setlong(uint8_t *b, uint32_t v);
-    __EXPORT void msb_setshort(uint8_t *b, uint16_t v);
-    __EXPORT void msb_setlong(uint8_t *b, uint32_t v);
-
-}
 
 typedef long Integer;
 typedef unsigned long Unsigned;
