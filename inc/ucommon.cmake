@@ -20,7 +20,7 @@ if (NOT UCOMMON_LIBS AND NOT UCOMMON_FLAGS)
         endif()
     endif()
 
-    if(BUILD_RUNTIME)
+    if(BUILD_RUNTIME AND WIN32)
         set(UCOMMON_FLAGS ${UCOMMON_FLAGS} -DUCOMMON_RUNTIME)
     else()
         if(BUILD_STATIC)
