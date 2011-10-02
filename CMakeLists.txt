@@ -413,7 +413,7 @@ target_link_libraries(usecure ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS
 add_dependencies(usecure ucommon)
 
 if(BUILD_COMPAT)
-    add_library(commoncpp ${BUILD_LIBRARY_TYPE} ${commoncpp_src} ${commoncpp_inc})
+    add_library(commoncpp ${BUILD_RUNTIME_TYPE} ${commoncpp_src} ${commoncpp_inc})
     set_target_properties(commoncpp PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
     target_link_libraries(commoncpp ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
     add_dependencies(commoncpp ucommon)
