@@ -1,3 +1,6 @@
+from ucommon 5.0.6 to 5.0.7
+- use debian move xopen forward patch
+
 from ucommon 5.0.5 to 5.0.6
 - generic object save/auto-restore.
 - separation of shell::error() from shell::errexit(0,...)

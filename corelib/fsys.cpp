@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
+#endif
+
 #include <config.h>
 #include <ucommon/export.h>
 #include <ucommon/thread.h>
@@ -32,10 +36,6 @@
 #undef  HAVE_POSIX_FADVISE
 #endif
 #endif
-#endif
-
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 600
 #endif
 
 #include <stdio.h>
