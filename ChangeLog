@@ -1,5 +1,6 @@
 from ucommon 5.0.6 to 5.0.7
 - use debian move xopen forward patch
+- joinable thread self-join does cleanup of run state
 
 from ucommon 5.0.5 to 5.0.6
 - generic object save/auto-restore.
