@@ -2092,12 +2092,16 @@ void JoinableThread::join(void)
     pthread_t self = pthread_self();
     int rc;
 
-    if(running && equal(tid, self))
-        Thread::exit();
-
     // already joined, so we ignore...
     if(running == INVALID_HANDLE_VALUE)
         return;
+
+    // self join does cleanup...
+    if(equal(tid, self)) {
+        CloseHandle(running);
+        running = INVALID_HANDLE_VALUE;
+        Thread::exit();
+    }
 
     joining = true;
     rc = WaitForSingleObject(running, INFINITE);
@@ -2179,12 +2183,14 @@ void JoinableThread::join(void)
 {
     pthread_t self = pthread_self();
 
-    if(running && equal(tid, self))
-        Thread::exit();
-
     // already joined, so we ignore...
     if(!running)
         return;
+
+    if(equal(tid, self)) {
+        running = false;
+        Thread::exit();
+    }
 
     joining = true;
 
