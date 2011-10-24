@@ -506,7 +506,7 @@ inline void swap(T& o1, T& o2)
  * @return max object.
  */
 template<typename T>
-inline T& (max)(T& o1, T& o2)
+inline T& (max)(const T& o1, const T& o2)
 {
     return o1 > o2 ? o1 : o2;
 }
@@ -518,7 +518,7 @@ inline T& (max)(T& o1, T& o2)
  * @return min object.
  */
 template<typename T>
-inline T& (min)(T& o1, T& o2)
+inline T& (min)(const T& o1, const T& o2)
 {
     return o1 < o2 ? o1 : o2;
 }
