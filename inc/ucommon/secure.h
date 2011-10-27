@@ -204,6 +204,10 @@ public:
     static void uuid(char *string);
 
     static String uuid(void);
+
+    template <typename T>
+    inline static void erase(T *object)
+        {memset(object, 0, sizeof(object)); delete object;}
 };
 
 /**

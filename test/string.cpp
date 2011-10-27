@@ -35,6 +35,8 @@ extern "C" int main()
     const char *tp;
     const char *array[5];
 
+    assert(max(3, 2) == 3);
+
     String::fill(buff, 32, ' ');
     stringbuf<128> mystr;
     mystr = (string_t)"hello" + (string_t)" this is a test";
