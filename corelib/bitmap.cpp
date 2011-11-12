@@ -82,7 +82,7 @@ void bitmap::set(size_t offset, bool bit)
 
     switch(bus) {
     case B64:
-        b64 = 1<<rem;
+        b64 = ((uint64_t)(1))<<rem;
         if(bit)
             addr.d[pos] |= b64;
         else
