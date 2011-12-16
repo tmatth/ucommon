@@ -1,3 +1,6 @@
+from ucommon 5.0.7 to 5.0.8
+- Pollak's suggestion for peek method for queue added.
+
 from ucommon 5.0.6 to 5.0.7
 - use debian move xopen forward patch
 - joinable thread self-join does cleanup of run state

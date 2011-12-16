@@ -254,6 +254,13 @@ public:
     bool post(ObjectProtocol *object, timeout_t timeout = 0);
 
     /**
+     * Examine pending existing object in queue.  Does not remove it.
+     * @param number of elements back.
+     * @return object in queue or NULL if invalid value.
+     */
+    ObjectProtocol *peek(unsigned offset = 0);
+
+    /**
      * Get and remove last object posted to the queue.  This can wait for
      * a specified timeout of the queue is empty.  The object is still
      * retained and must be released or deleted by the receiving function.
@@ -321,6 +328,9 @@ public:
      */
     static size_t count(queue& queue)
         {return queue.getCount();};
+
+    inline ObjectProtocol *operator[](unsigned pos)
+        {return peek(pos);};
 };
 
 /**
@@ -393,6 +403,13 @@ public:
     ObjectProtocol *pull(timeout_t timeout = 0);
 
     /**
+     * Examine an existing object on the stack.
+     * @param offset to stack entry.
+     * @return object examined.
+     */
+    ObjectProtocol *peek(unsigned offset = 0);
+
+    /**
      * Get number of object points currently in the stack.
      * @return number of objects in stack.
      */
@@ -433,6 +450,9 @@ public:
      */
     static inline size_t count(stack& stack)
         {return stack.getCount();};
+
+    inline ObjectProtocol *operator[](unsigned pos)
+        {return peek(pos);};
 };
 
 /**

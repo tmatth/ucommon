@@ -415,6 +415,29 @@ ObjectProtocol *queue::fifo(timeout_t timeout)
     return obj;
 }
 
+ObjectProtocol *queue::peek(unsigned back)
+{
+    linked_pointer<member> node;
+    ObjectProtocol *obj;
+
+    lock();
+
+    node = begin();
+
+    do {
+        if(!is(node)) {
+            obj = NULL;
+            break;
+        }
+        obj = node->object;
+        node.next();
+
+    } while(back-- > 0);
+
+    unlock();
+    return obj;
+}
+
 bool queue::post(ObjectProtocol *object, timeout_t timeout)
 {
     assert(object != NULL);
@@ -536,6 +559,28 @@ bool stack::remove(ObjectProtocol *o)
     }
     unlock();
     return rtn;
+}
+
+ObjectProtocol *stack::peek(unsigned back)
+{
+    linked_pointer<member> node;
+    ObjectProtocol *obj;
+
+    lock();
+    node = usedlist;
+
+    do {
+        if(!is(node)) {
+            obj = NULL;
+            break;
+        }
+        obj = node->object;
+        node.next();
+
+    } while(back-- > 0);
+
+    unlock();
+    return obj;
 }
 
 ObjectProtocol *stack::pull(timeout_t timeout)
