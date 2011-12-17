@@ -232,16 +232,23 @@ public:
 };
 
 /**
- * String pager for storing lists of NULL terminated strings.
+ * String pager for storing lists of NULL terminated strings.  This is
+ * used for accumulating lists which can be destroyed all at once.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT stringpager : public memalloc
+class __EXPORT stringpager : protected memalloc
 {
 private:
     unsigned members;
     LinkedObject *root;
 
 public:
+    /**
+     * Member of string list.  This is exposed so that the list of strings
+     * can be externally enumerated with linked_pointer<stringpager::member>
+     * if so desired, through the begin() method.
+     * @author David Sugar <dyfet@gnutelephony.org>
+     */
     class __EXPORT member : public LinkedObject
     {
     private:
@@ -256,26 +263,67 @@ public:
             {return text;};
     };
 
+    /**
+     * Create a pager with a maximum page size.
+     * @param size of pager allocation pages.
+     */
     stringpager(size_t pagesize = 256);
 
+    /**
+     * Get the number of items in the pager string list.
+     * @return number of items stored.
+     */
     inline unsigned count(void)
         {return members;};
 
+    /**
+     * Get string item from list.  This is useful when stringpager is
+     * passed as a pointer and hence inconvenient for the [] operator.
+     * @param item to access.
+     * @return pointer to text for item, or NULL if out of range.
+     */
     const char *get(unsigned item);
 
+    /**
+     * Add text to list.
+     * @param text to add.
+     */
     void add(const char *text);
 
+    /**
+     * Purge all members and release pager member.  The list can then
+     * be added to again.
+     */
     void clear(void);
 
+    /**
+     * Return specified member from pager list.  This is a convenience
+     * operator.
+     * @param item to access.
+     * @return text of item or NULL if invalid.
+     */
     inline const char *operator[](unsigned item)
         {return get(item);};
 
+    /**
+     * Get root of pager list.  This is useful for externally enumerating
+     * the list of strings.
+     * @return first member of list or NULL if empty.
+     */
     inline stringpager::member *begin(void)
         {return static_cast<stringpager::member *>(root);};
 
+    /**
+     * Convenience operator to add to pager.
+     * @param text to add to list.
+     */
     inline void operator+=(const char *text)
         {add(text);};
 
+    /**
+     * Convenience operator to add to pager.
+     * @param text to add to list.
+     */
     inline stringpager& operator<<(const char *text)
         {add(text); return *this;};
 };
