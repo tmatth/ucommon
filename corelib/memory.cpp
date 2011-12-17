@@ -214,6 +214,53 @@ void *mempager::_alloc(size_t size)
     return mem;
 }
 
+stringpager::member::member(LinkedObject **root, const char *data) :
+LinkedObject(root)
+{
+    text = data;
+}
+
+stringpager::stringpager(size_t size) :
+memalloc(size)
+{
+    members = 0;
+    root = NULL;
+}
+
+const char *stringpager::get(unsigned index)
+{
+    linked_pointer<member> list = root;
+
+    if(index >= members)
+        return NULL;
+
+    while(index--)
+        list.next();
+
+    return list->get();
+}
+
+void stringpager::clear(void)
+{
+    memalloc::purge();
+    members = 0;
+    root = NULL;
+}
+
+void stringpager::add(const char *text)
+{
+    if(!text)
+        text = "";
+
+    size_t size = strlen(text) + 1;
+    caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
+    char *str = (char *)memalloc::_alloc(size);
+
+    strcpy(str, text);
+    new(mem) member(&root, str);
+    ++members;
+}
+
 autorelease::autorelease()
 {
     pool = NULL;

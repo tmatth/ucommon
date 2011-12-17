@@ -232,6 +232,55 @@ public:
 };
 
 /**
+ * String pager for storing lists of NULL terminated strings.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT stringpager : public memalloc
+{
+private:
+    unsigned members;
+    LinkedObject *root;
+
+public:
+    class __EXPORT member : public LinkedObject
+    {
+    private:
+        const char *text;
+
+    public:
+        member(LinkedObject **root, const char *data);
+        inline const char *operator*()
+            {return text;};
+
+        inline const char *get(void)
+            {return text;};
+    };
+
+    stringpager(size_t pagesize = 256);
+
+    inline unsigned count(void)
+        {return members;};
+
+    const char *get(unsigned item);
+
+    void add(const char *text);
+
+    void clear(void);
+
+    inline const char *operator[](unsigned item)
+        {return get(item);};
+
+    inline stringpager::member *begin(void)
+        {return static_cast<stringpager::member *>(root);};
+
+    inline void operator+=(const char *text)
+        {add(text);};
+
+    inline stringpager& operator<<(const char *text)
+        {add(text); return *this;};
+};
+
+/**
  * Buffered pager for storing paged strings for character protocol.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
