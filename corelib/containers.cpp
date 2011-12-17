@@ -154,6 +154,23 @@ void *Buffer::get(void)
     return dbuf;
 }
 
+void *Buffer::peek(unsigned offset)
+{
+    caddr_t dbuf;
+
+    lock();
+    if(offset >= count) {
+        unlock();
+        return NULL;
+    }
+
+    dbuf = head + (objsize * offset);
+    if(dbuf >= buf + size)
+        dbuf -= size;
+    unlock();
+    return dbuf;
+}
+
 void Buffer::copy(void *data)
 {
     assert(data != NULL);

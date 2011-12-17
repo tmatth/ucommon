@@ -178,6 +178,15 @@ public:
     bool copy(void *data, timeout_t timeout);
 
     /**
+     * Peek at pending data in buffer.  This returns a pointer to
+     * objects relative to the head.  In effect it is the same as
+     * get() for item = 0.
+     * @param item to examine in buffer.
+     * @return pointer to item or NULL if invalid item number.
+     */
+    void *peek(unsigned item);
+
+    /**
      * Test if there is data waiting in the buffer.
      * @return true if buffer has data.
      */
@@ -559,6 +568,25 @@ public:
      */
     inline bool get(T *object, timeout_t timeout)
         {return copy(object, timeout);};
+
+    /**
+     * Examine past item in the buffer.  This is a typecast of the peek
+     * operation.
+     * @param item in buffer.
+     * @return item pointer if valid or NULL.
+     */
+    inline T *peek(unsigned item)
+        {return static_cast<T *>(Buffer::peek(item));};
+
+    /**
+     * Examine past item in the buffer.  This is a typecast of the peek
+     * operation.
+     * @param item in buffer.
+     * @return item pointer if valid or NULL.
+     */
+    inline T *operator[](unsigned item)
+        {return static_cast<T *>(queue::peek(item));};
+
 };
 
 /**
@@ -609,6 +637,25 @@ public:
      */
     inline T *pull(timeout_t timeout = 0)
         {return static_cast<T *>(stack::pull(timeout));};
+
+    /**
+     * Examine past item in the stack.  This is a typecast of the peek
+     * operation.
+     * @param offset in stack.
+     * @return item pointer if valid or NULL.
+     */
+    inline T *peek(unsigned offset = 0)
+        {return static_cast<T *>(stack::peek(offset));};
+
+    /**
+     * Examine past item in the stack.  This is a typecast of the peek
+     * operation.
+     * @param offset in stack.
+     * @return item pointer if valid or NULL.
+     */
+    inline T *operator[](unsigned offset)
+        {return static_cast<T *>(stack::peek(offset));};
+
 };
 
 /**
@@ -669,6 +716,25 @@ public:
      */
     inline T *lifo(timeout_t timeout = 0)
         {return static_cast<T *>(queue::lifo(timeout));};
+
+    /**
+     * Examine past item in the queue.  This is a typecast of the peek
+     * operation.
+     * @param offset in queue.
+     * @return item pointer if valid or NULL.
+     */
+    inline T *peek(unsigned offset = 0)
+        {return static_cast<T *>(queue::peek(offset));};
+
+    /**
+     * Examine past item in the queue.  This is a typecast of the peek
+     * operation.
+     * @param offset in queue.
+     * @return item pointer if valid or NULL.
+     */
+    inline T *operator[](unsigned offset)
+        {return static_cast<T *>(queue::peek(offset));};
+
 };
 
 /**
