@@ -2,6 +2,7 @@ from ucommon 5.0.7 to 5.1.0
 - Pollak's suggestion for peek method for queue added to queue, stack, buffer,
   and templates.
 - new stringpager class to hold simple expanding tables of strings.
+- commoncpp strerror_r fix from list.
 
 from ucommon 5.0.6 to 5.0.7
 - use debian move xopen forward patch
