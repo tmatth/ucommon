@@ -88,6 +88,7 @@
 #cmakedefine HAVE_OPENSSL_FIPS_H 1
 
 #cmakedefine POSIX_TIMERS 1
+#cmakedefine GCC_ATOMICS 1
 
 #cmakedefine UCOMMON_LOCALE "${UCOMMON_LOCALE}"
 #cmakedefine UCOMMON_CFGPATH "${UCOMMON_CFGPATH}"
@@ -95,6 +96,10 @@
 #cmakedefine UCOMMON_PREFIX "${UCOMMON_PREFIX}"
 #define SSL_CERTS "${UCOMMON_CERTS}"
 #define SSL_PRIVATE "${UCOMMON_KEYS}"
+
+#ifdef  GCC_ATOMICS
+#define HAVE_GCC_ATOMICS
+#endif
 
 #include <ucommon/platform.h>
 
