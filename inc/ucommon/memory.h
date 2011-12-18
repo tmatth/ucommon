@@ -291,6 +291,13 @@ public:
     void add(const char *text);
 
     /**
+     * Add list to list.  This is a list of string pointers terminated with
+     * NULL.
+     * @param list of text to add.
+     */
+    void add(char **list);
+
+    /**
      * Purge all members and release pager member.  The list can then
      * be added to again.
      */

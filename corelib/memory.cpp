@@ -261,6 +261,18 @@ void stringpager::add(const char *text)
     ++members;
 }
 
+void stringpager::add(char **list)
+{
+    const char *cp;
+    unsigned index = 0;
+
+    if(!list)
+        return;
+
+    while(NULL != (cp = list[index++]))
+        add(cp);
+}
+
 autorelease::autorelease()
 {
     pool = NULL;
