@@ -89,7 +89,7 @@ const char* IOException::getSystemErrorString() const throw()
     if ( !_systemErrorString )
         _systemErrorString = new char[errStrSize];
 #ifndef _MSWINDOWS_
-#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !defined(_GNU_SOURCE)
     strerror_r(_systemError, _systemErrorString, errStrSize);
     return _systemErrorString;
 #else
