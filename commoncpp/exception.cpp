@@ -45,6 +45,7 @@
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/string.h>
+#include <commoncpp/thread.h>
 #include <commoncpp/exception.h>
 
 #if defined(CCXX_EXCEPTIONS)
@@ -89,8 +90,16 @@ const char* IOException::getSystemErrorString() const throw()
     if ( !_systemErrorString )
         _systemErrorString = new char[errStrSize];
 #ifndef _MSWINDOWS_
+#ifdef  HAVE_STRERROR_R
     strerror_r(_systemError, _systemErrorString, errStrSize);
-    return _systemErrorString;
+#else
+    static Mutex mlock;
+
+    mlock.enter();
+    String::set(_systemErrorString, errStrSize, strerror(_systemError));
+    mlock.leave();
+#endif
+  return _systemErrorString;
 #else
     FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, _systemError,
         MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),

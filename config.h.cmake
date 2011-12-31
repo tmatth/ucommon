@@ -46,6 +46,7 @@
 #cmakedefine HAVE_GETHOSTBYNAME2 1
 #cmakedefine HAVE_INET_NTOP 1
 #cmakedefine HAVE_LOCALTIME_R 1
+#cmakedefine HAVE_STRERROR_R 1
 #cmakedefine HAVE_MACH_CLOCK_H 1
 #cmakedefine HAVE_MACH_O_DYLD_H 1
 #cmakedefine HAVE_MEMORY_H 1
