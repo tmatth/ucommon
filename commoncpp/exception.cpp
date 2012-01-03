@@ -53,8 +53,8 @@
 using namespace COMMONCPP_NAMESPACE;
 
 Exception::Exception(const String& what_arg) throw():
-  _what(what_arg)
-{ }
+_what(what_arg)
+{}
 
 Exception::~Exception() throw()
 {}
@@ -99,7 +99,7 @@ const char* IOException::getSystemErrorString() const throw()
     String::set(_systemErrorString, errStrSize, strerror(_systemError));
     mlock.leave();
 #endif
-  return _systemErrorString;
+    return _systemErrorString;
 #else
     FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, _systemError,
         MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
