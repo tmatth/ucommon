@@ -1,3 +1,8 @@
+from ucommon 5.1.1 to 5.1.2
+- corrected copyright.  since cc libs were moved to bayonne and commoncpp
+  had been added, ALL of ucommon (including commoncpp2) are L-GPL, not just
+  the "core" library.
+
 from ucommon 5.1.0 to 5.1.1
 - better handling of strerror_r support.
 
