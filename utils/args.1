@@ -21,42 +21,44 @@
 .SH NAME
 args \- manipulate and output command arguments.
 .SH SYNOPSIS
-.B args \fI[options]\fR \fIargs...\fR
+.B args
+.RI [ options ]
+.I args...
 .br
 .SH DESCRIPTION
 This command is used to manipulate and echo command line arguments to
 standard out.  This can include adding quotes around each argument passed
-or a seperator, or to output each argument on a separate line.  The program
+or a separator, or to output each argument on a separate line.  The program
 source also offers a basic example of how to use shell argument parsing and
 localization in ucommon.
 .SH OPTIONS
 .TP
-\fB--delim\fR \fIchar\fR
+.BI \-\-delim " char"
 Set a deliminator character, such as ',', to use between each argument when
 outputing arguments.
 .TP
-\fB--directory\fR
+.B \-\-directory
 If argument is a directory, list directory contents as arguments.
 .TP
-\fB--follow\fR
+.B \-\-follow
 If argument is a directory and a symlink, follow symlinks recursively.
 .TP
-\fB--lines\fR
+.B \-\-lines
 Output each argument on a separate line.
 .TP
-\fB--quote\fR \fIchar|pair\fR
+.BI \-\-quote " char|pair"
 Set a quote or special leading and trailing pair of characters to surround
 each argument with when output.  A typical use might be --quote=() to surround
 arguments in parenthesis.
 .TP
-\fB--recursive\fR
+.B \-\-recursive
 If argument is a directory, recursively scan directory and any subdirectory
 contents as arguments.
 .TP
-\fB--reverse\fR
+.B \-\-reverse
 Reverse order of arguments.
 .TP
-\fB--help\fR
+.B \-\-help
 Outputs help screen for the user.
 .SH AUTHOR
 .B args

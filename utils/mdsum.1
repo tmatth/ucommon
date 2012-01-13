@@ -21,7 +21,9 @@
 .SH NAME
 mdsum \- compute file digests using any supported algorithms.
 .SH SYNOPSIS
-.B mdsum \fI[options]\fR \fI[paths...]\fR 
+.B mdsum
+.RI [ options ]
+.RI [ paths... ]
 .br
 .SH DESCRIPTION
 This command computes a message digest for one or more specified files.  If
@@ -30,19 +32,19 @@ available in libusecure may be selected and used.  Entire directory trees
 may also be examined and computed using the -R (--recursive) option.
 .SH OPTIONS
 .TP
-\fB--digest\fR \fIname\fR
+.BI \-\-digest " name"
 Specify name of digest algorithm.  By default md5 will be used, unless the
 command is executed through a symlink which happens to match an algorithm
 name.
 .TP
-\fB--follow\fR
+.B \-\-follow
 Dereference and follow symlinks.  Otherwise they are ignored.
 .TP
-\fB--recursive\fR
+.B \-\-recursive
 If argument is a directory, recursively scan directory and any subdirectory
 contents as arguments.
 .TP
-\fB--help\fR
+.B \-\-help
 Outputs help screen for the user.
 .SH AUTHOR
 .B mdsum

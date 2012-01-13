@@ -21,7 +21,9 @@
 .SH NAME
 scrub\-files \- securely erase files by filling with random data first.
 .SH SYNOPSIS
-.B scrub \fI[options]\fR \fIpaths...\fR
+.B scrub
+.RI [ options ]
+.I paths...
 .br
 .SH DESCRIPTION
 This command is used to securely erase files.  This is accomplished by
@@ -34,29 +36,29 @@ associated with a securely deleted file.  This is specifically intended to
 make it harder to perform forensic analysis on securely erased files.
 .SH OPTIONS
 .TP
-\fB--blocksize\fR \fIsize\fR
+.BI \-\-blocksize " size"
 Set the default block size (in 1 k increments) for scrub\-files to use when
 writing random data.  This effects both the final file length, which will
 be aligned to the specified size, and the way the truncate option decomposes
 files.  The default is 1k.
 .TP
-\fB--follow\fR
+.B \-\-follow
 Dereference and follow symlinks, erasing the target file.
 .TP
-\fB--passes\fR \fIcount\fR
+.BI \-\-passes " count"
 The number of passes used when writing random data.  The default is 1 pass.
 .TP
-\fB--recursive\fR
+.B \-\-recursive
 If argument is a directory, recursively scan directory and any subdirectory
 contents as arguments.
 .TP
-\fB--rename\fR
+.B \-\-rename
 Rename the file randomly before deletion to clear persistant inode data.
 .TP
-\fB--truncate\fR
+.B \-\-truncate
 Decompose the file through truncation to break down file system page maps.
 .TP
-\fB--verbose\fR
+.B \-\-verbose
 Display each file being processed to the console.
 .TP
 \fB--help\fR

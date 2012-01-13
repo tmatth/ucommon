@@ -21,8 +21,13 @@
 .SH NAME
 car \- crytographic archiver.
 .SH SYNOPSIS
-.B car \fI[options]\fR \fI[paths...]\fR
-.B car \fI--decode\fR \fI[.carfile]\fR
+.B car
+.RI [ options ]
+.RI [ paths... ]
+.br
+.B car
+.I \-\-decode
+.RI [ .carfile ]
 .br
 .SH DESCRIPTION
 Creates and decodes portable cross-platform crytographic archives.  An archive
@@ -31,33 +36,33 @@ can be to a binary .car file, or ascified text.  A symetric cipher is used,
 and the passhrase is hashed to form a key.
 .SH OPTIONS
 .TP
-\fB--cipher\fR \fIname\fR
+.BI \-\-cipher " name"
 Specify symetric cipher.  By default 256 bit aes is used.
 .TP
-\fB--decrypt\fR
+.B \-\-decrypt
 Specify decryption operation on an existing car stream or file.  If no
 file is specified, stdin is used.
 .TP
-\fB--digest\fR \fIname\fR
+.BI \-\-digest " name"
 Specify name of digest algorithm.  By default sha will be used.
 .TP
-\fB--follow\fR
+.B \-\-follow
 Dereference and follow symlinks.  Otherwise they are ignored.
 .TP
-\fB--output\fR \fIfilename\fR
+.BI \-\-output " filename"
 Specify output file for a new archive.  By default stdout is used.
 .TP
-\fB--overwrite\fR
+.B \-\-overwrite
 Always overwrite existing files without prompting.
 .TP
-\fB--quiet\fR
+.B \-\-quiet
 Non-interactive and no status output.
 .TP
-\fB--recursive\fR
+.B \-\-recursive
 If argument is a directory, recursively scan directory and any subdirectory
 contents as arguments.
 .TP
-\fB--help\fR
+.B \-\-help
 Outputs help screen for the user.
 .SH AUTHOR
 .B car
