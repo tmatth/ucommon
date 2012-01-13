@@ -22,16 +22,7 @@
 ucommon-config \- script to get information about ucommon library
 .SH SYNOPSIS
 .B ucommon-config
-.BI [--prefix[= DIR ]]
-.BI [--exec-prefix[= DIR ]]
-.B [--version]
-.B [--cflags]
-.B [--libs]
-.B [--includes]
-.B [--plugins]
-.B [--secure]
-.B [--scripting]
-.B [--audiolibs]
+.RB [ options ]
 .SH DESCRIPTION
 .B ucommon-config
 is a tool that is used to configure to determine the compiler and
@@ -50,10 +41,6 @@ instead!
 Print the currently installed version of
 .B ucommon
 on the standard output.
-.TP
-.B --audiolibs
-Print additional linker flags needed to link a program with
-.BR ucommon telephonic audio library
 .TP
 .B --secure
 Print additional libraries needed to link a program with
@@ -77,7 +64,7 @@ Print the directory for
 .TP
 .B --cflags
 Print the compiler flags that are necessary to compile a program with
-.BR ucommon 
+.BR ucommon
 .TP
 .BI  --prefix= PREFIX
 If specified, use
@@ -100,7 +87,7 @@ options.
 If specified, use
 .I PREFIX
 instead of the installation exec prefix that
-.B ucommon 
+.B ucommon
 was built with when computing the output for the
 .B --cflags
 and
@@ -113,7 +100,7 @@ options.
 .SH "SEE ALSO"
 .IR pkg-config (1).
 .SH AUTHOR
-.B ucommon-config 
+.B ucommon-config
 was written by David Sugar <dyfet@gnutelephony.org>.
 .SH COPYRIGHT
 Copyright \(co 2009 David Sugar, Tycho Softworks.
