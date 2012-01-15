@@ -10,8 +10,7 @@
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
-    *-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* \
-    COPYRIGHT \
+    *-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* COPYRIGHT \
     CMakeLists.txt ucommon-config.cmake ucommon.pc.cmake \
     commoncpp-config.cmake commoncpp.pc.cmake ucommon.spec.cmake \
     config.h.cmake doxy.config.cmake
