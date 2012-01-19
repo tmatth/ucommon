@@ -563,6 +563,33 @@ public:
         {object.open(path, access);};
 
     /**
+     * Direct means to open a read-only file path and return a descriptor.
+     * @param path to open.
+     * @return descriptor on success, invalid handle on failure.
+     */
+    static fd_t input(const char *path);
+
+    /**
+     * Direct means to create or access a writable path and return descriptor.
+     * @param path to create.
+     * @return descriptor on success, invalid handle on failure.
+     */
+    static fd_t output(const char *path);
+
+    /**
+     * Direct means to create or append a writable path and return descriptor.
+     * @param path to create.
+     * @return descriptor on success, invalid handle on failure.
+     */
+    static fd_t append(const char *path);
+
+    /**
+     * Release a file descriptor.
+     * @param descriptor to release.
+     */
+    static void release(fd_t descriptor);
+
+    /**
      * create a file descriptor or directory directly.
      * @param object to assign descriptor for created file.
      * @param path of file to create.

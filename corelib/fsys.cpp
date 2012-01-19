@@ -314,6 +314,29 @@ int fsys::sync(void)
     return 0;
 }
 
+fd_t fsys::input(const char *path)
+{
+    return CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+}
+
+fd_t fsys::output(const char *path)
+{
+    return CreateFile(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+}
+
+fd_t fsys::append(const char *path)
+{
+    fd_t fd = CreateFile(path, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if(fd != INVALID_HANDLE_VALUE)
+        SetFilePointer(fd, 0, NULL, FILE_END);
+}
+
+void fsys::release(fd_t fd)
+{
+    CloseHandle(fd);
+}
+
 void fsys::open(const char *path, access_t access)
 {
     bool append = false;
@@ -373,7 +396,7 @@ void fsys::open(const char *path, access_t access)
     fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
     if(fd != INVALID_HANDLE_VALUE && append)
         seek(end);
-    else
+    else if(fd == INVALID_HANDLE_VALUE)
         error = remapError();
 }
 
@@ -384,7 +407,6 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     DWORD cmode;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
-    unsigned flags = 0;
 
     const char *cp = strrchr(path, '\\');
     const char *cp2 = strrchr(path, '/');
@@ -410,7 +432,6 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     case ACCESS_WRONLY:
         amode = GENERIC_WRITE;
         cmode = CREATE_ALWAYS;
-        flags = O_WRONLY | O_CREAT | O_TRUNC;
         break;
     case ACCESS_RANDOM:
         attr |= FILE_FLAG_RANDOM_ACCESS;
@@ -437,7 +458,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
     if(fd != INVALID_HANDLE_VALUE && append)
         seek(end);
-    else
+    else if(fd == INVALID_HANDLE_VALUE);
         error = remapError();
     if(fd != INVALID_HANDLE_VALUE)
         change(path, mode);
@@ -603,6 +624,26 @@ void fsys::close(void)
         else
             error = remapError();
     }
+}
+
+fd_t fsys::input(const char *path)
+{
+    return ::open(path, O_RDONLY);
+}
+
+fd_t fsys::output(const char *path)
+{
+    return ::open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+}
+
+fd_t fsys::append(const char *path)
+{
+    return ::open(path, O_WRONLY | O_CREAT | O_APPEND, 0666);
+}
+
+void fsys::release(fd_t fd)
+{
+    ::close(fd);
 }
 
 void fsys::create(const char *path, access_t access, unsigned mode)

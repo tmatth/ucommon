@@ -437,6 +437,11 @@ add_dependencies(usecure-car usecure ucommon)
 set_target_properties(usecure-car PROPERTIES OUTPUT_NAME car)
 target_link_libraries(usecure-car usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
+add_executable(ucommon-pdetach utils/pdetach.cpp)
+add_dependencies(ucommon-pdetach ucommon)
+set_target_properties(ucommon-pdetach PROPERTIES OUTPUT_NAME pdetach)
+target_link_libraries(ucommon-pdetach ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+
 add_executable(ucommon-sockaddr utils/sockaddr.cpp)
 add_dependencies(ucommon-sockaddr ucommon)
 set_target_properties(ucommon-sockaddr PROPERTIES OUTPUT_NAME sockaddr)
@@ -558,7 +563,7 @@ if(BUILD_COMPAT)
 endif()
 
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
-install(TARGETS ucommon-args usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
+install(TARGETS ucommon-args ucommon-pdetach usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
 install(FILES ${ucommon_man} DESTINATION ${INSTALL_MANDIR}/man1)
 
 

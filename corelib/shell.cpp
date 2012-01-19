@@ -2307,9 +2307,15 @@ int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
     }
 #endif
 
-    ::open("/dev/null", O_RDWR);
-    ::open("/dev/null", O_RDWR);
-    ::open("/dev/null", O_RDWR);
+    for(fd = 0; fd < 3; ++fd) {
+        if(stdio && stdio[fd] != INVALID_HANDLE_VALUE)
+            continue;
+        fd_t tmp = ::open("/dev/null", O_RDWR);
+        if(tmp != fd) {
+            ::dup2(tmp, fd);
+            ::close(tmp);
+        }
+    }
 
     while(envp && *envp) {
         String::set(symname, sizeof(symname), *envp);
@@ -2515,8 +2521,8 @@ void shell::debug(unsigned level, const char *fmt, ...)
 
 #ifdef  HAVE_SYSLOG_H
 
-#ifndef	LOG_AUTHPRIV
-#define	LOG_AUTHPRIV	LOG_AUTH
+#ifndef LOG_AUTHPRIV
+#define LOG_AUTHPRIV    LOG_AUTH
 #endif
 
 void shell::log(const char *name, loglevel_t level, logmode_t mode, logproc_t handler)

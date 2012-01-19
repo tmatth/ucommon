@@ -89,12 +89,14 @@ html browsable.
 %defattr(-,root,root,-)
 %{_bindir}/args
 %{_bindir}/car
+%{_bindir}/pdetach
 %{_bindir}/scrub-files
 %{_bindir}/mdsum
 %{_bindir}/sockaddr
 %{_bindir}/zerofill
 %{_mandir}/man1/args.*
 %{_mandir}/man1/car.*
+%{_mandir}/man1/pdetach.*
 %{_mandir}/man1/scrub-files.*
 %{_mandir}/man1/mdsum.*
 %{_mandir}/man1/sockaddr.*
