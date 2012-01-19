@@ -311,6 +311,9 @@ check_include_files(net/if.h HAVE_NET_IF_H)
 check_include_files(fcntl.h HAVE_FCNTL_H)
 check_include_files(termios.h HAVE_TERMIOS_H)
 check_include_files(termio.h HAVE_TERMIO_H)
+check_include_files(sys/param.h HAVE_SYS_PARAM_H)
+check_include_files(sys/file.h HAVE_SYS_FILE_H)
+check_include_files(sys/lockf.h HAVE_SYS_LOCKF_H)
 
 set(UCOMMON_LIBS ${UCOMMON_LIBS} ${UCOMMON_LINKING})
 

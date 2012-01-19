@@ -41,4 +41,29 @@ typedef uint32_t    uint32;
 typedef int64_t     int64;
 typedef uint64_t    uint64;
 
+#if !defined(_MSWINDOWS_) && !defined(__QNX__)
+
+/**
+ * Convenience function for case insensitive null terminated string compare.
+ * @param string1 to compare.
+ * @param string2 to compare.
+ * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
+ */
+extern "C" inline int stricmp(const char *string1, const char *string2)
+    {return ucommon::string::case_compare(string1, string2);}
+
+/**
+ * Convenience function for case insensitive null terminated string compare.
+ * @param string1 to compare.
+ * @param string2 to compare.
+ * @param max size of string to compare.
+ * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
+ */
+extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
+    {return ucommon::string::case_compare(string1, string2, max);}
+
+#endif
+
+
+
 #endif

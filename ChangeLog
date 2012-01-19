@@ -1,6 +1,7 @@
 from ucommon 5.1.2 to 5.2.0
 - improved shell::detach support and new pdetach utility
 - fsys generic basic file operations
+- commoncpp file and dso compatibility support added
 
 from ucommon 5.1.1 to 5.1.2
 - corrected copyright.  since cc libs were moved to bayonne and commoncpp
