@@ -306,9 +306,9 @@ RandomFile::Error RandomFile::setCompletion(Complete mode)
 
     flags.immediate = false;
 #ifdef O_SYNC
-    flag &= ~(O_SYNC | O_NDELAY);
+    flag &= ~(O_SYNC | O_NONBLOCK);
 #else
-    flag &= ~O_NDELAY;
+    flag &= ~O_NONBLOCK;
 #endif
     switch(mode) {
     case completionImmediate:
@@ -319,7 +319,7 @@ RandomFile::Error RandomFile::setCompletion(Complete mode)
         break;
 
     case completionDelayed:
-        flag |= O_NDELAY;
+        flag |= O_NONBLOCK;
 
     //completionDeferred: ? (hen)
     case completionDeferred:
