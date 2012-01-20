@@ -86,10 +86,6 @@ typedef unsigned long pos_t;
 #define caddr_t char *
 typedef size_t ccxx_size_t;
 #else
-#if !defined(__BORLANDC__) || __BORLANDC__ >= 0x0560
-typedef LONG off_t;
-#endif
-typedef void* caddr_t;
 typedef DWORD ccxx_size_t;
 #endif
 

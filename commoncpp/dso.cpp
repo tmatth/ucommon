@@ -73,7 +73,7 @@ extern "C" {
 #endif
 
 #ifdef  _MSWINDOWS_
-#define hImage ((hInstance)(image))
+#define hImage ((HMODULE)(image))
 #endif
 
 void DSO::dynunload(void)

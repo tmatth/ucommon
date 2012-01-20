@@ -130,7 +130,7 @@ static const char *clearfifo(const char *pathname, int mode)
 }
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+NAMESPACE_COMMONCPP;
 
 RandomFile::RandomFile(const char *name) : Mutex()
 {
@@ -454,7 +454,6 @@ SharedFile::Error SharedFile::fetch(caddr_t address, ccxx_size_t len, off_t pos)
         fcb.pos = pos;
 
 #ifdef _MSWINDOWS_
-    Thread::Cancel save = Thread::enterCancel();
     OVERLAPPED over;
     SetFilePointer(fd, fcb.pos, NULL, FILE_BEGIN);
     over.hEvent = 0;
@@ -463,11 +462,9 @@ SharedFile::Error SharedFile::fetch(caddr_t address, ccxx_size_t len, off_t pos)
     LockFileEx(fd, LOCKFILE_EXCLUSIVE_LOCK, 0, fcb.len, 0, &over);
     DWORD count;
     if(!ReadFile(fd, fcb.address, fcb.len, &count, NULL)) {
-        Thread::exitCancel(save);
         leaveMutex();
         return errReadFailure;
     }
-    Thread::exitCancel(save);
     leaveMutex();
     if(count < fcb.len)
         return errReadIncomplete;
@@ -542,7 +539,6 @@ SharedFile::Error SharedFile::update(caddr_t address, ccxx_size_t len, off_t pos
         fcb.pos = pos;
 
 #ifdef _MSWINDOWS_
-    Thread::Cancel save = Thread::enterCancel();
     OVERLAPPED over;
     SetFilePointer(fd, fcb.pos, NULL, FILE_BEGIN);
     over.hEvent = 0;
@@ -552,13 +548,11 @@ SharedFile::Error SharedFile::update(caddr_t address, ccxx_size_t len, off_t pos
     if(!WriteFile(fd, fcb.address, fcb.len, &count, NULL)) {
         SetFilePointer(fd, fcb.pos, NULL, FILE_CURRENT);
         UnlockFileEx(fd, 0, len, 0, &over);
-        Thread::exitCancel(save);
         leaveMutex();
         return errWriteFailure;
     }
     SetFilePointer(fd, fcb.pos, NULL, FILE_CURRENT);
     UnlockFileEx(fd, 0, len, 0, &over);
-    Thread::exitCancel(save);
     leaveMutex();
     if(count < fcb.len)
         return errWriteIncomplete;
@@ -606,7 +600,6 @@ SharedFile::Error SharedFile::append(caddr_t address, ccxx_size_t len)
         fcb.len = len;
 
 #ifdef _MSWINDOWS_
-    Thread::Cancel save = Thread::enterCancel();
     fcb.pos = SetFilePointer(fd, 0l, NULL, FILE_END);
     OVERLAPPED over;
     over.hEvent = 0;
@@ -618,15 +611,12 @@ SharedFile::Error SharedFile::append(caddr_t address, ccxx_size_t len)
     DWORD count;
     if(!WriteFile(fd, fcb.address, fcb.len, &count, NULL)) {
         SetFilePointer(fd, eof, NULL, FILE_CURRENT);
-        Thread::exitCancel(save);
         UnlockFileEx(fd, 0, 0x7fffffff, 0, &over);
-        Thread::exitCancel(save);
         leaveMutex();
         return errWriteFailure;
     }
     SetFilePointer(fd, eof, NULL, FILE_CURRENT);
     UnlockFileEx(fd, 0, 0x7fffffff, 0, &over);
-    Thread::exitCancel(save);
     leaveMutex();
     if(count < fcb.len)
         return errWriteIncomplete;
@@ -761,7 +751,7 @@ RandomFile(fname)
     map = CreateFileMapping(fd, NULL, page, 0, 0, mapname);
     if(!map)
         error(errMapFailed);
-    fcb.address = MapViewOfFile(map, prot, 0, 0, size);
+    fcb.address = (caddr_t)MapViewOfFile(map, prot, 0, 0, size);
     fcb.len = (ccxx_size_t)size;
     fcb.pos = 0;
     if(!fcb.address)
@@ -836,7 +826,7 @@ RandomFile(fname)
         error(errMapFailed);
         return;
     }
-    fcb.address = MapViewOfFile(map, prot, 0, pos, len);
+    fcb.address = (caddr_t)MapViewOfFile(map, prot, 0, pos, len);
     fcb.len = (ccxx_size_t)len;
     fcb.pos = pos;
     if(!fcb.address)
@@ -880,7 +870,7 @@ caddr_t MappedFile::fetch(off_t pos, size_t len)
         UnmapViewOfFile(fcb.address);
     }
 
-    fcb.address = MapViewOfFile(map, prot, 0, pos, len);
+    fcb.address = (caddr_t)MapViewOfFile(map, prot, 0, pos, len);
     fcb.len = (ccxx_size_t)len;
     fcb.pos = pos;
     if(!fcb.address)
@@ -1617,3 +1607,4 @@ char *File::getRealpath(const char *path, char *buffer, size_t size)
 
 #endif
 
+END_NAMESPACE

@@ -330,6 +330,8 @@ fd_t fsys::append(const char *path)
 
     if(fd != INVALID_HANDLE_VALUE)
         SetFilePointer(fd, 0, NULL, FILE_END);
+
+    return fd;
 }
 
 void fsys::release(fd_t fd)
@@ -458,7 +460,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
     if(fd != INVALID_HANDLE_VALUE && append)
         seek(end);
-    else if(fd == INVALID_HANDLE_VALUE);
+    else if(fd == INVALID_HANDLE_VALUE)
         error = remapError();
     if(fd != INVALID_HANDLE_VALUE)
         change(path, mode);
