@@ -106,7 +106,7 @@ DSO::~DSO()
 #elif defined(HAVE_SHL_LOAD)
     if(image)
         shl_unload(image);
-#else
+#elif defined(HAVE_DLFCN_H)
     if(image)
         dlclose(image);
 #endif
@@ -179,7 +179,7 @@ void DSO::loader(const char *filename, bool flag)
         image = shl_load(filename, BIND_IMMEDIATE, 0L);
     else
         image = shl_load(filename, BIND_DEFERRED, 0L);
-#else
+#elif defined(HAVE_DLFCN_H)
     if(flag)
         image = dlopen(filename, RTLD_NOW | RTLD_GLOBAL);
     else
@@ -196,9 +196,12 @@ void DSO::loader(const char *filename, bool flag)
 #elif defined(HAVE_SHL_LOAD)
     if(!image) {
         err = "load failed";
-#else
+#elif defined(HAVE_DLFCN_H)
     if(!image) {
         err = dlerror();
+#else
+    if(1) {
+        err = "load unsupported";
 #endif
 
 // since generally failure to map or load a plugin is fatel in most
@@ -287,8 +290,10 @@ void *DSO::operator[](const char *sym)
         err = "symbol missing";
 
     return addr;
-#else
+#elif defined(HAVE_DLFCN_H)
     return dlsym(image, (char *)sym);
+#else
+    return NULL;
 #endif
 }
 
