@@ -93,7 +93,7 @@ static const char *errname = NULL;
 static shell::logproc_t errproc = (shell::logproc_t)NULL;
 static mutex_t symlock;
 static char **_orig = NULL;
-static OrderedIndex _index;
+static shell::Option *ofirst = NULL, *olast = NULL;
 static const char *_domain = NULL;
 static shell::exitproc_t _exitproc = NULL;
 static shell::numeric_t numeric_mode = shell::NO_NUMERIC;
@@ -406,8 +406,15 @@ void shell::iobuf::open(const char *path, char **argv, shell::pmode_t mode, size
 }
 
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
-OrderedObject(&_index)
+OrderedObject()
 {
+    if(olast) {
+        olast->next = this;
+        olast = this;
+    }
+    else
+        ofirst = olast = this;
+
     while(longopt && *longopt == '-')
         ++longopt;
 
@@ -424,12 +431,12 @@ shell::Option::~Option()
 
 void shell::Option::reset(void)
 {
-    _index.reset();
+    ofirst = olast = NULL;
 }
 
 LinkedObject *shell::Option::first(void)
 {
-    return _index.begin();
+    return ofirst;
 }
 
 void shell::Option::disable(void)

@@ -1,46 +1,6 @@
-Completed ABI changes (3.x to 4.0):
+Proposed changes (likely deferred to 6.0.0)
 
-	Killed some FILE methods now that we have bufio
-
-	Consolidate "Socket::puts" and inline splints for 4.0 abi cleanup.
-
-	redo socket return int's like fsys to return errno() on error (this
-	may not require abi change, as no linkage is effected...)
-
-	add err() method and errno info everywhere needed for constency
-
-	templates that return refs rather than pointers.
-
-	string object no longer directly tied to read/write methods, fixes
-	include requirements for string.
-
-	protocols introduced as design concept.  character protocol allows
-	parsing and conversion classes (such as unicode) to operate on more
-	arbitrary objects.
-
-	bufpager allows text to be stored into and retrieved from segmented
-	storage allocated on demand.
-
-	i/o buffering becomes buffer protocol
-
-	Move ccaudio out of ucommon/focus on ucommon & secure runtime mission.
-
-	A pipe stream/process pipe handler that uses the buffer protocol.
-
-	tcpstream uses a char * address like TCPBuffer.
-
-	Reduced use of "family" in address methods as often no longer needed.  The
-	socket methods that use address lists now filter by the socket type.
-
-	Added a "add" and "remove" method for keymap?
-
-	New StreamProtocol to consolidate std::iostream based classes.
-
-Proposed ABI changes for 4.0:
-
-	sslstream
-
-Proposed changes (likely deferred post 4.0.0)
+	shell::Option no longer needs OrderedObject base class
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
 	Especially convenient with common use of NSS for future tls.  Do we
@@ -54,10 +14,10 @@ Proposed changes (likely deferred post 4.0.0)
 
 	Add NSS backend for secure alongside openssl & gnutls.
 
-	SSLBuffer does not do validation and peer methods missing.  We should load
-    all ca certificates rather than depend on using a directory path for using
-    multiple CA's because the latter depends on hash mapped directories for
-    openssl and may not exist as a feature in gnutls.  
+	SSLBuffer does not do validation and peer methods missing.  We should 
+	load all ca certificates rather than depend on using a directory path
+	for using multiple CA's because the latter depends on hash mapped
+	directories for openssl and may not exist as a feature in gnutls.  
 
 	Should we have a new generic ca archive format and ca management tool?
 
