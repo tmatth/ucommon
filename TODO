@@ -2,6 +2,10 @@ Proposed changes (likely deferred to 6.0.0)
 
 	String operator + should return temp string...preset size of both
 
+	Internal "StringTemp" class for str(..) functions with its own
+	operator + that works as before, so we do not have to "double stack"
+	temporary string objects when we concatenate expressions.
+
 	shell::Option no longer needs OrderedObject base class
 
 	shell::detach() static member and add exit code option!
