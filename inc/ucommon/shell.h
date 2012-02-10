@@ -46,8 +46,8 @@
 #define INVALID_PID_VALUE   -1
 #endif
 
-#ifdef	ERR
-#undef	ERR
+#ifdef  ERR
+#undef  ERR
 #endif
 
 NAMESPACE_UCOMMON
@@ -939,6 +939,12 @@ public:
      * @return 0 if success, -1 on error.
      */
     static int  detach(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
+
+    /**
+     * Detach and release from parent process with exit code.
+     * @param exit_code to send to parent process.
+     */
+    static void release(int exit_code = 0);
 
     /**
      * Wait for a child process to terminate.  This operation blocks.

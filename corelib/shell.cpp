@@ -1631,6 +1631,10 @@ void shell::exiting(exitproc_t handler)
         _exitproc = handler;
 }
 
+void shell::release(int exit_code)
+{
+}
+
 void shell::detach(mainproc_t entry)
 {
     const char *name = _argv0;
@@ -2177,6 +2181,63 @@ void shell::exiting(exitproc_t handler)
     }
     else
         _exitproc = handler;
+}
+
+void shell::release(int exit_code)
+{
+    const char *dev = "/dev/null";
+    pid_t pid;
+    int fd;
+
+    close(0);
+    close(1);
+    close(2);
+#ifdef  SIGTTOU
+    signal(SIGTTOU, SIG_IGN);
+#endif
+
+#ifdef  SIGTTIN
+    signal(SIGTTIN, SIG_IGN);
+#endif
+
+#ifdef  SIGTSTP
+    signal(SIGTSTP, SIG_IGN);
+#endif
+    pid = fork();
+    if(pid > 0)
+        exit(exit_code);
+    crit(pid == 0, "detach without process");
+
+#if defined(SIGTSTP) && defined(TIOCNOTTY)
+    crit(setpgid(0, getpid()) == 0, "detach without process group");
+    if((fd = open(_PATH_TTY, O_RDWR)) >= 0) {
+        ioctl(fd, TIOCNOTTY, NULL);
+        close(fd);
+    }
+#else
+
+#ifdef HAVE_SETPGRP
+    crit(setpgrp() == 0, "detach without process group");
+#else
+    crit(setpgid(0, getpid()) == 0, "detach without process group");
+#endif
+    signal(SIGHUP, SIG_IGN);
+    pid = fork();
+    if(pid > 0)
+        exit(0);
+    crit(pid == 0, "detach without process");
+#endif
+    if(dev && *dev) {
+        fd = open(dev, O_RDWR);
+        if(fd > 0)
+            dup2(fd, 0);
+        if(fd != 1)
+            dup2(fd, 1);
+        if(fd != 2)
+            dup2(fd, 2);
+        if(fd > 2)
+            close(fd);
+    }
 }
 
 void shell::detach(mainproc_t entry)
