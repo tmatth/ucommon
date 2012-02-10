@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
+AUTOMAKE_OPTIONS = no-dependencies dist-zip
 EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
     *-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* COPYRIGHT \
     CMakeLists.txt ucommon-config.cmake ucommon.pc.cmake \
@@ -34,4 +34,15 @@ doxy:
 
 clean-local:
 	-rm -rf doc
+
+dist-hook:
+	rm -f ${PACKAGE}-[0-9]*.tar.gz
+	rm -f ${PACKAGE}-[0-9]*.tar.bz2
+	rm -f ${PACKAGE}-[0-9]*.shar.gz
+	rm -f ${PACKAGE}-[0-9]*.zip
+	rm -f ${PACKAGE}-*.rpm
+	rm -f ${PACKAGE}[-_]*.deb
+	rm -f ${PACKAGE}_*.gz
+	rm -f ${PACKAGE}_*.dsc
+	rm -f *.changes
 
