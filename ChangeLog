@@ -1,3 +1,6 @@
+from ucommon 5.2.1 to 5.2.2
+- use strcoll for sorting when possible
+
 from ucommon 5.2.0 to 5.2.1
 - fixed issue with static linking initialization order
 - shell release method

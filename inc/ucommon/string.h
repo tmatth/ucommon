@@ -201,6 +201,9 @@ protected:
      */
     virtual int compare(const char *string) const;
 
+    inline int collate(const char *string) const
+        {return compare(string);};
+
     /**
     * Test if two string values are equal.
     * @param string to compare with.
@@ -1001,12 +1004,15 @@ public:
     static size_t count(const char *text);
 
     /**
-     * Safe string comparison function.
+     * Safe string collation function.
      * @param text1 to compare.
      * @param text2 to compare.
      * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
      */
     static int compare(const char *text1, const char *text2);
+
+    static inline int collate(const char *text1, const char *text2)
+        {return compare(text1, text2);};
 
     /**
      * Simple equal test for strings.
@@ -1017,7 +1023,7 @@ public:
     static bool equal(const char *text1, const char *text2);
 
     /**
-     * Safe string comparison function.
+     * Depreciated string comparison function.
      * @param text1 to compare.
      * @param text2 to compare.
      * @param size limit of strings to compare.
@@ -1035,7 +1041,7 @@ public:
     static bool equal(const char *text1, const char *text2, size_t size);
 
     /**
-     * Safe case insensitive string comparison function.
+     * Depreciated case insensitive string comparison function.
      * @param text1 to compare.
      * @param text2 to compare.
      * @return 0 if equal, >0 if text1 > text2, <0 if text1 < text2.
@@ -1051,7 +1057,7 @@ public:
     static bool case_equal(const char *text1, const char *text2);
 
     /**
-     * Safe case insensitive string comparison function.
+     * Depreciated case insensitive string comparison function.
      * @param text1 to compare.
      * @param text2 to compare.
      * @param size limit of strings to compare.

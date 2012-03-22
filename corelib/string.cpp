@@ -379,7 +379,19 @@ const char *string::c_str(void) const
 
 bool string::equal(const char *s) const
 {
+#ifdef  HAVE_STRCOLL
+    const char *mystr = "";
+
+    if(str)
+        mystr = str->text;
+
+    if(!s)
+        s = "";
+
+    return strcmp(mystr, s) == 0;
+#else
     return compare(s) == 0;
+#endif
 }
 
 int string::compare(const char *s) const
@@ -392,7 +404,11 @@ int string::compare(const char *s) const
     if(!s)
         s = "";
 
+#ifdef  HAVE_STRCOLL
+    return strcoll(mystr, s);
+#else
     return strcmp(mystr, s);
+#endif
 }
 
 const char *string::last(const char *clist) const
@@ -1623,42 +1639,17 @@ char *string::first(char *str, const char *clist)
 
 bool string::case_equal(const char *s1, const char *s2)
 {
-    return case_compare(s1, s2) == 0;
-}
-
-bool string::equal(const char *s1, const char *s2)
-{
-    return compare(s1, s2) == 0;
-}
-
-bool string::case_equal(const char *s1, const char *s2, size_t size)
-{
-    return case_compare(s1, s2, size) == 0;
-}
-
-bool string::equal(const char *s1, const char *s2, size_t size)
-{
-    return compare(s1, s2, size) == 0;
-}
-
-int string::compare(const char *s1, const char *s2)
-{
     if(!s1)
         s1 = "";
+
     if(!s2)
         s2 = "";
 
-    return strcmp(s1, s2);
-}
-
-int string::compare(const char *s1, const char *s2, size_t s)
-{
-    if(!s1)
-        s1 = "";
-    if(!s2)
-        s2 = "";
-
-    return strncmp(s1, s2, s);
+#ifdef  HAVE_STRICMP
+    return stricmp(s1, s2) == 0;
+#else
+    return strcasecmp(s1, s2) == 0;
+#endif
 }
 
 int string::case_compare(const char *s1, const char *s2)
@@ -1676,7 +1667,7 @@ int string::case_compare(const char *s1, const char *s2)
 #endif
 }
 
-int string::case_compare(const char *s1, const char *s2, size_t s)
+int string::case_compare(const char *s1, const char *s2, size_t size)
 {
     if(!s1)
         s1 = "";
@@ -1685,11 +1676,61 @@ int string::case_compare(const char *s1, const char *s2, size_t s)
         s2 = "";
 
 #ifdef  HAVE_STRICMP
-    return strnicmp(s1, s2, s);
+    return strnicmp(s1, s2, size);
 #else
-    return strncasecmp(s1, s2, s);
+    return strncasecmp(s1, s2, size);
 #endif
 }
+
+bool string::case_equal(const char *s1, const char *s2, size_t size)
+{
+    if(!s1)
+        s1 = "";
+
+    if(!s2)
+        s2 = "";
+
+#ifdef  HAVE_STRICMP
+    return strnicmp(s1, s2, size) == 0;
+#else
+    return strncasecmp(s1, s2, size) == 0;
+#endif
+}
+
+bool string::equal(const char *s1, const char *s2)
+{
+    if(!s1)
+        s1 = "";
+    if(!s2)
+        s2 = "";
+
+    return strcmp(s1, s2) == 0;
+}
+
+bool string::equal(const char *s1, const char *s2, size_t size)
+{
+    if(!s1)
+        s1 = "";
+    if(!s2)
+        s2 = "";
+
+    return strncmp(s1, s2, size) == 0;
+}
+
+int string::compare(const char *s1, const char *s2)
+{
+    if(!s1)
+        s1 = "";
+    if(!s2)
+        s2 = "";
+
+#ifdef  HAVE_STRCOLL
+    return strcoll(s1, s2);
+#else
+    return strcmp(s1, s2);
+#endif
+}
+
 
 char *string::unquote(char *str, const char *clist)
 {

@@ -70,6 +70,7 @@
 #cmakedefine HAVE_SOCKETPAIR 1
 #define HAVE_STDEXCEPT 1        /* cannot seem to test in cmake... */
 #cmakedefine HAVE_STRICMP 1
+#cmakedefine HAVE_STRCOLL 1
 #cmakedefine HAVE_STRINGS_H 1
 #cmakedefine HAVE_STRISTR 1
 #cmakedefine HAVE_SYSCONF 1

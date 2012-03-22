@@ -130,7 +130,7 @@ static const char *clearfifo(const char *pathname, int mode)
 }
 #endif
 
-NAMESPACE_COMMONCPP;
+NAMESPACE_COMMONCPP
 
 RandomFile::RandomFile(const char *name) : Mutex()
 {
