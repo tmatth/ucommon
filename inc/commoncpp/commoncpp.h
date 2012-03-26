@@ -19,5 +19,6 @@
 #include <commoncpp/mime.h>
 #include <commoncpp/serial.h>
 #include <commoncpp/tokenizer.h>
+#include <commoncpp/object.h>
 #endif
 
