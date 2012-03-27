@@ -29,6 +29,10 @@ add_executable(test-ucommonKeydata keydata.cpp)
 target_link_libraries(test-ucommonKeydata ucommon)
 add_test(NAME ucommonKeydata COMMAND test-ucommonKeydata)
 
+add_executable(test-ucommonMemory memory.cpp)
+target_link_libraries(test-ucommonMemory ucommon)
+add_test(NAME ucommonMemory COMMAND test-ucommonMemory)
+
 add_executable(test-ucommonStream stream.cpp)
 target_link_libraries(test-ucommonStream ucommon)
 add_test(NAME ucommonStream COMMAND test-ucommonStream)

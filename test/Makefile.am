@@ -14,8 +14,8 @@ LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.cpp keydata.conf CMakeLists.txt
 
 TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
-    ucommonKeydata ucommonStream ucommonUnicode ucommonQueue \
-    ucommonDatetime ucommonShell ucommonDigest ucommonCipher
+	ucommonMemory ucommonKeydata ucommonStream ucommonUnicode \
+	ucommonQueue ucommonDatetime ucommonShell ucommonDigest ucommonCipher
 
 noinst_PROGRAMS = demoSSL
 demoSSL_SOURCES = ssl.cpp
@@ -29,6 +29,7 @@ ucommonThreads_SOURCES = thread.cpp
 ucommonStrings_SOURCES = string.cpp
 ucommonLinked_SOURCES = linked.cpp
 ucommonSocket_SOURCES = socket.cpp
+ucommonMemory_SOURCES = memory.cpp
 ucommonStream_SOURCES = stream.cpp
 ucommonKeydata_SOURCES = keydata.cpp
 ucommonUnicode_SOURCES = unicode.cpp

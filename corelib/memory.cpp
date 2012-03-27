@@ -29,6 +29,18 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+extern "C" {
+
+    static int ncompare(const void *o1, const void *o2)
+    {
+        assert(o1 != NULL);
+        assert(o2 != NULL);
+        const stringpager::member * const *n1 = static_cast<const stringpager::member * const*>(o1);
+        const stringpager::member * const *n2 = static_cast<const stringpager::member * const*>(o2);
+        return String::collate((*n1)->get(), (*n2)->get());
+    }
+}
+
 memalloc::memalloc(size_t ps)
 {
 #ifdef  HAVE_SYSCONF
@@ -220,11 +232,18 @@ LinkedObject(root)
     text = data;
 }
 
+stringpager::member::member(const char *data) :
+LinkedObject()
+{
+    text = data;
+}
+
 stringpager::stringpager(size_t size) :
 memalloc(size)
 {
     members = 0;
     root = NULL;
+    last = NULL;
 }
 
 const char *stringpager::get(unsigned index)
@@ -245,6 +264,7 @@ void stringpager::clear(void)
     memalloc::purge();
     members = 0;
     root = NULL;
+    last = NULL;
 }
 
 void stringpager::add(const char *text)
@@ -257,8 +277,15 @@ void stringpager::add(const char *text)
     char *str = (char *)memalloc::_alloc(size);
 
     strcpy(str, text);
-    new(mem) member(&root, str);
-    ++members;
+    member *node;
+
+    if(members++) {
+        node = new(mem) member(str);
+        last->set(node);
+    }
+    else
+        node = new(mem) member(&root, str);
+    last = node;
 }
 
 void stringpager::add(char **list)
@@ -271,6 +298,28 @@ void stringpager::add(char **list)
 
     while(NULL != (cp = list[index++]))
         add(cp);
+}
+
+void stringpager::sort(void)
+{
+    if(!members)
+        return;
+
+    member **list = new member*[members];
+    unsigned index = 0;
+    linked_pointer<member> mp = root;
+
+    while(is(mp)) {
+        list[index++] = *mp;
+        mp.next();
+    }
+
+    qsort(static_cast<void *>(list), members, sizeof(member *), &ncompare);
+    root = NULL;
+    while(index)
+        list[--index]->enlist(&root);
+
+    delete list;
 }
 
 autorelease::autorelease()

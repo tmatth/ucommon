@@ -254,12 +254,20 @@ public:
     private:
         const char *text;
 
-    public:
+    protected:
+        friend class stringpager;
+
+        inline void set(member *node)
+            {next = node;};
+
         member(LinkedObject **root, const char *data);
-        inline const char *operator*()
+        member(const char *data);
+
+    public:
+        inline const char *operator*() const
             {return text;};
 
-        inline const char *get(void)
+        inline const char *get(void) const
             {return text;};
     };
 
@@ -321,7 +329,7 @@ public:
         {return static_cast<stringpager::member *>(root);};
 
     /**
-     * Convenience operator to add to pager.
+     * Convenience operator to add to pager and auto-sort.
      * @param text to add to list.
      */
     inline void operator+=(const char *text)
@@ -333,6 +341,14 @@ public:
      */
     inline stringpager& operator<<(const char *text)
         {add(text); return *this;};
+
+    /**
+     * Sort members.
+     */
+    void sort(void);
+
+private:
+    member *last;
 };
 
 /**
@@ -846,6 +862,18 @@ public:
     inline T **sort(void) const
         {return NamedObject::sort(NamedObject::index(idx, M));};
 };
+
+/**
+ * A convenience type for paged string lists.
+ */
+typedef stringpager stringlist_t;
+
+/**
+ * A convenience type for paged string list items.
+ */
+typedef stringpager::member stringitem_t;
+
+
 
 END_NAMESPACE
 
