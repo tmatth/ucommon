@@ -584,11 +584,21 @@ AC_LANG_RESTORE
 AC_SUBST_DIR(includes, includedir)
 AC_SUBST_DIR(libs, libdir)
 
-if test "$libs" != "/usr/lib" ; then
-    UCOMMON_LINKED="-L$libs $UCOMMON_LINKED" ; fi
+case "$libs" in
+/usr/*)
+    ;;
+*)
+    UCOMMON_LINKED="-L$libs $UCOMMON_LINKED"
+    ;;
+esac
 
-if test "$includes" != "/usr/include" ; then
-    UCOMMON_FLAGS="$UCOMMON_FLAGS -I$includes" ; fi
+case "$includes" in
+/usr/*)
+    ;;
+*)
+    UCOMMON_FLAGS="$UCOMMON_FLAGS -I$includes"
+    ;;
+esac
 
 case "$target_os" in
 *bsd*)
