@@ -28,7 +28,7 @@ using namespace UCOMMON_NAMESPACE;
 extern "C" int main()
 {
     stringlist_t mylist;
-    stringitem_t *item;
+    stringlistitem_t *item;
 
     mylist.add("100");
     mylist.add("050");

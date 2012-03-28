@@ -3,6 +3,7 @@ from ucommon 5.2.1 to 5.2.2
 - common c++ object linking, maps, and ref counted pointers added back
 - stringpager supports ordered add and sorting
 - no lib or include extra paths if in /usr/xxx
+- directory pager and list types added
 
 from ucommon 5.2.0 to 5.2.1
 - fixed issue with static linking initialization order

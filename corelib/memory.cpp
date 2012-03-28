@@ -20,6 +20,7 @@
 #include <ucommon/memory.h>
 #include <ucommon/thread.h>
 #include <ucommon/string.h>
+#include <ucommon/fsys.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -320,6 +321,56 @@ void stringpager::sort(void)
         list[--index]->enlist(&root);
 
     delete list;
+}
+
+DirPager::DirPager() :
+stringpager()
+{
+    dir = NULL;
+}
+
+DirPager::DirPager(const char *path) :
+stringpager()
+{
+    dir = NULL;
+    load(path);
+}
+
+bool DirPager::filter(const char *fname)
+{
+    if(*fname != '.')
+        return true;
+    return false;
+}
+
+void DirPager::operator=(const char *path)
+{
+    dir = NULL;
+    clear();
+    load(path);
+}
+
+bool DirPager::load(const char *path)
+{
+    fsys_t ds;
+    char buffer[128];
+
+    if(!fsys::isdir(path))
+        return false;
+
+    dir = dup(path);
+    ds.open(path, fsys::ACCESS_DIRECTORY);
+    if(!ds)
+        return false;
+
+    while(ds.read(buffer, sizeof(buffer)) > 0) {
+        if(filter(buffer))
+            add(buffer);
+    }
+
+    ds.close();
+    sort();
+    return true;
 }
 
 autorelease::autorelease()

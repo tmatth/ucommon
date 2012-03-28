@@ -352,6 +352,61 @@ private:
 };
 
 /**
+ * Directory pager is a paged string list for directory file names.
+ * This protocol is used to convert a directory into a list of filenames.
+ * As a protocol it offers a filtering method to select which files to
+ * include in the list.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT DirPager : protected stringpager
+{
+protected:
+    const char *dir;
+
+    /**
+     * Filter filenames in a derived class.
+     * @param filename to filter.
+     * @return true if include in final list.
+     */
+    virtual bool filter(const char *filename);
+
+    /**
+     * Load a directory path.
+     * @param path to load.
+     * @return true if valid.
+     */
+    bool load(const char *path);
+
+public:
+    DirPager();
+
+    DirPager(const char *path);
+
+    void operator=(const char *path);
+
+    inline const char *operator*()
+        {return dir;};
+
+    inline operator bool()
+        {return dir != NULL;};
+
+    inline bool operator!()
+        {return dir == NULL;};
+
+    /**
+     * Return specified filename from directory list.  This is a convenience
+     * operator.
+     * @param item to access.
+     * @return text of item or NULL if invalid.
+     */
+    inline const char *operator[](unsigned item)
+        {return stringpager::get(item);};
+
+    inline const char *get(unsigned item)
+        {return stringpager::get(item);};
+};
+
+/**
  * Buffered pager for storing paged strings for character protocol.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
@@ -871,8 +926,12 @@ typedef stringpager stringlist_t;
 /**
  * A convenience type for paged string list items.
  */
-typedef stringpager::member stringitem_t;
+typedef stringpager::member stringlistitem_t;
 
+/**
+ * A convenience type for using DirPager directly.
+ */
+typedef DirPager dirlist_t;
 
 
 END_NAMESPACE
