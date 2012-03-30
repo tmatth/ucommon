@@ -2189,6 +2189,9 @@ void shell::release(int exit_code)
     pid_t pid;
     int fd;
 
+    fflush(stdout);
+    fflush(stderr);
+
     close(0);
     close(1);
     close(2);
