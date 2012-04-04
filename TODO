@@ -1,5 +1,7 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	gaurd classes renamed
+
 	String operator + should return temp string...preset size of both
 
 	Internal "StringTemp" class for str(..) functions with its own
@@ -17,8 +19,6 @@ Proposed changes (likely deferred to 6.0.0)
 	Use NSPR code base for simulating msw conditional variables for direct
 	native msw threading if better than code we have in ucommon, or maybe
 	use NSPR in place of native msw threading entirely?
-
-	Add serialio and logging class?
 
 	Add NSS backend for secure alongside openssl & gnutls.
 
@@ -52,4 +52,6 @@ Rejected changes:
 	with std lib - build and compile issues if not global
 
 	ssl socket low level methods and bio rather than just upper level stream.
+
+	Add serialio and logging class? - rejected; in bayonne runtime
 
