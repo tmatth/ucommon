@@ -787,6 +787,31 @@ void bufpager::put(const char *text, size_t size)
     _unlock();
 }
 
+size_t bufpager::get(char *text, size_t size)
+{
+    _lock();
+    if(!ccount) {
+        _unlock();
+        return 0;
+    }
+
+    unsigned long index = 0;
+
+    while(index < size && current) {
+        if(cpos >= current->used) {
+            if(!current->next)
+                break;
+            current = current->next;
+            cpos = 0l;
+        }
+        text[index++] = current->text[cpos++];
+    }
+    if(index < size)
+        text[index] = 0;
+    _unlock();
+    return index;
+}
+
 void bufpager::add(const char *text)
 {
     _lock();

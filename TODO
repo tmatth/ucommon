@@ -1,5 +1,7 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	add CharbufProtocol with locking states
+
 	String operator + should return temp string...preset size of both
 
 	Internal "StringTemp" class for str(..) functions with its own

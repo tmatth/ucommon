@@ -487,6 +487,14 @@ public:
     void add(const char *text);
 
     /**
+     * Get string from buffer.
+     * @param text to save into.
+     * @param size of buffer.
+     * @return count of characters copied.
+     */
+    size_t get(char *text, size_t size);
+
+    /**
      * Put memory string into buffer including NULL byte.
      * @param text to add.
      * @param size of text to add.
@@ -500,8 +508,19 @@ public:
     inline unsigned long getUsed(void)
         {return ccount;}
 
+    /**
+     * Convenience operator to get text.
+     * @return text string of buffer.
+     */
     inline char *operator *()
         {return dup();}
+
+    /**
+     * Convenience operator to add to pager.
+     * @param text to add to list.
+     */
+    inline bufpager& operator<<(const char *text)
+        {add(text); return *this;};
 
     bufpager(size_t page = 0);
 };
