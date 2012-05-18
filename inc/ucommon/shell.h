@@ -906,6 +906,8 @@ public:
      */
     static shell::pid_t spawn(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
 
+    static shell::pid_t spawn(const char *path, stringlist_t& argv, char **env = NULL, fd_t *stdio = NULL);
+
     /**
      * Spawn a child pipe.  If the executable path is a pure filename, then
      * the $PATH will be used to find it.  The argv array may be created from
@@ -918,6 +920,8 @@ public:
      * @return pipe object or NULL on failure.
      */
     static shell::pipe_t spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
+
+    static shell::pipe_t spawn(const char *path, stringlist_t& argv, pmode_t mode, size_t size = 512, char **env = NULL);
 
     /**
      * Set priority level and enable priority scheduler.  This activates the

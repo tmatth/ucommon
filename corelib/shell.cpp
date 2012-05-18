@@ -2910,3 +2910,19 @@ String shell::path(path_t id, const char *dir)
     }
     return result;
 }
+
+shell::pid_t shell::spawn(const char *path, stringlist_t& list, char **envp, fd_t *stdio)
+{
+    char **argv = stringpager::index(list);
+    pid_t pid = spawn(path, argv, envp, stdio);
+    stringpager::release(argv);
+    return pid;
+}
+
+shell::pipe_t shell::spawn(const char *path, stringlist_t& list, pmode_t mode, size_t size, char **env)
+{
+    char **argv = stringpager::index(list);
+    pipe_t pio = spawn(path, argv, mode, size, env);
+    stringpager::release(argv);
+    return pio;
+}
