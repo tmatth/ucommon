@@ -299,6 +299,24 @@ public:
     void add(const char *text);
 
     /**
+     * Add text to front of list.
+     * @param text to add.
+     */
+    void push(const char *text);
+
+    /**
+     * Remove element from front of list.  Does not release memory.
+     * @return text removed.
+     */
+    const char *pull(void);
+
+    /**
+     * Remove element from back of list.  Does not release memory.
+     * @return text removed.
+     */
+    const char *pop(void);
+
+    /**
      * Add list to list.  This is a list of string pointers terminated with
      * NULL.
      * @param list of text to add.
@@ -346,6 +364,16 @@ public:
      * Sort members.
      */
     void sort(void);
+
+    /**
+     * Fetch index.
+     */
+    static char **index(stringpager& pager);
+
+    /**
+     * Release index.
+     */
+    static void release(char **idx);
 
 private:
     member *last;
@@ -441,11 +469,58 @@ public:
     void rewind(void);
 
     /**
+     * Create an output string from buffer.
+     * @return output string allocated.
+     */
+    char *dup(void);
+
+    /**
+     * Set text of string buffer.
+     * @param text to set.
+     */
+    void set(const char *text);
+
+    /**
+     * Add text to string buffer.
+     * @param text to add.
+     */
+    void add(const char *text);
+
+    /**
+     * Get string from buffer.
+     * @param text to save into.
+     * @param size of buffer.
+     * @return count of characters copied.
+     */
+    size_t get(char *text, size_t size);
+
+    /**
+     * Put memory string into buffer including NULL byte.
+     * @param text to add.
+     * @param size of text to add.
+     */
+    void put(const char *text, size_t size);
+
+    /**
      * Get total size.
      * @return number of characters in buffer.
      */
     inline unsigned long getUsed(void)
-        {return ccount;};
+        {return ccount;}
+
+    /**
+     * Convenience operator to get text.
+     * @return text string of buffer.
+     */
+    inline char *operator *()
+        {return dup();}
+
+    /**
+     * Convenience operator to add to pager.
+     * @param text to add to list.
+     */
+    inline bufpager& operator<<(const char *text)
+        {add(text); return *this;};
 
     bufpager(size_t page = 0);
 };

@@ -414,4 +414,11 @@ typedef long Integer;
 typedef unsigned long Unsigned;
 typedef double Real;
 
+/**
+ * Matching function for strdup().
+ * @param string to release from allocated memory.
+ */
+inline void strfree(char *str)
+    {::free(str);}
+
 #endif

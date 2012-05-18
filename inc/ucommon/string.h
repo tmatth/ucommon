@@ -1666,6 +1666,9 @@ extern "C" inline int strnicmp(const char *string1, const char *string2, size_t 
 inline bool eq(char const *s1, char const *s2)
     {return String::equal(s1, s2);}
 
+inline bool ne(char const *s1, char const *s2)
+    {return !String::equal(s1, s2);}
+
 /**
  * Compare two null terminated strings if equal up to specified size.
  * @param s1 string to compare.
@@ -1676,6 +1679,9 @@ inline bool eq(char const *s1, char const *s2)
 inline bool eq(char const *s1, char const *s2, size_t size)
     {return String::equal(s1, s2, size);}
 
+inline bool ne(char const *s1, char const *s2, size_t size)
+    {return !String::equal(s1, s2, size);}
+
 /**
  * Compare two string objects if equal.
  * @param s1 string to compare.
@@ -1684,6 +1690,9 @@ inline bool eq(char const *s1, char const *s2, size_t size)
  */
 inline bool eq(String &s1, String &s2)
     {return String::equal(s1.c_str(), s2.c_str());}
+
+inline bool ne(String &s1, String &s2)
+    {return !String::equal(s1.c_str(), s2.c_str());}
 
 /**
  * Compare two null terminated strings if equal ignoring case.  This is
@@ -1694,6 +1703,9 @@ inline bool eq(String &s1, String &s2)
  */
 inline bool case_eq(char const *s1, char const *s2)
     {return String::case_equal(s1, s2);}
+
+inline bool case_ne(char const *s1, char const *s2)
+    {return !String::case_equal(s1, s2);}
 
 // to be depreciated...
 inline bool ieq(char const *s1, char const *s2)
@@ -1745,6 +1757,13 @@ inline String str(double value)
     {String temp(40, "%f", value); return temp;}
 
 String str(CharacterProtocol& cp, strsize_t size);
+
+bool sort_eq(char const *str1, char const *str2);
+bool sort_ne(char const *str1, char const *str2);
+bool sort_gt(char const *str1, char const *str2);
+bool sort_lt(char const *str1, char const *str2);
+bool sort_ge(char const *str1, char const *str2);
+bool sort_le(char const *str1, char const *str2);
 
 template<>
 inline void swap<string_t>(string_t& s1, string_t& s2)
