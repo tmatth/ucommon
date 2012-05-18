@@ -24,6 +24,8 @@
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
 #include <ucommon/string.h>
+#include <ucommon/memory.h>
+#include <ucommon/shell.h>
 
 #ifdef  HAVE_SYSLOG_H
 #include <syslog.h>
@@ -1553,4 +1555,18 @@ fd_t fsys::release(void)
     ptr = NULL;
     error = 0;
     return save;
+}
+
+int fsys::exec(const char *path, char **argv)
+{
+    shell::pid_t pid = shell::spawn(path, argv);
+    return shell::wait(pid);
+}
+
+int fsys::exec(const char *path, stringlist_t& list)
+{
+    char **argv = stringpager::index(list);
+    shell::pid_t pid = shell::spawn(path, argv);
+    stringpager::release(argv);
+    return shell::wait(pid);
 }
