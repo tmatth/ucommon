@@ -268,6 +268,52 @@ void stringpager::clear(void)
     last = NULL;
 }
 
+void stringpager::push(const char *text)
+{
+    if(!text)
+        text = "";
+
+    size_t size = strlen(text) + 1;
+    caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
+    char *str = (char *)memalloc::_alloc(size);
+
+    strcpy(str, text);
+    member *node;
+
+    node = new(mem) member(&root, str);
+    if(!last)
+        last = node;
+    ++members;
+}
+
+const char *stringpager::pop(void)
+{
+    const char *out = NULL;
+
+    if(!root)
+        return NULL;
+
+    if(root == last) {
+        out = last->text;
+        root = last = NULL;
+        members = 0;
+        return out;
+    }
+
+    linked_pointer<member> np = root;
+    while(is(np)) {
+        if(np->next == last) {
+            out = last->text;
+            last = *np;
+            np->next = NULL;
+            --members;
+            break;
+        }
+        np.next();
+    }
+    return out;
+}
+
 void stringpager::add(const char *text)
 {
     if(!text)
@@ -321,6 +367,27 @@ void stringpager::sort(void)
         list[--index]->enlist(&root);
 
     delete list;
+}
+
+void stringpager::release(char **idx)
+{
+    if(!idx)
+        return;
+
+    delete[] idx;
+}
+
+char **stringpager::index(stringpager& list)
+{
+    unsigned index = 0;
+    char **data = new char *[list.members + 1];
+    linked_pointer<member> mp = list.root;
+    while(is(mp)) {
+        data[index++] = (char *)mp->text;
+        mp.next();
+    }
+    data[index] = NULL;
+    return data;
 }
 
 DirPager::DirPager() :

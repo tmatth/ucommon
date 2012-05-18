@@ -299,6 +299,24 @@ public:
     void add(const char *text);
 
     /**
+     * Add text to front of list.
+     * @param text to add.
+     */
+    void push(const char *text);
+
+    /**
+     * Remove element from front of list.  Does not release memory.
+     * @return text removed.
+     */
+    const char *pull(void);
+
+    /**
+     * Remove element from back of list.  Does not release memory.
+     * @return text removed.
+     */
+    const char *pop(void);
+
+    /**
      * Add list to list.  This is a list of string pointers terminated with
      * NULL.
      * @param list of text to add.
@@ -346,6 +364,16 @@ public:
      * Sort members.
      */
     void sort(void);
+
+    /**
+     * Fetch index.
+     */
+    static char **index(stringpager& pager);
+
+    /**
+     * Release index.
+     */
+    static void release(char **idx);
 
 private:
     member *last;
