@@ -469,11 +469,39 @@ public:
     void rewind(void);
 
     /**
+     * Create an output string from buffer.
+     * @return output string allocated.
+     */
+    char *dup(void);
+
+    /**
+     * Set text of string buffer.
+     * @param text to set.
+     */
+    void set(const char *text);
+
+    /**
+     * Add text to string buffer.
+     * @param text to add.
+     */
+    void add(const char *text);
+
+    /**
+     * Put memory string into buffer including NULL byte.
+     * @param text to add.
+     * @param size of text to add.
+     */
+    void put(const char *text, size_t size);
+
+    /**
      * Get total size.
      * @return number of characters in buffer.
      */
     inline unsigned long getUsed(void)
-        {return ccount;};
+        {return ccount;}
+
+    inline char *operator *()
+        {return dup();}
 
     bufpager(size_t page = 0);
 };

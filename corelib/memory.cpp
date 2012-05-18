@@ -725,6 +725,155 @@ memalloc(ps)
     cpos = 0;
 }
 
+void bufpager::set(const char *text)
+{
+    reset();
+    add(text);
+}
+
+void bufpager::put(const char *text, size_t size)
+{
+    _lock();
+
+    while(text && (size--)) {
+        if(!last || last->used == last->size) {
+            cpage_t *next;
+
+            if(freelist) {
+                next = freelist;
+                freelist = next->next;
+            }
+            else {
+                next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
+                if(!next) {
+                    _unlock();
+                    return;
+                }
+
+                page_t *p = page;
+                unsigned size = 0;
+
+                while(p) {
+                    size = pagesize - p->used;
+                    if(size)
+                        break;
+                    p = p->next;
+                }
+                if(!p)
+                    p = pager();
+
+                if(!p) {
+                    _unlock();
+                    return;
+                }
+
+                next->text = ((char *)(p)) + p->used;
+                next->used = 0;
+                next->size = size;
+                p->used = pagesize;
+            }
+
+            if(last)
+                last->next = next;
+
+            if(!first)
+                first = next;
+            last = next;
+        }
+
+        ++ccount;
+        last->text[last->used++] = *(text++);
+    }
+    _unlock();
+}
+
+void bufpager::add(const char *text)
+{
+    _lock();
+
+    while(text && *text) {
+        if(!last || last->used == last->size) {
+            cpage_t *next;
+
+            if(freelist) {
+                next = freelist;
+                freelist = next->next;
+            }
+            else {
+                next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
+                if(!next) {
+                    _unlock();
+                    return;
+                }
+
+                page_t *p = page;
+                unsigned size = 0;
+
+                while(p) {
+                    size = pagesize - p->used;
+                    if(size)
+                        break;
+                    p = p->next;
+                }
+                if(!p)
+                    p = pager();
+
+                if(!p) {
+                    _unlock();
+                    return;
+                }
+
+                next->text = ((char *)(p)) + p->used;
+                next->used = 0;
+                next->size = size;
+                p->used = pagesize;
+            }
+
+            if(last)
+                last->next = next;
+
+            if(!first)
+                first = next;
+            last = next;
+        }
+
+        ++ccount;
+        last->text[last->used++] = *(text++);
+    }
+    _unlock();
+}
+
+char *bufpager::dup(void)
+{
+    _lock();
+    if(!ccount) {
+        _unlock();
+        return NULL;
+    }
+
+    char *text = (char *)malloc(ccount + 1l);
+    if(!text) {
+        _unlock();
+        return NULL;
+    }
+
+    unsigned long index = 0, pos = 0;
+    cpage_t *page = first;
+
+    while(index < ccount && page) {
+        if(pos >= page->used) {
+            if(!page->next)
+                break;
+            page = page->next;
+            pos = 0l;
+        }
+        text[index++] = page->text[pos++];
+    }
+    text[index] = 0;
+    _unlock();
+    return text;
+}
+
 int bufpager::_getch(void)
 {
     _lock();

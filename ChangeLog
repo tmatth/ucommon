@@ -2,6 +2,7 @@ from ucommon 5.2.2 to 5.3.0
 - sort specific string collation functions added
 - more stringpager manipulations possible
 - use of stringlist_t in shell methods
+- string inpuit and output for bufpager.
 
 from ucommon 5.2.1 to 5.2.2
 - use strcoll for sorting when possible
