@@ -1769,6 +1769,42 @@ template<>
 inline void swap<string_t>(string_t& s1, string_t& s2)
     {String::swap(s1, s2);}
 
+class __EXPORT strdup_t
+{
+private:
+    const char *data;
+
+public:
+    inline strdup_t()
+        {data = NULL;}
+
+    inline strdup_t(const char *str)
+        {data = str;}
+
+    inline ~strdup_t()
+        {if(data) ::free((char *)data);}
+
+    inline strdup_t& operator=(const char *str)
+        {if(data) ::free((char *)data); data = str; return *this;}
+
+    inline operator bool() const
+        {return data != NULL;}
+
+    inline bool operator!() const
+        {return data == NULL;}
+
+    inline operator const char*() const
+        {return data;}
+
+    inline const char *operator*() const
+        {return data;}
+
+    inline char operator[](size_t size) const
+        {return data[size];}
+
+};
+
+
 END_NAMESPACE
 
 #endif

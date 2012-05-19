@@ -247,6 +247,15 @@ memalloc(size)
     last = NULL;
 }
 
+stringpager::stringpager(char **list, size_t size) :
+memalloc(size)
+{
+    members = 0;
+    root = NULL;
+    last = NULL;
+    add(list);
+}
+
 const char *stringpager::get(unsigned index)
 {
     linked_pointer<member> list = root;

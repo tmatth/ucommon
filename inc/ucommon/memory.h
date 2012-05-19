@@ -277,6 +277,8 @@ public:
      */
     stringpager(size_t pagesize = 256);
 
+    stringpager(char **list, size_t pagesize = 256);
+
     /**
      * Get the number of items in the pager string list.
      * @return number of items stored.
@@ -374,6 +376,18 @@ public:
      * Release index.
      */
     static void release(char **idx);
+
+    inline operator bool()
+        {return members > 0;}
+
+    inline bool operator!()
+        {return !members;}
+
+    inline stringpager& operator=(char **list)
+        {add(list); return *this;}
+
+    inline const char *operator*()
+        {return pull();}
 
 private:
     member *last;
@@ -1007,6 +1021,12 @@ typedef stringpager::member stringlistitem_t;
  * A convenience type for using DirPager directly.
  */
 typedef DirPager dirlist_t;
+
+inline const char *shift(stringlist_t& list)
+    {return list.pull();}
+
+inline void unshift(stringlist_t& list, const char *text)
+    {list.push(text);}
 
 
 END_NAMESPACE
