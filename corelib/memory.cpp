@@ -362,6 +362,48 @@ void stringpager::add(const char *text)
     last = node;
 }
 
+void stringpager::set(char **list)
+{
+    clear();
+    add(list);
+}
+
+void stringpager::push(char **list)
+{
+    const char *cp;
+    unsigned index = 0;
+
+    if(!list)
+        return;
+
+    while(NULL != (cp = list[index++]))
+        push(cp);
+}
+
+void stringpager::push(const stringpager& list)
+{
+    linked_pointer<member> mp = list.root;
+    while(is(mp)) {
+        push(mp->text);
+        mp.next();
+    }
+}
+
+void stringpager::add(const stringpager& list)
+{
+    linked_pointer<member> mp = list.root;
+    while(is(mp)) {
+        add(mp->text);
+        mp.next();
+    }
+}
+
+void stringpager::set(const stringpager& list)
+{
+    clear();
+    add(list);
+}
+
 void stringpager::add(char **list)
 {
     const char *cp;

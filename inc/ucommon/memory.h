@@ -307,6 +307,12 @@ public:
     void push(const char *text);
 
     /**
+     * Add text list to front of list.
+     * @param text to add.
+     */
+    void push(char **text);
+
+    /**
      * Remove element from front of list.  Does not release memory.
      * @return text removed.
      */
@@ -324,6 +330,35 @@ public:
      * @param list of text to add.
      */
     void add(char **list);
+
+    /**
+     * Set list from list.
+     * NULL.
+     * @param list to add.
+     */
+    void set(const stringpager& list);
+
+    /**
+     * Add list from list.
+     * NULL.
+     * @param list to add.
+     */
+    void add(const stringpager& list);
+
+    /**
+     * Push list from list.
+     * NULL.
+     * @param list to add.
+     */
+    void push(const stringpager& list);
+
+
+    /**
+     * Set list to list.  This is a list of string pointers terminated with
+     * NULL.
+     * @param list of text to set.
+     */
+    void set(char **list);
 
     /**
      * Purge all members and release pager member.  The list can then
@@ -384,7 +419,10 @@ public:
         {return !members;}
 
     inline stringpager& operator=(char **list)
-        {add(list); return *this;}
+        {set(list); return *this;}
+
+    inline stringpager& operator=(const stringpager& list)
+        {set(list); return *this;}
 
     inline const char *operator*()
         {return pull();}
