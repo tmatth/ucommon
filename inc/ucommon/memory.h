@@ -575,6 +575,14 @@ public:
         {add(text); return *this;};
 
     bufpager(size_t page = 0);
+
+    char *request(size_t *iosize);
+
+    char *copy(size_t *iosize);
+
+    void release(void);
+
+    void commit(size_t size);
 };
 
 /**

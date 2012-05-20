@@ -800,11 +800,11 @@ void bufpager::set(const char *text)
     add(text);
 }
 
-void bufpager::put(const char *text, size_t size)
+void bufpager::put(const char *text, size_t iosize)
 {
     _lock();
 
-    while(text && (size--)) {
+    while(text && (iosize--)) {
         if(!last || last->used == last->size) {
             cpage_t *next;
 
@@ -856,7 +856,89 @@ void bufpager::put(const char *text, size_t size)
     _unlock();
 }
 
-size_t bufpager::get(char *text, size_t size)
+char *bufpager::copy(size_t *iosize)
+{
+    *iosize = 0;
+    _lock();
+    if(!current || (current->next == NULL && cpos >= current->used)) {
+        _unlock();
+        return NULL;
+    }
+
+    if(cpos >= current->used) {
+        current = current->next;
+        cpos = 0l;
+    }
+
+    char *result = current->text + cpos;
+    *iosize = current->used - cpos;
+    cpos = 0l;
+    current = current->next;
+    return result;
+}
+
+char *bufpager::request(size_t *iosize)
+{
+    *iosize = 0;
+    _lock();
+    if(!last || last->used >= last->size) {
+        cpage_t *next;
+        if(freelist) {
+            next = freelist;
+            freelist = next->next;
+        }
+        else {
+            next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
+            if(!next) {
+                _unlock();
+                return NULL;
+            }
+
+            page_t *p = page;
+            unsigned size = 0;
+
+            while(p) {
+                size = pagesize - p->used;
+                if(size)
+                    break;
+                p = p->next;
+            }
+            if(!p)
+                p = pager();
+
+            if(!p) {
+                _unlock();
+                return NULL;
+            }
+            next->text = ((char *)(p)) + p->used;
+            next->used = 0;
+            next->size = size;
+            p->used = pagesize;
+        }
+
+        if(last)
+            last->next = next;
+
+        if(!first)
+            first = next;
+        last = next;
+    }
+    *iosize = last->size - last->used;
+    return last->text + last->used;
+}
+
+void bufpager::commit(size_t iosize)
+{
+    last->used += iosize;
+    _unlock();
+}
+
+void bufpager::release(void)
+{
+    _unlock();
+}
+
+size_t bufpager::get(char *text, size_t iosize)
 {
     _lock();
     if(!ccount) {
@@ -866,7 +948,7 @@ size_t bufpager::get(char *text, size_t size)
 
     unsigned long index = 0;
 
-    while(index < size && current) {
+    while(index < iosize && current) {
         if(cpos >= current->used) {
             if(!current->next)
                 break;
@@ -875,7 +957,7 @@ size_t bufpager::get(char *text, size_t size)
         }
         text[index++] = current->text[cpos++];
     }
-    if(index < size)
+    if(index < iosize)
         text[index] = 0;
     _unlock();
     return index;
