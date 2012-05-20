@@ -277,6 +277,24 @@ void stringpager::clear(void)
     last = NULL;
 }
 
+const char *stringpager::pull(void)
+{
+    if(!members)
+        return NULL;
+
+
+    member *mem = (member *)root;
+    const char *result = mem->text;
+    --members;
+    if(!members) {
+        root = NULL;
+        last = NULL;
+    }
+    else
+        root = mem->next;
+    return result;
+}
+
 void stringpager::push(const char *text)
 {
     if(!text)

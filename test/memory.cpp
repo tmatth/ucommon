@@ -43,5 +43,9 @@ extern "C" int main()
     assert(eq(mylist[1], "100"));
     assert(eq(mylist[2], "300"));
 
+    const char *str = *mylist;
+    assert(eq(str, "050"));
+    assert(eq(mylist[0], "100"));
+
     return 0;
 }
