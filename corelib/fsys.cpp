@@ -1563,10 +1563,3 @@ int fsys::exec(const char *path, char **argv)
     return shell::wait(pid);
 }
 
-int fsys::exec(const char *path, stringlist_t& list)
-{
-    char **argv = stringpager::index(list);
-    shell::pid_t pid = shell::spawn(path, argv);
-    stringpager::release(argv);
-    return shell::wait(pid);
-}

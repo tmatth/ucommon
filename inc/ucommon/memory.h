@@ -332,28 +332,6 @@ public:
     void add(char **list);
 
     /**
-     * Set list from list.
-     * NULL.
-     * @param list to add.
-     */
-    void set(const stringpager& list);
-
-    /**
-     * Add list from list.
-     * NULL.
-     * @param list to add.
-     */
-    void add(const stringpager& list);
-
-    /**
-     * Push list from list.
-     * NULL.
-     * @param list to add.
-     */
-    void push(const stringpager& list);
-
-
-    /**
      * Set list to list.  This is a list of string pointers terminated with
      * NULL.
      * @param list of text to set.
@@ -403,14 +381,10 @@ public:
     void sort(void);
 
     /**
-     * Fetch index.
+     * Gather index list.
+     * @return index.
      */
-    static char **index(stringpager& pager);
-
-    /**
-     * Release index.
-     */
-    static void release(char **idx);
+    char **list(void);
 
     inline operator bool()
         {return members > 0;}
@@ -421,14 +395,15 @@ public:
     inline stringpager& operator=(char **list)
         {set(list); return *this;}
 
-    inline stringpager& operator=(const stringpager& list)
-        {set(list); return *this;}
-
     inline const char *operator*()
         {return pull();}
 
+    inline operator char **()
+        {return list();};
+
 private:
     member *last;
+    char **index;
 };
 
 /**

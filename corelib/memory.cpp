@@ -245,6 +245,7 @@ memalloc(size)
     members = 0;
     root = NULL;
     last = NULL;
+    index = NULL;
 }
 
 stringpager::stringpager(char **list, size_t size) :
@@ -275,6 +276,7 @@ void stringpager::clear(void)
     members = 0;
     root = NULL;
     last = NULL;
+    index = NULL;
 }
 
 const char *stringpager::pull(void)
@@ -292,6 +294,7 @@ const char *stringpager::pull(void)
     }
     else
         root = mem->next;
+    index = NULL;
     return result;
 }
 
@@ -311,6 +314,7 @@ void stringpager::push(const char *text)
     if(!last)
         last = node;
     ++members;
+    index = NULL;
 }
 
 const char *stringpager::pop(void)
@@ -319,6 +323,8 @@ const char *stringpager::pop(void)
 
     if(!root)
         return NULL;
+
+    index = NULL;
 
     if(root == last) {
         out = last->text;
@@ -353,6 +359,7 @@ void stringpager::add(const char *text)
     strcpy(str, text);
     member *node;
 
+    index = NULL;
     if(members++) {
         node = new(mem) member(str);
         last->set(node);
@@ -380,30 +387,6 @@ void stringpager::push(char **list)
         push(cp);
 }
 
-void stringpager::push(const stringpager& list)
-{
-    linked_pointer<member> mp = list.root;
-    while(is(mp)) {
-        push(mp->text);
-        mp.next();
-    }
-}
-
-void stringpager::add(const stringpager& list)
-{
-    linked_pointer<member> mp = list.root;
-    while(is(mp)) {
-        add(mp->text);
-        mp.next();
-    }
-}
-
-void stringpager::set(const stringpager& list)
-{
-    clear();
-    add(list);
-}
-
 void stringpager::add(char **list)
 {
     const char *cp;
@@ -422,41 +405,37 @@ void stringpager::sort(void)
         return;
 
     member **list = new member*[members];
-    unsigned index = 0;
+    unsigned pos = 0;
     linked_pointer<member> mp = root;
 
     while(is(mp)) {
-        list[index++] = *mp;
+        list[pos++] = *mp;
         mp.next();
     }
 
     qsort(static_cast<void *>(list), members, sizeof(member *), &ncompare);
     root = NULL;
-    while(index)
-        list[--index]->enlist(&root);
+    while(pos)
+        list[--pos]->enlist(&root);
 
     delete list;
+    index = NULL;
 }
 
-void stringpager::release(char **idx)
+char **stringpager::list(void)
 {
-    if(!idx)
-        return;
+    if(index)
+        return index;
 
-    delete[] idx;
-}
-
-char **stringpager::index(stringpager& list)
-{
-    unsigned index = 0;
-    char **data = new char *[list.members + 1];
-    linked_pointer<member> mp = list.root;
+    unsigned pos = 0;
+    index = (char **)memalloc::_alloc(sizeof(char *) * (members + 1));
+    linked_pointer<member> mp = root;
     while(is(mp)) {
-        data[index++] = (char *)mp->text;
+        index[pos++] = (char *)mp->text;
         mp.next();
     }
-    data[index] = NULL;
-    return data;
+    index[pos] = NULL;
+    return index;
 }
 
 DirPager::DirPager() :

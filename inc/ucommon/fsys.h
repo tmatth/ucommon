@@ -619,14 +619,6 @@ public:
     static int exec(const char *path, char **argv);
 
     /**
-     * Execute a process and get exit code.
-     * @param path to execute.
-     * @param argv list.
-     * @return exit code.
-     */
-    static int exec(const char *path, stringlist_t& argv);
-
-    /**
      * Load a plugin into memory.
      * @param module for management.
      * @param path to plugin.
