@@ -47,5 +47,10 @@ extern "C" int main()
     assert(eq(str, "050"));
     assert(eq(mylist[0], "100"));
 
+    char **list = mylist;
+    assert(eq(list[0], "100"));
+    assert(eq(list[1], "300"));
+
+    assert(list[2] == NULL);
     return 0;
 }
