@@ -1772,20 +1772,20 @@ inline void swap<string_t>(string_t& s1, string_t& s2)
 class __EXPORT strdup_t
 {
 private:
-    const char *data;
+    char *data;
 
 public:
     inline strdup_t()
         {data = NULL;}
 
-    inline strdup_t(const char *str)
+    inline strdup_t(char *str)
         {data = str;}
 
     inline ~strdup_t()
-        {if(data) ::free((char *)data);}
+        {if(data) ::free(data);}
 
-    inline strdup_t& operator=(const char *str)
-        {if(data) ::free((char *)data); data = str; return *this;}
+    inline strdup_t& operator=(char *str)
+        {if(data) ::free(data); data = str; return *this;}
 
     inline operator bool() const
         {return data != NULL;}
@@ -1793,8 +1793,11 @@ public:
     inline bool operator!() const
         {return data == NULL;}
 
-    inline operator const char*() const
+    inline operator char*() const
         {return data;}
+
+    inline const char *c_str(void) const
+        {return data;};
 
     inline const char *operator*() const
         {return data;}

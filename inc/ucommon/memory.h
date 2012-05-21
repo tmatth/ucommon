@@ -386,6 +386,18 @@ public:
      */
     char **list(void);
 
+    /**
+     * Tokenize a string and add each token to the stringpager.
+     * @param text to tokenize.
+     * @param list of characters to use as token separators.
+     * @param quote pairs of characters for quoted text or NULL if not used.
+     * @param end of line marker characters or NULL if not used.
+     * @return number of tokens parsed.
+     */
+    unsigned token(const char *text, const char *list, const char *quote = NULL, const char *end = NULL);
+
+
+
     inline operator bool()
         {return members > 0;}
 

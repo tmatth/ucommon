@@ -257,6 +257,23 @@ memalloc(size)
     add(list);
 }
 
+unsigned stringpager::token(const char *text, const char *list, const char *quote, const char *end)
+{
+    unsigned count = 0;
+    const char *result;
+    char *last = NULL;
+
+    if(!text || !*text)
+        return 0;
+
+    strdup_t tmp = strdup(text);
+    while(NULL != (result = String::token(tmp, &last, list, quote, end))) {
+        ++count;
+        add(result);
+    }
+    return count;
+}
+
 const char *stringpager::get(unsigned index)
 {
     linked_pointer<member> list = root;
