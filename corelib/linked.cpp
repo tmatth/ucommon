@@ -399,7 +399,11 @@ int NamedObject::compare(const char *cid) const
 {
     assert(cid != NULL && *cid != 0);
 
+#ifdef  HAVE_STRCOLL
+    return strcoll(id, cid);
+#else
     return strcmp(id, cid);
+#endif
 }
 
 extern "C" {

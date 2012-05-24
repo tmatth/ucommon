@@ -1,3 +1,6 @@
+from ucommon 5.3.0 to 5.3.1
+- NamedList sort uses system collation.
+
 from ucommon 5.2.2 to 5.3.0
 - sort specific string collation functions added
 - more stringpager manipulations possible
