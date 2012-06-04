@@ -19,6 +19,7 @@
 #include "../config.h"
 #include <ucommon/export.h>
 #include <ucommon/numbers.h>
+#include <ucommon/string.h>
 #include <ucommon/datetime.h>
 #include <ucommon/thread.h>
 #include <stdlib.h>

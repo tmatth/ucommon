@@ -17,6 +17,9 @@
 
 #include "../config.h"
 #include <ucommon/export.h>
+#include <ucommon/protocols.h>
+#include <ucommon/socket.h>
+#include <ucommon/timers.h>
 #include <ucommon/buffer.h>
 #include <ucommon/string.h>
 

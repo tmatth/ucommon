@@ -17,6 +17,7 @@
 
 #include "../config.h"
 #include <ucommon/export.h>
+#include <ucommon/protocols.h>
 #include <ucommon/string.h>
 #include <ucommon/unicode.h>
 #include <ucommon/thread.h>

@@ -17,8 +17,11 @@
 
 #include "../config.h"
 #include <ucommon/export.h>
+#include <ucommon/protocols.h>
 #include <ucommon/string.h>
 #include <ucommon/memory.h>
+#include <ucommon/thread.h>
+#include <ucommon/fsys.h>
 #include <ucommon/shell.h>
 #include <stdlib.h>
 #include <stdarg.h>

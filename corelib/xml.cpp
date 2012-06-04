@@ -17,14 +17,12 @@
 
 #include "../config.h"
 #include <ucommon/export.h>
+#include <ucommon/protocols.h>
 #include <ucommon/string.h>
 #include <ucommon/xml.h>
 #include <ctype.h>
 
 using namespace UCOMMON_NAMESPACE;
-#if !defined(_MSC_VER)
-using namespace std;
-#endif
 
 static bool isElement(char c)
 {

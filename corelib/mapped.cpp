@@ -17,6 +17,9 @@
 
 #include "../config.h"
 #include <ucommon/export.h>
+#include <ucommon/linked.h>
+#include <ucommon/string.h>
+#include <ucommon/timers.h>
 #include <ucommon/mapped.h>
 
 #ifdef  HAVE_FCNTL_H
