@@ -19,7 +19,7 @@
 #define _XOPEN_SOURCE 600
 #endif
 
-#include <config.h>
+#include "../config.h"
 #include <ucommon/export.h>
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>

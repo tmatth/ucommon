@@ -18,7 +18,7 @@
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 #if !defined(_MSC_VER) || _MSC_VER >= 1400
 
-#include <config.h>
+#include "../config.h"
 #include <ucommon/export.h>
 #include <ucommon/persist.h>
 

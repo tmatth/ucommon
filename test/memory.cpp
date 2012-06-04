@@ -35,17 +35,17 @@ extern "C" int main()
     mylist.add("300");
 
     item = mylist.begin();
-    assert(eq("100", mylist[0]));
+    assert(eq("100", mylist[0u]));
     mylist.sort();
     item = mylist.begin();
     assert(eq(item->get(), "050"));
 
-    assert(eq(mylist[1], "100"));
-    assert(eq(mylist[2], "300"));
+    assert(eq(mylist[1u], "100"));
+    assert(eq(mylist[2u], "300"));
 
     const char *str = *mylist;
     assert(eq(str, "050"));
-    assert(eq(mylist[0], "100"));
+    assert(eq(mylist[0u], "100"));
 
     char **list = mylist;
     assert(eq(list[0], "100"));

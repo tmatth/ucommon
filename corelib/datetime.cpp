@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <config.h>
+#include "../config.h"
 #include <ucommon/export.h>
 #include <ucommon/numbers.h>
 #include <ucommon/datetime.h>
@@ -257,7 +257,7 @@ time_t Date::getTime(void) const
 {
     char buf[11];
     tm_t dt;
-    memset(&dt, 0, sizeof(tm));
+    memset(&dt, 0, sizeof(tm_t));
     fromJulian(buf);
     Number nyear(buf, 4);
     Number nmonth(buf + 5, 2);
@@ -712,7 +712,7 @@ DateTime::DateTime(time_t tm)
     DateTime::release(dt);
 }
 
-DateTime::DateTime(tm *dt) :
+DateTime::DateTime(tm_t *dt) :
 Date(dt), Time(dt)
 {}
 
