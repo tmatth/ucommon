@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include <config.h>
+#include "../config.h"
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE   600

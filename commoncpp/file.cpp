@@ -50,7 +50,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 
-#include <config.h>
+#include "../config.h"
 #include <fcntl.h>
 
 #ifdef  HAVE_SYS_PARAM_H
