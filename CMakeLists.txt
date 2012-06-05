@@ -346,7 +346,7 @@ endif()
 
 # common build options can be passed to cmake using WITH_CFLAGS, WITH_LIBS,
 # and WITH_INCLUDES.
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc ${WITH_INCLUDES})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc ${WITH_INCLUDES})
 add_definitions(${UCOMMON_FLAGS} ${WITH_CFLAGS})
 link_libraries(${WITH_LIBS})
 
