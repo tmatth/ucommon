@@ -412,6 +412,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 add_library(ucommon ${BUILD_RUNTIME_TYPE} ${common_src} ${ucommon_inc})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
