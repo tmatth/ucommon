@@ -661,6 +661,31 @@ public:
     string operator()(int offset, strsize_t size) const;
 
     /**
+     * Convenience method for left of string.
+     * @param size of substring to gather.
+     * @return string object holding substring.
+     */
+    inline string left(strsize_t size) const
+        {return operator()(0, size);}
+
+    /**
+     * Convenience method for right of string.
+     * @param offset of substring from right.
+     * @return string object holding substring.
+     */
+    inline string right(unsigned offset) const
+        {return operator()(-((int)offset), 0);}
+
+    /**
+     * Convenience method for substring extraction.
+     * @param offset into string.
+     * @param size of string to return.
+     * @return string object holding substring.
+     */
+    inline string mid(strsize_t offset, strsize_t size) const
+        {return operator()((int)offset, size);}
+
+    /**
      * Reference a string in the object by relative offset.  Positive
      * offsets are from the start of the string, negative from the
      * end.
@@ -1240,21 +1265,30 @@ public:
      * @return count of characters.
      */
     inline static size_t count(string& object)
-        {return object.count();};
+        {return object.count();}
+
+    inline static string mid(string& object, strsize_t offset, strsize_t size)
+        {return object.mid(offset, size);}
+
+    inline static string left(string& object, strsize_t size)
+        {return object.left(size);}
+
+    inline static string right(string& object, strsize_t offset)
+        {return object.right(offset);}
 
     /**
      * Convert string object to upper case.
      * @param object to modify.
      */
     inline static void upper(string& object)
-        {object.upper();};
+        {object.upper();}
 
     /**
      * Convert string object to lower case.
      * @param object to modify.
      */
     inline static void lower(string& object)
-        {object.lower();};
+        {object.lower();}
 
     /**
      * Unquote a quoted string.  Removes lead and trailing quote marks.
@@ -1263,7 +1297,7 @@ public:
      * @return true if string was quoted.
      */
     inline static bool unquote(string& object, const char *quote)
-        {return object.unquote(quote);};
+        {return object.unquote(quote);}
 
     /**
      * Trim lead characters from the string.
@@ -1271,7 +1305,7 @@ public:
      * @param list of characters to remove.
      */
     inline static void trim(string& object, const char *list)
-        {object.trim(list);};
+        {object.trim(list);}
 
     /**
      * Chop trailing characters from the string.
@@ -1279,7 +1313,7 @@ public:
      * @param list of characters to remove.
      */
     inline static void chop(string& object, const char *list)
-        {object.trim(list);};
+        {object.trim(list);}
 
     /**
      * Strip lead and trailing characters from the string.
@@ -1287,7 +1321,7 @@ public:
      * @param list of characters to remove.
      */
     inline static void strip(string& object, const char *list)
-        {object.trim(list);};
+        {object.trim(list);}
 
     /**
      * Find a character in the string.
@@ -1296,7 +1330,7 @@ public:
      * @return pointer to first occurrence of character.
      */
     inline static const char *find(string& object, const char *list)
-        {return object.find(list);};
+        {return object.find(list);}
 
     /**
      * Find last character in the string.
@@ -1305,7 +1339,7 @@ public:
      * @return pointer to last occurrence of character.
      */
     inline static const char *rfind(string& object, const char *list)
-        {return object.rfind(list);};
+        {return object.rfind(list);}
 
     /**
      * Get pointer to first character past character requested.
@@ -1314,7 +1348,7 @@ public:
      * @return first character pointer past list.
      */
     inline static const char *first(string& object, const char *list)
-        {return object.first(list);};
+        {return object.first(list);}
 
     /**
      * Get pointer to last character past character requested.
@@ -1323,7 +1357,7 @@ public:
      * @return last character pointer before list.
      */
     inline static const char *last(string& object, const char *list)
-        {return object.last(list);};
+        {return object.last(list);}
 
     /**
      * Convert string to a double value.
@@ -1332,7 +1366,7 @@ public:
      * @return double value of object.
      */
     inline static double tod(string& object, char **pointer = NULL)
-        {return strtod(mem(object), pointer);};
+        {return strtod(mem(object), pointer);}
 
     /**
      * Convert string to a long value.
@@ -1341,7 +1375,7 @@ public:
      * @return long value of object.
      */
     inline static long tol(string& object, char **pointer = NULL)
-        {return strtol(mem(object), pointer, 0);};
+        {return strtol(mem(object), pointer, 0);}
 
     /**
      * Convert text to a double value.
@@ -1350,7 +1384,7 @@ public:
      * @return double value of object.
      */
     inline static double tod(const char *text, char **pointer = NULL)
-        {return strtod(text, pointer);};
+        {return strtod(text, pointer);}
 
     /**
      * Convert text to a long value.
@@ -1359,7 +1393,7 @@ public:
      * @return long value of object.
      */
     inline static long tol(const char *text, char **pointer = NULL)
-        {return strtol(text, pointer, 0);};
+        {return strtol(text, pointer, 0);}
 
     /**
      * Standard radix 64 encoding.
