@@ -573,6 +573,30 @@ void string::trim(const char *clist)
     str->fix();
 }
 
+strsize_t string::locate(const char *substring, bool mode) const
+{
+    const char *addr = search(substring, mode);
+
+    if(!addr)
+        return npos;
+
+    return offset(addr);
+}
+
+const char *string::search(const char *substring, bool flag) const
+{
+    if(!str || !substring || str->len == 0)
+        return NULL;
+
+#ifdef  HAVE_STRICMP
+    if(flag)
+        return stristr(str->text, substring);
+#else
+    if(flag)
+        return strcasestr(str->text, substring);
+#endif
+    return strstr(str->text, substring);
+}
 
 const char *string::find(const char *clist, strsize_t offset) const
 {
@@ -1676,6 +1700,21 @@ char *string::rskip(char *str, const char *clist)
             return str;
     }
     return NULL;
+}
+
+strsize_t string::seek(const char *clist, strsize_t pos) const
+{
+    const char *addr;
+
+    if(pos == npos)
+        addr = rfind(clist);
+    else
+        addr = find(clist, pos);
+
+    if(!addr)
+        return npos;
+
+    return offset(addr);
 }
 
 char *string::find(char *str, const char *clist)

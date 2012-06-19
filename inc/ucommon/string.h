@@ -584,12 +584,32 @@ public:
     const char *rskip(const char *list, strsize_t offset = npos) const;
 
     /**
+     * Search for a substring in the string.
+     * @param substring to search for.
+     * @param bool for case insensitive search.
+     */
+    const char *search(const char *string, bool flag = false) const;
+
+    inline const char *isearch(const char *string) const
+        {return search(string, true);}
+
+    /**
      * Find a character in the string.
      * @param list of characters to search for.
      * @param offset to start of search.
      * @return pointer to first occurrence of character.
      */
     const char *find(const char *list, strsize_t offset = 0) const;
+
+    /**
+     * Used to find position for cut or paste.
+     * @param list of characters to search for.
+     * @param offset to start of search.  use npos for last instance.
+     * @return offset to character or npos if not found.
+     */
+    strsize_t seek(const char *list, strsize_t offset = 0) const;
+
+    strsize_t locate(const char *substring, bool flag = false) const;
 
     /**
      * Find last occurrence of character in the string.
@@ -1407,6 +1427,18 @@ public:
      */
     inline static const char *find(string& object, const char *list)
         {return object.find(list);}
+
+    inline static strsize_t seek(string& object, const char *list, strsize_t offset = 0)
+        {return object.seek(list, offset);}
+
+    inline static const char *search(string& object, const char *substring, bool flag = false)
+        {return object.search(substring, flag);}
+
+    inline static strsize_t locate(string& object, const char *substring, bool flag = false)
+        {return object.locate(substring, flag);}
+
+    inline static const char *isearch(string& object, const char *substring)
+        {return object.search(substring, true);}
 
     /**
      * Find last character in the string.
