@@ -474,6 +474,14 @@ public:
     void cut(strsize_t offset, strsize_t size = 0);
 
     /**
+     * Insert (paste) text into string.
+     * @param offset to start paste.
+     * @param text to paste.
+     * @param size of text to paste.
+     */
+    void paste(strsize_t offset, const char *text, strsize_t size = 0);
+
+    /**
      * Clear a field of a filled string with filler.
      * @param offset to start of field to clear.
      * @param size of field to fill or 0 to fill to end of string.
@@ -1227,6 +1235,8 @@ public:
 
     static void cut(char *text, size_t offset, size_t len);
 
+    static void paste(char *text, size_t max, size_t offset, const char *data, size_t len = 0);
+
     /**
      * A thread-safe token parsing routine for strings objects.  This
      * is related to strtok, but with safety checks for NULL values and a
@@ -1319,6 +1329,12 @@ public:
 
     inline static string right(string& object, strsize_t offset)
         {return object.right(offset);}
+
+    inline static void cut(string& object, strsize_t offset, strsize_t size)
+        {object.cut(offset, size);}
+
+    inline static void paste(string& object, strsize_t offset, const char *text, strsize_t size = 0)
+        {object.paste(offset, text, size);}
 
     /**
      * Convert string object to upper case.

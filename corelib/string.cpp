@@ -828,6 +828,37 @@ void string::set(const char *s)
     str->set(s);
 }
 
+void string::paste(strsize_t offset, const char *cp, strsize_t size)
+{
+    if(!cp)
+        return;
+
+    if(!size)
+        size = strlen(cp);
+
+    if(!size)
+        return;
+
+    if(!str) {
+        cow(size);
+        string::set(str->text, ++size, cp);
+        str->len = --size;
+        str->fix();
+        return;
+    }
+
+    cow(str->len + size);
+
+    if(offset >= str->len)
+        string::set(str->text + str->len, size + 1, cp);
+    else {
+        memmove(str->text + offset + size, str->text + offset, str->len - offset);
+        memmove(str->text + offset, cp, size);
+    }
+    str->len += size;
+    str->fix();
+}
+
 void string::cut(strsize_t offset, strsize_t size)
 {
     if(!str || offset >= str->len)
@@ -845,6 +876,32 @@ void string::cut(strsize_t offset, strsize_t size)
     memmove(str->text + offset, str->text + offset + size, str->len - offset - size);
     str->len -= size;
     str->fix();
+}
+
+void string::paste(char *text, size_t max, size_t offset, const char *cp, size_t size)
+{
+    if(!cp || !text)
+        return;
+
+    if(!size)
+        size = strlen(cp);
+
+    if(!size)
+        return;
+
+    size_t len = strlen(text);
+    if(len <= max)
+        return;
+
+    if(len + size >= max)
+        size = max - len;
+
+    if(offset >= len)
+        string::set(text + len, size + 1, cp);
+    else {
+        memmove(text + offset + size, text + offset, len - offset);
+        memmove(text + offset, cp, size);
+    }
 }
 
 void string::cut(char *text, size_t offset, size_t size)
