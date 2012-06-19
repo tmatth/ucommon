@@ -1,5 +1,7 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	string comparison operators become direct inlines to compare
+
 	gaurd classes renamed
 
 	add CharbufProtocol with locking states
