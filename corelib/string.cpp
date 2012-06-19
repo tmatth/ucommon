@@ -1311,6 +1311,44 @@ char *string::dup(const char *cp)
     return mem;
 }
 
+char *string::left(const char *cp, size_t size)
+{
+    char *mem;
+
+    if(!cp)
+        return NULL;
+
+    if(!size)
+        size = strlen(cp);
+
+    mem = (char *)malloc(++size);
+    crit(mem != NULL, "string dup allocation error");
+    string::set(mem, size, cp);
+    return mem;
+}
+
+const char *string::pos(const char *cp, ssize_t offset)
+{
+    if(!cp)
+        return NULL;
+
+    size_t len = strlen(cp);
+    if(!len)
+        return cp;
+
+    if(offset >= 0) {
+        if((size_t)offset > len)
+            offset = len;
+        return cp + offset;
+    }
+
+    offset = -offset;
+    if((size_t)offset >= len)
+        return cp;
+
+    return cp + len - offset;
+}
+
 size_t string::count(const char *cp)
 {
     if(!cp)

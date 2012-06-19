@@ -1184,6 +1184,28 @@ public:
     static char *dup(const char *text);
 
     /**
+     * Duplicate null terminated text of specific size to heap.
+     * @param text to duplicate.
+     * @param size of text, maximum space allocated.
+     * @return duplicate copy of text allocated on heap.
+     */
+    static char *left(const char *text, size_t size);
+
+    /**
+     * Compute position in string.
+     * @param text of string.
+     * @param offset from start, negative values from end.
+     * @return pointer to string position.
+     */
+    static const char *pos(const char *text, ssize_t offset);
+
+    inline static char *right(const char *text, size_t size)
+        {return dup(pos(text, -size));}
+
+    inline static char *mid(const char *text, size_t offset, size_t len)
+        {return left(pos(text, offset), len);}
+
+    /**
      * A thread-safe token parsing routine for strings objects.  This
      * is related to strtok, but with safety checks for NULL values and a
      * number of enhancements including support for quoted text that may
