@@ -821,6 +821,15 @@ public:
     string& operator+(const char *text);
 
     /**
+     * Concatenate null terminated text to our object.  This creates a new
+     * copy-on-write instance to hold the concatenated string.  This will
+     * eventually replace '+' when + creates a new string instance instead.
+     * @param text to concatenate.
+     */
+    inline string& operator|(const char *text)
+        {return operator+(text);}
+
+    /**
      * Concatenate null terminated text to our object.  This directly
      * appends the text to the string buffer and does not resize the
      * object if the existing cstring allocation space is fully used.
