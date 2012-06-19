@@ -847,6 +847,25 @@ void string::cut(strsize_t offset, strsize_t size)
     str->fix();
 }
 
+void string::cut(char *text, size_t offset, size_t size)
+{
+    if(!text)
+        return;
+
+    size_t len = strlen(text);
+    if(!len || offset >= len)
+        return;
+
+    if(offset + size >= len) {
+        text[offset] = 0;
+        return;
+    }
+
+    memmove(text + offset, text + offset + size, len - offset - size);
+    len -= size;
+    text[len] = 0;
+}
+
 bool string::resize(strsize_t size)
 {
     char fill = 0;

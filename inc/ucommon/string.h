@@ -696,7 +696,7 @@ public:
      * @param size of string to return.
      * @return string object holding substring.
      */
-    inline string mid(strsize_t offset, strsize_t size) const
+    inline string copy(strsize_t offset, strsize_t size) const
         {return operator()((int)offset, size);}
 
     /**
@@ -1222,8 +1222,10 @@ public:
     inline static char *right(const char *text, size_t size)
         {return dup(pos(text, -size));}
 
-    inline static char *mid(const char *text, size_t offset, size_t len)
+    inline static char *copy(const char *text, size_t offset, size_t len)
         {return left(pos(text, offset), len);}
+
+    static void cut(char *text, size_t offset, size_t len);
 
     /**
      * A thread-safe token parsing routine for strings objects.  This
@@ -1309,8 +1311,8 @@ public:
     inline static size_t count(string& object)
         {return object.count();}
 
-    inline static string mid(string& object, strsize_t offset, strsize_t size)
-        {return object.mid(offset, size);}
+    inline static string copy(string& object, strsize_t offset, strsize_t size)
+        {return object.copy(offset, size);}
 
     inline static string left(string& object, strsize_t size)
         {return object.left(size);}
