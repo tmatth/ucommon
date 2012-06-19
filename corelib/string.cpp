@@ -1002,14 +1002,14 @@ string &string::operator--()
 string &string::operator+=(strsize_t offset)
 {
     if(str)
-        str->dec(offset);
+        str->inc(offset);
     return *this;
 }
 
 string &string::operator-=(strsize_t offset)
 {
     if(str)
-        str->inc(offset);
+        str->dec(offset);
     return *this;
 }
 

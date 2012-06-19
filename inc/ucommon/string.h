@@ -434,10 +434,24 @@ public:
     void trim(const char *list);
 
     /**
+     * Trim lead characters from text.
+     * @param count of characters to remove.
+     */
+    inline void trim(strsize_t count = 1)
+        {operator+=(count);};
+
+    /**
      * Chop trailing characters from the string.
      * @param list of characters to remove.
      */
     void chop(const char *list);
+
+    /**
+     * Chop trailing characters from text.
+     * @param count of characters to remove.
+     */
+    inline void chop(strsize_t count = 1)
+        {operator-=(count);};
 
     /**
      * Strip lead and trailing characters from the string.
@@ -784,6 +798,12 @@ public:
      * @param number of characters to delete.
      */
     string& operator-=(strsize_t number);
+
+    /**
+     * Delete a specified number of characters from start of string.
+     * @param number of characters to delete.
+     */
+    string& operator*=(strsize_t number);
 
     /**
      * Compare our object with null terminated text.
@@ -1330,12 +1350,28 @@ public:
         {object.trim(list);}
 
     /**
+     * Trim first character(s) from the string.
+     * @param object to chop.
+     * @param count of characters to remove.
+     */
+    inline static void trim(string& object, strsize_t count = 1)
+        {object.trim(count);}
+
+    /**
      * Chop trailing characters from the string.
      * @param object to chop.
      * @param list of characters to remove.
      */
     inline static void chop(string& object, const char *list)
-        {object.trim(list);}
+        {object.chop(list);}
+
+    /**
+     * Chop last character(s) from the string.
+     * @param object to chop.
+     * @param count of characters to remove.
+     */
+    inline static void chop(string& object, strsize_t count = 1)
+        {object.chop(count);}
 
     /**
      * Strip lead and trailing characters from the string.
@@ -1343,7 +1379,7 @@ public:
      * @param list of characters to remove.
      */
     inline static void strip(string& object, const char *list)
-        {object.trim(list);}
+        {object.strip(list);}
 
     /**
      * Find a character in the string.
