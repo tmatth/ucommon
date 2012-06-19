@@ -94,6 +94,32 @@ protected:
      */
 
 public:
+    class __EXPORT regex
+    {
+    private:
+        void *object;
+        void *results;
+        size_t count;
+
+    public:
+        regex(const char *pattern, size_t slots = 1);
+        ~regex();
+
+        size_t offset(unsigned member);
+        size_t size(unsigned member);
+
+        inline size_t members(void)
+            {return count;};
+
+        bool match(const char *text, bool insensitive = false);
+
+        operator bool()
+            {return object != NULL;}
+
+        bool operator!()
+            {return object == NULL;}
+    };
+
     class __EXPORT cstring : public CountedObject
     {
     public:
@@ -588,10 +614,19 @@ public:
      * @param substring to search for.
      * @param bool for case insensitive search.
      */
-    const char *search(const char *string, bool flag = false) const;
+    const char *search(const char *string, unsigned instance = 0, bool flag = false) const;
 
-    inline const char *isearch(const char *string) const
-        {return search(string, true);}
+    const char *search(regex& expr, unsigned instance = 0, bool flag = false) const;
+
+    unsigned replace(const char *string, const char *text = NULL, bool flag = false);
+
+    unsigned replace(regex& expr, const char *text = NULL, bool flag = false);
+
+    inline const char *isearch(const char *string, unsigned instance = 0) const
+        {return search(string, instance, true);}
+
+    inline const char *isearch(regex& expr, unsigned instance = 0) const
+        {return search(expr, instance, true);}
 
     /**
      * Find a character in the string.
@@ -609,7 +644,9 @@ public:
      */
     strsize_t seek(const char *list, strsize_t offset = 0) const;
 
-    strsize_t locate(const char *substring, bool flag = false) const;
+    strsize_t locate(const char *substring, unsigned instance = 0, bool flag = false) const;
+
+    strsize_t locate(regex& expr, unsigned instance = 0, bool flag = false) const;
 
     /**
      * Find last occurrence of character in the string.
@@ -798,6 +835,10 @@ public:
      * @param object to assign from.
      */
     string& operator=(const string& object);
+
+    bool operator*=(const char *substring);
+
+    bool operator*=(regex& expr);
 
     /**
      * Assign text to our existing buffer.  This performs a set method.
@@ -1431,14 +1472,32 @@ public:
     inline static strsize_t seek(string& object, const char *list, strsize_t offset = 0)
         {return object.seek(list, offset);}
 
-    inline static const char *search(string& object, const char *substring, bool flag = false)
-        {return object.search(substring, flag);}
+    inline static const char *search(string& object, const char *substring, unsigned instance = 0, bool flag = false)
+        {return object.search(substring, instance, flag);}
 
-    inline static strsize_t locate(string& object, const char *substring, bool flag = false)
-        {return object.locate(substring, flag);}
+    inline static const char *search(string& object, regex& expr, unsigned instance = 0, bool flag = false)
+        {return object.search(expr, instance, flag);}
 
-    inline static const char *isearch(string& object, const char *substring)
-        {return object.search(substring, true);}
+    inline static unsigned replace(string& object, regex& expr, const char *text, bool flag = false)
+        {return object.replace(expr, text, flag);}
+
+    inline static unsigned replace(string& object, const char *match, const char *text, bool flag = false)
+        {return object.replace(match, text, flag);}
+
+    inline static strsize_t locate(string& object, const char *substring, unsigned instance = 0, bool flag = false)
+        {return object.locate(substring, instance, flag);}
+
+    inline static strsize_t locate(string& object, regex& expr, unsigned instance = 0, bool flag = false)
+        {return object.locate(expr, instance, flag);}
+
+    inline static const char *isearch(string& object, const char *substring, unsigned instance = 0)
+        {return object.search(substring, instance, true);}
+
+    inline static const char *isearch(string& object, regex& expr, unsigned instance = 0)
+        {return object.search(expr, instance, true);}
+
+    inline static bool search(regex& expr, const char *text, bool insensitive = false)
+        {return expr.match(text, insensitive);}
 
     /**
      * Find last character in the string.
@@ -1726,6 +1785,8 @@ public:
  * A convenience type for string.
  */
 typedef string string_t;
+
+typedef string::regex regexpr_t;
 
 /**
  * A convenience type when mixing std::string in old compilers that are bad

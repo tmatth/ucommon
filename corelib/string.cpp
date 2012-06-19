@@ -25,6 +25,9 @@
 #include <fcntl.h>
 #endif
 #include <limits.h>
+#ifdef  HAVE_REGEX_H
+#include <regex.h>
+#endif
 
 using namespace UCOMMON_NAMESPACE;
 
@@ -33,6 +36,95 @@ using namespace UCOMMON_NAMESPACE;
 const strsize_t string::npos = (strsize_t)(-1);
 const size_t memstring::header = sizeof(cstring);
 #endif
+
+String::regex::regex(const char *pattern, size_t slots)
+{
+#ifdef  HAVE_REGEX_H
+    regex_t *r = (regex_t *)malloc(sizeof(regex_t));
+    if(regcomp(r, pattern, 0)) {
+        regfree(r);
+        free(r);
+        r = NULL;
+    }
+    object = r;
+    count = slots;
+    if(object)
+        results = (regmatch_t *)malloc(sizeof(regmatch_t) * slots);
+    else
+        count = 0;
+#else
+    object = results = NULL;
+    count = 0;
+#endif
+}
+
+String::regex::~regex()
+{
+#ifdef  HAVE_REGEX_H
+    if(object) {
+        regfree((regex_t *)object);
+        free(object);
+        free(results);
+        object = results = NULL;
+    }
+#endif
+}
+
+size_t string::regex::offset(unsigned member)
+{
+#ifdef  HAVE_REGEX_H
+    if(!results)
+        return (size_t)-1;
+
+    regmatch_t *r = (regmatch_t *)results;
+
+    if(member >= count)
+        return (size_t)-1;
+    return (size_t)r[member].rm_so;
+#else
+    return (size_t)-1;
+#endif
+}
+
+size_t string::regex::size(unsigned member)
+{
+#ifdef  HAVE_REGEX_H
+    if(!results)
+        return 0;
+
+    regmatch_t *r = (regmatch_t *)results;
+
+    if(member >= count)
+        return (size_t)-1;
+
+    if(r[member].rm_so == -1)
+        return 0;
+
+    return (size_t)(r[member].rm_eo - r[member].rm_so);
+#else
+    return (size_t)0;
+#endif
+}
+
+bool string::regex::match(const char *text, bool ins)
+{
+#ifdef  HAVE_REGEX_H
+    int flags = 0;
+
+    if(ins)
+        flags |= REG_ICASE;
+
+    if(!text || !object || !results)
+        return false;
+
+    if(regexec((regex_t *)object, text, count, (regmatch_t *)results, flags))
+        return false;
+
+    return true;
+#else
+    return false;
+#endif
+}
 
 string::cstring::cstring(strsize_t size) :
 CountedObject()
@@ -573,9 +665,9 @@ void string::trim(const char *clist)
     str->fix();
 }
 
-strsize_t string::locate(const char *substring, bool mode) const
+strsize_t string::locate(regex& expr, unsigned instance, bool mode) const
 {
-    const char *addr = search(substring, mode);
+    const char *addr = search(expr, instance, mode);
 
     if(!addr)
         return npos;
@@ -583,19 +675,144 @@ strsize_t string::locate(const char *substring, bool mode) const
     return offset(addr);
 }
 
-const char *string::search(const char *substring, bool flag) const
+strsize_t string::locate(const char *substring, unsigned instance, bool mode) const
 {
+    const char *addr = search(substring, instance, mode);
+
+    if(!addr)
+        return npos;
+
+    return offset(addr);
+}
+
+const char *string::search(regex& expr, unsigned member, bool flag) const
+{
+    if(!str)
+        return NULL;
+
+#ifdef  HAVE_REGEX_H
+    if(expr.match(str->text, flag))
+        return NULL;
+
+    if(member >= expr.members())
+        return NULL;
+
+    if(expr.size(member) == 0)
+        return NULL;
+
+    return str->text + expr.offset(member);
+#else
+    return NULL;
+#endif
+}
+
+unsigned string::replace(regex& expr, const char *cp, bool flag)
+{
+#ifdef  HAVE_REGEX_H
+    size_t cpl = 0;
+
+    if(cp)
+        cpl = strlen(cp);
+
+    if(!str || str->len == 0)
+        return 0;
+
+    if(expr.match(str->text, flag))
+        return 0;
+
+    ssize_t adjust = 0;
+    unsigned member = 0;
+
+    while(member < expr.members()) {
+        ssize_t tcl = expr.size(member);
+        ssize_t offset = (expr.offset(member) + adjust);
+        if(!tcl)
+            break;
+
+        ++member;
+        cut(offset, tcl);
+        if(cpl) {
+            paste(offset, cp);
+            adjust += (cpl - tcl);
+        }
+    }
+    return member;
+#else
+    return 0;
+#endif
+}
+
+
+
+unsigned string::replace(const char *substring, const char *cp, bool flag)
+{
+    const char *result = "";
+    unsigned count = 0;
+    size_t cpl = 0;
+
+    if(cp)
+        cpl = strlen(cp);
+
+    if(!str || !substring || str->len == 0)
+        return 0;
+
+    strsize_t offset = 0;
+
+    size_t tcl = strlen(substring);
+
+    while(result) {
+        const char *text = str->text + offset;
+#ifdef  HAVE_STRICMP
+        if(flag)
+            result = stristr(text, substring);
+#else
+        if(flag)
+            result = strcasestr(text, substring);
+#endif
+        else
+            result = strstr(text, substring);
+
+        if(result) {
+            ++count;
+            offset = text - str->text;
+            cut(offset, tcl);
+            if(cpl) {
+                paste(offset, cp);
+                offset += cpl;
+            }
+        }
+    }
+    return count;
+}
+
+
+
+const char *string::search(const char *substring, unsigned instance, bool flag) const
+{
+    const char *result = "";
+
     if(!str || !substring || str->len == 0)
         return NULL;
 
+    const char *text = str->text;
+
+    if(!instance)
+        ++instance;
+    while(instance-- && result) {
 #ifdef  HAVE_STRICMP
-    if(flag)
-        return stristr(str->text, substring);
+        if(flag)
+            result = stristr(text, substring);
 #else
-    if(flag)
-        return strcasestr(str->text, substring);
+        if(flag)
+            result = strcasestr(text, substring);
 #endif
-    return strstr(str->text, substring);
+        else
+            result = strstr(text, substring);
+
+        if(result)
+            text = result + strlen(result);
+    }
+    return result;
 }
 
 const char *string::find(const char *clist, strsize_t offset) const
@@ -1111,6 +1328,22 @@ string &string::operator-=(strsize_t offset)
     if(str)
         str->dec(offset);
     return *this;
+}
+
+bool string::operator*=(const char *substr)
+{
+    if(search(substr))
+        return true;
+
+    return false;
+}
+
+bool string::operator*=(regex& expr)
+{
+    if(search(expr))
+        return true;
+
+    return false;
 }
 
 string &string::operator^=(const char *s)

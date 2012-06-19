@@ -43,6 +43,7 @@
 #cmakedefine HAVE_SYS_PARAM_H 1
 #cmakedefine HAVE_SYS_FILE_H 1
 #cmakedefine HAVE_SYS_LOCKF_H 1
+#cmakedefine HAVE_REGEX_H 1
 
 #cmakedefine HAVE_FTOK 1
 #cmakedefine HAVE_GETADDRINFO 1
