@@ -292,6 +292,46 @@ protected:
     UString operator()(int codepoint, strsize_t size) const;
 
     /**
+     * Convenience method for left of string.
+     * @param size of substring to gather in codepoints.
+     * @return string object holding substring.
+     */
+    inline UString left(strsize_t size) const
+        {return operator()(0, size);}
+
+    /**
+     * Convenience method for right of string.
+     * @param offset of substring from right in codepoints.
+     * @return string object holding substring.
+     */
+    inline UString right(strsize_t offset) const
+        {return operator()(-((int)offset), 0);}
+
+    /**
+     * Convenience method for substring extraction.
+     * @param offset into string.
+     * @param size of string to return.
+     * @return string object holding substring.
+     */
+    inline UString copy(strsize_t offset, strsize_t size) const
+        {return operator()((int)offset, size);}
+
+    /**
+     * Cut (remove) text from string using codepoint offsets.
+     * @param offset to start of text field to remove.
+     * @param size of text field to remove or 0 to remove to end of string.
+     */
+    void cut(strsize_t offset, strsize_t size = 0);
+
+    /**
+     * Insert (paste) text into string using codepoint offsets.
+     * @param offset to start paste.
+     * @param text to paste.
+     * @param size of text to paste.
+     */
+    void paste(strsize_t offset, const char *text, strsize_t size = 0);
+
+    /**
      * Reference a string in the object by codepoint offset.  Positive
      * offsets are from the start of the string, negative from the
      * end.

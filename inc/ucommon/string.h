@@ -754,7 +754,7 @@ public:
      * @param offset of substring from right.
      * @return string object holding substring.
      */
-    inline string right(unsigned offset) const
+    inline string right(strsize_t offset) const
         {return operator()(-((int)offset), 0);}
 
     /**
