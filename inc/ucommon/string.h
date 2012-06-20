@@ -802,6 +802,12 @@ public:
     string& operator^=(const string& object);
 
     /**
+     * Concatenate text to an existing string object.  This will use the
+     * old behavior when +/= updated.
+     */
+    string& operator|=(const char *text);
+
+    /**
      * Concatenate text to an existing string object.
      * @param text to add.
      * @return our object for expression use.

@@ -1177,6 +1177,12 @@ string &string::operator=(const char *s)
     return *this;
 }
 
+string &string::operator|=(const char *s)
+{
+    set(s);
+    return *this;
+}
+
 string &string::operator^=(const string &s)
 {
     release();
