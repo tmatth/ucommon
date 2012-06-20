@@ -19,5 +19,5 @@ libucommon_la_SOURCES = object.cpp linked.cpp string.cpp mapped.cpp \
 	counter.cpp bitmap.cpp timer.cpp memory.cpp socket.cpp access.cpp \
 	thread.cpp fsys.cpp cpr.cpp vector.cpp xml.cpp stream.cpp persist.cpp \
 	keydata.cpp numbers.cpp datetime.cpp unicode.cpp atomic.cpp \
-	protocols.cpp containers.cpp bufio.cpp shell.cpp
+	regex.cpp protocols.cpp containers.cpp bufio.cpp shell.cpp
 
