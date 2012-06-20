@@ -817,7 +817,8 @@ public:
 
     /**
      * Concatenate null terminated text to our object.  This creates a new
-     * copy-on-write instance to hold the concatenated string.
+     * copy-on-write instance to hold the concatenated string.  This will
+     * eventually become same as new ^ operator in 6.0.
      * @param text to concatenate.
      */
     string& operator+(const char *text);
@@ -828,8 +829,14 @@ public:
      * eventually replace '+' when + creates a new string instance instead.
      * @param text to concatenate.
      */
-    inline string& operator|(const char *text)
-        {return operator+(text);}
+    string& operator|(const char *text);
+
+    /**
+     * Transitional concat operator until abi can be changed.
+     * @param text to concatenate.
+     */
+    string operator^(const char *text);
+
 
     /**
      * Concatenate null terminated text to our object.  This directly
@@ -2002,14 +2009,11 @@ public:
     inline const char *operator*() const
         {return data;}
 
-    inline const char operator[](size_t size) const
+    inline char& operator[](int size)
         {return data[size];}
 
-    inline char& operator[](size_t size)
-        {return data[size];}
-
-    inline const char *operator+(size_t size) const
-        {return data + size;};
+    inline char *operator+(size_t size)
+        {return data + size;}
 };
 
 

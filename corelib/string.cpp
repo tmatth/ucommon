@@ -1275,6 +1275,16 @@ string &string::operator&(const char *s)
     return *this;
 }
 
+string &string::operator|(const char *s)
+{
+    if(!s || !*s)
+        return *this;
+
+    cow(strlen(s));
+    add(s);
+    return *this;
+}
+
 string &string::operator+(const char *s)
 {
     if(!s || !*s)
@@ -1283,6 +1293,15 @@ string &string::operator+(const char *s)
     cow(strlen(s));
     add(s);
     return *this;
+}
+
+string string::operator^(const char *s)
+{
+    string tmp = s;
+    if(s && *s)
+        tmp += s;
+
+    return tmp;
 }
 
 string &string::operator+=(const char *s)
