@@ -42,14 +42,46 @@ String::regex::regex(const char *pattern, size_t slots)
     }
     object = r;
     count = slots;
-    if(object)
-        results = (regmatch_t *)malloc(sizeof(regmatch_t) * slots);
-    else
-        count = 0;
+    results = (regmatch_t *)malloc(sizeof(regmatch_t) * slots);
 #else
     object = results = NULL;
     count = 0;
 #endif
+}
+
+String::regex::regex(size_t slots)
+{
+#ifdef  HAVE_REGEX_H
+    count = slots;
+    results = (regmatch_t *)malloc(sizeof(regmatch_t) * slots);
+    object = NULL;
+#else
+    object = results = NULL;
+    count = 0;
+#endif
+}
+
+string::regex& string::regex::operator=(const char *pattern)
+{
+#ifdef  HAVE_REGEX_H
+    if(object) {
+        regfree((regex_t *)object);
+        free(object);
+    }
+    regex_t *r = (regex_t *)malloc(sizeof(regex_t));
+    if(regcomp(r, pattern, 0)) {
+        regfree(r);
+        free(r);
+        r = NULL;
+    }
+    object = r;
+#endif
+    return *this;
+}
+
+bool string::regex::operator*=(const char *text)
+{
+    return match(text);
 }
 
 String::regex::~regex()
@@ -58,9 +90,10 @@ String::regex::~regex()
     if(object) {
         regfree((regex_t *)object);
         free(object);
-        free(results);
-        object = results = NULL;
     }
+    if(results)
+        free(results);
+    object = results = NULL;
 #endif
 }
 
@@ -100,12 +133,12 @@ size_t string::regex::size(unsigned member)
 #endif
 }
 
-bool string::regex::match(const char *text, bool ins)
+bool string::regex::match(const char *text, unsigned mode)
 {
 #ifdef  HAVE_REGEX_H
     int flags = 0;
 
-    if(ins)
+    if((mode & 0x01) == INSENSITIVE)
         flags |= REG_ICASE;
 
     if(!text || !object || !results)
@@ -120,23 +153,13 @@ bool string::regex::match(const char *text, bool ins)
 #endif
 }
 
-strsize_t string::locate(regex& expr, unsigned instance, bool mode) const
-{
-    const char *addr = search(expr, instance, mode);
-
-    if(!addr)
-        return npos;
-
-    return offset(addr);
-}
-
-const char *string::search(regex& expr, unsigned member, bool flag) const
+const char *string::search(regex& expr, unsigned member, unsigned flags) const
 {
     if(!str)
         return NULL;
 
 #ifdef  HAVE_REGEX_H
-    if(expr.match(str->text, flag))
+    if(expr.match(str->text, flags))
         return NULL;
 
     if(member >= expr.members())
@@ -151,7 +174,7 @@ const char *string::search(regex& expr, unsigned member, bool flag) const
 #endif
 }
 
-unsigned string::replace(regex& expr, const char *cp, bool flag)
+unsigned string::replace(regex& expr, const char *cp, unsigned flags)
 {
 #ifdef  HAVE_REGEX_H
     size_t cpl = 0;
@@ -162,7 +185,7 @@ unsigned string::replace(regex& expr, const char *cp, bool flag)
     if(!str || str->len == 0)
         return 0;
 
-    if(expr.match(str->text, flag))
+    if(expr.match(str->text, flags))
         return 0;
 
     ssize_t adjust = 0;

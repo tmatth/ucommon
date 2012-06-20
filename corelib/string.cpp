@@ -573,17 +573,7 @@ void string::trim(const char *clist)
     str->fix();
 }
 
-strsize_t string::locate(const char *substring, unsigned instance, bool mode) const
-{
-    const char *addr = search(substring, instance, mode);
-
-    if(!addr)
-        return npos;
-
-    return offset(addr);
-}
-
-unsigned string::replace(const char *substring, const char *cp, bool flag)
+unsigned string::replace(const char *substring, const char *cp, unsigned flags)
 {
     const char *result = "";
     unsigned count = 0;
@@ -602,10 +592,10 @@ unsigned string::replace(const char *substring, const char *cp, bool flag)
     while(result) {
         const char *text = str->text + offset;
 #ifdef  HAVE_STRICMP
-        if(flag)
+        if((flags & 0x01) == INSENSITIVE)
             result = stristr(text, substring);
 #else
-        if(flag)
+        if((flags & 0x01) == INSENSITIVE)
             result = strcasestr(text, substring);
 #endif
         else
@@ -624,9 +614,7 @@ unsigned string::replace(const char *substring, const char *cp, bool flag)
     return count;
 }
 
-
-
-const char *string::search(const char *substring, unsigned instance, bool flag) const
+const char *string::search(const char *substring, unsigned instance, unsigned flags) const
 {
     const char *result = "";
 
@@ -639,10 +627,10 @@ const char *string::search(const char *substring, unsigned instance, bool flag) 
         ++instance;
     while(instance-- && result) {
 #ifdef  HAVE_STRICMP
-        if(flag)
+        if((flags & 0x01) == INSENSITIVE)
             result = stristr(text, substring);
 #else
-        if(flag)
+        if((flags & 0x01) == INSENSITIVE)
             result = strcasestr(text, substring);
 #endif
         else

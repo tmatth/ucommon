@@ -94,6 +94,11 @@ protected:
      */
 
 public:
+    enum {
+        SENSITIVE = 0x00,
+        INSENSITIVE = 0x01
+    };
+
     class __EXPORT regex
     {
     private:
@@ -103,6 +108,7 @@ public:
 
     public:
         regex(const char *pattern, size_t slots = 1);
+        regex(size_t slots = 1);
         ~regex();
 
         size_t offset(unsigned member);
@@ -111,7 +117,11 @@ public:
         inline size_t members(void)
             {return count;};
 
-        bool match(const char *text, bool insensitive = false);
+        bool match(const char *text, unsigned flags = 0);
+
+        regex& operator=(const char *string);
+
+        bool operator*=(const char *string);
 
         operator bool()
             {return object != NULL;}
@@ -612,21 +622,15 @@ public:
     /**
      * Search for a substring in the string.
      * @param substring to search for.
-     * @param bool for case insensitive search.
+     * @param flags for case insensitive search.
      */
-    const char *search(const char *string, unsigned instance = 0, bool flag = false) const;
+    const char *search(const char *string, unsigned instance = 0, unsigned flags = 0) const;
 
-    const char *search(regex& expr, unsigned instance = 0, bool flag = false) const;
+    const char *search(regex& expr, unsigned instance = 0, unsigned flags = 0) const;
 
-    unsigned replace(const char *string, const char *text = NULL, bool flag = false);
+    unsigned replace(const char *string, const char *text = NULL, unsigned flags = 0);
 
-    unsigned replace(regex& expr, const char *text = NULL, bool flag = false);
-
-    inline const char *isearch(const char *string, unsigned instance = 0) const
-        {return search(string, instance, true);}
-
-    inline const char *isearch(regex& expr, unsigned instance = 0) const
-        {return search(expr, instance, true);}
+    unsigned replace(regex& expr, const char *text = NULL, unsigned flags = 0);
 
     /**
      * Find a character in the string.
@@ -643,10 +647,6 @@ public:
      * @return offset to character or npos if not found.
      */
     strsize_t seek(const char *list, strsize_t offset = 0) const;
-
-    strsize_t locate(const char *substring, unsigned instance = 0, bool flag = false) const;
-
-    strsize_t locate(regex& expr, unsigned instance = 0, bool flag = false) const;
 
     /**
      * Find last occurrence of character in the string.
@@ -1481,32 +1481,20 @@ public:
     inline static strsize_t seek(string& object, const char *list, strsize_t offset = 0)
         {return object.seek(list, offset);}
 
-    inline static const char *search(string& object, const char *substring, unsigned instance = 0, bool flag = false)
-        {return object.search(substring, instance, flag);}
+    inline static const char *search(string& object, const char *substring, unsigned instance = 0, unsigned flags = 0)
+        {return object.search(substring, instance, flags);}
 
-    inline static const char *search(string& object, regex& expr, unsigned instance = 0, bool flag = false)
-        {return object.search(expr, instance, flag);}
+    inline static const char *search(string& object, regex& expr, unsigned instance = 0, unsigned flags = 0)
+        {return object.search(expr, instance, flags);}
 
-    inline static unsigned replace(string& object, regex& expr, const char *text, bool flag = false)
-        {return object.replace(expr, text, flag);}
+    inline static unsigned replace(string& object, regex& expr, const char *text, unsigned flags = 0)
+        {return object.replace(expr, text, flags);}
 
     inline static unsigned replace(string& object, const char *match, const char *text, bool flag = false)
         {return object.replace(match, text, flag);}
 
-    inline static strsize_t locate(string& object, const char *substring, unsigned instance = 0, bool flag = false)
-        {return object.locate(substring, instance, flag);}
-
-    inline static strsize_t locate(string& object, regex& expr, unsigned instance = 0, bool flag = false)
-        {return object.locate(expr, instance, flag);}
-
-    inline static const char *isearch(string& object, const char *substring, unsigned instance = 0)
-        {return object.search(substring, instance, true);}
-
-    inline static const char *isearch(string& object, regex& expr, unsigned instance = 0)
-        {return object.search(expr, instance, true);}
-
-    inline static bool search(regex& expr, const char *text, bool insensitive = false)
-        {return expr.match(text, insensitive);}
+    inline static bool search(regex& expr, const char *text, unsigned flags = 0)
+        {return expr.match(text, flags);}
 
     /**
      * Find last character in the string.
