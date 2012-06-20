@@ -907,15 +907,14 @@ void string::paste(strsize_t offset, const char *cp, strsize_t size)
     if(!size)
         return;
 
+    cow(size);
+
     if(!str) {
-        cow(size);
         string::set(str->text, ++size, cp);
         str->len = --size;
         str->fix();
         return;
     }
-
-    cow(str->len + size);
 
     if(offset >= str->len)
         string::set(str->text + str->len, size + 1, cp);

@@ -18,6 +18,7 @@
 #include "../config.h"
 #include <ucommon/export.h>
 #include <ucommon/string.h>
+#include <ucommon/memory.h>
 #include <stdarg.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -216,5 +217,33 @@ bool string::operator*=(regex& expr)
         return true;
 
     return false;
+}
+
+unsigned stringpager::split(stringex_t& expr, const char *string, unsigned flags)
+{
+    strdup_t tmp = String::dup(string);
+    int prior = 0, match = 0;
+    size_t tcl = strlen(string);
+    unsigned count = 0, member = 0;
+
+    if(!expr.match(string, flags))
+        return 0;
+
+    while(member < expr.members()) {
+        if(!expr.size(member))
+            break;
+        match = expr.offset(member++);
+        if(match > prior) {
+            tmp[match] = 0;
+            add(tmp + (size_t)prior);
+            ++count;
+        }
+        prior = match + tcl;
+    }
+    if(tmp[prior]) {
+        add(tmp + (size_t)prior);
+        ++count;
+    }
+    return count;
 }
 

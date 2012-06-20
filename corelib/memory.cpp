@@ -275,6 +275,87 @@ unsigned stringpager::token(const char *text, const char *list, const char *quot
     return count;
 }
 
+String stringpager::join(const char *prefix, const char *middle, const char *suffix)
+{
+    string_t tmp;
+
+    if(!members)
+        return tmp;
+
+    if(prefix && *prefix)
+        tmp += prefix;
+
+    linked_pointer<member> mp = root;
+    while(is(mp)) {
+        tmp += mp->text;
+        if(mp->next && middle && *middle)
+            tmp += middle;
+        else if(mp->next == NULL && suffix && *suffix)
+            tmp += suffix;
+        mp.next();
+    }
+
+    return tmp;
+}
+
+unsigned stringpager::split(const char *text, const char *string, unsigned flags)
+{
+    strdup_t tmp = String::dup(string);
+    char *match = tmp;
+    char *prior = tmp;
+    size_t tcl = strlen(text);
+    unsigned count = 0;
+    bool found = false;
+
+    // until end of string or end of matches...
+    while(prior && *prior && match) {
+#ifdef  HAVE_STRICMP
+        if((flags & 0x01) == String::INSENSITIVE)
+            match = stristr(prior, text);
+#else
+        if((flags & 0x01) == String::INSENSITIVE)
+            match = strcasestr(prior, text);
+#endif
+        else
+            match = strstr(prior, text);
+
+        if(match)
+            found = true;
+
+        // we must have at least one match to add trailing data...
+        if(match == NULL && prior != NULL && found) {
+            ++count;
+            add(prior);
+        }
+        // if we have a current match see if anything to add in front of it
+        else if(match) {
+            *match = 0;
+            if(match > prior) {
+                ++count;
+                add(prior);
+            }
+
+            prior = match + tcl;
+        }
+    }
+    return count;
+}
+
+void stringpager::set(unsigned index, const char *text)
+{
+    linked_pointer<member> list = root;
+
+    if(index >= members)
+
+    while(index--)
+        list.next();
+
+    size_t size = strlen(text) + 1;
+    char *str = (char *)memalloc::_alloc(size);
+    strcpy(str, text);
+    list->text = str;
+}
+
 const char *stringpager::get(unsigned index)
 {
     linked_pointer<member> list = root;

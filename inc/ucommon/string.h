@@ -1785,7 +1785,7 @@ public:
  */
 typedef string string_t;
 
-typedef string::regex regexpr_t;
+typedef string::regex stringex_t;
 
 /**
  * A convenience type when mixing std::string in old compilers that are bad
@@ -2002,9 +2002,14 @@ public:
     inline const char *operator*() const
         {return data;}
 
-    inline char operator[](size_t size) const
+    inline const char operator[](size_t size) const
         {return data[size];}
 
+    inline char& operator[](size_t size)
+        {return data[size];}
+
+    inline const char *operator+(size_t size) const
+        {return data + size;};
 };
 
 

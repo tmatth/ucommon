@@ -42,6 +42,10 @@
 #include <ucommon/linked.h>
 #endif
 
+#ifndef _UCOMMON_STRING_H_
+#include <ucommon/string.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 class PagerPool;
@@ -295,6 +299,13 @@ public:
     const char *get(unsigned item);
 
     /**
+     * Replace string item in list.
+     * @param item to replace.
+     * @param string to replace with.
+     */
+    void set(unsigned item, const char *string);
+
+    /**
      * Add text to list.
      * @param text to add.
      */
@@ -396,7 +407,11 @@ public:
      */
     unsigned token(const char *text, const char *list, const char *quote = NULL, const char *end = NULL);
 
+    unsigned split(const char *text, const char *string, unsigned flags = 0);
 
+    unsigned split(stringex_t& expr, const char *string, unsigned flags = 0);
+
+    String join(const char *prefix = NULL, const char *middle = NULL, const char *suffix = NULL);
 
     inline operator bool()
         {return members > 0;}
@@ -1061,6 +1076,9 @@ inline const char *shift(stringlist_t& list)
 inline void unshift(stringlist_t& list, const char *text)
     {list.push(text);}
 
+
+inline String str(stringpager& list, const char *prefix = NULL, const char *middle = NULL, const char *suffix = NULL)
+    {return list.join(prefix, middle, suffix);}
 
 END_NAMESPACE
 

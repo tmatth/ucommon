@@ -3,6 +3,8 @@ from ucommon 5.3.0 to 5.3.1
 - NamedList sort uses system collation.
 - some convenience string methods added.
 - search and replace, regular expression support.
+- UString extended with copy/cut/paste/left/right operations.
+- stringpager extended with set/replace method and split.
 
 from ucommon 5.2.2 to 5.3.0
 - sort specific string collation functions added

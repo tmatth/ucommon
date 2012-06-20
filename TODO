@@ -1,5 +1,7 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	stringlist [] and get are const
+
 	string comparison operators become direct inlines to compare
 
 	gaurd classes renamed
