@@ -228,6 +228,7 @@ protected:
      */
     cstring *create(strsize_t size, char fill = 0) const;
 
+public:
     /**
      * Compare the values of two string.  This is a virtual so that it
      * can be overridden for example if we want to create strings which
@@ -240,6 +241,7 @@ protected:
     inline int collate(const char *string) const
         {return compare(string);};
 
+protected:
     /**
     * Test if two string values are equal.
     * @param string to compare with.
@@ -1883,16 +1885,31 @@ inline bool ne(char const *s1, char const *s2, size_t size)
     {return !String::equal(s1, s2, size);}
 
 /**
- * Compare two string objects if equal.
+ * Compare two string objects if equal.  The left string is an object,
+ * the right may be an object or converted to a const string.  The
+ * compare virtual method of the left object is used, so we can do
+ * things like collation order or derived class specific sorting.
  * @param s1 string to compare.
  * @param s2 string to compare.
  * @return true if equal.
  */
-inline bool eq(String &s1, String &s2)
-    {return String::equal(s1.c_str(), s2.c_str());}
+inline bool eq(String &s1, const char *s2)
+    {return s1.compare(s2) == 0;}
 
 inline bool ne(String &s1, String &s2)
-    {return !String::equal(s1.c_str(), s2.c_str());}
+    {return s1.compare(s2) != 0;}
+
+inline bool lt(String &s1, const char *s2)
+    {return s1.compare(s2) < 0;}
+
+inline bool gt(String &s1, const char *s2)
+    {return s1.compare(s2) > 0;}
+
+inline bool le(String &s1, const char *s2)
+    {return s1.compare(s2) <= 0;}
+
+inline bool ge(String &s1, const char *s2)
+    {return s1.compare(s2) >= 0;}
 
 /**
  * Compare two null terminated strings if equal ignoring case.  This is
@@ -1925,16 +1942,6 @@ inline bool case_eq(char const *s1, char const *s2, size_t size)
 inline bool ieq(char const *s1, char const *s2, size_t size)
     {return String::case_equal(s1, s2, size);}
 
-/**
- * Compare two string objects if equal ignoring case.  This is
- * related to stricmp or gcc strcasecmp.
- * @param s1 string to compare.
- * @param s2 string to compare.
- * @return true if equal.
- */
-inline bool ieq(String &s1, String &s2)
-    {return String::case_equal(s1.c_str(), s2.c_str());}
-
 inline String str(const char *string)
     {return (String)string;}
 
@@ -1957,13 +1964,6 @@ inline String str(double value)
     {String temp(40, "%f", value); return temp;}
 
 String str(CharacterProtocol& cp, strsize_t size);
-
-bool sort_eq(char const *str1, char const *str2);
-bool sort_ne(char const *str1, char const *str2);
-bool sort_gt(char const *str1, char const *str2);
-bool sort_lt(char const *str1, char const *str2);
-bool sort_ge(char const *str1, char const *str2);
-bool sort_le(char const *str1, char const *str2);
 
 template<>
 inline void swap<string_t>(string_t& s1, string_t& s2)
