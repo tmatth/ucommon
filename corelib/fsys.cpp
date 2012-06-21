@@ -1484,26 +1484,8 @@ bool fsys::ishidden(const char *path)
 
 charfile::charfile(fd_t fd, const char *mode)
 {
-#ifdef  _MSWINDOWS_
     fp = NULL;
-    int flags = _O_RDONLY;
-    if(eq(mode, "r+"))
-        flags = _O_RDWR;
-    else if(eq(mode, "w"))
-        flags = _O_WRONLY;
-    else if(eq(mode, "a"))
-        flags = _O_APPEND;
-    else if(eq(mode, "a+"))
-        flags |= _O_APPEND;
-    int f = _open_osfhandle((intptr_t)fd, flags);
-    if(f != 0) {
-        fp = _fdopen(f, mode);
-        opened = true;
-    }
-#else
-    fp = fdopen(fd, mode);
-    opened = true;
-#endif
+    open(fd, mode);
 }
 
 charfile::charfile(const char *file, const char *mode)
@@ -1533,6 +1515,32 @@ bool charfile::istty(void)
         return true;
 #endif
     return false;
+}
+
+void charfile::open(fd_t fd, const char *mode)
+{
+    if(fp)
+        fclose(fp);
+
+#ifdef  _MSWINDOWS_
+    int flags = _O_RDONLY;
+    if(eq(mode, "r+"))
+        flags = _O_RDWR;
+    else if(eq(mode, "w"))
+        flags = _O_WRONLY;
+    else if(eq(mode, "a"))
+        flags = _O_APPEND;
+    else if(eq(mode, "a+"))
+        flags |= _O_APPEND;
+    int f = _open_osfhandle((intptr_t)fd, flags);
+    if(f != 0) {
+        fp = _fdopen(f, mode);
+        opened = true;
+    }
+#else
+    fp = fdopen(fd, mode);
+    opened = true;
+#endif
 }
 
 void charfile::open(const char *path, const char *mode)

@@ -762,6 +762,8 @@ public:
      */
     void open(const char *path, const char *mode);
 
+    void open(fd_t descriptor, const char *mode);
+
     /**
      * Close an open file.
      */
