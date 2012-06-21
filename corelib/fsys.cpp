@@ -176,6 +176,18 @@ int fsys::removeDir(const char *path)
     return 0;
 }
 
+fd_t fsys::nullfile(void)
+{
+    fd_t handle;
+    SECURITY_ATTRIBUTES attr;
+
+    attr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    attr.bInheritHandle = TRUE;
+    attr.lpSecurityDescriptor = NULL;
+
+    return CreateFile("nul", GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+}
+
 int fsys::pipe(fd_t& input, ft_t& output, size_t size)
 {
     input = output = NULL;
@@ -620,6 +632,11 @@ ssize_t fsys::write(const void *buf, size_t len)
     if(rtn < 0)
         error = remapError();
     return rtn;
+}
+
+fd_t fsys::nullfile(void)
+{
+    return ::open("/dev/null", O_RDWR);
 }
 
 int fsys::pipe(fd_t& input, fd_t& output, size_t size)

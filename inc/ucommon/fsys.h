@@ -611,6 +611,12 @@ public:
     static int pipe(fd_t& input, fd_t& output, size_t size = 0);
 
     /**
+     * Create inheritable /dev/null handle.
+     * @return null device handle.
+     */
+    static fd_t nullfile(void);
+
+    /**
      * create a file descriptor or directory directly.
      * @param object to assign descriptor for created file.
      * @param path of file to create.
