@@ -606,7 +606,7 @@ public:
      * @param flag true to enable, false to disable.
      * @return 0 or error code.
      */
-    static int noexec(fd_t descriptor);
+    static int noexec(fd_t& descriptor);
 
     /**
      * Create pipe.  These are created inheritable by default.

@@ -203,7 +203,7 @@ int fsys::pipe(fd_t& input, ft_t& output, size_t size)
     return 0;
 }
 
-int fsys::noexec(fd_t fd)
+int fsys::noexec(fd_t& fd)
 {
     if(!SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0))
         return remapError();
@@ -682,7 +682,7 @@ int fsys::pipe(fd_t& input, fd_t& output, size_t size)
     return 0;
 }
 
-int fsys::noexec(fd_t fd)
+int fsys::noexec(fd_t& fd)
 {
     unsigned long flags = fcntl(fd, F_GETFD);
     flags |= FD_CLOEXEC;
