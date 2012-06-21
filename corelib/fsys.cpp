@@ -536,6 +536,20 @@ fsys::fsys(const fsys& copy)
     }
 }
 
+int sys::inherit(fd_t from)
+{
+    HANDLE pHandle = GetCurrentProcess();
+    HANDLE fd;
+
+    if(DuplicateHandle(pHandle, from, pHandle, &fd, 0, TRUE, DUPLICATE_SAME_ACCESS)) {
+        release(from);
+        from = fd;
+        return 0;
+    }
+
+    return remapError();
+}
+
 void fsys::operator=(fd_t from)
 {
     HANDLE pHandle = GetCurrentProcess();
@@ -903,6 +917,18 @@ fsys::fsys(const fsys& copy)
         fd = INVALID_HANDLE_VALUE;
     error = 0;
     ptr = NULL;
+}
+
+int fsys::inherit(fd_t& fd)
+{
+    unsigned long flags;
+    if(fd > -1) {
+        flags = fcntl(fd, F_GETFL);
+        flags &= ~FD_CLOEXEC;
+        if(fcntl(fd, F_SETFL, flags))
+            return remapError();
+    }
+    return 0;
 }
 
 void fsys::operator=(fd_t from)

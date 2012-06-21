@@ -618,6 +618,15 @@ public:
     static int pipe(fd_t& input, fd_t& output, size_t size = 0);
 
     /**
+     * Create inheritable handle.  On windows this is done by creating a
+     * duplicate handle and then closing the original.  Elsewhere this
+     * is done simply by setting flags.
+     * @param descriptor to modify.
+     * @return 0 on success, error on failure.
+     */
+    static int inherit(fd_t& descriptor);
+
+    /**
      * Create inheritable /dev/null handle.
      * @return null device handle.
      */
