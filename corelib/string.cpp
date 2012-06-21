@@ -1052,6 +1052,25 @@ void string::cow(strsize_t size)
     }
 }
 
+void string::add(char ch)
+{
+    char buf[2];
+
+    if(ch == 0)
+        return;
+
+    buf[0] = ch;
+    buf[1] = 0;
+
+    if(!str) {
+        set(buf);
+        return;
+    }
+
+    cow(1);
+    str->add(buf);
+}
+
 void string::add(const char *s)
 {
     if(!s || !*s)
@@ -1062,6 +1081,7 @@ void string::add(const char *s)
         return;
     }
 
+    cow(strlen(s));
     str->add(s);
 }
 

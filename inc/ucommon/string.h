@@ -940,6 +940,12 @@ public:
      */
     bool operator>=(const char *text) const;
 
+    inline string& operator<<(const char *text)
+        {add(text); return *this;}
+
+    inline string& operator<<(char code)
+        {add(code); return *this;}
+
     /**
      * Parse short integer value from a string.
      * @param value to store.
