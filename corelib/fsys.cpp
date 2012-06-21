@@ -203,13 +203,6 @@ int fsys::pipe(fd_t& input, ft_t& output, size_t size)
     return 0;
 }
 
-int fsys::noexec(fd_t& fd)
-{
-    if(!SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0))
-        return remapError();
-    return 0;
-}
-
 int fsys::fileinfo(const char *path, struct stat *buf)
 {
     if(_stat(path, (struct _stat *)(buf)))
@@ -536,10 +529,16 @@ fsys::fsys(const fsys& copy)
     }
 }
 
-int sys::inherit(fd_t from)
+int fsys::inherit(fd_t& from, bool enable)
 {
     HANDLE pHandle = GetCurrentProcess();
     HANDLE fd;
+
+    if(!enable) {
+        if(!SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0))
+            return remapError();
+        return 0;
+    }
 
     if(DuplicateHandle(pHandle, from, pHandle, &fd, 0, TRUE, DUPLICATE_SAME_ACCESS)) {
         release(from);
@@ -679,15 +678,6 @@ int fsys::pipe(fd_t& input, fd_t& output, size_t size)
         return remapError();
     input = pfd[0];
     output = pfd[1];
-    return 0;
-}
-
-int fsys::noexec(fd_t& fd)
-{
-    unsigned long flags = fcntl(fd, F_GETFD);
-    flags |= FD_CLOEXEC;
-    if(fcntl(fd, F_SETFD, flags))
-        return remapError();
     return 0;
 }
 
@@ -919,12 +909,15 @@ fsys::fsys(const fsys& copy)
     ptr = NULL;
 }
 
-int fsys::inherit(fd_t& fd)
+int fsys::inherit(fd_t& fd, bool enable)
 {
     unsigned long flags;
     if(fd > -1) {
         flags = fcntl(fd, F_GETFL);
-        flags &= ~FD_CLOEXEC;
+        if(enable)
+            flags &= ~FD_CLOEXEC;
+        else
+            flags |= FD_CLOEXEC;
         if(fcntl(fd, F_SETFL, flags))
             return remapError();
     }

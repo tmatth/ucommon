@@ -601,14 +601,6 @@ public:
     static void release(fd_t descriptor);
 
     /**
-     * Clear inheritance of descriptor for child.
-     * @param descriptor to modify.
-     * @param flag true to enable, false to disable.
-     * @return 0 or error code.
-     */
-    static int noexec(fd_t& descriptor);
-
-    /**
      * Create pipe.  These are created inheritable by default.
      * @param input descriptor.
      * @param output descriptor.
@@ -618,13 +610,14 @@ public:
     static int pipe(fd_t& input, fd_t& output, size_t size = 0);
 
     /**
-     * Create inheritable handle.  On windows this is done by creating a
+     * Changle inheritable handle.  On windows this is done by creating a
      * duplicate handle and then closing the original.  Elsewhere this
      * is done simply by setting flags.
      * @param descriptor to modify.
+     * @param enable child process inheritence.
      * @return 0 on success, error on failure.
      */
-    static int inherit(fd_t& descriptor);
+    static int inherit(fd_t& descriptor, bool enable);
 
     /**
      * Create inheritable /dev/null handle.
