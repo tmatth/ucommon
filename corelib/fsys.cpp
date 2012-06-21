@@ -176,6 +176,28 @@ int fsys::removeDir(const char *path)
     return 0;
 }
 
+int fsys::pipe(fd_t& input, ft_t& output, size_t size)
+{
+    input = output = NULL;
+    SECURITY_ATTRIBUTES attr;
+
+    attr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    attr.bInheritHandle = TRUE;
+    attr.lpSecurityDescriptor = NULL;
+
+    if(!CreatePipe(&input, &output, &attr, size))
+        return remapError();
+
+    return 0;
+}
+
+int fsys::noexec(fd_t fd)
+{
+    if(!SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0))
+        return remapError();
+    return 0;
+}
+
 int fsys::fileinfo(const char *path, struct stat *buf)
 {
     if(_stat(path, (struct _stat *)(buf)))
@@ -598,6 +620,26 @@ ssize_t fsys::write(const void *buf, size_t len)
     if(rtn < 0)
         error = remapError();
     return rtn;
+}
+
+int fsys::pipe(fd_t& input, fd_t& output, size_t size)
+{
+    input = output = -1;
+    int pfd[2];
+    if(::pipe(pfd))
+        return remapError();
+    input = pfd[0];
+    output = pfd[1];
+    return 0;
+}
+
+int fsys::noexec(fd_t fd)
+{
+    unsigned long flags = fcntl(fd, F_GETFD);
+    flags |= FD_CLOEXEC;
+    if(fcntl(fd, F_SETFD, flags))
+        return remapError();
+    return 0;
 }
 
 bool fsys::istty(fd_t fd)

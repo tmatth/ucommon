@@ -594,6 +594,23 @@ public:
     static void release(fd_t descriptor);
 
     /**
+     * Clear inheritance of descriptor for child.
+     * @param descriptor to modify.
+     * @param flag true to enable, false to disable.
+     * @return 0 or error code.
+     */
+    static int noexec(fd_t descriptor);
+
+    /**
+     * Create pipe.  These are created inheritable by default.
+     * @param input descriptor.
+     * @param output descriptor.
+     * @param size of buffer if supported.
+     * @return 0 or error code.
+     */
+    static int pipe(fd_t& input, fd_t& output, size_t size = 0);
+
+    /**
      * create a file descriptor or directory directly.
      * @param object to assign descriptor for created file.
      * @param path of file to create.
