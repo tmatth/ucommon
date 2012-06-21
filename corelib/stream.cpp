@@ -22,6 +22,7 @@
 #include <ucommon/thread.h>
 #include <ucommon/socket.h>
 #include <ucommon/string.h>
+#include <ucommon/shell.h>
 #include <ucommon/stream.h>
 #include <stdarg.h>
 
@@ -415,10 +416,10 @@ StreamProtocol()
 {
 }
 
-pipestream::pipestream(const char *cmd, access_t access, const char **envp, size_t size) :
+pipestream::pipestream(const char *cmd, access_t access, char **args, char **envp, size_t size) :
 StreamProtocol()
 {
-    open(cmd, access, envp, size);
+    open(cmd, access, args, envp, size);
 }
 
 pipestream::~pipestream()
@@ -427,87 +428,6 @@ pipestream::~pipestream()
 }
 
 #ifdef  _MSWINDOWS_
-void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t size)
-{
-    PROCESS_INFORMATION pi;
-    STARTUPINFO si;
-    SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-    sa.lpSecurityDescriptor = NULL;
-    sa.bInheritHandle = true;
-    HANDLE inputWriteTmp, inputRead,inputWrite;
-    HANDLE outputReadTmp, outputRead, outputWrite;
-    HANDLE errorWrite;
-    char cmdspec[128];
-    char *ep = NULL;
-    unsigned len = 0;
-
-    if(envp)
-        ep = new char[4096];
-
-    while(envp && *envp && len < 4090) {
-        String::set(ep + len, 4094 - len, *envp);
-        len += strlen(*(envp++)) + 1;
-    }
-
-    if(ep)
-        ep[len] = 0;
-
-    GetEnvironmentVariable("ComSpec", cmdspec, sizeof(cmdspec));
-
-    if(mode == WRONLY || mode == RDWR) {
-        CreatePipe(&inputRead, &inputWriteTmp,&sa,0);
-        DuplicateHandle(GetCurrentProcess(),inputWriteTmp,
-            GetCurrentProcess(), &inputWrite, 0,FALSE, DUPLICATE_SAME_ACCESS);
-        CloseHandle(&inputRead);
-    }
-    if(mode == RDONLY || mode == RDWR) {
-        CreatePipe(&outputReadTmp, &outputWrite,&sa,0);
-        DuplicateHandle(GetCurrentProcess(),outputWrite,
-            GetCurrentProcess(),&errorWrite,0, TRUE,DUPLICATE_SAME_ACCESS);
-        DuplicateHandle(GetCurrentProcess(),outputReadTmp,
-            GetCurrentProcess(), &outputRead, 0,FALSE, DUPLICATE_SAME_ACCESS);
-        CloseHandle(&outputReadTmp);
-    }
-
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(STARTUPINFO);
-    si.dwFlags = STARTF_USESTDHANDLES;
-
-    if(mode == RDONLY || mode == RDWR) {
-        si.hStdOutput = outputWrite;
-        si.hStdError = errorWrite;
-    }
-
-    if(mode == WRONLY || mode == RDWR)
-        si.hStdInput = inputRead;
-
-    if(!CreateProcess(cmdspec, (char *)cmd, NULL, NULL, TRUE,
-        CREATE_NEW_CONSOLE, ep, NULL, &si, &pi))
-        size = 0;
-    else
-        pid = pi.dwProcessId;
-
-    if(ep)
-        delete[] ep;
-
-    if(mode == WRONLY || mode == RDWR) {
-        fsys::assign(wr, &inputWrite);
-        CloseHandle(inputRead);
-    }
-    if(mode == RDONLY || mode == RDWR) {
-        fsys::assign(rd, &outputRead);
-        CloseHandle(outputWrite);
-        CloseHandle(errorWrite);
-    }
-    if(size)
-        allocate(size, mode);
-    else {
-        fsys::close(rd);
-        fsys::close(wr);
-    }
-}
-
 void pipestream::terminate(void)
 {
     HANDLE hProc;
@@ -521,19 +441,6 @@ void pipestream::terminate(void)
     }
 }
 
-void pipestream::close(void)
-{
-    HANDLE hProc;
-    if(bufsize) {
-        release();
-        hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
-        if(hProc != NULL) {
-            WaitForSingleObject(hProc, INFINITE);
-            CloseHandle(hProc);
-        }
-    }
-}
-
 #else
 
 void pipestream::terminate(void)
@@ -544,100 +451,15 @@ void pipestream::terminate(void)
     }
 }
 
-void pipestream::close(void)
-{
-    if(bufsize) {
-        release();
-        waitpid(pid, NULL, 0);
-    }
-}
-
-void pipestream::open(const char *cmd, access_t mode, const char **envp, size_t size)
-{
-    int input[2], output[2];
-    int max = sizeof(fd_set) * 8;
-    char symname[129];
-    const char *cp;
-    char *ep;
-
-#ifdef  RLIMIT_NOFILE
-    struct rlimit rlim;
-
-    if(!getrlimit(RLIMIT_NOFILE, &rlim))
-        max = rlim.rlim_max;
-#endif
-
-    close();
-
-    if(mode == RDONLY || mode == RDWR) {
-        if(pipe(input))
-            return;
-        fsys::assign(rd, input[0]);
-    }
-    else
-        input[1] = ::open("/dev/null", O_RDWR);
-
-    if(mode == WRONLY || mode == RDWR) {
-        if(pipe(output)) {
-            if(mode == RDWR) {
-                ::close(input[0]);
-                ::close(input[1]);
-            }
-            return;
-        }
-        fsys::assign(wr, output[1]);
-    }
-    else
-        output[0] = ::open("/dev/null", O_RDWR);
-
-    pid = fork();
-    if(pid) {
-        if(mode == RDONLY || mode == RDWR)
-            ::close(input[1]);
-        if(mode == WRONLY || mode == RDWR)
-            ::close(output[0]);
-        if(pid == -1) {
-            fsys::close(rd);
-            fsys::close(wr);
-        }
-        else
-            allocate(size, mode);
-        return;
-    }
-    dup2(input[1], 1);
-    dup2(output[0], 0);
-    for(int fd = 3; fd < max; ++fd)
-        ::close(fd);
-
-    while(envp && *envp) {
-        String::set(symname, sizeof(symname), *envp);
-        ep = strchr(symname, '=');
-        if(ep)
-            *ep = 0;
-        cp = strchr(*envp, '=');
-        if(cp)
-            ++cp;
-        ::setenv(symname, cp, 1);
-        ++envp;
-    }
-
-    ::signal(SIGQUIT, SIG_DFL);
-    ::signal(SIGINT, SIG_DFL);
-    ::signal(SIGCHLD, SIG_DFL);
-    ::signal(SIGPIPE, SIG_DFL);
-    ::execlp("/bin/sh", "sh", "-c", cmd, NULL);
-    exit(127);
-}
-
 #endif
 
 void pipestream::release(void)
 {
     if(gbuf)
-        fsys::close(rd);
+        fsys::release(rd);
 
     if(pbuf)
-        fsys::close(wr);
+        fsys::release(wr);
 
     StreamProtocol::release();
 }
@@ -761,6 +583,66 @@ int pipestream::_putch(int c)
         pbump(1);
     }
     return c;
+}
+
+void pipestream::open(const char *path, access_t mode, char **args, char **envp, size_t size)
+{
+/*#ifdef    RLIMIT_NOFILE
+    struct rlimit rlim;
+
+    if(!getrlimit(RLIMIT_NOFILE, &rlim))
+        max = rlim.rlim_max;
+#endif
+*/  close();
+
+    fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
+    fd_t input = INVALID_HANDLE_VALUE, output = INVALID_HANDLE_VALUE;
+
+    if(mode == RDONLY || mode == RDWR) {
+        if(fsys::pipe(input, stdio[1]))
+            return;
+        fsys::inherit(input, false);
+    }
+    else
+        stdio[1] = fsys::nullfile();
+
+    if(mode == WRONLY || mode == RDWR) {
+        if(fsys::pipe(stdio[0], output)) {
+            if(mode == RDWR) {
+                fsys::release(stdio[1]);
+                fsys::release(input);
+                input = INVALID_HANDLE_VALUE;
+            }
+            return;
+        }
+    }
+    else
+        stdio[0] = fsys::nullfile();
+
+    pid = shell::spawn(path, args, envp, stdio);
+
+    fsys::release(stdio[0]);
+    fsys::release(stdio[1]);
+    if(pid == -1) {
+        fsys::release(input);
+        fsys::release(output);
+        input = output = INVALID_HANDLE_VALUE;
+    }
+    else
+        allocate(size, mode);
+    rd.assign(input);
+    wr.assign(output);
+}
+
+int pipestream::close(void)
+{
+    sync();
+
+    if(bufsize) {
+        release();
+        return shell::wait(pid);
+    }
+    return -1;
 }
 
 filestream::filestream() :

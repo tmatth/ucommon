@@ -273,12 +273,13 @@ public:
 
     /**
      * Create child process and start pipe.
-     * @param command to pass.
+     * @param path to execute.
      * @param access mode of pipe stream.
+     * @param args to pass to command.
      * @param env to create in child.
      * @param size of buffer.
      */
-    pipestream(const char *command, access_t access, const char **env = NULL, size_t size = 512);
+    pipestream(const char *command, access_t access, char **args, char **env = NULL, size_t size = 512);
 
     /**
      * Destroy a pipe stream.
@@ -301,18 +302,20 @@ public:
 
     /**
      * Open a stream connection to a pipe service.
-     * @param command to execute.
+     * @param path to execute.
      * @param access mode of stream.
+     * @param args to pass to command.
      * @param env to create in child process.
      * @param buffering size to use.
      */
-    void open(const char *command, access_t access, const char **env = NULL, size_t buffering = 512);
+    void open(const char *path, access_t access, char **args, char **env = NULL, size_t buffering = 512);
 
     /**
      * Close an active stream connection.  This waits for the child to
      * terminate.
+     * @return exit code.
      */
-    void close(void);
+    int close(void);
 
     /**
      * Force terminate child and close.
