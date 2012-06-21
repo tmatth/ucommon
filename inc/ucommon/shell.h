@@ -154,151 +154,6 @@ public:
     typedef enum {RD = BufferProtocol::BUF_RD, WR = BufferProtocol::BUF_WR, RDWR = BufferProtocol::BUF_RDWR} pmode_t;
 
     /**
-     * A class to control a process that is piped.  This holds the active
-     * file descriptors for the pipe as well as the process id.  Basic I/O
-     * methods are provided to send and receive data with the piped child
-     * process.  This may be used by itself with various shell methods as
-     * a pipe_t, or to construct piped objects such as iobuf.
-     * @author David Sugar <dyfet@gnutelephony.org>
-     */
-    class __EXPORT pipeio
-    {
-    protected:
-        friend class shell;
-
-        /**
-         * Construct an empty initialized pipe for use.
-         */
-        pipeio();
-
-        /**
-         * Spawn and attach child process I/O through piping.  Stderr is left
-         * attached to the console.
-         * @param path of program to execute.  If simple file, $PATH is used.
-         * @param argv to pass to child process.
-         * @param mode of pipe operation; rdonly, wronly, or rdwr.
-         * @param size of atomic pipe buffer if setable.
-         * @param env that may optionally be given to the child process.
-         */
-        int spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
-
-        /**
-         * Wait for child process to exit.  When it does, close all piping.
-         * @return process exit code or -1 if error.
-         */
-        int wait(void);
-
-        /**
-         * Signal termination and wait for child process to exit.  When it
-         * does all piping is closed.
-         * @return process exit code or -1 if error.
-         */
-        int cancel(void);
-
-        /**
-         * Read input from child process.  If there is an error, the result
-         * is 0 and perror holds the error code.  If an error already
-         * happened no further data will be read.
-         * @param address to store input.
-         * @param size of input to read.
-         * @return number of bytes actually read.
-         */
-        size_t read(void *address, size_t size);
-
-        /**
-         * Write to the child process.  If there is an error, the result
-         * is 0 and perror holds the error code.  If an error already
-         * happened no further data will be written.
-         * @param address to write data from.
-         * @param size of data to write.
-         * @return number of bytes actually written.
-         */
-        size_t write(const void *address, size_t size);
-
-        pid_t pid;
-        fd_t input, output; // input to and output from child process...
-        int perror, presult;
-    };
-
-    /**
-     * Process pipe with I/O buffering.  This allows the creation and management
-     * of a shell pipe with buffered I/O support.  This also offers a common
-     * class to manage stdio sessions generically in the child process.
-     * @author David Sugar <dyfet@gnutelephony.org>
-     */
-    class __EXPORT iobuf : public BufferProtocol, private pipeio
-    {
-    protected:
-        friend class shell;
-
-        int ioerror;
-
-        virtual int _err(void) const;
-        virtual void _clear(void);
-
-        virtual size_t _push(const char *address, size_t size);
-        virtual size_t _pull(char *address, size_t size);
-
-    public:
-        /**
-         * Construct an i/o buffer. If a non-zero size is specified, then
-         * the object is attached to the process's stdin & stdout.  Otherwise
-         * an un-opened object is created.
-         */
-        iobuf(size_t size = 0);
-
-        /**
-         * Construct an i/o buffer for a child process.  This is used to
-         * create a child process directly when the object is made.  It
-         * essentially is the same as the open() method.
-         * @param path of program to execute, if filename uses $PATH.
-         * @param argv to pass to child process.
-         * @param mode of pipe, rdonly, wronly, or rdwr.
-         * @param size of buffering, and atomic pipe size if settable.
-         * @param env that may be passed to child process.
-         */
-        iobuf(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
-
-        /**
-         * Destroy i/o buffer.  This may cancel and block waiting for a child
-         * process to terminate.
-         */
-        ~iobuf();
-
-        /**
-         * Open the i/o buffer attached to a child process.
-         * @param path of program to execute, if filename uses $PATH.
-         * @param argv to pass to child process.
-         * @param mode of pipe, rdonly, wronly, or rdwr.
-         * @param size of buffering, and atomic pipe size if settable.
-         * @param env that may be passed to child process.
-         */
-        void open(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
-
-        /**
-         * Close the i/o buffer. If attached to a child process it will wait
-         * for the child to exit.
-         */
-        void close(void);
-
-        /**
-         * Terminate child process.  This also waits for the child process
-         * to exit and then closes buffers.
-         */
-        void cancel(void);
-    };
-
-    /**
-     * Buffered i/o type for pipes and stdio.
-     */
-    typedef iobuf io_t;
-
-    /**
-     * Convenience low level pipe object type.
-     */
-    typedef pipeio *pipe_t;
-
-    /**
      * This can be used to get internationalized error messages.  The internal
      * text for shell parser errors are passed through here.
      * @param id of error message to use.
@@ -833,30 +688,6 @@ public:
         {return writes(string.c_str());};
 
     /**
-     * Print to a pipe object.
-     * @param pipe to write to.
-     * @param format string to use.
-     * @return number of bytes written.
-     */
-    static size_t printf(pipe_t pipe, const char *format, ...) __PRINTF(2, 3);
-
-    /**
-     * Read a line from a pipe object.
-     * @param pipe to read from.
-     * @param buffer to save into.
-     * @param size of buffer.
-     * @return number of bytes read.
-     */
-    static size_t readln(pipe_t pipe, char *buffer, size_t size);
-
-    static size_t read(pipe_t pipe, String& string);
-
-    static size_t writes(pipe_t pipe, const char *string);
-
-    inline static size_t write(pipe_t pipe, String& string)
-        {return writes(pipe, string.c_str());};
-
-    /**
      * Get saved internal argc count for items.  This may be items that
      * remain after shell expansion and options have been parsed.
      * @return count of remaining arguments.
@@ -907,19 +738,6 @@ public:
     static shell::pid_t spawn(const char *path, char **argv, char **env = NULL, fd_t *stdio = NULL);
 
     /**
-     * Spawn a child pipe.  If the executable path is a pure filename, then
-     * the $PATH will be used to find it.  The argv array may be created from
-     * a string with the shell string parser.
-     * @param path to executable.
-     * @param argv list of command arguments for the child process.
-     * @param mode of pipe, rd only, wr only, or rdwr.
-     * @param size of pipe buffer.
-     * @param env of child process can be explicitly set.
-     * @return pipe object or NULL on failure.
-     */
-    static shell::pipe_t spawn(const char *path, char **argv, pmode_t mode, size_t size = 512, char **env = NULL);
-
-    /**
      * Set priority level and enable priority scheduler.  This activates the
      * realtime priority scheduler when a priority > 0 is requested for the
      * process, assuming scheduler support exists and the process is
@@ -959,21 +777,6 @@ public:
      * @return exit code of process, -1 if fails or pid is invalid.
      */
     static int cancel(shell::pid_t pid);
-
-    /**
-     * Wait for a child pipe to terminate.  This operation blocks.  If
-     * the pipe io handle is dynamic, it is deleted.
-     * @param pointer to pipe of child process to wait for.
-     * @return exit code of process, -1 if fails or pid is invalid.
-     */
-    static int wait(shell::pipe_t pointer);
-
-    /**
-     * Cancel a child pipe.  If the pipe io handle is dynamic, it is deleted.
-     * @param pointer to pipe of child process to cancel.
-     * @return exit code of process, -1 if fails or pid is invalid.
-     */
-    static int cancel(shell::pipe_t pointer);
 
     /**
      * Return argc count.

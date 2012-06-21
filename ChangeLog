@@ -6,6 +6,7 @@ from ucommon 5.3.0 to 5.3.1
 - UString extended with copy/cut/paste/left/right operations.
 - stringpager extended with set/replace method and split.
 - added fsys::pipe and fsys::noexec.
+- removed unused pipeio subsystem.
 
 from ucommon 5.2.2 to 5.3.0
 - sort specific string collation functions added
