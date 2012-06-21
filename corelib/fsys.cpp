@@ -968,6 +968,14 @@ fsys::~fsys()
     close();
 }
 
+void fsys::operator*=(fd_t& from)
+{
+    if(fd != INVALID_HANDLE_VALUE)
+        close();
+    fd = from;
+    from = INVALID_HANDLE_VALUE;
+}
+
 int fsys::linkinfo(const char *path, char *buffer, size_t size)
 {
 #if defined(_MSWINDOWS_)

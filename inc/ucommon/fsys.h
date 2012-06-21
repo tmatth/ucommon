@@ -244,6 +244,13 @@ public:
     void operator=(const fsys& descriptor);
 
     /**
+     * Replace current file descriptor with an external descriptor.  This
+     * does not create a duplicate.  The external descriptor object is
+     * marked as invalid.
+     */
+    void operator*=(fd_t& descriptor);
+
+    /**
      * Assing file descriptor from system descriptor.
      * @param descriptor to dup from.
      */
