@@ -1,5 +1,9 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	do not co-mingle ptr and pid in fsys!
+
+	fsys::exec with and without env will be merged
+
 	stringlist [] and get are const
 
 	resolve string cat operators
