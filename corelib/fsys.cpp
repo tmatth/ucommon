@@ -179,25 +179,25 @@ int fsys::removeDir(const char *path)
 fd_t fsys::nullfile(void)
 {
     fd_t handle;
-    SECURITY_ATTRIBUTES attr;
+    SECURITY_ATTRIBUTES sattr;
 
-    attr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    attr.bInheritHandle = TRUE;
-    attr.lpSecurityDescriptor = NULL;
+    sattr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sattr.bInheritHandle = TRUE;
+    sattr.lpSecurityDescriptor = NULL;
 
-    return CreateFile("nul", GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    return CreateFile("nul", GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, &sattr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
 int fsys::pipe(fd_t& input, ft_t& output, size_t size)
 {
     input = output = NULL;
-    SECURITY_ATTRIBUTES attr;
+    SECURITY_ATTRIBUTES sattr;
 
-    attr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    attr.bInheritHandle = TRUE;
-    attr.lpSecurityDescriptor = NULL;
+    sattr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sattr.bInheritHandle = TRUE;
+    sattr.lpSecurityDescriptor = NULL;
 
-    if(!CreatePipe(&input, &output, &attr, size))
+    if(!CreatePipe(&input, &output, &sattr, size))
         return remapError();
 
     return 0;
@@ -352,17 +352,35 @@ int fsys::sync(void)
 
 fd_t fsys::input(const char *path)
 {
-    return CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    SECURITY_ATTRIBUTES sattr;
+
+    sattr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sattr.bInheritHandle = TRUE;
+    sattr.lpSecurityDescriptor = NULL;
+
+    return CreateFile(path, GENERIC_READ, FILE_SHARE_READ, &sattr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
 fd_t fsys::output(const char *path)
 {
-    return CreateFile(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    SECURITY_ATTRIBUTES sattr;
+
+    sattr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sattr.bInheritHandle = TRUE;
+    sattr.lpSecurityDescriptor = NULL;
+
+    return CreateFile(path, GENERIC_WRITE, 0, &sattr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
 fd_t fsys::append(const char *path)
 {
-    fd_t fd = CreateFile(path, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    SECURITY_ATTRIBUTES sattr;
+
+    sattr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sattr.bInheritHandle = TRUE;
+    sattr.lpSecurityDescriptor = NULL;
+
+    fd_t fd = CreateFile(path, GENERIC_WRITE, 0, &sattr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if(fd != INVALID_HANDLE_VALUE)
         SetFilePointer(fd, 0, NULL, FILE_END);
