@@ -725,6 +725,12 @@ public:
      */
     charfile(const char *path, const char *mode);
 
+    /** Construct an open charfile from a handle and mode.
+     * @param descriptor of file to open.
+     * @param mode of file.
+     */
+    charfile(fd_t descriptor, const char *mode);
+
     /**
      * Construct an unopened file.
      */
