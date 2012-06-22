@@ -1,16 +1,19 @@
 Proposed changes (likely deferred to 6.0.0)
 
-	string format and numbers library
+	move spawn/proc stuff from shell into new proc::, move fsys:: 
+	inherited redirect methods and pipe into proc.  This is to clean
+	up static linking uses and interdependence of some things.  Maybe
+	also proc::release and detach from shell...  ??
 
-	StrgetProtocol for >> operator
+	separate enhanced string format and numbers library
 
-	do not co-mingle ptr and pid in fsys!
+	FetchProtocol for string >> operator?
 
-	fsys::exec with and without env will be merged
+	do not co-mingle ptr and pid in fsys object!
+
+	fsys::exec with and without env will be merged!
 
 	stringlist [] and get are const
-
-	resolve string cat operators
 
 	string comparison operators become direct inlines to compare
 
@@ -19,13 +22,6 @@ Proposed changes (likely deferred to 6.0.0)
 	add CharbufProtocol with locking states
 
 	String operator + should return temp string...preset size of both
-
-	Substring operator() inline, real substring() virtual so can be
-	derived in UString for codepoints.
-
-	Internal "StringTemp" class for str(..) functions with its own
-	operator + that works as before, so we do not have to "double stack"
-	temporary string objects when we concatenate expressions.
 
 	shell::Option no longer needs OrderedObject base class
 
