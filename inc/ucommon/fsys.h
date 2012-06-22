@@ -748,12 +748,6 @@ public:
      */
     charfile(const char *path, const char *mode);
 
-    /** Construct an open charfile from a handle and mode.
-     * @param descriptor of file to open.
-     * @param mode of file.
-     */
-    charfile(fd_t descriptor, const char *mode);
-
     /**
      * Construct an unopened file.
      */
@@ -787,8 +781,6 @@ public:
      * @param mode of file to open.
      */
     void open(const char *path, const char *mode);
-
-    void open(fd_t descriptor, const char *mode);
 
     /**
      * Close an open file.
