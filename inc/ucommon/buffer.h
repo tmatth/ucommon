@@ -55,6 +55,7 @@ class fbuf : public BufferProtocol, private fsys
 {
 private:
     offset_t    inpos, outpos;
+    pid_t pid;
 
 protected:
     size_t _push(const char *address, size_t size);
@@ -86,6 +87,15 @@ public:
     fbuf(const char *path, fsys::access_t access, unsigned permissions, size_t size);
 
     /**
+     * Construct a pipe buffer from an existing file.
+     * @param path of existing process.
+     * @param access mode of pipe.
+     * @param argv to pass.
+     * @param envp to use.
+     */
+    fbuf(const char *path, fsys::access_t access, char **argv, size_t size, char **envp = NULL);
+
+    /**
      * Construct a file buffer that opens an existing file.
      * @param path of existing file to open.
      * @param access mode of file (rw, rdonly, etc).
@@ -110,6 +120,15 @@ public:
      * @param size of the stream buffer.
      */
     void open(const char *path, fsys::access_t access = fsys::ACCESS_RDWR, size_t size = 512);
+
+    /**
+     * Construct a pipe buffer from an existing file.
+     * @param path of existing process.
+     * @param access mode of pipe.
+     * @param argv to pass.
+     * @param envp to use.
+     */
+    void open(const char *path, fsys::access_t access, char **argv, size_t size = 512, char **envp = NULL);
 
     /**
      * Close the file, flush buffers.

@@ -131,16 +131,10 @@ class __EXPORT fsys
 protected:
     fd_t    fd;
 #ifdef  _MSWINDOWS_
-    union {
-        WIN32_FIND_DATA *ptr;
-        pid_t pid;
-    }
+    WIN32_FIND_DATA *ptr;
     HINSTANCE   mem;
 #else
-    union {
-        void    *ptr;
-        pid_t   pid;
-    };
+    void    *ptr;
 #endif
     int     error;
 
@@ -481,15 +475,6 @@ public:
     void open(const char *path, access_t access);
 
     /**
-     * Pipe a file system.
-     * @param path to execute.
-     * @param access mode.
-     * @param argv list.
-     * @param optional environment.
-     */
-    void open(const char *path, access_t access, char **argv, char **envp = NULL);
-
-    /**
      * Assign descriptor directly.
      * @param descriptor to assign.
      */
@@ -571,12 +556,6 @@ public:
      * Close a fsys resource.
      */
     void close(void);
-
-    /**
-     * Close a fsys resource, then wait and get exit code of pid.
-     * @return exit code of pid.
-     */
-    int wait(void);
 
     /**
      * Get last error.

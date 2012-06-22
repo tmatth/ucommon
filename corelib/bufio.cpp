@@ -22,21 +22,35 @@
 #include <ucommon/timers.h>
 #include <ucommon/buffer.h>
 #include <ucommon/string.h>
+#include <ucommon/shell.h>
 
 using namespace UCOMMON_NAMESPACE;
 
-fbuf::fbuf() : BufferProtocol(), fsys()
+fbuf::fbuf() :
+BufferProtocol(), fsys()
 {
+    pid = INVALID_PID_VALUE;
 }
 
-fbuf::fbuf(const char *path, access_t access, size_t size)
+fbuf::fbuf(const char *path, access_t access, size_t size) :
+BufferProtocol(), fsys()
 {
+    pid = INVALID_PID_VALUE;
     open(path, access, size);
 }
 
-fbuf::fbuf(const char *path, access_t access, unsigned mode, size_t size)
+fbuf::fbuf(const char *path, access_t access, unsigned mode, size_t size) :
+BufferProtocol(), fsys()
 {
+    pid = INVALID_PID_VALUE;
     create(path, access, mode, size);
+}
+
+fbuf::fbuf(const char *path, fsys::access_t access, char **args, size_t size, char **envp) :
+BufferProtocol(), fsys()
+{
+    pid = INVALID_PID_VALUE;
+    open(path, access, args, size, envp);
 }
 
 fbuf::~fbuf()
@@ -54,9 +68,54 @@ void fbuf::_clear(void)
     error = 0;
 }
 
+void fbuf::open(const char *path, fsys::access_t access, char **args, size_t size, char **envp)
+{
+    bool write = false;
+
+    fbuf::close();
+    _clear();
+
+    switch(access)
+    {
+    case ACCESS_STREAM:
+    case ACCESS_RDONLY:
+        break;
+    case ACCESS_WRONLY:
+    case ACCESS_APPEND:
+        write = true;
+        break;
+    default:
+        return; // invalid
+    }
+
+    fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
+    if(write)
+        error = fsys::pipe(stdio[1], fd);
+    else
+        error = fsys::pipe(fd, stdio[0]);
+
+    if(error)
+        return;
+
+    inherit(fd, false);
+    pid = shell::spawn(path, args, envp, stdio);
+    if(pid == INVALID_PID_VALUE)
+        fsys::close();
+    if(write) {
+        allocate(size, BUF_WR);
+        fsys::release(stdio[1]);
+    }
+    else {
+        allocate(size, BUF_RD);
+        fsys::release(stdio[0]);
+    }
+}
+
 void fbuf::open(const char *path, access_t mode, size_t size)
 {
     fbuf::close();
+    _clear();
+
     if(mode != ACCESS_DIRECTORY)
         fsys::open(path, mode);
     if(getfile() == INVALID_HANDLE_VALUE)
@@ -88,6 +147,8 @@ void fbuf::open(const char *path, access_t mode, size_t size)
 void fbuf::create(const char *path, access_t mode, unsigned cmode, size_t size)
 {
     fbuf::close();
+    _clear();
+
     if(mode != ACCESS_DIRECTORY)
         fsys::create(path, mode, cmode);
     if(getfile() == INVALID_HANDLE_VALUE)
@@ -120,6 +181,10 @@ void fbuf::close()
 {
     BufferProtocol::release();
     fsys::close();
+    if(pid != INVALID_PID_VALUE) {
+        error = shell::wait(pid);
+        pid = INVALID_PID_VALUE;
+    }
 }
 
 fsys::offset_t fbuf::tell(void)
@@ -252,7 +317,8 @@ size_t fbuf::_pull(char *buf, size_t size)
     return (size_t)result;
 }
 
-TCPBuffer::TCPBuffer() : BufferProtocol()
+TCPBuffer::TCPBuffer() :
+BufferProtocol()
 {
     so = INVALID_SOCKET;
 }

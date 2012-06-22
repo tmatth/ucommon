@@ -1482,54 +1482,6 @@ bool fsys::ishidden(const char *path)
 #endif
 }
 
-int fsys::wait(void)
-{
-    int rtn = error;
-
-    error = 0;
-    if(pid)
-        rtn = shell::wait(pid);
-
-    ptr = NULL;
-    return rtn;
-}
-
-void fsys::open(const char *path, access_t access, char **args, char **envp)
-{
-    bool write = false;
-
-    close();
-
-    switch(access)
-    {
-    case ACCESS_STREAM:
-    case ACCESS_RDONLY:
-        break;
-    case ACCESS_WRONLY:
-    case ACCESS_APPEND:
-        write = true;
-        break;
-    default:
-        return; // invalid
-    }
-
-    fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
-    if(write)
-        error = fsys::pipe(stdio[1], fd);
-    else
-        error = fsys::pipe(fd, stdio[0]);
-
-    if(error)
-        return;
-
-    inherit(fd, false);
-    pid = shell::spawn(path, args, envp, stdio);
-    if(write)
-        release(stdio[1]);
-    else
-        release(stdio[0]);
-}
-
 charfile::charfile(const char *file, const char *mode)
 {
     fp = NULL;
