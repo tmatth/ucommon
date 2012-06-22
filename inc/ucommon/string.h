@@ -579,20 +579,6 @@ public:
     char at(int position) const;
 
     /**
-     * Find last occurrence of a character in the string.
-     * @param list of characters to search for.
-     * @return pointer to last occurrence from list or NULL.
-     */
-    const char *last(const char *list) const;
-
-    /**
-     * Find first occurrence of a character in the string.
-     * @param list of characters to search for.
-     * @return pointer to first occurrence from list or NULL.
-     */
-    const char *first(const char *list) const;
-
-    /**
      * Get pointer to first character in string for iteration.
      * @return first character pointer or NULL if empty.
      */
@@ -641,14 +627,6 @@ public:
      * @return pointer to first occurrence of character.
      */
     const char *find(const char *list, strsize_t offset = 0) const;
-
-    /**
-     * Used to find position for cut or paste.
-     * @param list of characters to search for.
-     * @param offset to start of search.  use npos for last instance.
-     * @return offset to character or npos if not found.
-     */
-    strsize_t seek(const char *list, strsize_t offset = 0) const;
 
     /**
      * Find last occurrence of character in the string.
@@ -806,6 +784,8 @@ public:
      * old behavior when +/= updated.
      */
     string& operator|=(const char *text);
+
+    string& operator&=(const char *text);
 
     /**
      * Concatenate text to an existing string object.
@@ -1272,28 +1252,20 @@ public:
     static char *find(char *text, const char *list);
 
     /**
+     * Offset until next occurrence of character in a text or length.
+     * @param text buffer to examine.
+     * @param list of characters to search for.
+     * @return offset to next occurrence or length of string.
+     */
+    static size_t seek(char *text, const char *list);
+
+    /**
      * Find the last occurrence of a character in a text buffer.
      * @param text buffer to examine.
      * @param list of characters to search for.
      * @return pointer to last instance found or NULL.
      */
     static char *rfind(char *text, const char *list);
-
-    /**
-     * Get pointer to first character past character requested.
-     * @param text buffer to examine.
-     * @param list of characters.
-     * @return first character pointer past list.
-     */
-    static char *first(char *text, const char *list);
-
-    /**
-     * Get pointer to last character before character requested.
-     * @param text buffer to examine.
-     * @param list of characters.
-     * @return last character pointer past list.
-     */
-    static char *last(char *text, const char *list);
 
     /**
      * Duplicate null terminated text into the heap.
@@ -1499,9 +1471,6 @@ public:
     inline static const char *find(string& object, const char *list)
         {return object.find(list);}
 
-    inline static strsize_t seek(string& object, const char *list, strsize_t offset = 0)
-        {return object.seek(list, offset);}
-
     inline static const char *search(string& object, const char *substring, unsigned instance = 0, unsigned flags = 0)
         {return object.search(substring, instance, flags);}
 
@@ -1525,24 +1494,6 @@ public:
      */
     inline static const char *rfind(string& object, const char *list)
         {return object.rfind(list);}
-
-    /**
-     * Get pointer to first character past character requested.
-     * @param object to examine.
-     * @param list of characters.
-     * @return first character pointer past list.
-     */
-    inline static const char *first(string& object, const char *list)
-        {return object.first(list);}
-
-    /**
-     * Get pointer to last character past character requested.
-     * @param object to examine.
-     * @param list of characters.
-     * @return last character pointer before list.
-     */
-    inline static const char *last(string& object, const char *list)
-        {return object.last(list);}
 
     /**
      * Convert string to a double value.

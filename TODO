@@ -1,5 +1,9 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	string format and numbers library
+
+	StrgetProtocol for >> operator
+
 	do not co-mingle ptr and pid in fsys!
 
 	fsys::exec with and without env will be merged

@@ -411,22 +411,6 @@ int string::compare(const char *s) const
 #endif
 }
 
-const char *string::last(const char *clist) const
-{
-    if(!str)
-        return NULL;
-
-    return last(str->text, clist);
-}
-
-const char *string::first(const char *clist) const
-{
-    if(!str)
-        return NULL;
-
-    return first(str->text, clist);
-}
-
 const char *string::begin(void) const
 {
     if(!str)
@@ -1193,11 +1177,18 @@ string &string::operator^=(const char *s)
 
 string &string::operator=(const char *s)
 {
+    release();
     set(s);
     return *this;
 }
 
 string &string::operator|=(const char *s)
+{
+    set(s);
+    return *this;
+}
+
+string &string::operator&=(const char *s)
 {
     set(s);
     return *this;
@@ -1306,7 +1297,12 @@ string &string::operator|(const char *s)
     if(!s || !*s)
         return *this;
 
-    add(s);
+    if(!str) {
+        set(s);
+        return *this;
+    }
+
+    str->add(s);
     return *this;
 }
 
@@ -1795,19 +1791,22 @@ char *string::rskip(char *str, const char *clist)
     return NULL;
 }
 
-strsize_t string::seek(const char *clist, strsize_t pos) const
+size_t string::seek(char *str, const char *clist)
 {
-    const char *addr;
+    size_t pos = 0;
 
-    if(pos == npos)
-        addr = rfind(clist);
-    else
-        addr = find(clist, pos);
+    if(!str)
+        return 0;
 
-    if(!addr)
-        return npos;
+    if(!clist)
+        return strlen(str);
 
-    return offset(addr);
+    while(str[pos]) {
+        if(strchr(clist, str[pos]))
+            return pos;
+        ++pos;
+    }
+    return pos;
 }
 
 char *string::find(char *str, const char *clist)
@@ -1840,47 +1839,6 @@ char *string::rfind(char *str, const char *clist)
             return s;
     }
     return NULL;
-}
-
-char *string::last(char *str, const char *clist)
-{
-    char *cp, *lp = NULL;
-
-    if(!str)
-        return NULL;
-
-    if(!clist)
-        return str + strlen(str) - 1;
-
-    while(clist && *clist) {
-        cp = strrchr(str, *(clist++));
-        if(cp && cp > lp)
-            lp = cp;
-    }
-
-    return lp;
-}
-
-char *string::first(char *str, const char *clist)
-{
-    char *cp, *fp;
-
-    if(!str)
-        return NULL;
-
-    if(!clist)
-        return str;
-
-    fp = str + strlen(str);
-    while(clist && *clist) {
-        cp = strchr(str, *(clist++));
-        if(cp && cp < fp)
-            fp = cp;
-    }
-
-    if(!*fp)
-        fp = NULL;
-    return fp;
 }
 
 bool string::case_equal(const char *s1, const char *s2)
