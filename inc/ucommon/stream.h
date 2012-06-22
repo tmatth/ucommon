@@ -313,7 +313,6 @@ public:
     /**
      * Close an active stream connection.  This waits for the child to
      * terminate.
-     * @return exit code.
      */
     int close(void);
 
@@ -321,6 +320,9 @@ public:
      * Force terminate child and close.
      */
     void terminate(void);
+
+    inline void cancel(void)
+        {terminate();}
 };
 
 /**

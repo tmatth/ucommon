@@ -131,7 +131,7 @@ public:
     void open(const char *path, fsys::access_t access, char **argv, size_t size = 512, char **envp = NULL);
 
     /**
-     * Close the file, flush buffers.
+     * Close the file, flush buffers.  Capture exit code in error for pipe.
      */
     void close(void);
 
@@ -139,6 +139,9 @@ public:
      * Force terminate child and close.
      */
     void terminate(void);
+
+    inline void cancel(void)
+        {terminate();}
 
     /**
      * Seek specific offset in open file and reset I/O buffers.  If the
