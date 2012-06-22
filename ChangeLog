@@ -1,4 +1,4 @@
-from ucommon 5.3.0 to 5.3.1
+from ucommon 5.3.0 to 5.4.0
 - cleanup for ide use.
 - NamedList sort uses system collation.
 - some convenience string methods added.
