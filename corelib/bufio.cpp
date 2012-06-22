@@ -177,7 +177,15 @@ void fbuf::create(const char *path, access_t mode, unsigned cmode, size_t size)
     }
 }
 
-void fbuf::close()
+void fbuf::terminate(void)
+{
+    if(pid != INVALID_PID_VALUE) {
+        shell::cancel(pid);
+        fbuf::close();
+    }
+}
+
+void fbuf::close(void)
 {
     BufferProtocol::release();
     fsys::close();

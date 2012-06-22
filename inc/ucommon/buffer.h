@@ -136,6 +136,11 @@ public:
     void close(void);
 
     /**
+     * Force terminate child and close.
+     */
+    void terminate(void);
+
+    /**
      * Seek specific offset in open file and reset I/O buffers.  If the
      * file is opened for both read and write, both the read and write
      * position will be reset.

@@ -427,31 +427,13 @@ pipestream::~pipestream()
     close();
 }
 
-#ifdef  _MSWINDOWS_
-void pipestream::terminate(void)
-{
-    HANDLE hProc;
-    if(bufsize) {
-        hProc = OpenProcess(SYNCHRONIZE|PROCESS_TERMINATE, FALSE, pid);
-        if(hProc != NULL) {
-            TerminateProcess(hProc,0);
-            CloseHandle(hProc);
-        }
-        release();
-    }
-}
-
-#else
-
 void pipestream::terminate(void)
 {
     if(bufsize) {
-        kill(pid, SIGTERM);
+        shell::cancel(pid);
         close();
     }
 }
-
-#endif
 
 void pipestream::release(void)
 {
