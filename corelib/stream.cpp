@@ -605,7 +605,7 @@ void pipestream::open(const char *path, access_t mode, char **args, char **envp,
 
     fsys::release(stdio[0]);
     fsys::release(stdio[1]);
-    if(pid == -1) {
+    if(pid == INVALID_PID_VALUE) {
         fsys::release(input);
         fsys::release(output);
         input = output = INVALID_HANDLE_VALUE;

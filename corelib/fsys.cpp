@@ -178,7 +178,6 @@ int fsys::removeDir(const char *path)
 
 fd_t fsys::nullfile(void)
 {
-    fd_t handle;
     SECURITY_ATTRIBUTES sattr;
 
     sattr.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -188,7 +187,7 @@ fd_t fsys::nullfile(void)
     return CreateFile("nul", GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, &sattr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
-int fsys::pipe(fd_t& input, ft_t& output, size_t size)
+int fsys::pipe(fd_t& input, fd_t& output, size_t size)
 {
     input = output = NULL;
     SECURITY_ATTRIBUTES sattr;
@@ -532,14 +531,14 @@ fsys::fsys(const fsys& copy)
 int fsys::inherit(fd_t& from, bool enable)
 {
     HANDLE pHandle = GetCurrentProcess();
-    HANDLE fd;
 
     if(!enable) {
-        if(!SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0))
+        if(!SetHandleInformation(from, HANDLE_FLAG_INHERIT, 0))
             return remapError();
         return 0;
     }
 
+    fd_t fd;
     if(DuplicateHandle(pHandle, from, pHandle, &fd, 0, TRUE, DUPLICATE_SAME_ACCESS)) {
         release(from);
         from = fd;

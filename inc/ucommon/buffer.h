@@ -43,6 +43,10 @@
 #include <ucommon/fsys.h>
 #endif
 
+#ifndef _UCOMMON_SHELL_H_
+#include <ucommon/shell.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 /**
@@ -55,7 +59,7 @@ class fbuf : public BufferProtocol, private fsys
 {
 private:
     offset_t    inpos, outpos;
-    pid_t pid;
+    shell::pid_t pid;
 
 protected:
     size_t _push(const char *address, size_t size);

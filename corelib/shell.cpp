@@ -1404,6 +1404,14 @@ int shell::inkey(const char *prompt)
     return (char)getch();
 }
 
+int shell::cancel(shell::pid_t pid)
+{
+    UINT code = 255;
+    if(!TerminateProcess(pid, 255))
+        return -1; 
+    return 0;
+}
+
 char *shell::getline(const char *prompt, char *buffer, size_t size)
 {
     unsigned pos = 0;

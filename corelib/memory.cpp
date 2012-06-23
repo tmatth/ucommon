@@ -309,7 +309,10 @@ unsigned stringpager::split(const char *text, const char *string, unsigned flags
 
     // until end of string or end of matches...
     while(prior && *prior && match) {
-#ifdef  HAVE_STRICMP
+#if defined(_MSWINDOWS_)
+        if((flags & 0x01) == String::INSENSITIVE)
+            match = strstr(prior, text);
+#elif  defined(HAVE_STRICMP)
         if((flags & 0x01) == String::INSENSITIVE)
             match = stristr(prior, text);
 #else

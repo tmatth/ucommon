@@ -45,6 +45,10 @@
 #include <ucommon/fsys.h>
 #endif
 
+#ifndef _UCOMMON_SHELL_H_
+#include <ucommon/shell.h>
+#endif
+
 #include <iostream>
 
 NAMESPACE_UCOMMON
@@ -241,7 +245,7 @@ private:
 
 protected:
     fsys_t rd, wr;
-    pid_t pid;
+    shell::pid_t pid;
 
     /**
      * Release the stream, detach/do not wait for the process.

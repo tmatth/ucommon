@@ -575,7 +575,10 @@ unsigned string::replace(const char *substring, const char *cp, unsigned flags)
 
     while(result) {
         const char *text = str->text + offset;
-#ifdef  HAVE_STRICMP
+#if defined(_MSWINDOWS_)
+        if((flags & 0x01) == INSENSITIVE)
+            result = strstr(text, substring);
+#elif  defined(HAVE_STRICMP)
         if((flags & 0x01) == INSENSITIVE)
             result = stristr(text, substring);
 #else
@@ -610,7 +613,10 @@ const char *string::search(const char *substring, unsigned instance, unsigned fl
     if(!instance)
         ++instance;
     while(instance-- && result) {
-#ifdef  HAVE_STRICMP
+#if defined(_MSWINDOWS_)
+        if((flags & 0x01) == INSENSITIVE)
+            result = strstr(text, substring);
+#elif  defined(HAVE_STRICMP)
         if((flags & 0x01) == INSENSITIVE)
             result = stristr(text, substring);
 #else
