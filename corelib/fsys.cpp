@@ -1444,9 +1444,10 @@ void fsys::unload(fsys& module)
 
 #else
 
-mem_t fsys::load(const char *path)
+void fsys::load(fsys& module, const char *path)
 {
-    return NULL;
+    module.error = ENOEXEC;
+    module.ptr = NULL;
 }
 
 void fsys::unload(mem_t addr)
