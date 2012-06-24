@@ -74,6 +74,8 @@ struct sockaddr_internet;
 
 typedef struct sockaddr *sockaddr_t;
 
+typedef struct sockaddr sockaddr_struct;    // older gcc needs...?
+
 /**
  * An object that holds ipv4 or ipv6 binary encoded host addresses.
  */
@@ -1760,7 +1762,7 @@ __EXPORT socket_t _getaddrsock(struct addrinfo *addrinfo);
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 template <>
-class linked_pointer<struct sockaddr>
+class linked_pointer<sockaddr_struct>
 {
 private:
     struct addrinfo *ptr;
