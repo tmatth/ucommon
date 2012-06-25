@@ -1,5 +1,9 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	Redu and split ucommon.pc and usecure.pc.  This is to get cleaner
+	linkages in derived projects.  Also or alternately change 
+	ucommon-config to have a with & without secure mode.
+
 	move spawn/proc stuff from shell into new proc::, move fsys:: 
 	inherited redirect methods and pipe into proc.  This is to clean
 	up static linking uses and interdependence of some things.  Maybe
