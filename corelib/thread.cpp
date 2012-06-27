@@ -579,7 +579,7 @@ void ConditionalAccess::waitBroadcast(void)
 
 ConditionalAccess::ConditionalAccess() : Conditional()
 {
-    pending = waiting = pending = 0;
+    pending = waiting = sharing = 0;
 }
 
 ConditionalAccess::~ConditionalAccess()

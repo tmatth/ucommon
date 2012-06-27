@@ -1,5 +1,6 @@
 from ucommon 5.4.1 to 5.4.2
 - fixes for older gcc builds and template issues.
+- bugfix for ConditionalAccess constructor.
 
 from ucommon 5.4.0 to 5.4.1
 - fixes for windows build.
