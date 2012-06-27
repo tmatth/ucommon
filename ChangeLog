@@ -1,3 +1,6 @@
+from ucommon 5.2.2 to 5.2.3
+- fixes for setAddress and ConditionalAccess.
+
 from ucommon 5.2.1 to 5.2.2
 - use strcoll for sorting when possible
 - common c++ object linking, maps, and ref counted pointers added back
