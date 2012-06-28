@@ -34,6 +34,8 @@
 // If you do not wish that, delete this exception notice.
 //
 
+#ifdef  NEW_STDCPP
+
 #include "../config.h"
 #include <commoncpp/config.h>
 #include <commoncpp/thread.h>
@@ -1187,4 +1189,4 @@ AppLog& AppLog::operator<< (ostream& (*pfManipulator)(ostream&))
   return  *this ;
 }
 
-
+#endif
