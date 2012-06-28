@@ -11,7 +11,7 @@
 
 #define __EXPORT    __SHARED
 
-#include <streambuf>
+// #include <streambuf>
 #include <iostream>
 
 #define CCXX_NAMESPACES

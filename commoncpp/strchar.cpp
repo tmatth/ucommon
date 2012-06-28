@@ -37,6 +37,7 @@
 //
 
 #include "../config.h"
+#include <ctype.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/string.h>
