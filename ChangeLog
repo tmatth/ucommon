@@ -1,3 +1,6 @@
+from ucommon 5.4.2 to 5.4.3
+- fixes for supporting ancient gcc compilers (at least >=2.96!)
+
 from ucommon 5.4.1 to 5.4.2
 - fixes for older gcc builds and template issues.
 - bugfix for ConditionalAccess constructor.
