@@ -1,3 +1,6 @@
+from ucommon 5.4.3 to 5.4.4
+- interesting bug in Conditional gettimeout and queue suggested by Pollak
+
 from ucommon 5.4.2 to 5.4.3
 - fixes for supporting ancient gcc compilers (at least >=2.96!)
 

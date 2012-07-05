@@ -425,7 +425,7 @@ void TimerPort::incTimer(timeout_t timeout)
     int usecs = (timeout % 1000) * 1000;
 
     timer.tv_usec += usecs;
-    if(timer.tv_usec > 1000000l) {
+    if(timer.tv_usec >= 1000000l) {
         ++timer.tv_sec;
         timer.tv_usec %= 1000000l;
     }
