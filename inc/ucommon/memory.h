@@ -235,6 +235,105 @@ public:
     virtual void *_alloc(size_t size);
 };
 
+class __EXPORT objectpager : protected memalloc
+{
+public:
+    class __EXPORT member : public LinkedObject
+    {
+    private:
+        void *mem;
+
+    protected:
+        friend class objectpager;
+
+        inline void set(member *node)
+            {next = node;};
+
+        member(LinkedObject **root);
+        member();
+
+    public:
+        inline void *operator*() const
+            {return mem;};
+
+        inline void *get(void) const
+            {return mem;};
+    };
+
+private:
+    unsigned members;
+    LinkedObject *root;
+    size_t typesize;
+    member *last;
+    void **index;
+
+protected:
+    objectpager(size_t objsize, size_t pagesize = 256);
+
+    /**
+     * Get object from list.  This is useful when objectpager is
+     * passed as a pointer and hence inconvenient for the [] operator.
+     * @param item to access.
+     * @return pointer to text for item, or NULL if out of range.
+     */
+    void *get(unsigned item);
+
+    /**
+     * Add object to list.
+     * @param object to add.
+     */
+    void *add(void);
+
+    void *push(void);
+
+    /**
+     * Remove element from front of list.  Does not release memory.
+     * @return object removed.
+     */
+    void *pull(void);
+
+    /**
+     * Remove element from back of list.  Does not release memory.
+     * @return object removed.
+     */
+    void *pop(void);
+
+public:
+    /**
+     * Purge all members and release pager member.  The list can then
+     * be added to again.
+     */
+    void clear(void);
+
+    /**
+     * Get root of pager list.  This is useful for externally enumerating
+     * the list of strings.
+     * @return first member of list or NULL if empty.
+     */
+    inline objectpager::member *begin(void)
+        {return static_cast<objectpager::member *>(root);};
+
+    inline operator bool()
+        {return members > 0;}
+
+    inline bool operator!()
+        {return !members;}
+
+    /**
+     * Get the number of items in the pager string list.
+     * @return number of items stored.
+     */
+    inline unsigned count(void)
+        {return members;};
+
+protected:
+    /**
+     * Gather index list.
+     * @return index.
+     */
+    void **list(void);
+};
+
 /**
  * String pager for storing lists of NULL terminated strings.  This is
  * used for accumulating lists which can be destroyed all at once.
@@ -384,7 +483,10 @@ public:
      * @param text to add to list.
      */
     inline stringpager& operator<<(const char *text)
-        {add(text); return *this;};
+        {add(text); return *this;}
+
+    inline stringpager& operator>>(const char *text)
+        {push(text); return *this;}
 
     /**
      * Sort members.
@@ -840,14 +942,46 @@ public:
     void *remove(const char *name);
 };
 
+template <class T, size_t P = 0>
+class listof : private objectpager
+{
+public:
+    inline listof() : objectpager(sizeof(T), P) {};
+
+    inline T& operator[](unsigned item) const
+        {return (T&)objectpager::get(item);}
+
+    inline T* pull(void)
+        {return (T*)objectpager::pull();}
+
+    inline T* pop(void)
+        {return (T*)objectpager::pop();}
+
+    inline operator T**()
+        {return (T**)objectpager::list();}
+
+    inline T** list(void)
+        {return (T**)objectpager::list();}
+
+    inline T* operator++(void)
+        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T; return tmp;}
+
+    inline listof& operator<<(const T& object)
+        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
+
+    inline listof& operator>>(const T& object)
+        {T* tmp = objectpager::push(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
+
+};
+
 template <class T, unsigned I = 177, size_t M = 0, size_t P = 0>
-class named_map : private keyassoc
+class mapof : private keyassoc
 {
 public:
     /**
      * Construct an associated pointer hash map based on the class template.
      */
-    inline named_map() : keyassoc(I, M, P) {};
+    inline mapof() : keyassoc(I, M, P) {};
 
     /**
      * Get the count of typed objects stored in our hash map.

@@ -228,6 +228,169 @@ void *mempager::_alloc(size_t size)
     return mem;
 }
 
+objectpager::member::member(LinkedObject **root) :
+LinkedObject(root)
+{
+    mem = NULL;
+}
+
+objectpager::member::member() :
+LinkedObject()
+{
+    mem = NULL;
+}
+
+objectpager::objectpager(size_t objsize, size_t size) :
+memalloc(size)
+{
+    members = 0;
+    root = NULL;
+    last = NULL;
+    index = NULL;
+    typesize = objsize;
+}
+
+void *objectpager::get(unsigned index)
+{
+    _lock();
+    linked_pointer<member> list = root;
+
+    if(index >= members) {
+        _unlock();
+        return NULL;
+    }
+
+    while(index--)
+        list.next();
+
+    _unlock();
+    return list->mem;
+}
+
+void objectpager::clear(void)
+{
+    memalloc::purge();
+    members = 0;
+    root = NULL;
+    last = NULL;
+    index = NULL;
+}
+
+void *objectpager::pull(void)
+{
+    _lock();
+    if(!members) {
+        _unlock();
+        return NULL;
+    }
+
+    member *mem = (member *)root;
+    void *result = mem->mem;
+    --members;
+    if(!members) {
+        root = NULL;
+        last = NULL;
+    }
+    else
+        root = mem->next;
+    index = NULL;
+    _unlock();
+    return result;
+}
+
+void *objectpager::push(void)
+{
+    _lock();
+    caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
+
+    member *node;
+
+    node = new(mem) member(&root);
+    if(!last)
+        last = node;
+    ++members;
+    node->mem = memalloc::_alloc(typesize);
+    index = NULL;
+    _unlock();
+    return node->mem;
+}
+
+void *objectpager::pop(void)
+{
+    void *out = NULL;
+
+    _lock();
+    if(!root) {
+        _unlock();
+        return NULL;
+    }
+
+    index = NULL;
+
+    if(root == last) {
+        out = last->mem;
+        root = last = NULL;
+        members = 0;
+        _unlock();
+        return out;
+    }
+
+    linked_pointer<member> np = root;
+    while(is(np)) {
+        if(np->next == last) {
+            out = last->mem;
+            last = *np;
+            np->next = NULL;
+            --members;
+            break;
+        }
+        np.next();
+    }
+    _unlock();
+    return out;
+}
+
+void *objectpager::add(void)
+{
+    _lock();
+    caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
+    member *node;
+
+    index = NULL;
+    if(members++) {
+        node = new(mem) member();
+        last->set(node);
+    }
+    else
+        node = new(mem) member(&root);
+    last = node;
+    node->mem = memalloc::_alloc(typesize);
+    _unlock();
+    return node->mem;
+}
+
+void **objectpager::list(void)
+{
+    _lock();
+    void **dp = index;
+    if(dp) {
+        _unlock();
+        return dp;
+    }
+
+    unsigned pos = 0;
+    index = (void **)memalloc::_alloc(sizeof(void *) * (members + 1));
+    linked_pointer<member> mp = root;
+    while(is(mp)) {
+        index[pos++] = mp->mem;
+        mp.next();
+    }
+    index[pos] = NULL;
+    dp = index;
+    _unlock();
+    return index;
+}
+
 stringpager::member::member(LinkedObject **root, const char *data) :
 LinkedObject(root)
 {

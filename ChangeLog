@@ -1,5 +1,5 @@
 from ucommon 5.4.3 to 5.4.4
-- named_map support added
+- mapof and listof added
 
 from ucommon 5.4.2 to 5.4.3
 - fixes for supporting ancient gcc compilers (at least >=2.96!)
