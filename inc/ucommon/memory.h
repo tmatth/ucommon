@@ -873,7 +873,6 @@ public:
     inline T *operator[](const char *name)
         {return static_cast<T*>(keyassoc::locate(name));}
 
-
     /**
      * Reference a typed object directly by name.
      * @param name of typed object to locate.
@@ -887,7 +886,7 @@ public:
      * @param name to assign.
      */
     inline T *map(char *name)
-        {return keyassoc::allocate(name, sizeof(T));}
+        {T *tmp = keyassoc::allocate(name, sizeof(T)); if(tmp) new((caddr_t)tmp) T;}
 
     /**
      * Remove a name and typed pointer association.  If managed key names are
