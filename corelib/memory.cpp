@@ -760,6 +760,45 @@ void *keyassoc::remove(const char *id)
     return data;
 }
 
+void *keyassoc::allocate(char *id, size_t dsize)
+{
+    assert(id != NULL && *id != 0);
+    assert(dsize != 0);
+
+    void *dp = NULL;
+    keydata *kd;
+    LinkedObject *obj;
+    unsigned size = strlen(id);
+
+    if(keysize && size >= keysize)
+        return NULL;
+
+    _lock();
+    kd = static_cast<keydata *>(NamedObject::map(root, id, paths));
+    if(kd) {
+        _unlock();
+        return NULL;
+    }
+    caddr_t ptr = NULL;
+    size /= 8;
+    if(list && list[size]) {
+        obj = list[size];
+        list[size] = obj->getNext();
+        ptr = (caddr_t)obj;
+    }
+    if(ptr == NULL) {
+        ptr = (caddr_t)memalloc::_alloc(sizeof(keydata) + size * 8);
+        dp = memalloc::_alloc(dsize);
+    }
+    else
+        dp = ((keydata *)(ptr))->data;
+    kd = new(ptr) keydata(this, id, paths, 8 + size * 8);
+    kd->data = dp;
+    ++count;
+    _unlock();
+    return dp;
+}
+
 bool keyassoc::create(char *id, void *data)
 {
     assert(id != NULL && *id != 0);

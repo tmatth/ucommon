@@ -1,5 +1,7 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	const char * for keyassoc id's
+
 	Redu and split ucommon.pc and usecure.pc.  This is to get cleaner
 	linkages in derived projects.  Also or alternately change 
 	ucommon-config to have a with & without secure mode.

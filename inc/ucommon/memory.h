@@ -764,6 +764,15 @@ private:
     NamedObject **root;
     LinkedObject **list;
 
+protected:
+    /**
+     * Allocate object stored in pager also.
+     * @param name of object entry.
+     * @param size of object to allocate.
+     * @return pointer to allocated object or NULL on failure.
+     */
+    void *allocate(char *name, size_t size);
+
 public:
     /**
      * Create a key associated memory pointer table.
@@ -831,6 +840,81 @@ public:
     void *remove(const char *name);
 };
 
+template <class T, unsigned I = 177, size_t M = 0, size_t P = 0>
+class named_map : private keyassoc
+{
+public:
+    /**
+     * Construct an associated pointer hash map based on the class template.
+     */
+    inline named_map() : keyassoc(I, M, P) {};
+
+    /**
+     * Get the count of typed objects stored in our hash map.
+     * @return typed objects in map.
+     */
+    inline unsigned getCount(void)
+        {return keyassoc::getCount();};
+
+    /**
+     * Purge the hash map of typed objects.
+     */
+    inline void purge(void)
+        {keyassoc::purge();};
+
+    /**
+     * Lookup a typed object by name.
+     * @param name of typed object to locate.
+     * @return typed object pointer or NULL if not found.
+     */
+    inline T *locate(const char *name)
+        {return static_cast<T*>(keyassoc::locate(name));}
+
+    inline T *operator[](const char *name)
+        {return static_cast<T*>(keyassoc::locate(name));}
+
+
+    /**
+     * Reference a typed object directly by name.
+     * @param name of typed object to locate.
+     * @return typed object pointer or NULL if not found.
+     */
+    inline T *operator()(const char *name)
+        {return locate(name);};
+
+    /**
+     * Create mapped entry from scratch.
+     * @param name to assign.
+     */
+    inline T *map(char *name)
+        {return keyassoc::allocate(name, sizeof(T));}
+
+    /**
+     * Remove a name and typed pointer association.  If managed key names are
+     * used then the memory allocated for the name will be re-used.
+     * @param name to remove.
+     */
+    inline void unmap(char *name)
+        {keyassoc::remove(name);};
+
+    /**
+     * Access to pager utilization stats.  This is needed because we
+     * inherit keyassoc privately.
+     * @return pager utilization, 0-100.
+     */
+    inline unsigned utilization(void)
+        {return mempager::utilization();};
+
+    /**
+     * Access to number of pages allocated from heap for our associated
+     * index pointer.  This is needed because we inherit keyassoc
+     * privately.
+     * @return count of heap pages used.
+     */
+    inline unsigned getPages(void)
+        {return mempager::getPages();};
+};
+
 /**
  * A typed template for using a key association with typed objects.
  * This essentially forms a form of "smart pointer" that is a reference
@@ -852,13 +936,13 @@ public:
      * @return typed objects in map.
      */
     inline unsigned getCount(void)
-        {return keyassoc::getCount();};
+        {return keyassoc::getCount();}
 
     /**
      * Purge the hash map of typed objects.
      */
     inline void purge(void)
-        {keyassoc::purge();};
+        {keyassoc::purge();}
 
     /**
      * Lookup a typed object by name.
@@ -866,7 +950,11 @@ public:
      * @return typed object pointer or NULL if not found.
      */
     inline T *locate(const char *name)
-        {return static_cast<T*>(keyassoc::locate(name));};
+        {return static_cast<T*>(keyassoc::locate(name));}
+
+    inline T *operator[](const char *name)
+        {return static_cast<T*>(keyassoc::locate(name));}
+
 
     /**
      * Reference a typed object directly by name.
@@ -874,7 +962,7 @@ public:
      * @return typed object pointer or NULL if not found.
      */
     inline T *operator()(const char *name)
-        {return locate(name);};
+        {return locate(name);}
 
     /**
      * Assign a name for a pointer to a typed object.  If the name exists,
@@ -884,7 +972,7 @@ public:
      * @return false if failed because name is too long for managed table.
      */
     inline bool assign(char *name, T *pointer)
-        {return keyassoc::assign(name, pointer);};
+        {return keyassoc::assign(name, pointer);}
 
     /**
      * Create a new name in the association table and assign typed object.
@@ -893,7 +981,7 @@ public:
      * @return false if already exists or name is too long for managed table.
      */
     inline bool create(char *name, T *pointer)
-        {return keyassoc::create(name, pointer);};
+        {return keyassoc::create(name, pointer);}
 
     /**
      * Remove a name and typed pointer association.  If managed key names are
@@ -901,7 +989,7 @@ public:
      * @param name to remove.
      */
     inline void remove(char *name)
-        {keyassoc::remove(name);};
+        {keyassoc::remove(name);}
 
     /**
      * Access to pager utilization stats.  This is needed because we
@@ -909,7 +997,7 @@ public:
      * @return pager utilization, 0-100.
      */
     inline unsigned utilization(void)
-        {return mempager::utilization();};
+        {return mempager::utilization();}
 
     /**
      * Access to number of pages allocated from heap for our associated
@@ -918,7 +1006,7 @@ public:
      * @return count of heap pages used.
      */
     inline unsigned getPages(void)
-        {return mempager::getPages();};
+        {return mempager::getPages();}
 };
 
 /**
