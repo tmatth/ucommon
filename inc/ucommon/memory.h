@@ -951,6 +951,12 @@ public:
     inline T& operator[](unsigned item) const
         {return (T&)objectpager::get(item);}
 
+    inline T* operator()(unsigned item) const
+        {return (T*)objectpager::get(item);}
+
+    inline T* get(unsigned item) const
+        {return (T*)objectpager::get(item);}
+
     inline T* pull(void)
         {return (T*)objectpager::pull();}
 
@@ -965,6 +971,12 @@ public:
 
     inline T* operator++(void)
         {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T; return tmp;}
+
+    inline T* add(const T& object)
+        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
+
+    inline T* push(const T& object)
+        {T* tmp = objectpager::push(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
 
     inline listof& operator<<(const T& object)
         {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
