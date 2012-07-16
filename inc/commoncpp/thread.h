@@ -260,7 +260,7 @@ public:
 class __EXPORT Semaphore : private ucommon::Semaphore
 {
 public:
-    inline Semaphore(unsigned size) : ucommon::Semaphore(size) {};
+    inline Semaphore(unsigned size=0) : ucommon::Semaphore(size) {};
 
     inline bool wait(timeout_t timeout = 0)
         {return ucommon::Semaphore::wait(timeout);};
