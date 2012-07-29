@@ -36,6 +36,8 @@
 // If you do not wish that, delete this exception notice.
 //
 
+#include <sys/stat.h>
+
 // needed for GNU/LINUX glibc otherwise pread/pwrite wont work
 
 #ifndef _XOPEN_SOURCE
@@ -298,8 +300,7 @@ bool RandomFile::initial(void)
         error(errInitFailed);
         return false;
     }
-    if(pathname)
-        chmod(pathname, mode);
+    fchmod(fd, mode);
 #endif
 
     leaveMutex();

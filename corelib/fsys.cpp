@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <sys/stat.h>
+
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
 
@@ -75,15 +77,6 @@
 
 #ifdef  HAVE_SYS_EVENT_H
 #include <sys/event.h>
-#endif
-
-// more broken BSD with XOPEN in headers...
-#ifdef  HAVE_LSTAT
-
-extern "C" {
-    int lstat(const char *path, struct stat *ino);
-}
-
 #endif
 
 using namespace UCOMMON_NAMESPACE;
