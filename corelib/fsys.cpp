@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef _MSC_VER
 #include <sys/stat.h>
+#endif
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
