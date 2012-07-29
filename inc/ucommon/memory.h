@@ -235,6 +235,105 @@ public:
     virtual void *_alloc(size_t size);
 };
 
+class __EXPORT objectpager : protected memalloc
+{
+public:
+    class __EXPORT member : public LinkedObject
+    {
+    private:
+        void *mem;
+
+    protected:
+        friend class objectpager;
+
+        inline void set(member *node)
+            {next = node;};
+
+        member(LinkedObject **root);
+        member();
+
+    public:
+        inline void *operator*() const
+            {return mem;};
+
+        inline void *get(void) const
+            {return mem;};
+    };
+
+private:
+    unsigned members;
+    LinkedObject *root;
+    size_t typesize;
+    member *last;
+    void **index;
+
+protected:
+    objectpager(size_t objsize, size_t pagesize = 256);
+
+    /**
+     * Get object from list.  This is useful when objectpager is
+     * passed as a pointer and hence inconvenient for the [] operator.
+     * @param item to access.
+     * @return pointer to text for item, or NULL if out of range.
+     */
+    void *get(unsigned item);
+
+    /**
+     * Add object to list.
+     * @param object to add.
+     */
+    void *add(void);
+
+    void *push(void);
+
+    /**
+     * Remove element from front of list.  Does not release memory.
+     * @return object removed.
+     */
+    void *pull(void);
+
+    /**
+     * Remove element from back of list.  Does not release memory.
+     * @return object removed.
+     */
+    void *pop(void);
+
+public:
+    /**
+     * Purge all members and release pager member.  The list can then
+     * be added to again.
+     */
+    void clear(void);
+
+    /**
+     * Get root of pager list.  This is useful for externally enumerating
+     * the list of strings.
+     * @return first member of list or NULL if empty.
+     */
+    inline objectpager::member *begin(void)
+        {return static_cast<objectpager::member *>(root);};
+
+    inline operator bool()
+        {return members > 0;}
+
+    inline bool operator!()
+        {return !members;}
+
+    /**
+     * Get the number of items in the pager string list.
+     * @return number of items stored.
+     */
+    inline unsigned count(void)
+        {return members;};
+
+protected:
+    /**
+     * Gather index list.
+     * @return index.
+     */
+    void **list(void);
+};
+
 /**
  * String pager for storing lists of NULL terminated strings.  This is
  * used for accumulating lists which can be destroyed all at once.
@@ -384,7 +483,10 @@ public:
      * @param text to add to list.
      */
     inline stringpager& operator<<(const char *text)
-        {add(text); return *this;};
+        {add(text); return *this;}
+
+    inline stringpager& operator>>(const char *text)
+        {push(text); return *this;}
 
     /**
      * Sort members.
@@ -764,6 +866,15 @@ private:
     NamedObject **root;
     LinkedObject **list;
 
+protected:
+    /**
+     * Allocate object stored in pager also.
+     * @param name of object entry.
+     * @param size of object to allocate.
+     * @return pointer to allocated object or NULL on failure.
+     */
+    void *allocate(char *name, size_t size);
+
 public:
     /**
      * Create a key associated memory pointer table.
@@ -831,6 +942,124 @@ public:
     void *remove(const char *name);
 };
 
+template <class T, size_t P = 0>
+class listof : private objectpager
+{
+public:
+    inline listof() : objectpager(sizeof(T), P) {};
+
+    inline T& operator[](unsigned item) const
+        {return (T&)objectpager::get(item);}
+
+    inline T* operator()(unsigned item) const
+        {return (T*)objectpager::get(item);}
+
+    inline T* get(unsigned item) const
+        {return (T*)objectpager::get(item);}
+
+    inline T* pull(void)
+        {return (T*)objectpager::pull();}
+
+    inline T* pop(void)
+        {return (T*)objectpager::pop();}
+
+    inline operator T**()
+        {return (T**)objectpager::list();}
+
+    inline T** list(void)
+        {return (T**)objectpager::list();}
+
+    inline T* operator++(void)
+        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T; return tmp;}
+
+    inline T* add(const T& object)
+        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
+
+    inline T* push(const T& object)
+        {T* tmp = objectpager::push(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
+
+    inline listof& operator<<(const T& object)
+        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
+
+    inline listof& operator>>(const T& object)
+        {T* tmp = objectpager::push(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
+
+};
+
+template <class T, unsigned I = 177, size_t M = 0, size_t P = 0>
+class mapof : private keyassoc
+{
+public:
+    /**
+     * Construct an associated pointer hash map based on the class template.
+     */
+    inline mapof() : keyassoc(I, M, P) {};
+
+    /**
+     * Get the count of typed objects stored in our hash map.
+     * @return typed objects in map.
+     */
+    inline unsigned getCount(void)
+        {return keyassoc::getCount();};
+
+    /**
+     * Purge the hash map of typed objects.
+     */
+    inline void purge(void)
+        {keyassoc::purge();};
+
+    /**
+     * Lookup a typed object by name.
+     * @param name of typed object to locate.
+     * @return typed object pointer or NULL if not found.
+     */
+    inline T *locate(const char *name)
+        {return static_cast<T*>(keyassoc::locate(name));}
+
+    inline T *operator[](const char *name)
+        {return static_cast<T*>(keyassoc::locate(name));}
+
+    /**
+     * Reference a typed object directly by name.
+     * @param name of typed object to locate.
+     * @return typed object pointer or NULL if not found.
+     */
+    inline T *operator()(const char *name)
+        {return locate(name);};
+
+    /**
+     * Create mapped entry from scratch.
+     * @param name to assign.
+     */
+    inline T *map(char *name)
+        {T *tmp = keyassoc::allocate(name, sizeof(T)); if(tmp) new((caddr_t)tmp) T;}
+
+    /**
+     * Remove a name and typed pointer association.  If managed key names are
+     * used then the memory allocated for the name will be re-used.
+     * @param name to remove.
+     */
+    inline void unmap(char *name)
+        {keyassoc::remove(name);};
+
+    /**
+     * Access to pager utilization stats.  This is needed because we
+     * inherit keyassoc privately.
+     * @return pager utilization, 0-100.
+     */
+    inline unsigned utilization(void)
+        {return mempager::utilization();};
+
+    /**
+     * Access to number of pages allocated from heap for our associated
+     * index pointer.  This is needed because we inherit keyassoc
+     * privately.
+     * @return count of heap pages used.
+     */
+    inline unsigned getPages(void)
+        {return mempager::getPages();};
+};
+
 /**
  * A typed template for using a key association with typed objects.
  * This essentially forms a form of "smart pointer" that is a reference
@@ -852,13 +1081,13 @@ public:
      * @return typed objects in map.
      */
     inline unsigned getCount(void)
-        {return keyassoc::getCount();};
+        {return keyassoc::getCount();}
 
     /**
      * Purge the hash map of typed objects.
      */
     inline void purge(void)
-        {keyassoc::purge();};
+        {keyassoc::purge();}
 
     /**
      * Lookup a typed object by name.
@@ -866,7 +1095,11 @@ public:
      * @return typed object pointer or NULL if not found.
      */
     inline T *locate(const char *name)
-        {return static_cast<T*>(keyassoc::locate(name));};
+        {return static_cast<T*>(keyassoc::locate(name));}
+
+    inline T *operator[](const char *name)
+        {return static_cast<T*>(keyassoc::locate(name));}
+
 
     /**
      * Reference a typed object directly by name.
@@ -874,7 +1107,7 @@ public:
      * @return typed object pointer or NULL if not found.
      */
     inline T *operator()(const char *name)
-        {return locate(name);};
+        {return locate(name);}
 
     /**
      * Assign a name for a pointer to a typed object.  If the name exists,
@@ -884,7 +1117,7 @@ public:
      * @return false if failed because name is too long for managed table.
      */
     inline bool assign(char *name, T *pointer)
-        {return keyassoc::assign(name, pointer);};
+        {return keyassoc::assign(name, pointer);}
 
     /**
      * Create a new name in the association table and assign typed object.
@@ -893,7 +1126,7 @@ public:
      * @return false if already exists or name is too long for managed table.
      */
     inline bool create(char *name, T *pointer)
-        {return keyassoc::create(name, pointer);};
+        {return keyassoc::create(name, pointer);}
 
     /**
      * Remove a name and typed pointer association.  If managed key names are
@@ -901,7 +1134,7 @@ public:
      * @param name to remove.
      */
     inline void remove(char *name)
-        {keyassoc::remove(name);};
+        {keyassoc::remove(name);}
 
     /**
      * Access to pager utilization stats.  This is needed because we
@@ -909,7 +1142,7 @@ public:
      * @return pager utilization, 0-100.
      */
     inline unsigned utilization(void)
-        {return mempager::utilization();};
+        {return mempager::utilization();}
 
     /**
      * Access to number of pages allocated from heap for our associated
@@ -918,7 +1151,7 @@ public:
      * @return count of heap pages used.
      */
     inline unsigned getPages(void)
-        {return mempager::getPages();};
+        {return mempager::getPages();}
 };
 
 /**

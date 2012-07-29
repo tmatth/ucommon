@@ -487,17 +487,14 @@ bool queue::post(ObjectProtocol *object, timeout_t timeout)
     if(freelist) {
         mem = freelist;
         freelist = freelist->getNext();
-        unlock();
         new((caddr_t)mem) member(this, object);
     }
     else {
-        unlock();
         if(pager)
             new((caddr_t)(pager->alloc(sizeof(member)))) member(this, object);
         else
             new member(this, object);
     }
-    lock();
     signal();
     unlock();
     return true;
@@ -667,11 +664,9 @@ bool stack::push(ObjectProtocol *object, timeout_t timeout)
     if(freelist) {
         mem = freelist;
         freelist = freelist->getNext();
-        unlock();
         new((caddr_t)mem) member(this, object);
     }
     else {
-        unlock();
         if(pager) {
             caddr_t ptr = (caddr_t)pager->alloc(sizeof(member));
             new(ptr) member(this, object);
@@ -679,7 +674,6 @@ bool stack::push(ObjectProtocol *object, timeout_t timeout)
         else
             new member(this, object);
     }
-    lock();
     signal();
     unlock();
     return true;

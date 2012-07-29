@@ -1,5 +1,15 @@
+from ucommon 5.4.3 to 5.4.4
+- mapof and listof added
+- semaphore default for commoncpp set to 0
+
+from ucommon 5.4.2 to 5.4.3
+- fixes for supporting ancient gcc compilers (at least >=2.96!)
+- bug in Conditional gettimeout, stack and queue suggested by Pollak
+
 from ucommon 5.4.1 to 5.4.2
 - fixes for older gcc builds and template issues.
+- bugfix for ConditionalAccess constructor.
+- bugfix for commoncpp address functions.
 
 from ucommon 5.4.0 to 5.4.1
 - fixes for windows build.

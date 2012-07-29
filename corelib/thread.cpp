@@ -199,7 +199,7 @@ void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
 #endif
     ts->tv_sec += msec / 1000;
     ts->tv_nsec += (msec % 1000) * 1000000l;
-    while(ts->tv_nsec > 1000000000l) {
+    while(ts->tv_nsec >= 1000000000l) {
         ++ts->tv_sec;
         ts->tv_nsec -= 1000000000l;
     }
