@@ -1,6 +1,7 @@
 from ucommon 5.4.3 to 5.4.4
 - mapof and listof added
 - semaphore default for commoncpp set to 0
+- simplify config, no longer separate stdlib and compat
 
 from ucommon 5.4.2 to 5.4.3
 - fixes for supporting ancient gcc compilers (at least >=2.96!)
