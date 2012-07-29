@@ -40,6 +40,14 @@
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
+
+// broken BSD; XOPEN should not imply _POSIX_C_SOURCE,
+//  _POSIX_C_SOURCE should not stop __BSD_VISIBLE
+
+#define u_int unsigned int
+#define u_short unsigned short
+#define u_long unsigned long
+#define u_char unsigned char
 #endif
 
 /*
@@ -79,6 +87,7 @@
 #include <cstdio>
 #include <cstdlib>
 #endif
+
 #include <sys/stat.h>
 #include <cerrno>
 
@@ -289,7 +298,8 @@ bool RandomFile::initial(void)
         error(errInitFailed);
         return false;
     }
-    fchmod(fd, mode);
+    if(pathname)
+        chmod(pathname, mode);
 #endif
 
     leaveMutex();
