@@ -19,6 +19,9 @@
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
+#endif
+
+#include "../config.h"
 
 // broken BSD; XOPEN should not imply _POSIX_C_SOURCE,
 //  _POSIX_C_SOURCE should not stop __BSD_VISIBLE
@@ -27,9 +30,7 @@
 #define u_short unsigned short
 #define u_long unsigned long
 #define u_char unsigned char
-#endif
 
-#include "../config.h"
 #include <ucommon/export.h>
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
