@@ -110,10 +110,6 @@ if test "x$enable_posix_timers" = "xyes" ; then
     UCOMMON_FLAGS="$UCOMMON_FLAGS -DPOSIX_TIMERS"
 fi
 
-AC_ARG_ENABLE(commoncpp,
-    AC_HELP_STRING([--disable-commoncpp],
-        [compile without common c++ compatibility library]))
-
 AC_ARG_ENABLE(stdcpp,
     AC_HELP_STRING([--disable-stdcpp],
         [compile without stdc++ runtime overhead]))
@@ -123,13 +119,11 @@ AC_ARG_ENABLE(stdcpp,
 if test "x$enable_stdcpp" = "xno" ; then
     UCOMMON_MODEL="CC"
     AC_MSG_RESULT(no)
+    COMPAT=""
 else
+    COMPAT="commoncpp"
     AC_MSG_RESULT(yes)
 fi
-
-COMPAT=""
-if test "x$enable_commoncpp" != "xno" ; then
-    COMPAT="commoncpp" ; fi
 
 AC_ARG_WITH(sslstack,
     AC_HELP_STRING([--with-sslstack=lib],[specify which ssl stack to build]),[
