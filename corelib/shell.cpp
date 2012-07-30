@@ -1408,7 +1408,7 @@ int shell::cancel(shell::pid_t pid)
 {
     UINT code = 255;
     if(!TerminateProcess(pid, 255))
-        return -1; 
+        return -1;
     return 0;
 }
 

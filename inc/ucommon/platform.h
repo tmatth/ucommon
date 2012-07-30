@@ -113,11 +113,13 @@
 //#define   _WIN32_WINNT 0x0501
 //#endif
 
+#ifdef  _MSC_VER
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4996)
 #pragma warning(disable: 4355)
 #pragma warning(disable: 4290)
 #pragma warning(disable: 4291)
+#endif
 
 #if defined(__BORLANDC__) && !defined(__MT__)
 #error Please enable multithreading
@@ -189,10 +191,12 @@ typedef char *caddr_t;
 typedef HANDLE fd_t;
 typedef SOCKET socket_t;
 
+#ifdef  _MSC_VER
 typedef struct timespec {
     time_t tv_sec;
     long  tv_nsec;
 } timespec_t;
+#endif
 
 extern "C" {
 
@@ -201,35 +205,35 @@ extern "C" {
     typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
 
     inline void sleep(int seconds)
-        {::Sleep((seconds * 1000l));};
+        {::Sleep((seconds * 1000l));}
 
     inline void pthread_exit(void *p)
-        {_endthreadex((DWORD)p);};
+        {_endthreadex((DWORD)p);}
 
     inline pthread_t pthread_self(void)
-        {return (pthread_t)GetCurrentThreadId();};
+        {return (pthread_t)GetCurrentThreadId();}
 
     inline int pthread_mutex_init(pthread_mutex_t *mutex, void *x)
-        {InitializeCriticalSection(mutex); return 0;};
+        {InitializeCriticalSection(mutex); return 0;}
 
     inline void pthread_mutex_destroy(pthread_mutex_t *mutex)
-        {DeleteCriticalSection(mutex);};
+        {DeleteCriticalSection(mutex);}
 
     inline void pthread_mutex_lock(pthread_mutex_t *mutex)
-        {EnterCriticalSection(mutex);};
+        {EnterCriticalSection(mutex);}
 
     inline void pthread_mutex_unlock(pthread_mutex_t *mutex)
-        {LeaveCriticalSection(mutex);};
+        {LeaveCriticalSection(mutex);}
 
     inline char *strdup(const char *s)
-        {return _strdup(s);};
+        {return _strdup(s);}
 
     inline int stricmp(const char *s1, const char *s2)
-        {return _stricmp(s1, s2);};
+        {return _stricmp(s1, s2);}
 
     inline int strnicmp(const char *s1, const char *s2, size_t l)
-        {return _strnicmp(s1, s2, l);};
-};
+        {return _strnicmp(s1, s2, l);}
+}
 
 #elif defined(__PTH__)
 
