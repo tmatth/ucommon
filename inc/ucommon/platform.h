@@ -208,7 +208,7 @@ extern "C" {
         {::Sleep((seconds * 1000l));}
 
     inline void pthread_exit(void *p)
-        {_endthreadex((DWORD)p);}
+        {_endthreadex((DWORD)0);}
 
     inline pthread_t pthread_self(void)
         {return (pthread_t)GetCurrentThreadId();}
