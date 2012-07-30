@@ -379,10 +379,9 @@ ssize_t UDPSocket::receive(void *buf, size_t len, bool reply)
     int bytes = ::recvfrom(so, (char *)buf, _IOLEN64 len, 0, addr, &alen);
 
 #ifdef  _MSWINDOWS_
-    int code = 0;
 
     if (bytes == SOCKET_ERROR) {
-        code = WSAGetLastError();
+        WSAGetLastError();
     }
 #endif
 
@@ -407,7 +406,7 @@ Socket::Error UDPSocket::join(const IPV4Multicast &ia,int InterfaceIndex)
     getsockname(so, (struct sockaddr *)&myaddr, &len);
     group.imr_multiaddr.s_addr = ia.getAddress().s_addr;
     group.imr_interface.s_addr = INADDR_ANY;
-    int retval = setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
+    setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
     return errSuccess;
 
 #elif defined(IP_ADD_MEMBERSHIP) && defined(SIOCGIFINDEX) && !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__) && !defined(_OSF_SOURCE) && !defined(__hpux) && !defined(__GNU__)

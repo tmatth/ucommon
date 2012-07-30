@@ -174,10 +174,10 @@ endif()
 set (UCOMMON_LIBS ${UCOMMON_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${WITH_LDFLAGS})
 
 if (MINGW OR MSYS)
-    set (UCOMMON_LIBS --enable-stdcall-fixup ${UCOMMON_LIBS} mingwex mingw32)
+    set (UCOMMON_LIBS ${UCOMMON_LIBS} mingwex mingw32)
 else()
     if (WIN32 AND CMAKE_COMPILER_IS_GNUCXX)
-        set (UCOMMON_LIBS --enable-stdcall-fixup ${UCOMMON_LIBS} mingwex mingw32)
+        set (UCOMMON_LIBS ${UCOMMON_LIBS} mingwex mingw32)
     endif()
 endif()
 

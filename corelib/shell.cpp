@@ -1077,7 +1077,6 @@ const char *shell::getenv(const char *id, const char *value)
 int shell::system(const char *cmd, const char **envp)
 {
     char cmdspec[128];
-    DWORD code = -1;
     PROCESS_INFORMATION pi;
     char *ep = NULL;
     unsigned len = 0;
@@ -1406,7 +1405,6 @@ int shell::inkey(const char *prompt)
 
 int shell::cancel(shell::pid_t pid)
 {
-    UINT code = 255;
     if(!TerminateProcess(pid, 255))
         return -1;
     return 0;

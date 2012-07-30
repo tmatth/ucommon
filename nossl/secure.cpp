@@ -19,7 +19,7 @@
 
 #ifdef  _MSWINDOWS_
 NAMESPACE_LOCAL
-HCRYPTPROV _handle = NULL;
+HCRYPTPROV _handle = (HCRYPTPROV)NULL;
 END_NAMESPACE
 #endif
 
@@ -41,17 +41,17 @@ bool secure::init(const char *progname)
         Socket::init();
 
 #ifdef  _MSWINDOWS_
-    if(_handle != NULL)
+    if(_handle != (HCRYPTPROV)NULL)
         return false;
 
     if(CryptAcquireContext(&_handle, NULL, NULL, PROV_RSA_FULL, 0))
         return false;
-    if(GetLastError() == NTE_BAD_KEYSET) {
+    if(GetLastError() == (DWORD)NTE_BAD_KEYSET) {
         if(CryptAcquireContext(&_handle, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
             return false;
     }
 
-    _handle = NULL;
+    _handle = (HCRYPTPROV)NULL;
 #endif
 
     return false;
@@ -101,14 +101,14 @@ int secure::oscerts(const char *pathname)
     if(!fp)
         return ENOSYS;
 
-    HCERTSTORE ca = CertOpenSystemStoreA(NULL, "ROOT");
+    HCERTSTORE ca = CertOpenSystemStoreA((HCRYPTPROV)NULL, "ROOT");
     if(ca) {
         caset = true;
         cexport(ca, fp);
         CertCloseStore(ca, 0);
     }
 
-    ca = CertOpenSystemStoreA(NULL, "CA");
+    ca = CertOpenSystemStoreA((HCRYPTPROV)NULL, "CA");
     if(ca) {
         caset = true;
         cexport(ca, fp);

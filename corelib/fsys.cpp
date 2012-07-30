@@ -608,7 +608,7 @@ int fsys::seek(offset_t pos)
     DWORD rpos = pos;
     int mode = FILE_BEGIN;
 
-    if(rpos == end) {
+    if(rpos == (DWORD)end) {
         rpos = 0;
         mode = FILE_END;
     }
@@ -1089,7 +1089,7 @@ int fsys::link(const char *path, const char *target)
     WORD len;
 
     lstrcpy(dest, "\\??\\");
-    if(!GetFullPathName(path, sizeof(dest) - (4 * sizeof(TCHAR)), &dest[4], &part) || GetFileAttributes(&dest[4]) == -1)
+    if(!GetFullPathName(path, sizeof(dest) - (4 * sizeof(TCHAR)), &dest[4], &part) || GetFileAttributes(&dest[4]) == INVALID_FILE_ATTRIBUTES)
         return remapError();
 
     memset(reparse, 0, sizeof(reparse));
