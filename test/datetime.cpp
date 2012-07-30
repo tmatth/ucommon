@@ -19,6 +19,7 @@
 #define DEBUG
 #endif
 
+#include <ucommon-config.h>
 #include <ucommon/ucommon.h>
 
 #include <stdio.h>

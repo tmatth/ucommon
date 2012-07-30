@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/thread.h>
@@ -83,9 +83,6 @@
 #endif
 
 using namespace COMMONCPP_NAMESPACE;
-
-static char *_pUser = NULL;
-static char *_pHome = NULL;
 
 bool Process::rtflag = false;
 
@@ -232,6 +229,9 @@ bool Process::isScheduler(void)
 #ifndef WCOREDUMP
 #define WCOREDUMP(status) (((status) & 0x80) != 0)
 #endif
+
+static char *_pUser = NULL;
+static char *_pHome = NULL;
 
 static void lookup(void)
 {

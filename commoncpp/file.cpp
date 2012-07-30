@@ -54,7 +54,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 
-#include "../config.h"
+#include <ucommon-config.h>
 
 // broken BSD; XOPEN should not imply _POSIX_C_SOURCE,
 //  _POSIX_C_SOURCE should not stop __BSD_VISIBLE
@@ -1462,7 +1462,9 @@ char *File::getRealpath(const char *path, char *buffer, size_t size)
     if(size > PATH_MAX)
         size = PATH_MAX;
 
+#ifdef  HAVE_LSTAT
     unsigned symlinks = 0;
+#endif
 #if !defined(DYNAMCIC_LOCAL_ARRAYS)
     char left[PATH_MAX];
 #else

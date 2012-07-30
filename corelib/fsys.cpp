@@ -23,7 +23,7 @@
 #define _XOPEN_SOURCE 600
 #endif
 
-#include "../config.h"
+#include <ucommon-config.h>
 
 // broken BSD; XOPEN should not imply _POSIX_C_SOURCE,
 //  _POSIX_C_SOURCE should not stop __BSD_VISIBLE

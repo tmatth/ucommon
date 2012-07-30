@@ -36,7 +36,7 @@
 
 #ifdef  NEW_STDCPP
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/thread.h>
 #include <commoncpp/slog.h>

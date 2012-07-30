@@ -19,7 +19,7 @@
 #define DEBUG
 #endif
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <ucommon/secure.h>
 
 #include <stdio.h>

@@ -3,6 +3,7 @@ from ucommon 5.4.3 to 5.5.0
 - semaphore default for commoncpp set to 0
 - simplify config, no longer separate stdlib and compat
 - resolved issues with XOPEN_SOURCE and broken BSD headers 
+- many mingw fixes, build fixes for out of source binary builds
 
 from ucommon 5.4.2 to 5.4.3
 - fixes for supporting ancient gcc compilers (at least >=2.96!)
