@@ -181,7 +181,7 @@ else()
     endif()
 endif()
 
-if (WIN32 OR MINGW OR MSYS)
+if (WIN32 OR MINGW OR MSYS OR CMAKE_SYSTEM MATCHES "Windows")
     set (UCOMMON_LIBS ${UCOMMON_LIBS} crypt32 advapi32 user32 ws2_32 wsock32 kernel32)
 endif()
 
@@ -420,7 +420,7 @@ target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_library(usecure ${BUILD_LIBRARY_TYPE} ${secure_src} ${secure_inc})
 set_target_properties(usecure PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-target_link_libraries(usecure ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
+target_link_libraries(usecure ucommon ${WITH_LIBS} ${SECURE_LIBS} ${UCOMMON_LIBS})
 add_dependencies(usecure ucommon)
 
 if(BUILD_STDLIB)
