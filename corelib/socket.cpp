@@ -2981,7 +2981,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
     assert(dest != NULL);
 
     int rtn = -1;
-    int so = INVALID_SOCKET;
+    socket_t so = INVALID_SOCKET;
     socklen_t len = getlen(dest);
 
     if(len)

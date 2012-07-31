@@ -84,7 +84,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-const fsys::offset_t fsys::end = (size_t)(-1);
+const fsys::offset_t fsys::end = (offset_t)(-1);
 charfile cstdin(stdin);
 charfile cstdout(stdout);
 charfile cstderr(stderr);
@@ -235,7 +235,7 @@ int fsys::trunc(offset_t offset)
 
 int fsys::fileinfo(struct stat *buf)
 {
-    int fn = _open_osfhandle((long int)(fd), O_RDONLY);
+    int fn = _open_osfhandle((intptr_t)(fd), O_RDONLY);
 
     int rtn = _fstat(fn, (struct _stat *)(buf));
     _close(fn);

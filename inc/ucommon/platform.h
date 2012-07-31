@@ -99,8 +99,8 @@
 
 #if defined(_M_X64) || defined(_M_ARM)
 #define _MSCONDITIONALS_
-#ifndef _WIN32_WINNT    0x0600
-#define _WIN32_WINNT
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT    0x0600
 #endif
 #endif
 
