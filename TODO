@@ -1,5 +1,8 @@
 Proposed changes (likely deferred to 6.0.0)
 
+	fsys.cpp & file.cpp split into part that truly requires
+	_XOPEN_SOURCE >= 600 and rest
+
 	const char * for keyassoc id's
 
 	Redu and split ucommon.pc and usecure.pc.  This is to get cleaner
