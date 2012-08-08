@@ -172,10 +172,10 @@ UDPSocket::UDPSocket(const char *name, Family fam) :
 Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
 {
     char namebuf[128], *cp;
-    tpport_t port;
-    struct servent *svc;
-    socklen_t alen;
-    struct sockaddr *addr;
+    tpport_t port = 0;
+    struct servent *svc = NULL;
+    socklen_t alen = 0;
+    struct sockaddr *addr = NULL;
 
     family = fam;
 
@@ -243,7 +243,7 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
         (socklen_t)sizeof(opt));
 #endif
 
-    if(!bind(so, addr, alen))
+    if(addr && !bind(so, addr, alen))
         state = BOUND;
 
     if(state != BOUND) {

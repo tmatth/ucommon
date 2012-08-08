@@ -42,6 +42,7 @@
 #include <commoncpp/string.h>
 #include <commoncpp/socket.h>
 #include <commoncpp/dccp.h>
+#include <errno.h>
 
 #ifdef _MSWINDOWS_
 #include <io.h>
@@ -197,7 +198,7 @@ Socket(fam, SOCK_DCCP, IPPROTO_DCCP)
 #ifdef  CCXX_IPV6
     struct sockaddr_in6 addr6;
 #endif
-    struct sockaddr *ap;
+    struct sockaddr *ap = NULL;
     socklen_t alen = 0;
 
     struct servent *svc;
@@ -258,9 +259,10 @@ Socket(fam, SOCK_DCCP, IPPROTO_DCCP)
         addr.sin_addr = getaddress(ia);
         ap = (struct sockaddr *)&addr;
         alen = sizeof(addr);
+        break;
     }
 
-    if(bind(so, (struct sockaddr *)ap, alen)) {
+    if(!ap || bind(so, (struct sockaddr *)ap, alen)) {
         endSocket();
         error(errBindingFailed,(char *)"Could not bind socket",socket_errno);
         return;

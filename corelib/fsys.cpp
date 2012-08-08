@@ -401,7 +401,7 @@ void fsys::release(fd_t fd)
 void fsys::open(const char *path, access_t access)
 {
     bool append = false;
-    DWORD amode;
+    DWORD amode = 0;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
 
@@ -464,8 +464,8 @@ void fsys::open(const char *path, access_t access)
 void fsys::create(const char *path, access_t access, unsigned mode)
 {
     bool append = false;
-    DWORD amode;
-    DWORD cmode;
+    DWORD amode = 0;
+    DWORD cmode = 0;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
 

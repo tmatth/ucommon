@@ -759,7 +759,7 @@ const char *Socket::getSystemErrorString(void) const
 
 bool Socket::isPending(Pending pending, timeout_t timeout)
 {
-    int status;
+    int status = 0;
 #ifdef USE_POLL
     struct pollfd pfd;
 

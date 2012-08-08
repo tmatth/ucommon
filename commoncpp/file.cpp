@@ -734,7 +734,7 @@ static void makemapname(const char *source, char *target)
 MappedFile::MappedFile(const char *fname, Access mode, size_t size) :
 RandomFile(fname)
 {
-    DWORD share, page;
+    DWORD share = 0, page = 0;
     map = INVALID_HANDLE_VALUE;
     fcb.address = NULL;
 
@@ -744,17 +744,21 @@ RandomFile(fname)
         page = PAGE_READONLY;
         prot = FILE_MAP_READ;
         break;
-        case accessWriteOnly:
+    case accessWriteOnly:
         share = FILE_SHARE_WRITE;
         page = PAGE_WRITECOPY;
         prot = FILE_MAP_COPY;
         break;
-        case accessReadWrite:
+    case accessReadWrite:
         share = FILE_SHARE_READ|FILE_SHARE_WRITE;
         page = PAGE_READWRITE;
         prot = FILE_MAP_WRITE;
     }
-    fd = CreateFile(pathname, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    if(share || page)
+        fd = CreateFile(pathname, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    else
+        fd = INVALID_HANDLE_VALUE;
+
     if(fd == INVALID_HANDLE_VALUE) {
         error(errOpenFailed);
         return;
@@ -775,7 +779,7 @@ RandomFile(fname)
 MappedFile::MappedFile(const char *fname, Access mode) :
 RandomFile(fname)
 {
-    DWORD share, page;
+    DWORD share = 0, page = 0;
     map = INVALID_HANDLE_VALUE;
     fcb.address = NULL;
 
@@ -795,7 +799,11 @@ RandomFile(fname)
         page = PAGE_READWRITE;
         prot = FILE_MAP_WRITE;
     }
-    fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    if(share || page)
+        fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    else
+        fd = INVALID_HANDLE_VALUE;
+
     if(fd == INVALID_HANDLE_VALUE) {
         error(errOpenFailed);
         return;
@@ -809,7 +817,7 @@ RandomFile(fname)
 MappedFile::MappedFile(const char *fname, pos_t pos, size_t len, Access mode) :
 RandomFile(fname)
 {
-    DWORD share, page;
+    DWORD share = 0, page = 0;
     map = INVALID_HANDLE_VALUE;
     fcb.address = NULL;
 
@@ -829,7 +837,11 @@ RandomFile(fname)
         page = PAGE_READWRITE;
         prot = FILE_MAP_WRITE;
     }
-    fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    if(share || page)
+        fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    else
+        fd = INVALID_HANDLE_VALUE;
+
     if(fd == INVALID_HANDLE_VALUE) {
         error(errOpenFailed);
         return;

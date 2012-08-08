@@ -1360,6 +1360,7 @@ int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
 
     pid = pi.hProcess;
     CloseHandle(pi.hThread);
+    err = 0;
 
 exit:
     if(ep)
