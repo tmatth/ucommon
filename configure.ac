@@ -155,8 +155,15 @@ clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
 AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h netinet/in.h net/if.h)
-AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h syslog.h sys/wait.h termios.h termio.h fcntl.h unistd.h)
+AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h sys/inotify.h sys/event.h syslog.h sys/wait.h termios.h termio.h fcntl.h unistd.h)
 AC_CHECK_HEADERS(sys/param.h sys/lockf.h sys/file.h regex.h dlfcn.h)
+
+AC_CHECK_HEADER(regex.h, [
+    AC_DEFINE(HAVE_REGEX_H, [1], [have regex header])
+    AC_CHECK_LIB(regex, regfree, [
+        UCOMMON_LIBS="$UCOMMON_LIBS -lregex")
+    ])
+])
 
 AC_CHECK_LIB(msvcrt, fopen, [
     threading="msw"

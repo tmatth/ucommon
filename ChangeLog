@@ -1,3 +1,6 @@
+from ucommon 5.5.0 to 5.5.1
+- regex checks also for lib, mingw support
+
 from ucommon 5.4.3 to 5.5.0
 - mapof and listof added
 - semaphore default for commoncpp set to 0
