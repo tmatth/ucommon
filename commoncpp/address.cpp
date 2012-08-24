@@ -360,7 +360,7 @@ void IPV4Address::setAddress(const char *host)
             if(ipaddr)
                 delete[] ipaddr;
             ipaddr = new struct in_addr[1];
-            memset((void *)&ipaddr[0], 0, sizeof(struct in_addr));
+            memset(ipaddr, 0, sizeof(struct in_addr));
             return;
         }
 
