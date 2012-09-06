@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/string.h>
@@ -172,10 +172,10 @@ UDPSocket::UDPSocket(const char *name, Family fam) :
 Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
 {
     char namebuf[128], *cp;
-    tpport_t port;
-    struct servent *svc;
-    socklen_t alen;
-    struct sockaddr *addr;
+    tpport_t port = 0;
+    struct servent *svc = NULL;
+    socklen_t alen = 0;
+    struct sockaddr *addr = NULL;
 
     family = fam;
 
@@ -243,7 +243,7 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
         (socklen_t)sizeof(opt));
 #endif
 
-    if(!bind(so, addr, alen))
+    if(addr && !bind(so, addr, alen))
         state = BOUND;
 
     if(state != BOUND) {
@@ -379,10 +379,9 @@ ssize_t UDPSocket::receive(void *buf, size_t len, bool reply)
     int bytes = ::recvfrom(so, (char *)buf, _IOLEN64 len, 0, addr, &alen);
 
 #ifdef  _MSWINDOWS_
-    int code = 0;
 
     if (bytes == SOCKET_ERROR) {
-        code = WSAGetLastError();
+        WSAGetLastError();
     }
 #endif
 
@@ -407,7 +406,7 @@ Socket::Error UDPSocket::join(const IPV4Multicast &ia,int InterfaceIndex)
     getsockname(so, (struct sockaddr *)&myaddr, &len);
     group.imr_multiaddr.s_addr = ia.getAddress().s_addr;
     group.imr_interface.s_addr = INADDR_ANY;
-    int retval = setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
+    setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
     return errSuccess;
 
 #elif defined(IP_ADD_MEMBERSHIP) && defined(SIOCGIFINDEX) && !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__) && !defined(_OSF_SOURCE) && !defined(__hpux) && !defined(__GNU__)

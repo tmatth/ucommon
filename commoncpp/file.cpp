@@ -36,6 +36,10 @@
 // If you do not wish that, delete this exception notice.
 //
 
+#ifndef _MSC_VER
+#include <sys/stat.h>
+#endif
+
 // needed for GNU/LINUX glibc otherwise pread/pwrite wont work
 
 #ifndef _XOPEN_SOURCE
@@ -50,7 +54,16 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 
-#include "../config.h"
+#include <ucommon-config.h>
+
+// broken BSD; XOPEN should not imply _POSIX_C_SOURCE,
+//  _POSIX_C_SOURCE should not stop __BSD_VISIBLE
+
+#define u_int unsigned int
+#define u_short unsigned short
+#define u_long unsigned long
+#define u_char unsigned char
+
 #include <fcntl.h>
 
 #ifdef  HAVE_SYS_PARAM_H
@@ -79,6 +92,7 @@
 #include <cstdio>
 #include <cstdlib>
 #endif
+
 #include <sys/stat.h>
 #include <cerrno>
 
@@ -720,7 +734,7 @@ static void makemapname(const char *source, char *target)
 MappedFile::MappedFile(const char *fname, Access mode, size_t size) :
 RandomFile(fname)
 {
-    DWORD share, page;
+    DWORD share = 0, page = 0;
     map = INVALID_HANDLE_VALUE;
     fcb.address = NULL;
 
@@ -730,17 +744,21 @@ RandomFile(fname)
         page = PAGE_READONLY;
         prot = FILE_MAP_READ;
         break;
-        case accessWriteOnly:
+    case accessWriteOnly:
         share = FILE_SHARE_WRITE;
         page = PAGE_WRITECOPY;
         prot = FILE_MAP_COPY;
         break;
-        case accessReadWrite:
+    case accessReadWrite:
         share = FILE_SHARE_READ|FILE_SHARE_WRITE;
         page = PAGE_READWRITE;
         prot = FILE_MAP_WRITE;
     }
-    fd = CreateFile(pathname, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    if(share || page)
+        fd = CreateFile(pathname, mode, share, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    else
+        fd = INVALID_HANDLE_VALUE;
+
     if(fd == INVALID_HANDLE_VALUE) {
         error(errOpenFailed);
         return;
@@ -761,7 +779,7 @@ RandomFile(fname)
 MappedFile::MappedFile(const char *fname, Access mode) :
 RandomFile(fname)
 {
-    DWORD share, page;
+    DWORD share = 0, page = 0;
     map = INVALID_HANDLE_VALUE;
     fcb.address = NULL;
 
@@ -781,7 +799,11 @@ RandomFile(fname)
         page = PAGE_READWRITE;
         prot = FILE_MAP_WRITE;
     }
-    fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    if(share || page)
+        fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    else
+        fd = INVALID_HANDLE_VALUE;
+
     if(fd == INVALID_HANDLE_VALUE) {
         error(errOpenFailed);
         return;
@@ -795,7 +817,7 @@ RandomFile(fname)
 MappedFile::MappedFile(const char *fname, pos_t pos, size_t len, Access mode) :
 RandomFile(fname)
 {
-    DWORD share, page;
+    DWORD share = 0, page = 0;
     map = INVALID_HANDLE_VALUE;
     fcb.address = NULL;
 
@@ -815,7 +837,11 @@ RandomFile(fname)
         page = PAGE_READWRITE;
         prot = FILE_MAP_WRITE;
     }
-    fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    if(share || page)
+        fd = CreateFile(pathname, mode, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+    else
+        fd = INVALID_HANDLE_VALUE;
+
     if(fd == INVALID_HANDLE_VALUE) {
         error(errOpenFailed);
         return;
@@ -1448,7 +1474,9 @@ char *File::getRealpath(const char *path, char *buffer, size_t size)
     if(size > PATH_MAX)
         size = PATH_MAX;
 
+#ifdef  HAVE_LSTAT
     unsigned symlinks = 0;
+#endif
 #if !defined(DYNAMCIC_LOCAL_ARRAYS)
     char left[PATH_MAX];
 #else

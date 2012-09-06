@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #ifdef  HAVE_ENDIAN_H
 #include <endian.h>
 #endif
@@ -360,7 +360,7 @@ void IPV4Address::setAddress(const char *host)
             if(ipaddr)
                 delete[] ipaddr;
             ipaddr = new struct in_addr[1];
-            memset((void *)&ipaddr[0], 0, sizeof(struct in_addr));
+            memset((void *)(&ipaddr[0]), 0, sizeof(struct in_addr));
             return;
         }
 

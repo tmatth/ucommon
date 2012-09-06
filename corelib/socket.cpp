@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <ucommon/export.h>
 #include <ucommon/socket.h>
 #include <ucommon/string.h>
@@ -26,6 +26,8 @@
 #include <sys/un.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
+#else
+#define HAVE_GETADDRINFO 1
 #endif
 #ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
@@ -79,7 +81,6 @@ typedef struct multicast_internet
 #endif
     };
 } inetmulticast_t;
-
 
 #ifndef HAVE_GETADDRINFO
 
@@ -572,7 +573,7 @@ void Socket::init(void)
     crit(status.wVersion == version, "socket init failure");
     atexit(_socketcleanup);
     _started = true;
-};
+}
 #else
 void Socket::init(void)
 {
@@ -867,7 +868,6 @@ void cidr::set(const char *cp)
 //  struct sockaddr saddr;
     int slen;
     struct sockaddr_in6 *paddr;
-    int ok;
     DWORD addr = (DWORD)inet_addr(cbuf);
 #endif
 
@@ -915,7 +915,7 @@ void cidr::set(const char *cp)
         struct sockaddr saddr;
         slen = sizeof(saddr);
         paddr = (struct sockaddr_in6 *)&saddr;
-        ok = WSAStringToAddress((LPSTR)cbuf, AF_INET6, NULL, &saddr, &slen);
+        WSAStringToAddress((LPSTR)cbuf, AF_INET6, NULL, &saddr, &slen);
         network.ipv6 = paddr->sin6_addr;
 #else
         inet_pton(AF_INET6, cbuf, &network.ipv6);
@@ -2142,7 +2142,7 @@ int Socket::disconnect(socket_t so)
     memset(addr, 0, sizeof(us.saddr));
     us.inaddr.sin_family = AF_UNSPEC;
 #endif
-    if(len > sizeof(us.saddr))
+    if((size_t)len > sizeof(us.saddr))
         len = sizeof(us.saddr);
     if(so == INVALID_SOCKET)
         return EBADF;
@@ -2981,7 +2981,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
     assert(dest != NULL);
 
     int rtn = -1;
-    int so = INVALID_SOCKET;
+    socket_t so = INVALID_SOCKET;
     socklen_t len = getlen(dest);
 
     if(len)
@@ -2994,7 +2994,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 #endif
     case AF_INET:
         so = ::socket(dest->sa_family, SOCK_DGRAM, 0);
-        if(so == INVALID_SOCKET)
+        if((socket_t)so == INVALID_SOCKET)
             return -1;
         socket_mapping(dest->sa_family, so);
         if(!_connect_(so, dest, len))
@@ -3014,7 +3014,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
 #endif
     }
 
-    if(so != INVALID_SOCKET) {
+    if((socket_t)so != INVALID_SOCKET) {
 #ifdef  _MSWINDOWS_
         ::closesocket(so);
 #else

@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/string.h>
@@ -584,7 +584,6 @@ void TCPStream::connect(const char *target, unsigned mss)
 {
     char namebuf[128];
     char *cp;
-    bool connected = false;
     struct servent *svc;
     tpport_t port;
 
@@ -865,7 +864,6 @@ void TCPStream::connect(TCPV6Socket &tcpip)
 void TCPStream::segmentBuffering(unsigned mss)
 {
     unsigned max = 0;
-    socklen_t alen = sizeof(max);
 
     if(mss == 1) {  // special interactive
         allocate(1);
@@ -873,6 +871,8 @@ void TCPStream::segmentBuffering(unsigned mss)
     }
 
 #ifdef  TCP_MAXSEG
+    socklen_t alen = sizeof(max);
+
     if(mss)
         setsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, sizeof(max));
     getsockopt(so, IPPROTO_TCP, TCP_MAXSEG, (char *)&max, &alen);

@@ -15,11 +15,24 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef _MSC_VER
+#include <sys/stat.h>
+#endif
+
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
 #endif
 
-#include "../config.h"
+#include <ucommon-config.h>
+
+// broken BSD; XOPEN should not imply _POSIX_C_SOURCE,
+//  _POSIX_C_SOURCE should not stop __BSD_VISIBLE
+
+#define u_int unsigned int
+#define u_short unsigned short
+#define u_long unsigned long
+#define u_char unsigned char
+
 #include <ucommon/export.h>
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
@@ -71,7 +84,7 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-const fsys::offset_t fsys::end = (size_t)(-1);
+const fsys::offset_t fsys::end = (offset_t)(-1);
 charfile cstdin(stdin);
 charfile cstdout(stdout);
 charfile cstderr(stderr);
@@ -222,7 +235,7 @@ int fsys::trunc(offset_t offset)
 
 int fsys::fileinfo(struct stat *buf)
 {
-    int fn = _open_osfhandle((long int)(fd), O_RDONLY);
+    int fn = _open_osfhandle((intptr_t)(fd), O_RDONLY);
 
     int rtn = _fstat(fn, (struct _stat *)(buf));
     _close(fn);
@@ -388,7 +401,7 @@ void fsys::release(fd_t fd)
 void fsys::open(const char *path, access_t access)
 {
     bool append = false;
-    DWORD amode;
+    DWORD amode = 0;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
 
@@ -451,8 +464,8 @@ void fsys::open(const char *path, access_t access)
 void fsys::create(const char *path, access_t access, unsigned mode)
 {
     bool append = false;
-    DWORD amode;
-    DWORD cmode;
+    DWORD amode = 0;
+    DWORD cmode = 0;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
 
@@ -595,7 +608,7 @@ int fsys::seek(offset_t pos)
     DWORD rpos = pos;
     int mode = FILE_BEGIN;
 
-    if(rpos == end) {
+    if(rpos == (DWORD)end) {
         rpos = 0;
         mode = FILE_END;
     }
@@ -1076,7 +1089,7 @@ int fsys::link(const char *path, const char *target)
     WORD len;
 
     lstrcpy(dest, "\\??\\");
-    if(!GetFullPathName(path, sizeof(dest) - (4 * sizeof(TCHAR)), &dest[4], &part) || GetFileAttributes(&dest[4]) == -1)
+    if(!GetFullPathName(path, sizeof(dest) - (4 * sizeof(TCHAR)), &dest[4], &part) || GetFileAttributes(&dest[4]) == INVALID_FILE_ATTRIBUTES)
         return remapError();
 
     memset(reparse, 0, sizeof(reparse));

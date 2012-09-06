@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/exception.h>

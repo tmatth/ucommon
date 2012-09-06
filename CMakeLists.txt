@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 5.4.3)
+set (VERSION 5.5.0)
 set (SOVERSION 5)
 
 # when we override default install prefix, assume full path is used...
@@ -70,10 +70,10 @@ if(MSVC60)
     set(GCC_ATOMICS OFF CACHE BOOL "does not use gcc atomics" FORCE)
     MARK_AS_ADVANCED(FORCE BUILD_STDLIB BUILD_STATIC POSIX_TIMERS GCC_ATOMICS)
 elseif(WIN32)
-		option(BUILD_RUNTIME "Set to OFF to build static runtime" ON)
-		if(BUILD_RUNTIME)
-			set(BUILD_RUNTIME_TYPE SHARED)
-		endif()
+        option(BUILD_RUNTIME "Set to OFF to build static runtime" ON)
+        if(BUILD_RUNTIME)
+            set(BUILD_RUNTIME_TYPE SHARED)
+        endif()
     option(BUILD_STATIC "Set to OFF to build shared libraries" ON)
     option(BUILD_STDLIB "Set to OFF to disable C++ stdlib" ON)
     set(POSIX_TIMERS OFF CACHE BOOL "does not use posix timers" FORCE)
@@ -87,7 +87,6 @@ else()
 endif()
 
 option(BUILD_TESTING "Set to ON to build test programs" OFF)
-option(BUILD_COMPAT "Set to OFF to disable Common C++ compatibility" ON)
 
 MESSAGE( STATUS "Configuring GNU ${PROJECT_NAME} ${VERSION}...")
 include(CheckFunctionExists)
@@ -175,14 +174,14 @@ endif()
 set (UCOMMON_LIBS ${UCOMMON_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${WITH_LDFLAGS})
 
 if (MINGW OR MSYS)
-    set (UCOMMON_LIBS --enable-stdcall-fixup ${UCOMMON_LIBS} mingwex mingw32)
+    set (UCOMMON_LIBS ${UCOMMON_LIBS} mingwex mingw32)
 else()
     if (WIN32 AND CMAKE_COMPILER_IS_GNUCXX)
-        set (UCOMMON_LIBS --enable-stdcall-fixup ${UCOMMON_LIBS} mingwex mingw32)
+        set (UCOMMON_LIBS ${UCOMMON_LIBS} mingwex mingw32)
     endif()
 endif()
 
-if (WIN32 OR MINGW OR MSYS)
+if (WIN32 OR MINGW OR MSYS OR CMAKE_SYSTEM MATCHES "Windows")
     set (UCOMMON_LIBS ${UCOMMON_LIBS} crypt32 advapi32 user32 ws2_32 wsock32 kernel32)
 endif()
 
@@ -200,6 +199,7 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT BUILD_STDLIB)
             set(UCOMMON_LIBS ${UCOMMON_LIBS} gcc)
     endif()
 endif()
+
 
 if(UNIX OR MSYS OR MINGW OR CYGWIN)
     check_library_exists(dl dlopen "" HAVE_DL_LIB)
@@ -274,7 +274,6 @@ check_function_exists(readlink HAVE_READLINK)
 check_function_exists(waitpid HAVE_WAITPID)
 check_function_exists(wait4 HAVE_WAIT4)
 
-check_include_files(regex.h HAVE_REGEX_H)
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(strings.h HAVE_STRINGS_H)
 check_include_files(stdlib.h HAVE_STDLIB_H)
@@ -314,6 +313,14 @@ check_include_files(termio.h HAVE_TERMIO_H)
 check_include_files(sys/param.h HAVE_SYS_PARAM_H)
 check_include_files(sys/file.h HAVE_SYS_FILE_H)
 check_include_files(sys/lockf.h HAVE_SYS_LOCKF_H)
+check_include_files(regex.h HAVE_REGEX_H)
+
+if(HAVE_REGEX_H)
+    check_library_exists(regex regfree "" HAVE_REGEX_LIB)
+    if(HAVE_REGEX_LIB OR MINGW OR MSYS)
+        set(UCOMMON_LIBS ${UCOMMON_LIBS} "regex")
+    endif()
+endif()
 
 set(UCOMMON_LIBS ${UCOMMON_LIBS} ${UCOMMON_LINKING})
 
@@ -406,14 +413,14 @@ if(NOT WIN32)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.spec.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.spec @ONLY)
 
-    if(BUILD_COMPAT)
+    if(BUILD_STDLIB)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/commoncpp.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/commoncpp.pc)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/commoncpp-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/commoncpp-config)
     endif()
 endif(NOT WIN32)
 
-configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-configure_file(config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+configure_file(ucommon-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(ucommon ${BUILD_RUNTIME_TYPE} ${common_src} ${ucommon_inc})
 set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
@@ -421,10 +428,10 @@ target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_library(usecure ${BUILD_LIBRARY_TYPE} ${secure_src} ${secure_inc})
 set_target_properties(usecure PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
-target_link_libraries(usecure ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
+target_link_libraries(usecure ucommon ${WITH_LIBS} ${SECURE_LIBS} ${UCOMMON_LIBS})
 add_dependencies(usecure ucommon)
 
-if(BUILD_COMPAT)
+if(BUILD_STDLIB)
     add_library(commoncpp ${BUILD_LIBRARY_TYPE} ${commoncpp_src} ${commoncpp_inc})
     set_target_properties(commoncpp PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
     target_link_libraries(commoncpp ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
@@ -469,11 +476,11 @@ target_link_libraries(usecure-zerofill usecure ucommon ${SECURE_LIBS} ${UCOMMON_
 find_package(Doxygen)
 
 if (DOXYGEN_FOUND)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doxy.config.cmake
-      ${CMAKE_CURRENT_BINARY_DIR}/doxy.config
-      @ONLY )
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doxy.config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/doxy.config
+        @ONLY )
 
-  seT(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/doxy.config")
+    seT(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/doxy.config")
 
     #add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     add_custom_target(doc
@@ -484,52 +491,52 @@ if (DOXYGEN_FOUND)
 
     #
     # TODO an: taken from internet, to be tested
-  #
-  # create a windows help .chm file using hhc.exe
-  # HTMLHelp DLL must be in path!
-  # fallback: use hhw.exe interactively
-  IF    (WIN32)
-    FIND_PACKAGE(HTMLHelp)
-    IF   (HTML_HELP_COMPILER)
-      SET (TMP "${CMAKE_CURRENT_BINARY_DIR}\\Doc\\html\\index.hhp")
-      STRING(REGEX REPLACE "[/]" "\\\\" HHP_FILE ${TMP} )
-      # MESSAGE(SEND_ERROR "DBG  HHP_FILE=${HHP_FILE}")
-      ADD_CUSTOM_TARGET(winhelp ${HTML_HELP_COMPILER} ${HHP_FILE})
-      ADD_DEPENDENCIES (winhelp doc)
+    #
+    # create a windows help .chm file using hhc.exe
+    # HTMLHelp DLL must be in path!
+    # fallback: use hhw.exe interactively
+    IF    (WIN32)
+        FIND_PACKAGE(HTMLHelp)
+        IF   (HTML_HELP_COMPILER)
+            SET (TMP "${CMAKE_CURRENT_BINARY_DIR}\\Doc\\html\\index.hhp")
+            STRING(REGEX REPLACE "[/]" "\\\\" HHP_FILE ${TMP} )
+            # MESSAGE(SEND_ERROR "DBG  HHP_FILE=${HHP_FILE}")
+            ADD_CUSTOM_TARGET(winhelp ${HTML_HELP_COMPILER} ${HHP_FILE})
+            ADD_DEPENDENCIES (winhelp doc)
 
-      IF (NOT TARGET_DOC_SKIP_INSTALL)
-      # install windows help?
-      # determine useful name for output file
-      # should be project and version unique to allow installing
-      # multiple projects into one global directory
-      IF   (EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
-        IF   (PROJECT_NAME)
-          SET(OUT "${PROJECT_NAME}")
-        ELSE (PROJECT_NAME)
-          SET(OUT "Documentation") # default
-        ENDIF(PROJECT_NAME)
-        IF   (${PROJECT_NAME}_VERSION_MAJOR)
-          SET(OUT "${OUT}-${${PROJECT_NAME}_VERSION_MAJOR}")
-          IF   (${PROJECT_NAME}_VERSION_MINOR)
-            SET(OUT  "${OUT}.${${PROJECT_NAME}_VERSION_MINOR}")
-            IF   (${PROJECT_NAME}_VERSION_PATCH)
-              SET(OUT "${OUT}.${${PROJECT_NAME}_VERSION_PATCH}")
-            ENDIF(${PROJECT_NAME}_VERSION_PATCH)
-          ENDIF(${PROJECT_NAME}_VERSION_MINOR)
-        ENDIF(${PROJECT_NAME}_VERSION_MAJOR)
-        # keep suffix
-        SET(OUT  "${OUT}.chm")
+            IF (NOT TARGET_DOC_SKIP_INSTALL)
+                # install windows help?
+                # determine useful name for output file
+                # should be project and version unique to allow installing
+                # multiple projects into one global directory
+                IF   (EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
+                    IF   (PROJECT_NAME)
+                        SET(OUT "${PROJECT_NAME}")
+                    ELSE (PROJECT_NAME)
+                        SET(OUT "Documentation") # default
+                    ENDIF(PROJECT_NAME)
+                    IF   (${PROJECT_NAME}_VERSION_MAJOR)
+                        SET(OUT "${OUT}-${${PROJECT_NAME}_VERSION_MAJOR}")
+                        IF   (${PROJECT_NAME}_VERSION_MINOR)
+                            SET(OUT  "${OUT}.${${PROJECT_NAME}_VERSION_MINOR}")
+                            IF   (${PROJECT_NAME}_VERSION_PATCH)
+                                SET(OUT "${OUT}.${${PROJECT_NAME}_VERSION_PATCH}")
+                            ENDIF(${PROJECT_NAME}_VERSION_PATCH)
+                        ENDIF(${PROJECT_NAME}_VERSION_MINOR)
+                    ENDIF(${PROJECT_NAME}_VERSION_MAJOR)
+                    # keep suffix
+                    SET(OUT  "${OUT}.chm")
 
-        #MESSAGE("DBG ${PROJECT_BINARY_DIR}/Doc/html/index.chm \n${OUT}")
-        # create target used by install and package commands
-        INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
-            DESTINATION ${INSTALL_DOCDIR} RENAME "${OUT}")
-      ENDIF(EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
-      ENDIF(NOT TARGET_DOC_SKIP_INSTALL)
+                    #MESSAGE("DBG ${PROJECT_BINARY_DIR}/Doc/html/index.chm \n${OUT}")
+                    # create target used by install and package commands
+                    INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
+                        DESTINATION ${INSTALL_DOCDIR} RENAME "${OUT}")
+                ENDIF(EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
+            ENDIF(NOT TARGET_DOC_SKIP_INSTALL)
 
-    ENDIF(HTML_HELP_COMPILER)
-    # MESSAGE(SEND_ERROR "HTML_HELP_COMPILER=${HTML_HELP_COMPILER}")
-  ENDIF (WIN32)
+        ENDIF(HTML_HELP_COMPILER)
+        # MESSAGE(SEND_ERROR "HTML_HELP_COMPILER=${HTML_HELP_COMPILER}")
+    ENDIF (WIN32)
 ENDIF(DOXYGEN_FOUND)
 
 
@@ -553,7 +560,7 @@ endif()
 if(NOT WIN32)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config DESTINATION ${INSTALL_BINDIR})
-    if(BUILD_COMPAT)
+    if(BUILD_STDLIB)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/commoncpp-config DESTINATION ${INSTALL_BINDIR})
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/commoncpp.pc DESTINATION ${INSTALL_LIBDIR}/pkgconfig)
     endif()
@@ -562,7 +569,7 @@ endif(NOT WIN32)
 install(FILES ${ucommon_inc} ${secure_inc} DESTINATION ${INSTALL_INCLUDEDIR}/ucommon    COMPONENT headers)
 install(FILES ${commoncpp_inc} DESTINATION ${INSTALL_INCLUDEDIR}/commoncpp  COMPONENT headers)
 
-if(BUILD_COMPAT)
+if(BUILD_STDLIB)
     install(TARGETS commoncpp DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
 endif()
 

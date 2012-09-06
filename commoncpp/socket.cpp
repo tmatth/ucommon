@@ -36,7 +36,7 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/address.h>
@@ -242,7 +242,7 @@ Socket::Error Socket::error(Error err, const char *errs, long systemError) const
 #ifdef _MSWINDOWS_
 Socket::Error Socket::connectError(void)
 {
-    char* str = "Could not connect to remote host";
+    const char* str = "Could not connect to remote host";
     switch(WSAGetLastError()) {
     case WSAENETDOWN:
         return error(errResourceFailure,str,socket_errno);
@@ -759,7 +759,7 @@ const char *Socket::getSystemErrorString(void) const
 
 bool Socket::isPending(Pending pending, timeout_t timeout)
 {
-    int status;
+    int status = 0;
 #ifdef USE_POLL
     struct pollfd pfd;
 

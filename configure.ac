@@ -10,8 +10,8 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="5.4.3"
-LT_VERSION="5:13:0"
+VERSION="5.5.0"
+LT_VERSION="5:14:0"
 OPENSSL_REQUIRES="0.9.7"
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -23,7 +23,7 @@ AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 AM_INIT_AUTOMAKE(ucommon, [$VERSION])
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(ucommon-config.h)
 
 AC_C_RESTRICT
 AC_C_VOLATILE
@@ -110,10 +110,6 @@ if test "x$enable_posix_timers" = "xyes" ; then
     UCOMMON_FLAGS="$UCOMMON_FLAGS -DPOSIX_TIMERS"
 fi
 
-AC_ARG_ENABLE(commoncpp,
-    AC_HELP_STRING([--disable-commoncpp],
-        [compile without common c++ compatibility library]))
-
 AC_ARG_ENABLE(stdcpp,
     AC_HELP_STRING([--disable-stdcpp],
         [compile without stdc++ runtime overhead]))
@@ -123,13 +119,11 @@ AC_ARG_ENABLE(stdcpp,
 if test "x$enable_stdcpp" = "xno" ; then
     UCOMMON_MODEL="CC"
     AC_MSG_RESULT(no)
+    COMPAT=""
 else
+    COMPAT="commoncpp"
     AC_MSG_RESULT(yes)
 fi
-
-COMPAT=""
-if test "x$enable_commoncpp" != "xno" ; then
-    COMPAT="commoncpp" ; fi
 
 AC_ARG_WITH(sslstack,
     AC_HELP_STRING([--with-sslstack=lib],[specify which ssl stack to build]),[
@@ -161,8 +155,15 @@ clib=`echo ${UCOMMON_LIBC} | sed s/[-]l//`
 tlib=""
 
 AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h endian.h sys/filio.h dirent.h sys/resource.h wchar.h netinet/in.h net/if.h)
-AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h regex.h sys/inotify.h sys/event.h syslog.h sys/wait.h termios.h termio.h fcntl.h unistd.h)
-AC_CHECK_HEADERS(sys/param.h sys/lockf.h sys/file.h regex.h dlfcn.h)
+AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h sys/inotify.h sys/event.h syslog.h sys/wait.h termios.h termio.h fcntl.h unistd.h)
+AC_CHECK_HEADERS(sys/param.h sys/lockf.h sys/file.h dlfcn.h)
+
+AC_CHECK_HEADER(regex.h, [
+    AC_DEFINE(HAVE_REGEX_H, [1], [have regex header])
+    AC_CHECK_LIB(regex, regfree, [
+        UCOMMON_LIBS="$UCOMMON_LIBS -lregex"
+    ])
+])
 
 AC_CHECK_LIB(msvcrt, fopen, [
     threading="msw"

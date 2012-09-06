@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <ucommon/export.h>
 #include <ucommon/string.h>
 #include <stdarg.h>
@@ -278,7 +278,7 @@ string::string(long value)
 {
     str = create(20);
     str->retain();
-    snprintf(str->text, 20, "%ld", value);
+    snprintf(&str->text[0], 20, "%ld", value);
     str->len = strlen(str->text);
     str->fix();
 }
@@ -287,7 +287,7 @@ string::string(double value)
 {
     str = create(32);
     str->retain();
-    snprintf(str->text, 32, "%f", value);
+    snprintf(&str->text[0], 32, "%f", value);
     str->len = strlen(str->text);
     str->fix();
 }

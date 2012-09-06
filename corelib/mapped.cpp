@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <ucommon/export.h>
 #include <ucommon/linked.h>
 #include <ucommon/string.h>
@@ -157,7 +157,7 @@ void MappedMemory::create(const char *fn, size_t len)
     assert(fn != NULL && *fn != 0);
 
     int share = FILE_SHARE_READ;
-    int prot = FILE_MAP_READ;
+//  int prot = FILE_MAP_READ;
     int mode = GENERIC_READ;
 
     size = 0;
@@ -175,7 +175,7 @@ void MappedMemory::create(const char *fn, size_t len)
         ++fn;
 
     if(len) {
-        prot = FILE_MAP_WRITE;
+//      prot = FILE_MAP_WRITE;
         mode |= GENERIC_WRITE;
         share |= FILE_SHARE_WRITE;
         fd = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, len, fn);

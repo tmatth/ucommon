@@ -36,12 +36,13 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/string.h>
 #include <commoncpp/socket.h>
 #include <commoncpp/dccp.h>
+#include <errno.h>
 
 #ifdef _MSWINDOWS_
 #include <io.h>
@@ -197,8 +198,8 @@ Socket(fam, SOCK_DCCP, IPPROTO_DCCP)
 #ifdef  CCXX_IPV6
     struct sockaddr_in6 addr6;
 #endif
-    struct sockaddr_in *ap;
-  socklen_t alen = 0;
+    struct sockaddr *ap = NULL;
+    socklen_t alen = 0;
 
     struct servent *svc;
 
@@ -243,22 +244,25 @@ Socket(fam, SOCK_DCCP, IPPROTO_DCCP)
 
     switch(family) {
 #ifdef  CCXX_IPV6
-    case IPV6:
+    case IPV6: {
         IPV6Address ia6(name);
         addr6.sin6_port = addr.sin_port;
         addr6.sin6_family = family;
-        ap = &addr6;
+        addr6.sin6_addr = getaddress(ia6);
+        ap = (struct sockaddr *)&addr6;
         alen = sizeof(addr6);
         break;
+    }
 #endif
     case IPV4:
         IPV4Address ia(name);
         addr.sin_addr = getaddress(ia);
-        ap = &addr;
-    alen = sizeof(addr);
+        ap = (struct sockaddr *)&addr;
+        alen = sizeof(addr);
+        break;
     }
 
-    if(bind(so, (struct sockaddr *)ap, alen)) {
+    if(!ap || bind(so, (struct sockaddr *)ap, alen)) {
         endSocket();
         error(errBindingFailed,(char *)"Could not bind socket",socket_errno);
         return;
@@ -436,7 +440,6 @@ void DCCPSocket::connect(const char *target)
 {
     char namebuf[128];
     char *cp;
-    bool connected = false;
     struct servent *svc;
     tpport_t port;
 

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../config.h"
+#include <ucommon-config.h>
 #include <ucommon/export.h>
 #include <ucommon/protocols.h>
 #include <ucommon/string.h>
@@ -1077,7 +1077,6 @@ const char *shell::getenv(const char *id, const char *value)
 int shell::system(const char *cmd, const char **envp)
 {
     char cmdspec[128];
-    DWORD code = -1;
     PROCESS_INFORMATION pi;
     char *ep = NULL;
     unsigned len = 0;
@@ -1361,6 +1360,7 @@ int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
 
     pid = pi.hProcess;
     CloseHandle(pi.hThread);
+    err = 0;
 
 exit:
     if(ep)
@@ -1406,9 +1406,8 @@ int shell::inkey(const char *prompt)
 
 int shell::cancel(shell::pid_t pid)
 {
-    UINT code = 255;
     if(!TerminateProcess(pid, 255))
-        return -1; 
+        return -1;
     return 0;
 }
 
