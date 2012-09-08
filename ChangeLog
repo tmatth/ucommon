@@ -1,6 +1,7 @@
 from ucommon 5.5.0 to 5.5.1
 - regex checks also for lib, mingw support
 - pedantic cleanup of mingw
+- anaselli fix for applog and pipes
 
 from ucommon 5.4.3 to 5.5.0
 - mapof and listof added
