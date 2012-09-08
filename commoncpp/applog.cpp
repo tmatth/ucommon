@@ -118,6 +118,7 @@ class logger : public ost::ThreadQueue
     string       _nomeFile;
     std::fstream _logfs;
     bool         _usePipe;
+    bool         _closedByApplog;
 
   protected:
     // to dequeue log messages and write them to file if not log_directly
@@ -126,13 +127,17 @@ class logger : public ost::ThreadQueue
     virtual void  stopQueue(void);
     virtual void  onTimer(void);
     virtual void  final(void);
-
+            void _openFile();
+  
   public:
     logger(const char* logFileName = NULL, bool usePipe = false);
     virtual ~logger();
 
     // To change log file name
     void logFileName(const char* FileName, bool usePipe = false);
+
+    void openFile();
+    void closeFile();
 
 };
 
@@ -288,35 +293,14 @@ HEXdump::HEXdump(const unsigned char *buffer, int len, int max_len) : _str()
 #endif
 
 // class logger
-logger::logger(const char* logFileName, bool usePipe)  : ThreadQueue(NULL, 0, 0), _usePipe(usePipe)
+logger::logger(const char* logFileName, bool usePipe)  : ThreadQueue(NULL, 0, 0), _usePipe(usePipe), _closedByApplog(false)
 {
   _nomeFile = "";
 
   if (logFileName)
     _nomeFile = logFileName;
-  if (!_nomeFile.empty())
-  {
-    if (!_usePipe)
-    {
-      _logfs.open(_nomeFile.c_str(), std::ofstream::out | std::ofstream::app | std::ofstream::ate);
-    }
-#ifndef _MSWINDOWS_
-    else
-    {
-      // create pipe
-      int err = mkfifo(_nomeFile.c_str(), S_IREAD | S_IWRITE);
-      if (err == 0 || errno == EEXIST)
-      {
-        // and open it
-        _logfs.open(_nomeFile.c_str(), std::fstream::in | std::fstream::out);
-      }
-      else
-        THROW(AppLogException("Can't create pipe"));
-    }
-#endif
-    if (_logfs.fail())
-      THROW(AppLogException("Can't open log file name"));
-  }
+ 
+  openFile();
 }
 
 logger::~logger()
@@ -339,41 +323,85 @@ void logger::logFileName(const char* FileName, bool usePipe)
   if (_logfs.is_open())
     _logfs.close();
 
-  if (!_nomeFile.empty())
-  {
-    if (!_usePipe)
-    {
-      _logfs.open(_nomeFile.c_str(), std::ofstream::out | std::ofstream::app | std::ofstream::ate);
-    }
-#ifndef _MSWINDOWS_
-    else
-    {
-      // create pipe
-      int err = mkfifo(_nomeFile.c_str(), S_IREAD | S_IWRITE);
-      if (err == 0 || errno == EEXIST)
-      {
-        // and open it
-        _logfs.open(_nomeFile.c_str(), std::fstream::in | std::fstream::out);
-      }
-      else
-        THROW(AppLogException("Can't create pipe"));
-    }
-#endif
-    if (_logfs.fail())
-      THROW(AppLogException("Can't open log file name"));
-  }
-
+  openFile();
 }
+
+/// open also logger if applog->open() is invoked
+void logger::openFile()
+{
+  _closedByApplog=false;
+}
+
+///internal logger openFile needed to use pipe and avoid stream buffering in the case
+/// the consumer is not connected to pipe
+void logger::_openFile()
+{
+  if (!_closedByApplog && !_logfs.is_open())
+  {
+    if (!_nomeFile.empty())
+    {
+      _logfs.clear();
+      if (!_usePipe)
+      {
+        _logfs.open(_nomeFile.c_str(), std::ofstream::out | std::ofstream::app | std::ofstream::ate);
+      }
+#ifndef _MSWINDOWS_
+      else
+      {
+        // create pipe
+        int err = mkfifo(_nomeFile.c_str(), S_IREAD | S_IWRITE);
+        if (err == 0 || errno == EEXIST)
+        {
+          // and open it
+          _logfs.open(_nomeFile.c_str(), std::fstream::in | std::fstream::out);
+        }
+        else
+          THROW(AppLogException("Can't create pipe"));
+      }
+#endif
+      if (_logfs.fail())
+        THROW(AppLogException("Can't open log file name"));
+    }
+  }
+}
+
+/// close also logger if applog->close() is invoked
+void logger::closeFile()
+{
+   _closedByApplog = true;
+}
+    
 
 // writes into filename enqueued messages
 void logger::runQueue(void * data)
 {
   char *str = (char *) data;
 
+  // if for some internal reasons file has been closed
+  // reopen it
+  try
+  {
+    _openFile();
+  }
+  catch (AppLogException e)
+  {
+    std::cerr << e.what() << std::endl;
+    slog.emerg("%s\n", e.what());
+    std::cerr.flush();
+  }
+  
   if (_logfs.is_open())
   {
     _logfs << str;
     _logfs.flush();
+  }
+  
+  //if we use a pipe to avoid increasing of stream buffer
+  // without a consumer, we open, use and close it
+  if ((_usePipe || _closedByApplog) && _logfs.is_open())
+  {
+    _logfs.flush();
+    _logfs.close();
   }
 }
 
@@ -544,7 +572,6 @@ void AppLog::logFileName(const char* FileName, bool logDirectly)
 #endif
   if (!d->_logDirectly)
   {
-    d->_nomeFile = FileName;
     if (d->_pLogger)
       d->_pLogger->logFileName(FileName, d->_logPipe);
     else
@@ -727,6 +754,11 @@ void AppLog::close(void)
     }
     d->_lock.leaveMutex();
   }
+  else
+  {
+    if (d->_pLogger)
+      d->_pLogger->closeFile();
+  }
 }
 
 void AppLog::open(const char *ident)
@@ -758,6 +790,11 @@ void AppLog::open(const char *ident)
         slog.emerg("Can't open file name!\n");
       }
       d->_lock.leaveMutex();
+    }
+    else
+    {
+      if (d->_pLogger)
+      	d->_pLogger->openFile();
     }
     if (ident != NULL)
       logIt->second._ident = ident;
@@ -1190,3 +1227,4 @@ AppLog& AppLog::operator<< (ostream& (*pfManipulator)(ostream&))
 }
 
 #endif
+
