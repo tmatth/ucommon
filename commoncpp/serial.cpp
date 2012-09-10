@@ -961,7 +961,7 @@ bool Serial::isPending(Pending pending, timeout_t timeout)
 #else
 
 
-    int status;
+    int status = 0;
 #ifdef HAVE_POLL
     struct pollfd pfd;
 
