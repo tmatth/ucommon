@@ -304,7 +304,7 @@ static void binarydecode(FILE *fp, const char *path)
     memset(frame, 0, sizeof(frame));
     memset(buffer, 0, sizeof(buffer));
     if(fread(frame, sizeof(frame), 1, fp) < 1)
-        shell::errexit(6, "*** %s: %s: %n",
+        shell::errexit(6, "*** %s: %s: %s\n",
             argv0, path, _TEXT("cannot read archive"));
 
     if(!eq((char *)frame, ".car", 4) || (frame[4] != 0xff))
