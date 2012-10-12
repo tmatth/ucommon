@@ -855,7 +855,7 @@ private:
         void *data;
         char text[8];
 
-        keydata(keyassoc *assoc, char *id, unsigned max, unsigned bufsize);
+        keydata(keyassoc *assoc, const char *id, unsigned max, unsigned bufsize);
     };
 
     friend class keydata;
@@ -873,7 +873,7 @@ protected:
      * @param size of object to allocate.
      * @return pointer to allocated object or NULL on failure.
      */
-    void *allocate(char *name, size_t size);
+    void *allocate(const char *name, size_t size);
 
 public:
     /**
@@ -893,7 +893,7 @@ public:
      * Get the number of associations we have in our object.
      * @return number of associations stored.
      */
-    inline unsigned getCount(void)
+    inline unsigned getCount(void) const
         {return count;};
 
     /**
@@ -923,7 +923,7 @@ public:
      * @param pointer value to assign with name.
      * @return false if failed because name is too long for managed table.
      */
-    bool assign(char *name, void *pointer);
+    bool assign(const char *name, void *pointer);
 
     /**
      * Create a new name in the association table and assign it's value.
@@ -931,7 +931,7 @@ public:
      * @param pointer value to assign with name.
      * @return false if already exists or name is too long for managed table.
      */
-    bool create(char *name, void *pointer);
+    bool create(const char *name, void *pointer);
 
     /**
      * Remove a name and pointer association.  If managed key names are used
@@ -999,7 +999,7 @@ public:
      * Get the count of typed objects stored in our hash map.
      * @return typed objects in map.
      */
-    inline unsigned getCount(void)
+    inline unsigned getCount(void) const
         {return keyassoc::getCount();};
 
     /**
@@ -1031,7 +1031,7 @@ public:
      * Create mapped entry from scratch.
      * @param name to assign.
      */
-    inline T *map(char *name)
+    inline T *map(const char *name)
         {T *tmp = keyassoc::allocate(name, sizeof(T)); if(tmp) new((caddr_t)tmp) T;}
 
     /**
@@ -1039,7 +1039,7 @@ public:
      * used then the memory allocated for the name will be re-used.
      * @param name to remove.
      */
-    inline void unmap(char *name)
+    inline void unmap(const char *name)
         {keyassoc::remove(name);};
 
     /**
@@ -1056,7 +1056,7 @@ public:
      * privately.
      * @return count of heap pages used.
      */
-    inline unsigned getPages(void)
+    inline unsigned getPages(void) const
         {return mempager::getPages();};
 };
 
@@ -1080,7 +1080,7 @@ public:
      * Get the count of typed objects stored in our hash map.
      * @return typed objects in map.
      */
-    inline unsigned getCount(void)
+    inline unsigned getCount(void) const
         {return keyassoc::getCount();}
 
     /**

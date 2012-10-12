@@ -835,8 +835,8 @@ PagerObject *PagerPool::get(size_t size)
     return ptr;
 }
 
-keyassoc::keydata::keydata(keyassoc *assoc, char *kid, unsigned max, unsigned bufsize) :
-NamedObject(assoc->root, kid, max)
+keyassoc::keydata::keydata(keyassoc *assoc, const char *kid, unsigned max, unsigned bufsize) :
+NamedObject(assoc->root, strdup(kid), max)
 {
     assert(assoc != NULL);
     assert(kid != NULL && *kid != 0);
@@ -923,7 +923,7 @@ void *keyassoc::remove(const char *id)
     return data;
 }
 
-void *keyassoc::allocate(char *id, size_t dsize)
+void *keyassoc::allocate(const char *id, size_t dsize)
 {
     assert(id != NULL && *id != 0);
     assert(dsize != 0);
@@ -962,7 +962,7 @@ void *keyassoc::allocate(char *id, size_t dsize)
     return dp;
 }
 
-bool keyassoc::create(char *id, void *data)
+bool keyassoc::create(const char *id, void *data)
 {
     assert(id != NULL && *id != 0);
     assert(data != NULL);
@@ -996,7 +996,7 @@ bool keyassoc::create(char *id, void *data)
     return true;
 }
 
-bool keyassoc::assign(char *id, void *data)
+bool keyassoc::assign(const char *id, void *data)
 {
     assert(id != NULL && *id != 0);
     assert(data != NULL);

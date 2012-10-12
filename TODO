@@ -3,8 +3,6 @@ Proposed changes (likely deferred to 6.0.0)
 	fsys.cpp & file.cpp split into part that truly requires
 	_XOPEN_SOURCE >= 600 and rest
 
-	const char * for keyassoc id's
-
 	Redu and split ucommon.pc and usecure.pc.  This is to get cleaner
 	linkages in derived projects.  Also or alternately change 
 	ucommon-config to have a with & without secure mode.
@@ -29,8 +27,6 @@ Proposed changes (likely deferred to 6.0.0)
 	gaurd classes renamed
 
 	add CharbufProtocol with locking states
-
-	String operator + should return temp string...preset size of both
 
 	shell::Option no longer needs OrderedObject base class
 
