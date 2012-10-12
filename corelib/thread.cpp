@@ -1015,24 +1015,24 @@ void auto_protect::operator=(void *obj)
         Mutex::protect(object);
 }
 
-Mutex::gaurd::gaurd()
+Mutex::guard::guard()
 {
     object = NULL;
 }
 
-Mutex::gaurd::gaurd(void *obj)
+Mutex::guard::guard(void *obj)
 {
     object = obj;
     if(obj)
         Mutex::protect(object);
 }
 
-Mutex::gaurd::~gaurd()
+Mutex::guard::~guard()
 {
     release();
 }
 
-void Mutex::gaurd::set(void *obj)
+void Mutex::guard::set(void *obj)
 {
     release();
     object = obj;
@@ -1040,7 +1040,7 @@ void Mutex::gaurd::set(void *obj)
         Mutex::protect(object);
 }
 
-void Mutex::gaurd::release(void)
+void Mutex::guard::release(void)
 {
     if(object) {
         Mutex::release(object);
@@ -1078,12 +1078,12 @@ void ThreadLock::indexing(unsigned index)
     }
 }
 
-ThreadLock::gaurd_reader::gaurd_reader()
+ThreadLock::guard_reader::guard_reader()
 {
     object = NULL;
 }
 
-ThreadLock::gaurd_reader::gaurd_reader(void *obj)
+ThreadLock::guard_reader::guard_reader(void *obj)
 {
     object = obj;
     if(obj)
@@ -1091,12 +1091,12 @@ ThreadLock::gaurd_reader::gaurd_reader(void *obj)
             object = NULL;
 }
 
-ThreadLock::gaurd_reader::~gaurd_reader()
+ThreadLock::guard_reader::~guard_reader()
 {
     release();
 }
 
-void ThreadLock::gaurd_reader::set(void *obj)
+void ThreadLock::guard_reader::set(void *obj)
 {
     release();
     object = obj;
@@ -1105,7 +1105,7 @@ void ThreadLock::gaurd_reader::set(void *obj)
             object = NULL;
 }
 
-void ThreadLock::gaurd_reader::release(void)
+void ThreadLock::guard_reader::release(void)
 {
     if(object) {
         ThreadLock::release(object);
@@ -1113,12 +1113,12 @@ void ThreadLock::gaurd_reader::release(void)
     }
 }
 
-ThreadLock::gaurd_writer::gaurd_writer()
+ThreadLock::guard_writer::guard_writer()
 {
     object = NULL;
 }
 
-ThreadLock::gaurd_writer::gaurd_writer(void *obj)
+ThreadLock::guard_writer::guard_writer(void *obj)
 {
     object = obj;
     if(obj)
@@ -1126,12 +1126,12 @@ ThreadLock::gaurd_writer::gaurd_writer(void *obj)
             object = NULL;
 }
 
-ThreadLock::gaurd_writer::~gaurd_writer()
+ThreadLock::guard_writer::~guard_writer()
 {
     release();
 }
 
-void ThreadLock::gaurd_writer::set(void *obj)
+void ThreadLock::guard_writer::set(void *obj)
 {
     release();
     object = obj;
@@ -1140,7 +1140,7 @@ void ThreadLock::gaurd_writer::set(void *obj)
             object = NULL;
 }
 
-void ThreadLock::gaurd_writer::release(void)
+void ThreadLock::guard_writer::release(void)
 {
     if(object) {
         ThreadLock::release(object);

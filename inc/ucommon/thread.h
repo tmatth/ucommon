@@ -556,102 +556,102 @@ protected:
 
 public:
     /**
-     * Gaurd class to apply scope based access locking to objects.  The rwlock
+     * Guard class to apply scope based access locking to objects.  The rwlock
      * is located from the rwlock pool rather than contained in the target
-     * object, and the read lock is released when the gaurd object falls out of
+     * object, and the read lock is released when the guard object falls out of
      * scope.  This is essentially an automation mechanism for mutex::reader.
      * @author David Sugar <dyfet@gnutelephony.org>
      */
-    class __EXPORT gaurd_reader
+    class __EXPORT guard_reader
     {
     private:
         void *object;
 
     public:
         /**
-          * Create an unitialized instance of gaurd.  Usually used with a
-          * gaurd = operator.
+          * Create an unitialized instance of guard.  Usually used with a
+          * guard = operator.
           */
-        gaurd_reader();
+        guard_reader();
 
         /**
-         * Construct a gaurd for a specific object.
-         * @param object to gaurd.
+         * Construct a guard for a specific object.
+         * @param object to guard.
          */
-        gaurd_reader(void *object);
+        guard_reader(void *object);
 
         /**
-         * Release mutex when gaurd falls out of scope.
+         * Release mutex when guard falls out of scope.
          */
-        ~gaurd_reader();
+        ~guard_reader();
 
         /**
-         * Set gaurd to mutex lock a new object.  If a lock is currently
+         * Set guard to mutex lock a new object.  If a lock is currently
          * held, it is released.
-         * @param object to gaurd.
+         * @param object to guard.
          */
         void set(void *object);
 
         /**
-         * Prematurely release a gaurd.
+         * Prematurely release a guard.
          */
         void release(void);
 
         /**
-         * Set gaurd to read lock a new object.  If a lock is currently
+         * Set guard to read lock a new object.  If a lock is currently
          * held, it is released.
-         * @param pointer to object to gaurd.
+         * @param pointer to object to guard.
          */
         inline void operator=(void *pointer)
             {set(pointer);};
     };
 
     /**
-     * Gaurd class to apply scope based exclusive locking to objects.  The rwlock
+     * Guard class to apply scope based exclusive locking to objects.  The rwlock
      * is located from the rwlock pool rather than contained in the target
-     * object, and the write lock is released when the gaurd object falls out of
+     * object, and the write lock is released when the guard object falls out of
      * scope.  This is essentially an automation mechanism for mutex::writer.
      * @author David Sugar <dyfet@gnutelephony.org>
      */
-    class __EXPORT gaurd_writer
+    class __EXPORT guard_writer
     {
     private:
         void *object;
 
     public:
         /**
-          * Create an unitialized instance of gaurd.  Usually used with a
-          * gaurd = operator.
+          * Create an unitialized instance of guard.  Usually used with a
+          * guard = operator.
           */
-        gaurd_writer();
+        guard_writer();
 
         /**
-         * Construct a gaurd for a specific object.
-         * @param object to gaurd.
+         * Construct a guard for a specific object.
+         * @param object to guard.
          */
-        gaurd_writer(void *object);
+        guard_writer(void *object);
 
         /**
-         * Release mutex when gaurd falls out of scope.
+         * Release mutex when guard falls out of scope.
          */
-        ~gaurd_writer();
+        ~guard_writer();
 
         /**
-         * Set gaurd to mutex lock a new object.  If a lock is currently
+         * Set guard to mutex lock a new object.  If a lock is currently
          * held, it is released.
-         * @param object to gaurd.
+         * @param object to guard.
          */
         void set(void *object);
 
         /**
-         * Prematurely release a gaurd.
+         * Prematurely release a guard.
          */
         void release(void);
 
         /**
-         * Set gaurd to read lock a new object.  If a lock is currently
+         * Set guard to read lock a new object.  If a lock is currently
          * held, it is released.
-         * @param pointer to object to gaurd.
+         * @param pointer to object to guard.
          */
         inline void operator=(void *pointer)
             {set(pointer);};
@@ -677,10 +677,10 @@ public:
     bool access(timeout_t timeout = Timer::inf);
 
     /**
-     * Specify hash table size for gaurd protection.  The default is 1.
+     * Specify hash table size for guard protection.  The default is 1.
      * This should be called at initialization time from the main thread
      * of the application before any other threads are created.
-     * @param size of hash table used for gaurding.
+     * @param size of hash table used for guarding.
      */
     static void indexing(unsigned size);
 
@@ -1131,51 +1131,51 @@ protected:
 
 public:
     /**
-     * Gaurd class to apply scope based mutex locking to objects.  The mutex
+     * Guard class to apply scope based mutex locking to objects.  The mutex
      * is located from the mutex pool rather than contained in the target
-     * object, and the lock is released when the gaurd object falls out of
+     * object, and the lock is released when the guard object falls out of
      * scope.  This is essentially an automation mechanism for mutex::protect.
      * @author David Sugar <dyfet@gnutelephony.org>
      */
-    class __EXPORT gaurd
+    class __EXPORT guard
     {
     private:
         void *object;
 
     public:
         /**
-          * Create an unitialized instance of gaurd.  Usually used with a
-          * gaurd = operator.
+          * Create an unitialized instance of guard.  Usually used with a
+          * guard = operator.
           */
-        gaurd();
+        guard();
 
         /**
-         * Construct a gaurd for a specific object.
-         * @param object to gaurd.
+         * Construct a guard for a specific object.
+         * @param object to guard.
          */
-        gaurd(void *object);
+        guard(void *object);
 
         /**
-         * Release mutex when gaurd falls out of scope.
+         * Release mutex when guard falls out of scope.
          */
-        ~gaurd();
+        ~guard();
 
         /**
-         * Set gaurd to mutex lock a new object.  If a lock is currently
+         * Set guard to mutex lock a new object.  If a lock is currently
          * held, it is released.
-         * @param object to gaurd.
+         * @param object to guard.
          */
         void set(void *object);
 
         /**
-         * Prematurely release a gaurd.
+         * Prematurely release a guard.
          */
         void release(void);
 
         /**
-         * Set gaurd to mutex lock a new object.  If a lock is currently
+         * Set guard to mutex lock a new object.  If a lock is currently
          * held, it is released.
-         * @param pointer to object to gaurd.
+         * @param pointer to object to guard.
          */
         inline void operator=(void *pointer)
             {set(pointer);};
@@ -1273,15 +1273,15 @@ public:
         {pthread_mutex_unlock(lock);};
 
     /**
-     * Specify hash table size for gaurd protection.  The default is 1.
+     * Specify hash table size for guard protection.  The default is 1.
      * This should be called at initialization time from the main thread
      * of the application before any other threads are created.
-     * @param size of hash table used for gaurding.
+     * @param size of hash table used for guarding.
      */
     static void indexing(unsigned size);
 
     /**
-     * Specify pointer/object/resource to gaurd protect.  This uses a
+     * Specify pointer/object/resource to guard protect.  This uses a
      * dynamically managed mutex.
      * @param pointer to protect.
      */
