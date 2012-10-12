@@ -15,6 +15,7 @@ config.h
 args
 car
 mdsum
+pdetach
 sockaddr
 zerofill
 scrub-files
@@ -33,4 +34,4 @@ doxy.config
 *.pc
 *.spec
 *~
-
+ucommon-config.h
