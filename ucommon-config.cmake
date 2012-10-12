@@ -23,14 +23,15 @@ Known values for OPTION are:
 
   --prefix=DIR      change ucommon prefix [default $prefix]
   --exec-prefix=DIR change ucommon exec prefix [default $exec_prefix]
-  --libs        print library linking information
-  --clink       print c model linking information
-  --cflags      print pre-processor and compiler flags
-  --includes    print framework include directory
-  --plugins     print framework plugin directory
-  --model       print the linking model used
-  --help        display this help and exit
-  --version     output version information
+  --libs            print library linking information
+  --clink           print c model linking information
+  --cflags          print pre-processor and compiler flags
+  --minimal         print minimal linking information
+  --includes        print framework include directory
+  --plugins         print framework plugin directory
+  --model           print the linking model used
+  --help            display this help and exit
+  --version         output version information
 EOF
 
     exit $1
@@ -44,71 +45,79 @@ cflags=false
 libs=false
 
 while test $# -gt 0; do
-    case "$1" in
-    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
-    *) optarg= ;;
-    esac
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) optarg= ;;
+  esac
 
-    case "$1" in
-    --prefix=*)
+  case "$1" in
+  --prefix=*)
     prefix=$optarg
     includedir=$prefix/include
     libdir=$prefix/lib
     ;;
 
-    --prefix)
+  --prefix)
     echo $prefix
     ;;
 
-    --exec-prefix=*)
-      exec_prefix=$optarg
-      libdir=$exec_prefix/lib
-      ;;
+  --exec-prefix=*)
+    exec_prefix=$optarg
+    libdir=$exec_prefix/lib
+    ;;
 
-    --exec-prefix)
-      echo $exec_prefix
-      ;;
+  --exec-prefix)
+    echo $exec_prefix
+    ;;
 
-    --version)
+  --version)
     echo ${PACKAGE_FILE_VERSION}
     exit 0
     ;;
 
-    --help)
+  --help)
     usage 0
     ;;
 
-    --cflags)
-        echo ${PACKAGE_FLAGS}
-        ;;
+  --cflags)
+    echo ${PACKAGE_FLAGS}
+    ;;
 
-    --libtool-libs)
+  --libtool-libs)
     if [ -r ${libdir}/libucommon.la ]
     then
-        echo ${libdir}/libucommon.la
+      echo ${libdir}/libucommon.la
     fi
-        ;;
+    ;;
 
-    --model)
-        echo CXX
-        ;;
+  --model)
+    echo CXX
+    ;;
 
-    --clink)
-        echo -lc
-        ;;
+  --clink)
+    echo -lc
+    ;;
 
-    --libs)
-        echo -lusecure -lucommon ${ADDITIONAL_LIBS} ${PACKAGE_LIBS}
-        ;;
-    --includes)
-        echo ${CMAKE_INSTALL_PREFIX}/include
-        ;;
-    *)
+  --minimal)
+    echo -lucommon ${PACKAGE_LIBS}
+    ;;
+
+
+  --libs)
+    echo -lusecure -lucommon ${ADDITIONAL_LIBS} ${PACKAGE_LIBS}
+    ;;
+
+  --includes)
+    echo ${CMAKE_INSTALL_PREFIX}/include
+    ;;
+
+  *)
     usage
     exit 1
     ;;
-    esac
-    shift
+
+  esac
+  shift
 done
 
 exit 0
