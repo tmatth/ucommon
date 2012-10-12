@@ -6,8 +6,6 @@ Proposed changes (likely deferred to 6.0.0)
 	
 	FetchProtocol for string >> operator?
 
-	string comparison operators become direct inlines to compare
-
 	add CharbufProtocol with locking states
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...

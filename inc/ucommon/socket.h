@@ -1866,16 +1866,11 @@ public:
 };
 
 /**
- * A convenience class for socket.
- */
-typedef Socket socket;
-
-/**
  * A convenience function to convert a socket address list into an addrinfo.
  * @param address list object.
  * @return addrinfo list or NULL if empty.
  */
-inline struct addrinfo *addrinfo(socket::address& address)
+inline struct addrinfo *addrinfo(Socket::address& address)
     {return address.getList();}
 
 /**
@@ -1884,7 +1879,7 @@ inline struct addrinfo *addrinfo(socket::address& address)
  * @param address list object.
  * @return first socket address in list or NULL if empty.
  */
-inline struct sockaddr *addr(socket::address& address)
+inline struct sockaddr *addr(Socket::address& address)
     {return address.getAddr();}
 
 /**
