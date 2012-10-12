@@ -19,7 +19,13 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
 set (VERSION 5.5.0)
-set (SOVERSION 5)
+
+set(RC_VERSION ${VERSION})
+STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
+set(RC_VERSION "${RC_VERSION},0")
+
+set(SOVERSION ${VERSION})
+STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
 
 # when we override default install prefix, assume full path is used...
 
