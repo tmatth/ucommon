@@ -530,10 +530,12 @@ fsys::fsys(const fsys& copy)
     error = 0;
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
+    pid = INVALID_HANDLE_VALUE;
 
     if(copy.fd == INVALID_HANDLE_VALUE)
         return;
 
+    pid = copy.pid;
     HANDLE pHandle = GetCurrentProcess();
     if(!DuplicateHandle(pHandle, copy.fd, pHandle, &fd, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
         fd = INVALID_HANDLE_VALUE;
@@ -910,15 +912,16 @@ int fsys::access(const char *path, unsigned mode)
 fsys::fsys(const fsys& copy)
 {
     fd = INVALID_HANDLE_VALUE;
+    pid = INVALID_HANDLE_VALUE;
     ptr = NULL;
     error = 0;
 
-    if(copy.fd != INVALID_HANDLE_VALUE)
+    if(copy.fd != INVALID_HANDLE_VALUE) {
         fd = ::dup(copy.fd);
+        pid = copy.pid;
+    }
     else
         fd = INVALID_HANDLE_VALUE;
-    error = 0;
-    ptr = NULL;
 }
 
 int fsys::inherit(fd_t& fd, bool enable)
@@ -991,6 +994,7 @@ int fsys::seek(offset_t pos)
 fsys::fsys()
 {
     fd = INVALID_HANDLE_VALUE;
+    pid = INVALID_HANDLE_VALUE;
     ptr = NULL;
     error = 0;
 }
@@ -998,6 +1002,7 @@ fsys::fsys()
 fsys::fsys(const char *path, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
+    pid = INVALID_HANDLE_VALUE;
     ptr = NULL;
     error = 0;
     open(path, access);
@@ -1008,6 +1013,7 @@ fsys::fsys(const char *path, access_t access, unsigned mode)
 {
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
+    pid = INVALID_HANDLE_VALUE;
     error = 0;
     create(path, access, mode);
 }
@@ -1653,6 +1659,7 @@ fsys::fsys(fd_t handle)
 {
     fd = handle;
     ptr = NULL;
+    pid = INVALID_HANDLE_VALUE;
     error = 0;
 }
 
