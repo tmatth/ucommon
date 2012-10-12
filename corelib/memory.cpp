@@ -87,7 +87,7 @@ memalloc::~memalloc()
     memalloc::purge();
 }
 
-unsigned memalloc::utilization(void)
+unsigned memalloc::utilization(void) const
 {
     unsigned long used = 0, alloc = 0;
     page_t *mp = page;
@@ -522,7 +522,7 @@ void StringPager::set(unsigned index, const char *text)
     list->text = str;
 }
 
-const char *StringPager::get(unsigned index)
+const char *StringPager::get(unsigned index) const
 {
     linked_pointer<member> list = root;
 

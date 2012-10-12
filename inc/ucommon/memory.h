@@ -100,7 +100,7 @@ public:
      * Get the number of pages that have been allocated from the real heap.
      * @return pages allocated from heap.
      */
-    inline unsigned getPages(void)
+    inline unsigned getPages(void) const
         {return count;};
 
     /**
@@ -110,7 +110,7 @@ public:
      * to detect and bring down apps that are leaking.
      * @return page allocation limit.
      */
-    inline unsigned getLimit(void)
+    inline unsigned getLimit(void) const
         {return limit;};
 
     /**
@@ -130,7 +130,7 @@ public:
      * may suggest a larger page size should be used.
      * @return pager utilization.
      */
-    unsigned utilization(void);
+    unsigned utilization(void) const;
 
     /**
      * Purge all allocated memory and heap pages immediately.
@@ -386,7 +386,7 @@ public:
      * Get the number of items in the pager string list.
      * @return number of items stored.
      */
-    inline unsigned count(void)
+    inline unsigned count(void) const
         {return members;};
 
     /**
@@ -395,7 +395,7 @@ public:
      * @param item to access.
      * @return pointer to text for item, or NULL if out of range.
      */
-    const char *get(unsigned item);
+    const char *get(unsigned item) const;
 
     /**
      * Replace string item in list.
@@ -460,7 +460,7 @@ public:
      * @param item to access.
      * @return text of item or NULL if invalid.
      */
-    inline const char *operator[](unsigned item)
+    inline const char *operator[](unsigned item) const
         {return get(item);};
 
     /**
@@ -468,7 +468,7 @@ public:
      * the list of strings.
      * @return first member of list or NULL if empty.
      */
-    inline StringPager::member *begin(void)
+    inline StringPager::member *begin(void) const
         {return static_cast<StringPager::member *>(root);};
 
     /**
@@ -568,14 +568,17 @@ public:
 
     void operator=(const char *path);
 
-    inline const char *operator*()
+    inline const char *operator*() const
         {return dir;};
 
-    inline operator bool()
+    inline operator bool() const
         {return dir != NULL;};
 
-    inline bool operator!()
+    inline bool operator!() const
         {return dir == NULL;};
+
+    inline unsigned count(void) const
+        {return StringPager::count();};
 
     /**
      * Return specified filename from directory list.  This is a convenience
@@ -583,10 +586,10 @@ public:
      * @param item to access.
      * @return text of item or NULL if invalid.
      */
-    inline const char *operator[](unsigned item)
+    inline const char *operator[](unsigned item) const
         {return StringPager::get(item);};
 
-    inline const char *get(unsigned item)
+    inline const char *get(unsigned item) const
         {return StringPager::get(item);};
 };
 
@@ -1141,7 +1144,7 @@ public:
      * inherit keyassoc privately.
      * @return pager utilization, 0-100.
      */
-    inline unsigned utilization(void)
+    inline unsigned utilization(void) const
         {return mempager::utilization();}
 
     /**
@@ -1150,7 +1153,7 @@ public:
      * privately.
      * @return count of heap pages used.
      */
-    inline unsigned getPages(void)
+    inline unsigned getPages(void) const
         {return mempager::getPages();}
 };
 
