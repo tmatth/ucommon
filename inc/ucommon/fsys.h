@@ -647,11 +647,10 @@ public:
      * Execute a process and get exit code.
      * @param path to execute.
      * @param argv list.
+     * @param optional env.
      * @return exit code.
      */
-    static int exec(const char *path, char **argv);
-
-    static int exec(const char *path, char **argv, char **envp);
+    static int exec(const char *path, char **argv, char **envp = NULL);
 
     /**
      * Load a plugin into memory.

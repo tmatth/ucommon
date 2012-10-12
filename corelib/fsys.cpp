@@ -1674,12 +1674,6 @@ fd_t fsys::release(void)
     return save;
 }
 
-int fsys::exec(const char *path, char **argv)
-{
-    shell::pid_t pid = shell::spawn(path, argv);
-    return shell::wait(pid);
-}
-
 int fsys::exec(const char *path, char **argv, char **envp)
 {
     shell::pid_t pid = shell::spawn(path, argv, envp);
