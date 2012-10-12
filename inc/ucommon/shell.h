@@ -857,7 +857,7 @@ typedef shell shell_t;
  */
 #undef  _TEXT
 #undef  _STR
-#define _STR(x) x
+#define _STR(x) (const char *)(x)
 
 /**
  * Invoke translation lookup if available.  This can also be used to
