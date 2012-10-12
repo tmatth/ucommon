@@ -802,12 +802,10 @@ public:
     string& operator^=(const char *text);
 
     /**
-     * Concatenate null terminated text to our object.  This creates a new
-     * copy-on-write instance to hold the concatenated string.  This will
-     * eventually become same as new ^ operator in 6.0.
+     * Concatenate null terminated text to our object.
      * @param text to concatenate.
      */
-    string& operator+(const char *text);
+    string operator+(const char *text);
 
     /**
      * Concatenate null terminated text to our object.  This creates a new
@@ -816,13 +814,6 @@ public:
      * @param text to concatenate.
      */
     string& operator|(const char *text);
-
-    /**
-     * Transitional concat operator until abi can be changed.
-     * @param text to concatenate.
-     */
-    string operator^(const char *text);
-
 
     /**
      * Concatenate null terminated text to our object.  This directly

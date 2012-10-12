@@ -1312,16 +1312,7 @@ string &string::operator|(const char *s)
     return *this;
 }
 
-string &string::operator+(const char *s)
-{
-    if(!s || !*s)
-        return *this;
-
-    add(s);
-    return *this;
-}
-
-string string::operator^(const char *s)
+string string::operator+(const char *s)
 {
     string tmp = s;
     if(s && *s)
