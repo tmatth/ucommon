@@ -856,7 +856,6 @@ typedef shell shell_t;
  * Abusive compilers...
  */
 #undef  _TEXT
-#undef  _STR
 
 /**
  * Invoke translation lookup if available.  This can also be used to
@@ -867,9 +866,6 @@ typedef shell shell_t;
  */
 inline  const char *_TEXT(const char *s)
     {return shell::text(s);}
-
-inline const char *_STR(String& s)
-    {return *s;}
 
 END_NAMESPACE
 
