@@ -189,7 +189,7 @@ public:
      * class is created to perform the argument parsing.
      * @author David Sugar <dyfet@gnutelephony.org>
      */
-    class __EXPORT Option : public OrderedObject
+    class __EXPORT Option : public LinkedObject
     {
     public:
         char short_option;
@@ -717,7 +717,7 @@ public:
     /**
      * Detach current process to daemon for service entry.
      */
-    void detach(mainproc_t mainentry = (mainproc_t)NULL);
+    static void detach(mainproc_t mainentry = (mainproc_t)NULL);
 
     /**
      * Make current process restartable.

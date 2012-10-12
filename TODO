@@ -4,22 +4,11 @@ Proposed changes (likely deferred to 6.0.0)
 	_XOPEN_SOURCE >= 600 and rest
 
 	
-	move spawn/proc stuff from shell into new proc::, move fsys:: 
-	inherited redirect methods and pipe into proc.  This is to clean
-	up static linking uses and interdependence of some things.  Maybe
-	also proc::release and detach from shell...  ??
-
-	separate enhanced string format and numbers library
-
 	FetchProtocol for string >> operator?
 
 	string comparison operators become direct inlines to compare
 
 	add CharbufProtocol with locking states
-
-	shell::Option no longer needs OrderedObject base class
-
-	shell::detach() static member and add exit code option!
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
 	Especially convenient with common use of NSS for future tls.  Do we
@@ -68,4 +57,11 @@ Rejected changes:
 	linkages in derived projects.  Also or alternately change 
 	ucommon-config to have a with & without secure mode. - for now added
 	minimal linking
+
+	move spawn/proc stuff from shell into new proc::, move fsys:: 
+	inherited redirect methods and pipe into proc.  This is to clean
+	up static linking uses and interdependence of some things.  Maybe
+	also proc::release and detach from shell...  ??
+
+	separate enhanced string format and numbers library
 

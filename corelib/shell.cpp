@@ -103,7 +103,7 @@ static shell::numeric_t numeric_mode = shell::NO_NUMERIC;
 static long numeric_value = 0l;
 
 shell::Option::Option(char shortopt, const char *longopt, const char *value, const char *help) :
-OrderedObject()
+LinkedObject()
 {
     if(olast) {
         olast->next = this;
