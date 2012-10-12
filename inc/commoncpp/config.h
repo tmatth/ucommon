@@ -50,7 +50,7 @@ typedef uint64_t    uint64;
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int stricmp(const char *string1, const char *string2)
-    {return ucommon::string::case_compare(string1, string2);}
+    {return ucommon::String::case_compare(string1, string2);}
 
 /**
  * Convenience function for case insensitive null terminated string compare.
@@ -60,7 +60,7 @@ extern "C" inline int stricmp(const char *string1, const char *string2)
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
-    {return ucommon::string::case_compare(string1, string2, max);}
+    {return ucommon::String::case_compare(string1, string2, max);}
 
 #endif
 

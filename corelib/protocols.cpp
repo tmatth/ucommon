@@ -335,7 +335,7 @@ size_t BufferProtocol::putline(const char *string)
     return count;
 }
 
-size_t BufferProtocol::getline(string& s)
+size_t BufferProtocol::getline(String& s)
 {
     size_t result = getline(s.c_mem(), s.size() + 1);
     String::fix(s);

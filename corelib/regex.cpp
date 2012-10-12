@@ -62,7 +62,7 @@ String::regex::regex(size_t slots)
 #endif
 }
 
-string::regex& string::regex::operator=(const char *pattern)
+String::regex& String::regex::operator=(const char *pattern)
 {
 #ifdef  HAVE_REGEX_H
     if(object) {
@@ -80,7 +80,7 @@ string::regex& string::regex::operator=(const char *pattern)
     return *this;
 }
 
-bool string::regex::operator*=(const char *text)
+bool String::regex::operator*=(const char *text)
 {
     return match(text);
 }
@@ -98,7 +98,7 @@ String::regex::~regex()
 #endif
 }
 
-size_t string::regex::offset(unsigned member)
+size_t String::regex::offset(unsigned member)
 {
 #ifdef  HAVE_REGEX_H
     if(!results)
@@ -114,7 +114,7 @@ size_t string::regex::offset(unsigned member)
 #endif
 }
 
-size_t string::regex::size(unsigned member)
+size_t String::regex::size(unsigned member)
 {
 #ifdef  HAVE_REGEX_H
     if(!results)
@@ -134,7 +134,7 @@ size_t string::regex::size(unsigned member)
 #endif
 }
 
-bool string::regex::match(const char *text, unsigned mode)
+bool String::regex::match(const char *text, unsigned mode)
 {
 #ifdef  HAVE_REGEX_H
     int flags = 0;
@@ -154,7 +154,7 @@ bool string::regex::match(const char *text, unsigned mode)
 #endif
 }
 
-const char *string::search(regex& expr, unsigned member, unsigned flags) const
+const char *String::search(regex& expr, unsigned member, unsigned flags) const
 {
     if(!str)
         return NULL;
@@ -175,7 +175,7 @@ const char *string::search(regex& expr, unsigned member, unsigned flags) const
 #endif
 }
 
-unsigned string::replace(regex& expr, const char *cp, unsigned flags)
+unsigned String::replace(regex& expr, const char *cp, unsigned flags)
 {
 #ifdef  HAVE_REGEX_H
     size_t cpl = 0;
@@ -211,7 +211,7 @@ unsigned string::replace(regex& expr, const char *cp, unsigned flags)
 #endif
 }
 
-bool string::operator*=(regex& expr)
+bool String::operator*=(regex& expr)
 {
     if(search(expr))
         return true;

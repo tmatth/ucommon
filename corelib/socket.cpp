@@ -662,7 +662,7 @@ LinkedObject(policy)
     assert(id != NULL && *id != 0);
 
     set(cp);
-    string::set(name, sizeof(name), id);
+    String::set(name, sizeof(name), id);
 }
 
 
@@ -882,7 +882,7 @@ void cidr::set(const char *cp)
     case AF_INET:
         memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
         bitset((bit_t *)&netmask.ipv4, getMask(cp));
-        string::set(cbuf, sizeof(cbuf), cp);
+        String::set(cbuf, sizeof(cbuf), cp);
         ep = (char *)strchr(cbuf, '/');
         if(ep)
             *ep = 0;
@@ -894,7 +894,7 @@ void cidr::set(const char *cp)
         }
 
         while(dots++ < 3)
-            string::add(cbuf, sizeof(cbuf), ".0");
+            String::add(cbuf, sizeof(cbuf), ".0");
 
 #ifdef  _MSWINDOWS_
         memcpy(&network.ipv4, &addr, sizeof(network.ipv4));
@@ -907,7 +907,7 @@ void cidr::set(const char *cp)
     case AF_INET6:
         memset(&netmask.ipv6, 0, sizeof(netmask));
         bitset((bit_t *)&netmask.ipv6, getMask(cp));
-        string::set(cbuf, sizeof(cbuf), cp);
+        String::set(cbuf, sizeof(cbuf), cp);
         ep = (char *)strchr(cp, '/');
         if(ep)
             *ep = 0;
@@ -1779,7 +1779,7 @@ size_t Socket::readline(char *data, size_t max)
     return (size_t)result;
 }
 
-size_t Socket::readline(string& s)
+size_t Socket::readline(String& s)
 {
     if(!s.c_mem())
         return 0;
@@ -2935,7 +2935,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
     switch(addr->sa_family) {
 #ifdef  AF_UNIX
     case AF_UNIX:
-        string::set(name, size, ((struct sockaddr_un *)(addr))->sun_path);
+        String::set(name, size, ((struct sockaddr_un *)(addr))->sun_path);
         return name;
 #endif
 #ifdef  _MSWINDOWS_
@@ -2966,7 +2966,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
 #else
     case AF_INET:
         ENTER_EXCLUSIVE
-        string::set(name, size, inet_ntoa(((struct sockaddr_in *)(addr))->sin_addr));
+        String::set(name, size, inet_ntoa(((struct sockaddr_in *)(addr))->sin_addr));
         LEAVE_EXCLUSIVE
         return name;
 #endif

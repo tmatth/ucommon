@@ -36,7 +36,7 @@
 
 NAMESPACE_UCOMMON
 
-class string;
+class String;
 
 class __EXPORT MemoryProtocol
 {
@@ -378,7 +378,7 @@ public:
      * @param buffer to save input into.
      * @return count of characters actually read or 0 if at end of data.
      */
-    size_t getline(string& buffer);
+    size_t getline(String& buffer);
 
     /**
      * Put a string as a line of output to the buffer.  The eol character is

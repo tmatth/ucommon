@@ -955,7 +955,7 @@ public:
      * @param buffer to save input line.
      * @return number of bytes read, 0 if none, err() has error.
      */
-    size_t readline(string& buffer);
+    size_t readline(String& buffer);
 
     /**
      * Read a newline of text data from the socket and save in NULL terminated

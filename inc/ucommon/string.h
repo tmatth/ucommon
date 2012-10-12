@@ -79,7 +79,7 @@ typedef unsigned short strsize_t;
  * manipulate ordinary null terminated character arrays directly in memory.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT string : public ObjectProtocol
+class __EXPORT String : public ObjectProtocol
 {
 protected:
     /**
@@ -291,32 +291,32 @@ public:
     /**
      * Create a new empty string object.
      */
-    string();
+    String();
 
     /**
      * Create a string from a long integer.
      * @param value to convert to string.
      */
-    string(long value);
+    String(long value);
 
     /**
      * Create a string from a floating point.
      * @param value to convert to string.
      */
-    string(double value);
+    String(double value);
 
     /**
      * Create an empty string with a buffer pre-allocated to a specified size.
      * @param size of buffer to allocate.
      */
-    string(strsize_t size);
+    String(strsize_t size);
 
     /**
      * Create a filled string with a buffer pre-allocated to a specified size.
      * @param size of buffer to allocate.
      * @param fill character to use.
      */
-    string(strsize_t size, char fill);
+    String(strsize_t size, char fill);
 
     /**
      * Create a string by printf-like formating into a pre-allocated space
@@ -325,14 +325,14 @@ public:
      * @param size of buffer to allocate.
      * @param format control for string.
      */
-    string(strsize_t size, const char *format, ...) __PRINTF(3, 4);
+    String(strsize_t size, const char *format, ...) __PRINTF(3, 4);
 
 
     /**
      * Create a string from null terminated text.
      * @param text to use for string.
      */
-    string(const char *text);
+    String(const char *text);
 
     /**
      * Create a string from null terminated text up to a maximum specified
@@ -340,7 +340,7 @@ public:
      * @param text to use for string.
      * @param size limit of new string.
      */
-    string(const char *text, strsize_t size);
+    String(const char *text, strsize_t size);
 
     /**
      * Create a string for a substring.  The end of the substring is a
@@ -348,20 +348,20 @@ public:
      * @param text to use for string.
      * @param end of text in substring.
      */
-    string(const char *text, const char *end);
+    String(const char *text, const char *end);
 
     /**
      * Construct a copy of a string object.  Our copy inherets the same
      * reference counted instance of cstring as in the original.
      * @param existing string to copy from.
      */
-    string(const string& existing);
+    String(const String& existing);
 
     /**
      * Destroy string.  De-reference cstring.  If last reference to cstring,
      * then also remove cstring from heap.
      */
-    virtual ~string();
+    virtual ~String();
 
     /**
      * Get a new string object as a substring of the current object.
@@ -369,7 +369,7 @@ public:
      * @param size of substring or 0 if to end.
      * @return string object holding substring.
      */
-    string get(strsize_t offset, strsize_t size = 0) const;
+    String get(strsize_t offset, strsize_t size = 0) const;
 
     /**
      * Scan input items from a string object.
@@ -717,14 +717,14 @@ public:
      * @param size of substring or 0 if to end.
      * @return string object holding substring.
      */
-    string operator()(int offset, strsize_t size) const;
+    String operator()(int offset, strsize_t size) const;
 
     /**
      * Convenience method for left of string.
      * @param size of substring to gather.
      * @return string object holding substring.
      */
-    inline string left(strsize_t size) const
+    inline String left(strsize_t size) const
         {return operator()(0, size);}
 
     /**
@@ -732,7 +732,7 @@ public:
      * @param offset of substring from right.
      * @return string object holding substring.
      */
-    inline string right(strsize_t offset) const
+    inline String right(strsize_t offset) const
         {return operator()(-((int)offset), 0);}
 
     /**
@@ -741,7 +741,7 @@ public:
      * @param size of string to return.
      * @return string object holding substring.
      */
-    inline string copy(strsize_t offset, strsize_t size) const
+    inline String copy(strsize_t offset, strsize_t size) const
         {return operator()((int)offset, size);}
 
     /**
@@ -777,35 +777,35 @@ public:
      * @param object to assign from.
      * @return our object for expression use.
      */
-    string& operator^=(const string& object);
+    String& operator^=(const String& object);
 
     /**
      * Concatenate text to an existing string object.  This will use the
      * old behavior when +/= updated.
      */
-    string& operator|=(const char *text);
+    String& operator|=(const char *text);
 
-    string& operator&=(const char *text);
+    String& operator&=(const char *text);
 
     /**
      * Concatenate text to an existing string object.
      * @param text to add.
      * @return our object for expression use.
      */
-    string& operator+=(const char *text);
+    String& operator+=(const char *text);
 
     /**
      * Create new cow instance and assign value from null terminated text.
      * @param text to assign from.
      * @return our object for expression use.
      */
-    string& operator^=(const char *text);
+    String& operator^=(const char *text);
 
     /**
      * Concatenate null terminated text to our object.
      * @param text to concatenate.
      */
-    string operator+(const char *text);
+    String operator+(const char *text);
 
     /**
      * Concatenate null terminated text to our object.  This creates a new
@@ -813,7 +813,7 @@ public:
      * eventually replace '+' when + creates a new string instance instead.
      * @param text to concatenate.
      */
-    string& operator|(const char *text);
+    String& operator|(const char *text);
 
     /**
      * Concatenate null terminated text to our object.  This directly
@@ -821,7 +821,7 @@ public:
      * object if the existing cstring allocation space is fully used.
      * @param text to concatenate.
      */
-    string& operator&(const char *text);
+    String& operator&(const char *text);
 
     /**
      * Assign our string with the cstring of another object.  If we had
@@ -829,7 +829,7 @@ public:
      * a duplicate reference to the cstring of the other object.
      * @param object to assign from.
      */
-    string& operator=(const string& object);
+    String& operator=(const String& object);
 
     bool operator*=(const char *substring);
 
@@ -839,35 +839,35 @@ public:
      * Assign text to our existing buffer.  This performs a set method.
      * @param text to assign from.
      */
-    string& operator=(const char *text);
+    String& operator=(const char *text);
 
     /**
      * Delete first character from string.
      */
-    string& operator++(void);
+    String& operator++(void);
 
     /**
      * Delete a specified number of characters from start of string.
      * @param number of characters to delete.
      */
-    string& operator+=(strsize_t number);
+    String& operator+=(strsize_t number);
 
     /**
      * Delete last character from string.
      */
-    string& operator--(void);
+    String& operator--(void);
 
     /**
      * Delete a specified number of characters from end of string.
      * @param number of characters to delete.
      */
-    string& operator-=(strsize_t number);
+    String& operator-=(strsize_t number);
 
     /**
      * Delete a specified number of characters from start of string.
      * @param number of characters to delete.
      */
-    string& operator*=(strsize_t number);
+    String& operator*=(strsize_t number);
 
     /**
      * Compare our object with null terminated text.
@@ -911,10 +911,10 @@ public:
      */
     bool operator>=(const char *text) const;
 
-    inline string& operator<<(const char *text)
+    inline String& operator<<(const char *text)
         {add(text); return *this;}
 
-    inline string& operator<<(char code)
+    inline String& operator<<(char code)
         {add(code); return *this;}
 
     /**
@@ -922,42 +922,42 @@ public:
      * @param value to store.
      * @return object in expression.
      */
-    string &operator%(short& value);
+    String &operator%(short& value);
 
     /**
      * Parse long integer value from a string.
      * @param value to store.
      * @return object in expression.
      */
-    string &operator%(unsigned short& value);
+    String &operator%(unsigned short& value);
 
     /**
      * Parse long integer value from a string.
      * @param value to store.
      * @return object in expression.
      */
-    string &operator%(long& value);
+    String &operator%(long& value);
 
     /**
      * Parse long integer value from a string.
      * @param value to store.
      * @return object in expression.
      */
-    string &operator%(unsigned long& value);
+    String &operator%(unsigned long& value);
 
     /**
      * Parse double value from a string.
      * @param value to store.
      * @return object in expression.
      */
-    string &operator%(double& value);
+    String &operator%(double& value);
 
     /**
      * Parse text from a string in a scan expression.
      * @param text to scan and bypass.
      * @return object in expression.
      */
-    string &operator%(const char *text);
+    String &operator%(const char *text);
 
     /**
      * Scan input items from a string object.
@@ -965,7 +965,7 @@ public:
      * @param format string of input to scan.
      * @return number of items scanned.
      */
-    static int scanf(string& object, const char *format, ...) __SCANF(2, 3);
+    static int scanf(String& object, const char *format, ...) __SCANF(2, 3);
 
     /**
      * Print formatted items into a string object.
@@ -973,20 +973,20 @@ public:
      * @param format string to print with.
      * @return number of bytes written into object.
      */
-    static strsize_t printf(string& object, const char *format, ...) __PRINTF(2, 3);
+    static strsize_t printf(String& object, const char *format, ...) __PRINTF(2, 3);
 
     /**
      * Swap the cstring references between two strings.
      * @param object1 to swap.
      * @param object2 to swap.
      */
-    static void swap(string& object1, string& object2);
+    static void swap(String& object1, String& object2);
 
     /**
      * Fix and reset string object filler.
      * @param object to fix.
      */
-    static void fix(string& object);
+    static void fix(String& object);
 
     /**
      * Convert null terminated text to lower case.
@@ -1304,7 +1304,7 @@ public:
      * @param end of line marker characters or NULL if not used.
      * @return token extracted from string or NULL if no more tokens found.
      */
-    inline static char *token(string& object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
+    inline static char *token(String& object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
         {return token(object.c_mem(), last, list, quote, end);};
 
     /**
@@ -1314,7 +1314,7 @@ public:
      * @param args list to scan into.
      * @return number of items scanned.
      */
-    __SCANF(2,0) inline static int vscanf(string& object, const char *format, va_list args)
+    __SCANF(2,0) inline static int vscanf(String& object, const char *format, va_list args)
         {return object.vscanf(format, args);}
 
     /**
@@ -1324,7 +1324,7 @@ public:
      * @param args list to print.
      * @return number of bytes written to string.
      */
-    __PRINTF(2,0) inline static strsize_t vprintf(string& object, const char *format, va_list args)
+    __PRINTF(2,0) inline static strsize_t vprintf(String& object, const char *format, va_list args)
         {return object.vprintf(format, args);}
 
     /**
@@ -1332,7 +1332,7 @@ public:
      * @param object to count.
      * @return count of characters.
      */
-    inline static strsize_t len(string& object)
+    inline static strsize_t len(String& object)
         {return object.len();};
 
     /**
@@ -1340,7 +1340,7 @@ public:
      * @param object to get string buffer from.
      * @return writable string buffer.
      */
-    inline static char *mem(string& object)
+    inline static char *mem(String& object)
         {return object.c_mem();};
 
     /**
@@ -1348,14 +1348,14 @@ public:
      * @param object to examine.
      * @return size allocated for text.
      */
-    inline static strsize_t size(string& object)
+    inline static strsize_t size(String& object)
         {return object.size();};
 
     /**
      * Clear a string object.
      * @param object to clear.
      */
-    inline static void clear(string& object)
+    inline static void clear(String& object)
         {object.clear();};
 
     /**
@@ -1364,7 +1364,7 @@ public:
      * @param list of characters to find.
      * @return count of instances of characters.
      */
-    inline static unsigned ccount(string& object, const char *list)
+    inline static unsigned ccount(String& object, const char *list)
         {return object.ccount(list);};
 
     /**
@@ -1372,36 +1372,36 @@ public:
      * @param object to count.
      * @return count of characters.
      */
-    inline static size_t count(string& object)
+    inline static size_t count(String& object)
         {return object.count();}
 
-    inline static string copy(string& object, strsize_t offset, strsize_t size)
+    inline static String copy(String& object, strsize_t offset, strsize_t size)
         {return object.copy(offset, size);}
 
-    inline static string left(string& object, strsize_t size)
+    inline static String left(String& object, strsize_t size)
         {return object.left(size);}
 
-    inline static string right(string& object, strsize_t offset)
+    inline static String right(String& object, strsize_t offset)
         {return object.right(offset);}
 
-    inline static void cut(string& object, strsize_t offset, strsize_t size)
+    inline static void cut(String& object, strsize_t offset, strsize_t size)
         {object.cut(offset, size);}
 
-    inline static void paste(string& object, strsize_t offset, const char *text, strsize_t size = 0)
+    inline static void paste(String& object, strsize_t offset, const char *text, strsize_t size = 0)
         {object.paste(offset, text, size);}
 
     /**
      * Convert string object to upper case.
      * @param object to modify.
      */
-    inline static void upper(string& object)
+    inline static void upper(String& object)
         {object.upper();}
 
     /**
      * Convert string object to lower case.
      * @param object to modify.
      */
-    inline static void lower(string& object)
+    inline static void lower(String& object)
         {object.lower();}
 
     /**
@@ -1410,7 +1410,7 @@ public:
      * @param quote pairs of characters for open and close quote.
      * @return true if string was quoted.
      */
-    inline static bool unquote(string& object, const char *quote)
+    inline static bool unquote(String& object, const char *quote)
         {return object.unquote(quote);}
 
     /**
@@ -1418,7 +1418,7 @@ public:
      * @param object to trim.
      * @param list of characters to remove.
      */
-    inline static void trim(string& object, const char *list)
+    inline static void trim(String& object, const char *list)
         {object.trim(list);}
 
     /**
@@ -1426,7 +1426,7 @@ public:
      * @param object to chop.
      * @param count of characters to remove.
      */
-    inline static void trim(string& object, strsize_t count = 1)
+    inline static void trim(String& object, strsize_t count = 1)
         {object.trim(count);}
 
     /**
@@ -1434,7 +1434,7 @@ public:
      * @param object to chop.
      * @param list of characters to remove.
      */
-    inline static void chop(string& object, const char *list)
+    inline static void chop(String& object, const char *list)
         {object.chop(list);}
 
     /**
@@ -1442,7 +1442,7 @@ public:
      * @param object to chop.
      * @param count of characters to remove.
      */
-    inline static void chop(string& object, strsize_t count = 1)
+    inline static void chop(String& object, strsize_t count = 1)
         {object.chop(count);}
 
     /**
@@ -1450,7 +1450,7 @@ public:
      * @param object to strip.
      * @param list of characters to remove.
      */
-    inline static void strip(string& object, const char *list)
+    inline static void strip(String& object, const char *list)
         {object.strip(list);}
 
     /**
@@ -1459,19 +1459,19 @@ public:
      * @param list of characters to search for.
      * @return pointer to first occurrence of character.
      */
-    inline static const char *find(string& object, const char *list)
+    inline static const char *find(String& object, const char *list)
         {return object.find(list);}
 
-    inline static const char *search(string& object, const char *substring, unsigned instance = 0, unsigned flags = 0)
+    inline static const char *search(String& object, const char *substring, unsigned instance = 0, unsigned flags = 0)
         {return object.search(substring, instance, flags);}
 
-    inline static const char *search(string& object, regex& expr, unsigned instance = 0, unsigned flags = 0)
+    inline static const char *search(String& object, regex& expr, unsigned instance = 0, unsigned flags = 0)
         {return object.search(expr, instance, flags);}
 
-    inline static unsigned replace(string& object, regex& expr, const char *text, unsigned flags = 0)
+    inline static unsigned replace(String& object, regex& expr, const char *text, unsigned flags = 0)
         {return object.replace(expr, text, flags);}
 
-    inline static unsigned replace(string& object, const char *match, const char *text, bool flag = false)
+    inline static unsigned replace(String& object, const char *match, const char *text, bool flag = false)
         {return object.replace(match, text, flag);}
 
     inline static bool search(regex& expr, const char *text, unsigned flags = 0)
@@ -1483,7 +1483,7 @@ public:
      * @param list of characters to search for.
      * @return pointer to last occurrence of character.
      */
-    inline static const char *rfind(string& object, const char *list)
+    inline static const char *rfind(String& object, const char *list)
         {return object.rfind(list);}
 
     /**
@@ -1492,7 +1492,7 @@ public:
      * @param pointer to update with end of parsed value.
      * @return double value of object.
      */
-    inline static double tod(string& object, char **pointer = NULL)
+    inline static double tod(String& object, char **pointer = NULL)
         {return strtod(mem(object), pointer);}
 
     /**
@@ -1501,7 +1501,7 @@ public:
      * @param pointer to update with end of parsed value.
      * @return long value of object.
      */
-    inline static long tol(string& object, char **pointer = NULL)
+    inline static long tol(String& object, char **pointer = NULL)
         {return strtol(mem(object), pointer, 0);}
 
     /**
@@ -1585,7 +1585,7 @@ public:
  * the overhead() size needed for the cstring object control data.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT memstring : public string
+class __EXPORT memstring : public String
 {
 public:
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
@@ -1607,7 +1607,7 @@ public:
      * Assign the text of a string to our object.
      * @param object to copy text from.
      */
-    inline void operator=(string& object)
+    inline void operator=(String& object)
         {set(object.c_str());};
 
     /**
@@ -1672,14 +1672,14 @@ public:
      * @param text to assign.
      */
     inline charbuf(const char *text)
-        {string::set(buffer, S, text);};
+        {String::set(buffer, S, text);};
 
     /**
      * Assign null terminated text to the object.
      * @param text to assign.
      */
     inline void operator=(const char *text)
-        {string::set(buffer, S, text);};
+        {String::set(buffer, S, text);};
 
     /**
      * Concatenate text into the object.  If the text is larger than the
@@ -1687,7 +1687,7 @@ public:
      * @param text to append.
      */
     inline void operator+=(const char *text)
-        {string::add(buffer, S, text);};
+        {String::add(buffer, S, text);};
 
     /**
      * Test if data is contained in the object.
@@ -1744,15 +1744,9 @@ public:
 /**
  * A convenience type for string.
  */
-typedef string string_t;
+typedef String string_t;
 
-typedef string::regex stringex_t;
-
-/**
- * A convenience type when mixing std::string in old compilers that are bad
- * with namespaces...
- */
-typedef string String;
+typedef String::regex stringex_t;
 
 /**
  * A string class that has a predefined string buffer.  The string class
@@ -1793,7 +1787,7 @@ public:
      * Assign a string buffer from another string object.
      * @param object to assign from.
      */
-    inline void operator=(string& object)
+    inline void operator=(String& object)
         {set(object.c_str());};
 };
 
@@ -1806,7 +1800,7 @@ public:
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int stricmp(const char *string1, const char *string2)
-    {return string::case_compare(string1, string2);}
+    {return String::case_compare(string1, string2);}
 
 /**
  * Convenience function for case insensitive null terminated string compare.
@@ -1816,7 +1810,7 @@ extern "C" inline int stricmp(const char *string1, const char *string2)
  * @return 0 if equal, > 0 if s2 > s1, < 0 if s2 < s1.
  */
 extern "C" inline int strnicmp(const char *string1, const char *string2, size_t max)
-    {return string::case_compare(string1, string2, max);}
+    {return String::case_compare(string1, string2, max);}
 
 #endif
 

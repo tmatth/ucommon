@@ -30,11 +30,11 @@ using namespace UCOMMON_NAMESPACE;
 
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
 #else
-const strsize_t string::npos = (strsize_t)(-1);
+const strsize_t String::npos = (strsize_t)(-1);
 const size_t memstring::header = sizeof(cstring);
 #endif
 
-string::cstring::cstring(strsize_t size) :
+String::cstring::cstring(strsize_t size) :
 CountedObject()
 {
     max = size;
@@ -43,7 +43,7 @@ CountedObject()
     text[0] = 0;
 }
 
-string::cstring::cstring(strsize_t size, char f) :
+String::cstring::cstring(strsize_t size, char f) :
 CountedObject()
 {
     max = size;
@@ -56,14 +56,14 @@ CountedObject()
     }
 }
 
-void string::cstring::fix(void)
+void String::cstring::fix(void)
 {
     while(fill && len < max)
         text[len++] = fill;
     text[len] = 0;
 }
 
-void string::cstring::unfix(void)
+void String::cstring::unfix(void)
 {
     while(len && fill) {
         if(text[len - 1] == fill)
@@ -72,7 +72,7 @@ void string::cstring::unfix(void)
     text[len] = 0;
 }
 
-void string::cstring::clear(strsize_t offset, strsize_t size)
+void String::cstring::clear(strsize_t offset, strsize_t size)
 {
     if(!fill || offset >= max)
         return;
@@ -83,7 +83,7 @@ void string::cstring::clear(strsize_t offset, strsize_t size)
     }
 }
 
-void string::cstring::dec(strsize_t offset)
+void String::cstring::dec(strsize_t offset)
 {
     if(!len)
         return;
@@ -108,7 +108,7 @@ void string::cstring::dec(strsize_t offset)
     fix();
 }
 
-void string::cstring::inc(strsize_t offset)
+void String::cstring::inc(strsize_t offset)
 {
     if(!offset)
         ++offset;
@@ -125,7 +125,7 @@ void string::cstring::inc(strsize_t offset)
     fix();
 }
 
-void string::cstring::add(const char *str)
+void String::cstring::add(const char *str)
 {
     strsize_t size = strlen(str);
 
@@ -146,7 +146,7 @@ void string::cstring::add(const char *str)
     fix();
 }
 
-void string::cstring::add(char ch)
+void String::cstring::add(char ch)
 {
     if(!ch)
         return;
@@ -161,7 +161,7 @@ void string::cstring::add(char ch)
     fix();
 }
 
-void string::cstring::set(strsize_t offset, const char *str, strsize_t size)
+void String::cstring::set(strsize_t offset, const char *str, strsize_t size)
 {
     assert(str != NULL);
 
@@ -187,7 +187,7 @@ void string::cstring::set(strsize_t offset, const char *str, strsize_t size)
     }
 }
 
-char string::fill(void)
+char String::fill(void)
 {
     if(!str)
         return 0;
@@ -195,7 +195,7 @@ char string::fill(void)
     return str->fill;
 }
 
-strsize_t string::size(void) const
+strsize_t String::size(void) const
 {
     if(!str)
         return 0;
@@ -203,7 +203,7 @@ strsize_t string::size(void) const
     return str->max;
 }
 
-strsize_t string::len(void)
+strsize_t String::len(void)
 {
     if(!str)
         return 0;
@@ -211,7 +211,7 @@ strsize_t string::len(void)
     return str->len;
 }
 
-void string::cstring::set(const char *str)
+void String::cstring::set(const char *str)
 {
     assert(str != NULL);
 
@@ -227,12 +227,12 @@ void string::cstring::set(const char *str)
     fix();
 }
 
-string::string()
+String::String()
 {
     str = NULL;
 }
 
-string::string(const char *s, const char *end)
+String::String(const char *s, const char *end)
 {
     strsize_t size = 0;
 
@@ -247,7 +247,7 @@ string::string(const char *s, const char *end)
     str->set(s);
 }
 
-string::string(const char *s)
+String::String(const char *s)
 {
     strsize_t size = count(s);
     if(!s)
@@ -257,7 +257,7 @@ string::string(const char *s)
     str->set(s);
 }
 
-string::string(const char *s, strsize_t size)
+String::String(const char *s, strsize_t size)
 {
     if(!s)
         s = "";
@@ -268,13 +268,13 @@ string::string(const char *s, strsize_t size)
     str->set(s);
 }
 
-string::string(strsize_t size)
+String::String(strsize_t size)
 {
     str = create(size);
     str->retain();
 }
 
-string::string(long value)
+String::String(long value)
 {
     str = create(20);
     str->retain();
@@ -283,7 +283,7 @@ string::string(long value)
     str->fix();
 }
 
-string::string(double value)
+String::String(double value)
 {
     str = create(32);
     str->retain();
@@ -292,15 +292,13 @@ string::string(double value)
     str->fix();
 }
 
-
-
-string::string(strsize_t size, char fill)
+String::String(strsize_t size, char fill)
 {
     str = create(size, fill);
     str->retain();
 }
 
-string::string(strsize_t size, const char *format, ...)
+String::String(strsize_t size, const char *format, ...)
 {
     assert(format != NULL);
 
@@ -313,34 +311,34 @@ string::string(strsize_t size, const char *format, ...)
     va_end(args);
 }
 
-string::string(const string &dup)
+String::String(const String &dup)
 {
     str = dup.c_copy();
     if(str)
         str->retain();
 }
 
-string::~string()
+String::~String()
 {
-    string::release();
+    String::release();
 }
 
-string::cstring *string::c_copy(void) const
+String::cstring *String::c_copy(void) const
 {
     return str;
 }
 
-string string::get(strsize_t offset, strsize_t len) const
+String String::get(strsize_t offset, strsize_t len) const
 {
     if(!str || offset >= str->len)
-        return string("");
+        return String("");
 
     if(!len)
         len = str->len - offset;
-    return string(str->text + offset, len);
+    return String(str->text + offset, len);
 }
 
-string::cstring *string::create(strsize_t size, char fill) const
+String::cstring *String::create(strsize_t size, char fill) const
 {
     if(fill)
         return new((size_t)size) cstring(size, fill);
@@ -348,20 +346,20 @@ string::cstring *string::create(strsize_t size, char fill) const
         return new((size_t)size) cstring(size);
 }
 
-void string::retain(void)
+void String::retain(void)
 {
     if(str)
         str->retain();
 }
 
-void string::release(void)
+void String::release(void)
 {
     if(str)
         str->release();
     str = NULL;
 }
 
-char *string::c_mem(void) const
+char *String::c_mem(void) const
 {
     if(!str)
         return NULL;
@@ -369,7 +367,7 @@ char *string::c_mem(void) const
     return str->text;
 }
 
-const char *string::c_str(void) const
+const char *String::c_str(void) const
 {
     if(!str)
         return "";
@@ -377,7 +375,7 @@ const char *string::c_str(void) const
     return str->text;
 }
 
-bool string::equal(const char *s) const
+bool String::equal(const char *s) const
 {
 #ifdef  HAVE_STRCOLL
     const char *mystr = "";
@@ -394,7 +392,7 @@ bool string::equal(const char *s) const
 #endif
 }
 
-int string::compare(const char *s) const
+int String::compare(const char *s) const
 {
     const char *mystr = "";
 
@@ -411,7 +409,7 @@ int string::compare(const char *s) const
 #endif
 }
 
-const char *string::begin(void) const
+const char *String::begin(void) const
 {
     if(!str)
         return NULL;
@@ -419,7 +417,7 @@ const char *string::begin(void) const
     return str->text;
 }
 
-const char *string::end(void) const
+const char *String::end(void) const
 {
     if(!str)
         return NULL;
@@ -427,7 +425,7 @@ const char *string::end(void) const
     return str->text + str->len;
 }
 
-const char *string::chr(char ch) const
+const char *String::chr(char ch) const
 {
     assert(ch != 0);
 
@@ -437,7 +435,7 @@ const char *string::chr(char ch) const
     return ::strchr(str->text, ch);
 }
 
-const char *string::rchr(char ch) const
+const char *String::rchr(char ch) const
 {
     assert(ch != 0);
 
@@ -447,7 +445,7 @@ const char *string::rchr(char ch) const
     return ::strrchr(str->text, ch);
 }
 
-const char *string::skip(const char *clist, strsize_t offset) const
+const char *String::skip(const char *clist, strsize_t offset) const
 {
     if(!str || !clist || !*clist || !str->len || offset > str->len)
         return NULL;
@@ -460,7 +458,7 @@ const char *string::skip(const char *clist, strsize_t offset) const
     return NULL;
 }
 
-const char *string::rskip(const char *clist, strsize_t offset) const
+const char *String::rskip(const char *clist, strsize_t offset) const
 {
     if(!str || !clist || !*clist)
         return NULL;
@@ -478,7 +476,7 @@ const char *string::rskip(const char *clist, strsize_t offset) const
     return NULL;
 }
 
-const char *string::rfind(const char *clist, strsize_t offset) const
+const char *String::rfind(const char *clist, strsize_t offset) const
 {
     if(!str || !clist || !*clist)
         return NULL;
@@ -496,7 +494,7 @@ const char *string::rfind(const char *clist, strsize_t offset) const
     return NULL;
 }
 
-void string::chop(const char *clist)
+void String::chop(const char *clist)
 {
     strsize_t offset;
 
@@ -525,13 +523,13 @@ void string::chop(const char *clist)
     str->fix();
 }
 
-void string::strip(const char *clist)
+void String::strip(const char *clist)
 {
     trim(clist);
     chop(clist);
 }
 
-void string::trim(const char *clist)
+void String::trim(const char *clist)
 {
     unsigned offset = 0;
 
@@ -557,7 +555,7 @@ void string::trim(const char *clist)
     str->fix();
 }
 
-unsigned string::replace(const char *substring, const char *cp, unsigned flags)
+unsigned String::replace(const char *substring, const char *cp, unsigned flags)
 {
     const char *result = "";
     unsigned count = 0;
@@ -601,7 +599,7 @@ unsigned string::replace(const char *substring, const char *cp, unsigned flags)
     return count;
 }
 
-const char *string::search(const char *substring, unsigned instance, unsigned flags) const
+const char *String::search(const char *substring, unsigned instance, unsigned flags) const
 {
     const char *result = "";
 
@@ -632,7 +630,7 @@ const char *string::search(const char *substring, unsigned instance, unsigned fl
     return result;
 }
 
-const char *string::find(const char *clist, strsize_t offset) const
+const char *String::find(const char *clist, strsize_t offset) const
 {
     if(!str || !clist || !*clist || !str->len || offset > str->len)
         return NULL;
@@ -645,7 +643,7 @@ const char *string::find(const char *clist, strsize_t offset) const
     return NULL;
 }
 
-bool string::unquote(const char *clist)
+bool String::unquote(const char *clist)
 {
     assert(clist != NULL);
 
@@ -665,19 +663,19 @@ bool string::unquote(const char *clist)
     return true;
 }
 
-void string::upper(void)
+void String::upper(void)
 {
     if(str)
         upper(str->text);
 }
 
-void string::lower(void)
+void String::lower(void)
 {
     if(str)
         lower(str->text);
 }
 
-strsize_t string::offset(const char *s) const
+strsize_t String::offset(const char *s) const
 {
     if(!str || !s)
         return npos;
@@ -691,14 +689,14 @@ strsize_t string::offset(const char *s) const
     return (strsize_t)(s - str->text);
 }
 
-strsize_t string::count(void) const
+strsize_t String::count(void) const
 {
     if(!str)
         return 0;
     return str->len;
 }
 
-strsize_t string::ccount(const char *clist) const
+strsize_t String::ccount(const char *clist) const
 {
     if(!str)
         return 0;
@@ -706,7 +704,7 @@ strsize_t string::ccount(const char *clist) const
     return ccount(str->text, clist);
 }
 
-strsize_t string::printf(const char *format, ...)
+strsize_t String::printf(const char *format, ...)
 {
     assert(format != NULL);
 
@@ -721,7 +719,7 @@ strsize_t string::printf(const char *format, ...)
     return len();
 }
 
-strsize_t string::vprintf(const char *format, va_list args)
+strsize_t String::vprintf(const char *format, va_list args)
 {
     assert(format != NULL);
 
@@ -734,7 +732,7 @@ strsize_t string::vprintf(const char *format, va_list args)
 }
 
 #if !defined(_MSC_VER)
-int string::vscanf(const char *format, va_list args)
+int String::vscanf(const char *format, va_list args)
 {
     assert(format != NULL);
 
@@ -743,7 +741,7 @@ int string::vscanf(const char *format, va_list args)
     return -1;
 }
 
-int string::scanf(const char *format, ...)
+int String::scanf(const char *format, ...)
 {
     assert(format != NULL);
 
@@ -757,18 +755,18 @@ int string::scanf(const char *format, ...)
     return rtn;
 }
 #else
-int string::vscanf(const char *format, va_list args)
+int String::vscanf(const char *format, va_list args)
 {
     return 0;
 }
 
-int string::scanf(const char *format, ...)
+int String::scanf(const char *format, ...)
 {
     return 0;
 }
 #endif
 
-void string::rsplit(const char *s)
+void String::rsplit(const char *s)
 {
     if(!str || !s || s <= str->text || s > str->text + str->len)
         return;
@@ -776,7 +774,7 @@ void string::rsplit(const char *s)
     str->set(s);
 }
 
-void string::rsplit(strsize_t pos)
+void String::rsplit(strsize_t pos)
 {
     if(!str || pos > str->len || !pos)
         return;
@@ -784,7 +782,7 @@ void string::rsplit(strsize_t pos)
     str->set(str->text + pos);
 }
 
-void string::split(const char *s)
+void String::split(const char *s)
 {
     unsigned pos;
 
@@ -799,7 +797,7 @@ void string::split(const char *s)
     str->fix();
 }
 
-void string::split(strsize_t pos)
+void String::split(strsize_t pos)
 {
     if(!str || pos >= str->len)
         return;
@@ -808,7 +806,7 @@ void string::split(strsize_t pos)
     str->fix();
 }
 
-void string::set(strsize_t offset, const char *s, strsize_t size)
+void String::set(strsize_t offset, const char *s, strsize_t size)
 {
     if(!s || !*s || !str)
         return;
@@ -819,7 +817,7 @@ void string::set(strsize_t offset, const char *s, strsize_t size)
     str->set(offset, s, size);
 }
 
-void string::set(const char *s, char overflow, strsize_t offset, strsize_t size)
+void String::set(const char *s, char overflow, strsize_t offset, strsize_t size)
 {
     size_t len = count(s);
 
@@ -843,7 +841,7 @@ void string::set(const char *s, char overflow, strsize_t offset, strsize_t size)
         str->text[offset + size - 1] = overflow;
 }
 
-void string::rset(const char *s, char overflow, strsize_t offset, strsize_t size)
+void String::rset(const char *s, char overflow, strsize_t offset, strsize_t size)
 {
     size_t len = count(s);
     strsize_t dif;
@@ -870,7 +868,7 @@ void string::rset(const char *s, char overflow, strsize_t offset, strsize_t size
         str->text[offset] = overflow;
 }
 
-void string::set(const char *s)
+void String::set(const char *s)
 {
     strsize_t len;
 
@@ -886,7 +884,7 @@ void string::set(const char *s)
     str->set(s);
 }
 
-void string::paste(strsize_t offset, const char *cp, strsize_t size)
+void String::paste(strsize_t offset, const char *cp, strsize_t size)
 {
     if(!cp)
         return;
@@ -900,14 +898,14 @@ void string::paste(strsize_t offset, const char *cp, strsize_t size)
     cow(size);
 
     if(!str) {
-        string::set(str->text, ++size, cp);
+        String::set(str->text, ++size, cp);
         str->len = --size;
         str->fix();
         return;
     }
 
     if(offset >= str->len)
-        string::set(str->text + str->len, size + 1, cp);
+        String::set(str->text + str->len, size + 1, cp);
     else {
         memmove(str->text + offset + size, str->text + offset, str->len - offset);
         memmove(str->text + offset, cp, size);
@@ -916,7 +914,7 @@ void string::paste(strsize_t offset, const char *cp, strsize_t size)
     str->fix();
 }
 
-void string::cut(strsize_t offset, strsize_t size)
+void String::cut(strsize_t offset, strsize_t size)
 {
     if(!str || offset >= str->len)
         return;
@@ -935,7 +933,7 @@ void string::cut(strsize_t offset, strsize_t size)
     str->fix();
 }
 
-void string::paste(char *text, size_t max, size_t offset, const char *cp, size_t size)
+void String::paste(char *text, size_t max, size_t offset, const char *cp, size_t size)
 {
     if(!cp || !text)
         return;
@@ -954,14 +952,14 @@ void string::paste(char *text, size_t max, size_t offset, const char *cp, size_t
         size = max - len;
 
     if(offset >= len)
-        string::set(text + len, size + 1, cp);
+        String::set(text + len, size + 1, cp);
     else {
         memmove(text + offset + size, text + offset, len - offset);
         memmove(text + offset, cp, size);
     }
 }
 
-void string::cut(char *text, size_t offset, size_t size)
+void String::cut(char *text, size_t offset, size_t size)
 {
     if(!text)
         return;
@@ -980,7 +978,7 @@ void string::cut(char *text, size_t offset, size_t size)
     text[len] = 0;
 }
 
-bool string::resize(strsize_t size)
+bool String::resize(strsize_t size)
 {
     char fill = 0;
 
@@ -1003,7 +1001,7 @@ bool string::resize(strsize_t size)
     return true;
 }
 
-void string::clear(strsize_t offset, strsize_t size)
+void String::clear(strsize_t offset, strsize_t size)
 {
     if(!str)
         return;
@@ -1014,13 +1012,13 @@ void string::clear(strsize_t offset, strsize_t size)
     str->clear(offset, size);
 }
 
-void string::clear(void)
+void String::clear(void)
 {
     if(str)
         str->set("");
 }
 
-void string::cow(strsize_t size)
+void String::cow(strsize_t size)
 {
     if(str) {
         if(str->fill)
@@ -1035,14 +1033,14 @@ void string::cow(strsize_t size)
     if(!str || !str->max || str->isCopied() || size > str->max) {
         cstring *s = create(size);
         s->len = str->len;
-        string::set(s->text, s->max + 1, str->text);
+        String::set(s->text, s->max + 1, str->text);
         s->retain();
         str->release();
         str = s;
     }
 }
 
-void string::add(char ch)
+void String::add(char ch)
 {
     char buf[2];
 
@@ -1061,7 +1059,7 @@ void string::add(char ch)
     str->add(buf);
 }
 
-void string::add(const char *s)
+void String::add(const char *s)
 {
     if(!s || !*s)
         return;
@@ -1075,7 +1073,7 @@ void string::add(const char *s)
     str->add(s);
 }
 
-char string::at(int offset) const
+char String::at(int offset) const
 {
     if(!str)
         return 0;
@@ -1092,7 +1090,7 @@ char string::at(int offset) const
     return str->text[(int)(str->len) + offset];
 }
 
-string string::operator()(int offset, strsize_t len) const
+String String::operator()(int offset, strsize_t len) const
 {
     const char *cp = operator()(offset);
     if(!cp)
@@ -1101,10 +1099,10 @@ string string::operator()(int offset, strsize_t len) const
     if(!len)
         len = strlen(cp);
 
-    return string(cp, len);
+    return String(cp, len);
 }
 
-const char *string::operator()(int offset) const
+const char *String::operator()(int offset) const
 {
     if(!str)
         return NULL;
@@ -1121,7 +1119,7 @@ const char *string::operator()(int offset) const
     return str->text + str->len + offset;
 }
 
-const char string::operator[](int offset) const
+const char String::operator[](int offset) const
 {
     if(!str)
         return 0;
@@ -1138,35 +1136,35 @@ const char string::operator[](int offset) const
     return str->text[str->len + offset];
 }
 
-string &string::operator++()
+String &String::operator++()
 {
     if(str)
         str->inc(1);
     return *this;
 }
 
-string &string::operator--()
+String &String::operator--()
 {
     if(str)
         str->dec(1);
     return *this;
 }
 
-string &string::operator+=(strsize_t offset)
+String &String::operator+=(strsize_t offset)
 {
     if(str)
         str->inc(offset);
     return *this;
 }
 
-string &string::operator-=(strsize_t offset)
+String &String::operator-=(strsize_t offset)
 {
     if(str)
         str->dec(offset);
     return *this;
 }
 
-bool string::operator*=(const char *substr)
+bool String::operator*=(const char *substr)
 {
     if(search(substr))
         return true;
@@ -1174,40 +1172,40 @@ bool string::operator*=(const char *substr)
     return false;
 }
 
-string &string::operator^=(const char *s)
+String &String::operator^=(const char *s)
 {
     release();
     set(s);
     return *this;
 }
 
-string &string::operator=(const char *s)
+String &String::operator=(const char *s)
 {
     release();
     set(s);
     return *this;
 }
 
-string &string::operator|=(const char *s)
+String &String::operator|=(const char *s)
 {
     set(s);
     return *this;
 }
 
-string &string::operator&=(const char *s)
+String &String::operator&=(const char *s)
 {
     set(s);
     return *this;
 }
 
-string &string::operator^=(const string &s)
+String &String::operator^=(const String &s)
 {
     release();
     set(s.c_str());
     return *this;
 }
 
-string &string::operator=(const string &s)
+String &String::operator=(const String &s)
 {
     if(str == s.str)
         return *this;
@@ -1222,7 +1220,7 @@ string &string::operator=(const string &s)
     return *this;
 }
 
-bool string::full(void) const
+bool String::full(void) const
 {
     if(!str)
         return false;
@@ -1234,7 +1232,7 @@ bool string::full(void) const
     return false;
 }
 
-bool string::operator!() const
+bool String::operator!() const
 {
     bool rtn = false;
     if(!str)
@@ -1248,7 +1246,7 @@ bool string::operator!() const
     return rtn;
 }
 
-string::operator bool() const
+String::operator bool() const
 {
     bool rtn = false;
 
@@ -1262,43 +1260,43 @@ string::operator bool() const
     return rtn;
 }
 
-bool string::operator==(const char *s) const
+bool String::operator==(const char *s) const
 {
     return (compare(s) == 0);
 }
 
-bool string::operator!=(const char *s) const
+bool String::operator!=(const char *s) const
 {
     return (compare(s) != 0);
 }
 
-bool string::operator<(const char *s) const
+bool String::operator<(const char *s) const
 {
     return (compare(s) < 0);
 }
 
-bool string::operator<=(const char *s) const
+bool String::operator<=(const char *s) const
 {
     return (compare(s) <= 0);
 }
 
-bool string::operator>(const char *s) const
+bool String::operator>(const char *s) const
 {
     return (compare(s) > 0);
 }
 
-bool string::operator>=(const char *s) const
+bool String::operator>=(const char *s) const
 {
     return (compare(s) >= 0);
 }
 
-string &string::operator&(const char *s)
+String &String::operator&(const char *s)
 {
     add(s);
     return *this;
 }
 
-string &string::operator|(const char *s)
+String &String::operator|(const char *s)
 {
     if(!s || !*s)
         return *this;
@@ -1312,9 +1310,9 @@ string &string::operator|(const char *s)
     return *this;
 }
 
-string string::operator+(const char *s)
+String String::operator+(const char *s)
 {
-    string tmp;
+    String tmp;
     if(str && str->text)
         tmp.set(str->text);
 
@@ -1324,7 +1322,7 @@ string string::operator+(const char *s)
     return tmp;
 }
 
-string &string::operator+=(const char *s)
+String &String::operator+=(const char *s)
 {
     if(!s || !*s)
         return *this;
@@ -1377,7 +1375,7 @@ void memstring::cow(strsize_t adj)
 {
 }
 
-char *string::token(char *text, char **token, const char *clist, const char *quote, const char *eol)
+char *String::token(char *text, char **token, const char *clist, const char *quote, const char *eol)
 {
     char *result;
 
@@ -1440,14 +1438,14 @@ char *string::token(char *text, char **token, const char *clist, const char *quo
     return result;
 }
 
-string::cstring *memstring::c_copy(void) const
+String::cstring *memstring::c_copy(void) const
 {
-    cstring *tmp = string::create(str->max, str->fill);
+    cstring *tmp = String::create(str->max, str->fill);
     tmp->set(str->text);
     return tmp;
 }
 
-void string::fix(string &s)
+void String::fix(String &s)
 {
     if(s.str) {
         s.str->len = strlen(s.str->text);
@@ -1455,7 +1453,7 @@ void string::fix(string &s)
     }
 }
 
-int string::scanf(string &s, const char *fmt, ...)
+int String::scanf(String &s, const char *fmt, ...)
 {
     assert(fmt != NULL);
 
@@ -1468,7 +1466,7 @@ int string::scanf(string &s, const char *fmt, ...)
     return rtn;
 }
 
-strsize_t string::printf(string &s, const char *fmt, ...)
+strsize_t String::printf(String &s, const char *fmt, ...)
 {
     assert(fmt != NULL);
 
@@ -1479,14 +1477,14 @@ strsize_t string::printf(string &s, const char *fmt, ...)
     return len(s);
 }
 
-void string::swap(string &s1, string &s2)
+void String::swap(String &s1, String &s2)
 {
-    string::cstring *s = s1.str;
+    String::cstring *s = s1.str;
     s1.str = s2.str;
     s2.str = s;
 }
 
-char *string::dup(const char *cp)
+char *String::dup(const char *cp)
 {
     char *mem;
 
@@ -1496,11 +1494,11 @@ char *string::dup(const char *cp)
     size_t len = strlen(cp) + 1;
     mem = (char *)malloc(len);
     crit(mem != NULL, "string dup allocation error");
-    string::set(mem, len, cp);
+    String::set(mem, len, cp);
     return mem;
 }
 
-char *string::left(const char *cp, size_t size)
+char *String::left(const char *cp, size_t size)
 {
     char *mem;
 
@@ -1512,11 +1510,11 @@ char *string::left(const char *cp, size_t size)
 
     mem = (char *)malloc(++size);
     crit(mem != NULL, "string dup allocation error");
-    string::set(mem, size, cp);
+    String::set(mem, size, cp);
     return mem;
 }
 
-const char *string::pos(const char *cp, ssize_t offset)
+const char *String::pos(const char *cp, ssize_t offset)
 {
     if(!cp)
         return NULL;
@@ -1538,7 +1536,7 @@ const char *string::pos(const char *cp, ssize_t offset)
     return cp + len - offset;
 }
 
-size_t string::count(const char *cp)
+size_t String::count(const char *cp)
 {
     if(!cp)
         return 0;
@@ -1546,7 +1544,7 @@ size_t string::count(const char *cp)
     return strlen(cp);
 }
 
-const char *string::find(const char *str, const char *key, const char *delim)
+const char *String::find(const char *str, const char *key, const char *delim)
 {
     unsigned l1 = strlen(str);
     unsigned l2 = strlen(key);
@@ -1576,7 +1574,7 @@ const char *string::find(const char *str, const char *key, const char *delim)
     return NULL;
 }
 
-const char *string::ifind(const char *str, const char *key, const char *delim)
+const char *String::ifind(const char *str, const char *key, const char *delim)
 {
     unsigned l1 = strlen(str);
     unsigned l2 = strlen(key);
@@ -1606,7 +1604,7 @@ const char *string::ifind(const char *str, const char *key, const char *delim)
     return NULL;
 }
 
-char *string::set(char *str, size_t size, const char *s, size_t len)
+char *String::set(char *str, size_t size, const char *s, size_t len)
 {
     if(!str)
         return NULL;
@@ -1634,7 +1632,7 @@ char *string::set(char *str, size_t size, const char *s, size_t len)
     return str;
 }
 
-char *string::rset(char *str, size_t size, const char *s)
+char *String::rset(char *str, size_t size, const char *s)
 {
     size_t len = count(s);
     if(len > size)
@@ -1642,7 +1640,7 @@ char *string::rset(char *str, size_t size, const char *s)
     return set(str, size, s);
 }
 
-char *string::set(char *str, size_t size, const char *s)
+char *String::set(char *str, size_t size, const char *s)
 {
     if(!str)
         return NULL;
@@ -1668,7 +1666,7 @@ char *string::set(char *str, size_t size, const char *s)
     return str;
 }
 
-char *string::add(char *str, size_t size, const char *s, size_t len)
+char *String::add(char *str, size_t size, const char *s, size_t len)
 {
     if(!str)
         return NULL;
@@ -1685,7 +1683,7 @@ char *string::add(char *str, size_t size, const char *s, size_t len)
     return str;
 }
 
-char *string::add(char *str, size_t size, const char *s)
+char *String::add(char *str, size_t size, const char *s)
 {
     if(!str)
         return NULL;
@@ -1702,7 +1700,7 @@ char *string::add(char *str, size_t size, const char *s)
     return str;
 }
 
-char *string::trim(char *str, const char *clist)
+char *String::trim(char *str, const char *clist)
 {
     if(!str)
         return NULL;
@@ -1716,7 +1714,7 @@ char *string::trim(char *str, const char *clist)
     return str;
 }
 
-char *string::chop(char *str, const char *clist)
+char *String::chop(char *str, const char *clist)
 {
     if(!str)
         return NULL;
@@ -1730,14 +1728,14 @@ char *string::chop(char *str, const char *clist)
     return str;
 }
 
-char *string::strip(char *str, const char *clist)
+char *String::strip(char *str, const char *clist)
 {
     str = trim(str, clist);
     chop(str, clist);
     return str;
 }
 
-void string::upper(char *str)
+void String::upper(char *str)
 {
     while(str && *str) {
         *str = toupper(*str);
@@ -1745,7 +1743,7 @@ void string::upper(char *str)
     }
 }
 
-void string::lower(char *str)
+void String::lower(char *str)
 {
     while(str && *str) {
         *str = tolower(*str);
@@ -1753,7 +1751,7 @@ void string::lower(char *str)
     }
 }
 
-unsigned string::ccount(const char *str, const char *clist)
+unsigned String::ccount(const char *str, const char *clist)
 {
     unsigned count = 0;
     while(str && *str) {
@@ -1763,7 +1761,7 @@ unsigned string::ccount(const char *str, const char *clist)
     return count;
 }
 
-char *string::skip(char *str, const char *clist)
+char *String::skip(char *str, const char *clist)
 {
     if(!str || !clist)
         return NULL;
@@ -1777,7 +1775,7 @@ char *string::skip(char *str, const char *clist)
     return NULL;
 }
 
-char *string::rskip(char *str, const char *clist)
+char *String::rskip(char *str, const char *clist)
 {
     size_t len = count(str);
 
@@ -1791,7 +1789,7 @@ char *string::rskip(char *str, const char *clist)
     return NULL;
 }
 
-size_t string::seek(char *str, const char *clist)
+size_t String::seek(char *str, const char *clist)
 {
     size_t pos = 0;
 
@@ -1809,7 +1807,7 @@ size_t string::seek(char *str, const char *clist)
     return pos;
 }
 
-char *string::find(char *str, const char *clist)
+char *String::find(char *str, const char *clist)
 {
     if(!str)
         return NULL;
@@ -1824,7 +1822,7 @@ char *string::find(char *str, const char *clist)
     return NULL;
 }
 
-char *string::rfind(char *str, const char *clist)
+char *String::rfind(char *str, const char *clist)
 {
     if(!str)
         return NULL;
@@ -1841,7 +1839,7 @@ char *string::rfind(char *str, const char *clist)
     return NULL;
 }
 
-bool string::case_equal(const char *s1, const char *s2)
+bool String::case_equal(const char *s1, const char *s2)
 {
     if(!s1)
         s1 = "";
@@ -1856,7 +1854,7 @@ bool string::case_equal(const char *s1, const char *s2)
 #endif
 }
 
-int string::case_compare(const char *s1, const char *s2)
+int String::case_compare(const char *s1, const char *s2)
 {
     if(!s1)
         s1 = "";
@@ -1871,7 +1869,7 @@ int string::case_compare(const char *s1, const char *s2)
 #endif
 }
 
-int string::case_compare(const char *s1, const char *s2, size_t size)
+int String::case_compare(const char *s1, const char *s2, size_t size)
 {
     if(!s1)
         s1 = "";
@@ -1886,7 +1884,7 @@ int string::case_compare(const char *s1, const char *s2, size_t size)
 #endif
 }
 
-bool string::case_equal(const char *s1, const char *s2, size_t size)
+bool String::case_equal(const char *s1, const char *s2, size_t size)
 {
     if(!s1)
         s1 = "";
@@ -1901,7 +1899,7 @@ bool string::case_equal(const char *s1, const char *s2, size_t size)
 #endif
 }
 
-bool string::equal(const char *s1, const char *s2)
+bool String::equal(const char *s1, const char *s2)
 {
     if(!s1)
         s1 = "";
@@ -1911,7 +1909,7 @@ bool string::equal(const char *s1, const char *s2)
     return strcmp(s1, s2) == 0;
 }
 
-bool string::equal(const char *s1, const char *s2, size_t size)
+bool String::equal(const char *s1, const char *s2, size_t size)
 {
     if(!s1)
         s1 = "";
@@ -1921,7 +1919,7 @@ bool string::equal(const char *s1, const char *s2, size_t size)
     return strncmp(s1, s2, size) == 0;
 }
 
-int string::compare(const char *s1, const char *s2)
+int String::compare(const char *s1, const char *s2)
 {
     if(!s1)
         s1 = "";
@@ -1936,7 +1934,7 @@ int string::compare(const char *s1, const char *s2)
 }
 
 
-char *string::unquote(char *str, const char *clist)
+char *String::unquote(char *str, const char *clist)
 {
     assert(clist != NULL);
 
@@ -1954,7 +1952,7 @@ char *string::unquote(char *str, const char *clist)
     return str;
 }
 
-char *string::fill(char *str, size_t size, char fill)
+char *String::fill(char *str, size_t size, char fill)
 {
     if(!str)
         return NULL;
@@ -1964,7 +1962,7 @@ char *string::fill(char *str, size_t size, char fill)
     return str;
 }
 
-unsigned string::hexsize(const char *format)
+unsigned String::hexsize(const char *format)
 {
     unsigned count = 0;
     char *ep;
@@ -1984,7 +1982,7 @@ unsigned string::hexsize(const char *format)
     return count;
 }
 
-unsigned string::hexdump(const unsigned char *binary, char *string, const char *format)
+unsigned String::hexdump(const unsigned char *binary, char *string, const char *format)
 {
     unsigned count = 0;
     char *ep;
@@ -2017,7 +2015,7 @@ static unsigned hex(char ch)
         return toupper(ch) - 'A' + 10;
 }
 
-unsigned string::hexpack(unsigned char *binary, const char *string, const char *format)
+unsigned String::hexpack(unsigned char *binary, const char *string, const char *format)
 {
     unsigned count = 0;
     char *ep;
@@ -2042,7 +2040,7 @@ unsigned string::hexpack(unsigned char *binary, const char *string, const char *
     return count;
 }
 
-string &string::operator%(unsigned short& value)
+String &String::operator%(unsigned short& value)
 {
     unsigned long temp = USHRT_MAX + 1;
     char *ep;
@@ -2065,7 +2063,7 @@ failed:
     return *this;
 }
 
-string &string::operator%(short& value)
+String &String::operator%(short& value)
 {
     long temp = SHRT_MAX + 1;
     char *ep;
@@ -2091,7 +2089,7 @@ failed:
     return *this;
 }
 
-string &string::operator%(long& value)
+String &String::operator%(long& value)
 {
     value = 0;
     char *ep;
@@ -2107,7 +2105,7 @@ string &string::operator%(long& value)
     return *this;
 }
 
-string &string::operator%(unsigned long& value)
+String &String::operator%(unsigned long& value)
 {
     value = 0;
     char *ep;
@@ -2123,7 +2121,7 @@ string &string::operator%(unsigned long& value)
     return *this;
 }
 
-string &string::operator%(double& value)
+String &String::operator%(double& value)
 {
     value = 0;
     char *ep;
@@ -2139,7 +2137,7 @@ string &string::operator%(double& value)
     return *this;
 }
 
-string &string::operator%(const char *get)
+String &String::operator%(const char *get)
 {
     if(!str || !str->text || !get)
         return *this;
@@ -2190,7 +2188,7 @@ String str(CharacterProtocol *p, strsize_t size)
 static const unsigned char alphabet[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-size_t string::b64encode(char *dest, const uint8_t *bin, size_t size, size_t dsize)
+size_t String::b64encode(char *dest, const uint8_t *bin, size_t size, size_t dsize)
 {
     assert(dest != NULL && bin != NULL);
 
@@ -2239,7 +2237,7 @@ end:
     return count;
 }
 
-size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
+size_t String::b64decode(uint8_t *dest, const char *src, size_t size)
 {
     char decoder[256];
     unsigned long bits;
@@ -2293,7 +2291,7 @@ size_t string::b64decode(uint8_t *dest, const char *src, size_t size)
 #define CRC24_INIT 0xb704ceL
 #define CRC24_POLY 0x1864cfbL
 
-uint32_t string::crc24(uint8_t *binary, size_t size)
+uint32_t String::crc24(uint8_t *binary, size_t size)
 {
     uint32_t crc = CRC24_INIT;
     unsigned i;
@@ -2309,7 +2307,7 @@ uint32_t string::crc24(uint8_t *binary, size_t size)
     return crc & 0xffffffL;
 }
 
-uint16_t string::crc16(uint8_t *binary, size_t size)
+uint16_t String::crc16(uint8_t *binary, size_t size)
 {
     uint16_t crc = 0xffff;
     unsigned i;

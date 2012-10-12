@@ -661,7 +661,7 @@ NamedTree *NamedTree::path(const char *tid) const
     }
 
     while(tid && *tid && node) {
-        string::set(buf, sizeof(buf), tid);
+        String::set(buf, sizeof(buf), tid);
         ep = strchr(buf, '.');
         if(ep)
             *ep = 0;

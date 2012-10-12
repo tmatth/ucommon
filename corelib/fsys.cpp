@@ -1587,7 +1587,7 @@ size_t charfile::readline(char *address, size_t size)
     return result;
 }
 
-size_t charfile::readline(string& s)
+size_t charfile::readline(String& s)
 {
     if(!s.c_mem())
         return true;

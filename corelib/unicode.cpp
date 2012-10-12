@@ -502,24 +502,24 @@ void UString::cut(strsize_t pos, strsize_t size)
 
     strsize_t bpos = 0, blen = 0;
     if(pos && pos != npos)
-         bpos = string::offset(utf8::offset(str->text, (ssize_t)pos));
+         bpos = String::offset(utf8::offset(str->text, (ssize_t)pos));
 
     if(size && size != npos)
-        blen = string::offset(utf8::offset(str->text, (ssize_t)size));
+        blen = String::offset(utf8::offset(str->text, (ssize_t)size));
 
-    string::cut(bpos, blen);
+    String::cut(bpos, blen);
 }
 
 void UString::paste(strsize_t pos, const char *text, strsize_t size)
 {
     strsize_t bpos = 0, blen = 0;
     if(pos && pos != npos && str)
-         bpos = string::offset(utf8::offset(str->text, (ssize_t)pos));
+         bpos = String::offset(utf8::offset(str->text, (ssize_t)pos));
 
     if(size && size != npos && str)
-        blen = string::offset(utf8::offset(str->text, (ssize_t)size));
+        blen = String::offset(utf8::offset(str->text, (ssize_t)size));
 
-    string::paste(bpos, text, blen);
+    String::paste(bpos, text, blen);
 }
 
 UString UString::get(strsize_t pos, strsize_t size) const

@@ -792,7 +792,7 @@ public:
      * @param string to write.
      * @return true if data read, 0 if at end of file.
      */
-    size_t readline(string& string);
+    size_t readline(String& string);
 
     inline size_t put(const void *data, size_t size)
         { return fp == NULL ? 0 : fwrite(data, 1, size, fp);}
