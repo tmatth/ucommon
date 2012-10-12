@@ -130,6 +130,7 @@ class __EXPORT fsys
 {
 protected:
     fd_t    fd;
+    pid_t   pid;
 #ifdef  _MSWINDOWS_
     WIN32_FIND_DATA *ptr;
     HINSTANCE   mem;
