@@ -1314,9 +1314,12 @@ string &string::operator|(const char *s)
 
 string string::operator+(const char *s)
 {
-    string tmp = s;
+    string tmp;
+    if(str && str->text)
+        tmp.set(str->text);
+
     if(s && *s)
-        tmp += s;
+        tmp.add(s);
 
     return tmp;
 }
