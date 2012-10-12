@@ -37,8 +37,8 @@ extern "C" {
     {
         assert(o1 != NULL);
         assert(o2 != NULL);
-        const stringpager::member * const *n1 = static_cast<const stringpager::member * const*>(o1);
-        const stringpager::member * const *n2 = static_cast<const stringpager::member * const*>(o2);
+        const StringPager::member * const *n1 = static_cast<const StringPager::member * const*>(o1);
+        const StringPager::member * const *n2 = static_cast<const StringPager::member * const*>(o2);
         return String::collate((*n1)->get(), (*n2)->get());
     }
 }
@@ -391,19 +391,19 @@ void **objectpager::list(void)
     return index;
 }
 
-stringpager::member::member(LinkedObject **root, const char *data) :
+StringPager::member::member(LinkedObject **root, const char *data) :
 LinkedObject(root)
 {
     text = data;
 }
 
-stringpager::member::member(const char *data) :
+StringPager::member::member(const char *data) :
 LinkedObject()
 {
     text = data;
 }
 
-stringpager::stringpager(size_t size) :
+StringPager::StringPager(size_t size) :
 memalloc(size)
 {
     members = 0;
@@ -412,7 +412,7 @@ memalloc(size)
     index = NULL;
 }
 
-stringpager::stringpager(char **list, size_t size) :
+StringPager::StringPager(char **list, size_t size) :
 memalloc(size)
 {
     members = 0;
@@ -421,7 +421,7 @@ memalloc(size)
     add(list);
 }
 
-unsigned stringpager::token(const char *text, const char *list, const char *quote, const char *end)
+unsigned StringPager::token(const char *text, const char *list, const char *quote, const char *end)
 {
     unsigned count = 0;
     const char *result;
@@ -438,7 +438,7 @@ unsigned stringpager::token(const char *text, const char *list, const char *quot
     return count;
 }
 
-String stringpager::join(const char *prefix, const char *middle, const char *suffix)
+String StringPager::join(const char *prefix, const char *middle, const char *suffix)
 {
     string_t tmp;
 
@@ -461,7 +461,7 @@ String stringpager::join(const char *prefix, const char *middle, const char *suf
     return tmp;
 }
 
-unsigned stringpager::split(const char *text, const char *string, unsigned flags)
+unsigned StringPager::split(const char *text, const char *string, unsigned flags)
 {
     strdup_t tmp = String::dup(string);
     char *match = tmp;
@@ -507,7 +507,7 @@ unsigned stringpager::split(const char *text, const char *string, unsigned flags
     return count;
 }
 
-void stringpager::set(unsigned index, const char *text)
+void StringPager::set(unsigned index, const char *text)
 {
     linked_pointer<member> list = root;
 
@@ -522,7 +522,7 @@ void stringpager::set(unsigned index, const char *text)
     list->text = str;
 }
 
-const char *stringpager::get(unsigned index)
+const char *StringPager::get(unsigned index)
 {
     linked_pointer<member> list = root;
 
@@ -535,7 +535,7 @@ const char *stringpager::get(unsigned index)
     return list->get();
 }
 
-void stringpager::clear(void)
+void StringPager::clear(void)
 {
     memalloc::purge();
     members = 0;
@@ -544,7 +544,7 @@ void stringpager::clear(void)
     index = NULL;
 }
 
-const char *stringpager::pull(void)
+const char *StringPager::pull(void)
 {
     if(!members)
         return NULL;
@@ -563,7 +563,7 @@ const char *stringpager::pull(void)
     return result;
 }
 
-void stringpager::push(const char *text)
+void StringPager::push(const char *text)
 {
     if(!text)
         text = "";
@@ -582,7 +582,7 @@ void stringpager::push(const char *text)
     index = NULL;
 }
 
-const char *stringpager::pop(void)
+const char *StringPager::pop(void)
 {
     const char *out = NULL;
 
@@ -612,7 +612,7 @@ const char *stringpager::pop(void)
     return out;
 }
 
-void stringpager::add(const char *text)
+void StringPager::add(const char *text)
 {
     if(!text)
         text = "";
@@ -634,13 +634,13 @@ void stringpager::add(const char *text)
     last = node;
 }
 
-void stringpager::set(char **list)
+void StringPager::set(char **list)
 {
     clear();
     add(list);
 }
 
-void stringpager::push(char **list)
+void StringPager::push(char **list)
 {
     const char *cp;
     unsigned index = 0;
@@ -652,7 +652,7 @@ void stringpager::push(char **list)
         push(cp);
 }
 
-void stringpager::add(char **list)
+void StringPager::add(char **list)
 {
     const char *cp;
     unsigned index = 0;
@@ -664,7 +664,7 @@ void stringpager::add(char **list)
         add(cp);
 }
 
-void stringpager::sort(void)
+void StringPager::sort(void)
 {
     if(!members)
         return;
@@ -687,7 +687,7 @@ void stringpager::sort(void)
     index = NULL;
 }
 
-char **stringpager::list(void)
+char **StringPager::list(void)
 {
     if(index)
         return index;
@@ -704,13 +704,13 @@ char **stringpager::list(void)
 }
 
 DirPager::DirPager() :
-stringpager()
+StringPager()
 {
     dir = NULL;
 }
 
 DirPager::DirPager(const char *path) :
-stringpager()
+StringPager()
 {
     dir = NULL;
     load(path);

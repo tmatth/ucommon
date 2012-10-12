@@ -339,7 +339,7 @@ protected:
  * used for accumulating lists which can be destroyed all at once.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT stringpager : protected memalloc
+class __EXPORT StringPager : protected memalloc
 {
 private:
     unsigned members;
@@ -348,7 +348,7 @@ private:
 public:
     /**
      * Member of string list.  This is exposed so that the list of strings
-     * can be externally enumerated with linked_pointer<stringpager::member>
+     * can be externally enumerated with linked_pointer<StringPager::member>
      * if so desired, through the begin() method.
      * @author David Sugar <dyfet@gnutelephony.org>
      */
@@ -358,7 +358,7 @@ public:
         const char *text;
 
     protected:
-        friend class stringpager;
+        friend class StringPager;
 
         inline void set(member *node)
             {next = node;};
@@ -378,9 +378,9 @@ public:
      * Create a pager with a maximum page size.
      * @param size of pager allocation pages.
      */
-    stringpager(size_t pagesize = 256);
+    StringPager(size_t pagesize = 256);
 
-    stringpager(char **list, size_t pagesize = 256);
+    StringPager(char **list, size_t pagesize = 256);
 
     /**
      * Get the number of items in the pager string list.
@@ -390,7 +390,7 @@ public:
         {return members;};
 
     /**
-     * Get string item from list.  This is useful when stringpager is
+     * Get string item from list.  This is useful when StringPager is
      * passed as a pointer and hence inconvenient for the [] operator.
      * @param item to access.
      * @return pointer to text for item, or NULL if out of range.
@@ -468,8 +468,8 @@ public:
      * the list of strings.
      * @return first member of list or NULL if empty.
      */
-    inline stringpager::member *begin(void)
-        {return static_cast<stringpager::member *>(root);};
+    inline StringPager::member *begin(void)
+        {return static_cast<StringPager::member *>(root);};
 
     /**
      * Convenience operator to add to pager and auto-sort.
@@ -482,10 +482,10 @@ public:
      * Convenience operator to add to pager.
      * @param text to add to list.
      */
-    inline stringpager& operator<<(const char *text)
+    inline StringPager& operator<<(const char *text)
         {add(text); return *this;}
 
-    inline stringpager& operator>>(const char *text)
+    inline StringPager& operator>>(const char *text)
         {push(text); return *this;}
 
     /**
@@ -500,7 +500,7 @@ public:
     char **list(void);
 
     /**
-     * Tokenize a string and add each token to the stringpager.
+     * Tokenize a string and add each token to the StringPager.
      * @param text to tokenize.
      * @param list of characters to use as token separators.
      * @param quote pairs of characters for quoted text or NULL if not used.
@@ -521,7 +521,7 @@ public:
     inline bool operator!()
         {return !members;}
 
-    inline stringpager& operator=(char **list)
+    inline StringPager& operator=(char **list)
         {set(list); return *this;}
 
     inline const char *operator*()
@@ -542,7 +542,7 @@ private:
  * include in the list.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT DirPager : protected stringpager
+class __EXPORT DirPager : protected StringPager
 {
 protected:
     const char *dir;
@@ -584,10 +584,10 @@ public:
      * @return text of item or NULL if invalid.
      */
     inline const char *operator[](unsigned item)
-        {return stringpager::get(item);};
+        {return StringPager::get(item);};
 
     inline const char *get(unsigned item)
-        {return stringpager::get(item);};
+        {return StringPager::get(item);};
 };
 
 /**
@@ -1291,12 +1291,12 @@ public:
 /**
  * A convenience type for paged string lists.
  */
-typedef stringpager stringlist_t;
+typedef StringPager stringlist_t;
 
 /**
  * A convenience type for paged string list items.
  */
-typedef stringpager::member stringlistitem_t;
+typedef StringPager::member stringlistitem_t;
 
 /**
  * A convenience type for using DirPager directly.
@@ -1310,7 +1310,7 @@ inline void unshift(stringlist_t& list, const char *text)
     {list.push(text);}
 
 
-inline String str(stringpager& list, const char *prefix = NULL, const char *middle = NULL, const char *suffix = NULL)
+inline String str(StringPager& list, const char *prefix = NULL, const char *middle = NULL, const char *suffix = NULL)
     {return list.join(prefix, middle, suffix);}
 
 END_NAMESPACE

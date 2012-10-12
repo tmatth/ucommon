@@ -219,7 +219,7 @@ bool string::operator*=(regex& expr)
     return false;
 }
 
-unsigned stringpager::split(stringex_t& expr, const char *string, unsigned flags)
+unsigned StringPager::split(stringex_t& expr, const char *string, unsigned flags)
 {
     strdup_t tmp = String::dup(string);
     int prior = 0, match = 0;
