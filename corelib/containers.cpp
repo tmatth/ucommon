@@ -156,7 +156,7 @@ void *Buffer::get(void)
     return dbuf;
 }
 
-void *Buffer::peek(unsigned offset)
+const void *Buffer::at(unsigned offset)
 {
     caddr_t dbuf;
 
@@ -434,7 +434,7 @@ ObjectProtocol *queue::fifo(timeout_t timeout)
     return obj;
 }
 
-ObjectProtocol *queue::peek(unsigned back)
+const ObjectProtocol *queue::at(unsigned back)
 {
     linked_pointer<member> node;
     ObjectProtocol *obj;
@@ -577,7 +577,7 @@ bool stack::remove(ObjectProtocol *o)
     return rtn;
 }
 
-ObjectProtocol *stack::peek(unsigned back)
+const ObjectProtocol *stack::at(unsigned back)
 {
     linked_pointer<member> node;
     ObjectProtocol *obj;
@@ -595,6 +595,39 @@ ObjectProtocol *stack::peek(unsigned back)
 
     } while(back-- > 0);
 
+    unlock();
+    return obj;
+}
+
+const ObjectProtocol *stack::peek(timeout_t timeout)
+{
+    bool rtn = true;
+    struct timespec ts;
+    member *member;
+    ObjectProtocol *obj = NULL;
+
+    if(timeout && timeout != Timer::inf)
+        gettimeout(timeout, &ts);
+
+    lock();
+    while(rtn && !usedlist) {
+        if(timeout == Timer::inf)
+            Conditional::wait();
+        else if(timeout)
+            rtn = Conditional::wait(&ts);
+        else
+            rtn = false;
+    }
+    if(!rtn) {
+        unlock();
+        return NULL;
+    }
+    if(usedlist) {
+        member = static_cast<stack::member *>(usedlist);
+        obj = member->object;
+    }
+    if(rtn)
+        signal();
     unlock();
     return obj;
 }

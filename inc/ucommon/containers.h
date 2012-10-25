@@ -184,7 +184,7 @@ public:
      * @param item to examine in buffer.
      * @return pointer to item or NULL if invalid item number.
      */
-    void *peek(unsigned item);
+    const void *at(unsigned item);
 
     /**
      * Test if there is data waiting in the buffer.
@@ -267,7 +267,7 @@ public:
      * @param number of elements back.
      * @return object in queue or NULL if invalid value.
      */
-    ObjectProtocol *peek(unsigned offset = 0);
+    const ObjectProtocol *at(unsigned offset = 0);
 
     /**
      * Get and remove last object posted to the queue.  This can wait for
@@ -338,8 +338,8 @@ public:
     static size_t count(queue& queue)
         {return queue.getCount();};
 
-    inline ObjectProtocol *operator[](unsigned pos)
-        {return peek(pos);};
+    inline const ObjectProtocol *operator[](unsigned pos)
+        {return at(pos);};
 };
 
 /**
@@ -416,7 +416,7 @@ public:
      * @param offset to stack entry.
      * @return object examined.
      */
-    ObjectProtocol *peek(unsigned offset = 0);
+    const ObjectProtocol *at(unsigned offset = 0);
 
     /**
      * Get number of object points currently in the stack.
@@ -460,8 +460,12 @@ public:
     static inline size_t count(stack& stack)
         {return stack.getCount();};
 
-    inline ObjectProtocol *operator[](unsigned pos)
-        {return peek(pos);};
+    inline const ObjectProtocol *operator[](unsigned pos)
+        {return at(pos);};
+
+    const ObjectProtocol *peek(timeout_t timeout = 0);
+
+    static inline const ObjectProtocol *peek(stack& stack, timeout_t timeout = 0);
 };
 
 /**
@@ -575,8 +579,8 @@ public:
      * @param item in buffer.
      * @return item pointer if valid or NULL.
      */
-    inline T *peek(unsigned item)
-        {return static_cast<T *>(Buffer::peek(item));};
+    inline const T *at(unsigned item)
+        {return static_cast<const T *>(Buffer::at(item));};
 
     /**
      * Examine past item in the buffer.  This is a typecast of the peek
@@ -584,8 +588,8 @@ public:
      * @param item in buffer.
      * @return item pointer if valid or NULL.
      */
-    inline T *operator[](unsigned item)
-        {return static_cast<T *>(queue::peek(item));};
+    inline const T *operator[](unsigned item)
+        {return static_cast<const T *>(queue::at(item));};
 
 };
 
@@ -639,13 +643,13 @@ public:
         {return static_cast<T *>(stack::pull(timeout));};
 
     /**
-     * Examine past item in the stack.  This is a typecast of the peek
-     * operation.
-     * @param offset in stack.
-     * @return item pointer if valid or NULL.
+     * Examine last typed object posted to the stack.  This can wait for
+     * a specified timeout of the stack is empty.
+     * @param timeout to wait if empty in milliseconds.
+     * @return object in queue or NULL if empty and timed out.
      */
-    inline T *peek(unsigned offset = 0)
-        {return static_cast<T *>(stack::peek(offset));};
+    inline const T *peek(timeout_t timeout = 0)
+        {return static_cast<const T *>(stack::peek(timeout));};
 
     /**
      * Examine past item in the stack.  This is a typecast of the peek
@@ -653,8 +657,17 @@ public:
      * @param offset in stack.
      * @return item pointer if valid or NULL.
      */
-    inline T *operator[](unsigned offset)
-        {return static_cast<T *>(stack::peek(offset));};
+    inline const T *at(unsigned offset = 0)
+        {return static_cast<const T *>(stack::at(offset));};
+
+    /**
+     * Examine past item in the stack.  This is a typecast of the peek
+     * operation.
+     * @param offset in stack.
+     * @return item pointer if valid or NULL.
+     */
+    inline const T *operator[](unsigned offset)
+        {return static_cast<const T *>(stack::at(offset));};
 
 };
 
@@ -723,8 +736,8 @@ public:
      * @param offset in queue.
      * @return item pointer if valid or NULL.
      */
-    inline T *peek(unsigned offset = 0)
-        {return static_cast<T *>(queue::peek(offset));};
+    inline const T *at(unsigned offset = 0)
+        {return static_cast<const T *>(queue::at(offset));};
 
     /**
      * Examine past item in the queue.  This is a typecast of the peek
@@ -732,8 +745,8 @@ public:
      * @param offset in queue.
      * @return item pointer if valid or NULL.
      */
-    inline T *operator[](unsigned offset)
-        {return static_cast<T *>(queue::peek(offset));};
+    inline const T *operator[](unsigned offset)
+        {return static_cast<const T *>(queue::at(offset));};
 
 };
 

@@ -334,8 +334,7 @@ static void streamdecode(FILE *fp, const char *path)
 {
     char buffer[128];
     for(;;) {
-        fgets(buffer, sizeof(buffer), fp);
-        if(feof(fp)) {
+        if(NULL == fgets(buffer, sizeof(buffer), fp) || feof(fp)) {
             shell::errexit(5, "*** %s: %s: %s\n",
                 argv0, path, _TEXT("no archive found"));
         }
