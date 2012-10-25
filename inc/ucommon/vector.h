@@ -436,16 +436,11 @@ public:
      */
     inline vectorof(vectorsize_t size) : Vector(size) {};
 
-    /**
-     * Get object pointer of specified type from vector.
-     * @param index of typed member to return, < 0 to use from end of list.
-     * @return typed object pointer of member.
-     */
-    inline T *get(int index)
-        {return static_cast<T *>(Vector::get(index));};
-
     inline T& operator[](int index)
-        {return static_cast<T *>(Vector::get(index));};
+        {return static_cast<T&>(Vector::get(index));};
+
+    inline const T& at(int index)
+        {return static_cast<const T&>(Vector::get(index));};
 
     /**
      * Retrieve a typed member of the vector directly.
@@ -699,11 +694,11 @@ public:
      * @param index of typed member to return, < 0 to use from end of list.
      * @return typed object pointer of member.
      */
-    inline T *get(int index)
-        {return static_cast<T *>(Vector::get(index));};
+    inline const T& at(int index)
+        {return static_cast<const T&>(Vector::get(index));};
 
     inline T& operator[](int index)
-        {return static_cast<T*>(Vector::get(index));};
+        {return static_cast<T&>(Vector::get(index));};
 
     /**
      * Retrieve a typed member of the fixed vector directly.
