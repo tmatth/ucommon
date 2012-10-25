@@ -2397,14 +2397,14 @@ int Socket::recvsize(socket_t so, unsigned size)
 #endif
 }
 
-bool Socket::isConnected(void) const
+bool Socket::connected(void) const
 {
     char buf;
 
     if(so == INVALID_SOCKET)
         return false;
 
-    if(!waitPending())
+    if(!wait())
         return true;
 
     if(_recv_(so, &buf, 1, MSG_DONTWAIT | MSG_PEEK) < 1)
@@ -2413,7 +2413,7 @@ bool Socket::isConnected(void) const
     return true;
 }
 
-bool Socket::isPending(unsigned qio) const
+bool Socket::pending(unsigned qio) const
 {
     if(getPending() >= qio)
         return true;
@@ -2455,7 +2455,7 @@ socket_t Socket::acceptfrom(socket_t so, struct sockaddr_storage *addr)
         return _accept_(so, NULL, NULL);
 }
 
-bool Socket::waitPending(timeout_t timeout) const
+bool Socket::wait(timeout_t timeout) const
 {
     return wait(so, timeout);
 }

@@ -669,13 +669,13 @@ public:
      * @param value to test for.
      * @return true if at least that many bytes waiting in receive queue.
      */
-    bool isPending(unsigned value) const;
+    bool pending(unsigned value) const;
 
     /**
      * Test if socket is connected.
      * @return true if connected.
      */
-    bool isConnected(void) const;
+    bool connected(void) const;
 
     /**
      * Test for pending input data.  This function can wait up to a specified
@@ -683,7 +683,7 @@ public:
      * @param timeout or 0 if none.
      * @return true if input data waiting.
      */
-    bool waitPending(timeout_t timeout = 0) const;
+    bool wait(timeout_t timeout = 0) const;
 
     /**
      * Set nodelay option for tcp socket.
@@ -1722,8 +1722,8 @@ public:
      * @param timeout to wait.
      * @return true when acceptable connection is pending.
      */
-    inline bool waitConnection(timeout_t timeout = Timer::inf) const
-        {return Socket::waitPending(timeout);};
+    inline bool wait(timeout_t timeout = Timer::inf) const
+        {return Socket::wait(timeout);};
 
     /**
      * Get the socket descriptor of the listener.
