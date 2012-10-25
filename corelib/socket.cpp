@@ -1253,7 +1253,7 @@ bool Socket::address::insert(struct sockaddr *addr)
     node = (struct addrinfo *)malloc(sizeof(struct addrinfo));
     memset(node, 0, sizeof(node));
     node->ai_family = addr->sa_family;
-    node->ai_addrlen = getlen(addr);
+    node->ai_addrlen = len(addr);
     node->ai_next = list;
     node->ai_addr = (struct sockaddr *)malloc(node->ai_addrlen);
     memcpy(node->ai_addr, addr, node->ai_addrlen);
@@ -1305,12 +1305,12 @@ struct sockaddr *Socket::address::dup(struct sockaddr *addr)
     if(!addr)
         return NULL;
 
-    size_t len = getlen(addr);
-    if(!len)
+    size_t slen = len(addr);
+    if(!slen)
         return NULL;
 
-    node = (struct sockaddr *)malloc(len);
-    memcpy(node, addr, len);
+    node = (struct sockaddr *)malloc(slen);
+    memcpy(node, addr, slen);
     return node;
 }
 
@@ -1724,16 +1724,16 @@ size_t Socket::readfrom(void *data, size_t len, struct sockaddr_storage *from)
     return (size_t)result;
 }
 
-size_t Socket::writeto(const void *data, size_t len, const struct sockaddr *dest)
+size_t Socket::writeto(const void *data, size_t dlen, const struct sockaddr *dest)
 {
     assert(data != NULL);
     assert(len > 0);
 
     socklen_t slen = 0;
     if(dest)
-        slen = getlen(dest);
+        slen = len(dest);
 
-    ssize_t result = _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL, dest, slen);
+    ssize_t result = _sendto_(so, (caddr_t)data, dlen, MSG_NOSIGNAL, dest, slen);
     if(result < 0) {
         ioerr = Socket::error();
         return 0;
@@ -1741,16 +1741,16 @@ size_t Socket::writeto(const void *data, size_t len, const struct sockaddr *dest
     return (size_t)result;
 }
 
-ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, const struct sockaddr *dest)
+ssize_t Socket::sendto(socket_t so, const void *data, size_t dlen, int flags, const struct sockaddr *dest)
 {
     assert(data != NULL);
     assert(len > 0);
 
     socklen_t slen = 0;
     if(dest)
-        slen = getlen(dest);
+        slen = len(dest);
 
-    return _sendto_(so, (caddr_t)data, len, MSG_NOSIGNAL | flags, dest, slen);
+    return _sendto_(so, (caddr_t)data, dlen, MSG_NOSIGNAL | flags, dest, slen);
 }
 
 size_t Socket::writes(const char *str)
@@ -2740,7 +2740,7 @@ char *Socket::hostname(const struct sockaddr *sa, char *buf, size_t max)
     return buf;
 }
 
-socklen_t Socket::getaddr(socket_t so, struct sockaddr_storage *sa, const char *host, const char *svc)
+socklen_t Socket::query(socket_t so, struct sockaddr_storage *sa, const char *host, const char *svc)
 {
     assert(sa != NULL);
     assert(host != NULL && *host != 0);
@@ -2771,14 +2771,14 @@ exit:
 
 int Socket::bindto(socket_t so, const struct sockaddr *iface)
 {
-    if(!_bind_(so, iface, getlen(iface)))
+    if(!_bind_(so, iface, len(iface)))
         return 0;
     return Socket::error();
 }
 
 int Socket::listento(socket_t so, const struct sockaddr *iface, int backlog)
 {
-    if(_bind_(so, iface, getlen(iface)))
+    if(_bind_(so, iface, len(iface)))
         return Socket::error();
     if(_listen_(so, backlog))
         return Socket::error();
@@ -2982,10 +2982,10 @@ int Socket::network(struct sockaddr *iface, const struct sockaddr *dest)
 
     int rtn = -1;
     socket_t so = INVALID_SOCKET;
-    socklen_t len = getlen(dest);
+    socklen_t slen = len(dest);
 
-    if(len)
-        memset(iface, 0, len);
+    if(slen)
+        memset(iface, 0, slen);
 
     iface->sa_family = AF_UNSPEC;
     switch(dest->sa_family) {
@@ -2997,8 +2997,8 @@ int Socket::network(struct sockaddr *iface, const struct sockaddr *dest)
         if((socket_t)so == INVALID_SOCKET)
             return -1;
         socket_mapping(dest->sa_family, so);
-        if(!_connect_(so, dest, len))
-            rtn = _getsockname_(so, iface, &len);
+        if(!_connect_(so, dest, slen))
+            rtn = _getsockname_(so, iface, &slen);
         break;
     default:
         return ENOSYS;
@@ -3085,10 +3085,10 @@ unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
     if(s1 == NULL || s2 == NULL)
         return 0;
 
-    socklen_t len = getlen(s1);
+    socklen_t slen = len(s1);
     if(len > 0) {
-        memcpy(s1, s2, len);
-        return len;
+        memcpy(s1, s2, slen);
+        return slen;
     }
     return 0;
 }
@@ -3116,7 +3116,7 @@ bool Socket::equalhost(const struct sockaddr *s1, const struct sockaddr *s2)
         return true;
 #endif
     default:
-        if(memcmp(s1, s2, getlen(s1)))
+        if(memcmp(s1, s2, len(s1)))
             return false;
         return true;
     }
@@ -3159,7 +3159,7 @@ bool Socket::equal(const struct sockaddr *s1, const struct sockaddr *s2)
         return true;
 #endif
     default:
-        if(memcmp(s1, s2, getlen(s1)))
+        if(memcmp(s1, s2, len(s1)))
             return false;
         return true;
     }
@@ -3194,7 +3194,7 @@ ssize_t Socket::printf(socket_t so, const char *format, ...)
     return sendto(so, buf, strlen(buf), 0, NULL);
 }
 
-socklen_t Socket::getlen(const struct sockaddr *sa)
+socklen_t Socket::len(const struct sockaddr *sa)
 {
     if(!sa)
         return 0;
@@ -3300,11 +3300,11 @@ int Socket::select(int max, set_t read, set_t write, set_t error, timeout_t time
     return _select_(max, (fd_set *)read, (fd_set *)write, (fd_set *)error, tvp);
 }
 
-Socket::set_t Socket::getmask(void)
+Socket::set_t Socket::get(void)
 {
-    set_t mask = (set_t)malloc(sizeof(fd_set));
-    clear(mask);
-    return mask;
+    set_t masking = (set_t)malloc(sizeof(fd_set));
+    clear(masking);
+    return masking;
 }
 
 void Socket::clear(set_t mask)

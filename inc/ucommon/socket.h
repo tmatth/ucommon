@@ -1402,14 +1402,17 @@ public:
      * @param service port.
      * @return socket address size.
      */
-    static socklen_t getaddr(socket_t socket, struct sockaddr_storage *address, const char *hostname, const char *service);
+    static socklen_t query(socket_t socket, struct sockaddr_storage *address, const char *hostname, const char *service);
 
     /**
      * Get the size of a socket address.
      * @param address of socket.
      * @return size to use for this socket address object.
      */
-    static socklen_t getlen(const struct sockaddr *address);
+    static socklen_t len(const struct sockaddr *address);
+
+    static inline socklen_t getlen(const struct sockaddr *address)
+        {return len(address);}
 
     /**
      * Compare socket addresses.  Test if the address and service matches
@@ -1639,7 +1642,7 @@ public:
      * Get a mask from the heap.
      * @return mask to use, all bits cleared.
      */
-    static set_t getmask(void);
+    static set_t get(void);
 
     /**
      * Clear a mask, setting all entries to zero.
