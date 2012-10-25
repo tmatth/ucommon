@@ -100,8 +100,12 @@ public:
      * Get the number of pages that have been allocated from the real heap.
      * @return pages allocated from heap.
      */
+    inline unsigned pages(void) const
+        {return count;}
+
+    /** depricated */
     inline unsigned getPages(void) const
-        {return count;};
+        {return count;}
 
     /**
      * Get the maximum number of pages that are permitted.  One can use a
@@ -110,15 +114,15 @@ public:
      * to detect and bring down apps that are leaking.
      * @return page allocation limit.
      */
-    inline unsigned getLimit(void) const
-        {return limit;};
+    inline unsigned max(void) const
+        {return limit;}
 
     /**
      * Get the size of a memory page.
      * @return size of each pager heap allocation.
      */
-    inline unsigned getAlloc(void)
-        {return pagesize;};
+    inline unsigned size(void) const
+        {return pagesize;}
 
     /**
      * Determine fragmentation level of acquired heap pages.  This is
@@ -670,7 +674,7 @@ public:
      * Get total size.
      * @return number of characters in buffer.
      */
-    inline unsigned long getUsed(void)
+    inline unsigned long used(void) const
         {return ccount;}
 
     /**
@@ -1063,8 +1067,8 @@ public:
      * privately.
      * @return count of heap pages used.
      */
-    inline unsigned getPages(void) const
-        {return mempager::getPages();};
+    inline unsigned pages(void) const
+        {return mempager::pages();};
 };
 
 /**
@@ -1157,8 +1161,8 @@ public:
      * privately.
      * @return count of heap pages used.
      */
-    inline unsigned getPages(void) const
-        {return mempager::getPages();}
+    inline unsigned pages(void) const
+        {return mempager::pages();}
 };
 
 /**
