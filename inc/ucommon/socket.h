@@ -1490,10 +1490,10 @@ public:
      * @param destination address.
      * @return 0 on success, -1 on error.
      */
-    static int bound(struct sockaddr *address, const struct sockaddr *destination);
+    static int network(struct sockaddr *address, const struct sockaddr *destination);
 
     inline static int getinterface(struct sockaddr *address, const struct sockaddr *destination)
-        {return bound(address, destination);}
+        {return network(address, destination);}
 
     /**
      * Get the hostname of a socket address.

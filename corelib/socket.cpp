@@ -2975,7 +2975,7 @@ char *Socket::query(const struct sockaddr *addr, char *name, socklen_t size)
     return NULL;
 }
 
-int Socket::bound(struct sockaddr *iface, const struct sockaddr *dest)
+int Socket::network(struct sockaddr *iface, const struct sockaddr *dest)
 {
     assert(iface != NULL);
     assert(dest != NULL);
