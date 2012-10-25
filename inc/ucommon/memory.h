@@ -57,7 +57,7 @@ class PagerPool;
  * performance.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT memalloc : public MemoryProtocol, protected LockingProtocol
+class __EXPORT memalloc : public MemoryProtocol
 {
 private:
     friend class bufpager;
@@ -167,7 +167,7 @@ public:
  * insufficient space in the current page to complete a request.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT mempager : public memalloc
+class __EXPORT mempager : public memalloc, public LockingProtocol
 {
 private:
     pthread_mutex_t mutex;
@@ -693,9 +693,7 @@ public:
 
     char *copy(size_t *iosize);
 
-    void release(void);
-
-    void commit(size_t size);
+    void update(size_t size);
 };
 
 /**

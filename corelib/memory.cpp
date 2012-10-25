@@ -252,18 +252,14 @@ memalloc(size)
 
 void *ObjectPager::get(unsigned index)
 {
-    _lock();
     linked_pointer<member> list = root;
 
-    if(index >= members) {
-        _unlock();
+    if(index >= members)
         return NULL;
-    }
 
     while(index--)
         list.next();
 
-    _unlock();
     return list->mem;
 }
 
@@ -278,11 +274,8 @@ void ObjectPager::clear(void)
 
 void *ObjectPager::pull(void)
 {
-    _lock();
-    if(!members) {
-        _unlock();
+    if(!members)
         return NULL;
-    }
 
     member *mem = (member *)root;
     void *result = mem->mem;
@@ -294,13 +287,11 @@ void *ObjectPager::pull(void)
     else
         root = mem->next;
     index = NULL;
-    _unlock();
     return result;
 }
 
 void *ObjectPager::push(void)
 {
-    _lock();
     caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
 
     member *node;
@@ -311,7 +302,6 @@ void *ObjectPager::push(void)
     ++members;
     node->mem = memalloc::_alloc(typesize);
     index = NULL;
-    _unlock();
     return node->mem;
 }
 
@@ -319,11 +309,8 @@ void *ObjectPager::pop(void)
 {
     void *out = NULL;
 
-    _lock();
-    if(!root) {
-        _unlock();
+    if(!root)
         return NULL;
-    }
 
     index = NULL;
 
@@ -331,7 +318,6 @@ void *ObjectPager::pop(void)
         out = last->mem;
         root = last = NULL;
         members = 0;
-        _unlock();
         return out;
     }
 
@@ -346,13 +332,11 @@ void *ObjectPager::pop(void)
         }
         np.next();
     }
-    _unlock();
     return out;
 }
 
 void *ObjectPager::add(void)
 {
-    _lock();
     caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
     member *node;
 
@@ -365,18 +349,14 @@ void *ObjectPager::add(void)
         node = new(mem) member(&root);
     last = node;
     node->mem = memalloc::_alloc(typesize);
-    _unlock();
     return node->mem;
 }
 
 void **ObjectPager::list(void)
 {
-    _lock();
     void **dp = index;
-    if(dp) {
-        _unlock();
+    if(dp)
         return dp;
-    }
 
     unsigned pos = 0;
     index = (void **)memalloc::_alloc(sizeof(void *) * (members + 1));
@@ -387,7 +367,6 @@ void **ObjectPager::list(void)
     }
     index[pos] = NULL;
     dp = index;
-    _unlock();
     return index;
 }
 
@@ -1085,8 +1064,6 @@ void bufpager::set(const char *text)
 
 void bufpager::put(const char *text, size_t iosize)
 {
-    _lock();
-
     while(text && (iosize--)) {
         if(!last || last->used == last->size) {
             cpage_t *next;
@@ -1098,7 +1075,6 @@ void bufpager::put(const char *text, size_t iosize)
             else {
                 next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
                 if(!next) {
-                    _unlock();
                     return;
                 }
 
@@ -1114,10 +1090,8 @@ void bufpager::put(const char *text, size_t iosize)
                 if(!p)
                     p = pager();
 
-                if(!p) {
-                    _unlock();
+                if(!p)
                     return;
-                }
 
                 next->text = ((char *)(p)) + p->used;
                 next->used = 0;
@@ -1136,17 +1110,13 @@ void bufpager::put(const char *text, size_t iosize)
         ++ccount;
         last->text[last->used++] = *(text++);
     }
-    _unlock();
 }
 
 char *bufpager::copy(size_t *iosize)
 {
     *iosize = 0;
-    _lock();
-    if(!current || (current->next == NULL && cpos >= current->used)) {
-        _unlock();
+    if(!current || (current->next == NULL && cpos >= current->used))
         return NULL;
-    }
 
     if(cpos >= current->used) {
         current = current->next;
@@ -1163,7 +1133,6 @@ char *bufpager::copy(size_t *iosize)
 char *bufpager::request(size_t *iosize)
 {
     *iosize = 0;
-    _lock();
     if(!last || last->used >= last->size) {
         cpage_t *next;
         if(freelist) {
@@ -1172,10 +1141,8 @@ char *bufpager::request(size_t *iosize)
         }
         else {
             next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
-            if(!next) {
-                _unlock();
+            if(!next)
                 return NULL;
-            }
 
             page_t *p = page;
             unsigned size = 0;
@@ -1189,10 +1156,9 @@ char *bufpager::request(size_t *iosize)
             if(!p)
                 p = pager();
 
-            if(!p) {
-                _unlock();
+            if(!p)
                 return NULL;
-            }
+
             next->text = ((char *)(p)) + p->used;
             next->used = 0;
             next->size = size;
@@ -1210,24 +1176,15 @@ char *bufpager::request(size_t *iosize)
     return last->text + last->used;
 }
 
-void bufpager::commit(size_t iosize)
+void bufpager::update(size_t iosize)
 {
     last->used += iosize;
-    _unlock();
-}
-
-void bufpager::release(void)
-{
-    _unlock();
 }
 
 size_t bufpager::get(char *text, size_t iosize)
 {
-    _lock();
-    if(!ccount) {
-        _unlock();
+    if(!ccount)
         return 0;
-    }
 
     unsigned long index = 0;
 
@@ -1242,13 +1199,11 @@ size_t bufpager::get(char *text, size_t iosize)
     }
     if(index < iosize)
         text[index] = 0;
-    _unlock();
     return index;
 }
 
 void bufpager::add(const char *text)
 {
-    _lock();
 
     while(text && *text) {
         if(!last || last->used == last->size) {
@@ -1260,10 +1215,8 @@ void bufpager::add(const char *text)
             }
             else {
                 next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
-                if(!next) {
-                    _unlock();
+                if(!next)
                     return;
-                }
 
                 page_t *p = page;
                 unsigned size = 0;
@@ -1277,10 +1230,8 @@ void bufpager::add(const char *text)
                 if(!p)
                     p = pager();
 
-                if(!p) {
-                    _unlock();
+                if(!p)
                     return;
-                }
 
                 next->text = ((char *)(p)) + p->used;
                 next->used = 0;
@@ -1299,22 +1250,16 @@ void bufpager::add(const char *text)
         ++ccount;
         last->text[last->used++] = *(text++);
     }
-    _unlock();
 }
 
 char *bufpager::dup(void)
 {
-    _lock();
-    if(!ccount) {
-        _unlock();
+    if(!ccount)
         return NULL;
-    }
 
     char *text = (char *)malloc(ccount + 1l);
-    if(!text) {
-        _unlock();
+    if(!text)
         return NULL;
-    }
 
     unsigned long index = 0, pos = 0;
     cpage_t *page = first;
@@ -1329,44 +1274,35 @@ char *bufpager::dup(void)
         text[index++] = page->text[pos++];
     }
     text[index] = 0;
-    _unlock();
     return text;
 }
 
 int bufpager::_getch(void)
 {
-    _lock();
 
     if(!current)
         current = first;
 
-    if(!current) {
-        _unlock();
+    if(!current)
         return EOF;
-    }
 
     if(cpos >= current->used) {
-        if(!current->next) {
-            _unlock();
+        if(!current->next)
             return EOF;
-        }
+
         current = current->next;
         cpos = 0;
     }
 
-    if(cpos >= current->used) {
-        _unlock();
+    if(cpos >= current->used)
         return EOF;
-    }
 
     char ch = current->text[cpos++];
-    _unlock();
     return ch;
 }
 
 int bufpager::_putch(int code)
 {
-    _lock();
     if(!last || last->used == last->size) {
         cpage_t *next;
 
@@ -1376,10 +1312,8 @@ int bufpager::_putch(int code)
         }
         else {
             next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
-            if(!next) {
-                _unlock();
+            if(!next)
                 return EOF;
-            }
 
             page_t *p = page;
             unsigned size = 0;
@@ -1393,10 +1327,8 @@ int bufpager::_putch(int code)
             if(!p)
                 p = pager();
 
-            if(!p) {
-                _unlock();
+            if(!p)
                 return EOF;
-            }
 
             next->text = ((char *)(p)) + p->used;
             next->used = 0;
@@ -1414,29 +1346,23 @@ int bufpager::_putch(int code)
 
     ++ccount;
     last->text[last->used++] = code;
-    _unlock();
     return code;
 }
 
 void *bufpager::_alloc(size_t size)
 {
-    _lock();
     void *ptr = memalloc::_alloc(size);
-    _unlock();
     return ptr;
 }
 
 void bufpager::rewind(void)
 {
-    _lock();
     cpos = 0;
     current = first;
-    _unlock();
 }
 
 void bufpager::reset(void)
 {
-    _lock();
     cpos = 0;
     ccount = 0;
     current = first;
@@ -1446,7 +1372,6 @@ void bufpager::reset(void)
     }
     freelist = first;
     first = last = current = NULL;
-    _unlock();
 }
 
 charmem::charmem(char *mem, size_t size)

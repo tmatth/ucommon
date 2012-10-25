@@ -6,8 +6,6 @@ Proposed changes (likely deferred to 6.0.0)
 	
 	FetchProtocol for string >> operator?
 
-	add CharbufProtocol with locking states
-
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
 	Especially convenient with common use of NSS for future tls.  Do we
 	still keep GNU pth option if we do this?
