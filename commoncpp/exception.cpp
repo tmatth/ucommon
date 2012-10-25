@@ -91,7 +91,11 @@ const char* IOException::getSystemErrorString() const throw()
         _systemErrorString = new char[errStrSize];
 #ifndef _MSWINDOWS_
 #ifdef  HAVE_STRERROR_R
-    strerror_r(_systemError, _systemErrorString, errStrSize);
+#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+    assert(strerror_r(_systemError, _systemErrorString, errStrSize) == 0);
+#else
+    _systemErrorString = strerror_r(_systemError, _systemErrorString, errStrSize);
+#endif
 #else
     static Mutex mlock;
 
