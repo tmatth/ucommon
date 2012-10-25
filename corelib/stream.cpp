@@ -149,7 +149,7 @@ StreamProtocol()
 tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
 StreamProtocol()
 {
-    so = Socket::create(list.getfamily(), SOCK_STREAM, IPPROTO_TCP);
+    so = Socket::create(list.family(), SOCK_STREAM, IPPROTO_TCP);
     timeout = tv;
     open(list);
 }

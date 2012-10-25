@@ -1300,6 +1300,9 @@ public:
     inline linked_pointer(LinkedObject *pointer)
         {ptr = static_cast<T*>(pointer);};
 
+    inline linked_pointer(const LinkedObject *pointer)
+        {ptr = static_cast<T*>(pointer);};
+
     /**
      * Create a linked pointer to examine an ordered index.
      * @param index of linked objects to iterate through.

@@ -690,15 +690,15 @@ unsigned cidr::getMask(void) const
     }
 }
 
-cidr *cidr::find(policy *policy, const struct sockaddr *s)
+const cidr *cidr::find(const policy *policy, const struct sockaddr *s)
 {
     assert(policy != NULL);
     assert(s != NULL);
 
-    cidr *member = NULL;
+    const cidr *member = NULL;
     unsigned top = 0;
 
-    linked_pointer<cidr> p = policy;
+    linked_pointer<const cidr> p = policy;
     while(p) {
         if(p->isMember(s)) {
             if(p->getMask() > top) {
@@ -711,15 +711,15 @@ cidr *cidr::find(policy *policy, const struct sockaddr *s)
     return member;
 }
 
-cidr *cidr::container(policy *policy, const struct sockaddr *s)
+const cidr *cidr::container(const policy *policy, const struct sockaddr *s)
 {
     assert(policy != NULL);
     assert(s != NULL);
 
-    cidr *member = NULL;
+    const cidr *member = NULL;
     unsigned top = 128;
 
-    linked_pointer<cidr> p = policy;
+    linked_pointer<const cidr> p = policy;
     while(p) {
         if(p->isMember(s)) {
             if(p->getMask() < top) {
@@ -1156,7 +1156,7 @@ struct sockaddr *Socket::address::getAddr(void) const
     return list->ai_addr;
 }
 
-int Socket::address::getfamily(void) const
+int Socket::address::family(void) const
 {
     struct sockaddr *ap;
     if(!list)
@@ -1353,7 +1353,7 @@ void Socket::address::add(const char *host, const char *svc, int socktype)
     last->ai_next = join;
 }
 
-struct sockaddr *Socket::address::find(struct sockaddr *addr) const
+struct sockaddr *Socket::address::find(const struct sockaddr *addr) const
 {
     assert(addr != NULL);
 
@@ -2844,7 +2844,7 @@ exit:
     return rtn;
 }
 
-unsigned Socket::keyhost(struct sockaddr *addr, unsigned keysize)
+unsigned Socket::keyhost(const struct sockaddr *addr, unsigned keysize)
 {
     assert(addr != NULL);
     assert(keysize > 0);
@@ -2855,12 +2855,12 @@ unsigned Socket::keyhost(struct sockaddr *addr, unsigned keysize)
 switch(addr->sa_family) {
 #ifdef  AF_INET6
     case AF_INET6:
-        cp = (caddr_t)(&((struct sockaddr_in6 *)(addr))->sin6_addr);
+        cp = (caddr_t)(&((const struct sockaddr_in6 *)(addr))->sin6_addr);
         len = 16;
         break;
 #endif
     case AF_INET:
-        cp = (caddr_t)(&((struct sockaddr_in *)(addr))->sin_addr);
+        cp = (caddr_t)(&((const struct sockaddr_in *)(addr))->sin_addr);
         len = 4;
         break;
     default:
@@ -2873,7 +2873,7 @@ switch(addr->sa_family) {
     return key % keysize;
 }
 
-unsigned Socket::keyindex(struct sockaddr *addr, unsigned keysize)
+unsigned Socket::keyindex(const struct sockaddr *addr, unsigned keysize)
 {
     assert(addr != NULL);
     assert(keysize > 0);
@@ -2884,13 +2884,13 @@ unsigned Socket::keyindex(struct sockaddr *addr, unsigned keysize)
 switch(addr->sa_family) {
 #ifdef  AF_INET6
     case AF_INET6:
-        cp = (caddr_t)(&((struct sockaddr_in6 *)(addr))->sin6_addr);
+        cp = (caddr_t)(&((const struct sockaddr_in6 *)(addr))->sin6_addr);
         len = 16;
         key = getservice(addr);
         break;
 #endif
     case AF_INET:
-        cp = (caddr_t)(&((struct sockaddr_in *)(addr))->sin_addr);
+        cp = (caddr_t)(&((const struct sockaddr_in *)(addr))->sin_addr);
         len = 4;
         key = getservice(addr);
         break;
@@ -2904,22 +2904,22 @@ switch(addr->sa_family) {
     return key % keysize;
 }
 
-short Socket::getservice(struct sockaddr *addr)
+short Socket::getservice(const struct sockaddr *addr)
 {
     assert(addr != NULL);
 
     switch(addr->sa_family) {
 #ifdef  AF_INET6
     case AF_INET6:
-        return ntohs(((struct sockaddr_in6 *)(addr))->sin6_port);
+        return ntohs(((const struct sockaddr_in6 *)(addr))->sin6_port);
 #endif
     case AF_INET:
-        return ntohs(((struct sockaddr_in *)(addr))->sin_port);
+        return ntohs(((const struct sockaddr_in *)(addr))->sin_port);
     }
     return 0;
 }
 
-char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
+char *Socket::getaddress(const struct sockaddr *addr, char *name, socklen_t size)
 {
     assert(addr != NULL);
     assert(name != NULL);
@@ -2935,7 +2935,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
     switch(addr->sa_family) {
 #ifdef  AF_UNIX
     case AF_UNIX:
-        String::set(name, size, ((struct sockaddr_un *)(addr))->sun_path);
+        String::set(name, size, ((const struct sockaddr_un *)(addr))->sun_path);
         return name;
 #endif
 #ifdef  _MSWINDOWS_
@@ -2944,29 +2944,29 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
         struct sockaddr_in6 saddr6;
         memcpy(&saddr6, addr, sizeof(saddr6));
         saddr6.sin6_port = 0;
-        WSAAddressToString((struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
+        WSAAddressToString((const struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
         return name;
 #endif
     case AF_INET:
         struct sockaddr_in saddr;
         memcpy(&saddr, addr, sizeof(saddr));
         saddr.sin_port = 0;
-        WSAAddressToString((struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
+        WSAAddressToString((const struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
         return name;
 #else
 #ifdef  HAVE_INET_NTOP
 #ifdef  AF_INET6
     case AF_INET6:
-        inet_ntop(addr->sa_family, &((struct sockaddr_in6 *)(addr))->sin6_addr, name, size);
+        inet_ntop(addr->sa_family, &((const struct sockaddr_in6 *)(addr))->sin6_addr, name, size);
         return name;
 #endif
     case AF_INET:
-        inet_ntop(addr->sa_family, &((struct sockaddr_in *)(addr))->sin_addr, name, size);
+        inet_ntop(addr->sa_family, &((const struct sockaddr_in *)(addr))->sin_addr, name, size);
         return name;
 #else
     case AF_INET:
         ENTER_EXCLUSIVE
-        String::set(name, size, inet_ntoa(((struct sockaddr_in *)(addr))->sin_addr));
+        String::set(name, size, inet_ntoa(((const struct sockaddr_in *)(addr))->sin_addr));
         LEAVE_EXCLUSIVE
         return name;
 #endif
@@ -2975,7 +2975,7 @@ char *Socket::getaddress(struct sockaddr *addr, char *name, socklen_t size)
     return NULL;
 }
 
-int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
+int Socket::getinterface(struct sockaddr *iface, const struct sockaddr *dest)
 {
     assert(iface != NULL);
     assert(dest != NULL);
@@ -3028,7 +3028,7 @@ int Socket::getinterface(struct sockaddr *iface, struct sockaddr *dest)
     return rtn;
 }
 
-bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
+bool Socket::subnet(const struct sockaddr *s1, const struct sockaddr *s2)
 {
     assert(s1 != NULL && s2 != NULL);
 
@@ -3039,8 +3039,8 @@ bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
     if(s1->sa_family != AF_INET)
         return true;
 
-    a1 = (unsigned char *)&(((struct sockaddr_in *)(s1))->sin_addr);
-    a2 = (unsigned char *)&(((struct sockaddr_in *)(s1))->sin_addr);
+    a1 = (unsigned char *)&(((const struct sockaddr_in *)(s1))->sin_addr);
+    a2 = (unsigned char *)&(((const struct sockaddr_in *)(s1))->sin_addr);
 
     if(*a1 == *a2 && *a1 < 128)
         return true;
@@ -3060,7 +3060,7 @@ bool Socket::subnet(struct sockaddr *s1, struct sockaddr *s2)
     return true;
 }
 
-unsigned Socket::store(struct sockaddr_internet *storage, struct sockaddr *address)
+unsigned Socket::store(struct sockaddr_internet *storage, const struct sockaddr *address)
 {
     if(storage == NULL || address == NULL)
         return 0;
@@ -3080,7 +3080,7 @@ unsigned Socket::store(struct sockaddr_internet *storage, struct sockaddr *addre
     return 0;
 }
 
-unsigned Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
+unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
 {
     if(s1 == NULL || s2 == NULL)
         return 0;
@@ -3093,7 +3093,7 @@ unsigned Socket::copy(struct sockaddr *s1, struct sockaddr *s2)
     return 0;
 }
 
-bool Socket::equalhost(struct sockaddr *s1, struct sockaddr *s2)
+bool Socket::equalhost(const struct sockaddr *s1, const struct sockaddr *s2)
 {
     assert(s1 != NULL && s2 != NULL);
 
@@ -3102,15 +3102,15 @@ bool Socket::equalhost(struct sockaddr *s1, struct sockaddr *s2)
 
     switch(s1->sa_family) {
     case AF_INET:
-        if(memcmp(&(((struct sockaddr_in *)s1)->sin_addr),
-            &(((struct sockaddr_in *)s2)->sin_addr), 4))
+        if(memcmp(&(((const struct sockaddr_in *)s1)->sin_addr),
+            &(((const struct sockaddr_in *)s2)->sin_addr), 4))
                 return false;
 
         return true;
 #ifdef  AF_INET6
     case AF_INET6:
-        if(memcmp(&(((struct sockaddr_in6 *)s1)->sin6_addr),
-            &(((struct sockaddr_in6 *)s2)->sin6_addr), 4))
+        if(memcmp(&(((const struct sockaddr_in6 *)s1)->sin6_addr),
+            &(((const struct sockaddr_in6 *)s2)->sin6_addr), 4))
                 return false;
 
         return true;
@@ -3124,7 +3124,7 @@ bool Socket::equalhost(struct sockaddr *s1, struct sockaddr *s2)
 }
 
 
-bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
+bool Socket::equal(const struct sockaddr *s1, const struct sockaddr *s2)
 {
     assert(s1 != NULL && s2 != NULL);
 
@@ -3133,27 +3133,27 @@ bool Socket::equal(struct sockaddr *s1, struct sockaddr *s2)
 
     switch(s1->sa_family) {
     case AF_INET:
-        if(memcmp(&(((struct sockaddr_in *)s1)->sin_addr),
-            &(((struct sockaddr_in *)s2)->sin_addr), 4))
+        if(memcmp(&(((const struct sockaddr_in *)s1)->sin_addr),
+            &(((const struct sockaddr_in *)s2)->sin_addr), 4))
                 return false;
 
-        if(!((struct sockaddr_in *)s1)->sin_port || !((struct sockaddr_in *)s2)->sin_port)
+        if(!((const struct sockaddr_in *)s1)->sin_port || !((const struct sockaddr_in *)s2)->sin_port)
             return true;
 
-        if(((struct sockaddr_in *)s1)->sin_port != ((struct sockaddr_in *)s2)->sin_port)
+        if(((const struct sockaddr_in *)s1)->sin_port != ((const struct sockaddr_in *)s2)->sin_port)
             return false;
 
         return true;
 #ifdef  AF_INET6
     case AF_INET6:
-        if(memcmp(&(((struct sockaddr_in6 *)s1)->sin6_addr),
-            &(((struct sockaddr_in6 *)s2)->sin6_addr), 4))
+        if(memcmp(&(((const struct sockaddr_in6 *)s1)->sin6_addr),
+            &(((const struct sockaddr_in6 *)s2)->sin6_addr), 4))
                 return false;
 
-        if(!((struct sockaddr_in6 *)s1)->sin6_port || !((struct sockaddr_in6 *)s2)->sin6_port)
+        if(!((const struct sockaddr_in6 *)s1)->sin6_port || !((const struct sockaddr_in6 *)s2)->sin6_port)
             return true;
 
-        if(((struct sockaddr_in6 *)s1)->sin6_port != ((struct sockaddr_in6 *)s2)->sin6_port)
+        if(((const struct sockaddr_in6 *)s1)->sin6_port != ((const struct sockaddr_in6 *)s2)->sin6_port)
             return false;
 
         return true;
@@ -3194,7 +3194,7 @@ ssize_t Socket::printf(socket_t so, const char *format, ...)
     return sendto(so, buf, strlen(buf), 0, NULL);
 }
 
-socklen_t Socket::getlen(struct sockaddr *sa)
+socklen_t Socket::getlen(const struct sockaddr *sa)
 {
     if(!sa)
         return 0;

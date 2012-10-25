@@ -209,7 +209,7 @@ public:
      * @param address to search for.
      * @return smallest cidr or NULL if none match.
      */
-    static cidr *find(policy *policy, const struct sockaddr *address);
+    static const cidr *find(const policy *policy, const struct sockaddr *address);
 
     /**
      * Get the largest container cidr entry in a list that matches the
@@ -218,7 +218,7 @@ public:
      * @param address to search for.
      * @return largest cidr or NULL if none match.
      */
-    static cidr *container(policy *policy, const struct sockaddr *address);
+    static const cidr *container(const policy *policy, const struct sockaddr *address);
 
     /**
      * Get the saved name of our cidr.  This is typically used with find
@@ -413,6 +413,9 @@ public:
          */
         struct sockaddr *getAddr(void) const;
 
+        inline struct sockaddr *operator()(void) const
+            {return getAddr();}
+
         /**
          * Get the first socket address of specified family from our list.
          * @param family to seek.
@@ -420,17 +423,20 @@ public:
          */
         struct sockaddr *get(int family) const;
 
+        inline struct sockaddr *operator()(int family) const
+            {return get(family);}
+
         /**
          * Get the family of the first member in a list of services.
          * @return family of first socket address or 0 if none.
          */
-        int getfamily(void) const;
+        int family(void) const;
 
         /**
          * Find a specific socket address in our address list.
          * @return matching address from list or NULL if not found.
          */
-        struct sockaddr *find(struct sockaddr *addr) const;
+        struct sockaddr *find(const struct sockaddr *addr) const;
 
         /**
          * Get the full socket address list from the object.
@@ -1400,7 +1406,7 @@ public:
      * @param address of socket.
      * @return size to use for this socket address object.
      */
-    static socklen_t getlen(struct sockaddr *address);
+    static socklen_t getlen(const struct sockaddr *address);
 
     /**
      * Compare socket addresses.  Test if the address and service matches
@@ -1409,7 +1415,7 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    static bool equal(struct sockaddr *address1, struct sockaddr *address2);
+    static bool equal(const struct sockaddr *address1, const struct sockaddr *address2);
 
     /**
      * Copy a socket address.
@@ -1417,7 +1423,7 @@ public:
      * @param origin address pointer to copy from.
      * @return number of bytes copied, 0 if invalid.
      */
-    static unsigned copy(struct sockaddr *target, struct sockaddr *origin);
+    static unsigned copy(struct sockaddr *target, const struct sockaddr *origin);
 
     /**
      * Store an address into an address object.
@@ -1425,7 +1431,7 @@ public:
      * @param address to store.
      * @return number of bytes stored.
      */
-    inline static unsigned store(struct sockaddr_storage *storage, struct sockaddr *address)
+    inline static unsigned store(struct sockaddr_storage *storage, const struct sockaddr *address)
         {return copy((struct sockaddr*)storage, address);};
 
     /**
@@ -1434,7 +1440,7 @@ public:
      * @param address to store.
      * @return number of bytes stored.
      */
-    static unsigned store(struct sockaddr_internet *storage, struct sockaddr *address);
+    static unsigned store(struct sockaddr_internet *storage, const struct sockaddr *address);
 
     /**
      * Compare socket host addresses.  Test if the host address matches
@@ -1443,7 +1449,7 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    static bool equalhost(struct sockaddr *address1, struct sockaddr *address2);
+    static bool equalhost(const struct sockaddr *address1, const struct sockaddr *address2);
 
     /**
      * Compare socket addresses.  Test if the stored addresses received match.
@@ -1452,8 +1458,8 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    inline static bool equalfrom(struct sockaddr_storage *address1, struct sockaddr_storage *address2)
-        {return equal((struct sockaddr *)address1, (struct sockaddr *)address2);};
+    inline static bool equalfrom(const struct sockaddr_storage *address1, const struct sockaddr_storage *address2)
+        {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);};
 
     /**
      * Compare socket addresses.  Test if the internet addresses received match.
@@ -1462,8 +1468,8 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    inline static bool equalinet(struct sockaddr_internet *address1, struct sockaddr_internet *address2)
-        {return equal((struct sockaddr *)address1, (struct sockaddr *)address2);};
+    inline static bool equalinet(const struct sockaddr_internet *address1, const struct sockaddr_internet *address2)
+        {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);};
 
     /**
      * See if both addresses are in the same subnet.  This is only relevant
@@ -1472,7 +1478,7 @@ public:
      * @param address2 to test.
      * @return true if in same subnet.
      */
-    static bool subnet(struct sockaddr *address1, struct sockaddr *address2);
+    static bool subnet(const struct sockaddr *address1, const struct sockaddr *address2);
 
     /**
      * Get the socket address of the interface needed to reach a destination
@@ -1481,7 +1487,7 @@ public:
      * @param destination address.
      * @return 0 on success, -1 on error.
      */
-    static int getinterface(struct sockaddr *address, struct sockaddr *destination);
+    static int getinterface(struct sockaddr *address, const struct sockaddr *destination);
 
     /**
      * Get the hostname of a socket address.
@@ -1490,21 +1496,21 @@ public:
      * @param size of hostname buffer.
      * @return buffer if found or NULL if not.
      */
-    static char *getaddress(struct sockaddr *address, char *buffer, socklen_t size);
+    static char *getaddress(const struct sockaddr *address, char *buffer, socklen_t size);
 
     /**
      * Get the service port of a socket.
      * @param address of socket to examine.
      * @return service port number.
      */
-    static short getservice(struct sockaddr *address);
+    static short getservice(const struct sockaddr *address);
 
     /**
      * Get the service port of an inet socket.
      * @param address of internet socket to examine.
      * @return service port number.
      */
-    inline static short inetservice(struct sockaddr_internet *address)
+    inline static short inetservice(const struct sockaddr_internet *address)
         {return getservice((struct sockaddr *)address);};
 
     /**
@@ -1513,7 +1519,7 @@ public:
      * @param size of map index.
      * @return key index path.
      */
-    static unsigned keyindex(struct sockaddr *address, unsigned size);
+    static unsigned keyindex(const struct sockaddr *address, unsigned size);
 
     /**
      * Convert a socket host address into a hash map index.
@@ -1521,7 +1527,7 @@ public:
      * @param size of map index.
      * @return key index path.
      */
-    static unsigned keyhost(struct sockaddr *address, unsigned size);
+    static unsigned keyhost(const struct sockaddr *address, unsigned size);
 
     /**
      * Initialize socket subsystem.
