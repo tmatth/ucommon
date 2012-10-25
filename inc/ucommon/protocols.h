@@ -285,6 +285,10 @@ protected:
      */
     virtual bool _flush(void);
 
+    virtual int _getch(void);
+
+    virtual int _putch(int ch);
+
     /**
      * Get current input position.  Sometimes used to help compute and report
      * a "tell" offset.
@@ -324,13 +328,15 @@ public:
      * Get a character from the buffer.  If no data is available, return EOF.
      * @return character from buffer or eof.
      */
-    int _getch(void);
+    inline int getch(void)
+        {return _getch();}
 
     /**
      * Put a character into the buffer.
      * @return character put into buffer or eof.
      */
-    int _putch(int ch);
+    inline int putch(int ch)
+        {return _putch(ch);}
 
     /**
      * Print formatted string to the buffer.  The maximum output size is
