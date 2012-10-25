@@ -545,8 +545,6 @@ static unsigned bitcount(bit_t *bits, unsigned len)
     return count;
 }
 
-const size_t Socket::masksize = sizeof(fd_set);
-
 #ifdef  _MSWINDOWS_
 
 static bool _started = false;
@@ -3278,58 +3276,6 @@ int Socket::remote(socket_t sock, struct sockaddr_storage *addr)
 {
     socklen_t slen = sizeof(sockaddr_storage);
     return _getpeername_(sock, (struct sockaddr *)addr, &slen);
-}
-
-int Socket::select(int max, set_t read, set_t write, set_t error)
-{
-    return _select_(max, (fd_set *)read, (fd_set *)write, (fd_set *)error, NULL);
-}
-
-int Socket::select(int max, set_t read, set_t write, set_t error, timeout_t timeout)
-{
-    struct timeval tv;
-    struct timeval *tvp = &tv;
-
-    if(timeout == Timer::inf)
-        tvp = NULL;
-    else {
-        tv.tv_usec = (timeout % 1000) * 1000;
-        tv.tv_sec = timeout / 1000;
-    }
-
-    return _select_(max, (fd_set *)read, (fd_set *)write, (fd_set *)error, tvp);
-}
-
-Socket::set_t Socket::get(void)
-{
-    set_t masking = (set_t)malloc(sizeof(fd_set));
-    clear(masking);
-    return masking;
-}
-
-void Socket::clear(set_t mask)
-{
-    FD_ZERO((fd_set *)mask);
-}
-
-void Socket::set(socket_t sock, set_t mask)
-{
-    FD_SET(sock, (fd_set *)mask);
-}
-
-void Socket::clear(socket_t sock, set_t mask)
-{
-    FD_CLR(sock, (fd_set *)mask);
-}
-
-bool Socket::test(socket_t sock, set_t mask)
-{
-    return FD_ISSET(sock, (fd_set *)mask) != 0;
-}
-
-void Socket::release(set_t mask)
-{
-    free(mask);
 }
 
 String str(Socket& so, strsize_t size)

@@ -329,15 +329,6 @@ public:
     static void release(struct addrinfo *list);
 
     /**
-     * External definition of fd_set type.  This is used to generate
-     * select calls which may be wrapped through an internal function
-     * such as socks proxy or pth library.
-     */
-    typedef void *set_t;
-
-    static const size_t masksize;
-
-    /**
      * A generic socket address class.  This class uses the addrinfo list
      * to store socket multiple addresses in a protocol and family
      * independent manner.  Hence, this address class can be used for ipv4
@@ -1618,65 +1609,6 @@ public:
      * @return 0 on success, -1 on failure.
      */
     static int remote(socket_t socket, struct sockaddr_storage *address);
-
-    /**
-     * Select without timeout.
-     * @param max socket id + 1.
-     * @param read mask of socket id's.
-     * @param write mask of socket id's.
-     * @param error mask of socket id's.
-     */
-    static int select(int max, set_t read, set_t write, set_t error);
-
-    /**
-     * Select with timeout.
-     * @param max socket id + 1.
-     * @param read mask of socket id's.
-     * @param write mask of socket id's.
-     * @param error mask of socket id's.
-     * @param timeout in milliseconds to wait for select activity.
-     */
-    static int select(int max, set_t read, set_t write, set_t error, timeout_t timeout);
-
-    /**
-     * Get a mask from the heap.
-     * @return mask to use, all bits cleared.
-     */
-    static set_t get(void);
-
-    /**
-     * Clear a mask, setting all entries to zero.
-     * @param mask to clear.
-     */
-    static void clear(set_t mask);
-
-    /**
-     * Release a heap allocated mask.
-     * @param mask to release.
-     */
-    static void release(set_t mask);
-
-    /**
-     * Set a socket entry in a mask.
-     * @param socket entry to set.
-     * @param mask to set entry in.
-     */
-    static void set(socket_t socket, set_t mask);
-
-    /**
-     * Clear a socket entry in a mask.
-     * @param socket entry to clear.
-     * @param mask to set entry in.
-     */
-    static void clear(socket_t socket, set_t mask);
-
-    /**
-     * Test a socket entry in a mask.
-     * @param socket entry to test.
-     * @param mask to set entry in.
-     * @return true if entry set.
-     */
-    static bool test(socket_t socket, set_t mask);
 };
 
 /**
