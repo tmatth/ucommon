@@ -2066,7 +2066,7 @@ int Socket::multicast(socket_t so, unsigned ttl)
     }
 }
 
-int Socket::join(struct addrinfo *addr)
+int Socket::join(const struct addrinfo *addr)
 {
     int rtn = Socket::join(so, addr);
     if(rtn)
@@ -2074,7 +2074,7 @@ int Socket::join(struct addrinfo *addr)
     return rtn;
 }
 
-int Socket::drop(struct addrinfo *addr)
+int Socket::drop(const struct addrinfo *addr)
 {
     int rtn = Socket::drop(so, addr);
     if(rtn)
@@ -2154,14 +2154,14 @@ int Socket::disconnect(socket_t so)
     return err;
 }
 
-int Socket::join(socket_t so, struct addrinfo *node)
+int Socket::join(socket_t so, const struct addrinfo *node)
 {
     assert(node != NULL);
 
     struct multicast_internet mcast;
     struct sockaddr_internet addr;
     socklen_t len = sizeof(addr);
-    struct sockaddr_internet *target;
+    const struct sockaddr_internet *target;
     int family;
     int rtn = 0;
 
@@ -2170,7 +2170,7 @@ int Socket::join(socket_t so, struct addrinfo *node)
 
     _getsockname_(so, (struct sockaddr *)&addr, &len);
     while(!rtn && node && node->ai_addr) {
-        target = (struct sockaddr_internet *)node->ai_addr;
+        target = (const struct sockaddr_internet *)node->ai_addr;
         family = node->ai_family;
         node = node->ai_next;
         if(family != addr.address.sa_family)
@@ -2202,14 +2202,14 @@ int Socket::join(socket_t so, struct addrinfo *node)
     return rtn;
 }
 
-int Socket::drop(socket_t so, struct addrinfo *node)
+int Socket::drop(socket_t so, const struct addrinfo *node)
 {
     assert(node != NULL);
 
     struct multicast_internet mcast;
     struct sockaddr_internet addr;
     socklen_t len = sizeof(addr);
-    struct sockaddr_internet *target;
+    const struct sockaddr_internet *target;
     int family;
     int rtn = 0;
 
@@ -2218,7 +2218,7 @@ int Socket::drop(socket_t so, struct addrinfo *node)
 
     _getsockname_(so, (struct sockaddr *)&addr, &len);
     while(!rtn && node && node->ai_addr) {
-        target = (struct sockaddr_internet *)node->ai_addr;
+        target = (const struct sockaddr_internet *)node->ai_addr;
         family = node->ai_family;
         node = node->ai_next;
 
