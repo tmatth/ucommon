@@ -856,7 +856,7 @@ mempager(ps)
 
     paths = pathmax;
     keysize = strmax;
-    count = 0;
+    keycount = 0;
 
     root = (NamedObject **)_alloc(sizeof(NamedObject *) * pathmax);
     memset(root, 0, sizeof(NamedObject *) * pathmax);
@@ -918,7 +918,7 @@ void *keyassoc::remove(const char *id)
     obj = static_cast<LinkedObject*>(kd);
     obj->delist((LinkedObject**)(&root[path]));
     obj->enlist(&list[size / 8]);
-    --count;
+    --keycount;
     _unlock();
     return data;
 }
@@ -957,7 +957,7 @@ void *keyassoc::allocate(const char *id, size_t dsize)
         dp = ((keydata *)(ptr))->data;
     kd = new(ptr) keydata(this, id, paths, 8 + size * 8);
     kd->data = dp;
-    ++count;
+    ++keycount;
     _unlock();
     return dp;
 }
@@ -991,7 +991,7 @@ bool keyassoc::create(const char *id, void *data)
         ptr = (caddr_t)memalloc::_alloc(sizeof(keydata) + size * 8);
     kd = new(ptr) keydata(this, id, paths, 8 + size * 8);
     kd->data = data;
-    ++count;
+    ++keycount;
     _unlock();
     return true;
 }
@@ -1021,7 +1021,7 @@ bool keyassoc::assign(const char *id, void *data)
         if(ptr == NULL)
             ptr = (caddr_t)memalloc::_alloc(sizeof(keydata) + size * 8);
         kd = new(ptr) keydata(this, id, paths, 8 + size * 8);
-        ++count;
+        ++keycount;
     }
     kd->data = data;
     _unlock();

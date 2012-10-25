@@ -463,6 +463,9 @@ public:
     inline const char *operator[](unsigned item) const
         {return get(item);};
 
+    inline const char *at(unsigned item) const
+        {return get(item);};
+
     /**
      * Get root of pager list.  This is useful for externally enumerating
      * the list of strings.
@@ -590,6 +593,9 @@ public:
         {return StringPager::get(item);};
 
     inline const char *get(unsigned item) const
+        {return StringPager::get(item);};
+
+    inline const char *at(unsigned item) const
         {return StringPager::get(item);};
 };
 
@@ -863,7 +869,7 @@ private:
 
     friend class keydata;
 
-    unsigned count;
+    unsigned keycount;
     unsigned paths;
     size_t keysize;
     NamedObject **root;
@@ -896,8 +902,8 @@ public:
      * Get the number of associations we have in our object.
      * @return number of associations stored.
      */
-    inline unsigned getCount(void) const
-        {return count;};
+    inline unsigned count(void) const
+        {return keycount;};
 
     /**
      * Lookup the data pointer of a string by direct operation.
@@ -1002,8 +1008,8 @@ public:
      * Get the count of typed objects stored in our hash map.
      * @return typed objects in map.
      */
-    inline unsigned getCount(void) const
-        {return keyassoc::getCount();};
+    inline unsigned count(void) const
+        {return keyassoc::count();};
 
     /**
      * Purge the hash map of typed objects.
@@ -1083,8 +1089,8 @@ public:
      * Get the count of typed objects stored in our hash map.
      * @return typed objects in map.
      */
-    inline unsigned getCount(void) const
-        {return keyassoc::getCount();}
+    inline unsigned count(void) const
+        {return keyassoc::count();}
 
     /**
      * Purge the hash map of typed objects.
