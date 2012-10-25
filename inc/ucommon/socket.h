@@ -1381,7 +1381,7 @@ public:
      * @param size of buffer to save hostname into.
      * @return buffer or NULL if lookup fails.
      */
-    static char *gethostname(const struct sockaddr *address, char *buffer, size_t size);
+    static char *hostname(const struct sockaddr *address, char *buffer, size_t size);
 
     /**
      * Create an address info lookup hint based on the family and type

@@ -2699,7 +2699,7 @@ unsigned Socket::segsize(socket_t so, unsigned size)
     return size;
 }
 
-char *Socket::gethostname(const struct sockaddr *sa, char *buf, size_t max)
+char *Socket::hostname(const struct sockaddr *sa, char *buf, size_t max)
 {
     assert(sa != NULL);
     assert(buf != NULL);
