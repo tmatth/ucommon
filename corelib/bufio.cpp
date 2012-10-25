@@ -352,7 +352,7 @@ TCPBuffer::~TCPBuffer()
 
 void TCPBuffer::open(const char *host, const char *service, size_t size)
 {
-    struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
+    struct addrinfo *list = Socket::query(host, service, SOCK_STREAM, 0);
     if(!list)
         return;
 

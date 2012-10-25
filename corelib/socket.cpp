@@ -1002,7 +1002,7 @@ void Socket::release(struct addrinfo *list)
         freeaddrinfo(list);
 }
 
-struct ::addrinfo *Socket::getaddress(const char *hp, const char *svc, int type, int protocol)
+struct ::addrinfo *Socket::query(const char *hp, const char *svc, int type, int protocol)
 {
     assert(hp != NULL && *hp != 0);
 
@@ -1085,10 +1085,10 @@ void Socket::address::set(const char *host, unsigned port)
 
     if(port) {
         snprintf(buf, sizeof(buf), "%u", port);
-        list = Socket::getaddress(host, buf);
+        list = Socket::query(host, buf);
     }
     else
-        list = Socket::getaddress(host, NULL);
+        list = Socket::query(host, NULL);
 }
 
 void Socket::address::set(int family, const char *a, int type, int protocol)
@@ -1321,8 +1321,8 @@ void Socket::address::add(struct sockaddr *addr)
     char buffer[80];
     char svc[8];
 
-    Socket::getaddress(addr, buffer, sizeof(buffer));
-    snprintf(svc, sizeof(svc), "%d", Socket::getservice(addr));
+    Socket::query(addr, buffer, sizeof(buffer));
+    snprintf(svc, sizeof(svc), "%d", Socket::service(addr));
     add(buffer, svc, addr->sa_family);
 }
 
@@ -1339,7 +1339,7 @@ void Socket::address::add(const char *host, const char *svc, int socktype)
 
     struct addrinfo *join = NULL, *last = NULL;
 
-    join = Socket::getaddress(host, svc, socktype);
+    join = Socket::query(host, svc, socktype);
     if(!join)
         return;
 
@@ -2886,13 +2886,13 @@ switch(addr->sa_family) {
     case AF_INET6:
         cp = (caddr_t)(&((const struct sockaddr_in6 *)(addr))->sin6_addr);
         len = 16;
-        key = getservice(addr);
+        key = service(addr);
         break;
 #endif
     case AF_INET:
         cp = (caddr_t)(&((const struct sockaddr_in *)(addr))->sin_addr);
         len = 4;
-        key = getservice(addr);
+        key = service(addr);
         break;
     default:
         return 0;
@@ -2904,7 +2904,7 @@ switch(addr->sa_family) {
     return key % keysize;
 }
 
-short Socket::getservice(const struct sockaddr *addr)
+short Socket::service(const struct sockaddr *addr)
 {
     assert(addr != NULL);
 
@@ -2919,7 +2919,7 @@ short Socket::getservice(const struct sockaddr *addr)
     return 0;
 }
 
-char *Socket::getaddress(const struct sockaddr *addr, char *name, socklen_t size)
+char *Socket::query(const struct sockaddr *addr, char *name, socklen_t size)
 {
     assert(addr != NULL);
     assert(name != NULL);
@@ -2975,7 +2975,7 @@ char *Socket::getaddress(const struct sockaddr *addr, char *name, socklen_t size
     return NULL;
 }
 
-int Socket::getinterface(struct sockaddr *iface, const struct sockaddr *dest)
+int Socket::bound(struct sockaddr *iface, const struct sockaddr *dest)
 {
     assert(iface != NULL);
     assert(dest != NULL);

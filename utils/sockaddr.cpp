@@ -71,7 +71,7 @@ PROGRAM_MAIN(argc, argv)
         }
 
         if(port) {
-            Socket::getaddress(*ap, buffer, sizeof(buffer));
+            Socket::query(*ap, buffer, sizeof(buffer));
             printf("%s/%u\n", buffer, port);
         }
 

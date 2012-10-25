@@ -310,7 +310,7 @@ void tcpstream::open(const char *host, const char *service, unsigned mss)
     if(bufsize)
         close();
 
-    struct addrinfo *list = Socket::getaddress(host, service, SOCK_STREAM, 0);
+    struct addrinfo *list = Socket::query(host, service, SOCK_STREAM, 0);
     if(!list)
         return;
 

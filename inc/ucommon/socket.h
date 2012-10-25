@@ -316,7 +316,10 @@ public:
      * @param type of service to get.
      * @param protocol of service to get.
      */
-    static struct addrinfo *getaddress(const char *host, const char *service, int type = SOCK_STREAM, int protocol = 0);
+    static struct addrinfo *query(const char *host, const char *service, int type = SOCK_STREAM, int protocol = 0);
+
+    static inline struct addrinfo *getaddress(const char *host, const char *service, int type = SOCK_STREAM, int protocol = 0)
+        {return query(host, service, type, protocol);}
 
     /**
      * Release an address list directly.  This is used internally by some
@@ -1487,7 +1490,10 @@ public:
      * @param destination address.
      * @return 0 on success, -1 on error.
      */
-    static int getinterface(struct sockaddr *address, const struct sockaddr *destination);
+    static int bound(struct sockaddr *address, const struct sockaddr *destination);
+
+    inline static int getinterface(struct sockaddr *address, const struct sockaddr *destination)
+        {return bound(address, destination);}
 
     /**
      * Get the hostname of a socket address.
@@ -1496,22 +1502,28 @@ public:
      * @param size of hostname buffer.
      * @return buffer if found or NULL if not.
      */
-    static char *getaddress(const struct sockaddr *address, char *buffer, socklen_t size);
+    static char *query(const struct sockaddr *address, char *buffer, socklen_t size);
+
+    static inline char *getaddress(const struct sockaddr *address, char *buffer, socklen_t size)
+        {return query(address, buffer, size);}
 
     /**
      * Get the service port of a socket.
      * @param address of socket to examine.
      * @return service port number.
      */
-    static short getservice(const struct sockaddr *address);
+    static short service(const struct sockaddr *address);
+
+    static inline short getservice(const struct sockaddr *address)
+        {return service(address);}
 
     /**
      * Get the service port of an inet socket.
      * @param address of internet socket to examine.
      * @return service port number.
      */
-    inline static short inetservice(const struct sockaddr_internet *address)
-        {return getservice((struct sockaddr *)address);};
+    inline static short service(const struct sockaddr_internet *address)
+        {return service((const struct sockaddr *)address);};
 
     /**
      * Convert a socket address and service into a hash map index.
