@@ -1044,7 +1044,7 @@ struct ::addrinfo *Socket::getaddress(const char *hp, const char *svc, int type,
         svc = cp;
     }
 
-    if(isNumeric(host)) {
+    if(isnumeric(host)) {
         hint.ai_flags |= AI_NUMERICHOST;
 
         if(strchr(host, ':')) {
@@ -3230,7 +3230,7 @@ int Socket::family(socket_t so)
     return us.inaddr.sin_family;
 }
 
-bool Socket::isNull(const char *str)
+bool Socket::isnull(const char *str)
 {
     assert(str != NULL);
 
@@ -3247,7 +3247,7 @@ bool Socket::isNull(const char *str)
     return true;
 }
 
-bool Socket::isNumeric(const char *str)
+bool Socket::isnumeric(const char *str)
 {
     assert(str != NULL);
 
@@ -3268,13 +3268,13 @@ bool Socket::isNumeric(const char *str)
     return true;
 }
 
-int Socket::getlocal(socket_t sock, struct sockaddr_storage *addr)
+int Socket::local(socket_t sock, struct sockaddr_storage *addr)
 {
     socklen_t slen = sizeof(sockaddr_storage);
     return _getsockname_(sock, (struct sockaddr *)addr, &slen);
 }
 
-int Socket::getremote(socket_t sock, struct sockaddr_storage *addr)
+int Socket::remote(socket_t sock, struct sockaddr_storage *addr)
 {
     socklen_t slen = sizeof(sockaddr_storage);
     return _getpeername_(sock, (struct sockaddr *)addr, &slen);

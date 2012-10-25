@@ -1569,7 +1569,7 @@ public:
      * @param string address to check.
      * @return true if zero/null address.
      */
-    static bool isNull(const char *string);
+    static bool isnull(const char *string);
 
     /**
      * Simple function to validate that a given IP address string is a numeric
@@ -1578,7 +1578,11 @@ public:
      * @param string address to check.
      * @return true if zero/null address.
      */
-    static bool isNumeric(const char *string);
+    static bool isnumeric(const char *string);
+
+    /** depreciated */
+    inline static bool isNumeric(const char *string)
+        {return isnumeric(string);}
 
     /**
      * Get local address to which the socket is bound.  This is defined here
@@ -1588,7 +1592,7 @@ public:
      * @param address storage for local address.
      * @return 0 on success, -1 on failure.
      */
-    static int getlocal(socket_t socket, struct sockaddr_storage *address);
+    static int local(socket_t socket, struct sockaddr_storage *address);
 
     /**
      * Get remote address to which the socket is connected.  This is defined
@@ -1598,7 +1602,7 @@ public:
      * @param address storage for remote address.
      * @return 0 on success, -1 on failure.
      */
-    static int getremote(socket_t socket, struct sockaddr_storage *address);
+    static int remote(socket_t socket, struct sockaddr_storage *address);
 
     /**
      * Select without timeout.
@@ -1711,21 +1715,24 @@ public:
      * @return socket descriptor.
      */
     inline operator socket_t() const
-        {return so;};
+        {return so;}
 
     /**
      * Get the socket descriptor of the listener by pointer reference.
      * @return socket descriptor.
      */
     inline socket_t operator*() const
-        {return so;};
+        {return so;}
 
     /**
      * Get the socket descriptor of the listener.
      * @return socket descriptor.
      */
     inline socket_t getsocket(void) const
-        {return so;};
+        {return so;}
+
+    inline socket_t handle(void) const
+        {return so;}
 
 };
 
@@ -1895,7 +1902,7 @@ inline struct sockaddr *addr(Socket::address& address)
  * @param s2 socket address to compare.
  * @return true if addresses same.
  */
-inline bool eq(struct sockaddr *s1, struct sockaddr *s2)
+inline bool eq(const struct sockaddr *s1, const struct sockaddr *s2)
     {return Socket::equal(s1, s2);}
 
 /**
@@ -1905,8 +1912,8 @@ inline bool eq(struct sockaddr *s1, struct sockaddr *s2)
  * @param s2 stored socket address to compare.
  * @return true if addresses same.
  */
-inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
-    {return Socket::equal((struct sockaddr *)s1, (struct sockaddr *)s2);}
+inline bool eq(const struct sockaddr_storage *s1, const struct sockaddr_storage *s2)
+    {return Socket::equal((const struct sockaddr *)s1, (const struct sockaddr *)s2);}
 
 /**
  * Compare two host addresses to see if equal.  The port numbers are
@@ -1915,11 +1922,11 @@ inline bool eq(struct sockaddr_storage *s1, struct sockaddr_storage *s2)
  * @param s2 socket address to compare.
  * @return true if addresses same.
  */
-inline bool host_eq(struct sockaddr *s1, struct sockaddr *s2)
+inline bool host_eq(const struct sockaddr *s1, const struct sockaddr *s2)
     {return Socket::equalhost(s1, s2);}
 
 // to be depreciated...
-inline bool ieq(struct sockaddr *s1, struct sockaddr *s2)
+inline bool ieq(const struct sockaddr *s1, const struct sockaddr *s2)
     {return Socket::equalhost(s1, s2);}
 
 String str(Socket& so, strsize_t size);
