@@ -104,13 +104,13 @@ Conditional()
 {
     assert(osize > 0 && c > 0);
 
-    size = osize * c;
+    bufsize = osize * c;
     objsize = osize;
-    count = 0;
+    objcount = 0;
     limit = c;
 
     if(osize) {
-        buf = (char *)malloc(size);
+        buf = (char *)malloc(bufsize);
         crit(buf != NULL, "buffer alloc failed");
     }
     else
@@ -126,7 +126,7 @@ Buffer::~Buffer()
     buf = NULL;
 }
 
-unsigned Buffer::getCount(void)
+unsigned Buffer::count(void)
 {
     unsigned bcount = 0;
 
@@ -134,14 +134,14 @@ unsigned Buffer::getCount(void)
     if(tail > head)
         bcount = (unsigned)((size_t)(tail - head) / objsize);
     else if(head > tail)
-        bcount = (unsigned)((((buf + size) - head) + (tail - buf)) / objsize);
+        bcount = (unsigned)((((buf + bufsize) - head) + (tail - buf)) / objsize);
     unlock();
     return bcount;
 }
 
-unsigned Buffer::getSize(void)
+unsigned Buffer::size(void)
 {
-    return size / objsize;
+    return bufsize / objsize;
 }
 
 void *Buffer::get(void)
@@ -149,26 +149,26 @@ void *Buffer::get(void)
     caddr_t dbuf;
 
     lock();
-    while(!count)
+    while(!objcount)
         wait();
     dbuf = head;
     unlock();
     return dbuf;
 }
 
-const void *Buffer::at(unsigned offset)
+void *Buffer::peek(unsigned offset)
 {
     caddr_t dbuf;
 
     lock();
-    if(offset >= count) {
+    if(offset >= objcount) {
         unlock();
         return NULL;
     }
 
     dbuf = head + (objsize * offset);
-    if(dbuf >= buf + size)
-        dbuf -= size;
+    if(dbuf >= buf + bufsize)
+        dbuf -= bufsize;
     unlock();
     return dbuf;
 }
@@ -205,7 +205,7 @@ void *Buffer::get(timeout_t timeout)
         gettimeout(timeout, &ts);
 
     lock();
-    while(!count && rtn) {
+    while(!objcount && rtn) {
         if(timeout == Timer::inf)
             wait();
         else if(timeout)
@@ -213,7 +213,7 @@ void *Buffer::get(timeout_t timeout)
         else
             rtn = false;
     }
-    if(count && rtn)
+    if(objcount && rtn)
         dbuf = head;
     unlock();
     return dbuf;
@@ -223,9 +223,9 @@ void Buffer::release(void)
 {
     lock();
     head += objsize;
-    if(head >= buf + size)
+    if(head >= buf + bufsize)
         head = buf;
-    --count;
+    --objcount;
     signal();
     unlock();
 }
@@ -235,13 +235,13 @@ void Buffer::put(void *dbuf)
     assert(dbuf != NULL);
 
     lock();
-    while(count == limit)
+    while(objcount == limit)
         wait();
     memcpy(tail, dbuf, objsize);
     tail += objsize;
-    if(tail >= (buf + size))
+    if(tail >= (buf + bufsize))
         tail = buf;
-    ++count;
+    ++objcount;
     signal();
     unlock();
 }
@@ -257,7 +257,7 @@ bool Buffer::put(void *dbuf, timeout_t timeout)
         gettimeout(timeout, &ts);
 
     lock();
-    while(count == limit && rtn) {
+    while(objcount == limit && rtn) {
         if(timeout == Timer::inf)
             wait();
         else if(timeout)
@@ -265,12 +265,12 @@ bool Buffer::put(void *dbuf, timeout_t timeout)
         else
             rtn = false;
     }
-    if(rtn && count < limit) {
+    if(rtn && objcount < limit) {
         memcpy(tail, dbuf, objsize);
         tail += objsize;
-        if(tail >= (buf + size))
+        if(tail >= (buf + bufsize))
             tail = 0;
-        ++count;
+        ++objcount;
         signal();
     }
     unlock();
@@ -300,7 +300,7 @@ bool Buffer::operator!()
     return rtn;
 }
 
-queue::member::member(queue *q, ObjectProtocol *o) :
+Queue::member::member(Queue *q, ObjectProtocol *o) :
 OrderedObject(q)
 {
     assert(o != NULL);
@@ -309,7 +309,7 @@ OrderedObject(q)
     object = o;
 }
 
-queue::queue(mempager *p, size_t size) :
+Queue::Queue(mempager *p, size_t size) :
 OrderedIndex(), Conditional()
 {
     assert(size > 0);
@@ -320,7 +320,7 @@ OrderedIndex(), Conditional()
     limit = size;
 }
 
-queue::~queue()
+Queue::~Queue()
 {
     linked_pointer<member> mp;
     OrderedObject *next;
@@ -343,7 +343,7 @@ queue::~queue()
     }
 }
 
-bool queue::remove(ObjectProtocol *o)
+bool Queue::remove(ObjectProtocol *o)
 {
     assert(o != NULL);
 
@@ -367,7 +367,7 @@ bool queue::remove(ObjectProtocol *o)
     return rtn;
 }
 
-ObjectProtocol *queue::lifo(timeout_t timeout)
+ObjectProtocol *Queue::lifo(timeout_t timeout)
 {
     struct timespec ts;
     bool rtn = true;
@@ -388,7 +388,7 @@ ObjectProtocol *queue::lifo(timeout_t timeout)
     }
     if(rtn && tail) {
         --used;
-        member = static_cast<queue::member *>(tail);
+        member = static_cast<Queue::member *>(tail);
         obj = member->object;
         member->delist(this);
         member->LinkedObject::enlist(&freelist);
@@ -399,7 +399,7 @@ ObjectProtocol *queue::lifo(timeout_t timeout)
     return obj;
 }
 
-ObjectProtocol *queue::fifo(timeout_t timeout)
+ObjectProtocol *Queue::fifo(timeout_t timeout)
 {
     bool rtn = true;
     struct timespec ts;
@@ -434,7 +434,7 @@ ObjectProtocol *queue::fifo(timeout_t timeout)
     return obj;
 }
 
-const ObjectProtocol *queue::at(unsigned back)
+ObjectProtocol *Queue::get(unsigned back)
 {
     linked_pointer<member> node;
     ObjectProtocol *obj;
@@ -457,7 +457,7 @@ const ObjectProtocol *queue::at(unsigned back)
     return obj;
 }
 
-bool queue::post(ObjectProtocol *object, timeout_t timeout)
+bool Queue::post(ObjectProtocol *object, timeout_t timeout)
 {
     assert(object != NULL);
 
@@ -500,17 +500,17 @@ bool queue::post(ObjectProtocol *object, timeout_t timeout)
     return true;
 }
 
-size_t queue::getCount(void)
+size_t Queue::count(void)
 {
-    size_t count;
+    size_t qcount;
     lock();
-    count = used;
+    qcount = used;
     unlock();
-    return count;
+    return qcount;
 }
 
 
-stack::member::member(stack *S, ObjectProtocol *o) :
+Stack::member::member(Stack *S, ObjectProtocol *o) :
 LinkedObject((&S->usedlist))
 {
     assert(o != NULL);
@@ -519,7 +519,7 @@ LinkedObject((&S->usedlist))
     object = o;
 }
 
-stack::stack(mempager *p, size_t size) :
+Stack::Stack(mempager *p, size_t size) :
 Conditional()
 {
     assert(size > 0);
@@ -530,7 +530,7 @@ Conditional()
     used = 0;
 }
 
-stack::~stack()
+Stack::~Stack()
 {
     linked_pointer<member> mp;
     LinkedObject *next;
@@ -553,7 +553,7 @@ stack::~stack()
     }
 }
 
-bool stack::remove(ObjectProtocol *o)
+bool Stack::remove(ObjectProtocol *o)
 {
     assert(o != NULL);
 
@@ -577,7 +577,7 @@ bool stack::remove(ObjectProtocol *o)
     return rtn;
 }
 
-const ObjectProtocol *stack::at(unsigned back)
+ObjectProtocol *Stack::get(unsigned back)
 {
     linked_pointer<member> node;
     ObjectProtocol *obj;
@@ -599,7 +599,7 @@ const ObjectProtocol *stack::at(unsigned back)
     return obj;
 }
 
-const ObjectProtocol *stack::peek(timeout_t timeout)
+const ObjectProtocol *Stack::peek(timeout_t timeout)
 {
     bool rtn = true;
     struct timespec ts;
@@ -623,7 +623,7 @@ const ObjectProtocol *stack::peek(timeout_t timeout)
         return NULL;
     }
     if(usedlist) {
-        member = static_cast<stack::member *>(usedlist);
+        member = static_cast<Stack::member *>(usedlist);
         obj = member->object;
     }
     if(rtn)
@@ -632,7 +632,7 @@ const ObjectProtocol *stack::peek(timeout_t timeout)
     return obj;
 }
 
-ObjectProtocol *stack::pull(timeout_t timeout)
+ObjectProtocol *Stack::pull(timeout_t timeout)
 {
     bool rtn = true;
     struct timespec ts;
@@ -656,7 +656,7 @@ ObjectProtocol *stack::pull(timeout_t timeout)
         return NULL;
     }
     if(usedlist) {
-        member = static_cast<stack::member *>(usedlist);
+        member = static_cast<Stack::member *>(usedlist);
         obj = member->object;
         usedlist = member->getNext();
         member->enlist(&freelist);
@@ -667,7 +667,7 @@ ObjectProtocol *stack::pull(timeout_t timeout)
     return obj;
 }
 
-bool stack::push(ObjectProtocol *object, timeout_t timeout)
+bool Stack::push(ObjectProtocol *object, timeout_t timeout)
 {
     assert(object != NULL);
 
@@ -712,13 +712,13 @@ bool stack::push(ObjectProtocol *object, timeout_t timeout)
     return true;
 }
 
-size_t stack::getCount(void)
+size_t Stack::count(void)
 {
-    size_t count;
+    size_t scount;
     lock();
-    count = used;
+    scount = used;
     unlock();
-    return count;
+    return scount;
 }
 
 

@@ -228,19 +228,19 @@ void *mempager::_alloc(size_t size)
     return mem;
 }
 
-objectpager::member::member(LinkedObject **root) :
+ObjectPager::member::member(LinkedObject **root) :
 LinkedObject(root)
 {
     mem = NULL;
 }
 
-objectpager::member::member() :
+ObjectPager::member::member() :
 LinkedObject()
 {
     mem = NULL;
 }
 
-objectpager::objectpager(size_t objsize, size_t size) :
+ObjectPager::ObjectPager(size_t objsize, size_t size) :
 memalloc(size)
 {
     members = 0;
@@ -250,7 +250,7 @@ memalloc(size)
     typesize = objsize;
 }
 
-void *objectpager::get(unsigned index)
+void *ObjectPager::get(unsigned index)
 {
     _lock();
     linked_pointer<member> list = root;
@@ -267,7 +267,7 @@ void *objectpager::get(unsigned index)
     return list->mem;
 }
 
-void objectpager::clear(void)
+void ObjectPager::clear(void)
 {
     memalloc::purge();
     members = 0;
@@ -276,7 +276,7 @@ void objectpager::clear(void)
     index = NULL;
 }
 
-void *objectpager::pull(void)
+void *ObjectPager::pull(void)
 {
     _lock();
     if(!members) {
@@ -298,7 +298,7 @@ void *objectpager::pull(void)
     return result;
 }
 
-void *objectpager::push(void)
+void *ObjectPager::push(void)
 {
     _lock();
     caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
@@ -315,7 +315,7 @@ void *objectpager::push(void)
     return node->mem;
 }
 
-void *objectpager::pop(void)
+void *ObjectPager::pop(void)
 {
     void *out = NULL;
 
@@ -350,7 +350,7 @@ void *objectpager::pop(void)
     return out;
 }
 
-void *objectpager::add(void)
+void *ObjectPager::add(void)
 {
     _lock();
     caddr_t mem = (caddr_t)memalloc::_alloc(sizeof(member));
@@ -369,7 +369,7 @@ void *objectpager::add(void)
     return node->mem;
 }
 
-void **objectpager::list(void)
+void **ObjectPager::list(void)
 {
     _lock();
     void **dp = index;

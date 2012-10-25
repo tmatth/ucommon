@@ -235,7 +235,7 @@ public:
     virtual void *_alloc(size_t size);
 };
 
-class __EXPORT objectpager : protected memalloc
+class __EXPORT ObjectPager : protected memalloc
 {
 public:
     class __EXPORT member : public LinkedObject
@@ -244,19 +244,19 @@ public:
         void *mem;
 
     protected:
-        friend class objectpager;
+        friend class ObjectPager;
 
         inline void set(member *node)
             {next = node;};
+
+        inline void *get(void) const
+            {return mem;};
 
         member(LinkedObject **root);
         member();
 
     public:
         inline void *operator*() const
-            {return mem;};
-
-        inline void *get(void) const
             {return mem;};
     };
 
@@ -268,7 +268,7 @@ private:
     void **index;
 
 protected:
-    objectpager(size_t objsize, size_t pagesize = 256);
+    ObjectPager(size_t objsize, size_t pagesize = 256);
 
     /**
      * Get object from list.  This is useful when objectpager is
@@ -310,20 +310,20 @@ public:
      * the list of strings.
      * @return first member of list or NULL if empty.
      */
-    inline objectpager::member *begin(void)
-        {return static_cast<objectpager::member *>(root);};
+    inline ObjectPager::member *begin(void)
+        {return static_cast<ObjectPager::member *>(root);};
 
-    inline operator bool()
+    inline operator bool() const
         {return members > 0;}
 
-    inline bool operator!()
+    inline bool operator!() const
         {return !members;}
 
     /**
      * Get the number of items in the pager string list.
      * @return number of items stored.
      */
-    inline unsigned count(void)
+    inline unsigned count(void) const
         {return members;};
 
 protected:
@@ -946,46 +946,46 @@ public:
 };
 
 template <class T, size_t P = 0>
-class listof : private objectpager
+class listof : private ObjectPager
 {
 public:
-    inline listof() : objectpager(sizeof(T), P) {};
+    inline listof() : ObjectPager(sizeof(T), P) {};
 
     inline T& operator[](unsigned item) const
-        {return (T&)objectpager::get(item);}
+        {return (T&)ObjectPager::get(item);}
 
     inline T* operator()(unsigned item) const
-        {return (T*)objectpager::get(item);}
+        {return (T*)ObjectPager::get(item);}
 
-    inline T* get(unsigned item) const
-        {return (T*)objectpager::get(item);}
+    inline const T& at(unsigned item) const
+        {return (const T&)ObjectPager::get(item);}
 
     inline T* pull(void)
-        {return (T*)objectpager::pull();}
+        {return (T*)ObjectPager::pull();}
 
     inline T* pop(void)
-        {return (T*)objectpager::pop();}
+        {return (T*)ObjectPager::pop();}
 
     inline operator T**()
-        {return (T**)objectpager::list();}
+        {return (T**)ObjectPager::list();}
 
     inline T** list(void)
-        {return (T**)objectpager::list();}
+        {return (T**)ObjectPager::list();}
 
     inline T* operator++(void)
-        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T; return tmp;}
+        {T* tmp = ObjectPager::add(); if(tmp) new((caddr_t)tmp) T; return tmp;}
 
     inline T* add(const T& object)
-        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
+        {T* tmp = ObjectPager::add(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
 
     inline T* push(const T& object)
-        {T* tmp = objectpager::push(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
+        {T* tmp = ObjectPager::push(); if(tmp) new((caddr_t)tmp) T(object); return tmp;}
 
     inline listof& operator<<(const T& object)
-        {T* tmp = objectpager::add(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
+        {T* tmp = ObjectPager::add(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
 
     inline listof& operator>>(const T& object)
-        {T* tmp = objectpager::push(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
+        {T* tmp = ObjectPager::push(); if(tmp) new((caddr_t)tmp) T(object); return *this;}
 
 };
 

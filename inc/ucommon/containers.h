@@ -88,42 +88,30 @@ public:
  * A thread-safe buffer for serializing and streaming class data.  While
  * the queue and stack operate by managing lists of reference pointers to
  * objects of various mixed kind, the buffer holds physical copies of objects
- * that being passed through it, and all must be the same size.  The buffer
- * class can be used stand-alone or with the typed bufferof template.  The
- * buffer is accessed in fifo order.
+ * that being passed through it, and all must be the same size.  For this
+ * reason the buffer is normally used through the bufferof<type> template
+ * rather than stand-alone.  The buffer is accessed in fifo order.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT Buffer : protected Conditional
 {
 private:
-    size_t size, objsize;
+    size_t bufsize, objsize;
     caddr_t buf, head, tail;
-    unsigned count, limit;
+    unsigned objcount, limit;
 
-public:
+protected:
     /**
      * Create a buffer to hold a series of objects.
      * @param size of each object in buffer.
      * @param count of objects in the buffer.
      */
-    Buffer(size_t size, size_t count);
+    Buffer(size_t typesize, size_t count);
 
     /**
      * Deallocate buffer and unblock any waiting threads.
      */
     virtual ~Buffer();
-
-    /**
-     * Get the size of the buffer.
-     * @return size of the buffer.
-     */
-    unsigned getSize(void);
-
-    /**
-     * Get the number of objects in the buffer currently.
-     * @return number of objects buffered.
-     */
-    unsigned getCount(void);
 
     /**
      * Get the next object from the buffer.
@@ -184,7 +172,20 @@ public:
      * @param item to examine in buffer.
      * @return pointer to item or NULL if invalid item number.
      */
-    const void *at(unsigned item);
+    void *peek(unsigned item);
+
+public:
+    /**
+     * Get the size of the buffer.
+     * @return size of the buffer.
+     */
+    unsigned size(void);
+
+    /**
+     * Get the number of objects in the buffer currently.
+     * @return number of objects buffered.
+     */
+    unsigned count(void);
 
     /**
      * Test if there is data waiting in the buffer.
@@ -209,7 +210,7 @@ public:
  * slow.  If you need primarily lifo, you should use stack instead.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT queue : protected OrderedIndex, protected Conditional
+class __EXPORT Queue : protected OrderedIndex, protected Conditional
 {
 private:
     mempager *pager;
@@ -219,7 +220,7 @@ private:
     class __LOCAL member : public OrderedObject
     {
     public:
-        member(queue *q, ObjectProtocol *obj);
+        member(Queue *q, ObjectProtocol *obj);
         ObjectProtocol *object;
     };
 
@@ -236,12 +237,12 @@ public:
      * @param number of pointers that can be in the queue or 0 for unlimited.
      * size limit.
      */
-    queue(mempager *pager = NULL, size_t number = 0);
+    Queue(mempager *pager = NULL, size_t number = 0);
 
     /**
      * Destroy queue.  If no mempager is used, then frees heap.
      */
-    ~queue();
+    ~Queue();
 
     /**
      * Remove a specific object pointer for the queue.  This can remove
@@ -267,7 +268,7 @@ public:
      * @param number of elements back.
      * @return object in queue or NULL if invalid value.
      */
-    const ObjectProtocol *at(unsigned offset = 0);
+    ObjectProtocol *get(unsigned offset = 0);
 
     /**
      * Get and remove last object posted to the queue.  This can wait for
@@ -291,7 +292,7 @@ public:
      * Get number of object points currently in the queue.
      * @return number of objects in queue.
      */
-    size_t getCount(void);
+    size_t count(void);
 
     /**
      * Convenience function to remove an object from the queue.
@@ -299,7 +300,7 @@ public:
      * @param object to remove.
      * @return true if removed, false if not found.
      */
-    static bool remove(queue& queue, ObjectProtocol *object)
+    static bool remove(Queue& queue, ObjectProtocol *object)
         {return queue.remove(object);};
 
     /**
@@ -309,7 +310,7 @@ public:
      * @param timeout to wait if full.
      * @return true if posted, false if timed out while full.
      */
-    static bool post(queue& queue, ObjectProtocol *object, timeout_t timeout = 0)
+    static bool post(Queue& queue, ObjectProtocol *object, timeout_t timeout = 0)
         {return queue.post(object, timeout);};
 
     /**
@@ -318,7 +319,7 @@ public:
      * @param timeout to wait if empty.
      * @return first object or NULL if timed out empty.
      */
-    static ObjectProtocol *fifo(queue& queue, timeout_t timeout = 0)
+    static ObjectProtocol *fifo(Queue& queue, timeout_t timeout = 0)
         {return queue.fifo(timeout);};
 
     /**
@@ -327,7 +328,7 @@ public:
      * @param timeout to wait if empty.
      * @return last object or NULL if timed out empty.
      */
-    static ObjectProtocol *lifo(queue& queue, timeout_t timeout = 0)
+    static ObjectProtocol *lifo(Queue& queue, timeout_t timeout = 0)
         {return queue.lifo(timeout);};
 
     /**
@@ -335,11 +336,8 @@ public:
      * @param queue to count.
      * @return number of objects in the queue.
      */
-    static size_t count(queue& queue)
-        {return queue.getCount();};
-
-    inline const ObjectProtocol *operator[](unsigned pos)
-        {return at(pos);};
+    static size_t count(Queue& queue)
+        {return queue.count();};
 };
 
 /**
@@ -350,7 +348,7 @@ public:
  * member objects are used to operate the stack.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT stack : protected Conditional
+class __EXPORT Stack : protected Conditional
 {
 private:
     LinkedObject *freelist, *usedlist;
@@ -360,7 +358,7 @@ private:
     class __LOCAL member : public LinkedObject
     {
     public:
-        member(stack *s, ObjectProtocol *obj);
+        member(Stack *s, ObjectProtocol *obj);
         ObjectProtocol *object;
     };
 
@@ -376,12 +374,12 @@ public:
      * @param pager to use for internal member object or NULL to use heap.
      * @param number of pointers that can be in the stack or 0 if unlimited.
      */
-    stack(mempager *pager = NULL, size_t number = 0);
+    Stack(mempager *pager = NULL, size_t number = 0);
 
     /**
      * Destroy queue.  If no pager is used, then frees heap.
      */
-    ~stack();
+    ~Stack();
 
     /**
      * Remove a specific object pointer for the queue.  This can remove
@@ -416,13 +414,13 @@ public:
      * @param offset to stack entry.
      * @return object examined.
      */
-    const ObjectProtocol *at(unsigned offset = 0);
+    ObjectProtocol *get(unsigned offset = 0);
 
     /**
      * Get number of object points currently in the stack.
      * @return number of objects in stack.
      */
-    size_t getCount(void);
+    size_t count(void);
 
     /**
      * Convenience function to remove an object from the stacl.
@@ -430,7 +428,7 @@ public:
      * @param object to remove.
      * @return true if removed, false if not found.
      */
-    static inline bool remove(stack& stack, ObjectProtocol *object)
+    static inline bool remove(Stack& stack, ObjectProtocol *object)
         {return stack.remove(object);};
 
     /**
@@ -440,7 +438,7 @@ public:
      * @param timeout to wait if full.
      * @return true if pusheded, false if timed out while full.
      */
-    static inline bool push(stack& stack, ObjectProtocol *object, timeout_t timeout = 0)
+    static inline bool push(Stack& stack, ObjectProtocol *object, timeout_t timeout = 0)
         {return stack.push(object, timeout);};
 
     /**
@@ -449,7 +447,7 @@ public:
      * @param timeout to wait if empty.
      * @return last object or NULL if timed out empty.
      */
-    static inline ObjectProtocol *pull(stack& stack, timeout_t timeout = 0)
+    static inline ObjectProtocol *pull(Stack& stack, timeout_t timeout = 0)
         {return stack.pull(timeout);};
 
     /**
@@ -457,15 +455,12 @@ public:
      * @param stack to count.
      * @return number of objects in the stack.
      */
-    static inline size_t count(stack& stack)
-        {return stack.getCount();};
-
-    inline const ObjectProtocol *operator[](unsigned pos)
-        {return at(pos);};
+    static inline size_t count(Stack& stack)
+        {return stack.count();};
 
     const ObjectProtocol *peek(timeout_t timeout = 0);
 
-    static inline const ObjectProtocol *peek(stack& stack, timeout_t timeout = 0);
+    static inline const ObjectProtocol *peek(Stack& stack, timeout_t timeout = 0);
 };
 
 /**
@@ -520,8 +515,8 @@ public:
      * Create a buffer to hold a series of typed objects.
      * @param count of typed objects in the buffer.
      */
-    inline bufferof(unsigned count) :
-        Buffer(sizeof(T), count) {};
+    inline bufferof(unsigned capacity) :
+        Buffer(sizeof(T), capacity) {};
 
     /**
      * Get the next typed object from the buffer.  This blocks until an object
@@ -579,8 +574,8 @@ public:
      * @param item in buffer.
      * @return item pointer if valid or NULL.
      */
-    inline const T *at(unsigned item)
-        {return static_cast<const T *>(Buffer::at(item));};
+    inline const T& at(unsigned item)
+        {return static_cast<const T&>(Buffer::peek(item));};
 
     /**
      * Examine past item in the buffer.  This is a typecast of the peek
@@ -588,9 +583,11 @@ public:
      * @param item in buffer.
      * @return item pointer if valid or NULL.
      */
-    inline const T *operator[](unsigned item)
-        {return static_cast<const T *>(queue::at(item));};
+    inline T&operator[](unsigned item)
+        {return static_cast<T&>(Buffer::peek(item));};
 
+    inline T* operator()(unsigned offset = 0)
+        {return static_cast<T*>(Buffer::peek(offset));}
 };
 
 /**
@@ -601,7 +598,7 @@ public:
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 template<class T>
-class stackof : public stack
+class stackof : public Stack
 {
 public:
     /**
@@ -609,7 +606,7 @@ public:
      * @param memory pool for internal use of stack.
      * @param size of stack to construct.  Uses 0 if no size limit.
      */
-    inline stackof(mempager *memory, size_t size = 0) : stack(memory, size) {};
+    inline stackof(mempager *memory, size_t size = 0) : Stack(memory, size) {};
 
     /**
      * Remove a specific typed object pointer for the stack.  This can remove
@@ -619,7 +616,7 @@ public:
      * @return true if object was removed, false if not found.
      */
     inline bool remove(T *object)
-        {return stack::remove(object);};
+        {return Stack::remove(object);};
 
     /**
      * Push a typed object into the stack by it's pointer.  This can wait for
@@ -630,7 +627,7 @@ public:
      * @return true if object pushed, false if queue full and timeout expired.
      */
     inline bool push(T *object, timeout_t timeout = 0)
-        {return stack::push(object);};
+        {return Stack::push(object);};
 
     /**
      * Get and remove last typed object posted to the stack.  This can wait for
@@ -640,7 +637,7 @@ public:
      * @return object from queue or NULL if empty and timed out.
      */
     inline T *pull(timeout_t timeout = 0)
-        {return static_cast<T *>(stack::pull(timeout));};
+        {return static_cast<T *>(Stack::pull(timeout));};
 
     /**
      * Examine last typed object posted to the stack.  This can wait for
@@ -649,7 +646,10 @@ public:
      * @return object in queue or NULL if empty and timed out.
      */
     inline const T *peek(timeout_t timeout = 0)
-        {return static_cast<const T *>(stack::peek(timeout));};
+        {return static_cast<const T *>(Stack::peek(timeout));};
+
+    inline T* operator()(unsigned offset = 0)
+        {return static_cast<T*>(Stack::get(offset));}
 
     /**
      * Examine past item in the stack.  This is a typecast of the peek
@@ -657,8 +657,8 @@ public:
      * @param offset in stack.
      * @return item pointer if valid or NULL.
      */
-    inline const T *at(unsigned offset = 0)
-        {return static_cast<const T *>(stack::at(offset));};
+    inline const T& at(unsigned offset = 0)
+        {return static_cast<const T&>(Stack::get(offset));};
 
     /**
      * Examine past item in the stack.  This is a typecast of the peek
@@ -666,8 +666,8 @@ public:
      * @param offset in stack.
      * @return item pointer if valid or NULL.
      */
-    inline const T *operator[](unsigned offset)
-        {return static_cast<const T *>(stack::at(offset));};
+    inline const T& operator[](unsigned offset)
+        {return static_cast<T&>(Stack::get(offset));};
 
 };
 
@@ -679,7 +679,7 @@ public:
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 template<class T>
-class queueof : public queue
+class queueof : public Queue
 {
 public:
     /**
@@ -687,7 +687,7 @@ public:
      * @param memory pool for internal use by queue.
      * @param size of queue to construct.  Uses 0 if no size limit.
      */
-    inline queueof(mempager *memory, size_t size = 0) : queue(memory, size) {};
+    inline queueof(mempager *memory, size_t size = 0) : Queue(memory, size) {};
 
     /**
      * Remove a specific typed object pointer for the queue.  This can remove
@@ -697,7 +697,7 @@ public:
      * @return true if object was removed, false if not found.
      */
     inline bool remove(T *object)
-        {return queue::remove(object);};
+        {return Queue::remove(object);};
 
     /**
      * Post a typed object into the queue by it's pointer.  This can wait for
@@ -708,7 +708,7 @@ public:
      * @return true if object posted, false if queue full and timeout expired.
      */
     inline bool post(T *object, timeout_t timeout = 0)
-        {return queue::post(object);};
+        {return Queue::post(object);};
 
     /**
      * Get and remove first typed object posted to the queue.  This can wait for
@@ -718,7 +718,7 @@ public:
      * @return object from queue or NULL if empty and timed out.
      */
     inline T *fifo(timeout_t timeout = 0)
-        {return static_cast<T *>(queue::fifo(timeout));};
+        {return static_cast<T *>(Queue::fifo(timeout));};
 
     /**
      * Get and remove last typed object posted to the queue.  This can wait for
@@ -728,7 +728,7 @@ public:
      * @return object from queue or NULL if empty and timed out.
      */
     inline T *lifo(timeout_t timeout = 0)
-        {return static_cast<T *>(queue::lifo(timeout));};
+        {return static_cast<T *>(Queue::lifo(timeout));};
 
     /**
      * Examine past item in the queue.  This is a typecast of the peek
@@ -736,8 +736,8 @@ public:
      * @param offset in queue.
      * @return item pointer if valid or NULL.
      */
-    inline const T *at(unsigned offset = 0)
-        {return static_cast<const T *>(queue::at(offset));};
+    inline const T& at(unsigned offset = 0)
+        {return static_cast<const T&>(Queue::get(offset));};
 
     /**
      * Examine past item in the queue.  This is a typecast of the peek
@@ -745,20 +745,22 @@ public:
      * @param offset in queue.
      * @return item pointer if valid or NULL.
      */
-    inline const T *operator[](unsigned offset)
-        {return static_cast<const T *>(queue::at(offset));};
+    inline T& operator[](unsigned offset)
+        {return static_cast<T&>(Queue::get(offset));};
 
+    inline T* operator()(unsigned offset = 0)
+        {return static_cast<T*>(Queue::get(offset));}
 };
 
 /**
  * Convenience type for using thread-safe object stacks.
  */
-typedef stack stack_t;
+typedef Stack stack_t;
 
 /**
  * Convenience type for using thread-safe object fifo (queue).
  */
-typedef queue fifo_t;
+typedef Queue fifo_t;
 
 /**
  * Convenience function to push an object onto a stack.
