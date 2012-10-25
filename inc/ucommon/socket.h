@@ -927,7 +927,7 @@ public:
      * @param address of peer to send data to if not connected.
      * @return number of bytes actually sent, 0 if none, -1 if error.
      */
-    size_t writeto(const void *data, size_t number, struct sockaddr *address = NULL);
+    size_t writeto(const void *data, size_t number, const struct sockaddr *address = NULL);
 
     /**
      * Read a newline of text data from the socket and save in NULL terminated
@@ -1173,22 +1173,22 @@ public:
      * Get the address family of the socket descriptor.
      * @return address family.
      */
-    static int getfamily(socket_t socket);
+    static int family(socket_t socket);
 
     /**
      * Get the address family of a socket address object.
      * @param address to examine.
      * @return address family.
      */
-    inline static int getfamily(struct sockaddr_storage& address)
-        {return ((struct sockaddr *)&address)->sa_family;};
+    inline static int family(const struct sockaddr_storage& address)
+        {return ((const struct sockaddr *)&address)->sa_family;};
 
     /**
      * Get the address family of an internet socket address object.
      * @param address to examine.
      * @return address family.
      */
-    inline static int getfamily(struct sockaddr_internet& address)
+    inline static int family(const struct sockaddr_internet& address)
         {return address.address.sa_family;};
 
     /**
@@ -1211,7 +1211,7 @@ public:
      * @param address of destination, NULL if connected.
      * @return number of bytes sent, -1 if error.
      */
-    static ssize_t sendto(socket_t socket, const void *buffer, size_t size, int flags = 0, struct sockaddr *address = NULL);
+    static ssize_t sendto(socket_t socket, const void *buffer, size_t size, int flags = 0, const struct sockaddr *address = NULL);
 
     /**
      * Send reply on socket.  Used to reply to a recvfrom message.
@@ -1222,8 +1222,8 @@ public:
      * @param address to reply to.
      * @return number of bytes sent, -1 if error.
      */
-    inline static ssize_t replyto(socket_t socket, const void *buffer, size_t size, int flags, struct sockaddr_storage *address)
-        {return sendto(socket, buffer, size, flags, (struct sockaddr *)address);};
+    inline static ssize_t replyto(socket_t socket, const void *buffer, size_t size, int flags, const struct sockaddr_storage *address)
+        {return sendto(socket, buffer, size, flags, (const struct sockaddr *)address);};
 
     /**
      * Send to internet socket.
@@ -1234,8 +1234,8 @@ public:
      * @param address to send to.
      * @return number of bytes sent, -1 if error.
      */
-    inline static ssize_t sendinet(socket_t socket, const void *buffer, size_t size, int flags, struct sockaddr_internet *address)
-        {return sendto(socket, buffer, size, flags, (struct sockaddr *)address);};
+    inline static ssize_t sendinet(socket_t socket, const void *buffer, size_t size, int flags, const struct sockaddr_internet *address)
+        {return sendto(socket, buffer, size, flags, (const struct sockaddr *)address);};
 
     /**
      * Get internet data waiting in receive queue.
@@ -1265,7 +1265,7 @@ public:
      * @param backlog for service.
      * @return 0 on success, -1 if error.
      */
-    static int listento(socket_t socket, struct sockaddr *address, int backlog = 5);
+    static int listento(socket_t socket, const struct sockaddr *address, int backlog = 5);
 
     /**
      * Bind the socket descriptor to a known interface.
@@ -1273,7 +1273,7 @@ public:
      * @param address of interface to bind to.
      * @return 0 on success, -1 if error.
      */
-    static int bindto(socket_t socket, struct sockaddr *address);
+    static int bindto(socket_t socket, const struct sockaddr *address);
 
     /**
      * Accept a socket connection from a remote host.
@@ -1299,7 +1299,7 @@ public:
      * @param protocol of socket.
      * @return socket descriptor created or INVALID_SOCKET.
      */
-    static socket_t create(struct addrinfo *address, int type, int protocol);
+    static socket_t create(const struct addrinfo *address, int type, int protocol);
 
     /**
      * Create a bound socket for a service.
@@ -1317,7 +1317,7 @@ public:
      * @param address of service for connect.
      * @return socket descriptor.
      */
-    static socket_t create(Socket::address &address);
+    static socket_t create(const Socket::address &address);
 
     /**
      * Release (close) a socket.
@@ -1333,7 +1333,7 @@ public:
      * @param address to send to or NULL if connected.
      * @return number of bytes send, -1 if error.
      */
-    inline static size_t writeto(Socket& socket, const char *buffer, size_t size, struct sockaddr *address)
+    inline static size_t writeto(Socket& socket, const char *buffer, size_t size, const struct sockaddr *address)
         {return socket.writeto(buffer, size, address);};
 
     /**
@@ -1352,7 +1352,7 @@ public:
      * @param socket object to connect.
      * @param address list to connect to.
      */
-    inline static void connectto(Socket& socket, Socket::address &address)
+    inline static void connectto(Socket& socket, const Socket::address &address)
         {socket.connectto(address);};
 
     /**
@@ -1378,7 +1378,7 @@ public:
      * @param size of buffer to save hostname into.
      * @return buffer or NULL if lookup fails.
      */
-    static char *gethostname(struct sockaddr *address, char *buffer, size_t size);
+    static char *gethostname(const struct sockaddr *address, char *buffer, size_t size);
 
     /**
      * Create an address info lookup hint based on the family and type
@@ -1543,9 +1543,9 @@ public:
     /**
      * Set default socket family preference for query options when the
      * socket type is otherwise not specified.
-     * @param query family to select.
+     * @param family to select.
      */
-    static void family(int query);
+    static void query(int family);
 
     /**
      * Set the default socket behavior for v6-v4 mapping.  This also

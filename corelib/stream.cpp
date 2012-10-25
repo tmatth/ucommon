@@ -135,7 +135,7 @@ int StreamProtocol::sync(void)
 tcpstream::tcpstream(const tcpstream &copy) :
 StreamProtocol()
 {
-    so = Socket::create(Socket::getfamily(copy.so), SOCK_STREAM, IPPROTO_TCP);
+    so = Socket::create(Socket::family(copy.so), SOCK_STREAM, IPPROTO_TCP);
     timeout = copy.timeout;
 }
 

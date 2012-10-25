@@ -622,9 +622,9 @@ void Socket::v4mapping(bool enable)
         v6only = 1;
 }
 
-void Socket::family(int query)
+void Socket::query(int querymode)
 {
-    query_family = query;
+    query_family = querymode;
 }
 
 cidr::cidr() :
@@ -1441,7 +1441,7 @@ Socket::Socket(const char *iface, const char *port, int family, int type, int pr
     ioerr = 0;
 }
 
-socket_t Socket::create(Socket::address &address)
+socket_t Socket::create(const Socket::address &address)
 {
     socket_t so;
     struct addrinfo *res = *address;
@@ -1724,7 +1724,7 @@ size_t Socket::readfrom(void *data, size_t len, struct sockaddr_storage *from)
     return (size_t)result;
 }
 
-size_t Socket::writeto(const void *data, size_t len, struct sockaddr *dest)
+size_t Socket::writeto(const void *data, size_t len, const struct sockaddr *dest)
 {
     assert(data != NULL);
     assert(len > 0);
@@ -1741,7 +1741,7 @@ size_t Socket::writeto(const void *data, size_t len, struct sockaddr *dest)
     return (size_t)result;
 }
 
-ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, struct sockaddr *dest)
+ssize_t Socket::sendto(socket_t so, const void *data, size_t len, int flags, const struct sockaddr *dest)
 {
     assert(data != NULL);
     assert(len > 0);
@@ -2252,7 +2252,7 @@ int Socket::drop(socket_t so, const struct addrinfo *node)
     return rtn;
 }
 
-socket_t Socket::create(struct addrinfo *node, int stype, int sprotocol)
+socket_t Socket::create(const struct addrinfo *node, int stype, int sprotocol)
 {
     assert(node != NULL);
 
@@ -2313,7 +2313,7 @@ int Socket::connectto(socket_t so, struct addrinfo *node)
     if(so == INVALID_SOCKET)
         return EBADF;
 
-    socket_family = getfamily(so);
+    socket_family = family(so);
 
     while(node) {
         if(node->ai_family == socket_family) {
@@ -2699,7 +2699,7 @@ unsigned Socket::segsize(socket_t so, unsigned size)
     return size;
 }
 
-char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
+char *Socket::gethostname(const struct sockaddr *sa, char *buf, size_t max)
 {
     assert(sa != NULL);
     assert(buf != NULL);
@@ -2708,7 +2708,7 @@ char *Socket::gethostname(struct sockaddr *sa, char *buf, size_t max)
     socklen_t sl;
 
 #ifdef  AF_UNIX
-    struct sockaddr_un *un = (struct sockaddr_un *)sa;
+    const struct sockaddr_un *un = (const struct sockaddr_un *)sa;
 #endif
 
     switch(sa->sa_family) {
@@ -2769,14 +2769,14 @@ exit:
     return len;
 }
 
-int Socket::bindto(socket_t so, struct sockaddr *iface)
+int Socket::bindto(socket_t so, const struct sockaddr *iface)
 {
     if(!_bind_(so, iface, getlen(iface)))
         return 0;
     return Socket::error();
 }
 
-int Socket::listento(socket_t so, struct sockaddr *iface, int backlog)
+int Socket::listento(socket_t so, const struct sockaddr *iface, int backlog)
 {
     if(_bind_(so, iface, getlen(iface)))
         return Socket::error();
@@ -3212,7 +3212,7 @@ socklen_t Socket::getlen(const struct sockaddr *sa)
     }
 }
 
-int Socket::getfamily(socket_t so)
+int Socket::family(socket_t so)
 {
     assert(so != INVALID_SOCKET);
 
