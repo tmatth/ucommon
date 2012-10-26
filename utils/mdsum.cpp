@@ -106,7 +106,7 @@ static void digest(const char *path = NULL)
             return;
         }
 
-        if(fsys::issys(&ino)) {
+        if(fsys::is_sys(&ino)) {
             result(path, EBADF);
             return;
         }
@@ -147,7 +147,7 @@ static void scan(String path, bool top = true)
             continue;
 
         filepath = str(path) + str("/") + str(filename);
-        if(fsys::isdir(filepath)) {
+        if(fsys::is_dir(filepath)) {
             if(is(recursive) || is(altrecursive))
                 scan(filepath, false);
             else
@@ -190,7 +190,7 @@ PROGRAM_MAIN(argc, argv)
     if(!args())
         digest();
     else while(count < args()) {
-        if(fsys::isdir(args[count]))
+        if(fsys::is_dir(args[count]))
             scan(str(args[count++]));
         else
             digest(args[count++]);

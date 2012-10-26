@@ -714,7 +714,7 @@ bool DirPager::load(const char *path)
     fsys_t ds;
     char buffer[128];
 
-    if(!fsys::isdir(path))
+    if(!fsys::is_dir(path))
         return false;
 
     dir = dup(path);

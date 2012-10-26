@@ -204,7 +204,7 @@ public:
      * Check if date is valid.
      * @return true if julian date is valid.
      */
-    bool isValid(void) const;
+    bool valid(void) const;
 
     /**
      * Casting operator to return date as number.
@@ -336,14 +336,14 @@ public:
      * @return true if date is invalid.
      */
     inline bool operator!() const
-        {return !isValid();};
+        {return !valid();};
 
     /**
      * Check if julian date is valid for is() expression.
      * @return true if date is valid.
      */
     inline operator bool() const
-        {return isValid();};
+        {return valid();};
 };
 
 /**
@@ -468,21 +468,21 @@ public:
      * Check if time object had valid value.
      * @return true if object is valid.
      */
-    bool isValid(void) const;
+    bool valid(void) const;
 
     /**
      * Check if time object has valid value for is() operator.
      * @return true if object is valid.
      */
     inline operator bool() const
-        {return isValid();};
+        {return valid();};
 
     /**
      * Check if time object has valid value for ! operator.
      * @return true if object is not valid.
      */
     inline bool operator!() const
-        {return !isValid();};
+        {return !valid();};
 
     /**
      * Get difference (in seconds) between two times.
@@ -714,7 +714,7 @@ public:
      * Test if object is valid.
      * @return true if object is valid.
      */
-    bool isValid(void) const;
+    bool valid(void) const;
 
     /**
      * Operator to compute number of days between two dates.

@@ -90,7 +90,7 @@ static void zerofill(const char *devname)
         shell::errexit(5, "*** zerofill: %s: %s\n",
             devname, _TEXT("cannot access"));
 
-    if(!fsys::isdisk(&ino))
+    if(!fsys::is_disk(&ino))
         shell::errexit(6, "*** zerofill: %s: %s\n",
             devname, _TEXT("not block device"));
 

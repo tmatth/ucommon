@@ -272,7 +272,7 @@ int fsys::access(const char *path, unsigned mode)
     return 0;
 }
 
-bool fsys::istty(fd_t fd)
+bool fsys::is_tty(fd_t fd)
 {
     if(fd == INVALID_HANDLE_VALUE)
         return false;
@@ -282,7 +282,7 @@ bool fsys::istty(fd_t fd)
     return false;
 }
 
-bool fsys::istty(void)
+bool fsys::is_tty(void)
 {
     error = 0;
     if(fd == INVALID_HANDLE_VALUE)
@@ -695,14 +695,14 @@ int fsys::pipe(fd_t& input, fd_t& output, size_t size)
     return 0;
 }
 
-bool fsys::istty(fd_t fd)
+bool fsys::is_tty(fd_t fd)
 {
     if(isatty(fd))
         return true;
     return false;
 }
 
-bool fsys::istty(void)
+bool fsys::is_tty(void)
 {
     if(isatty(fd))
         return true;
@@ -1241,7 +1241,7 @@ int fsys::load(const char *path)
 #endif
 }
 
-bool fsys::isfile(const char *path)
+bool fsys::is_file(const char *path)
 {
 #ifdef _MSWINDOWS_
     DWORD attr = GetFileAttributes(path);
@@ -1266,7 +1266,7 @@ bool fsys::isfile(const char *path)
 #endif
 }
 
-bool fsys::islink(const char *path)
+bool fsys::is_link(const char *path)
 {
 #if defined(_MSWINDOWS_)
     DWORD attr = GetFileAttributes(path);
@@ -1288,7 +1288,7 @@ bool fsys::islink(const char *path)
 #endif
 }
 
-bool fsys::isdir(const char *path)
+bool fsys::is_dir(const char *path)
 {
 #ifdef _MSWINDOWS_
     DWORD attr = GetFileAttributes(path);
@@ -1479,7 +1479,7 @@ void *fsys::find(mem_t addr, const char *sym)
 
 #endif
 
-bool fsys::ishidden(const char *path)
+bool fsys::is_hidden(const char *path)
 {
 #ifdef  _MSWINDOWS_
     DWORD attr = GetFileAttributes(path);
@@ -1518,7 +1518,7 @@ charfile::~charfile()
     close();
 }
 
-bool charfile::istty(void)
+bool charfile::is_tty(void)
 {
 #ifdef  _MSWINDOWS_
     if(_isatty(_fileno(fp)))

@@ -1477,7 +1477,7 @@ char *shell::getline(const char *prompt, char *buffer, size_t size)
 {
     size_t pos = 0;
 
-    if(!fsys::istty(input()))
+    if(!fsys::is_tty(input()))
         return fgets(buffer, size, stdin);
 
     noecho(1);
@@ -1530,7 +1530,7 @@ char *shell::getpass(const char *prompt, char *buffer, size_t size)
 
 int shell::inkey(const char *prompt)
 {
-    if(!fsys::istty(1))
+    if(!fsys::is_tty(1))
         return 0;
 
     noecho(1);

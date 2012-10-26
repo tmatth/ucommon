@@ -241,7 +241,7 @@ void Date::update(void)
 {
 }
 
-bool Date::isValid(void) const
+bool Date::valid(void) const
 {
     if(julian == 0x7fffffffl)
         return false;
@@ -499,7 +499,7 @@ void Time::set(void)
     DateTime::release(dt);
 }
 
-bool Time::isValid(void) const
+bool Time::valid(void) const
 {
     if(seconds == -1)
         return false;
@@ -785,9 +785,9 @@ void DateTime::set()
     Time::set();
 }
 
-bool DateTime::isValid(void) const
+bool DateTime::valid(void) const
 {
-    return Date::isValid() && Time::isValid();
+    return Date::valid() && Time::valid();
 }
 
 char *DateTime::get(char *buf) const
@@ -925,7 +925,7 @@ bool DateTime::operator>=(const DateTime &d)
 
 bool DateTime::operator!() const
 {
-    return !(Date::isValid() && Time::isValid());
+    return !(Date::valid() && Time::valid());
 }
 
 

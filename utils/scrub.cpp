@@ -106,17 +106,17 @@ static void scrub(const char *path)
 
     int err = fsys::fileinfo(path, &ino);
 
-    if(err == ENOENT || fsys::islink(path)) {
+    if(err == ENOENT || fsys::is_link(path)) {
         report(path, fsys::unlink(path));
         return;
     }
 
-    if(fsys::isdir(&ino)) {
+    if(fsys::is_dir(&ino)) {
         report(path, fsys::removeDir(path));
         return;
     }
 
-    if(err == ENOENT || !ino.st_size || fsys::issys(&ino) || fsys::isdev(&ino)) {
+    if(err == ENOENT || !ino.st_size || fsys::is_sys(&ino) || fsys::is_dev(&ino)) {
         report(path, fsys::remove(path));
         return;
     }
@@ -203,9 +203,9 @@ static void scan(String path, bool top = true)
             continue;
 
         filepath = str(path) + str("/") + str(filename);
-        if(fsys::isdir(filepath)) {
+        if(fsys::is_dir(filepath)) {
             if(is(follow) || is(recursive) || is(altrecursive)) {
-                if(fsys::islink(filepath) && !is(follow))
+                if(fsys::is_link(filepath) && !is(follow))
                     scrub(filepath);
                 else
                     scan(filepath, false);
@@ -251,7 +251,7 @@ PROGRAM_MAIN(argc, argv)
     secure::init();
 
     while(count < args()) {
-        if(fsys::isdir(args[count]))
+        if(fsys::is_dir(args[count]))
             scan(str(args[count++]));
         else
             scrub(args[count++]);

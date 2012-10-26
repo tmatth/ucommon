@@ -58,9 +58,9 @@ static void dirpath(bool middle, String path, bool top = true)
         output(middle, subdir);
         middle = true;
 
-        if(fsys::isdir(*subdir)) {
+        if(fsys::is_dir(*subdir)) {
             if(is(follow) || is(recursive)) {
-                if(!fsys::islink(*subdir) || is(follow))
+                if(!fsys::is_link(*subdir) || is(follow))
                     dirpath(true, subdir, false);
             }
         }
@@ -119,7 +119,7 @@ PROGRAM_MAIN(argc, argv)
     if(is(rflag)) {
         count = args();
         while(count--) {
-            if(fsys::isdir(args[count]) && (is(directory) || is(recursive) || is(follow)))
+            if(fsys::is_dir(args[count]) && (is(directory) || is(recursive) || is(follow)))
                 dirpath(middle, (String)args[count]);
             else
                 output(middle, args[count]);
@@ -127,7 +127,7 @@ PROGRAM_MAIN(argc, argv)
         }
     }
     else while(count < args()) {
-        if(fsys::isdir(args[count]) && (is(directory) || is(recursive) || is(follow)))
+        if(fsys::is_dir(args[count]) && (is(directory) || is(recursive) || is(follow)))
             dirpath(middle, (String)args[count++]);
         else
             output(middle, (String)args[count++]);

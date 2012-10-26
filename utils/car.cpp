@@ -142,7 +142,7 @@ static void encodestream(void)
 
     size_t offset = 6;
 
-    if(fsys::istty(shell::input()))
+    if(fsys::is_tty(shell::input()))
         fputs("car: type your message\n", stderr);
 
     memset(frame, 0, sizeof(frame));
@@ -254,11 +254,11 @@ static void process(void)
             *cp = 0;
             fsys::createDir((char *)(cbuf + 6), 0640);
         }
-        if(fsys::isdir(*path))
+        if(fsys::is_dir(*path))
             shell::errexit(8, "*** %s: %s: %s\n",
                 argv0, *path, _TEXT("output is directory"));
 
-        if(fsys::isfile(*path) && !is(yes)) {
+        if(fsys::is_file(*path) && !is(yes)) {
             string_t prompt = str("overwrite ") + path + " <y/n>? ";
             if(is(quiet))
                 key = 0;
@@ -400,7 +400,7 @@ static void scan(string_t path, string_t prefix)
         else
             name ^= str(filename);
 
-        if(fsys::isdir(filepath)) {
+        if(fsys::is_dir(filepath)) {
             if(is(recursive) || is(altrecursive))
                 scan(filepath, name);
             else
@@ -508,7 +508,7 @@ PROGRAM_MAIN(argc, argv)
     }
 
     while(count < args()) {
-        if(fsys::isdir(args[count]))
+        if(fsys::is_dir(args[count]))
             scan(str(args[count++]), "");
         else {
             const char *cp = args[count++];
