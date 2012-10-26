@@ -424,6 +424,13 @@ public:
             {return get();}
 
         /**
+         * Get the first socket address by casted reference.
+         * @return first socket address we resolved or NULL if none.
+         */
+        inline operator struct sockaddr *() const
+            {return get();};
+
+        /**
          * Get the first socket address of specified family from our list.
          * @param family to seek.
          * @return first socket address of family or NULL if none.
@@ -432,6 +439,14 @@ public:
 
         inline struct sockaddr *operator()(int family) const
             {return get(family);}
+
+        inline operator struct sockaddr_in *() const
+            {return (struct sockaddr_in *)get(AF_INET);}
+
+#ifdef  AF_INET6
+        inline operator struct sockaddr_in6 *() const
+            {return (struct sockaddr_in6 *)get(AF_INET6);}
+#endif
 
         /**
          * Get the family of the first member in a list of services.
@@ -480,12 +495,6 @@ public:
         inline bool operator!() const
             {return list == NULL;};
 
-        /**
-         * Get the first socket address by casted reference.
-         * @return first socket address we resolved or NULL if none.
-         */
-        inline operator struct sockaddr *() const
-            {return get();};
 
         /**
          * Clear current object.
