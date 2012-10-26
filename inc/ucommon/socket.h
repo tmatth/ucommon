@@ -161,7 +161,11 @@ protected:
     int family;
     inethostaddr_t netmask, network;
     char name[16];
-    unsigned getMask(const char *cp) const;
+
+    unsigned mask(const char *cp) const;
+
+    inline unsigned getMask(const char *cp) const
+        {return getMask();}
 
 public:
     /**
@@ -255,13 +259,19 @@ public:
      * Get the broadcast host address represented by our cidr.
      * @return binary broadcast host address.
      */
-    inethostaddr_t getBroadcast(void) const;
+    inethostaddr_t broadcast(void) const;
+
+    inethostaddr_t getBroadcast(void) const
+        {return broadcast();}
 
     /**
      * Get the number of bits in the cidr bitmask.
      * @return bit mask of cidr.
      */
-    unsigned getMask(void) const;
+    unsigned mask(void) const;
+
+    inline unsigned getMask(void) const
+        {return mask();}
 
     /**
      * Set our cidr to a string address.  Replaces prior value.

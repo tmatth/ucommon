@@ -673,7 +673,7 @@ LinkedObject()
     memcpy(&name, &copy.name, sizeof(name));
 }
 
-unsigned cidr::getMask(void) const
+unsigned cidr::mask(void) const
 {
     switch(family)
     {
@@ -761,7 +761,7 @@ bool cidr::isMember(const struct sockaddr *s) const
     }
 }
 
-inethostaddr_t cidr::getBroadcast(void) const
+inethostaddr_t cidr::broadcast(void) const
 {
     inethostaddr_t bcast;
 
@@ -782,7 +782,7 @@ inethostaddr_t cidr::getBroadcast(void) const
     }
 }
 
-unsigned cidr::getMask(const char *cp) const
+unsigned cidr::mask(const char *cp) const
 {
     assert(cp != NULL && *cp != 0);
 
