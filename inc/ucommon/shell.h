@@ -551,7 +551,10 @@ public:
      * @param value of symbol if not found.
      * @return value of symbol.
      */
-    const char *getenv(const char *name, const char *value = NULL);
+    const char *env(const char *name, const char *value = NULL);
+
+    inline const char *getenv(const char *name, const char *value = NULL)
+        {return env(name, value);}
 
     /**
      * Get a local symbol.  This uses getenv if no local symbol is found.
@@ -559,21 +562,27 @@ public:
      * @param value of symbol if not found.
      * @return value of symbol.
      */
-    const char *getsym(const char *name, const char *value = NULL);
+    const char *get(const char *name, const char *value = NULL);
+
+    inline const char *getsym(const char *name, const char *value = NULL)
+        {return get(name, value);}
 
     /**
      * Set a local symbol.
      * @param name of symbol to set.
      * @param value of symbol to set.
      */
-    void setsym(const char *name, const char *value);
+    void set(const char *name, const char *value);
+
+    inline void setsym(const char *name, const char *value)
+        {return set(name, value);}
 
     /**
      * Test if symbol exists.
      * @param name of symbol.
      * @return true if found.
      */
-    bool issym(const char *name);
+    bool is_sym(const char *name);
 
     /**
      * Parse and extract the argv0 filename alone.
