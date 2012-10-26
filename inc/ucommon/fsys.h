@@ -836,6 +836,15 @@ typedef fsys fsys_t;
 
 extern charfile cstdin, cstdout, cstderr;
 
+inline bool is_file(const char *path)
+    {return fsys::is_file(path);}
+
+inline bool is_dir(const char *path)
+    {return fsys::is_dir(path);}
+
+inline bool is_link(const char *path)
+    {return fsys::is_link(path);}
+
 END_NAMESPACE
 
 #endif
