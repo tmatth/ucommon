@@ -814,7 +814,7 @@ public:
      * @param socket descriptor.
      * @return socket type.
      */
-    static int gettype(socket_t socket);
+    static int type(socket_t socket);
 
     /**
      * Set segment size and get MTU.
@@ -830,14 +830,14 @@ public:
      * @param ccid value to set.
      * @return true if success, false if not dccp or not supported ccid used.
      */
-    static bool setccid(socket_t socket, uint8_t ccid);
+    static bool ccid(socket_t socket, uint8_t id);
 
     /**
      * Get the type of a socket.
      * @return socket type.
      */
-    inline int gettype(void)
-        {return gettype(so);};
+    inline int type(void)
+        {return type(so);};
 
     /**
      * Set segment size and get mtu of a socket.
@@ -852,8 +852,8 @@ public:
      * @param ccid to set.
      * @return true if success, false if not dccp or not supported ccid used.
      */
-    inline bool setccid(uint8_t ccid)
-        {return setccid(so, ccid);};
+    inline bool ccid(uint8_t id)
+        {return ccid(so, id);};
 
     /**
      * Set the type of service field of outgoing packets.  Some useful

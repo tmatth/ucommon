@@ -2634,7 +2634,7 @@ struct ::addrinfo *Socket::hinting(socket_t so, struct addrinfo *hint)
     return hint;
 }
 
-int Socket::gettype(socket_t so)
+int Socket::type(socket_t so)
 {
     int sotype;
     socklen_t slen = sizeof(sotype);
@@ -2643,7 +2643,7 @@ int Socket::gettype(socket_t so)
     return sotype;
 }
 
-bool Socket::setccid(socket_t so, uint8_t ccid)
+bool Socket::ccid(socket_t so, uint8_t ccid)
 {
     uint8_t ccids[4];
     socklen_t len = sizeof(ccids);
@@ -2675,7 +2675,7 @@ unsigned Socket::segsize(socket_t so, unsigned size)
     socklen_t alen = sizeof(size);
 #endif
 
-    switch(gettype(so)) {
+    switch(type(so)) {
     case SOCK_STREAM:
 #ifdef  TCP_MAXSEG
         if(size)
