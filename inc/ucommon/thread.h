@@ -553,7 +553,7 @@ public:
     class __EXPORT guard_reader
     {
     private:
-        void *object;
+        const void *object;
 
     public:
         /**
@@ -566,7 +566,7 @@ public:
          * Construct a guard for a specific object.
          * @param object to guard.
          */
-        guard_reader(void *object);
+        guard_reader(const void *object);
 
         /**
          * Release mutex when guard falls out of scope.
@@ -578,7 +578,7 @@ public:
          * held, it is released.
          * @param object to guard.
          */
-        void set(void *object);
+        void set(const void *object);
 
         /**
          * Prematurely release a guard.
@@ -590,7 +590,7 @@ public:
          * held, it is released.
          * @param pointer to object to guard.
          */
-        inline void operator=(void *pointer)
+        inline void operator=(const void *pointer)
             {set(pointer);};
     };
 
@@ -604,7 +604,7 @@ public:
     class __EXPORT guard_writer
     {
     private:
-        void *object;
+        const void *object;
 
     public:
         /**
@@ -617,7 +617,7 @@ public:
          * Construct a guard for a specific object.
          * @param object to guard.
          */
-        guard_writer(void *object);
+        guard_writer(const void *object);
 
         /**
          * Release mutex when guard falls out of scope.
@@ -629,7 +629,7 @@ public:
          * held, it is released.
          * @param object to guard.
          */
-        void set(void *object);
+        void set(const void *object);
 
         /**
          * Prematurely release a guard.
@@ -641,7 +641,7 @@ public:
          * held, it is released.
          * @param pointer to object to guard.
          */
-        inline void operator=(void *pointer)
+        inline void operator=(const void *pointer)
             {set(pointer);};
     };
 
@@ -679,7 +679,7 @@ public:
       * @param timeout in milliseconds to wait for lock.
       * @return true if locked, false if timeout.
       */
-    static bool writer(void *object, timeout_t timeout = Timer::inf);
+    static bool writer(const void *object, timeout_t timeout = Timer::inf);
 
     /**
      * Shared access to an arbitrary object.  This is based on the protect
@@ -688,13 +688,13 @@ public:
      * @param timeout in milliseconds to wait for lock.
      * @return true if shared, false if timeout.
      */
-    static bool reader(void *object, timeout_t timeout = Timer::inf);
+    static bool reader(const void *object, timeout_t timeout = Timer::inf);
 
     /**
      * Release an arbitrary object that has been protected by a rwlock.
      * @param object to release.
      */
-    static void release(void *object);
+    static void release(const void *object);
 
     /**
      * Release the lock.
@@ -1088,7 +1088,7 @@ public:
     class __EXPORT guard
     {
     private:
-        void *object;
+        const void *object;
 
     public:
         /**
@@ -1101,7 +1101,7 @@ public:
          * Construct a guard for a specific object.
          * @param object to guard.
          */
-        guard(void *object);
+        guard(const void *object);
 
         /**
          * Release mutex when guard falls out of scope.
@@ -1113,7 +1113,7 @@ public:
          * held, it is released.
          * @param object to guard.
          */
-        void set(void *object);
+        void set(const void *object);
 
         /**
          * Prematurely release a guard.
@@ -1233,13 +1233,13 @@ public:
      * dynamically managed mutex.
      * @param pointer to protect.
      */
-    static void protect(void *pointer);
+    static void protect(const void *pointer);
 
     /**
      * Specify a pointer/object/resource to release.
      * @param pointer to release.
      */
-    static void release(void *pointer);
+    static void release(const void *pointer);
 };
 
 /**
@@ -1257,7 +1257,7 @@ private:
     inline auto_protect(const auto_object &pointer) {};
 
 protected:
-    void *object;
+    const void *object;
 
     auto_protect();
 
@@ -1266,7 +1266,7 @@ public:
      * Construct a protected pointer referencing an existing object.
      * @param object we point to.
      */
-    auto_protect(void *object);
+    auto_protect(const void *object);
 
     /**
      * Delete protected pointer.  When it falls out of scope the associated
@@ -1299,7 +1299,7 @@ public:
      * pointer references our new object and that new object is locked.
      * @param object to assign to.
      */
-    void operator=(void *object);
+    void operator=(const void *object);
 };
 
 /**

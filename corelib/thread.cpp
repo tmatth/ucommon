@@ -45,7 +45,7 @@ struct mutex_entry
 {
     pthread_mutex_t mutex;
     struct mutex_entry *next;
-    void *pointer;
+    const void *pointer;
     unsigned count;
 };
 
@@ -54,7 +54,7 @@ class __LOCAL rwlock_entry : public ThreadLock
 public:
     rwlock_entry();
     rwlock_entry *next;
-    void *object;
+    const void *object;
     unsigned count;
 };
 
@@ -132,24 +132,24 @@ inline pthread_t pthread_self(void)
 
 #endif
 
-static unsigned hash_address(void *ptr, unsigned indexing)
+static unsigned hash_address(const void *ptr, unsigned indexing)
 {
     assert(ptr != NULL);
 
     unsigned key = 0;
     unsigned count = 0;
-    unsigned char *addr = (unsigned char *)(&ptr);
+    const unsigned char *addr = (unsigned char *)(&ptr);
 
     if(indexing < 2)
         return 0;
 
     // skip lead zeros if little endian...
-    while(count < sizeof(void *) && *addr == 0) {
+    while(count < sizeof(const void *) && *addr == 0) {
         ++count;
         ++addr;
     }
 
-    while(count++ < sizeof(void *) && *addr)
+    while(count++ < sizeof(const void *) && *addr)
         key = (key << 1) ^ *(addr++);
 
     return key % indexing;
@@ -921,7 +921,7 @@ auto_protect::auto_protect()
     object = NULL;
 }
 
-auto_protect::auto_protect(void *obj)
+auto_protect::auto_protect(const void *obj)
 {
     object = obj;
     if(object)
@@ -941,7 +941,7 @@ void auto_protect::release()
     }
 }
 
-void auto_protect::operator=(void *obj)
+void auto_protect::operator=(const void *obj)
 {
     if(obj == object)
         return;
@@ -957,7 +957,7 @@ Mutex::guard::guard()
     object = NULL;
 }
 
-Mutex::guard::guard(void *obj)
+Mutex::guard::guard(const void *obj)
 {
     object = obj;
     if(obj)
@@ -969,7 +969,7 @@ Mutex::guard::~guard()
     release();
 }
 
-void Mutex::guard::set(void *obj)
+void Mutex::guard::set(const void *obj)
 {
     release();
     object = obj;
@@ -1020,7 +1020,7 @@ ThreadLock::guard_reader::guard_reader()
     object = NULL;
 }
 
-ThreadLock::guard_reader::guard_reader(void *obj)
+ThreadLock::guard_reader::guard_reader(const void *obj)
 {
     object = obj;
     if(obj)
@@ -1033,7 +1033,7 @@ ThreadLock::guard_reader::~guard_reader()
     release();
 }
 
-void ThreadLock::guard_reader::set(void *obj)
+void ThreadLock::guard_reader::set(const void *obj)
 {
     release();
     object = obj;
@@ -1055,7 +1055,7 @@ ThreadLock::guard_writer::guard_writer()
     object = NULL;
 }
 
-ThreadLock::guard_writer::guard_writer(void *obj)
+ThreadLock::guard_writer::guard_writer(const void *obj)
 {
     object = obj;
     if(obj)
@@ -1068,7 +1068,7 @@ ThreadLock::guard_writer::~guard_writer()
     release();
 }
 
-void ThreadLock::guard_writer::set(void *obj)
+void ThreadLock::guard_writer::set(const void *obj)
 {
     release();
     object = obj;
@@ -1085,7 +1085,7 @@ void ThreadLock::guard_writer::release(void)
     }
 }
 
-bool ThreadLock::reader(void *ptr, timeout_t timeout)
+bool ThreadLock::reader(const void *ptr, timeout_t timeout)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry, *empty = NULL;
@@ -1122,7 +1122,7 @@ bool ThreadLock::reader(void *ptr, timeout_t timeout)
     return false;
 }
 
-bool ThreadLock::writer(void *ptr, timeout_t timeout)
+bool ThreadLock::writer(const void *ptr, timeout_t timeout)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry, *empty = NULL;
@@ -1159,7 +1159,7 @@ bool ThreadLock::writer(void *ptr, timeout_t timeout)
     return false;
 }
 
-void Mutex::protect(void *ptr)
+void Mutex::protect(const void *ptr)
 {
     mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
     mutex_entry *entry, *empty = NULL;
@@ -1194,7 +1194,7 @@ void Mutex::protect(void *ptr)
     pthread_mutex_lock(&entry->mutex);
 }
 
-void ThreadLock::release(void *ptr)
+void ThreadLock::release(const void *ptr)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry;
@@ -1218,7 +1218,7 @@ void ThreadLock::release(void *ptr)
     index->release();
 }
 
-void Mutex::release(void *ptr)
+void Mutex::release(const void *ptr)
 {
     mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
     mutex_entry *entry;
