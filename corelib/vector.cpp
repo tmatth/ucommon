@@ -498,7 +498,7 @@ ReusableObject *ArrayReuse::get(timeout_t timeout)
     ReusableObject *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(!freelist && used >= limit && rtn) {
@@ -624,7 +624,7 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
     ReusableObject *obj;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && limit && count >= limit) {

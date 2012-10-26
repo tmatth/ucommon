@@ -49,7 +49,7 @@ LinkedObject *LinkedAllocator::get(timeout_t timeout)
     LinkedObject *node = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(!freelist && rtn) {
@@ -202,7 +202,7 @@ void *Buffer::get(timeout_t timeout)
     bool rtn = true;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(!objcount && rtn) {
@@ -254,7 +254,7 @@ bool Buffer::put(void *dbuf, timeout_t timeout)
     struct timespec ts;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(objcount == limit && rtn) {
@@ -375,7 +375,7 @@ ObjectProtocol *Queue::lifo(timeout_t timeout)
     ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(!tail && rtn) {
@@ -407,7 +407,7 @@ ObjectProtocol *Queue::fifo(timeout_t timeout)
     ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && !head) {
@@ -466,7 +466,7 @@ bool Queue::post(ObjectProtocol *object, timeout_t timeout)
     LinkedObject *mem;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && limit && used == limit) {
@@ -607,7 +607,7 @@ const ObjectProtocol *Stack::peek(timeout_t timeout)
     ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && !usedlist) {
@@ -640,7 +640,7 @@ ObjectProtocol *Stack::pull(timeout_t timeout)
     ObjectProtocol *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && !usedlist) {
@@ -676,7 +676,7 @@ bool Stack::push(ObjectProtocol *object, timeout_t timeout)
     LinkedObject *mem;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && limit && used == limit) {

@@ -185,7 +185,7 @@ void ConditionalAccess::limit_sharing(unsigned max)
     max_sharing = max;
 }
 
-void Conditional::gettimeout(timeout_t msec, struct timespec *ts)
+void Conditional::set(struct timespec *ts, timeout_t msec)
 {
     assert(ts != NULL);
 
@@ -247,7 +247,7 @@ bool Semaphore::wait(timeout_t timeout)
 {
     bool result = true;
     struct timespec ts;
-    gettimeout(timeout, &ts);
+    Conditional::set(&ts, timeout);
 
     lock();
     while(used >= count && result) {
@@ -487,7 +487,7 @@ Conditional::~Conditional()
 bool Conditional::wait(timeout_t timeout)
 {
     struct timespec ts;
-    gettimeout(timeout, &ts);
+    set(&ts, timeout);
     return wait(&ts);
 }
 
@@ -664,7 +664,7 @@ ConditionalAccess::~ConditionalAccess()
 bool ConditionalAccess::waitSignal(timeout_t timeout)
 {
     struct timespec ts;
-    gettimeout(timeout, &ts);
+    set(&ts, timeout);
     return waitSignal(&ts);
 }
 
@@ -681,7 +681,7 @@ bool ConditionalAccess::waitBroadcast(struct timespec *ts)
 bool ConditionalAccess::waitBroadcast(timeout_t timeout)
 {
     struct timespec ts;
-    gettimeout(timeout, &ts);
+    set(&ts, timeout);
     return waitBroadcast(&ts);
 }
 
@@ -801,7 +801,7 @@ bool RecursiveMutex::lock(timeout_t timeout)
 {
     bool result = true;
     struct timespec ts;
-    gettimeout(timeout, &ts);
+    set(&ts, timeout);
 
     Conditional::lock();
     while(result && lockers) {
@@ -902,7 +902,7 @@ bool ThreadLock::modify(timeout_t timeout)
     struct timespec ts;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while((writers || sharing) && rtn) {
@@ -933,7 +933,7 @@ bool ThreadLock::access(timeout_t timeout)
     bool rtn = true;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while((writers || pending) && rtn) {
@@ -1482,7 +1482,7 @@ bool TimedEvent::sync(void)
     if(!timeout)
         return false;
 
-    Conditional::gettimeout(timeout, &ts);
+    Conditional::set(&ts, timeout);
 
     if(pthread_cond_timedwait(&cond, &mutex, &ts) == ETIMEDOUT)
         return false;

@@ -536,7 +536,7 @@ ReusableObject *MappedReuse::getTimed(timeout_t timeout)
     ReusableObject *obj = NULL;
 
     if(timeout && timeout != Timer::inf)
-        gettimeout(timeout, &ts);
+        set(&ts, timeout);
 
     lock();
     while(rtn && (!freelist || (freelist && reading)) && used >= size) {

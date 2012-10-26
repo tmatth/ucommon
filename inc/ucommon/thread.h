@@ -197,10 +197,10 @@ public:
     /**
      * Convert a millisecond timeout into use for high resolution
      * conditional timers.
+     * @param hires timespec representation to set.
      * @param timeout to convert.
-     * @param hires timespec representation to fill.
      */
-    static void gettimeout(timeout_t timeout, struct timespec *hires);
+    static void set(struct timespec *hires, timeout_t timeout);
 };
 
 /**
@@ -253,11 +253,11 @@ protected:
     /**
      * Convert a millisecond timeout into use for high resolution
      * conditional timers.
+     * @param hires timespec representation to set.
      * @param timeout to convert.
-     * @param hires timespec representation to fill.
      */
-    inline static void gettimeout(timeout_t timeout, struct timespec *hires)
-        {Conditional::gettimeout(timeout, hires);};
+    inline static void set(struct timespec *hires, timeout_t timeout)
+        {Conditional::set(hires, timeout);};
 
 
 #ifdef  _MSWINDOWS_
