@@ -1394,7 +1394,7 @@ public:
      * @param hint buffer.
      * @return hint buffer.
      */
-    static struct addrinfo *gethint(socket_t socket, struct addrinfo *hint);
+    static struct addrinfo *hinting(socket_t socket, struct addrinfo *hint);
 
     /**
      * Lookup a host name and service address based on the addressing family

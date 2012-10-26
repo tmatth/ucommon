@@ -2613,7 +2613,7 @@ ListenSocket(address, service, backlog)
 #undef  AF_UNIX
 #endif
 
-struct ::addrinfo *Socket::gethint(socket_t so, struct addrinfo *hint)
+struct ::addrinfo *Socket::hinting(socket_t so, struct addrinfo *hint)
 {
     assert(hint != NULL);
 
@@ -2752,7 +2752,7 @@ socklen_t Socket::query(socket_t so, struct sockaddr_storage *sa, const char *ho
         return unixaddr((struct sockaddr_un *)sa, host);
 #endif
 
-    if(!gethint(so, &hint) || !svc)
+    if(!hinting(so, &hint) || !svc)
         return 0;
 
     if(getaddrinfo(host, svc, &hint, &res) || !res)
@@ -2805,7 +2805,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
     };
 #endif
 
-    if(!gethint(so, &hint) || !svc)
+    if(!hinting(so, &hint) || !svc)
         return ENOSYS;
 
     hint.ai_protocol = protocol;
