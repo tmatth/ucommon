@@ -435,11 +435,11 @@ PROGRAM_MAIN(argc, argv)
     if(!secure::init())
         shell::errexit(1, "*** %s: %s\n", argv0, _TEXT("not supported"));
 
-    if(!Digest::is(*hash))
+    if(!Digest::has(*hash))
         shell::errexit(2, "*** %s: %s: %s\n",
             argv0, *hash, _TEXT("unkown or unsupported digest method"));
 
-    if(!Cipher::is(*algo))
+    if(!Cipher::has(*algo))
         shell::errexit(2, "*** %s: %s: %s\n",
             argv0, *algo, _TEXT("unknown or unsupported cipher method"));
 
@@ -476,7 +476,7 @@ PROGRAM_MAIN(argc, argv)
                 argv0, args[0], _TEXT("cannot open or access"));
 
         const char *ext = strrchr(args[0], '.');
-        if(case_eq(ext, ".car"))
+        if(eq_case(ext, ".car"))
             binarydecode(fp, args[0]);
         else
             streamdecode(fp, args[0]);
@@ -493,7 +493,7 @@ PROGRAM_MAIN(argc, argv)
 
     // if we are outputting to a car file, do it in binary
     ext = strrchr(*out, '.');
-    if(case_eq(ext, ".car"))
+    if(eq_case(ext, ".car"))
         header();
 
     if(!binary && !is(noheader)) {

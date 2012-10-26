@@ -1468,7 +1468,7 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    static bool equalhost(const struct sockaddr *address1, const struct sockaddr *address2);
+    static bool eq_host(const struct sockaddr *address1, const struct sockaddr *address2);
 
     /**
      * Compare socket addresses.  Test if the stored addresses received match.
@@ -1477,7 +1477,7 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    inline static bool equalfrom(const struct sockaddr_storage *address1, const struct sockaddr_storage *address2)
+    inline static bool eq_from(const struct sockaddr_storage *address1, const struct sockaddr_storage *address2)
         {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);};
 
     /**
@@ -1487,7 +1487,7 @@ public:
      * @param address2 to compare.
      * @return true if same family and equal.
      */
-    inline static bool equalinet(const struct sockaddr_internet *address1, const struct sockaddr_internet *address2)
+    inline static bool eq_inet(const struct sockaddr_internet *address1, const struct sockaddr_internet *address2)
         {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);};
 
     /**
@@ -1497,7 +1497,7 @@ public:
      * @param address2 to test.
      * @return true if in same subnet.
      */
-    static bool equalsubnet(const struct sockaddr *address1, const struct sockaddr *address2);
+    static bool eq_subnet(const struct sockaddr *address1, const struct sockaddr *address2);
 
     /**
      * Get the socket address of the interface needed to reach a destination
@@ -1887,12 +1887,11 @@ inline bool eq(const struct sockaddr_storage *s1, const struct sockaddr_storage 
  * @param s2 socket address to compare.
  * @return true if addresses same.
  */
-inline bool host_eq(const struct sockaddr *s1, const struct sockaddr *s2)
-    {return Socket::equalhost(s1, s2);}
+inline bool eq_host(const struct sockaddr *s1, const struct sockaddr *s2)
+    {return Socket::eq_host(s1, s2);}
 
-// to be depreciated...
-inline bool ieq(const struct sockaddr *s1, const struct sockaddr *s2)
-    {return Socket::equalhost(s1, s2);}
+inline bool eq_subnet(const struct sockaddr *s1, const struct sockaddr *s2)
+    {return Socket::eq_subnet(s1, s2);}
 
 String str(Socket& so, strsize_t size);
 

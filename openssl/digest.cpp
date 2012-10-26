@@ -40,7 +40,7 @@ Digest::~Digest()
     release();
 }
 
-bool Digest::is(const char *id)
+bool Digest::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
 }
@@ -52,7 +52,7 @@ void Digest::set(const char *type)
     release();
 
     // never use sha0
-    if(case_eq(type, "sha"))
+    if(eq_case(type, "sha"))
         type = "sha1";
 
     hashtype = (void *)EVP_get_digestbyname(type);
@@ -166,7 +166,7 @@ void Digest::uuid(char *str, const char *name, const unsigned char *ns)
 {
     unsigned mask = 0x50;
     const char *type = "sha1";
-    if(!is("sha1")) {
+    if(!has("sha1")) {
         mask = 0x30;
         type = "md5";
     }

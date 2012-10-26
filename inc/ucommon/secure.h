@@ -187,7 +187,7 @@ public:
      * Determine if the current security context is valid.
      * @return true if valid, -1 if not.
      */
-    inline bool is(void)
+    inline bool is_valid(void) const
         {return error == OK;};
 
     /**
@@ -208,6 +208,13 @@ public:
     template <typename T>
     inline static void erase(T *object)
         {memset(object, 0, sizeof(object)); delete object;}
+
+    inline operator bool()
+        {return is_valid();}
+
+    inline bool operator!()
+        {return !is_valid();}
+
 };
 
 /**
@@ -423,7 +430,7 @@ public:
      * @param name of cipher to check.
      * @return true if supported, false if not.
      */
-    static bool is(const char *name);
+    static bool has(const char *name);
 };
 
 /**
@@ -511,7 +518,7 @@ public:
      * @param name of digest we want to check.
      * @return true if supported, false if not.
      */
-    static bool is(const char *name);
+    static bool has(const char *name);
 
     static void uuid(char *string, const char *name, const unsigned char *ns = NULL);
 

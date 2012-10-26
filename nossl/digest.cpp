@@ -40,12 +40,12 @@ Digest::~Digest()
     release();
 }
 
-bool Digest::is(const char *id)
+bool Digest::has(const char *id)
 {
-    if(case_eq(id, "md5"))
+    if(eq_case(id, "md5"))
         return true;
 
-    if(case_eq(id, "sha1") || case_eq(id, "sha"))
+    if(eq_case(id, "sha1") || eq_case(id, "sha"))
         return true;
 
     return false;
@@ -55,12 +55,12 @@ void Digest::set(const char *type)
 {
     release();
 
-    if(case_eq(type, "md5")) {
+    if(eq_case(type, "md5")) {
         hashtype = "m";
         context = new MD5_CTX;
         MD5Init((MD5_CTX*)context);
     }
-    else if(case_eq(type, "sha") || case_eq(type, "sha1")) {
+    else if(eq_case(type, "sha") || eq_case(type, "sha1")) {
         hashtype = "s";
         context = new SHA1_CTX;
         SHA1Init((SHA1_CTX*)context);
@@ -220,7 +220,7 @@ void Digest::uuid(char *str, const char *name, const unsigned char *ns)
 {
     unsigned mask = 0x50;
     const char *type = "sha1";
-    if(!is("sha1")) {
+    if(!has("sha1")) {
         mask = 0x30;
         type = "md5";
     }

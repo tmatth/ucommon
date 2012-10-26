@@ -3026,7 +3026,7 @@ int Socket::network(struct sockaddr *iface, const struct sockaddr *dest)
     return rtn;
 }
 
-bool Socket::equalsubnet(const struct sockaddr *s1, const struct sockaddr *s2)
+bool Socket::eq_subnet(const struct sockaddr *s1, const struct sockaddr *s2)
 {
     assert(s1 != NULL && s2 != NULL);
 
@@ -3091,7 +3091,7 @@ unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
     return 0;
 }
 
-bool Socket::equalhost(const struct sockaddr *s1, const struct sockaddr *s2)
+bool Socket::eq_host(const struct sockaddr *s1, const struct sockaddr *s2)
 {
     assert(s1 != NULL && s2 != NULL);
 

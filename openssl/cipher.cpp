@@ -86,7 +86,7 @@ void Cipher::Key::set(const char *cipher, const char *digest)
     set(cipher);
 
     // never use sha0...
-    if(case_eq(digest, "sha"))
+    if(eq_case(digest, "sha"))
         digest = "sha1";
 
     hashtype = EVP_get_digestbyname(digest);
@@ -144,7 +144,7 @@ Cipher::~Cipher()
     release();
 }
 
-bool Cipher::is(const char *id)
+bool Cipher::has(const char *id)
 {
     // make sure cipher-bitsize forms without -mode do not fail...
     char algoname[64];

@@ -1169,7 +1169,7 @@ public:
      * @param text2 to test.
      * @return true if equal.
      */
-    static bool case_equal(const char *text1, const char *text2);
+    static bool eq_case(const char *text1, const char *text2);
 
     /**
      * Depreciated case insensitive string comparison function.
@@ -1187,7 +1187,7 @@ public:
      * @param size limit of strings to compare.
      * @return true if equal.
      */
-    static bool case_equal(const char *text1, const char *text2, size_t size);
+    static bool eq_case(const char *text1, const char *text2, size_t size);
 
     /**
      * Return start of string after characters to trim from beginning.
@@ -1873,15 +1873,11 @@ inline bool ge(String &s1, const char *s2)
  * @param s2 string to compare.
  * @return true if equal.
  */
-inline bool case_eq(char const *s1, char const *s2)
-    {return String::case_equal(s1, s2);}
+inline bool eq_case(char const *s1, char const *s2)
+    {return String::eq_case(s1, s2);}
 
-inline bool case_ne(char const *s1, char const *s2)
-    {return !String::case_equal(s1, s2);}
-
-// to be depreciated...
-inline bool ieq(char const *s1, char const *s2)
-    {return String::case_equal(s1, s2);}
+inline bool ne_case(char const *s1, char const *s2)
+    {return !String::eq_case(s1, s2);}
 
 /**
  * Compare two null terminated strings if equal for a specified size
@@ -1891,11 +1887,8 @@ inline bool ieq(char const *s1, char const *s2)
  * @param size of string to compare.
  * @return true if equal.
  */
-inline bool case_eq(char const *s1, char const *s2, size_t size)
-    {return String::case_equal(s1, s2, size);}
-
-inline bool ieq(char const *s1, char const *s2, size_t size)
-    {return String::case_equal(s1, s2, size);}
+inline bool eq_case(char const *s1, char const *s2, size_t size)
+    {return String::eq_case(s1, s2, size);}
 
 inline String str(const char *string)
     {return (String)string;}

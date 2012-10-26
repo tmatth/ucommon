@@ -546,25 +546,25 @@ void Process::setScheduler(const char *pol)
 #endif
 
 #ifdef  SCHED_RR
-        if(ucommon::case_eq(pol, "rr"))
+        if(ucommon::eq_case(pol, "rr"))
             policy = SCHED_RR;
 #endif
 #if !defined(SCHED_RR) && defined(SCHED_FIFO)
-        if(ucommon::case_eq(pol, "rr"))
+        if(ucommon::eq_case(pol, "rr"))
             policy = SCHED_FIFO;
 #endif
 #ifdef  SCHED_FIFO
-        if(ucommon::case_eq(pol, "fifo")) {
+        if(ucommon::eq_case(pol, "fifo")) {
             rtflag = true;
             policy = SCHED_FIFO;
         }
 #endif
 #ifdef  SCHED_TS
-        if(ucommon::case_eq(pol, "ts"))
+        if(ucommon::eq_case(pol, "ts"))
             policy = SCHED_TS;
 #endif
 #ifdef  SCHED_OTHER
-        if(ucommon::case_eq(pol, "other"))
+        if(ucommon::eq_case(pol, "other"))
             policy = SCHED_OTHER;
 #endif
     }

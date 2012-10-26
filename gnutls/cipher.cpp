@@ -205,7 +205,7 @@ void Cipher::release(void)
     }
 }
 
-bool Cipher::is(const char *cipher)
+bool Cipher::has(const char *cipher)
 {
     // eliminate issues with algo-size-mode formed algo strings...
 

@@ -57,7 +57,7 @@ void Digest::set(const char *type)
 
     release();
 
-    if(case_eq(type, "sha"))
+    if(eq_case(type, "sha"))
         type = "sha1";
 
     hashid = gcry_md_map_name(type);
@@ -67,9 +67,9 @@ void Digest::set(const char *type)
     gcry_md_open((MD_CTX *)&context, hashid, 0);
 }
 
-bool Digest::is(const char *type)
+bool Digest::has(const char *type)
 {
-    if(case_eq(type, "sha"))
+    if(eq_case(type, "sha"))
         type = "sha1";
 
     return gcry_md_map_name(type) != GCRY_MD_NONE;
@@ -168,7 +168,7 @@ void Digest::uuid(char *str, const char *name, const unsigned char *ns)
 {
     unsigned mask = 0x50;
     const char *type = "sha1";
-    if(!is("sha1")) {
+    if(!has("sha1")) {
         mask = 0x30;
         type = "md5";
     }

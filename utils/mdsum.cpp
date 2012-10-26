@@ -177,14 +177,14 @@ PROGRAM_MAIN(argc, argv)
     }
 
     secure::init();
-    if(!Digest::is(*hash))
+    if(!Digest::has(*hash))
         shell::errexit(2, "*** %s: %s: %s\n",
             argv0, *hash, _TEXT("unkown or unsupported digest method"));
 
     md = *hash;
 
     // we can symlink md as md5, etc, to set alternate default digest names
-    if(!is(hash) && Digest::is(argv0))
+    if(!is(hash) && Digest::has(argv0))
         md = argv0;
 
     if(!args())

@@ -1839,7 +1839,7 @@ char *String::rfind(char *str, const char *clist)
     return NULL;
 }
 
-bool String::case_equal(const char *s1, const char *s2)
+bool String::eq_case(const char *s1, const char *s2)
 {
     if(!s1)
         s1 = "";
@@ -1884,7 +1884,7 @@ int String::case_compare(const char *s1, const char *s2, size_t size)
 #endif
 }
 
-bool String::case_equal(const char *s1, const char *s2, size_t size)
+bool String::eq_case(const char *s1, const char *s2, size_t size)
 {
     if(!s1)
         s1 = "";

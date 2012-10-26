@@ -105,7 +105,7 @@ Cipher::~Cipher()
     release();
 }
 
-bool Cipher::is(const char *id)
+bool Cipher::has(const char *id)
 {
     return false;
 }
