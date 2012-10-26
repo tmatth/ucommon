@@ -296,17 +296,11 @@ public:
      */
     bool is_tty(void);
 
-    inline bool istty(void)
-        {return is_tty();}
-
     /**
      * See if the file handle is a tty device.
      * @return true if device.
      */
     static bool is_tty(fd_t fd);
-
-    inline static bool istty(fd_t fd)
-        {return is_tty(fd);}
 
     /**
      * Read data from descriptor or scan directory.
@@ -415,18 +409,12 @@ public:
      */
     static bool is_file(const char *path);
 
-    inline static bool isfile(const char *path)
-        {return is_file(path);}
-
     /**
      * Test if path is a directory.
      * @param path to test.
      * @return true if exists and is directory.
      */
     static bool is_dir(const char *path);
-
-    inline static bool isdir(const char *path)
-        {return is_dir(path);}
 
     /**
      * Test if path is a symlink.
@@ -435,18 +423,12 @@ public:
      */
     static bool is_link(const char *path);
 
-    inline static bool islink(const char *path)
-        {return is_link(path);}
-
     /**
      * Test if path is a hidden file.
      * @param path to test.
      * @return true if exists and is hidden.
      */
     static bool is_hidden(const char *path);
-
-    inline static bool ishidden(const char *path)
-        {return is_hidden(path);}
 
     /**
      * Read data from file descriptor or directory.
@@ -711,29 +693,6 @@ public:
 
     static inline bool is_sys(struct stat *inode)
         {return S_ISSOCK(inode->st_mode) || S_ISFIFO(inode->st_mode);}
-
-    /** to be depreciated */
-
-    static inline bool isfile(struct stat *inode)
-        {return S_ISREG(inode->st_mode);}
-
-    static inline bool isdir(struct stat *inode)
-        {return S_ISDIR(inode->st_mode);}
-
-    static inline bool islink(struct stat *inode)
-        {return S_ISLNK(inode->st_mode);}
-
-    static inline bool isdev(struct stat *inode)
-        {return S_ISBLK(inode->st_mode) || S_ISCHR(inode->st_mode);}
-
-    static inline bool ischar(struct stat *inode)
-        {return S_ISCHR(inode->st_mode);}
-
-    static inline bool isdisk(struct stat *inode)
-        {return S_ISBLK(inode->st_mode);}
-
-    static inline bool issys(struct stat *inode)
-        {return S_ISSOCK(inode->st_mode) || S_ISFIFO(inode->st_mode);}
 };
 
 /**
@@ -866,9 +825,6 @@ public:
     size_t printf(const char *format, ...) __PRINTF(2, 3);
 
     bool is_tty(void);
-
-    inline bool istty(void)
-        {return is_tty();}
 };
 
 String str(charfile& fp, strsize_t size);

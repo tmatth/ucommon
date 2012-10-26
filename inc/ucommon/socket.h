@@ -286,9 +286,6 @@ public:
      */
     bool is_member(const struct sockaddr *address) const;
 
-    bool isMember(const struct sockaddr *address) const
-        {return is_member(address);}
-
     /**
      * Test if a given socket address falls within this cidr.
      * @param address of socket to test.
@@ -1610,10 +1607,6 @@ public:
      * @return true if zero/null address.
      */
     static bool is_numeric(const char *string);
-
-    /** depreciated */
-    inline static bool isNumeric(const char *string)
-        {return is_numeric(string);}
 
     /**
      * Get local address to which the socket is bound.  This is defined here

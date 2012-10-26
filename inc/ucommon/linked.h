@@ -721,9 +721,6 @@ public:
     inline bool is_leaf(void) const
         {return (child.begin() == NULL);};
 
-    inline bool isLeaf(void) const
-        {return (child.begin() == NULL);};
-
     /**
      * Test if node is root node.
      * @return true if node is root node.
