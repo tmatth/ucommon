@@ -1010,18 +1010,6 @@ public:
     bool wait(timeout_t timeout);
 
     /**
-     * Get active semaphore limit.
-     * @return count of maximum threads to pass.
-     */
-    unsigned getCount(void);
-
-    /**
-     * Get current semaphore usage.
-     * @return number of active threads.
-     */
-    unsigned getUsed(void);
-
-    /**
      * Alter semaphore limit at runtime
      * @param count of threads to allow.
      */

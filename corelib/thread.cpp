@@ -225,24 +225,6 @@ void Semaphore::Unlock(void)
     release();
 }
 
-unsigned Semaphore::getUsed(void)
-{
-    unsigned rtn;
-    lock();
-    rtn = used;
-    unlock();
-    return rtn;
-}
-
-unsigned Semaphore::getCount(void)
-{
-    unsigned rtn;
-    lock();
-    rtn = count;
-    unlock();
-    return rtn;
-}
-
 bool Semaphore::wait(timeout_t timeout)
 {
     bool result = true;
