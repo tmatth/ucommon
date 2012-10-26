@@ -194,7 +194,7 @@ void LinkedObject::purge(LinkedObject *root)
     }
 }
 
-bool LinkedObject::isMember(LinkedObject *list) const
+bool LinkedObject::is_member(LinkedObject *list) const
 {
     assert(list != NULL);
 
@@ -682,7 +682,7 @@ NamedTree *NamedTree::getLeaf(const char *tid) const
     linked_pointer<NamedTree> node = child.begin();
 
     while(node) {
-        if(node->isLeaf() && !strcmp(node->id, tid))
+        if(node->is_leaf() && !strcmp(node->id, tid))
             return *node;
         node.next();
     }
@@ -697,10 +697,10 @@ NamedTree *NamedTree::leaf(const char *tid) const
     NamedTree *obj;
 
     while(node) {
-        if(node->isLeaf() && !strcmp(node->id, tid))
+        if(node->is_leaf() && !strcmp(node->id, tid))
             return *node;
         obj = NULL;
-        if(!node->isLeaf())
+        if(!node->is_leaf())
             obj = node->leaf(tid);
         if(obj)
             return obj;
@@ -717,7 +717,7 @@ NamedTree *NamedTree::find(const char *tid) const
     NamedTree *obj;
 
     while(node) {
-        if(!node->isLeaf()) {
+        if(!node->is_leaf()) {
             if(!strcmp(node->id, tid))
                 return *node;
             obj = node->find(tid);

@@ -110,7 +110,7 @@ public:
      * Search to see if we are a member of a specific list.
      * @return true if we are member of the list.
      */
-    bool isMember(LinkedObject *list) const;
+    bool is_member(LinkedObject *list) const;
 
     /**
      * Release all objects from a list.
@@ -718,6 +718,9 @@ public:
      * Test if node has children.
      * @return true if node contains child nodes.
      */
+    inline bool is_leaf(void) const
+        {return (child.begin() == NULL);};
+
     inline bool isLeaf(void) const
         {return (child.begin() == NULL);};
 
@@ -725,7 +728,7 @@ public:
      * Test if node is root node.
      * @return true if node is root node.
      */
-    inline bool isRoot(void) const
+    inline bool is_root(void) const
         {return (parent == NULL);};
 
     /**
@@ -810,14 +813,14 @@ public:
      * Test if we are at the head of a list.
      * @return true if we are the first node in a list.
      */
-    inline bool isHead(void) const
+    inline bool is_head(void) const
         {return root->head == (OrderedObject *)this;};
 
     /**
      * Test if we are at the end of a list.
      * @return true if we are the last node in a list.
      */
-    inline bool isTail(void) const
+    inline bool is_tail(void) const
         {return root->tail == (OrderedObject *)this;};
 
     /**
@@ -1408,14 +1411,14 @@ public:
      * Test for next member in linked list.
      * @return true if there is more members after current one.
      */
-    inline bool isNext(void) const
+    inline bool is_next(void) const
         {return (ptr->getNext() != NULL);};
 
     /**
      * Test for previous member in double linked list.
      * @return true if there is more members before current one.
      */
-    inline bool isPrev(void) const
+    inline bool is_prev(void) const
         {return (ptr->getPrev() != NULL);};
 
     /**
@@ -1600,7 +1603,7 @@ public:
      * Test if this node is a leaf node for a tree pointer table.
      * @return true if value pointer is not NULL and there are no children.
      */
-    inline bool isAttribute(void) const
+    inline bool is_attribute(void) const
         {return (!child.begin() && value != NULL);};
 
     /**
