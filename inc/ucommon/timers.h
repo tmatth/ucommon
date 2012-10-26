@@ -61,6 +61,19 @@ private:
 #endif
     bool updated;
 
+protected:
+    /**
+     * Check if timer has been updated since last check.
+     * @return true if updated.
+     */
+    bool update(void);
+
+    /**
+     * Check if timer active.
+     * @return true if active.
+     */
+    bool active(void);
+
 public:
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
     static const timeout_t inf = ((timeout_t)(-1));
@@ -98,18 +111,6 @@ public:
      * @param copy of timer to construct from.
      */
     Timer(const Timer& copy);
-
-    /**
-     * Check if timer expired.
-     * @return true if expired.
-     */
-    bool isExpired(void);
-
-    /**
-     * Check if timer has been updated since last check.
-     * @return true if updated.
-     */
-    bool isUpdated(void);
 
     /**
      * Set the timer to expire.
@@ -335,13 +336,6 @@ public:
          * Disarm event.
          */
         void disarm(void);
-
-        /**
-         * Test if event has expired.
-         * @return true if expired.
-         */
-        inline bool isExpired(void)
-            {return Timer::isExpired();};
 
         /**
          * Time remaining until expired.
