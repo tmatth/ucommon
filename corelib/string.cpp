@@ -992,7 +992,7 @@ bool String::resize(strsize_t size)
         str = create(size, fill);
         str->retain();
     }
-    else if(str->isCopied() || str->max < size) {
+    else if(str->is_copied() || str->max < size) {
         fill = str->fill;
         str->release();
         str = create(size, fill);
@@ -1030,7 +1030,7 @@ void String::cow(strsize_t size)
     if(!size)
         return;
 
-    if(!str || !str->max || str->isCopied() || size > str->max) {
+    if(!str || !str->max || str->is_copied() || size > str->max) {
         cstring *s = create(size);
         s->len = str->len;
         String::set(s->text, s->max + 1, str->text);

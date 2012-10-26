@@ -353,7 +353,7 @@ bool Vector::resize(vectorsize_t size)
         return true;
     }
 
-    if(data->isCopied() || data->max < size) {
+    if(data->is_copied() || data->max < size) {
         data->release();
         data = create(size);
         data->retain();
@@ -370,7 +370,7 @@ void Vector::cow(vectorsize_t size)
     if(!size)
         return;
 
-    if(!data || !data->max || data->isCopied() || size > data->max) {
+    if(!data || !data->max || data->is_copied() || size > data->max) {
         array *a = create(size);
         a->len = data->len;
         memcpy(a->list, data->list, data->len * sizeof(ObjectProtocol *));

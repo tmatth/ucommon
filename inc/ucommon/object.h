@@ -123,14 +123,14 @@ public:
      * one object has a reference to our object.
      * @return true if referenced by more than one object.
      */
-    inline bool isCopied(void)
+    inline bool is_copied(void)
         {return count > 1;};
 
     /**
      * Test if the object has been referenced (retained) by anyone yet.
      * @return true if retained.
      */
-    inline bool isRetained(void)
+    inline bool is_retained(void)
         {return count > 0;};
 
     /**
