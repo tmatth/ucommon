@@ -698,7 +698,7 @@ const cidr *cidr::find(const policy *policy, const struct sockaddr *s)
 
     linked_pointer<const cidr> p = policy;
     while(p) {
-        if(p->isMember(s)) {
+        if(p->is_member(s)) {
             if(p->getMask() > top) {
                 top = p->getMask();
                 member = *p;
@@ -719,7 +719,7 @@ const cidr *cidr::container(const policy *policy, const struct sockaddr *s)
 
     linked_pointer<const cidr> p = policy;
     while(p) {
-        if(p->isMember(s)) {
+        if(p->is_member(s)) {
             if(p->getMask() < top) {
                 top = p->getMask();
                 member = *p;
@@ -731,7 +731,7 @@ const cidr *cidr::container(const policy *policy, const struct sockaddr *s)
 }
 
 
-bool cidr::isMember(const struct sockaddr *s) const
+bool cidr::is_member(const struct sockaddr *s) const
 {
     assert(s != NULL);
 
@@ -1042,7 +1042,7 @@ struct ::addrinfo *Socket::query(const char *hp, const char *svc, int type, int 
         svc = cp;
     }
 
-    if(isnumeric(host)) {
+    if(is_numeric(host)) {
         hint.ai_flags |= AI_NUMERICHOST;
 
         if(strchr(host, ':')) {
@@ -3026,7 +3026,7 @@ int Socket::network(struct sockaddr *iface, const struct sockaddr *dest)
     return rtn;
 }
 
-bool Socket::subnet(const struct sockaddr *s1, const struct sockaddr *s2)
+bool Socket::equalsubnet(const struct sockaddr *s1, const struct sockaddr *s2)
 {
     assert(s1 != NULL && s2 != NULL);
 
@@ -3228,7 +3228,7 @@ int Socket::family(socket_t so)
     return us.inaddr.sin_family;
 }
 
-bool Socket::isnull(const char *str)
+bool Socket::is_null(const char *str)
 {
     assert(str != NULL);
 
@@ -3245,7 +3245,7 @@ bool Socket::isnull(const char *str)
     return true;
 }
 
-bool Socket::isnumeric(const char *str)
+bool Socket::is_numeric(const char *str)
 {
     assert(str != NULL);
 

@@ -1458,6 +1458,11 @@ protected:
      */
     void map(void);
 
+    /**
+     * Check if running.
+     */
+    virtual bool is_active(void);
+
 public:
     /**
      * Set thread priority without disrupting scheduling if possible.
@@ -1539,13 +1544,14 @@ public:
      */
     static pthread_t self(void);
 
-    /**
-     * Check if running.
-     */
-    virtual bool isRunning(void);
-
     inline operator bool()
-        {return isRunning();}
+        {return is_active();}
+
+    inline bool operator!()
+        {return !is_active();}
+
+    inline bool isRunning(void)
+        {return is_active();}
 };
 
 /**
@@ -1558,7 +1564,7 @@ public:
  * exits.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT JoinableThread : protected Thread
+class __EXPORT JoinableThread : public Thread
 {
 protected:
 #ifdef  _MSWINDOWS_
@@ -1587,8 +1593,11 @@ protected:
      */
     void join(void);
 
+    bool is_active(void);
+
+    virtual void run(void) = 0;
+
 public:
-    bool isRunning(void);
 
     /**
      * Start execution of child context.  This must be called after the
@@ -1615,7 +1624,7 @@ public:
  * exiting, or explicity calling the exit member function.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT DetachedThread : protected Thread
+class __EXPORT DetachedThread : public Thread
 {
 protected:
     bool active;
@@ -1643,6 +1652,10 @@ protected:
      */
     void exit(void);
 
+    bool is_active(void);
+
+    virtual void run(void) = 0;
+
 public:
     /**
      * Start execution of detached context.  This must be called after the
@@ -1651,8 +1664,6 @@ public:
      * @param priority to start thread with.
      */
     void start(int priority = 0);
-
-    bool isRunning(void);
 };
 
 /**

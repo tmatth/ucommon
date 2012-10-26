@@ -44,7 +44,7 @@ extern "C" int main()
     Socket::getaddress((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
     assert(0 == strcmp(addrbuf, "127.0.0.1"));
     assert(Socket::equal((struct sockaddr *)&addr, localhost.get(AF_INET)));
-    assert(Socket::subnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
+    assert(Socket::equalsubnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
 #ifdef  AF_INET6
     // we can only test if interface/ipv6 support is actually running
     // so we use getinterface to find out first.  it will return -1 for

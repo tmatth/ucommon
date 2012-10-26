@@ -284,7 +284,10 @@ public:
      * @param address of socket to test.
      * @return true if address is within cidr.
      */
-    bool isMember(const struct sockaddr *address) const;
+    bool is_member(const struct sockaddr *address) const;
+
+    bool isMember(const struct sockaddr *address) const
+        {return is_member(address);}
 
     /**
      * Test if a given socket address falls within this cidr.
@@ -292,7 +295,7 @@ public:
      * @return true if address is within cidr.
      */
     inline bool operator==(const struct sockaddr *address) const
-        {return isMember(address);};
+        {return is_member(address);};
 
     /**
      * Test if a given socket address falls outside this cidr.
@@ -300,7 +303,7 @@ public:
      * @return true if address is outside cidr.
      */
     inline bool operator!=(const struct sockaddr *address) const
-        {return !isMember(address);};
+        {return !is_member(address);};
 };
 
 /**
@@ -1497,7 +1500,7 @@ public:
      * @param address2 to test.
      * @return true if in same subnet.
      */
-    static bool subnet(const struct sockaddr *address1, const struct sockaddr *address2);
+    static bool equalsubnet(const struct sockaddr *address1, const struct sockaddr *address2);
 
     /**
      * Get the socket address of the interface needed to reach a destination
@@ -1597,7 +1600,7 @@ public:
      * @param string address to check.
      * @return true if zero/null address.
      */
-    static bool isnull(const char *string);
+    static bool is_null(const char *string);
 
     /**
      * Simple function to validate that a given IP address string is a numeric
@@ -1606,11 +1609,11 @@ public:
      * @param string address to check.
      * @return true if zero/null address.
      */
-    static bool isnumeric(const char *string);
+    static bool is_numeric(const char *string);
 
     /** depreciated */
     inline static bool isNumeric(const char *string)
-        {return isnumeric(string);}
+        {return is_numeric(string);}
 
     /**
      * Get local address to which the socket is bound.  This is defined here

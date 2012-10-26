@@ -680,12 +680,12 @@ bool ConditionalAccess::waitSignal(struct timespec *ts)
 #endif
 
 // abstract class never runs...
-bool Thread::isRunning(void)
+bool Thread::is_active(void)
 {
     return false;
 }
 
-bool JoinableThread::isRunning(void)
+bool JoinableThread::is_active(void)
 {
 #ifdef  _MSWINDOWS_
     return (running != INVALID_HANDLE_VALUE) && !joining;
@@ -694,7 +694,7 @@ bool JoinableThread::isRunning(void)
 #endif
 }
 
-bool DetachedThread::isRunning(void)
+bool DetachedThread::is_active(void)
 {
     return active;
 }

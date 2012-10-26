@@ -210,7 +210,7 @@ void TimerQueue::event::arm(timeout_t timeout)
 void TimerQueue::event::disarm(void)
 {
     TimerQueue *tq = getQueue();
-    bool flag = active();
+    bool flag = is_active();
 
     if(tq && flag)
         tq->modify();
@@ -267,7 +267,7 @@ bool Timer::update(void)
     return rtn;
 }
 
-bool Timer::active(void)
+bool Timer::is_active(void)
 {
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     if(!timer.tv_sec && !timer.tv_nsec)
@@ -384,7 +384,7 @@ Timer& Timer::operator=(timeout_t to)
 
 Timer& Timer::operator+=(timeout_t to)
 {
-    if(!active())
+    if(!is_active())
         set();
 
     timer.tv_sec += (to / 1000);
@@ -400,7 +400,7 @@ Timer& Timer::operator+=(timeout_t to)
 
 Timer& Timer::operator-=(timeout_t to)
 {
-    if(!active())
+    if(!is_active())
         set();
     timer.tv_sec -= (to / 1000);
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
@@ -415,7 +415,7 @@ Timer& Timer::operator-=(timeout_t to)
 
 Timer& Timer::operator+=(time_t abs)
 {
-    if(!active())
+    if(!is_active())
         set();
     timer.tv_sec += difftime(abs);
     updated = true;
@@ -424,7 +424,7 @@ Timer& Timer::operator+=(time_t abs)
 
 Timer& Timer::operator-=(time_t abs)
 {
-    if(!active())
+    if(!is_active())
         set();
     timer.tv_sec -= difftime(abs);
     return *this;
@@ -460,7 +460,7 @@ void Timer::sync(Timer &t)
 timeout_t TQEvent::timeout(void)
 {
     timeout_t timeout = get();
-    if(active() && !timeout) {
+    if(is_active() && !timeout) {
         disarm();
         expired();
         timeout = get();

@@ -72,7 +72,7 @@ protected:
      * Check if timer active.
      * @return true if active.
      */
-    bool active(void);
+    bool is_active(void);
 
 public:
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
