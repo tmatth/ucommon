@@ -415,10 +415,13 @@ public:
          * Get the first socket address in our address list.
          * @return first socket address or NULL if none.
          */
-        struct sockaddr *getAddr(void) const;
+        struct sockaddr *get(void) const;
+
+        inline struct sockaddr *getAddr(void) const
+            {return get();}
 
         inline struct sockaddr *operator()(void) const
-            {return getAddr();}
+            {return get();}
 
         /**
          * Get the first socket address of specified family from our list.
@@ -482,7 +485,7 @@ public:
          * @return first socket address we resolved or NULL if none.
          */
         inline operator struct sockaddr *() const
-            {return getAddr();};
+            {return get();};
 
         /**
          * Clear current object.
@@ -1850,7 +1853,7 @@ inline struct addrinfo *addrinfo(Socket::address& address)
  * @return first socket address in list or NULL if empty.
  */
 inline struct sockaddr *addr(Socket::address& address)
-    {return address.getAddr();}
+    {return address.get();}
 
 /**
  * Compare two socket addresses to see if equal.  If the port is zero

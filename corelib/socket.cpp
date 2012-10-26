@@ -1146,7 +1146,7 @@ proc:
     getaddrinfo(host, svc, &hint, &list);
 }
 
-struct sockaddr *Socket::address::getAddr(void) const
+struct sockaddr *Socket::address::get(void) const
 {
     if(!list)
         return NULL;
