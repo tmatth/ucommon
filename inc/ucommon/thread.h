@@ -1900,7 +1900,7 @@ public:
      * @return instance of typed object.
      */
     inline T& operator*() const
-        {return *(static_cast<T *>(object));};
+        {return *(static_cast<T&>(object));};
 
     /**
      * Access member of instance of locked typed object by member reference.
@@ -1942,7 +1942,7 @@ public:
      * Access shared typed singleton object this instance locks and references.
      */
     inline const T& operator*() const
-        {return *(static_cast<const T *>(ptr->pointer));};
+        {return *(static_cast<const T&>(ptr->pointer));};
 
     /**
      * Access member of shared typed singleton object this instance locks and
@@ -1985,7 +1985,7 @@ public:
      * @return object we are pointing to.
      */
     inline T& operator*() const
-        {return *(static_cast<T*>(auto_protect::object));};
+        {return *(static_cast<T&>(auto_protect::object));};
 
     /**
      * Reference member of object we are pointing to.
