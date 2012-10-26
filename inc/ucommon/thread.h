@@ -506,18 +506,6 @@ public:
     void release(void);
 
     /**
-     * Get the number of recursive locking levels.
-     * @return locking level.
-     */
-    unsigned getLocking(void);
-
-    /**
-     * Get the number of threads waiting on lock.
-     * @return wating thread count.
-     */
-    unsigned getWaiting(void);
-
-    /**
      * Convenience method to lock a recursive lock.
      * @param rex lock to lock.
      */
@@ -714,24 +702,6 @@ public:
     void release(void);
 
     /**
-     * Get the number of threads in shared access mode.
-     * @return number of accessing threads.
-     */
-    unsigned getAccess(void);
-
-    /**
-     * Get the number of threads waiting to modify the lock.
-     * @return number of pending write threads.
-     */
-    unsigned getModify(void);
-
-    /**
-     * Get the number of threads waiting to access after writer completes.
-     * @return number of waiting access threads.
-     */
-    unsigned getWaiting(void);
-
-    /**
      * Convenience function to modify (write lock) a rwlock.
      * @param lock to modify.
      * @param timeout to wait for lock.
@@ -864,16 +834,6 @@ public:
      * Return an exclusive access lock back to share mode.
      */
     void share(void);
-
-    /**
-     * Get the number of threads reading (sharing) the lock.
-     */
-    unsigned getReaders(void);
-
-    /**
-     * Get the number of threads waiting to share the lock.
-     */
-    unsigned getWaiters(void);
 
     /**
      * Convenience function to modify lock.

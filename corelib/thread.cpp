@@ -769,24 +769,6 @@ Conditional()
     waiting = 0;
 }
 
-unsigned RecursiveMutex::getWaiting(void)
-{
-    unsigned count;
-    Conditional::lock();
-    count = waiting;
-    Conditional::unlock();
-    return count;
-}
-
-unsigned RecursiveMutex::getLocking(void)
-{
-    unsigned count;
-    Conditional::lock();
-    count = lockers;
-    Conditional::unlock();
-    return count;
-}
-
 void RecursiveMutex::Exlock(void)
 {
     lock();
@@ -852,33 +834,6 @@ ThreadLock::ThreadLock() :
 ConditionalAccess()
 {
     writers = 0;
-}
-
-unsigned ThreadLock::getAccess(void)
-{
-    unsigned count;
-    lock();
-    count = sharing;
-    unlock();
-    return count;
-}
-
-unsigned ThreadLock::getModify(void)
-{
-    unsigned count;
-    lock();
-    count = writers;
-    unlock();
-    return count;
-}
-
-unsigned ThreadLock::getWaiting(void)
-{
-    unsigned count;
-    lock();
-    count = waiting + pending;
-    unlock();
-    return count;
 }
 
 void ThreadLock::Exlock(void)
@@ -1558,26 +1513,6 @@ ConditionalLock::Context *ConditionalLock::getContext(void)
     }
     slot->thread = tid;
     return slot;
-}
-
-unsigned ConditionalLock::getReaders(void)
-{
-    unsigned count;
-
-    lock();
-    count = sharing;
-    unlock();
-    return count;
-}
-
-unsigned ConditionalLock::getWaiters(void)
-{
-    unsigned count;
-
-    lock();
-    count = pending + waiting;
-    unlock();
-    return count;
 }
 
 void ConditionalLock::Shlock(void)
