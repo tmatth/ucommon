@@ -2234,9 +2234,9 @@ inline bool _rw_release_(const void *obj)
 
 #define SYNC(obj) for(bool _sync_flag_ = _sync_protect_(obj); _sync_flag_; _sync_flag_ = _sync_release_(obj))
 
-#define SYNC_READER(obj) for(bool _sync_flag_ = _rw_reader_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
+#define SHARED(obj) for(bool _sync_flag_ = _rw_reader_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
 
-#define SYNC_WRITER(obj) for(bool _sync_flag_ = _rw_writer_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
+#define EXCLUSIVE(obj) for(bool _sync_flag_ = _rw_writer_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
 
 END_NAMESPACE
 
