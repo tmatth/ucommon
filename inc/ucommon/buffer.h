@@ -59,6 +59,7 @@ class fbuf : public BufferProtocol, private fsys
 private:
     offset_t    inpos, outpos;
     shell::pid_t pid;
+    char *pipename;
 
 protected:
     size_t _push(const char *address, size_t size);

@@ -29,12 +29,14 @@ using namespace UCOMMON_NAMESPACE;
 fbuf::fbuf() :
 BufferProtocol(), fsys()
 {
+    pipename = NULL;
     pid = INVALID_PID_VALUE;
 }
 
 fbuf::fbuf(const char *path, mode_t access, size_t size) :
 BufferProtocol(), fsys()
 {
+    pipename = NULL;
     pid = INVALID_PID_VALUE;
     open(path, access, size);
 }
@@ -42,6 +44,7 @@ BufferProtocol(), fsys()
 fbuf::fbuf(const char *path, char **args, shell::pmode_t access, size_t size, char **envp) :
 BufferProtocol(), fsys()
 {
+    pipename = NULL;
     pid = INVALID_PID_VALUE;
     open(path, args, access, size, envp);
 }
@@ -76,8 +79,11 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
             return;
         inherit(fd, false);
         pid = shell::spawn(path, args, envp, stdio);
-        if(pid == INVALID_PID_VALUE)
+        if(pid == INVALID_PID_VALUE) {
+            ::close(stdio[0]);
             fsys::close();
+            return;
+        }
         allocate(size, BUF_RD);
         fsys::release(stdio[0]);
         break;
@@ -87,12 +93,69 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
             return;
         inherit(fd, false);
         pid = shell::spawn(path, args, envp, stdio);
-        if(pid == INVALID_PID_VALUE)
+        if(pid == INVALID_PID_VALUE) {
+            ::close(stdio[1]);
             fsys::close();
+            return;
+        }
         allocate(size, BUF_WR);
         fsys::release(stdio[1]);
         break;
     default:
+#if defined(HAVE_SOCKETPAIR)
+        int pair[2];
+        if(socketpair(AF_LOCAL, SOCK_STREAM, 0, pair)) {
+            error = errno;
+            return;
+        }
+        fd = pair[0];
+        stdio[0] = stdio[1] = pair[1];
+        inherit(fd, false);
+        pid = shell::spawn(path, args, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            ::close(pair[1]);
+            fsys::close();
+            return;
+        }
+        allocate(size, BUF_RDWR);
+        fsys::release(pair[1]);
+#elif defined(MS_WINDOWS)
+        static int count;
+        char buf[96];
+        snprintf(buf, sizeof(buf), "\\\\.\\pipe\\pair-%ld-%d",
+            GetCurrentProcessId(), count++);
+        fd = CreateNamedPipe(buf, PIPE_ACCESS_DUPLEX,
+            PIPE_TYPE_BYTE | PIPE_NOWAIT,
+            PIPE_UNLIMITED_INSTANCES, size, size, 0, NULL);
+        if(fd == INVALID_HANDLE_VALUE)
+            return;
+        fd_t child = CreateFile(buf, GENERIC_READ|GENERIC_WRITE, 0, NULL,
+            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if(child == INVALID_HANDLE_VALUE) {
+failed:
+            CloseHandle(fd);
+            ::remove(buf);
+            return;
+        }
+
+        inherit(child, true);
+        inherit(fd, false);
+
+        DWORD mode = PIPE_NOWAIT;
+        SetNamedPipeHandleState(fd, &mode, NULL, NULL);
+        stdio[0] = child;
+        stdio[1] = child;
+        pid = shell::spawn(path, args, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            CloseHandle(child);
+            ::remove(buf);
+            fsys::close();
+            return;
+        }
+        allocate(size, BUF_RDWR);
+        fsys::release(child);
+        pipename = strdup(buf);
+#endif
         return; // invalid
     }
 }
@@ -150,6 +213,11 @@ int fbuf::close(void)
     if(pid != INVALID_PID_VALUE) {
         error = shell::wait(pid);
         pid = INVALID_PID_VALUE;
+    }
+    if(pipename) {
+        ::remove(pipename);
+        ::free(pipename);
+        pipename = NULL;
     }
     return error;
 }
