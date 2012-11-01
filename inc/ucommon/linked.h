@@ -1829,6 +1829,11 @@ public:
      */
     inline T **sort(void) const
         {return NamedObject::sort(NamedObject::index(idx, M));};
+
+    /**
+     * Convenience typedef for iterative pointer.
+     */
+    typedef linked_pointer<T> iterator;
 };
 
 /**
@@ -1920,6 +1925,11 @@ public:
      */
     inline T **sort(void)
         {return static_cast<T**>(NamedObject::sort(index()));};
+
+    /**
+     * Convenience typedef for iterative pointer.
+     */
+    typedef linked_pointer<T> iterator;
 };
 
 /**

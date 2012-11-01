@@ -330,7 +330,6 @@ public:
     inline unsigned count(void) const
         {return members;};
 
-
     /**
      * Convenience typedef for iterative pointer.
      */
