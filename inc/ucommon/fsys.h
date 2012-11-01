@@ -555,8 +555,15 @@ public:
 
     /**
      * Close a fsys resource.
+     * @return exit status if process.
      */
-    void close(void);
+    int close(void);
+
+    /**
+     * Cancel a fsys process.
+     * @return exit status of process.
+     */
+    int cancel(void);
 
     /**
      * Get last error.
@@ -705,6 +712,7 @@ class __EXPORT charfile : public CharacterProtocol
 private:
     FILE *fp;
     bool opened;
+    pid_t pid;
 
     int _putch(int code);
 

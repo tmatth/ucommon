@@ -295,11 +295,17 @@ bool fsys::is_tty(void)
     return false;
 }
 
-void fsys::close(void)
+int fsys::close(void)
 {
     error = 0;
+
+    if(pid != INVALID_PID_VALUE) {
+        error = shell::wait(pid);
+        pid = INVALID_PID_VALUE;
+    }
+
     if(fd == INVALID_HANDLE_VALUE)
-        return;
+        return EBADR;
 
     if(ptr) {
         if(::FindClose(fd)) {
@@ -314,6 +320,7 @@ void fsys::close(void)
         fd = INVALID_HANDLE_VALUE;
     else
         error = remapError();
+    return error;
 }
 
 ssize_t fsys::read(void *buf, size_t len)
@@ -405,6 +412,7 @@ void fsys::open(const char *path, access_t access)
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
 
+    cancel();
     close();
 
     switch(access)
@@ -530,7 +538,7 @@ fsys::fsys(const fsys& copy)
     error = 0;
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
-    pid = INVALID_HANDLE_VALUE;
+    pid = INVALID_PID_VALUE;
 
     if(copy.fd == INVALID_HANDLE_VALUE)
         return;
@@ -709,9 +717,13 @@ bool fsys::is_tty(void)
     return false;
 }
 
-void fsys::close(void)
+int fsys::close(void)
 {
     error = 0;
+    if(pid != INVALID_PID_VALUE) {
+        error = shell::wait(pid);
+        pid = INVALID_PID_VALUE;
+    }
     if(ptr) {
         if(::closedir((DIR *)ptr))
             error = remapError();
@@ -723,6 +735,9 @@ void fsys::close(void)
         else
             error = remapError();
     }
+    else
+        error = EBADR;
+    return error;
 }
 
 fd_t fsys::input(const char *path)
@@ -802,6 +817,7 @@ void fsys::open(const char *path, access_t access)
 {
     unsigned flags = 0;
 
+    cancel();
     close();
 
     switch(access)
@@ -912,7 +928,7 @@ int fsys::access(const char *path, unsigned mode)
 fsys::fsys(const fsys& copy)
 {
     fd = INVALID_HANDLE_VALUE;
-    pid = INVALID_HANDLE_VALUE;
+    pid = INVALID_PID_VALUE;
     ptr = NULL;
     error = 0;
 
@@ -994,7 +1010,7 @@ int fsys::seek(offset_t pos)
 fsys::fsys()
 {
     fd = INVALID_HANDLE_VALUE;
-    pid = INVALID_HANDLE_VALUE;
+    pid = INVALID_PID_VALUE;
     ptr = NULL;
     error = 0;
 }
@@ -1002,7 +1018,7 @@ fsys::fsys()
 fsys::fsys(const char *path, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
-    pid = INVALID_HANDLE_VALUE;
+    pid = INVALID_PID_VALUE;
     ptr = NULL;
     error = 0;
     open(path, access);
@@ -1013,7 +1029,7 @@ fsys::fsys(const char *path, access_t access, unsigned mode)
 {
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
-    pid = INVALID_HANDLE_VALUE;
+    pid = INVALID_PID_VALUE;
     error = 0;
     create(path, access, mode);
 }
@@ -1501,15 +1517,26 @@ bool fsys::is_hidden(const char *path)
 #endif
 }
 
+int fsys::cancel(void)
+{
+    if(pid == INVALID_PID_VALUE)
+        return EBADR;
+    int error = shell::cancel(pid);
+    pid = INVALID_PID_VALUE;
+    return error;
+}
+
 charfile::charfile(const char *file, const char *mode)
 {
     fp = NULL;
+    pid = INVALID_PID_VALUE;
     open(file, mode);
 }
 
 charfile::charfile()
 {
     fp = NULL;
+    pid = INVALID_PID_VALUE;
     opened = false;
 }
 
@@ -1532,10 +1559,15 @@ bool charfile::is_tty(void)
 
 void charfile::open(const char *path, const char *mode)
 {
+    if(pid != INVALID_PID_VALUE) {
+        shell::cancel(pid);
+        shell::wait(pid);
+    }
     if(fp)
         fclose(fp);
 
     fp = fopen(path, mode);
+    pid = INVALID_PID_VALUE;
     opened = true;
 }
 
@@ -1659,7 +1691,7 @@ fsys::fsys(fd_t handle)
 {
     fd = handle;
     ptr = NULL;
-    pid = INVALID_HANDLE_VALUE;
+    pid = INVALID_PID_VALUE;
     error = 0;
 }
 
@@ -1675,7 +1707,7 @@ fd_t fsys::release(void)
 {
     fd_t save = fd;
 
-    fd = INVALID_HANDLE_VALUE;
+    fd = INVALID_PID_VALUE;
     ptr = NULL;
     error = 0;
     return save;
