@@ -50,9 +50,8 @@
 NAMESPACE_UCOMMON
 
 /**
- * A generic file streaming class built from the buffer protocol.  This can
- * be used in place of fopen based file operations and does not require
- * libstdc++.
+ * A generic file streaming class built from the buffer protocol.  This is
+ * used to support bidirectional i/o for pipes and devices.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class fbuf : public BufferProtocol, private fsys
@@ -72,6 +71,11 @@ protected:
 
 public:
     /**
+     * Device I/O mode.
+     */
+    typedef enum {RD = BufferProtocol::BUF_RD, WR = BufferProtocol::BUF_WR, RDWR = BufferProtocol::BUF_RDWR} mode_t;
+
+    /**
      * Construct an unopened file buffer.
      */
     fbuf();
@@ -82,13 +86,29 @@ public:
     ~fbuf();
 
     /**
-     * Construct a file buffer that creates and opens a specific file.
-     * @param path of file to create.
+     * Construct a pipe buffer from an existing process.
+     * @param path of existing process.
+     * @param access mode of pipe.
+     * @param argv to pass.
+     * @param envp to use.
+     */
+    fbuf(const char *path, char  **argv, shell::pmode_t access = shell::RDWR, size_t size = 512, char **envp = NULL);
+
+    /**
+     * Construct a buffer that opens an existing device.
+     * @param path of existing device to open.
      * @param access mode of file (rw, rdonly, etc).
-     * @param permissions of the newly created file.
      * @param size of the stream buffer.
      */
-    fbuf(const char *path, fsys::access_t access, unsigned permissions, size_t size);
+    fbuf(const char *path, mode_t access = RDWR, size_t size = 512);
+
+    /**
+     * Construct a file buffer that opens an existing device.
+     * @param path of existing file to open.
+     * @param access mode of file (rw, rdonly, etc).
+     * @param size of the stream buffer.
+     */
+    void open(const char *path, mode_t access = RDWR, size_t size = 512);
 
     /**
      * Construct a pipe buffer from an existing file.
@@ -97,55 +117,17 @@ public:
      * @param argv to pass.
      * @param envp to use.
      */
-    fbuf(const char *path, fsys::access_t access, char **argv, size_t size, char **envp = NULL);
-
-    /**
-     * Construct a file buffer that opens an existing file.
-     * @param path of existing file to open.
-     * @param access mode of file (rw, rdonly, etc).
-     * @param size of the stream buffer.
-     */
-    fbuf(const char *path, fsys::access_t access, size_t size);
-
-    /**
-     * Create and open the specified file.  If a file is currently open, it
-     * is closed first.
-     * @param path of file to create.
-     * @param access mode of file (rw, rdonly, etc).
-     * @param permissions of the newly created file.
-     * @param size of the stream buffer.
-     */
-    void create(const char *path, fsys::access_t access = fsys::ACCESS_APPEND, unsigned permissions = 0640, size_t size = 512);
-
-    /**
-     * Construct a file buffer that opens an existing file.
-     * @param path of existing file to open.
-     * @param access mode of file (rw, rdonly, etc).
-     * @param size of the stream buffer.
-     */
-    void open(const char *path, fsys::access_t access = fsys::ACCESS_RDWR, size_t size = 512);
-
-    /**
-     * Construct a pipe buffer from an existing file.
-     * @param path of existing process.
-     * @param access mode of pipe.
-     * @param argv to pass.
-     * @param envp to use.
-     */
-    void open(const char *path, fsys::access_t access, char **argv, size_t size = 512, char **envp = NULL);
+    void open(const char *path, char **argv, shell::pmode_t access = shell::RDWR, size_t size = 512, char **envp = NULL);
 
     /**
      * Close the file, flush buffers.  Capture exit code in error for pipe.
      */
-    void close(void);
+    int close(void);
 
     /**
      * Force terminate child and close.
      */
-    void terminate(void);
-
-    inline void cancel(void)
-        {terminate();}
+    int cancel(void);
 
     /**
      * Seek specific offset in open file and reset I/O buffers.  If the

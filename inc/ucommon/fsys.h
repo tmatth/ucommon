@@ -130,7 +130,6 @@ class __EXPORT fsys
 {
 protected:
     fd_t    fd;
-    pid_t   pid;
 #ifdef  _MSWINDOWS_
     WIN32_FIND_DATA *ptr;
     HINSTANCE   mem;
@@ -555,15 +554,9 @@ public:
 
     /**
      * Close a fsys resource.
-     * @return exit status if process.
+     * @return error code as needed.
      */
     int close(void);
-
-    /**
-     * Cancel a fsys process.
-     * @return exit status of process.
-     */
-    int cancel(void);
 
     /**
      * Get last error.
@@ -712,7 +705,6 @@ class __EXPORT charfile : public CharacterProtocol
 private:
     FILE *fp;
     bool opened;
-    pid_t pid;
 
     int _putch(int code);
 
