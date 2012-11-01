@@ -431,3 +431,14 @@ LockingProtocol::~LockingProtocol()
 CharacterProtocol::~CharacterProtocol()
 {
 }
+
+ObjectProtocol::~ObjectProtocol()
+{
+}
+
+ObjectProtocol *ObjectProtocol::copy(void)
+{
+    retain();
+    return this;
+}
+

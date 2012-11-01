@@ -330,6 +330,12 @@ public:
     inline unsigned count(void) const
         {return members;};
 
+
+    /**
+     * Convenience typedef for iterative pointer.
+     */
+    typedef linked_pointer<ObjectPager::member> iterator;
+
 protected:
     /**
      * Gather index list.
@@ -536,6 +542,11 @@ public:
 
     inline operator char **()
         {return list();};
+
+    /**
+     * Convenience typedef for iterative pointer.
+     */
+    typedef linked_pointer<StringPager::member> iterator;
 
 private:
     member *last;
@@ -1297,6 +1308,11 @@ public:
      */
     inline T **sort(void) const
         {return NamedObject::sort(NamedObject::index(idx, M));};
+
+    /**
+     * Convenience typedef for iterative pointer.
+     */
+    typedef linked_pointer<T> iterator;
 };
 
 /**

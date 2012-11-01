@@ -17,6 +17,7 @@
 
 #include <ucommon-config.h>
 #include <ucommon/export.h>
+#include <ucommon/protocols.h>
 #include <ucommon/object.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,16 +32,6 @@ CountedObject::CountedObject()
 CountedObject::CountedObject(const ObjectProtocol &source)
 {
     count = 0;
-}
-
-ObjectProtocol::~ObjectProtocol()
-{
-}
-
-ObjectProtocol *ObjectProtocol::copy(void)
-{
-    retain();
-    return this;
 }
 
 void CountedObject::dealloc(void)

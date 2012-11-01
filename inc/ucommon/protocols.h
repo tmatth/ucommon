@@ -452,6 +452,49 @@ public:
         {return _err();}
 };
 
+/**
+ * A common base class for all managed objects.  This is used to manage
+ * objects that might be linked or reference counted.  The base class defines
+ * only core virtuals some common public methods that should be used by
+ * all inherited object types.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT ObjectProtocol
+{
+public:
+    /**
+     * Method to retain (or increase retention) of an object.
+     */
+    virtual void retain(void) = 0;
+
+    /**
+     * Method to release (or decrease retention) of an object.
+     */
+    virtual void release(void) = 0;
+
+    /**
+     * Required virtual destructor.
+     */
+    virtual ~ObjectProtocol();
+
+    /**
+     * Retain (increase retention of) object when copying.
+     */
+    ObjectProtocol *copy(void);
+
+    /**
+     * Increase retention operator.
+     */
+    inline void operator++(void)
+        {retain();};
+
+    /**
+     * Decrease retention operator.
+     */
+    inline void operator--(void)
+        {release();};
+};
+
 END_NAMESPACE
 
 #endif
