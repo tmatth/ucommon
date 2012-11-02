@@ -156,6 +156,11 @@ void *Buffer::get(void)
     return dbuf;
 }
 
+void *Buffer::invalid(void) const
+{
+    return NULL;
+}
+
 void *Buffer::peek(unsigned offset)
 {
     caddr_t dbuf;
@@ -163,7 +168,7 @@ void *Buffer::peek(unsigned offset)
     lock();
     if(offset >= objcount) {
         unlock();
-        return NULL;
+        return invalid();
     }
 
     dbuf = head + (objsize * offset);
@@ -434,6 +439,11 @@ ObjectProtocol *Queue::fifo(timeout_t timeout)
     return obj;
 }
 
+ObjectProtocol *Queue::invalid(void) const
+{
+    return NULL;
+}
+
 ObjectProtocol *Queue::get(unsigned back)
 {
     linked_pointer<member> node;
@@ -445,7 +455,7 @@ ObjectProtocol *Queue::get(unsigned back)
 
     do {
         if(!is(node)) {
-            obj = NULL;
+            obj = invalid();
             break;
         }
         obj = node->object;
@@ -577,6 +587,11 @@ bool Stack::remove(ObjectProtocol *o)
     return rtn;
 }
 
+ObjectProtocol *Stack::invalid(void) const
+{
+    return NULL;
+}
+
 ObjectProtocol *Stack::get(unsigned back)
 {
     linked_pointer<member> node;
@@ -587,7 +602,7 @@ ObjectProtocol *Stack::get(unsigned back)
 
     do {
         if(!is(node)) {
-            obj = NULL;
+            obj = invalid();
             break;
         }
         obj = node->object;

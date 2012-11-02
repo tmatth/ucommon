@@ -42,6 +42,7 @@ class __EXPORT MemoryProtocol
 {
 protected:
     friend class MemoryRedirect;
+
     /**
      * Protocol to allocate memory from the pager heap.  The size of the
      * request must be less than the size of the memory page used.  The
@@ -50,6 +51,11 @@ protected:
      * @return allocated memory or NULL if not possible.
      */
     virtual void *_alloc(size_t size) = 0;
+
+    /**
+     * Allocation failure handler.
+     */
+    virtual void fault(void) const;
 
 public:
     virtual ~MemoryProtocol();
@@ -200,6 +206,11 @@ protected:
      * Destroy object by releasing buffer memory.
      */
     virtual ~BufferProtocol();
+
+    /**
+     * Allocation error handler.
+     */
+    virtual void fault(void) const;
 
     /**
      * Set end of line marker.  Normally this is set to cr & lf, which

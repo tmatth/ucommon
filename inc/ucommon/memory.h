@@ -84,6 +84,11 @@ protected:
      */
     page_t *pager(void);
 
+    /**
+     * Report runtime memory exhaustion.
+     */
+    virtual void fault(void) const;
+
 public:
     /**
      * Construct a memory pager.
@@ -280,7 +285,7 @@ protected:
      * @param item to access.
      * @return pointer to text for item, or NULL if out of range.
      */
-    void *get(unsigned item);
+    void *get(unsigned item) const;
 
     /**
      * Add object to list.
@@ -301,6 +306,12 @@ protected:
      * @return object removed.
      */
     void *pop(void);
+
+    /**
+     * Invalid object...
+     * @return typically NULL.
+     */
+    void *invalid(void) const;
 
 public:
     /**
@@ -353,6 +364,9 @@ class __EXPORT StringPager : protected memalloc
 private:
     unsigned members;
     LinkedObject *root;
+
+protected:
+    virtual const char *invalid(void) const;
 
 public:
     /**

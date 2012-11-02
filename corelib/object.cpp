@@ -155,17 +155,22 @@ unsigned SparseObjects::count(void)
     return c;
 }
 
+ObjectProtocol *SparseObjects::invalid(void) const
+{
+    return NULL;
+}
+
 ObjectProtocol *SparseObjects::get(unsigned pos)
 {
     ObjectProtocol *obj;
 
     if(pos >= max)
-        return NULL;
+        return invalid();
 
     if(!vector[pos]) {
         obj = create();
         if(!obj)
-            return NULL;
+            return invalid();
         obj->retain();
         vector[pos] = obj;
     }

@@ -136,6 +136,13 @@ protected:
 
     friend class Vector::array;
 
+protected:
+    /**
+     * Object handler for index outside vector range.
+     * @return default object, often NULL.
+     */
+    virtual ObjectProtocol *invalid(void) const;
+
 public:
     /**
      * npos is a constant for an "invalid" position value.

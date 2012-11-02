@@ -174,6 +174,8 @@ protected:
      */
     void *peek(unsigned item);
 
+    virtual void *invalid(void) const;
+
 public:
     /**
      * Get the size of the buffer.
@@ -228,6 +230,8 @@ private:
 
 protected:
     size_t limit;
+
+    virtual ObjectProtocol *invalid(void) const;
 
 public:
     /**
@@ -366,6 +370,8 @@ private:
 
 protected:
     size_t limit;
+
+    virtual ObjectProtocol *invalid(void) const;
 
 public:
     /**

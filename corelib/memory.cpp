@@ -117,6 +117,11 @@ void memalloc::purge(void)
     count = 0;
 }
 
+void memalloc::fault(void) const
+{
+    cpr_runtime_error("mempager exhausted");
+}
+
 memalloc::page_t *memalloc::pager(void)
 {
     page_t *npage = NULL;
@@ -124,7 +129,8 @@ memalloc::page_t *memalloc::pager(void)
     void *addr;
 #endif
 
-    crit(!limit || count < limit, "mempager limit reached");
+    if(limit && count >= limit)
+        fault();
 
 #ifdef  HAVE_POSIX_MEMALIGN
     if(align && !posix_memalign(&addr, align, pagesize)) {
@@ -137,7 +143,8 @@ memalloc::page_t *memalloc::pager(void)
 #ifdef  HAVE_POSIX_MEMALIGN
 use:
 #endif
-    crit(npage != NULL, "mempager alloc failed");
+    if(!npage)
+        fault();
 
     ++count;
     npage->used = sizeof(page_t);
@@ -156,7 +163,10 @@ void *memalloc::_alloc(size_t size)
     caddr_t mem;
     page_t *p = page;
 
-    crit(size <= (pagesize - sizeof(page_t)), "mempager alloc failed");
+    if(size > (pagesize - sizeof(page_t))) {
+        fault();
+        return NULL;
+    }
 
     while(size % sizeof(void *))
         ++size;
@@ -250,12 +260,12 @@ memalloc(size)
     typesize = objsize;
 }
 
-void *ObjectPager::get(unsigned index)
+void *ObjectPager::get(unsigned index) const
 {
     linked_pointer<member> list = root;
 
     if(index >= members)
-        return NULL;
+        return invalid();
 
     while(index--)
         list.next();
@@ -275,7 +285,7 @@ void ObjectPager::clear(void)
 void *ObjectPager::pull(void)
 {
     if(!members)
-        return NULL;
+        return invalid();
 
     member *mem = (member *)root;
     void *result = mem->mem;
@@ -310,7 +320,7 @@ void *ObjectPager::pop(void)
     void *out = NULL;
 
     if(!root)
-        return NULL;
+        return invalid();
 
     index = NULL;
 
@@ -333,6 +343,11 @@ void *ObjectPager::pop(void)
         np.next();
     }
     return out;
+}
+
+void *ObjectPager::invalid(void) const
+{
+    return NULL;
 }
 
 void *ObjectPager::add(void)
@@ -501,12 +516,17 @@ void StringPager::set(unsigned index, const char *text)
     list->text = str;
 }
 
+const char *StringPager::invalid(void) const
+{
+    return NULL;
+}
+
 const char *StringPager::get(unsigned index) const
 {
     linked_pointer<member> list = root;
 
     if(index >= members)
-        return NULL;
+        return invalid();
 
     while(index--)
         list.next();
@@ -526,7 +546,7 @@ void StringPager::clear(void)
 const char *StringPager::pull(void)
 {
     if(!members)
-        return NULL;
+        return invalid();
 
 
     member *mem = (member *)root;
@@ -566,7 +586,7 @@ const char *StringPager::pop(void)
     const char *out = NULL;
 
     if(!root)
-        return NULL;
+        return invalid();
 
     index = NULL;
 

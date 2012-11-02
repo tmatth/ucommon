@@ -81,6 +81,11 @@ protected:
      * Handler to invoke in derived class when accessing outside the
      * shared memory segment boundary.
      */
+    virtual void *invalid(void) const;
+
+    /**
+     * Handler for failure to map (allocate) memory.
+     */
     virtual void fault(void) const;
 
 public:

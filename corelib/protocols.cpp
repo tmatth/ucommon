@@ -27,13 +27,20 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+void MemoryProtocol::fault(void) const
+{
+}
+
 char *MemoryProtocol::dup(const char *str)
 {
     if(!str)
         return NULL;
     size_t len = strlen(str) + 1;
     char *mem = static_cast<char *>(alloc(len));
-    String::set(mem, len, str);
+    if(mem)
+        String::set(mem, len, str);
+    else
+        fault();
     return mem;
 }
 
@@ -43,7 +50,10 @@ void *MemoryProtocol::dup(void *obj, size_t size)
     assert(size > 0);
 
     char *mem = static_cast<char *>(alloc(size));
-    memcpy(mem, obj, size);
+    if(mem)
+        memcpy(mem, obj, size);
+    else
+        fault();
     return mem;
 }
 
@@ -53,6 +63,8 @@ void *MemoryProtocol::zalloc(size_t size)
 
     if(mem)
         memset(mem, 0, size);
+    else
+        fault();
 
     return mem;
 }
@@ -95,6 +107,10 @@ BufferProtocol::~BufferProtocol()
     release();
 }
 
+void BufferProtocol::fault(void) const
+{
+}
+
 void BufferProtocol::release(void)
 {
     if(buffer) {
@@ -118,12 +134,18 @@ void BufferProtocol::allocate(size_t size, type_t mode)
         input = buffer = (char *)malloc(size * 2);
         if(buffer)
             output = buffer + size;
+        else
+            fault();
         break;
     case BUF_RD:
         input = buffer = (char *)malloc(size);
+        if(!buffer)
+            fault();
         break;
     case BUF_WR:
         output = buffer = (char *)malloc(size);
+        if(!buffer)
+            fault();
         break;
     }
 

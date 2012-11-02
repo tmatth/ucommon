@@ -222,6 +222,8 @@ protected:
      */
     void purge(void);
 
+    virtual ObjectProtocol *invalid(void) const;
+
     /**
      * Get (reference) an object at a specified offset in the array.
      * @param offset in array.

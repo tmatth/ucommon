@@ -8,6 +8,7 @@ from ucommon 5.5.1 to 6.0.0
 - depreciated methods removed
 - access base classes now consistent with protocols
 - reorg of datetime classes
+- allocation and access fault handling
 
 from ucommon 5.5.0 to 5.5.1
 - regex checks also for lib, mingw support

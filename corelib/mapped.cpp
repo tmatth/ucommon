@@ -167,6 +167,8 @@ void MappedMemory::create(const char *fn, size_t len)
     if(!use_mapping) {
         assert(len > 0);    // cannot use dummy for r/o...
         map = (caddr_t)malloc(len);
+        if(!map)
+            fault();
         size = len;
         return;
     }
@@ -191,6 +193,8 @@ void MappedMemory::create(const char *fn, size_t len)
         size = len;
         VirtualLock(map, size);
     }
+    else
+        fault();
 }
 
 MappedMemory::~MappedMemory()
@@ -240,6 +244,8 @@ void MappedMemory::create(const char *fn, size_t len)
     if(!use_mapping) {
         assert(len > 0);
         map = (caddr_t)malloc(size);
+        if(!map)
+            fault();
         size = mapsize = len;
         return;
     }
@@ -273,6 +279,8 @@ void MappedMemory::create(const char *fn, size_t len)
 
 
     map = (caddr_t)mmap(NULL, len, prot, MAP_SHARED, fd, 0);
+    if(!map)
+        fault();
     close(fd);
     if(map != (caddr_t)MAP_FAILED) {
         size = mapsize = len;
@@ -361,6 +369,8 @@ void MappedMemory::create(const char *name, size_t len)
     if(!use_mapping) {
         assert(len > 0);
         map = (caddr_t)malloc(len);
+        if(!map)
+            fault();
         size = len;
         return;
     }
@@ -391,6 +401,8 @@ remake:
             fd = -1;
     }
     map = (caddr_t)shmat(fd, NULL, 0);
+    if(!map)
+        fault();
 #ifdef  SHM_LOCK
     if(fd > -1)
         shmctl(fd, SHM_LOCK, NULL);
@@ -424,6 +436,11 @@ void MappedMemory::release(void)
 
 #endif
 
+void *MappedMemory::invalid(void) const
+{
+    abort();
+}
+
 void MappedMemory::fault(void) const
 {
     abort();
@@ -454,7 +471,7 @@ void MappedMemory::copy(size_t offset, void *buffer, size_t bufsize) const
 void *MappedMemory::offset(size_t offset) const
 {
     if(offset >= size)
-        fault();
+        return invalid();
     return (void *)(map + offset);
 }
 

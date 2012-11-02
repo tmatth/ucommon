@@ -185,16 +185,21 @@ ObjectProtocol **Vector::list(void) const
     return data->list;
 }
 
+ObjectProtocol *Vector::invalid(void) const
+{
+    return NULL;
+}
+
 ObjectProtocol *Vector::get(int offset) const
 {
     if(!data || !data->len)
-        return NULL;
+        return invalid();
 
     if(offset >= (int)(data->len))
-        return NULL;
+        return invalid();
 
     if(((vectorsize_t)(-offset)) >= data->len)
-        return NULL;
+        return invalid();
 
     if(offset >= 0)
         return data->list[offset];
