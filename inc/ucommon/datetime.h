@@ -384,7 +384,7 @@ public:
      * @param pointer to formatted time field.
      * @param size of field if not null terminated.
      */
-    Time(char *pointer, size_t size = 0);
+    Time(const char *pointer, size_t size = 0);
 
     /**
      * Create a time from hours (0-23), minutes (0-59), and seconds (0-59).
@@ -451,7 +451,7 @@ public:
      * @param pointer to time field.
      * @param size of field if not null terminated.
      */
-    void set(char *pointer, size_t size = 0);
+    void set(const char *pointer, size_t size = 0);
 
     /**
      * Check if time object had valid value.

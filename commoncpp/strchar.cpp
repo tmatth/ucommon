@@ -41,6 +41,7 @@
 #include <commoncpp/config.h>
 #include <commoncpp/export.h>
 #include <commoncpp/string.h>
+#include <commoncpp/numbers.h>
 
 NAMESPACE_COMMONCPP
 

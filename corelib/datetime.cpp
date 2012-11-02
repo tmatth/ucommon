@@ -458,7 +458,7 @@ Time::Time(time_t tm)
     DateTime::release(dt);
 }
 
-Time::Time(char *str, size_t size)
+Time::Time(const char *str, size_t size)
 {
     set(str, size);
 }
@@ -515,7 +515,7 @@ void Time::update(void)
     seconds = abs(seconds % DateTime::c_day);
 }
 
-void Time::set(char *str, size_t size)
+void Time::set(const char *str, size_t size)
 {
     int sec = 00;
 
@@ -528,7 +528,7 @@ void Time::set(char *str, size_t size)
     }
 //00:00:00
     else if (size == 8) {
-        ZNumber nsecond(str + 6, 2);
+        ZNumber nsecond((char *)(str + 6), 2);
         sec = nsecond();
     }
     else {
@@ -536,8 +536,8 @@ void Time::set(char *str, size_t size)
         return;
     }
 
-    ZNumber nhour(str, 2);
-    ZNumber nminute(str+3, 2);
+    ZNumber nhour((char *)str, 2);
+    ZNumber nminute((char *)(str + 3), 2);
     set(nhour(), nminute(), sec);
 }
 
