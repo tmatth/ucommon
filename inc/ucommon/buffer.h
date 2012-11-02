@@ -72,11 +72,6 @@ protected:
 
 public:
     /**
-     * Device I/O mode.
-     */
-    typedef enum {RD = BufferProtocol::BUF_RD, WR = BufferProtocol::BUF_WR, RDWR = BufferProtocol::BUF_RDWR} mode_t;
-
-    /**
      * Construct an unopened file buffer.
      */
     fbuf();
@@ -101,7 +96,7 @@ public:
      * @param access mode of file (rw, rdonly, etc).
      * @param size of the stream buffer.
      */
-    fbuf(const char *path, mode_t access = RDWR, size_t size = 512);
+    fbuf(const char *path, size_t size = 512);
 
     /**
      * Construct a file buffer that opens an existing device.
@@ -109,7 +104,7 @@ public:
      * @param access mode of file (rw, rdonly, etc).
      * @param size of the stream buffer.
      */
-    void open(const char *path, mode_t access = RDWR, size_t size = 512);
+    void open(const char *path, size_t size = 512);
 
     /**
      * Construct a pipe buffer from an existing file.

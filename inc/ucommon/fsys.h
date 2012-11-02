@@ -158,6 +158,8 @@ public:
         ACCESS_RDWR = ACCESS_REWRITE,
         ACCESS_APPEND,
         ACCESS_SHARED,
+        ACCESS_EXCLUSIVE,
+        ACCESS_DEVICE,
         ACCESS_DIRECTORY,
         ACCESS_STREAM,
         ACCESS_RANDOM
@@ -421,6 +423,13 @@ public:
      * @return true if exists and is symlink.
      */
     static bool is_link(const char *path);
+
+    /**
+     * Test if path is a device path.
+     * @param path to test.
+     * @return true of is a device path.
+     */
+    static bool is_device(const char *path);
 
     /**
      * Test if path is a hidden file.
@@ -844,6 +853,9 @@ inline bool is_dir(const char *path)
 
 inline bool is_link(const char *path)
     {return fsys::is_link(path);}
+
+inline bool is_device(const char *path)
+    {return fsys::is_device(path);}
 
 END_NAMESPACE
 

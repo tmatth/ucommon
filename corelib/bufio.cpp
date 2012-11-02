@@ -33,12 +33,12 @@ BufferProtocol(), fsys()
     pid = INVALID_PID_VALUE;
 }
 
-fbuf::fbuf(const char *path, mode_t access, size_t size) :
+fbuf::fbuf(const char *path, size_t size) :
 BufferProtocol(), fsys()
 {
     pipename = NULL;
     pid = INVALID_PID_VALUE;
-    open(path, access, size);
+    open(path, size);
 }
 
 fbuf::fbuf(const char *path, char **args, shell::pmode_t access, size_t size, char **envp) :
@@ -119,7 +119,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
         }
         allocate(size, BUF_RDWR);
         fsys::release(pair[1]);
-#elif defined(MS_WINDOWS)
+#elif defined(_MSWINDOWS_)
         static int count;
         char buf[96];
         snprintf(buf, sizeof(buf), "\\\\.\\pipe\\pair-%ld-%d",
@@ -160,50 +160,27 @@ failed:
     }
 }
 
-void fbuf::open(const char *path, mode_t mode, size_t size)
+void fbuf::open(const char *path, size_t size)
 {
     fbuf::close();
     _clear();
 
-    switch(mode) {
-    case RD:
-        fsys::open(path, ACCESS_STREAM);
-        break;
-    case WR:
-        fsys::open(path, ACCESS_WRONLY);
-        break;
-    case RDWR:
-        fsys::open(path, ACCESS_RANDOM);
-        break;
-    }
-
+    fsys::open(path, ACCESS_DEVICE);
     if(getfile() == INVALID_HANDLE_VALUE)
         return;
 
     inpos = outpos = 0;
-
-    switch(mode) {
-    case RD:
-        allocate(size, BUF_RD);
-        break;
-    case WR:
-        allocate(size, BUF_WR);
-        break;
-    case RDWR:
-        allocate(size, BUF_RDWR);
-        break;
-    default:
-        break;
-    }
+    allocate(size, BUF_RDWR);
 }
 
 int fbuf::cancel(void)
 {
-    if(pid != INVALID_PID_VALUE) {
-        error = shell::cancel(pid);
-        fbuf::close();
-    }
-    return error;
+    int result = 0;
+    if(pid != INVALID_PID_VALUE)
+        result = shell::cancel(pid);
+    pid = INVALID_PID_VALUE;
+    fbuf::close();
+    return result;
 }
 
 int fbuf::close(void)

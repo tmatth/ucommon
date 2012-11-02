@@ -57,6 +57,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 #ifdef  HAVE_POSIX_FADVISE
 #ifndef POSIX_FADV_RANDOM
@@ -406,8 +407,35 @@ void fsys::open(const char *path, access_t access)
     DWORD amode = 0;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
+    char buf[128];
 
     close();
+
+    if(access == ACCESS_DEVICE) {
+#ifdef  _MSWINDOWS_
+        if(isalpha(path[0]) && path[1] == ':') {
+            if(!QueryDosDevice(path, buf, sizeof(buf))
+                return;
+            path = buf;
+        }
+#else
+        if(!strchr(path, '/')) {
+            if(path[0] == 'S' && isdigit(path[1]))
+                snprintf(buf, sizeof(buf) "/dev/tty%s", path);
+            else if(strncmp(path, "USB", 3))
+                snprintf(buf, sizeof(buf), "/dev/tty%s", path);
+            else
+                snprintf(buf, sizeof(buf), "/dev/%s", path);
+
+            char *cp = strchr(buf, ':');
+            if(cp)
+                *cp = 0;
+            path = buf;
+        }
+#endif
+        if(!is_device(buf))
+            return;
+    }
 
     switch(access)
     {
@@ -421,6 +449,10 @@ void fsys::open(const char *path, access_t access)
         break;
     case ACCESS_WRONLY:
         amode = GENERIC_WRITE;
+        break;
+    case ACCESS_EXCLUSIVE:
+    case ACCESS_DEVICE:
+        amode = GENERIC_READ | GENERIC_WRITE;
         break;
     case ACCESS_RANDOM:
         attr |= FILE_FLAG_RANDOM_ACCESS;
@@ -486,6 +518,9 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 
     switch(access)
     {
+    case ACCESS_DEVICE:
+        return;
+
     case ACCESS_RDONLY:
         amode = GENERIC_READ;
         cmode = OPEN_ALWAYS;
@@ -495,6 +530,10 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     case ACCESS_WRONLY:
         amode = GENERIC_WRITE;
         cmode = CREATE_ALWAYS;
+        break;
+    case ACCESS_EXCLUSIVE:
+        amode = GENERIC_READ | GENERIC_WRITE;
+        cmode = OPEN_ALWAYS;
         break;
     case ACCESS_RANDOM:
         attr |= FILE_FLAG_RANDOM_ACCESS;
@@ -756,6 +795,9 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 
     switch(access)
     {
+    case ACCESS_DEVICE:
+        return;
+
     case ACCESS_RDONLY:
         flags = O_RDONLY | O_CREAT;
         break;
@@ -766,6 +808,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     case ACCESS_RANDOM:
     case ACCESS_SHARED:
     case ACCESS_REWRITE:
+    case ACCESS_EXCLUSIVE:
         flags = O_RDWR | O_CREAT;
         break;
     case ACCESS_APPEND:
@@ -820,9 +863,11 @@ void fsys::open(const char *path, access_t access)
     case ACCESS_WRONLY:
         flags = O_WRONLY;
         break;
+    case ACCESS_EXCLUSIVE:
     case ACCESS_RANDOM:
     case ACCESS_SHARED:
     case ACCESS_REWRITE:
+    case ACCESS_DEVICE:
         flags = O_RDWR;
         break;
     case ACCESS_APPEND:
@@ -1476,6 +1521,49 @@ void *fsys::find(mem_t addr, const char *sym)
 }
 
 #endif
+
+bool fsys::is_device(const char *path)
+{
+    if(!path)
+        return false;
+
+#ifndef _MSWINDOWS_
+    if(is_dir(path))
+        return false;
+
+    if(!strncmp(path, "/dev/", 5))
+        return true;
+
+    return false;
+#else
+    if(path[1] == ':' && !path[2] && isalpha(*path))
+        return true;
+
+    if(!strncmp(path, "com", 3) || !strncmp(path, "lpt", 3)) {
+        path += 3;
+        while(isdigit(*path))
+            ++path;
+        if(!path || *path == ':')
+            return true;
+        return false;
+    }
+
+    if(!strncmp(path, "aux") || !strcmp(path, "prn")) {
+        if(!path[3] || path[3] == ':')
+            return true;
+        return false;
+    }
+
+    if(!strncmp(path, "\\\\.\\", 4))
+        return true;
+
+    if(!strnicmp(path, "\\\\?\\Device\\", 12))
+        return true;
+
+    return false;
+
+#endif
+}
 
 bool fsys::is_hidden(const char *path)
 {
