@@ -258,7 +258,7 @@ public:
      */
     inethostaddr_t broadcast(void) const;
 
-    inethostaddr_t getBroadcast(void) const
+    inline inethostaddr_t getBroadcast(void) const
         {return broadcast();}
 
     /**
@@ -324,9 +324,6 @@ public:
      * @param protocol of service to get.
      */
     static struct addrinfo *query(const char *host, const char *service, int type = SOCK_STREAM, int protocol = 0);
-
-    static inline struct addrinfo *getaddress(const char *host, const char *service, int type = SOCK_STREAM, int protocol = 0)
-        {return query(host, service, type, protocol);}
 
     /**
      * Release an address list directly.  This is used internally by some
@@ -1421,9 +1418,6 @@ public:
      */
     static socklen_t len(const struct sockaddr *address);
 
-    static inline socklen_t getlen(const struct sockaddr *address)
-        {return len(address);}
-
     /**
      * Compare socket addresses.  Test if the address and service matches
      * or if there is no service, then just the host address values.
@@ -1505,9 +1499,6 @@ public:
      */
     static int network(struct sockaddr *address, const struct sockaddr *destination);
 
-    inline static int getinterface(struct sockaddr *address, const struct sockaddr *destination)
-        {return network(address, destination);}
-
     /**
      * Get the hostname of a socket address.
      * @param address to lookup.
@@ -1517,18 +1508,12 @@ public:
      */
     static char *query(const struct sockaddr *address, char *buffer, socklen_t size);
 
-    static inline char *getaddress(const struct sockaddr *address, char *buffer, socklen_t size)
-        {return query(address, buffer, size);}
-
     /**
      * Get the service port of a socket.
      * @param address of socket to examine.
      * @return service port number.
      */
     static short service(const struct sockaddr *address);
-
-    static inline short getservice(const struct sockaddr *address)
-        {return service(address);}
 
     /**
      * Get the service port of an inet socket.
