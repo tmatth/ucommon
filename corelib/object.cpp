@@ -119,7 +119,7 @@ void auto_object::operator=(ObjectProtocol *o)
     object = o;
 }
 
-sparse_array::sparse_array(unsigned m)
+SparseObjects::SparseObjects(unsigned m)
 {
     assert(m > 0);
     max = m;
@@ -127,12 +127,12 @@ sparse_array::sparse_array(unsigned m)
     memset(vector, 0, sizeof(ObjectProtocol *) * m);
 }
 
-sparse_array::~sparse_array()
+SparseObjects::~SparseObjects()
 {
     purge();
 }
 
-void sparse_array::purge(void)
+void SparseObjects::purge(void)
 {
     if(!vector)
         return;
@@ -145,7 +145,7 @@ void sparse_array::purge(void)
     vector = NULL;
 }
 
-unsigned sparse_array::count(void)
+unsigned SparseObjects::count(void)
 {
     unsigned c = 0;
     for(unsigned pos = 0; pos < max; ++pos) {
@@ -155,7 +155,7 @@ unsigned sparse_array::count(void)
     return c;
 }
 
-ObjectProtocol *sparse_array::get(unsigned pos)
+ObjectProtocol *SparseObjects::get(unsigned pos)
 {
     ObjectProtocol *obj;
 

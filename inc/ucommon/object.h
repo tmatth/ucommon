@@ -203,7 +203,7 @@ public:
  * in advance and is a helper class for the sarray template.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT sparse_array
+class __EXPORT SparseObjects
 {
 private:
     ObjectProtocol **vector;
@@ -234,14 +234,14 @@ protected:
      * created until they are referenced.
      * @param size of array.
      */
-    sparse_array(unsigned size);
+    SparseObjects(unsigned size);
 
-public:
     /**
      * Destroy sparse array and delete all generated objects.
      */
-    virtual ~sparse_array();
+    virtual ~SparseObjects();
 
+public:
     /**
      * Get count of array elements.
      * @return array elements.
@@ -259,14 +259,14 @@ public:
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 template <class T>
-class sarray : public sparse_array
+class sarray : public SparseObjects
 {
 public:
     /**
      * Generate a sparse typed array of specified size.
      * @param size of array to create.
      */
-    inline sarray(unsigned size) : sparse_array(size) {};
+    inline sarray(unsigned size) : SparseObjects(size) {};
 
     /**
      * Get typed member of array.  If the object does not exist, it is
@@ -275,7 +275,7 @@ public:
      * @return pointer to typed object.
      */
     inline T *get(unsigned offset)
-        {static_cast<T*>(sparse_array::get(offset));};
+        {return static_cast<T*>(SparseObjects::get(offset));}
 
     /**
      * Array operation to access member object.  If the object does not
@@ -285,6 +285,9 @@ public:
      */
     inline T& operator[](unsigned offset)
         {return get(offset);};
+
+    inline const T* at(unsigned offset)
+        {return static_cast<const T&>(SparseObjects::get(offset));}
 
 private:
     __LOCAL ObjectProtocol *create(void)
