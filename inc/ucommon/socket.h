@@ -164,9 +164,6 @@ protected:
 
     unsigned mask(const char *cp) const;
 
-    inline unsigned getMask(const char *cp) const
-        {return getMask();}
-
 public:
     /**
      * A convenience type for using a pointer to a linked list as a policy chain.

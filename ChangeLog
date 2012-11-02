@@ -4,6 +4,8 @@ from ucommon 5.5.1 to 6.0.0
 - made StringPager proper base class by naming conventions
 - new device access mode and name checking for fsys
 - fbuf refocused on process pipe and device access
+- more consistent abi naming conventions
+- depreciated methods removed
 
 from ucommon 5.5.0 to 5.5.1
 - regex checks also for lib, mingw support

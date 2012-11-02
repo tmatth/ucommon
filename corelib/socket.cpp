@@ -879,7 +879,7 @@ void cidr::set(const char *cp)
     switch(family) {
     case AF_INET:
         memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
-        bitset((bit_t *)&netmask.ipv4, getMask(cp));
+        bitset((bit_t *)&netmask.ipv4, mask(cp));
         String::set(cbuf, sizeof(cbuf), cp);
         ep = (char *)strchr(cbuf, '/');
         if(ep)
@@ -904,7 +904,7 @@ void cidr::set(const char *cp)
 #ifdef  AF_INET6
     case AF_INET6:
         memset(&netmask.ipv6, 0, sizeof(netmask));
-        bitset((bit_t *)&netmask.ipv6, getMask(cp));
+        bitset((bit_t *)&netmask.ipv6, mask(cp));
         String::set(cbuf, sizeof(cbuf), cp);
         ep = (char *)strchr(cp, '/');
         if(ep)
