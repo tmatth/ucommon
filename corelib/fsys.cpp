@@ -414,8 +414,10 @@ void fsys::open(const char *path, access_t access)
     if(access == ACCESS_DEVICE) {
 #ifdef  _MSWINDOWS_
         if(isalpha(path[0]) && path[1] == ':') {
-            if(!QueryDosDevice(path, buf, sizeof(buf))
+            if(!QueryDosDevice(path, buf, sizeof(buf))) {
+                error = ENODEV;
                 return;
+            }
             path = buf;
         }
 #else
@@ -433,8 +435,10 @@ void fsys::open(const char *path, access_t access)
             path = buf;
         }
 #endif
-        if(!is_device(buf))
+        if(!is_device(buf)) {
+            error = ENODEV;
             return;
+        }
     }
 
     switch(access)

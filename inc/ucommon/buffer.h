@@ -67,7 +67,7 @@ protected:
     int _err(void) const;
     void _clear(void);
 
-    inline fd_t getfile(void)
+    inline fd_t handle(void)
         {return fd;};
 
 public:

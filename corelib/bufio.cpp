@@ -166,7 +166,7 @@ void fbuf::open(const char *path, size_t size)
     _clear();
 
     fsys::open(path, ACCESS_DEVICE);
-    if(getfile() == INVALID_HANDLE_VALUE)
+    if(fd == INVALID_HANDLE_VALUE)
         return;
 
     inpos = outpos = 0;
@@ -268,7 +268,7 @@ size_t fbuf::_push(const char *buf, size_t size)
     }
 
 #ifdef  HAVE_PWRITE
-    result = pwrite(getfile(), buf, size, outpos);
+    result = pwrite(fd, buf, size, outpos);
     if(result < 0)
         result = 0;
     outpos += result;
@@ -309,7 +309,7 @@ size_t fbuf::_pull(char *buf, size_t size)
 
 #ifdef  HAVE_PWRITE
     if(is_output())
-        result = pread(getfile(), buf, size, inpos);
+        result = pread(fd, buf, size, inpos);
     else
         result = fsys::read(buf, size);
 #else
