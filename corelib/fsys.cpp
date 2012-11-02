@@ -523,6 +523,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     switch(access)
     {
     case ACCESS_DEVICE:
+        error = ENOSYS;
         return;
 
     case ACCESS_RDONLY:
@@ -800,6 +801,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
     switch(access)
     {
     case ACCESS_DEVICE:
+        error = ENOSYS;
         return;
 
     case ACCESS_RDONLY:
