@@ -40,7 +40,7 @@ extern "C" int main()
     assert(localhost.get(AF_INET) != NULL);
     Socket::query(localhost.get(AF_INET), addrbuf, sizeof(addrbuf));
     assert(0 == strcmp(addrbuf, "127.0.0.1"));
-    Socket::network((struct sockaddr *)&addr, localhost.get(AF_INET));
+    Socket::via((struct sockaddr *)&addr, localhost.get(AF_INET));
     Socket::query((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
     assert(0 == strcmp(addrbuf, "127.0.0.1"));
     assert(eq((struct sockaddr *)&addr, localhost.get(AF_INET)));
@@ -50,7 +50,7 @@ extern "C" int main()
     // so we use getinterface to find out first.  it will return -1 for
     // localhost interface if ipv6 is down...
     assert(localhost6.get(AF_INET6) != NULL);
-    if(!Socket::network((struct sockaddr *)&addr, localhost6.get(AF_INET6))) {
+    if(!Socket::via((struct sockaddr *)&addr, localhost6.get(AF_INET6))) {
         Socket::query((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
         assert(0 == strcmp(addrbuf, "::1"));
         assert(Socket::equal((struct sockaddr *)&addr, localhost6.get(AF_INET6)));

@@ -1497,7 +1497,7 @@ public:
      * @param destination address.
      * @return 0 on success, -1 on error.
      */
-    static int network(struct sockaddr *address, const struct sockaddr *destination);
+    static int via(struct sockaddr *address, const struct sockaddr *destination);
 
     /**
      * Get the hostname of a socket address.
