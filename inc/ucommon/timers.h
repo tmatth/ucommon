@@ -207,42 +207,42 @@ public:
      * @param timer to compare with.
      * @return true if same.
      */
-    bool operator==(const Timer& timer);
+    bool operator==(const Timer& timer) const;
 
     /**
      * Compare timers if not same timeout.
      * @param timer to compare with.
      * @return true if not same.
      */
-    bool operator!=(const Timer& timer);
+    bool operator!=(const Timer& timer) const;
 
     /**
      * Compare timers if earlier timeout than another timer.
      * @param timer to compare with.
      * @return true if earlier.
      */
-    bool operator<(const Timer& timer);
+    bool operator<(const Timer& timer) const;
 
     /**
      * Compare timers if earlier than or equal to another timer.
      * @param timer to compare with.
      * @return true if earlier or same.
      */
-    bool operator<=(const Timer& timer);
+    bool operator<=(const Timer& timer) const;
 
     /**
      * Compare timers if later timeout than another timer.
      * @param timer to compare with.
      * @return true if later.
      */
-    bool operator>(const Timer& timer);
+    bool operator>(const Timer& timer) const;
 
     /**
      * Compare timers if later than or equal to another timer.
      * @param timer to compare with.
      * @return true if later or same.
      */
-    bool operator>=(const Timer& timer);
+    bool operator>=(const Timer& timer) const;
 
     /**
      * Sleep current thread until the specified timer expires.
@@ -353,7 +353,7 @@ public:
          * Get the timer queue we are attached to.
          * @return timer queue or NULL if not attached.
          */
-        inline TimerQueue *getQueue(void)
+        inline TimerQueue *list(void)
             {return static_cast<TimerQueue*>(root);};
     };
 

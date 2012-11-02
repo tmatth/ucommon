@@ -184,7 +184,7 @@ void Timer::set(time_t time)
 
 void TimerQueue::event::attach(TimerQueue *tq)
 {
-    if(tq == getQueue())
+    if(tq == list())
         return;
 
     detach();
@@ -199,7 +199,7 @@ void TimerQueue::event::attach(TimerQueue *tq)
 
 void TimerQueue::event::arm(timeout_t timeout)
 {
-    TimerQueue *tq = getQueue();
+    TimerQueue *tq = list();
     if(tq)
         tq->modify();
     set(timeout);
@@ -209,7 +209,7 @@ void TimerQueue::event::arm(timeout_t timeout)
 
 void TimerQueue::event::disarm(void)
 {
-    TimerQueue *tq = getQueue();
+    TimerQueue *tq = list();
     bool flag = is_active();
 
     if(tq && flag)
@@ -221,7 +221,7 @@ void TimerQueue::event::disarm(void)
 
 void TimerQueue::event::update(void)
 {
-    TimerQueue *tq = getQueue();
+    TimerQueue *tq = list();
     if(Timer::update() && tq) {
         tq->modify();
         tq->update();
@@ -230,7 +230,7 @@ void TimerQueue::event::update(void)
 
 void TimerQueue::event::detach(void)
 {
-    TimerQueue *tq = getQueue();
+    TimerQueue *tq = list();
     if(tq) {
         tq->modify();
         clear();
@@ -341,32 +341,32 @@ timeout_t Timer::operator-(const Timer& source)
     return tv - dv;
 }
 
-bool Timer::operator==(const Timer& source)
+bool Timer::operator==(const Timer& source) const
 {
     return get() == source.get();
 }
 
-bool Timer::operator!=(const Timer& source)
+bool Timer::operator!=(const Timer& source) const
 {
     return get() != source.get();
 }
 
-bool Timer::operator<(const Timer& source)
+bool Timer::operator<(const Timer& source) const
 {
     return get() < source.get();
 }
 
-bool Timer::operator<=(const Timer& source)
+bool Timer::operator<=(const Timer& source) const
 {
     return get() <= source.get();
 }
 
-bool Timer::operator>(const Timer& source)
+bool Timer::operator>(const Timer& source) const
 {
     return get() > source.get();
 }
 
-bool Timer::operator>=(const Timer& source)
+bool Timer::operator>=(const Timer& source) const
 {
     return get() >= source.get();
 }
@@ -497,6 +497,6 @@ void TimerQueue::operator+=(event &te) { te.attach(this); }
 
 void TimerQueue::operator-=(event &te)
 {
-    if(te.getQueue() == this)
+    if(te.list() == this)
         te.detach();
 }
