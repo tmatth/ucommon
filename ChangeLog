@@ -6,6 +6,8 @@ from ucommon 5.5.1 to 6.0.0
 - fbuf refocused on process pipe and device access
 - more consistent abi naming conventions
 - depreciated methods removed
+- access base classes now consistent with protocols
+- reorg of datetime classes
 
 from ucommon 5.5.0 to 5.5.1
 - regex checks also for lib, mingw support

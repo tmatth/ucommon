@@ -30,9 +30,9 @@ int main(int argc, char **argv)
 {
     Date date = Date(2003, 1, 6);
     int exp_year = 2003;
-    int exp_month = 1;
-    int exp_day = 6;
-    int exp_dayofweek = 1;
+    unsigned exp_month = 1;
+    unsigned exp_day = 6;
+    unsigned exp_dayofweek = 1;
     String exp_stringdate;
     tm_t exp_dt;
     time_t exp_ctime;
@@ -47,17 +47,17 @@ int main(int argc, char **argv)
     exp_dt.tm_mday = exp_day;
     exp_ctime = mktime(&exp_dt);
 
-    assert(exp_year == date[Date::year]);
-    assert(exp_month == date[Date::month]);
-    assert(exp_day == date[Date::day]);
-    assert(exp_dayofweek == date[Date::dow]);
+    assert(exp_year == date.year());
+    assert(exp_month == date.month());
+    assert(exp_day == date.day());
+    assert(exp_dayofweek == date.dow());
 
     // test some conversions...
     exp_stringdate = date();
     assert(eq(*exp_stringdate, "2003-01-06"));
-    date.get(buf);
+    date.put(buf);
     assert(eq(buf, "2003-01-06"));
-    assert(exp_ctime == date.getTime());
+    assert(exp_ctime == date.timeref());
 
     // some operator tests...
     Date aday = date;

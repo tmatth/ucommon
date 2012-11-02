@@ -75,8 +75,7 @@ class __EXPORT Date
 protected:
     long julian;
 
-    void toJulian(long year, long month, long day);
-    void fromJulian(char *buf) const;
+    void set(long year, long month, long day);
 
     /**
      * A method to use to "post" any changed values when shadowing
@@ -85,11 +84,6 @@ protected:
     virtual void update(void);
 
 public:
-    /**
-     * index elements.
-     */
-    typedef enum {year = 10, month, day, dow} index_t;
-
     /**
      * Size of date string field.
      */
@@ -142,45 +136,38 @@ public:
      * Get the year of the date.
      * @return year of the date
      */
-    int getYear(void) const;
+    int year(void) const;
 
     /**
      * Get the month of the date (1-12).
      * @return month of year
      */
-    unsigned getMonth(void) const;
+    unsigned month(void) const;
 
     /**
      * Get the day of the month of the date.
      * @return day of month
      */
-    unsigned getDay(void) const;
+    unsigned day(void) const;
 
     /**
      * Get the day of the week (0-7).
      * @return day of week
      */
-    unsigned getDayOfWeek(void) const;
-
-    /**
-     * Get the julian number of a date.
-     * @return julian number.
-     */
-    inline long getJulian(void)
-        {return julian;};
+    unsigned dow(void) const;
 
     /**
      * Get a ISO string representation of the date (yyyy-mm-dd).
      * @param buffer to store string.
      * @return string representation.
      */
-    char *get(char *buffer) const;
+    const char *put(char *buffer) const;
 
     /**
      * Get a time_t for the julian date if in time_t epoch.
      * @return time_t or -1 if out of range.
      */
-    time_t getTime(void) const;
+    time_t timeref(void) const;
 
     /**
      * Get the date as a number for the object or 0 if invalid.
@@ -212,13 +199,6 @@ public:
      */
     inline operator long() const
         {return get();};
-
-    /**
-     * Access numeric components.
-     * @param component to access.
-     * @return value of component.
-     */
-    int operator[](index_t component) const;
 
     /**
      * Access julian value.
@@ -294,42 +274,42 @@ public:
      * @param date to compare with.
      * @return true if same.
      */
-    bool operator==(const Date& date);
+    bool operator==(const Date& date) const;
 
     /**
      * Compare julian dates if not same date.
      * @param date to compare with.
      * @return true if not same.
      */
-    bool operator!=(const Date& date);
+    bool operator!=(const Date& date) const;
 
     /**
      * Compare julian date if earlier than another date.
      * @param date to compare with.
      * @return true if earlier.
      */
-    bool operator<(const Date& date);
+    bool operator<(const Date& date) const;
 
     /**
      * Compare julian date if earlier than or equal to another date.
      * @param date to compare with.
      * @return true if earlier or same.
      */
-    bool operator<=(const Date& date);
+    bool operator<=(const Date& date) const;
 
     /**
      * Compare julian date if later than another date.
      * @param date to compare with.
      * @return true if later.
      */
-    bool operator>(const Date& date);
+    bool operator>(const Date& date) const;
 
     /**
      * Compare julian date if later than or equal to another date.
      * @param date to compare with.
      * @return true if later or same.
      */
-    bool operator>=(const Date& date);
+    bool operator>=(const Date& date) const;
 
     /**
      * Check if julian date is not valid.
@@ -363,15 +343,24 @@ protected:
     long seconds;
 
 protected:
-    void toSeconds(int hour, int minute = 0, int second = 0);
-    void fromSeconds(char *buf) const;
+    void set(int hour, int minute = 0, int second = 0);
     virtual void update(void);
 
 public:
     /**
-     * Component access index.
+     * Constant for number of seconds in a day.
      */
-    typedef enum {hour = 20, minute, second} index_t;
+    static const long c_day;
+
+    /**
+     * Constant for number of seconds in a hour.
+     */
+    static const long c_hour;
+
+    /**
+     * Constant for number of seconds in a week.
+     */
+    static const long c_week;
 
     /**
      * Size of time string field.
@@ -431,26 +420,26 @@ public:
      * Get hours from midnight.
      * @return hours from midnight.
      */
-    int getHour(void) const;
+    int hour(void) const;
 
     /**
      * Get minutes from current hour.
      * @return minutes from current hour.
      */
-    int getMinute(void) const;
+    int minute(void) const;
 
     /**
      * Get seconds from current minute.
      * @return seconds from current minute.
      */
-    int getSecond(void) const;
+    int second(void) const;
 
     /**
      * Get a hh:mm:ss formatted string for current time.
      * @param buffer to store time string in.
      * @return time string buffer or NULL if invalid.
      */
-    char *get(char *buffer) const;
+    const char *put(char *buffer) const;
 
     /**
      * Set (update) the time with current time.
@@ -520,13 +509,6 @@ public:
         {return get();};
 
     /**
-     * Get component of time object.
-     * @param component index.
-     * @return value of component.
-     */
-    int operator[](index_t component) const;
-
-    /**
      * Convert to standard 24 hour time string.
      * @return time string.
      */
@@ -570,42 +552,42 @@ public:
      * @param time to compare with.
      * @return true if same time.
      */
-    bool operator==(const Time &time);
+    bool operator==(const Time &time) const;
 
     /**
      * Compare time with another time to see if not same time.
      * @param time to compare with.
      * @return true if not same time.
      */
-    bool operator!=(const Time &time);
+    bool operator!=(const Time &time) const;
 
     /**
      * Compare time if earlier than another time.
      * @param time object to compare with.
      * @return true if earlier than object.
      */
-    bool operator<(const Time &time);
+    bool operator<(const Time &time) const;
 
     /**
      * Compare time if earlier than or equal to another time.
      * @param time object to compare with.
      * @return true if earlier or same as object.
      */
-    bool operator<=(const Time &time);
+    bool operator<=(const Time &time) const;
 
     /**
      * Compare time if later than another time.
      * @param time object to compare with.
      * @return true if later than object.
      */
-    bool operator>(const Time &time);
+    bool operator>(const Time &time) const;
 
     /**
      * Compare time if later than or equal to another time.
      * @param time object to compare with.
      * @return true if later than or same as object.
      */
-    bool operator>=(const Time &time);
+    bool operator>=(const Time &time) const;
 };
 
 /**
@@ -623,28 +605,6 @@ protected:
     void update(void);
 
 public:
-    /**
-     * Index to components we can access.
-     */
-    typedef enum {year = Date::year, month = Date::month, day = Date::day,
-        dow = Date::dow,
-        hour = Time::hour, minute = Time::minute, second = Time::second} index_t;
-
-    /**
-     * Constant for number of seconds in a day.
-     */
-    static const long c_day;
-
-    /**
-     * Constant for number of seconds in a hour.
-     */
-    static const long c_hour;
-
-    /**
-     * Constant for number of seconds in a week.
-     */
-    static const long c_week;
-
     /**
      * Size of datetime string field.
      */
@@ -702,7 +662,7 @@ public:
      * @param buffer to store date and time in (yyyy-mm-dd hh:mm:ss).
      * @return string buffer if object is valid.
      */
-    char *get(char *buffer) const;
+    const char *put(char *buffer) const;
 
     /**
      * Get C library time_t type if object in C library epoch range.
@@ -779,21 +739,21 @@ public:
      * @param datetime to compare with.
      * @return true if equal.
      */
-    bool operator==(const DateTime& datetime);
+    bool operator==(const DateTime& datetime) const;
 
     /**
      * Compare date and time with another date and time to see if not same.
      * @param datetime to compare with.
      * @return true if not equal.
      */
-    bool operator!=(const DateTime& datetime);
+    bool operator!=(const DateTime& datetime) const;
 
     /**
      * Compare date and time with another date and time to see if earlier.
      * @param datetime to compare with.
      * @return true if earlier.
      */
-    bool operator<(const DateTime& datetime);
+    bool operator<(const DateTime& datetime) const;
 
     /**
      * Compare date and time with another date and time to see if earlier or
@@ -801,14 +761,14 @@ public:
      * @param datetime to compare with.
      * @return true if earlier or equal.
      */
-    bool operator<=(const DateTime& datetime);
+    bool operator<=(const DateTime& datetime) const;
 
     /**
      * Compare date and time with another date and time to see if later.
      * @param datetime to compare with.
      * @return true if later.
      */
-    bool operator>(const DateTime& datetime);
+    bool operator>(const DateTime& datetime) const;
 
     /**
      * Compare date and time with another date and time to see if later or
@@ -816,20 +776,13 @@ public:
      * @param datetime to compare with.
      * @return true if later or equal.
      */
-    bool operator>=(const DateTime& datetime);
+    bool operator>=(const DateTime& datetime) const;
 
     /**
      * Check if date and time is not valid.
      * @return true if not valid.
      */
     bool operator!() const;
-
-    /**
-     * Access time components.
-     * @param component to access.
-     * @return number or -1 if invalid.
-     */
-    int operator[](index_t component) const;
 
     /**
      * Test is date and time is valid for is() operator.
@@ -870,7 +823,7 @@ public:
      * @param time object or NULL if using current time.
      * @return locked instance of struct tm object.
      */
-    static tm_t *glt(time_t *time = NULL);
+    static tm_t *local(time_t *time = NULL);
 
     /**
      * Fetch an instance of time converted to gmt.  If the gmtime abi

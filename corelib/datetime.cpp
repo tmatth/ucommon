@@ -35,9 +35,9 @@ using std::tm;
 using std::localtime;
 #endif
 
-const long DateTime::c_day = 86400l;
-const long DateTime::c_hour = 3600l;
-const long DateTime::c_week = 604800l;
+const long Time::c_day = 86400l;
+const long Time::c_hour = 3600l;
+const long Time::c_week = 604800l;
 
 const size_t Date::sz_string = 11;
 const size_t Time::sz_string = 9;
@@ -45,7 +45,7 @@ const size_t DateTime::sz_string = 20;
 
 #ifdef  HAVE_LOCALTIME_R
 
-tm_t *DateTime::glt(time_t *now)
+tm_t *DateTime::local(time_t *now)
 {
     tm_t *result, *dt = new tm_t;
     time_t tmp;
@@ -88,7 +88,7 @@ void DateTime::release(tm_t *dt)
 #else
 static mutex_t lockflag;
 
-tm_t *DateTime::glt(time_t *now)
+tm_t *DateTime::local(time_t *now)
 {
     tm_t *dt;
     time_t tmp;
@@ -144,13 +144,13 @@ Date::Date(const Date& copy)
 
 Date::Date(tm_t *dt)
 {
-    toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
+    set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 }
 
 Date::Date(time_t tm)
 {
-    tm_t *dt = DateTime::glt(&tm);
-    toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
+    tm_t *dt = DateTime::local(&tm);
+    set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
     DateTime::release(dt);
 }
 
@@ -165,15 +165,15 @@ Date::~Date()
 
 void Date::set()
 {
-    tm_t *dt = DateTime::glt();
+    tm_t *dt = DateTime::local();
 
-    toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
+    set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
     DateTime::release(dt);
 }
 
 void Date::set(const char *str, size_t size)
 {
-    tm_t *dt = DateTime::glt();
+    tm_t *dt = DateTime::local();
     int nyear = 0;
     const char *mstr = str;
     const char *dstr = str;
@@ -229,12 +229,12 @@ void Date::set(const char *str, size_t size)
     DateTime::release(dt);
     ZNumber nmonth((char*)mstr, 2);
     ZNumber nday((char*)dstr, 2);
-    toJulian(nyear, nmonth(), nday());
+    set(nyear, nmonth(), nday());
 }
 
 Date::Date(int nyear, unsigned nmonth, unsigned nday)
 {
-    toJulian(nyear, nmonth, nday);
+    set(nyear, nmonth, nday);
 }
 
 void Date::update(void)
@@ -248,18 +248,12 @@ bool Date::is_valid(void) const
     return true;
 }
 
-char *Date::get(char *buf) const
-{
-    fromJulian(buf);
-    return buf;
-}
-
-time_t Date::getTime(void) const
+time_t Date::timeref(void) const
 {
     char buf[11];
     tm_t dt;
     memset(&dt, 0, sizeof(tm_t));
-    fromJulian(buf);
+    put(buf);
     Number nyear(buf, 4);
     Number nmonth(buf + 5, 2);
     Number nday(buf + 8, 2);
@@ -271,46 +265,31 @@ time_t Date::getTime(void) const
     return mktime(&dt); // to fill in day of week etc.
 }
 
-int Date::operator[](index_t idx) const
-{
-    switch(idx) {
-    case year:
-        return getYear();
-    case month:
-        return getMonth();
-    case day:
-        return getDay();
-    case dow:
-        return getDayOfWeek();
-    }
-    return -1;
-}
-
-int Date::getYear(void) const
+int Date::year(void) const
 {
     char buf[11];
-    fromJulian(buf);
+    put(buf);
     Number num(buf, 4);
     return num();
 }
 
-unsigned Date::getMonth(void) const
+unsigned Date::month(void) const
 {
     char buf[11];
-    fromJulian(buf);
+    put(buf);
     Number num(buf + 5, 2);
     return num();
 }
 
-unsigned Date::getDay(void) const
+unsigned Date::day(void) const
 {
     char buf[11];
-    fromJulian(buf);
+    put(buf);
     Number num(buf + 8, 2);
     return num();
 }
 
-unsigned Date::getDayOfWeek(void) const
+unsigned Date::dow(void) const
 {
     return (unsigned)((julian + 1l) % 7l);
 }
@@ -319,7 +298,7 @@ String Date::operator()() const
 {
     char buf[11];
 
-    fromJulian(buf);
+    put(buf);
     String date(buf);
 
     return date;
@@ -328,7 +307,7 @@ String Date::operator()() const
 long Date::get(void) const
 {
     char buf[11];
-    fromJulian(buf);
+    put(buf);
     return atol(buf) * 10000 + atol(buf + 5) * 100 + atol(buf + 8);
 }
 
@@ -374,37 +353,37 @@ Date& Date::operator-=(long val)
     return *this;
 }
 
-bool Date::operator==(const Date &d)
+bool Date::operator==(const Date &d) const
 {
     return julian == d.julian;
 }
 
-bool Date::operator!=(const Date &d)
+bool Date::operator!=(const Date &d) const
 {
     return julian != d.julian;
 }
 
-bool Date::operator<(const Date &d)
+bool Date::operator<(const Date &d) const
 {
     return julian < d.julian;
 }
 
-bool Date::operator<=(const Date &d)
+bool Date::operator<=(const Date &d) const
 {
     return julian <= d.julian;
 }
 
-bool Date::operator>(const Date &d)
+bool Date::operator>(const Date &d) const
 {
     return julian > d.julian;
 }
 
-bool Date::operator>=(const Date &d)
+bool Date::operator>=(const Date &d) const
 {
     return julian >= d.julian;
 }
 
-void Date::toJulian(long nyear, long nmonth, long nday)
+void Date::set(long nyear, long nmonth, long nday)
 {
     julian = 0x7fffffffl;
 
@@ -426,7 +405,7 @@ Date& Date::operator=(const Date& date)
     return *this;
 }
 
-void Date::fromJulian(char *buffer) const
+const char *Date::put(char *buffer) const
 {
 // The following conversion algorithm is due to
 // Henry F. Fliegel and Thomas C. Van Flandern:
@@ -454,6 +433,7 @@ void Date::fromJulian(char *buffer) const
     nday = int(k);
 
     buffer[10] = '\0';
+    return buffer;
 }
 
 Time::Time()
@@ -468,13 +448,13 @@ Time::Time(const Time& copy)
 
 Time::Time(tm_t *dt)
 {
-    toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
+    set(dt->tm_hour, dt->tm_min, dt->tm_sec);
 }
 
 Time::Time(time_t tm)
 {
-    tm_t *dt = DateTime::glt(&tm);
-    toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
+    tm_t *dt = DateTime::local(&tm);
+    set(dt->tm_hour, dt->tm_min, dt->tm_sec);
     DateTime::release(dt);
 }
 
@@ -485,7 +465,7 @@ Time::Time(char *str, size_t size)
 
 Time::Time(int nhour, int nminute, int nsecond)
 {
-    toSeconds(nhour, nminute, nsecond);
+    set(nhour, nminute, nsecond);
 }
 
 Time::~Time()
@@ -494,8 +474,8 @@ Time::~Time()
 
 void Time::set(void)
 {
-    tm_t *dt = DateTime::glt();
-    toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
+    tm_t *dt = DateTime::local();
+    set(dt->tm_hour, dt->tm_min, dt->tm_sec);
     DateTime::release(dt);
 }
 
@@ -506,26 +486,7 @@ bool Time::is_valid(void) const
     return true;
 }
 
-char *Time::get(char *buf) const
-{
-    fromSeconds(buf);
-    return buf;
-}
-
-int Time::operator[](index_t idx) const
-{
-    switch(idx) {
-    case hour:
-        return getHour();
-    case minute:
-        return getMinute();
-    case second:
-        return getSecond();
-    }
-    return -1;
-}
-
-int Time::getHour(void) const
+int Time::hour(void) const
 {
     if(seconds == -1)
         return -1;
@@ -533,7 +494,7 @@ int Time::getHour(void) const
     return (int)(seconds / 3600l);
 }
 
-int Time::getMinute(void) const
+int Time::minute(void) const
 {
     if(seconds == -1)
         return -1;
@@ -541,7 +502,7 @@ int Time::getMinute(void) const
     return (int)((seconds / 60l) % 60l);
 }
 
-int Time::getSecond(void) const
+int Time::second(void) const
 {
     if(seconds == -1)
         return -1;
@@ -577,14 +538,14 @@ void Time::set(char *str, size_t size)
 
     ZNumber nhour(str, 2);
     ZNumber nminute(str+3, 2);
-    toSeconds(nhour(), nminute(), sec);
+    set(nhour(), nminute(), sec);
 }
 
 String Time::operator()() const
 {
     char buf[7];
 
-    fromSeconds(buf);
+    put(buf);
     String strTime(buf);
 
     return strTime;
@@ -637,32 +598,32 @@ Time Time::operator-(long val)
     return result;
 }
 
-bool Time::operator==(const Time &t)
+bool Time::operator==(const Time &t) const
 {
     return seconds == t.seconds;
 }
 
-bool Time::operator!=(const Time &t)
+bool Time::operator!=(const Time &t) const
 {
     return seconds != t.seconds;
 }
 
-bool Time::operator<(const Time &t)
+bool Time::operator<(const Time &t) const
 {
     return seconds < t.seconds;
 }
 
-bool Time::operator<=(const Time &t)
+bool Time::operator<=(const Time &t) const
 {
     return seconds <= t.seconds;
 }
 
-bool Time::operator>(const Time &t)
+bool Time::operator>(const Time &t) const
 {
     return seconds > t.seconds;
 }
 
-bool Time::operator>=(const Time &t)
+bool Time::operator>=(const Time &t) const
 {
     return seconds >= t.seconds;
 }
@@ -675,7 +636,7 @@ long Time::operator-(const Time &t)
         return seconds - t.seconds;
 }
 
-void Time::toSeconds(int nhour, int nminute, int nsecond)
+void Time::set(int nhour, int nminute, int nsecond)
 {
     seconds = -1;
 
@@ -685,7 +646,7 @@ void Time::toSeconds(int nhour, int nminute, int nsecond)
     seconds = 3600 * nhour + 60 * nminute + nsecond;
 }
 
-void Time::fromSeconds(char *buffer) const
+const char *Time::put(char *buffer) const
 {
     ZNumber zhour(buffer, 2);
     buffer[2] = ':';
@@ -697,6 +658,7 @@ void Time::fromSeconds(char *buffer) const
     zminute = (seconds - (3600l * zhour())) / 60l;
     zsecond = seconds - (3600l * zhour()) - (60l * zminute());
     buffer[8] = '\0';
+    return buffer;
 }
 
 Time& Time::operator=(const Time& time)
@@ -707,9 +669,9 @@ Time& Time::operator=(const Time& time)
 
 DateTime::DateTime(time_t tm)
 {
-    tm_t *dt = DateTime::glt();
-    toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
-    toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
+    tm_t *dt = DateTime::local();
+    Date::set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
+    Time::set(dt->tm_hour, dt->tm_min, dt->tm_sec);
     DateTime::release(dt);
 }
 
@@ -769,9 +731,9 @@ DateTime::DateTime(int year, unsigned month, unsigned day,
 
 DateTime::DateTime() : Date(), Time()
 {
-    tm_t *dt = DateTime::glt();
-    toSeconds(dt->tm_hour, dt->tm_min, dt->tm_sec);
-    toJulian(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
+    tm_t *dt = DateTime::local();
+    Time::set(dt->tm_hour, dt->tm_min, dt->tm_sec);
+    Date::set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
     DateTime::release(dt);
 }
 
@@ -790,11 +752,11 @@ bool DateTime::is_valid(void) const
     return Date::is_valid() && Time::is_valid();
 }
 
-char *DateTime::get(char *buf) const
+const char *DateTime::put(char *buf) const
 {
-    fromJulian(buf);
+    Date::put(buf);
     buf[10] = ' ';
-    fromSeconds(buf+11);
+    Time::put(buf+11);
     return buf;
 }
 
@@ -804,7 +766,7 @@ time_t DateTime::get(void) const
     tm_t dt;
     memset(&dt, 0, sizeof(dt));
 
-    fromJulian(buf);
+    Date::put(buf);
     ZNumber nyear(buf, 4);
     ZNumber nmonth(buf + 5, 2);
     ZNumber nday(buf + 8, 2);
@@ -812,7 +774,7 @@ time_t DateTime::get(void) const
     dt.tm_mon = nmonth() - 1;
     dt.tm_mday = nday();
 
-    fromSeconds(buf);
+    Time::put(buf);
     ZNumber nhour(buf, 2);
     ZNumber nminute(buf + 2, 2);
     ZNumber nsecond(buf + 4, 2);
@@ -822,27 +784,6 @@ time_t DateTime::get(void) const
     dt.tm_isdst = -1;
 
     return mktime(&dt);
-}
-
-int DateTime::operator[](index_t idx) const
-{
-    switch(idx) {
-    case year:
-        return getYear();
-    case month:
-        return getMonth();
-    case day:
-        return getDay();
-    case dow:
-        return getDayOfWeek();
-    case hour:
-        return getHour();
-    case minute:
-        return getMinute();
-    case second:
-        return getSecond();
-    }
-    return -1;
 }
 
 DateTime& DateTime::operator=(const DateTime& datetime)
@@ -873,17 +814,17 @@ void DateTime::update(void)
     Time::update();
 }
 
-bool DateTime::operator==(const DateTime &d)
+bool DateTime::operator==(const DateTime &d) const
 {
     return (julian == d.julian) && (seconds == d.seconds);
 }
 
-bool DateTime::operator!=(const DateTime &d)
+bool DateTime::operator!=(const DateTime &d) const
 {
     return (julian != d.julian) || (seconds != d.seconds);
 }
 
-bool DateTime::operator<(const DateTime &d)
+bool DateTime::operator<(const DateTime &d) const
 {
     if (julian != d.julian) {
         return (julian < d.julian);
@@ -893,7 +834,7 @@ bool DateTime::operator<(const DateTime &d)
     }
 }
 
-bool DateTime::operator<=(const DateTime &d)
+bool DateTime::operator<=(const DateTime &d) const
 {
     if (julian != d.julian) {
         return (julian < d.julian);
@@ -903,7 +844,7 @@ bool DateTime::operator<=(const DateTime &d)
     }
 }
 
-bool DateTime::operator>(const DateTime &d)
+bool DateTime::operator>(const DateTime &d) const
 {
     if (julian != d.julian) {
         return (julian > d.julian);
@@ -913,7 +854,7 @@ bool DateTime::operator>(const DateTime &d)
     }
 }
 
-bool DateTime::operator>=(const DateTime &d)
+bool DateTime::operator>=(const DateTime &d) const
 {
     if (julian != d.julian) {
         return (julian > d.julian);
@@ -938,7 +879,7 @@ String DateTime::format(const char *text) const
     String retval;
 
     t = get();
-    tbp = glt(&t);
+    tbp = local(&t);
     last = ::strftime(buffer, 64, text, tbp);
     release(tbp);
 
@@ -997,7 +938,7 @@ DateNumber::~DateNumber()
 
 void DateNumber::update(void)
 {
-    fromJulian(buffer);
+    Date::put(buffer);
 }
 
 void DateNumber::set(void)
@@ -1060,13 +1001,13 @@ void DateTimeString::update(void)
     DateTime::update();
     switch(mode) {
     case BOTH:
-        DateTime::get(buffer);
+        DateTime::put(buffer);
         break;
     case DATE:
-        Date::get(buffer);
+        Date::put(buffer);
         break;
     case TIME:
-        Time::get(buffer);
+        Time::put(buffer);
     }
 }
 

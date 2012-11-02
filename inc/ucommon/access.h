@@ -16,7 +16,7 @@
 // along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Locking classes for member function automatic operations.
+ * Locking protocol classes for member function automatic operations.
  * This header covers ucommon access related classes.  These are used to
  * provide automatic management of locks and synchronization objects through
  * common virtual base classes which can be used with automatic objects.
@@ -45,6 +45,11 @@
 
 NAMESPACE_UCOMMON
 
+/**
+ * Common unlock protocol for locking protocol interface classes.
+ * This is to assure _unlock is a common base virtual method.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
 class __EXPORT UnlockProtocol
 {
 protected:
