@@ -215,12 +215,12 @@ Conditional()
     used = 0;
 }
 
-void Semaphore::Shlock(void)
+void Semaphore::_share(void)
 {
     wait();
 }
 
-void Semaphore::Unlock(void)
+void Semaphore::_unlock(void)
 {
     release();
 }
@@ -751,12 +751,12 @@ Conditional()
     waiting = 0;
 }
 
-void RecursiveMutex::Exlock(void)
+void RecursiveMutex::_lock(void)
 {
     lock();
 }
 
-void RecursiveMutex::Unlock(void)
+void RecursiveMutex::_unlock(void)
 {
     release();
 }
@@ -818,17 +818,17 @@ ConditionalAccess()
     writers = 0;
 }
 
-void ThreadLock::Exlock(void)
+void ThreadLock::_lock(void)
 {
     modify();
 }
 
-void ThreadLock::Shlock(void)
+void ThreadLock::_share(void)
 {
     access();
 }
 
-void ThreadLock::Unlock(void)
+void ThreadLock::_unlock(void)
 {
     release();
 }
@@ -1243,12 +1243,12 @@ void Mutex::release(const void *ptr)
     index->release();
 }
 
-void Mutex::Exlock(void)
+void Mutex::_lock(void)
 {
     pthread_mutex_lock(&mlock);
 }
 
-void Mutex::Unlock(void)
+void Mutex::_unlock(void)
 {
     pthread_mutex_unlock(&mlock);
 }
@@ -1497,24 +1497,14 @@ ConditionalLock::Context *ConditionalLock::getContext(void)
     return slot;
 }
 
-void ConditionalLock::Shlock(void)
+void ConditionalLock::_share(void)
 {
     access();
 }
 
-void ConditionalLock::Unlock(void)
+void ConditionalLock::_unlock(void)
 {
     release();
-}
-
-void ConditionalLock::Exclusive(void)
-{
-    exclusive();
-}
-
-void ConditionalLock::Share(void)
-{
-    share();
 }
 
 void ConditionalLock::modify(void)

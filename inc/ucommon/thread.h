@@ -481,8 +481,8 @@ protected:
     unsigned lockers;
     pthread_t locker;
 
-    void Exlock(void);
-    void Unlock(void);
+    virtual void _lock(void);
+    virtual void _unlock(void);
 
 public:
     /**
@@ -538,9 +538,9 @@ protected:
     unsigned writers;
     pthread_t writeid;
 
-    void Exlock(void);
-    void Shlock(void);
-    void Unlock(void);
+    virtual void _lock(void);
+    virtual void _share(void);
+    virtual void _unlock(void);
 
 public:
     /**
@@ -787,10 +787,9 @@ protected:
 
     LinkedObject *contexts;
 
-    void Shlock(void);
-    void Unlock(void);
-    void Exclusive(void);
-    void Share(void);
+    virtual void _share(void);
+    virtual void _unlock(void);
+
     Context *getContext(void);
 
 public:
@@ -828,12 +827,12 @@ public:
      * Convert read lock into exclusive (write/modify) access.  Schedule
      * when other readers sharing.
      */
-    void exclusive(void);
+    virtual void exclusive(void);
 
     /**
      * Return an exclusive access lock back to share mode.
      */
-    void share(void);
+    virtual void share(void);
 
     /**
      * Convenience function to modify lock.
@@ -985,8 +984,8 @@ class __EXPORT Semaphore : public SharedProtocol, protected Conditional
 protected:
     unsigned count, waits, used;
 
-    void Shlock(void);
-    void Unlock(void);
+    virtual void _share(void);
+    virtual void _unlock(void);
 
 public:
     /**
@@ -1074,8 +1073,8 @@ class __EXPORT Mutex : public ExclusiveProtocol
 protected:
     pthread_mutex_t mlock;
 
-    void Exlock(void);
-    void Unlock(void);
+    virtual void _lock(void);
+    virtual void _unlock(void);
 
 public:
     /**

@@ -29,11 +29,11 @@ ExclusiveProtocol::~ExclusiveProtocol()
 {
 }
 
-void SharedProtocol::Exclusive(void)
+void SharedProtocol::exclusive(void)
 {
 }
 
-void SharedProtocol::Share(void)
+void SharedProtocol::share(void)
 {
 }
 
@@ -42,22 +42,22 @@ shared_lock::shared_lock(SharedProtocol *obj)
     assert(obj != NULL);
     lock = obj;
     modify = false;
-    lock->Shlock();
+    lock->shared_lock();
 }
 
 exclusive_lock::exclusive_lock(ExclusiveProtocol *obj)
 {
     assert(obj != NULL);
     lock = obj;
-    lock->Exlock();
+    lock->exclusive_lock();
 }
 
 shared_lock::~shared_lock()
 {
     if(lock) {
         if(modify)
-            lock->Share();
-        lock->Unlock();
+            lock->share();
+        lock->release_share();
         lock = NULL;
         modify = false;
     }
@@ -66,7 +66,7 @@ shared_lock::~shared_lock()
 exclusive_lock::~exclusive_lock()
 {
     if(lock) {
-        lock->Unlock();
+        lock->release_exclusive();
         lock = NULL;
     }
 }
@@ -75,8 +75,8 @@ void shared_lock::release()
 {
     if(lock) {
         if(modify)
-            lock->Share();
-        lock->Unlock();
+            lock->share();
+        lock->release_share();
         lock = NULL;
         modify = false;
     }
@@ -85,7 +85,7 @@ void shared_lock::release()
 void exclusive_lock::release()
 {
     if(lock) {
-        lock->Unlock();
+        lock->release_exclusive();
         lock = NULL;
     }
 }
@@ -93,7 +93,7 @@ void exclusive_lock::release()
 void shared_lock::exclusive(void)
 {
     if(lock && !modify) {
-        lock->Exclusive();
+        lock->exclusive();
         modify = true;
     }
 }
@@ -101,7 +101,7 @@ void shared_lock::exclusive(void)
 void shared_lock::share(void)
 {
     if(lock && modify) {
-        lock->Share();
+        lock->share();
         modify = false;
     }
 }

@@ -1879,7 +1879,6 @@ String str(Socket& so, strsize_t size);
 
 typedef TCPServer   tcpserv_t;
 
-
 END_NAMESPACE
 
 #endif
