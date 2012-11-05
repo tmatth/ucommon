@@ -67,12 +67,6 @@ public:
      */
     typedef enum {OK=0, INVALID, MISSING_CERTIFICATE, MISSING_PRIVATEKEY, INVALID_CERTIFICATE, INVALID_AUTHORITY, INVALID_PEERNAME, INVALID_CIPHER} error_t;
 
-    /**
-     * Path types to retrieve.
-     */
-    typedef enum {
-        BUNDLED_AUTHORITIES, PUBLIC_CERTIFICATES, PRIVATE_KEYS} path_t;
-
 protected:
     /**
      * Last error flagged for this context.
@@ -124,14 +118,6 @@ public:
     static bool fips(const char *program = NULL);
 
     /**
-     * Get a certificate path.  This is used to get directories for application
-     * specific certificate stores.
-     * @param id of path to return.
-     * @return path string or emptry string if not supported.
-     */
-    static String path(path_t id);
-
-    /**
      * Copy system certificates to a local path.
      * @param path to copy to.
      * @return 0 or error number on failure.
@@ -164,7 +150,7 @@ public:
      * @param authority path to use or NULL if none.
      * @return a security context that is cast from derived library.
      */
-    static server_t server(const char *authority = NULL);
+    static server_t server(const char *keyfile = NULL, const char *authority = NULL);
 
     /**
      * Create an anonymous client context with an optional authority to

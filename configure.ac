@@ -696,12 +696,6 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 
 includes='${includedir}/ucommon'
 
-if test -z "$ssl_certs" ; then
-    ssl_certs='${sysconfdir}/ssl/certs' ; fi
-
-if test -z "$ssl_private" ; then
-    ssl_private='${sysconfdir}/ssl/private' ; fi
-
 if test "$sysconfdir" = '${prefix}/etc' ; then
     sysconfdir="/etc" ; fi
 
@@ -728,14 +722,10 @@ AC_SUBST_DIR(UCOMMON_LOCALE, localedir)
 AC_SUBST_DIR(UCOMMON_CFGPATH, sysconfdir)
 AC_SUBST_DIR(UCOMMON_VARPATH, localstatedir)
 AC_SUBST_DIR(UCOMMON_PREFIX, prefixdir)
-AC_SUBST_DIR(ssl_publickeys, ssl_certs)
-AC_SUBST_DIR(ssl_privatekeys, ssl_private)
 AC_DEFINE_UNQUOTED(UCOMMON_PREFIX, "$UCOMMON_PREFIX", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_CFGPATH, "$UCOMMON_CFGPATH", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_VARPATH, "$UCOMMON_VARPATH", [config path])
 AC_DEFINE_UNQUOTED(UCOMMON_LOCALE, "$UCOMMON_LOCALE", [locale path])
-AC_DEFINE_UNQUOTED(SSL_CERTS, "$ssl_publickeys", [certificate path])
-AC_DEFINE_UNQUOTED(SSL_PRIVATE, "$ssl_privatekeys", [private certificates])
 
 AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)

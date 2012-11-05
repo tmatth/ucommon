@@ -88,19 +88,6 @@ bool secure::init(const char *progname)
     return true;
 }
 
-String secure::path(path_t id)
-{
-    switch(id) {
-    case BUNDLED_AUTHORITIES:
-        return str(oscerts());
-    case PUBLIC_CERTIFICATES:
-        return str(SSL_CERTS);
-    case PRIVATE_KEYS:
-        return str(SSL_PRIVATE);
-    }
-    return str("");
-}
-
 #if defined(_MSWINDOWS_)
 
 static void cexport(HCERTSTORE ca, FILE *fp)
@@ -176,8 +163,8 @@ int secure::oscerts(const char *pathname)
 #else
 const char *secure::oscerts(void)
 {
-    if(is_file(SSL_CERTS "/ca-certificates.crt"))
-        return SSL_CERTS "/ca-certificates.crt";
+    if(is_file("/etc/ssl/certs/ca-certificates.crt"))
+        return "/etc/ssl/certs/ca-certificates.crt";
 
     if(is_file("/etc/pki/tls/ca-bundle.crt"))
         return "/etc/pki/tls/ca-bundle.crt";
@@ -216,8 +203,6 @@ void secure::cipher(secure *scontext, const char *ciphers)
 
 secure::client_t secure::client(const char *ca)
 {
-    char certfile[256];
-
     context *ctx = new(context);
     secure::init();
 
@@ -237,11 +222,7 @@ secure::client_t secure::client(const char *ca)
         return ctx;
 
     if(eq(ca, "*"))
-        ca = SSL_CERTS;
-    else if(*ca != '/') {
-        snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_CERTS, ca);
-        ca = certfile;
-    }
+        ca = oscerts();
 
     if(!SSL_CTX_load_verify_locations(ctx->ctx, ca, 0)) {
         ctx->error = secure::INVALID_AUTHORITY;
@@ -251,7 +232,7 @@ secure::client_t secure::client(const char *ca)
     return ctx;
 }
 
-secure::server_t secure::server(const char *ca)
+secure::server_t secure::server(const char *certfile, const char *ca)
 {
     context *ctx = new(context);
 
@@ -267,15 +248,11 @@ secure::server_t secure::server(const char *ca)
         return ctx;
     }
 
-    char certfile[256];
-
-    snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_CERTS, certid);
     if(!SSL_CTX_use_certificate_chain_file(ctx->ctx, certfile)) {
         ctx->error = secure::MISSING_CERTIFICATE;
         return ctx;
     }
 
-    snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_PRIVATE, certid);
     if(!SSL_CTX_use_PrivateKey_file(ctx->ctx, certfile, SSL_FILETYPE_PEM)) {
         ctx->error = secure::MISSING_PRIVATEKEY;
         return ctx;
@@ -290,11 +267,7 @@ secure::server_t secure::server(const char *ca)
         return ctx;
 
     if(eq(ca, "*"))
-        ca = SSL_CERTS;
-    else if(*ca != '/') {
-        snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_CERTS, ca);
-        ca = certfile;
-    }
+        ca = oscerts();
 
     if(!SSL_CTX_load_verify_locations(ctx->ctx, ca, 0)) {
         ctx->error = secure::INVALID_AUTHORITY;

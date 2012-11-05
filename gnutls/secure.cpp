@@ -94,11 +94,8 @@ bool secure::init(const char *progname)
     return true;
 }
 
-secure::server_t secure::server(const char *ca)
+secure::server_t secure::server(const char *certfile, const char *ca)
 {
-    char certfile[256];
-    char keyfile[256];
-
     context *ctx = new context;
 
     if(!ctx)
@@ -111,36 +108,17 @@ secure::server_t secure::server(const char *ca)
     ctx->dh = NULL;
     gnutls_certificate_allocate_credentials(&ctx->xcred);
 
-    snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_CERTS, certid);
-    snprintf(keyfile, sizeof(keyfile), "%s/%s.pem", SSL_PRIVATE, certid);
-    gnutls_certificate_set_x509_key_file(ctx->xcred, certfile, keyfile, GNUTLS_X509_FMT_PEM);
+    gnutls_certificate_set_x509_key_file(ctx->xcred, certfile, certfile, GNUTLS_X509_FMT_PEM);
 
     if(!ca)
         return ctx;
 
     if(eq(ca, "*"))
-        ca = SSL_CERTS;
-    else if(*ca != '/') {
-        snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_CERTS, ca);
-        ca = certfile;
-    }
+        ca = oscerts();
 
-    gnutls_certificate_set_x509_trust_file (ctx->xcred, certfile, GNUTLS_X509_FMT_PEM);
+    gnutls_certificate_set_x509_trust_file (ctx->xcred, ca, GNUTLS_X509_FMT_PEM);
 
     return ctx;
-}
-
-String secure::path(path_t id)
-{
-    switch(id) {
-    case BUNDLED_AUTHORITIES:
-        return str(oscerts());
-    case PUBLIC_CERTIFICATES:
-        return str(SSL_CERTS);
-    case PRIVATE_KEYS:
-        return str(SSL_PRIVATE);
-    }
-    return str("");
 }
 
 #if defined(_MSWINDOWS_)
@@ -217,8 +195,8 @@ int secure::oscerts(const char *pathname)
 #else
 const char *secure::oscerts(void)
 {
-    if(is_file(SSL_CERTS "/ca-certificates.crt"))
-        return SSL_CERTS "/ca-certificates.crt";
+    if(is_file("/etc/ssl/certs/ca-certificates.crt"))
+        return "/etc/ssl/certs/ca-certificates.crt";
 
     if(is_file("/etc/pki/tls/ca-bundle.crt"))
         return "/etc/pki/tls/ca-bundle.crt";
@@ -248,8 +226,6 @@ int secure::oscerts(const char *pathname)
 
 secure::client_t secure::client(const char *ca)
 {
-    char certfile[256];
-
     context *ctx = new context;
 
     if(!ctx)
@@ -266,13 +242,9 @@ secure::client_t secure::client(const char *ca)
         return ctx;
 
     if(eq(ca, "*"))
-        ca = SSL_CERTS;
-    else if(*ca != '/') {
-        snprintf(certfile, sizeof(certfile), "%s/%s.pem", SSL_CERTS, ca);
-        ca = certfile;
-    }
+        ca = oscerts();
 
-    gnutls_certificate_set_x509_trust_file (ctx->xcred, certfile, GNUTLS_X509_FMT_PEM);
+    gnutls_certificate_set_x509_trust_file (ctx->xcred, ca, GNUTLS_X509_FMT_PEM);
 
     return ctx;
 }

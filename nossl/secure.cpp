@@ -57,19 +57,6 @@ bool secure::init(const char *progname)
     return false;
 }
 
-String secure::path(path_t id)
-{
-    switch(id) {
-    case BUNDLED_AUTHORITIES:
-        return str(oscerts());
-    case PUBLIC_CERTIFICATES:
-        return str(SSL_CERTS);
-    case PRIVATE_KEYS:
-        return str(SSL_PRIVATE);
-    }
-    return str("");
-}
-
 #if defined(_MSWINDOWS_)
 
 static void cexport(HCERTSTORE ca, FILE *fp)
@@ -145,8 +132,8 @@ int secure::oscerts(const char *pathname)
 #else
 const char *secure::oscerts(void)
 {
-    if(is_file(SSL_CERTS "/ca-certificates.crt"))
-        return SSL_CERTS "/ca-certificates.crt";
+    if(is_file("/etc/ssl/certs/ca-certificates.crt"))
+        return "/etc/ssl/certs/ca-certificates.crt";
 
     if(is_file("/etc/pki/tls/ca-bundle.crt"))
         return "/etc/pki/tls/ca-bundle.crt";
