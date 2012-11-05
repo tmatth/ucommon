@@ -22,7 +22,6 @@
 #endif
 
 static mutex_t *private_locks = NULL;
-static const char *certid = "generic";
 
 extern "C" {
     static void ssl_lock(int mode, int n, const char *file, int line)
@@ -43,7 +42,7 @@ extern "C" {
     }
 }
 
-bool secure::fips(const char *progname)
+bool secure::fips(void)
 {
 #ifdef  HAVE_OPENSSL_FIPS_H
 
@@ -54,24 +53,19 @@ bool secure::fips(const char *progname)
     if(!FIPS_mode_set(1))
         return false;
 
-    return init(progname);
+    return init();
 #else
     return false;
 #endif
 }
 
-bool secure::init(const char *progname)
+bool secure::init(void)
 {
     if(private_locks)
         return true;
 
     Thread::init();
-    if(progname) {
-        certid = progname;
-        Socket::init(progname);
-    }
-    else
-        Socket::init();
+    Socket::init();
 
     SSL_library_init();
     SSL_load_error_strings();

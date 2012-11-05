@@ -60,27 +60,20 @@ extern "C" {
     }
 }
 
-static const char *certid = "generic";
-
 gnutls_priority_t context::priority_cache;
 
-bool secure::fips(const char *progname)
+bool secure::fips(void)
 {
     return false;
 }
 
-bool secure::init(const char *progname)
+bool secure::init(void)
 {
     static bool initialized = false;
 
     if(!initialized) {
         Thread::init();
-        if(progname) {
-            Socket::init(progname);
-            certid = progname;
-        }
-        else
-            Socket::init();
+        Socket::init(progname);
 
 #ifndef _MSWINDOWS_
         gcry_control(GCRYCTL_SET_THREAD_CBS, &gcrypt_threading);

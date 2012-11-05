@@ -101,21 +101,18 @@ public:
 
     /**
      * Initialize secure stack for first use, and report if SSL support is
-     * compiled in.  This allows a program name to be passed, which may be
-     * used for some proxy systems.
-     * @param program name we are initializing for.
+     * compiled in.
      * @return true if ssl support is available, false if not.
      */
-    static bool init(const char *program = NULL);
+    static bool init(void);
 
     /**
      * Initialize secure stack with fips support.  If fips support is not
      * successfully enabled, the secure stack is also not initialized.  Hence
      * init() can be used for non-fips certified operation if fips fails.
-     * @param program name we are initializing for.
      * @return true if fips support enabled and stack initialized.
      */
-    static bool fips(const char *program = NULL);
+    static bool fips(void);
 
     /**
      * Copy system certificates to a local path.

@@ -27,18 +27,15 @@ secure::~secure()
 {
 }
 
-bool secure::fips(const char *progname)
+bool secure::fips(void)
 {
     return false;
 }
 
-bool secure::init(const char *progname)
+bool secure::init(void)
 {
     Thread::init();
-    if(progname)
-        Socket::init(progname);
-    else
-        Socket::init();
+    Socket::init();
 
 #ifdef  _MSWINDOWS_
     if(_handle != (HCRYPTPROV)NULL)
