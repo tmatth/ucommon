@@ -136,6 +136,24 @@ public:
      * @return new value of number object.
      */
     long operator++();
+
+    inline bool operator==(const long value) const
+        {return get() == value;}
+
+    inline bool operator!=(const long value) const
+        {return get() != value;}
+
+    inline bool operator<(const long value) const
+        {return get() < value;}
+
+    inline bool operator>(const long value) const
+        {return get() > value;}
+
+    inline bool operator<=(const long value) const
+        {return get() <= value;}
+
+    inline bool operator>=(const long value) const
+        {return get() >= value;}
 };
 
 /**
