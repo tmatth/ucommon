@@ -91,9 +91,11 @@ bool secure::init(const char *progname)
 String secure::path(path_t id)
 {
     switch(id) {
-    case SYSTEM_CERTIFICATES:
+    case BUNDLED_AUTHORITIES:
+        return str(oscerts());
+    case PUBLIC_CERTIFICATES:
         return str(SSL_CERTS);
-    case SYSTEM_KEYS:
+    case PRIVATE_KEYS:
         return str(SSL_PRIVATE);
     }
     return str("");
@@ -123,10 +125,26 @@ static void cexport(HCERTSTORE ca, FILE *fp)
     }
 }
 
+const char *secure::oscerts(void)
+{
+    const char *path = "c:/temp/ca-bundle.crt";
+    if(!is_file(path)) {
+        if(oscerts(path))
+            return NULL;
+    }
+    return path;
+}
+
 int secure::oscerts(const char *pathname)
 {
     bool caset;
-    string_t target = shell::path(shell::USER_CONFIG) + pathname;
+    string_t target;
+
+    if(pathname[1] == ':' || pathname[0] == '/' || pathname[0] == '\\')
+        target = pathname;
+    else
+        target = shell::path(shell::USER_CONFIG) + "/" + pathname;
+
     FILE *fp = fopen(*target, "wt");
 
     if(!fp)
@@ -156,12 +174,31 @@ int secure::oscerts(const char *pathname)
 }
 
 #else
+const char *secure::oscerts(void)
+{
+    if(is_file(SSL_CERTS "/ca-certificates.crt"))
+        return SSL_CERTS "/ca-certificates.crt";
+
+    if(is_file("/etc/pki/tls/ca-bundle.crt"))
+        return "/etc/pki/tls/ca-bundle.crt";
+
+    if(is_file("/etc/ssl/ca-bundle.pem"))
+        return "/etc/ssl/ca-bundle.pem";
+
+    return NULL;
+}
+
 int secure::oscerts(const char *pathname)
 {
-    string_t source = path(SYSTEM_CERTIFICATES) + "/ca-certificates.crt";
-    string_t target = shell::path(shell::USER_CONFIG) + pathname;
+    string_t source = oscerts();
+    string_t target;
 
-    if(!*source || !*target)
+    if(pathname[0] == '/')
+        target = pathname;
+    else
+        target = shell::path(shell::USER_CONFIG) + "/" + pathname;
+
+    if(!source)
         return ENOSYS;
 
     return fsys::copy(*source, *target);

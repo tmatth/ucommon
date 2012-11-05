@@ -71,7 +71,7 @@ public:
      * Path types to retrieve.
      */
     typedef enum {
-        SYSTEM_CERTIFICATES, SYSTEM_KEYS} path_t;
+        BUNDLED_AUTHORITIES, PUBLIC_CERTIFICATES, PRIVATE_KEYS} path_t;
 
 protected:
     /**
@@ -137,6 +137,12 @@ public:
      * @return 0 or error number on failure.
      */
     static int oscerts(const char *path);
+
+    /**
+     * Get path to system certificates.
+     * @return path to system certificates.
+     */
+    static const char *oscerts(void);
 
     /**
      * Verify a certificate chain through your certificate authority.
