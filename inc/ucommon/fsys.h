@@ -867,6 +867,18 @@ typedef fsys fsys_t;
 
 extern charfile cstdin, cstdout, cstderr;
 
+inline bool is_exists(const char *path)
+    {return fsys::is_exists(path);}
+
+inline bool is_readable(const char *path)
+    {return fsys::is_readable(path);}
+
+inline bool is_writable(const char *path)
+    {return fsys::is_writable(path);}
+
+inline bool is_executable(const char *path)
+    {return fsys::is_executable(path);}
+
 inline bool is_file(const char *path)
     {return fsys::is_file(path);}
 
