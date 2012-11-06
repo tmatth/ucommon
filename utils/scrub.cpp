@@ -112,7 +112,7 @@ static void scrub(const char *path)
     }
 
     if(fsys::is_dir(&ino)) {
-        report(path, fsys::removeDir(path));
+        report(path, fsys::remove(path));
         return;
     }
 

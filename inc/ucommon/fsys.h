@@ -366,7 +366,7 @@ public:
     static int info(const char *path, fileinfo_t *buffer);
 
     /**
-     * Remove a file.
+     * Remove a file or empty directory.
      * @param path of file.
      * @return error number or 0 on success.
      */
@@ -514,14 +514,7 @@ public:
      * @param mode of directory.
      * @return error number or 0 on success.
      */
-    static int createDir(const char *path, unsigned mode);
-
-    /**
-     * Simple direct method to remove a directory.
-     * @param path to remove.
-     * @return error number or 0 on success.
-     */
-    static int removeDir(const char *path);
+    static int create(const char *path, unsigned mode);
 
     /**
      * Remove a symbolic link explicitly.  Other kinds of files are also

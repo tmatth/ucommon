@@ -170,24 +170,21 @@ int fsys::remapError(void)
     case ERROR_SIGNAL_PENDING:
     case ERROR_BUSY:
         return EBUSY;
+    case ERROR_DIR_NOT_EMPTY:
+        return ENOTEMPTY;
+    case ERROR_DIRECTORY:
+        return ENOTDIR;
     default:
         return EINVAL;
     }
 }
 
-int fsys::createDir(const char *path, unsigned mode)
+int fsys::create(const char *path, unsigned mode)
 {
     if(!CreateDirectory(path, NULL))
         return remapError();
 
     return change(path, mode);
-}
-
-int fsys::removeDir(const char *path)
-{
-    if(_rmdir(path))
-        return remapError();
-    return 0;
 }
 
 fd_t fsys::nullfile(void)
@@ -558,7 +555,7 @@ void fsys::create(const char *path, access_t access, unsigned mode)
         smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
     case ACCESS_DIRECTORY:
-        createDir(path, mode);
+        create(path, mode);
         open(path, access);
         return;
     }
@@ -836,16 +833,9 @@ void fsys::create(const char *path, access_t access, unsigned mode)
 #endif
 }
 
-int fsys::createDir(const char *path, unsigned mode)
+int fsys::create(const char *path, unsigned mode)
 {
     if(::mkdir(path, mode))
-        return remapError();
-    return 0;
-}
-
-int fsys::removeDir(const char *path)
-{
-    if(::rmdir(path))
         return remapError();
     return 0;
 }
@@ -1206,6 +1196,19 @@ int fsys::unlink(const char *path)
 
 int fsys::remove(const char *path)
 {
+#ifdef  _MSWINDOWS_
+    if(RemoveDirectory(path))
+        return 0;
+    int error = remapError();
+    if(ENOTEMPTY)
+        return ENOTEMPTY;
+#else
+    if(!::rmdir(path))
+        return 0;
+    if(errno != ENOTDIR)
+        return errno;
+#endif
+
     if(::remove(path))
         return remapError();
     return 0;

@@ -252,7 +252,7 @@ static void process(void)
         cp = strrchr((char *)(cbuf + 6), '/');
         if(cp) {
             *cp = 0;
-            fsys::createDir((char *)(cbuf + 6), 0640);
+            fsys::create((char *)(cbuf + 6), 0640);
         }
         if(fsys::is_dir(*path))
             shell::errexit(8, "*** %s: %s: %s\n",

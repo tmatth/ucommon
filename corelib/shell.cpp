@@ -989,29 +989,29 @@ String shell::path(path_t id)
     case USER_DATA:
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
-            fsys::createDir(*result, 0700);
+            fsys::create(*result, 0700);
         }
         break;
     case USER_CONFIG:
         if(GetEnvironmentVariable("USERPROFILE", buf, sizeof(buf))) {
             result = str(buf) + "\\Local Settings\\" + _domain;
-            fsys::createDir(*result, 0700);
+            fsys::create(*result, 0700);
         }
         break;
     case USER_CACHE:
     case SERVICE_CACHE:
         if(GetEnvironmentVariable("TEMP", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
-            fsys::createDir(*result, 0700);
+            fsys::create(*result, 0700);
             break;
         }
         if(GetEnvironmentVariable("APPDATA", buf, sizeof(buf))) {
             result = str(buf) + "\\" + _domain;
-            fsys::createDir(*result, 0700);
+            fsys::create(*result, 0700);
         }
         break;
     case SYSTEM_TEMP:
-        fsys::createDir("c:\\temp", 0777);
+        fsys::create("c:\\temp", 0777);
         result ^= "c:\\temp";
         break;
     case PROGRAM_TEMP:
@@ -1617,7 +1617,7 @@ String shell::path(path_t id)
 #else
         result = str(home) + "/.config/" + _domain;
 #endif
-        fsys::createDir(*result, 0700);
+        fsys::create(*result, 0700);
         break;
     case USER_CACHE:
         home = ::getenv("HOME");
@@ -1648,7 +1648,7 @@ String shell::path(path_t id)
 #else
         result = str(home) + "/.config/" + _domain;
 #endif
-        fsys::createDir(*result, 0700);
+        fsys::create(*result, 0700);
 
 #ifdef  __APPLE__
         result = result + "/" + _domain + ".conf";
