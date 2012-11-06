@@ -30,7 +30,7 @@ static bool temp = false;
 static void cleanup(void)
 {
     if(temp)
-        fsys::remove("zerofill.tmp");
+        fsys::erase("zerofill.tmp");
     if(live)
         shell::printf("\n");
     live = false;
