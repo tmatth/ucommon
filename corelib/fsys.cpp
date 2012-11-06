@@ -245,14 +245,14 @@ int fsys::info(struct stat *buf)
     return rtn;
 }
 
-int fsys::changeDir(const char *path)
+int fsys::prefix(const char *path)
 {
     if (_chdir(path))
         return remapError();
     return 0;
 }
 
-int fsys::getPrefix(char *path, size_t len)
+int fsys::prefix(char *path, size_t len)
 {
     if (_getcwd(path, len))
         return remapError();
@@ -935,14 +935,14 @@ int fsys::info(struct stat *ino)
     return 0;
 }
 
-int fsys::changeDir(const char *path)
+int fsys::prefix(const char *path)
 {
     if(::chdir(path))
         return remapError();
     return 0;
 }
 
-int fsys::getPrefix(char *path, size_t len)
+int fsys::prefix(char *path, size_t len)
 {
     if(::getcwd(path, len))
         return remapError();
@@ -1778,3 +1778,11 @@ int fsys::exec(const char *path, char **argv, char **envp)
     return shell::wait(pid);
 }
 
+string_t fsys::prefix(void)
+{
+    char buf[256];
+
+    prefix(buf, sizeof(buf));
+    string_t s = buf;
+    return s;
+}

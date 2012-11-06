@@ -345,7 +345,7 @@ public:
      * @param path to change to.
      * @return error number or 0 on success.
      */
-    static int changeDir(const char *path);
+    static int prefix(const char *path);
 
     /**
      * Get current directory prefix (pwd).
@@ -353,7 +353,9 @@ public:
      * @param size of path we can save.
      * @return error number or 0 on success.
      */
-    static int getPrefix(char *path, size_t size);
+    static int prefix(char *path, size_t size);
+
+    static string_t prefix(void);
 
     /**
      * Stat a file.

@@ -290,7 +290,7 @@ void shell::set0(char *argv0)
         return;
 
     if(*argv0 != '/' && *argv0 != '\\' && argv0[1] != ':') {
-        fsys::getPrefix(prefix, sizeof(prefix));
+        fsys::prefix(prefix, sizeof(prefix));
         String::add(prefix, sizeof(prefix), "/");
         String::add(prefix, sizeof(prefix), argv0);
     }
