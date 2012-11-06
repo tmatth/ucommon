@@ -1254,7 +1254,9 @@ int fsys::unlink(const char *path)
         return 0;
     }
 #endif
-    return fsys::remove(path);
+    if(::remove(path))
+        return remapError();
+    return 0;
 }
 
 int fsys::erase(const char *path)
