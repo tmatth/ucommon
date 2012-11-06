@@ -256,9 +256,9 @@ int fsys::prefix(char *path, size_t len)
     return 0;
 }
 
-int fsys::change(const char *path, unsigned mode)
+int fsys::mode(const char *path, unsigned value)
 {
-    if(_chmod(path, mode))
+    if(_chmod(path, value))
         return remapError();
     return 0;
 }
@@ -939,9 +939,9 @@ int fsys::prefix(char *path, size_t len)
     return 0;
 }
 
-int fsys::change(const char *path, unsigned mode)
+int fsys::mode(const char *path, unsigned value)
 {
-    if(::chmod(path, mode))
+    if(::chmod(path, value))
         return remapError();
     return 0;
 }

@@ -392,10 +392,10 @@ public:
     /**
      * Change file access mode.
      * @param path to change.
-     * @param mode to assign.
+     * @param value of mode to assign.
      * @return error number or 0 on success.
      */
-    static int change(const char *path, unsigned mode);
+    static int mode(const char *path, unsigned value);
 
     /**
      * Test path access.
