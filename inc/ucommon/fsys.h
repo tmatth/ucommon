@@ -506,7 +506,7 @@ public:
      * @param access mode of descriptor.
      * @param mode of file if created.
      */
-    void create(const char *path, access_t access, unsigned mode);
+    void open(const char *path, access_t access, unsigned mode);
 
     /**
      * Simple direct method to create a directory.
@@ -637,8 +637,8 @@ public:
      * @param access mode of descriptor.
      * @param mode of file if created.
      */
-    inline static void create(fsys& object, const char *path, access_t access, unsigned mode)
-        {object.create(path, access, mode);};
+    inline static void open(fsys& object, const char *path, access_t access, unsigned mode)
+        {object.open(path, access, mode);};
 
     /**
      * Load an unmaged plugin directly.

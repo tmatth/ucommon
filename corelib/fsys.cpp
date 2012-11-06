@@ -496,7 +496,7 @@ void fsys::open(const char *path, access_t access)
         error = remapError();
 }
 
-void fsys::create(const char *path, access_t access, unsigned mode)
+void fsys::open(const char *path, access_t access, unsigned mode)
 {
     bool append = false;
     DWORD amode = 0;
@@ -789,7 +789,7 @@ void fsys::release(fd_t fd)
     ::close(fd);
 }
 
-void fsys::create(const char *path, access_t access, unsigned mode)
+void fsys::open(const char *path, access_t access, unsigned mode)
 {
     unsigned flags = 0;
 
@@ -1054,7 +1054,7 @@ fsys::fsys(const char *path, access_t access, unsigned mode)
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
     error = 0;
-    create(path, access, mode);
+    open(path, access, mode);
 }
 
 fsys::~fsys()
@@ -1232,7 +1232,7 @@ int fsys::copy(const char *oldpath, const char *newpath, size_t size)
     if(!is(src))
         goto end;
 
-    dest.create(newpath, fsys::ACCESS_STREAM, 0664);
+    dest.open(newpath, fsys::ACCESS_STREAM, 0664);
     if(!is(dest))
         goto end;
 

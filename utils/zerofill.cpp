@@ -45,7 +45,7 @@ static void zerofill(void)
 
     temp = true;
 
-    fs.create("zerofill.tmp", fsys::ACCESS_STREAM, 0666);
+    fs.open("zerofill.tmp", fsys::ACCESS_STREAM, 0666);
     if(!is(fs))
         shell::errexit(1, "*** zerofill: %s\n",
             _TEXT("cannot create temporary file"));

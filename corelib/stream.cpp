@@ -712,7 +712,7 @@ void filestream::allocate(size_t size, fsys::access_t mode)
 void filestream::create(const char *fname, fsys::access_t access, unsigned mode, size_t size)
 {
     close();
-    fsys::create(fd, fname, access, mode);
+    fsys::open(fd, fname, access, mode);
     if(is(fd))
         allocate(size, access);
 }
