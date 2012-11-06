@@ -20,8 +20,8 @@
  * This header covers ucommon access related classes.  These are used to
  * provide automatic management of locks and synchronization objects through
  * common virtual base classes which can be used with automatic objects.
- * These classes are intended to be used much like "protocols" in conjunction
- * with smart pointer/referencing classes.  This protocol interface supports
+ * These classes are related to "protocols" and are used in conjunction
+ * with smart pointer/referencing classes.  The access interface supports
  * member functions to acquire a lock when entered and automatically
  * release the lock when the member function returns that are used in
  * conjunction with special referencing smart pointers.
@@ -50,7 +50,7 @@ NAMESPACE_UCOMMON
  * This is to assure _unlock is a common base virtual method.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT UnlockProtocol
+class __EXPORT UnlockAccess
 {
 protected:
     virtual void _unlock(void) = 0;
@@ -62,41 +62,41 @@ protected:
  * exclusive lock while being actively referenced by a smart pointer.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT ExclusiveProtocol : public UnlockProtocol
+class __EXPORT ExclusiveAccess : public UnlockAccess
 {
 protected:
-    virtual ~ExclusiveProtocol();
+    virtual ~ExclusiveAccess();
 
     virtual void _lock(void) = 0;
 
 public:
     /**
-     * Protocol interface to exclusive lock the object.
+     * Access interface to exclusive lock the object.
      */
     inline void exclusive_lock(void)
         {return _lock();}
 
     /**
-     * Protocol interface to release a lock.
+     * Access interface to release a lock.
      */
     inline void release_exclusive(void)
         {return _unlock();}
 };
 
 /**
- * An exclusive locking protocol interface base.
+ * An exclusive locking access interface base.
  * This is an abstract class to form objects that will operate under an
  * exclusive lock while being actively referenced by a smart pointer.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT SharedProtocol : protected UnlockProtocol
+class __EXPORT SharedAccess : protected UnlockAccess
 {
 protected:
-    virtual ~SharedProtocol();
+    virtual ~SharedAccess();
 
 protected:
     /**
-     * Protocol interface to share lock the object.
+     * Access interface to share lock the object.
      */
     virtual void _share(void) = 0;
 
@@ -132,22 +132,22 @@ public:
  * You would pass the pointer an object that has the Exclusive as a base class.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT exclusive_lock
+class __EXPORT exclusive_access
 {
 private:
-    ExclusiveProtocol *lock;
+    ExclusiveAccess *lock;
 
 public:
     /**
      * Create an instance of an exclusive object reference.
      * @param object containing Exclusive base class protocol to lock.
      */
-    exclusive_lock(ExclusiveProtocol *object);
+    exclusive_access(ExclusiveAccess *object);
 
     /**
      * Destroy reference to exclusively locked object, release lock.
      */
-    ~exclusive_lock();
+    ~exclusive_access();
 
     /**
      * Test if the reference holds an active lock.
@@ -178,10 +178,10 @@ public:
  * You would pass the pointer an object that has the Shared as a base class.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT shared_lock
+class __EXPORT shared_access
 {
 private:
-    SharedProtocol *lock;
+    SharedAccess *lock;
     int state;
     bool modify;
 
@@ -190,12 +190,12 @@ public:
      * Create an instance of an exclusive object reference.
      * @param object containing Exclusive base class protocol to lock.
      */
-    shared_lock(SharedProtocol *object);
+    shared_access(SharedAccess *object);
 
     /**
      * Destroy reference to shared locked object, release lock.
      */
-    ~shared_lock();
+    ~shared_access();
 
     /**
      * Test if the reference holds an active lock.
@@ -233,53 +233,53 @@ public:
  * Convenience function to exclusively lock an object through it's protocol.
  * @param object to lock.
  */
-inline void lock(ExclusiveProtocol *object)
-    {object->exclusive_lock();}
+inline void lock(ExclusiveAccess& object)
+    {object.exclusive_lock();}
 
 /**
  * Convenience function to unlock an exclusive object through it's protocol.
  * @param object to unlock.
  */
-inline void unlock(ExclusiveProtocol *object)
-    {object->release_exclusive();}
+inline void unlock(ExclusiveAccess& object)
+    {object.release_exclusive();}
 
 /**
  * Convenience function to access (lock) shared object through it's protocol.
  * @param object to share lock.
  */
-inline void access(SharedProtocol *object)
-    {object->shared_lock();}
+inline void access(SharedAccess& object)
+    {object.shared_lock();}
 
 /**
  * Convenience function to unlock shared object through it's protocol.
  * @param object to unlock.
  */
-inline void release(SharedProtocol *object)
-    {object->release_share();}
+inline void release(SharedAccess& object)
+    {object.release_share();}
 
 /**
  * Convenience function to exclusive lock shared object through it's protocol.
  * @param object to exclusive lock.
  */
-inline void exclusive(SharedProtocol *object)
-    {object->exclusive();}
+inline void exclusive(SharedAccess& object)
+    {object.exclusive();}
 
 /**
  * Convenience function to restore shared locking for object through it's protocol.
  * @param object to restore shared locking.
  */
-inline void share(SharedProtocol *object)
-    {object->share();}
+inline void share(SharedAccess& object)
+    {object.share();}
 
 /**
  * Convenience type to use for object referencing an exclusive object.
  */
-typedef exclusive_lock exlock_t;
+typedef exclusive_access exlock_t;
 
 /**
  * Convenience type to use for object referencing a shared object.
  */
-typedef shared_lock shlock_t;
+typedef shared_access shlock_t;
 
 /**
  * Convenience function to release a reference to an exclusive lock.
@@ -302,8 +302,8 @@ inline void release(shlock_t &reference)
 
 #define exclusive_object()  exlock_t __autolock__ = this
 #define protected_object()  shlock_t __autolock__ = this
-#define exclusive_access(x) exlock_t __autolock__ = &x
-#define protected_access(x) shlock_t __autolock__ = &x
+#define exclusive_locking(x) exlock_t __autolock__ = &x
+#define protected_locking(x) shlock_t __autolock__ = &x
 
 END_NAMESPACE
 

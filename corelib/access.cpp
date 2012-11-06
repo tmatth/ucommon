@@ -21,23 +21,23 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-SharedProtocol::~SharedProtocol()
+SharedAccess::~SharedAccess()
 {
 }
 
-ExclusiveProtocol::~ExclusiveProtocol()
+ExclusiveAccess::~ExclusiveAccess()
 {
 }
 
-void SharedProtocol::exclusive(void)
+void SharedAccess::exclusive(void)
 {
 }
 
-void SharedProtocol::share(void)
+void SharedAccess::share(void)
 {
 }
 
-shared_lock::shared_lock(SharedProtocol *obj)
+shared_access::shared_access(SharedAccess *obj)
 {
     assert(obj != NULL);
     lock = obj;
@@ -45,14 +45,14 @@ shared_lock::shared_lock(SharedProtocol *obj)
     lock->shared_lock();
 }
 
-exclusive_lock::exclusive_lock(ExclusiveProtocol *obj)
+exclusive_access::exclusive_access(ExclusiveAccess *obj)
 {
     assert(obj != NULL);
     lock = obj;
     lock->exclusive_lock();
 }
 
-shared_lock::~shared_lock()
+shared_access::~shared_access()
 {
     if(lock) {
         if(modify)
@@ -63,7 +63,7 @@ shared_lock::~shared_lock()
     }
 }
 
-exclusive_lock::~exclusive_lock()
+exclusive_access::~exclusive_access()
 {
     if(lock) {
         lock->release_exclusive();
@@ -71,7 +71,7 @@ exclusive_lock::~exclusive_lock()
     }
 }
 
-void shared_lock::release()
+void shared_access::release()
 {
     if(lock) {
         if(modify)
@@ -82,7 +82,7 @@ void shared_lock::release()
     }
 }
 
-void exclusive_lock::release()
+void exclusive_access::release()
 {
     if(lock) {
         lock->release_exclusive();
@@ -90,7 +90,7 @@ void exclusive_lock::release()
     }
 }
 
-void shared_lock::exclusive(void)
+void shared_access::exclusive(void)
 {
     if(lock && !modify) {
         lock->exclusive();
@@ -98,7 +98,7 @@ void shared_lock::exclusive(void)
     }
 }
 
-void shared_lock::share(void)
+void shared_access::share(void)
 {
     if(lock && modify) {
         lock->share();
