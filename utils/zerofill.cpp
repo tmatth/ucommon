@@ -86,7 +86,7 @@ static void zerofill(const char *devname)
     unsigned long count = 0;
     fsys_t fs;
 
-    if(fsys::fileinfo(devname, &ino))
+    if(fsys::info(devname, &ino))
         shell::errexit(5, "*** zerofill: %s: %s\n",
             devname, _TEXT("cannot access"));
 

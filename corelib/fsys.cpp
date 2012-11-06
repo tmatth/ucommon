@@ -216,7 +216,7 @@ int fsys::pipe(fd_t& input, fd_t& output, size_t size)
     return 0;
 }
 
-int fsys::fileinfo(const char *path, struct stat *buf)
+int fsys::info(const char *path, struct stat *buf)
 {
     if(_stat(path, (struct _stat *)(buf)))
         return remapError();
@@ -234,7 +234,7 @@ int fsys::trunc(offset_t offset)
     return remapError();
 }
 
-int fsys::fileinfo(struct stat *buf)
+int fsys::info(struct stat *buf)
 {
     int fn = _open_osfhandle((intptr_t)(fd), O_RDONLY);
 
@@ -899,7 +899,7 @@ void fsys::open(const char *path, access_t access)
 #endif
 }
 
-int fsys::fileinfo(const char *path, struct stat *ino)
+int fsys::info(const char *path, struct stat *ino)
 {
     if(::stat(path, ino))
         return remapError();
@@ -926,7 +926,7 @@ int fsys::trunc(offset_t offset)
 }
 #endif
 
-int fsys::fileinfo(struct stat *ino)
+int fsys::info(struct stat *ino)
 {
     if(::fstat(fd, ino)) {
         error = remapError();

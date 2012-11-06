@@ -262,7 +262,7 @@ public:
      * Get the native system descriptor handle of the file descriptor.
      * @return native os descriptor.
      */
-    inline fd_t getHandle(void) const
+    inline fd_t handle(void) const
         {return fd;};
 
     /**
@@ -324,7 +324,7 @@ public:
      * @param buffer to save status info in.
      * @return error number or 0 on success.
      */
-    int fileinfo(fileinfo_t *buffer);
+    int info(fileinfo_t *buffer);
 
     /**
      * Truncate file to specified length.  The file pointer is positioned
@@ -361,7 +361,7 @@ public:
      * @param buffer to save stat info.
      * @return error number or 0 on success.
      */
-    static int fileinfo(const char *path, fileinfo_t *buffer);
+    static int info(const char *path, fileinfo_t *buffer);
 
     /**
      * Remove a file.

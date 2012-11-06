@@ -99,7 +99,7 @@ static void digest(const char *path = NULL)
     unsigned char buffer[1024];
 
     if(path) {
-        int err = fsys::fileinfo(path, &ino);
+        int err = fsys::info(path, &ino);
 
         if(err) {
             result(path, err);

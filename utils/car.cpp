@@ -175,7 +175,7 @@ static void encodefile(const char *path, const char *name)
 
     fsys::fileinfo_t ino;
 
-    fsys::fileinfo(path, &ino);
+    fsys::info(path, &ino);
 
     FILE *fp = fopen(path, "r");
     if(!fp) {

@@ -104,7 +104,7 @@ static void scrub(const char *path)
     if(is(verbose))
         shell::printf("%s", path);
 
-    int err = fsys::fileinfo(path, &ino);
+    int err = fsys::info(path, &ino);
 
     if(err == ENOENT || fsys::is_link(path)) {
         report(path, fsys::unlink(path));
