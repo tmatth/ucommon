@@ -366,6 +366,13 @@ public:
     static int info(const char *path, fileinfo_t *buffer);
 
     /**
+     * Erase (remove) a file only.
+     * @param path of file.
+     * @return error number or 0 on success.
+     */
+    static int erase(const char *path);
+
+    /**
      * Remove a file or empty directory.
      * @param path of file.
      * @return error number or 0 on success.
@@ -398,12 +405,32 @@ public:
     static int mode(const char *path, unsigned value);
 
     /**
-     * Test path access.
+     * Test if path exists.
      * @param path to test.
-     * @param mode to test for.
-     * @return error number or 0 on success.
+     * @return if true.
      */
-    static int access(const char *path, unsigned mode);
+    static bool is_exists(const char *path);
+
+    /**
+     * Test if path readable.
+     * @param path to test.
+     * @return if true.
+     */
+    static bool is_readable(const char *path);
+
+    /**
+     * Test if path writable.
+     * @param path to test.
+     * @return if true.
+     */
+    static bool is_writable(const char *path);
+
+    /**
+     * Test if path is executable.
+     * @param path to test.
+     * @return if true.
+     */
+    static bool is_executable(const char *path);
 
     /**
      * Test if path is a file.

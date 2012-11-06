@@ -263,11 +263,46 @@ int fsys::mode(const char *path, unsigned value)
     return 0;
 }
 
-int fsys::access(const char *path, unsigned mode)
+bool fsys::is_exists(const char *path)
 {
-    if(_access(path, mode))
-        return remapError();
-    return 0;
+    if(_access(path, F_OK))
+        return false;
+    return true;
+}
+
+bool fsys::is_readable(const char *path)
+{
+    if(_access(path, R_OK))
+        return false;
+    return true;
+}
+
+bool fsys::is_writable(const char *path)
+{
+    if(_access(path, W_OK))
+        return false;
+    return true;
+}
+
+bool fsys::is_executable(const char *path)
+{
+    const char *strrchr(path, '.');
+    if(eq_case(path, ".exe"))
+        return true;
+
+    if(eq_case(path, ".bat"))
+        return true;
+
+    if(eq_case(path, ".com"))
+        return true;
+
+    if(eq_case(path, ".cmd"))
+        return true;
+
+    if(eq_case(path, ".ps1"))
+        return true;
+
+    return false;
 }
 
 bool fsys::is_tty(fd_t fd)
@@ -946,11 +981,39 @@ int fsys::mode(const char *path, unsigned value)
     return 0;
 }
 
-int fsys::access(const char *path, unsigned mode)
+bool fsys::is_exists(const char *path)
 {
-    if(::access(path, mode))
-        return remapError();
-    return 0;
+    if(::access(path, F_OK))
+        return false;
+
+    return true;
+}
+
+bool fsys::is_readable(const char *path)
+{
+    if(::access(path, R_OK))
+        return false;
+
+    return true;
+}
+
+bool fsys::is_writable(const char *path)
+{
+    if(::access(path, W_OK))
+        return false;
+
+    return true;
+}
+
+bool fsys::is_executable(const char *path)
+{
+    if(is_dir(path))
+        return false;
+
+    if(::access(path, X_OK))
+        return false;
+
+    return true;
 }
 
 fsys::fsys(const fsys& copy)
@@ -1194,8 +1257,24 @@ int fsys::unlink(const char *path)
     return fsys::remove(path);
 }
 
+int fsys::erase(const char *path)
+{
+    if(is_device(path))
+        return ENOSYS;
+
+    if(is_dir(path))
+        return ENOENT;
+
+    if(::remove(path))
+        return remapError();
+    return 0;
+}
+
 int fsys::remove(const char *path)
 {
+    if(is_device(path))
+        return ENOSYS;
+
 #ifdef  _MSWINDOWS_
     if(RemoveDirectory(path))
         return 0;
