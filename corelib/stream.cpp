@@ -648,10 +648,10 @@ StreamProtocol()
     open(filename, mode, size);
 }
 
-filestream::filestream(const char *filename, fsys::access_t access, unsigned mode, size_t size) :
+filestream::filestream(const char *filename, unsigned mode, fsys::access_t access, size_t size) :
 StreamProtocol()
 {
-    create(filename, access, mode, size);
+    open(filename, mode, access, size);
 }
 
 filestream::~filestream()
@@ -709,10 +709,10 @@ void filestream::allocate(size_t size, fsys::access_t mode)
         setp(pbuf, pbuf + size);
 }
 
-void filestream::create(const char *fname, fsys::access_t access, unsigned mode, size_t size)
+void filestream::open(const char *fname, unsigned fmode, fsys::access_t access, size_t size)
 {
     close();
-    fsys::open(fd, fname, access, mode);
+    fsys::open(fd, fname, access, fmode);
     if(is(fd))
         allocate(size, access);
 }

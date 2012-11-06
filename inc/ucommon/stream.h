@@ -382,14 +382,14 @@ public:
     filestream(const filestream& copy);
 
     /**
-     * Create file stream.
+     * Create and open a file stream.
      */
-    filestream(const char *path, fsys::access_t access, unsigned mode, size_t bufsize);
+    filestream(const char *path, unsigned mode, fsys::access_t access, size_t bufsize = 512);
 
     /**
      * Open file stream.
      */
-    filestream(const char *path, fsys::access_t access, size_t bufsize);
+    filestream(const char *path, fsys::access_t access, size_t bufsize = 512);
 
     /**
      * Destroy a file stream.
@@ -418,7 +418,7 @@ public:
     /**
      * Create a stream connection to a tcp service.
      */
-    void create(const char *filename, fsys::access_t access, unsigned mode, size_t buffering = 512);
+    void open(const char *filename, unsigned mode, fsys::access_t access, size_t buffering = 512);
 
     /**
      * Close an active stream connection.
