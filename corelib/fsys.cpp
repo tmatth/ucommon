@@ -184,7 +184,7 @@ int fsys::create(const char *path, unsigned mode)
     if(!CreateDirectory(path, NULL))
         return remapError();
 
-    return change(path, mode);
+    return mode(path, mode);
 }
 
 fd_t fsys::nullfile(void)
@@ -531,13 +531,15 @@ void fsys::open(const char *path, access_t access)
         error = remapError();
 }
 
-void fsys::open(const char *path, unsigned mode, access_t access)
+void fsys::open(const char *path, unsigned fmode, access_t access)
 {
     bool append = false;
     DWORD amode = 0;
     DWORD cmode = 0;
     DWORD smode = 0;
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
+
+    fmode &= 0666;
 
     const char *cp = strrchr(path, '\\');
     const char *cp2 = strrchr(path, '/');
@@ -600,7 +602,7 @@ void fsys::open(const char *path, unsigned mode, access_t access)
     else if(fd == INVALID_HANDLE_VALUE)
         error = remapError();
     if(fd != INVALID_HANDLE_VALUE)
-        change(path, mode);
+        mode(path, fmode);
 }
 
 fsys::fsys(const fsys& copy)
@@ -811,12 +813,12 @@ fd_t fsys::input(const char *path)
 
 fd_t fsys::output(const char *path)
 {
-    return ::open(path, O_WRONLY | O_CREAT | O_TRUNC, FILE_EVERYONE);
+    return ::open(path, O_WRONLY | O_CREAT | O_TRUNC, EVERYONE);
 }
 
 fd_t fsys::append(const char *path)
 {
-    return ::open(path, O_WRONLY | O_CREAT | O_APPEND, FILE_EVERYONE);
+    return ::open(path, O_WRONLY | O_CREAT | O_APPEND, EVERYONE);
 }
 
 void fsys::release(fd_t fd)
@@ -829,6 +831,8 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
     unsigned flags = 0;
 
     close();
+
+    fmode &= 0666;
 
     switch(access)
     {
@@ -868,9 +872,16 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 #endif
 }
 
-int fsys::create(const char *path, unsigned fmode)
+int fsys::create(const char *path, unsigned perms)
 {
-    if(::mkdir(path, fmode))
+    if(perms & 06)
+        perms |= 01;
+    if(perms & 060)
+        perms |= 010;
+    if(perms & 0600)
+        perms |= 0100;
+
+    if(::mkdir(path, perms))
         return remapError();
     return 0;
 }
@@ -1313,7 +1324,7 @@ int fsys::copy(const char *oldpath, const char *newpath, size_t size)
     if(!is(src))
         goto end;
 
-    dest.open(newpath, FILE_GROUP_PUBLIC, fsys::ACCESS_STREAM);
+    dest.open(newpath, GROUP_PUBLIC, fsys::ACCESS_STREAM);
     if(!is(dest))
         goto end;
 
