@@ -372,6 +372,7 @@ int fsys::close(void)
 
 ssize_t dir::read(char *buf, size_t len)
 {
+    ssize_t rtn = -1;
     if(ptr) {
         snprintf((char *)buf, len, ptr->cFileName);
         rtn = strlen(ptr->cFileName);

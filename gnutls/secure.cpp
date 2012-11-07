@@ -179,7 +179,7 @@ int secure::oscerts(const char *pathname)
     fclose(fp);
 
     if(!caset) {
-        fsys::remove(*target);
+        fsys::erase(*target);
         return ENOSYS;
     }
     return 0;
