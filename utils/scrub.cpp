@@ -117,7 +117,7 @@ static void scrub(const char *path)
     }
 
     if(err == ENOENT || !ino.st_size || fsys::is_sys(&ino) || fsys::is_dev(&ino)) {
-        report(path, dir::remove(path));
+        report(path, fsys::erase(path));
         return;
     }
 
