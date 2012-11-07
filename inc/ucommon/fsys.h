@@ -204,7 +204,7 @@ public:
      * @param access mode of file access.
      * @param permission mode of file.
      */
-    fsys(const char *path, access_t access, unsigned permission);
+    fsys(const char *path, unsigned permission, access_t access);
 
     /**
      * Close and release a file descriptor.
@@ -533,7 +533,7 @@ public:
      * @param access mode of descriptor.
      * @param mode of file if created.
      */
-    void open(const char *path, access_t access, unsigned mode);
+    void open(const char *path, unsigned mode, access_t access);
 
     /**
      * Simple direct method to create a directory.
@@ -664,8 +664,8 @@ public:
      * @param access mode of descriptor.
      * @param mode of file if created.
      */
-    inline static void open(fsys& object, const char *path, access_t access, unsigned mode)
-        {object.open(path, access, mode);};
+    inline static void open(fsys& object, const char *path, unsigned mode, access_t access)
+        {object.open(path, mode, access);};
 
     /**
      * Load an unmaged plugin directly.

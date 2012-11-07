@@ -531,7 +531,7 @@ void fsys::open(const char *path, access_t access)
         error = remapError();
 }
 
-void fsys::open(const char *path, access_t access, unsigned mode)
+void fsys::open(const char *path, unsigned mode, access_t access)
 {
     bool append = false;
     DWORD amode = 0;
@@ -824,7 +824,7 @@ void fsys::release(fd_t fd)
     ::close(fd);
 }
 
-void fsys::open(const char *path, access_t access, unsigned mode)
+void fsys::open(const char *path, unsigned fmode, access_t access)
 {
     unsigned flags = 0;
 
@@ -853,11 +853,11 @@ void fsys::open(const char *path, access_t access, unsigned mode)
         flags = O_RDWR | O_APPEND | O_CREAT;
         break;
     case ACCESS_DIRECTORY:
-        ::mkdir(path, mode);
+        ::mkdir(path, fmode);
         open(path, access);
         return;
     }
-    fd = ::open(path, flags, mode);
+    fd = ::open(path, flags, fmode);
     if(fd == INVALID_HANDLE_VALUE)
         error = remapError();
 #ifdef HAVE_POSIX_FADVISE
@@ -868,9 +868,9 @@ void fsys::open(const char *path, access_t access, unsigned mode)
 #endif
 }
 
-int fsys::create(const char *path, unsigned mode)
+int fsys::create(const char *path, unsigned fmode)
 {
-    if(::mkdir(path, mode))
+    if(::mkdir(path, fmode))
         return remapError();
     return 0;
 }
@@ -1112,12 +1112,12 @@ fsys::fsys(const char *path, access_t access)
 }
 
 
-fsys::fsys(const char *path, access_t access, unsigned mode)
+fsys::fsys(const char *path, unsigned fmode, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
     error = 0;
-    open(path, access, mode);
+    open(path, fmode, access);
 }
 
 fsys::~fsys()
@@ -1313,7 +1313,7 @@ int fsys::copy(const char *oldpath, const char *newpath, size_t size)
     if(!is(src))
         goto end;
 
-    dest.open(newpath, fsys::ACCESS_STREAM, 0664);
+    dest.open(newpath, 0664, fsys::ACCESS_STREAM);
     if(!is(dest))
         goto end;
 

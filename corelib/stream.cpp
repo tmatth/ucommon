@@ -641,7 +641,6 @@ StreamProtocol()
         allocate(copy.bufsize, copy.ac);
 }
 
-
 filestream::filestream(const char *filename, fsys::access_t mode, size_t size) :
 StreamProtocol()
 {
@@ -712,7 +711,7 @@ void filestream::allocate(size_t size, fsys::access_t mode)
 void filestream::open(const char *fname, unsigned fmode, fsys::access_t access, size_t size)
 {
     close();
-    fsys::open(fd, fname, access, fmode);
+    fsys::open(fd, fname, fmode, access);
     if(is(fd))
         allocate(size, access);
 }
