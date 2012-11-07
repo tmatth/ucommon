@@ -164,6 +164,10 @@ protected:
 
     unsigned mask(const char *cp) const;
 
+    inethostaddr_t broadcast(void) const;
+
+    unsigned mask(void) const;
+
 public:
     /**
      * A convenience type for using a pointer to a linked list as a policy chain.
@@ -256,8 +260,6 @@ public:
      * Get the broadcast host address represented by our cidr.
      * @return binary broadcast host address.
      */
-    inethostaddr_t broadcast(void) const;
-
     inline inethostaddr_t getBroadcast(void) const
         {return broadcast();}
 
@@ -265,8 +267,6 @@ public:
      * Get the number of bits in the cidr bitmask.
      * @return bit mask of cidr.
      */
-    unsigned mask(void) const;
-
     inline unsigned getMask(void) const
         {return mask();}
 
