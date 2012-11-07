@@ -179,12 +179,19 @@ int fsys::remapError(void)
     }
 }
 
-int fsys::create(const char *path, unsigned mode)
+int fsys::create(const char *path, unsigned perms)
 {
     if(!CreateDirectory(path, NULL))
         return remapError();
 
-    return mode(path, mode);
+    if(perms & 06)
+        perms |= 01;
+    if(perms & 060)
+        perms |= 010;
+    if(perms & 0600)
+        perms |= 0100;
+
+    return mode(path, perms);
 }
 
 fd_t fsys::nullfile(void)
@@ -592,8 +599,7 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
         smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
     case ACCESS_DIRECTORY:
-        create(path, mode);
-        open(path, access);
+        error = ENOENT;
         return;
     }
     fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
@@ -832,8 +838,6 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 
     close();
 
-    fmode &= 0666;
-
     switch(access)
     {
     case ACCESS_DEVICE:
@@ -857,8 +861,7 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
         flags = O_RDWR | O_APPEND | O_CREAT;
         break;
     case ACCESS_DIRECTORY:
-        ::mkdir(path, fmode);
-        open(path, access);
+        error = ENOENT;
         return;
     }
     fd = ::open(path, flags, fmode);
