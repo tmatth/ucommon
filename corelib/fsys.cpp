@@ -458,6 +458,8 @@ void fsys::release(fd_t fd)
 
 void dir::open(const char *path)
 {
+    close();
+
     char tpath[256];
     DWORD attr = GetFileAttributes(path);
 
@@ -915,6 +917,8 @@ int dir::create(const char *path, unsigned perms)
 
 void dir::open(const char *path)
 {
+    close();
+
     ptr = opendir(path);
     if(!ptr)
         error = remapError();
