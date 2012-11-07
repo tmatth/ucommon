@@ -586,7 +586,7 @@ void pipestream::open(const char *path, access_t mode, char **args, char **envp,
         fsys::inherit(input, false);
     }
     else
-        stdio[1] = fsys::nullfile();
+        stdio[1] = fsys::null();
 
     if(mode == WRONLY || mode == RDWR) {
         if(fsys::pipe(stdio[0], output)) {
@@ -599,7 +599,7 @@ void pipestream::open(const char *path, access_t mode, char **args, char **envp,
         }
     }
     else
-        stdio[0] = fsys::nullfile();
+        stdio[0] = fsys::null();
 
     pid = shell::spawn(path, args, envp, stdio);
 

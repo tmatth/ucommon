@@ -194,7 +194,7 @@ int dir::create(const char *path, unsigned perms)
     return mode(path, perms);
 }
 
-fd_t fsys::nullfile(void)
+fd_t fsys::null(void)
 {
     SECURITY_ATTRIBUTES sattr;
 
@@ -786,7 +786,7 @@ ssize_t fsys::write(const void *buf, size_t len)
     return rtn;
 }
 
-fd_t fsys::nullfile(void)
+fd_t fsys::null(void)
 {
     return ::open("/dev/null", O_RDWR);
 }

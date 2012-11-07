@@ -654,7 +654,7 @@ public:
      * Create inheritable /dev/null handle.
      * @return null device handle.
      */
-    static fd_t nullfile(void);
+    static fd_t null(void);
 
     /**
      * create a file descriptor or directory directly.
