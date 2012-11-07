@@ -523,6 +523,19 @@ inline T& (min)(T& o1, T& o2)
     return o1 < o2 ? o1 : o2;
 }
 
+/**
+ * Convenience macro to range restrict values.
+ * @param value to check.
+ * @param low value.
+ * @param high value.
+ * @return adjusted value.
+ */
+template<typename T>
+inline T& (limit)(T& value, T& low, T& high)
+{
+    return (value < low) ? low : ((value > high) ? high : value);
+}
+
 END_NAMESPACE
 
 #endif
