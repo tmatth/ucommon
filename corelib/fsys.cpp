@@ -811,12 +811,12 @@ fd_t fsys::input(const char *path)
 
 fd_t fsys::output(const char *path)
 {
-    return ::open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    return ::open(path, O_WRONLY | O_CREAT | O_TRUNC, FILE_EVERYONE);
 }
 
 fd_t fsys::append(const char *path)
 {
-    return ::open(path, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    return ::open(path, O_WRONLY | O_CREAT | O_APPEND, FILE_EVERYONE);
 }
 
 void fsys::release(fd_t fd)
@@ -1313,7 +1313,7 @@ int fsys::copy(const char *oldpath, const char *newpath, size_t size)
     if(!is(src))
         goto end;
 
-    dest.open(newpath, 0664, fsys::ACCESS_STREAM);
+    dest.open(newpath, FILE_GROUP_PUBLIC, fsys::ACCESS_STREAM);
     if(!is(dest))
         goto end;
 

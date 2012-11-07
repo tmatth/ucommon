@@ -139,6 +139,28 @@ protected:
     int     error;
 
 public:
+    /**
+     * Most of the common chmod values are predefined.
+     */
+    enum {
+        DIR_OWNER_PRIVATE = 0700,
+        DIR_OWNER_PUBLIC = 0755,
+        DIR_GROUP_PRIVATE = 0770,
+        DIR_GROUP_PUBLIC = 0775,
+        DIR_TEMPORARY = 01777,
+        EXE_OWNER = 0500,
+        EXE_GROUP = 0550,
+        EXE_PUBLIC = 0555,
+        FILE_OWNER_READONLY = 0400,
+        FILE_GROUP_READONLY = 0440,
+        FILE_PUBLIC_READONLY = 0444,
+        FILE_OWNER_PRIVATE = 0600,
+        FILE_OWNER_PUBLIC = 0644,
+        FILE_GROUP_PRIVATE = 0660,
+        FILE_GROUP_PUBLIC = 0664,
+        FILE_EVERYONE = 0666
+    };
+
     typedef struct stat fileinfo_t;
 
 #ifdef  _MSWINDOWS_

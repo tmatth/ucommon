@@ -21,6 +21,7 @@
 #include <ucommon/string.h>
 #include <ucommon/timers.h>
 #include <ucommon/mapped.h>
+#include <ucommon/fsys.h>
 
 #ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
@@ -98,7 +99,7 @@ static key_t createipc(const char *name, char mode)
     int fd;
 
     ftok_name(name, buf, sizeof(buf));
-    fd = open(buf, O_CREAT | O_EXCL | O_WRONLY, 0664);
+    fd = open(buf, O_CREAT | O_EXCL | O_WRONLY, fsys::FILE_GROUP_PUBLIC);
     if(fd > -1)
         close(fd);
     return ftok(buf, mode);
@@ -258,7 +259,7 @@ void MappedMemory::create(const char *fn, size_t len)
     if(len) {
         len += INSERT_OFFSET;
         prot |= PROT_WRITE;
-        fd = shm_open(fn, O_RDWR | O_CREAT, 0664);
+        fd = shm_open(fn, O_RDWR | O_CREAT, fsys::FILE_GROUP_PUBLIC);
         if(fd > -1) {
             if(ftruncate(fd, len)) {
                 ::close(fd);
@@ -267,7 +268,7 @@ void MappedMemory::create(const char *fn, size_t len)
         }
     }
     else {
-        fd = shm_open(fn, O_RDONLY, 0664);
+        fd = shm_open(fn, O_RDONLY, fsys::FILE_GROUP_PUBLIC);
         if(fd > -1) {
             fstat(fd, &ino);
             len = ino.st_size;
@@ -378,7 +379,7 @@ void MappedMemory::create(const char *name, size_t len)
     if(len) {
         key = createipc(name, 'S');
 remake:
-        fd = shmget(key, len, IPC_CREAT | IPC_EXCL | 0664);
+        fd = shmget(key, len, IPC_CREAT | IPC_EXCL | fsys::FILE_GROUP_PUBLIC);
         if(fd == -1 && errno == EEXIST) {
             fd = shmget(key, 0, 0);
             if(fd > -1) {
