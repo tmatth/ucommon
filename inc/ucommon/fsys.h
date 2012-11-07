@@ -787,6 +787,12 @@ public:
     inline static ssize_t read(dir& descriptor, char *buffer, size_t count)
         {return descriptor.read(buffer, count);};
 
+    inline static void close(dir& descriptor)
+        {descriptor.close();}
+
+    inline static void open(dir& descriptor, const char *path)
+        {descriptor.open(path);}
+
     /**
      * Close and release directory object.
      */
