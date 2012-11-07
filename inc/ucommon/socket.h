@@ -158,9 +158,9 @@ NAMESPACE_UCOMMON
 class __EXPORT cidr : public LinkedObject
 {
 protected:
-    int family;
-    inethostaddr_t netmask, network;
-    char name[16];
+    int Family;
+    inethostaddr_t Netmask, Network;
+    char Name[16];
 
     unsigned mask(const char *cp) const;
 
@@ -229,28 +229,28 @@ public:
      * @return name of cidr.
      */
     inline const char *getName(void) const
-        {return name;};
+        {return Name;};
 
     /**
      * Get the address family of our cidr block object.
      * @return family of our cidr.
      */
     inline int getFamily(void) const
-        {return family;};
+        {return Family;};
 
     /**
      * Get the network host base address of our cidr block.
      * @return binary network host address.
      */
     inline inethostaddr_t getNetwork(void) const
-        {return network;};
+        {return Network;};
 
     /**
      * Get the effective network mask for our cidr block.
      * @return binary network mask for our cidr.
      */
     inline inethostaddr_t getNetmask(void) const
-        {return netmask;};
+        {return Netmask;};
 
     /**
      * Get the broadcast host address represented by our cidr.

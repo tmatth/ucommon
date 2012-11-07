@@ -628,10 +628,10 @@ void Socket::query(int querymode)
 cidr::cidr() :
 LinkedObject()
 {
-    family = AF_UNSPEC;
-    memset(&network, 0, sizeof(network));
-    memset(&netmask, 0, sizeof(netmask));
-    name[0] = 0;
+    Family = AF_UNSPEC;
+    memset(&Network, 0, sizeof(Network));
+    memset(&Netmask, 0, sizeof(Netmask));
+    Name[0] = 0;
 }
 
 cidr::cidr(const char *cp) :
@@ -639,7 +639,7 @@ LinkedObject()
 {
     assert(cp != NULL && *cp != 0);
     set(cp);
-    name[0] = 0;
+    Name[0] = 0;
 }
 
 cidr::cidr(policy **policy, const char *cp) :
@@ -649,7 +649,7 @@ LinkedObject(policy)
     assert(cp != NULL && *cp != 0);
 
     set(cp);
-    name[0] = 0;
+    Name[0] = 0;
 }
 
 cidr::cidr(policy **policy, const char *cp, const char *id) :
@@ -660,28 +660,28 @@ LinkedObject(policy)
     assert(id != NULL && *id != 0);
 
     set(cp);
-    String::set(name, sizeof(name), id);
+    String::set(Name, sizeof(Name), id);
 }
 
 
 cidr::cidr(const cidr &copy) :
 LinkedObject()
 {
-    family = copy.family;
-    memcpy(&network, &copy.network, sizeof(network));
-    memcpy(&netmask, &copy.netmask, sizeof(netmask));
-    memcpy(&name, &copy.name, sizeof(name));
+    Family = copy.Family;
+    memcpy(&Network, &copy.Network, sizeof(Network));
+    memcpy(&Netmask, &copy.Netmask, sizeof(Netmask));
+    memcpy(&Name, &copy.Name, sizeof(Name));
 }
 
 unsigned cidr::mask(void) const
 {
-    switch(family)
+    switch(Family)
     {
     case AF_INET:
-        return bitcount((bit_t *)&netmask.ipv4, sizeof(struct in_addr));
+        return bitcount((bit_t *)&Netmask.ipv4, sizeof(struct in_addr));
 #ifdef  AF_INET6
     case AF_INET6:
-        return bitcount((bit_t *)&netmask.ipv6, sizeof(struct in6_addr));
+        return bitcount((bit_t *)&Netmask.ipv6, sizeof(struct in6_addr));
 #endif
     default:
         return 0;
@@ -738,21 +738,21 @@ bool cidr::is_member(const struct sockaddr *s) const
     inethostaddr_t host;
     struct sockaddr_internet *addr = (struct sockaddr_internet *)s;
 
-    if(addr->address.sa_family != family)
+    if(addr->address.sa_family != Family)
         return false;
 
-    switch(family) {
+    switch(Family) {
     case AF_INET:
         memcpy(&host.ipv4, &addr->ipv4.sin_addr, sizeof(host.ipv4));
-        bitmask((bit_t *)&host.ipv4, (bit_t *)&netmask, sizeof(host.ipv4));
-        if(!memcmp(&host.ipv4, &network.ipv4, sizeof(host.ipv4)))
+        bitmask((bit_t *)&host.ipv4, (bit_t *)&Netmask, sizeof(host.ipv4));
+        if(!memcmp(&host.ipv4, &Network.ipv4, sizeof(host.ipv4)))
             return true;
         return false;
 #ifdef  AF_INET6
     case AF_INET6:
         memcpy(&host.ipv6, &addr->ipv6.sin6_addr, sizeof(host.ipv6));
-        bitmask((bit_t *)&host.ipv6, (bit_t *)&netmask, sizeof(host.ipv6));
-        if(!memcmp(&host.ipv6, &network.ipv6, sizeof(host.ipv6)))
+        bitmask((bit_t *)&host.ipv6, (bit_t *)&Netmask, sizeof(host.ipv6));
+        if(!memcmp(&host.ipv6, &Network.ipv6, sizeof(host.ipv6)))
             return true;
         return false;
 #endif
@@ -765,15 +765,15 @@ inethostaddr_t cidr::broadcast(void) const
 {
     inethostaddr_t bcast;
 
-    switch(family) {
+    switch(Family) {
     case AF_INET:
-        memcpy(&bcast.ipv4, &network.ipv4, sizeof(network.ipv4));
-        bitimask((bit_t *)&bcast.ipv4, (bit_t *)&netmask.ipv4, sizeof(bcast.ipv4));
+        memcpy(&bcast.ipv4, &Network.ipv4, sizeof(Network.ipv4));
+        bitimask((bit_t *)&bcast.ipv4, (bit_t *)&Netmask.ipv4, sizeof(bcast.ipv4));
         return bcast;
 #ifdef  AF_INET6
     case AF_INET6:
-        memcpy(&bcast.ipv6, &network.ipv6, sizeof(network.ipv6));
-        bitimask((bit_t *)&bcast.ipv6, (bit_t *)&netmask.ipv6, sizeof(bcast.ipv6));
+        memcpy(&bcast.ipv6, &Network.ipv6, sizeof(Network.ipv6));
+        bitimask((bit_t *)&bcast.ipv6, (bit_t *)&Netmask.ipv6, sizeof(bcast.ipv6));
         return bcast;
 #endif
     default:
@@ -793,7 +793,7 @@ unsigned cidr::mask(const char *cp) const
     unsigned char dots[4];
     uint32_t mask;
 
-    switch(family) {
+    switch(Family) {
 #ifdef  AF_INET6
     case AF_INET6:
         if(sp)
@@ -871,15 +871,15 @@ void cidr::set(const char *cp)
 
 #ifdef  AF_INET6
     if(strchr(cp, ':'))
-        family = AF_INET6;
+        Family = AF_INET6;
     else
 #endif
-        family = AF_INET;
+        Family = AF_INET;
 
-    switch(family) {
+    switch(Family) {
     case AF_INET:
-        memset(&netmask.ipv4, 0, sizeof(netmask.ipv4));
-        bitset((bit_t *)&netmask.ipv4, mask(cp));
+        memset(&Netmask.ipv4, 0, sizeof(Netmask.ipv4));
+        bitset((bit_t *)&Netmask.ipv4, mask(cp));
         String::set(cbuf, sizeof(cbuf), cp);
         ep = (char *)strchr(cbuf, '/');
         if(ep)
@@ -895,16 +895,16 @@ void cidr::set(const char *cp)
             String::add(cbuf, sizeof(cbuf), ".0");
 
 #ifdef  _MSWINDOWS_
-        memcpy(&network.ipv4, &addr, sizeof(network.ipv4));
+        memcpy(&Network.ipv4, &addr, sizeof(Network.ipv4));
 #else
-        inet_aton(cbuf, &network.ipv4);
+        inet_aton(cbuf, &Network.ipv4);
 #endif
-        bitmask((bit_t *)&network.ipv4, (bit_t *)&netmask.ipv4, sizeof(network.ipv4));
+        bitmask((bit_t *)&Network.ipv4, (bit_t *)&Netmask.ipv4, sizeof(Network.ipv4));
         break;
 #ifdef  AF_INET6
     case AF_INET6:
-        memset(&netmask.ipv6, 0, sizeof(netmask));
-        bitset((bit_t *)&netmask.ipv6, mask(cp));
+        memset(&Netmask.ipv6, 0, sizeof(Netmask));
+        bitset((bit_t *)&Netmask.ipv6, mask(cp));
         String::set(cbuf, sizeof(cbuf), cp);
         ep = (char *)strchr(cp, '/');
         if(ep)
@@ -916,9 +916,9 @@ void cidr::set(const char *cp)
         WSAStringToAddress((LPSTR)cbuf, AF_INET6, NULL, &saddr, &slen);
         network.ipv6 = paddr->sin6_addr;
 #else
-        inet_pton(AF_INET6, cbuf, &network.ipv6);
+        inet_pton(AF_INET6, cbuf, &Network.ipv6);
 #endif
-        bitmask((bit_t *)&network.ipv6, (bit_t *)&netmask.ipv6, sizeof(network.ipv6));
+        bitmask((bit_t *)&Network.ipv6, (bit_t *)&Netmask.ipv6, sizeof(Network.ipv6));
 #endif
     default:
         break;
