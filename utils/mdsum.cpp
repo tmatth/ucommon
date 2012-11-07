@@ -111,7 +111,7 @@ static void digest(const char *path = NULL)
             return;
         }
 
-        fs.open(path, fsys::ACCESS_STREAM);
+        fs.open(path, fsys::STREAM);
     }
     else
         fs.assign(shell::input());
@@ -137,7 +137,7 @@ static void scan(String path, bool top = true)
 {
     char filename[128];
     String filepath;
-    fsys_t dir(path, fsys::ACCESS_DIRECTORY);
+    fsys_t dir(path, fsys::DIRECTORY);
 
     while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))

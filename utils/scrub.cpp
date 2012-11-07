@@ -125,7 +125,7 @@ static void scrub(const char *path)
     count /= (fsys::offset_t)(*blocks);
     count *= (fsys::offset_t)(*blocks);
 
-    fs.open(path, fsys::ACCESS_REWRITE);
+    fs.open(path, fsys::REWRITE);
     if(!is(fs)) {
         report(path, fs.err());
         return;
@@ -196,7 +196,7 @@ static void scan(String path, bool top = true)
 {
     char filename[128];
     String filepath;
-    fsys_t dir(path, fsys::ACCESS_DIRECTORY);
+    fsys_t dir(path, fsys::DIRECTORY);
 
     while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))

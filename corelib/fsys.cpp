@@ -454,7 +454,7 @@ void fsys::open(const char *path, access_t access)
 
     close();
 
-    if(access == ACCESS_DEVICE) {
+    if(access == DEVICE) {
 #ifdef  _MSWINDOWS_
         if(isalpha(path[0]) && path[1] == ':') {
             if(!QueryDosDevice(path, buf, sizeof(buf))) {
@@ -486,36 +486,36 @@ void fsys::open(const char *path, access_t access)
 
     switch(access)
     {
-    case ACCESS_STREAM:
+    case STREAM:
 #ifdef  FILE_FLAG_SEQUENTIAL_SCAN
         attr |= FILE_FLAG_SEQUENTIAL_SCAN;
 #endif
-    case ACCESS_RDONLY:
+    case RDONLY:
         amode = GENERIC_READ;
         smode = FILE_SHARE_READ;
         break;
-    case ACCESS_WRONLY:
+    case WRONLY:
         amode = GENERIC_WRITE;
         break;
-    case ACCESS_EXCLUSIVE:
-    case ACCESS_DEVICE:
+    case EXCLUSIVE:
+    case DEVICE:
         amode = GENERIC_READ | GENERIC_WRITE;
         break;
-    case ACCESS_RANDOM:
+    case RANDOM:
         attr |= FILE_FLAG_RANDOM_ACCESS;
-    case ACCESS_REWRITE:
+    case REWRITE:
         amode = GENERIC_READ | GENERIC_WRITE;
         smode = FILE_SHARE_READ;
         break;
-    case ACCESS_APPEND:
+    case APPEND:
         amode = GENERIC_WRITE;
         append = true;
         break;
-    case ACCESS_SHARED:
+    case SHARED:
         amode = GENERIC_READ | GENERIC_WRITE;
         smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
-    case ACCESS_DIRECTORY:
+    case DIRECTORY:
         char tpath[256];
         DWORD attr = GetFileAttributes(path);
 
@@ -567,42 +567,42 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 
     switch(access)
     {
-    case ACCESS_DEVICE:
+    case DEVICE:
         error = ENOSYS;
         return;
 
-    case ACCESS_RDONLY:
+    case RDONLY:
         amode = GENERIC_READ;
         cmode = OPEN_ALWAYS;
         smode = FILE_SHARE_READ;
         break;
-    case ACCESS_STREAM:
-    case ACCESS_WRONLY:
+    case STREAM:
+    case WRONLY:
         amode = GENERIC_WRITE;
         cmode = CREATE_ALWAYS;
         break;
-    case ACCESS_EXCLUSIVE:
+    case EXCLUSIVE:
         amode = GENERIC_READ | GENERIC_WRITE;
         cmode = OPEN_ALWAYS;
         break;
-    case ACCESS_RANDOM:
+    case RANDOM:
         attr |= FILE_FLAG_RANDOM_ACCESS;
-    case ACCESS_REWRITE:
+    case REWRITE:
         amode = GENERIC_READ | GENERIC_WRITE;
         cmode = OPEN_ALWAYS;
         smode = FILE_SHARE_READ;
         break;
-    case ACCESS_APPEND:
+    case APPEND:
         amode = GENERIC_WRITE;
         cmode = OPEN_ALWAYS;
         append = true;
         break;
-    case ACCESS_SHARED:
+    case SHARED:
         amode = GENERIC_READ | GENERIC_WRITE;
         cmode = OPEN_ALWAYS;
         smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
-    case ACCESS_DIRECTORY:
+    case DIRECTORY:
         error = ENOENT;
         return;
     }
@@ -844,27 +844,27 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 
     switch(access)
     {
-    case ACCESS_DEVICE:
+    case DEVICE:
         error = ENOSYS;
         return;
 
-    case ACCESS_RDONLY:
+    case RDONLY:
         flags = O_RDONLY | O_CREAT;
         break;
-    case ACCESS_STREAM:
-    case ACCESS_WRONLY:
+    case STREAM:
+    case WRONLY:
         flags = O_WRONLY | O_CREAT | O_TRUNC;
         break;
-    case ACCESS_RANDOM:
-    case ACCESS_SHARED:
-    case ACCESS_REWRITE:
-    case ACCESS_EXCLUSIVE:
+    case RANDOM:
+    case SHARED:
+    case REWRITE:
+    case EXCLUSIVE:
         flags = O_RDWR | O_CREAT;
         break;
-    case ACCESS_APPEND:
+    case APPEND:
         flags = O_RDWR | O_APPEND | O_CREAT;
         break;
-    case ACCESS_DIRECTORY:
+    case DIRECTORY:
         error = ENOENT;
         return;
     }
@@ -873,7 +873,7 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
         error = remapError();
 #ifdef HAVE_POSIX_FADVISE
     else {
-        if(access == ACCESS_RANDOM)
+        if(access == RANDOM)
             posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_RANDOM);
     }
 #endif
@@ -901,28 +901,28 @@ void fsys::open(const char *path, access_t access)
 
     switch(access)
     {
-    case ACCESS_STREAM:
+    case STREAM:
 #if defined(O_STREAMING)
         flags = O_RDONLY | O_STREAMING;
         break;
 #endif
-    case ACCESS_RDONLY:
+    case RDONLY:
         flags = O_RDONLY;
         break;
-    case ACCESS_WRONLY:
+    case WRONLY:
         flags = O_WRONLY;
         break;
-    case ACCESS_EXCLUSIVE:
-    case ACCESS_RANDOM:
-    case ACCESS_SHARED:
-    case ACCESS_REWRITE:
-    case ACCESS_DEVICE:
+    case EXCLUSIVE:
+    case RANDOM:
+    case SHARED:
+    case REWRITE:
+    case DEVICE:
         flags = O_RDWR;
         break;
-    case ACCESS_APPEND:
+    case APPEND:
         flags = O_RDWR | O_APPEND;
         break;
-    case ACCESS_DIRECTORY:
+    case DIRECTORY:
         ptr = opendir(path);
         if(!ptr)
             error = remapError();
@@ -934,9 +934,9 @@ void fsys::open(const char *path, access_t access)
 #ifdef HAVE_POSIX_FADVISE
     else {
         // Linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
-        if(access == ACCESS_STREAM)
+        if(access == STREAM)
             posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_SEQUENTIAL);
-        else if(access == ACCESS_RANDOM)
+        else if(access == RANDOM)
             posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_RANDOM);
     }
 #endif
@@ -1327,11 +1327,11 @@ int fsys::copy(const char *oldpath, const char *newpath, size_t size)
 
     remove(newpath);
 
-    src.open(oldpath, fsys::ACCESS_STREAM);
+    src.open(oldpath, fsys::STREAM);
     if(!is(src))
         goto end;
 
-    dest.open(newpath, GROUP_PUBLIC, fsys::ACCESS_STREAM);
+    dest.open(newpath, GROUP_PUBLIC, fsys::STREAM);
     if(!is(dest))
         goto end;
 

@@ -164,7 +164,7 @@ void fbuf::open(const char *path, size_t size)
     fbuf::close();
     _clear();
 
-    fsys::open(path, ACCESS_DEVICE);
+    fsys::open(path, fsys::DEVICE);
     if(fd == INVALID_HANDLE_VALUE)
         return;
 

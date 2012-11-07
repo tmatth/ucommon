@@ -167,17 +167,17 @@ public:
      * Enumerated file access modes.
      */
     typedef enum {
-        ACCESS_RDONLY,
-        ACCESS_WRONLY,
-        ACCESS_REWRITE,
-        ACCESS_RDWR = ACCESS_REWRITE,
-        ACCESS_APPEND,
-        ACCESS_SHARED,
-        ACCESS_EXCLUSIVE,
-        ACCESS_DEVICE,
-        ACCESS_DIRECTORY,
-        ACCESS_STREAM,
-        ACCESS_RANDOM
+        RDONLY,
+        WRONLY,
+        REWRITE,
+        RDWR = REWRITE,
+        APPEND,
+        SHARED,
+        EXCLUSIVE,
+        DEVICE,
+        DIRECTORY,
+        STREAM,
+        RANDOM
     } access_t;
 
     /**

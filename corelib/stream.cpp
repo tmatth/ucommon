@@ -692,19 +692,19 @@ void filestream::allocate(size_t size, fsys::access_t mode)
         return;
     }
 
-    if(mode == fsys::ACCESS_RDONLY || fsys::ACCESS_RDWR || fsys::ACCESS_SHARED || fsys::ACCESS_DIRECTORY)
+    if(mode == fsys::RDONLY || fsys::RDWR || fsys::SHARED || fsys::DIRECTORY)
         gbuf = new char[size];
-    if(mode == fsys::ACCESS_WRONLY || fsys::ACCESS_APPEND || fsys::ACCESS_SHARED || fsys::ACCESS_RDWR)
+    if(mode == fsys::WRONLY || fsys::APPEND || fsys::SHARED || fsys::RDWR)
         pbuf = new char[size];
     bufsize = size;
     clear();
-    if(mode == fsys::ACCESS_RDONLY || fsys::ACCESS_RDWR || fsys::ACCESS_SHARED || fsys::ACCESS_DIRECTORY) {
+    if(mode == fsys::RDONLY || fsys::RDWR || fsys::SHARED || fsys::DIRECTORY) {
 #if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
         setb(gbuf, gbuf + size, 0);
 #endif
         setg(gbuf, gbuf + size, gbuf + size);
     }
-    if(mode == fsys::ACCESS_WRONLY || fsys::ACCESS_APPEND || fsys::ACCESS_SHARED || fsys::ACCESS_RDWR)
+    if(mode == fsys::WRONLY || fsys::APPEND || fsys::SHARED || fsys::RDWR)
         setp(pbuf, pbuf + size);
 }
 

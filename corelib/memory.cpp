@@ -738,7 +738,7 @@ bool DirPager::load(const char *path)
         return false;
 
     dir = dup(path);
-    ds.open(path, fsys::ACCESS_DIRECTORY);
+    ds.open(path, fsys::DIRECTORY);
     if(!ds)
         return false;
 

@@ -45,7 +45,7 @@ static void zerofill(void)
 
     temp = true;
 
-    fs.open("zerofill.tmp", 0666, fsys::ACCESS_STREAM);
+    fs.open("zerofill.tmp", 0666, fsys::STREAM);
     if(!is(fs))
         shell::errexit(1, "*** zerofill: %s\n",
             _TEXT("cannot create temporary file"));
@@ -94,7 +94,7 @@ static void zerofill(const char *devname)
         shell::errexit(6, "*** zerofill: %s: %s\n",
             devname, _TEXT("not block device"));
 
-    fs.open(devname, fsys::ACCESS_WRONLY);
+    fs.open(devname, fsys::WRONLY);
     if(fs.err())
         shell::errexit(5, "*** zerofill: %s: %s\n",
             devname, _TEXT("cannot modify"));

@@ -46,7 +46,7 @@ static void dirpath(bool middle, String path, bool top = true)
 {
     char filename[128];
     String subdir;
-    fsys_t dir(path, fsys::ACCESS_DIRECTORY);
+    fsys_t dir(path, fsys::DIRECTORY);
     unsigned count = 0;
 
     while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {

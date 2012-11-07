@@ -385,7 +385,7 @@ static void scan(string_t path, string_t prefix)
     string_t filepath;
     string_t name;
     string_t subdir;
-    fsys_t dir(path, fsys::ACCESS_DIRECTORY);
+    fsys_t dir(path, fsys::DIRECTORY);
 
     while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))
