@@ -692,13 +692,13 @@ void filestream::allocate(size_t size, fsys::access_t mode)
         return;
     }
 
-    if(mode == fsys::RDONLY || fsys::RDWR || fsys::SHARED || fsys::DIRECTORY)
+    if(mode == fsys::RDONLY || fsys::RDWR || fsys::SHARED)
         gbuf = new char[size];
     if(mode == fsys::WRONLY || fsys::APPEND || fsys::SHARED || fsys::RDWR)
         pbuf = new char[size];
     bufsize = size;
     clear();
-    if(mode == fsys::RDONLY || fsys::RDWR || fsys::SHARED || fsys::DIRECTORY) {
+    if(mode == fsys::RDONLY || fsys::RDWR || fsys::SHARED) {
 #if (defined(__GNUC__) && (__GNUC__ < 3)) && !defined(MSWINDOWS) && !defined(STLPORT)
         setb(gbuf, gbuf + size, 0);
 #endif

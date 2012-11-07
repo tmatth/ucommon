@@ -252,7 +252,7 @@ static void process(void)
         cp = strrchr((char *)(cbuf + 6), '/');
         if(cp) {
             *cp = 0;
-            fsys::create((char *)(cbuf + 6), 0640);
+            dir::create((char *)(cbuf + 6), 0640);
         }
         if(fsys::is_dir(*path))
             shell::errexit(8, "*** %s: %s: %s\n",
@@ -385,9 +385,9 @@ static void scan(string_t path, string_t prefix)
     string_t filepath;
     string_t name;
     string_t subdir;
-    fsys_t dir(path, fsys::DIRECTORY);
+    dirsys_t dir(path);
 
-    while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))
             continue;
 

@@ -130,13 +130,13 @@ class __EXPORT fsys
 {
 protected:
     fd_t    fd;
+    int     error;
 #ifdef  _MSWINDOWS_
     WIN32_FIND_DATA *ptr;
     HINSTANCE   mem;
 #else
     void    *ptr;
 #endif
-    int     error;
 
 public:
     /**
@@ -175,7 +175,6 @@ public:
         SHARED,
         EXCLUSIVE,
         DEVICE,
-        DIRECTORY,
         STREAM,
         RANDOM
     } access_t;
@@ -238,21 +237,21 @@ public:
      * @return low level file handle.
      */
     inline operator fd_t() const
-        {return fd;};
+        {return fd;}
 
     /**
      * Test if file descriptor is open.
      * @return true if open.
      */
     inline operator bool() const
-        {return fd != INVALID_HANDLE_VALUE || ptr != NULL;};
+        {return fd != INVALID_HANDLE_VALUE || ptr != NULL;}
 
     /**
      * Test if file descriptor is closed.
      * @return true if closed.
      */
     inline bool operator!() const
-        {return fd == INVALID_HANDLE_VALUE && ptr == NULL;};
+        {return fd == INVALID_HANDLE_VALUE && ptr == NULL;}
 
     /**
      * Assign file descriptor by duplicating another descriptor.
@@ -386,13 +385,6 @@ public:
      * @return error number or 0 on success.
      */
     static int erase(const char *path);
-
-    /**
-     * Remove a file or empty directory.
-     * @param path of file.
-     * @return error number or 0 on success.
-     */
-    static int remove(const char *path);
 
     /**
      * Copy a file.
@@ -549,14 +541,6 @@ public:
      * @param mode of file if created.
      */
     void open(const char *path, unsigned mode, access_t access);
-
-    /**
-     * Simple direct method to create a directory.
-     * @param path of directory to create.
-     * @param mode of directory.
-     * @return error number or 0 on success.
-     */
-    static int create(const char *path, unsigned mode);
 
     /**
      * Remove a symbolic link explicitly.  Other kinds of files are also
@@ -742,6 +726,92 @@ public:
 };
 
 /**
+ * Convenience class for directories.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT dir : private fsys
+{
+public:
+    /**
+     * Construct and open a directory path.
+     * @param path of directory.
+     */
+    dir(const char *path);
+
+    /**
+     * Construct an unopened directory.
+     */
+    dir();
+
+    /**
+     * Close and release directory.
+     */
+    ~dir();
+
+    /**
+     * Simple direct method to create a directory.
+     * @param path of directory to create.
+     * @param mode of directory.
+     * @return error number or 0 on success.
+     */
+    static int create(const char *path, unsigned mode);
+
+    /**
+     * Remove an empty directory.
+     * @param path of directory.
+     * @return error number or 0 on success.
+     */
+    static int remove(const char *path);
+
+    /**
+     * Open a directory path for reading.
+     * @param path to open.
+     */
+    void open(const char *path);
+
+    /**
+     * Read data from directory.
+     * @param buffer to read into.
+     * @param count of bytes to read.
+     * @return bytes transferred, -1 if error.
+     */
+    ssize_t read(char *buffer, size_t count);
+
+    /**
+     * Read data from directory.
+     * @param descriptor to read from.
+     * @param buffer to read into.
+     * @param count of bytes to read.
+     * @return bytes transferred, -1 if error.
+     */
+    inline static ssize_t read(dir& descriptor, char *buffer, size_t count)
+        {return descriptor.read(buffer, count);};
+
+    /**
+     * Close and release directory object.
+     */
+    void close(void);
+
+    inline int err(void) const
+        {return fsys::err();}
+
+    /**
+     * Test if file descriptor is open.
+     * @return true if open.
+     */
+    inline operator bool() const
+        {return ptr != NULL;};
+
+    /**
+     * Test if file descriptor is closed.
+     * @return true if closed.
+     */
+    inline bool operator!() const
+        {return ptr == NULL;};
+
+};
+
+/**
  * Access standard files through character protocol.  This can also be
  * used as an alternative means to access files that manages file pointers.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -879,6 +949,8 @@ String str(charfile& fp, strsize_t size);
  * Convience type for fsys.
  */
 typedef fsys fsys_t;
+
+typedef dir dirsys_t;
 
 extern charfile cstdin, cstdout, cstderr;
 

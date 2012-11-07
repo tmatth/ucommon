@@ -112,12 +112,12 @@ static void scrub(const char *path)
     }
 
     if(fsys::is_dir(&ino)) {
-        report(path, fsys::remove(path));
+        report(path, dir::remove(path));
         return;
     }
 
     if(err == ENOENT || !ino.st_size || fsys::is_sys(&ino) || fsys::is_dev(&ino)) {
-        report(path, fsys::remove(path));
+        report(path, dir::remove(path));
         return;
     }
 
@@ -186,7 +186,7 @@ repeat:
         }
     }
 
-    report(path, fsys::remove(path));
+    report(path, dir::remove(path));
 
     fs.close();
 
@@ -196,9 +196,9 @@ static void scan(String path, bool top = true)
 {
     char filename[128];
     String filepath;
-    fsys_t dir(path, fsys::DIRECTORY);
+    dirsys_t dir(path);
 
-    while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))
             continue;
 

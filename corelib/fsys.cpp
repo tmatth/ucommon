@@ -179,7 +179,7 @@ int fsys::remapError(void)
     }
 }
 
-int fsys::create(const char *path, unsigned perms)
+int dir::create(const char *path, unsigned perms)
 {
     if(!CreateDirectory(path, NULL))
         return remapError();
@@ -339,12 +339,9 @@ bool fsys::is_tty(void)
     return false;
 }
 
-int fsys::close(void)
+void dir::close(void)
 {
     error = 0;
-
-    if(fd == INVALID_HANDLE_VALUE)
-        return EBADF;
 
     if(ptr) {
         if(::FindClose(fd)) {
@@ -355,18 +352,26 @@ int fsys::close(void)
         else
             error = remapError();
     }
-    else if(::CloseHandle(fd))
+    else
+        error = EBADF;
+}
+
+int fsys::close(void)
+{
+    error = 0;
+
+    if(fd == INVALID_HANDLE_VALUE)
+        return EBADF;
+
+    if(::CloseHandle(fd))
         fd = INVALID_HANDLE_VALUE;
     else
         error = remapError();
     return error;
 }
 
-ssize_t fsys::read(void *buf, size_t len)
+ssize_t dir::read(char *buf, size_t len)
 {
-    ssize_t rtn = -1;
-    DWORD count;
-
     if(ptr) {
         snprintf((char *)buf, len, ptr->cFileName);
         rtn = strlen(ptr->cFileName);
@@ -374,6 +379,13 @@ ssize_t fsys::read(void *buf, size_t len)
             close();
         return rtn;
     }
+    return -1;
+}
+
+ssize_t fsys::read(void *buf, size_t len)
+{
+    ssize_t rtn = -1;
+    DWORD count;
 
     if(ReadFile(fd, (LPVOID) buf, (DWORD)len, &count, NULL))
         rtn = count;
@@ -442,6 +454,27 @@ fd_t fsys::append(const char *path)
 void fsys::release(fd_t fd)
 {
     CloseHandle(fd);
+}
+
+void dir::open(const char *path)
+{
+    char tpath[256];
+    DWORD attr = GetFileAttributes(path);
+
+    if((attr == (DWORD)~0l) || !(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+        error = ENOTDIR;
+        return;
+    }
+
+    snprintf(tpath, sizeof(tpath), "%s%s", path, "\\*");
+    ptr = new WIN32_FIND_DATA;
+    fd = FindFirstFile(tpath, ptr);
+    if(fd == INVALID_HANDLE_VALUE) {
+        delete ptr;
+        ptr = NULL;
+        error = remapError();
+    }
+    return;
 }
 
 void fsys::open(const char *path, access_t access)
@@ -515,24 +548,6 @@ void fsys::open(const char *path, access_t access)
         amode = GENERIC_READ | GENERIC_WRITE;
         smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
-    case DIRECTORY:
-        char tpath[256];
-        DWORD attr = GetFileAttributes(path);
-
-        if((attr == (DWORD)~0l) || !(attr & FILE_ATTRIBUTE_DIRECTORY)) {
-            error = ENOTDIR;
-            return;
-        }
-
-        snprintf(tpath, sizeof(tpath), "%s%s", path, "\\*");
-        ptr = new WIN32_FIND_DATA;
-        fd = FindFirstFile(tpath, ptr);
-        if(fd == INVALID_HANDLE_VALUE) {
-            delete ptr;
-            ptr = NULL;
-            error = remapError();
-        }
-        return;
     }
 
     fd = CreateFile(path, amode, smode, NULL, OPEN_EXISTING, attr, NULL);
@@ -602,9 +617,6 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
         cmode = OPEN_ALWAYS;
         smode = FILE_SHARE_READ | FILE_SHARE_WRITE;
         break;
-    case DIRECTORY:
-        error = ENOENT;
-        return;
     }
     fd = CreateFile(path, amode, smode, NULL, cmode, attr, NULL);
     if(fd != INVALID_HANDLE_VALUE && append)
@@ -617,9 +629,9 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 
 fsys::fsys(const fsys& copy)
 {
+    ptr = NULL;
     error = 0;
     fd = INVALID_HANDLE_VALUE;
-    ptr = NULL;
 
     if(copy.fd == INVALID_HANDLE_VALUE)
         return;
@@ -711,7 +723,7 @@ int fsys::seek(offset_t pos)
 
 #else
 
-ssize_t fsys::read(void *buf, size_t len)
+ssize_t dir::read(char *buf, size_t len)
 {
     if(ptr) {
         dirent *entry = ::readdir((DIR *)ptr);
@@ -722,7 +734,11 @@ ssize_t fsys::read(void *buf, size_t len)
         String::set((char *)buf, len, entry->d_name);
         return strlen(entry->d_name);
     }
+    return -1;
+}
 
+ssize_t fsys::read(void *buf, size_t len)
+{
 #ifdef  __PTH__
     int rtn = ::pth_read(fd, buf, len);
 #else
@@ -797,7 +813,7 @@ bool fsys::is_tty(void)
     return false;
 }
 
-int fsys::close(void)
+void dir::close(void)
 {
     error = 0;
     if(ptr) {
@@ -805,7 +821,14 @@ int fsys::close(void)
             error = remapError();
         ptr = NULL;
     }
-    else if(fd != INVALID_HANDLE_VALUE) {
+    else
+        error = EBADF;
+}
+
+int fsys::close(void)
+{
+    error = 0;
+    if(fd != INVALID_HANDLE_VALUE) {
         if(::close(fd) == 0)
             fd = INVALID_HANDLE_VALUE;
         else
@@ -864,9 +887,6 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
     case APPEND:
         flags = O_RDWR | O_APPEND | O_CREAT;
         break;
-    case DIRECTORY:
-        error = ENOENT;
-        return;
     }
     fd = ::open(path, flags, fmode);
     if(fd == INVALID_HANDLE_VALUE)
@@ -879,7 +899,7 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 #endif
 }
 
-int fsys::create(const char *path, unsigned perms)
+int dir::create(const char *path, unsigned perms)
 {
     if(perms & 06)
         perms |= 01;
@@ -891,6 +911,13 @@ int fsys::create(const char *path, unsigned perms)
     if(::mkdir(path, perms))
         return remapError();
     return 0;
+}
+
+void dir::open(const char *path)
+{
+    ptr = opendir(path);
+    if(!ptr)
+        error = remapError();
 }
 
 void fsys::open(const char *path, access_t access)
@@ -922,11 +949,6 @@ void fsys::open(const char *path, access_t access)
     case APPEND:
         flags = O_RDWR | O_APPEND;
         break;
-    case DIRECTORY:
-        ptr = opendir(path);
-        if(!ptr)
-            error = remapError();
-        return;
     }
     fd = ::open(path, flags);
     if(fd == INVALID_HANDLE_VALUE)
@@ -1114,11 +1136,27 @@ int fsys::seek(offset_t pos)
 
 #endif
 
+dir::dir() :
+fsys()
+{
+}
+
+dir::~dir()
+{
+    close();
+}
+
 fsys::fsys()
 {
     fd = INVALID_HANDLE_VALUE;
     ptr = NULL;
     error = 0;
+}
+
+dir::dir(const char *path) :
+fsys()
+{
+    open(path);
 }
 
 fsys::fsys(const char *path, access_t access)
@@ -1128,7 +1166,6 @@ fsys::fsys(const char *path, access_t access)
     error = 0;
     open(path, access);
 }
-
 
 fsys::fsys(const char *path, unsigned fmode, access_t access)
 {
@@ -1282,15 +1319,12 @@ int fsys::erase(const char *path)
     if(is_device(path))
         return ENOSYS;
 
-    if(is_dir(path))
-        return ENOENT;
-
     if(::remove(path))
         return remapError();
     return 0;
 }
 
-int fsys::remove(const char *path)
+int dir::remove(const char *path)
 {
     if(is_device(path))
         return ENOSYS;
@@ -1859,8 +1893,8 @@ fsys::fsys(fd_t handle)
 void fsys::set(fd_t handle)
 {
     close();
-    fd = handle;
     ptr = NULL;
+    fd = handle;
     error = 0;
 }
 

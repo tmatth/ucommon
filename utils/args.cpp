@@ -45,11 +45,11 @@ static void output(bool middle, const char *arg)
 static void dirpath(bool middle, String path, bool top = true)
 {
     char filename[128];
-    String subdir;
-    fsys_t dir(path, fsys::DIRECTORY);
+    string_t subdir;
+    dirsys_t dir(path);
     unsigned count = 0;
 
-    while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
         if(*filename == '.')
             continue;
 

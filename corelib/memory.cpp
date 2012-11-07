@@ -731,14 +731,14 @@ void DirPager::operator=(const char *path)
 
 bool DirPager::load(const char *path)
 {
-    fsys_t ds;
+    dirsys_t ds;
     char buffer[128];
 
     if(!fsys::is_dir(path))
         return false;
 
     dir = dup(path);
-    ds.open(path, fsys::DIRECTORY);
+    ds.open(path);
     if(!ds)
         return false;
 

@@ -136,10 +136,10 @@ static void digest(const char *path = NULL)
 static void scan(String path, bool top = true)
 {
     char filename[128];
-    String filepath;
-    fsys_t dir(path, fsys::DIRECTORY);
+    string_t filepath;
+    dirsys_t dir(path);
 
-    while(is(dir) && fsys::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))
             continue;
 
