@@ -108,10 +108,6 @@ public:
     inline unsigned pages(void) const
         {return count;}
 
-    /** depricated */
-    inline unsigned getPages(void) const
-        {return count;}
-
     /**
      * Get the maximum number of pages that are permitted.  One can use a
      * derived class to set and enforce a maximum limit to the number of

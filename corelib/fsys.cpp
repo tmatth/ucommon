@@ -293,7 +293,11 @@ bool fsys::is_writable(const char *path)
 
 bool fsys::is_executable(const char *path)
 {
-    const char *strrchr(path, '.');
+    path = strrchr(path, '.');
+
+    if(!path)
+        return false;
+
     if(eq_case(path, ".exe"))
         return true;
 
@@ -340,7 +344,7 @@ int fsys::close(void)
     error = 0;
 
     if(fd == INVALID_HANDLE_VALUE)
-        return EBADR;
+        return EBADF;
 
     if(ptr) {
         if(::FindClose(fd)) {
@@ -808,7 +812,7 @@ int fsys::close(void)
             error = remapError();
     }
     else
-        error = EBADR;
+        error = EBADF;
     return error;
 }
 
@@ -1154,7 +1158,7 @@ int fsys::linkinfo(const char *path, char *buffer, size_t size)
     char reparse[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
     DWORD rsize;
 
-    if(!fsys::islink(path))
+    if(!fsys::is_link(path))
         return EINVAL;
 
     h = CreateFile(path, GENERIC_READ, 0, 0, OPEN_EXISTING,
@@ -1250,7 +1254,7 @@ int fsys::unlink(const char *path)
 {
 #ifdef  _MSWINDOWS_
     HANDLE h = INVALID_HANDLE_VALUE;
-    if(islink(path))
+    if(is_link(path))
         h = CreateFile(path, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
             FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, 0);
     if(!h || h != INVALID_HANDLE_VALUE) {
@@ -1295,7 +1299,7 @@ int fsys::remove(const char *path)
     if(RemoveDirectory(path))
         return 0;
     int error = remapError();
-    if(ENOTEMPTY)
+    if(error == ENOTEMPTY)
         return ENOTEMPTY;
 #else
     if(!::rmdir(path))
@@ -1652,7 +1656,7 @@ bool fsys::is_device(const char *path)
         return false;
     }
 
-    if(!strncmp(path, "aux") || !strcmp(path, "prn")) {
+    if(!strcmp(path, "aux") || !strcmp(path, "prn")) {
         if(!path[3] || path[3] == ':')
             return true;
         return false;

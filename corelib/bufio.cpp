@@ -80,7 +80,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
         inherit(fd, false);
         pid = shell::spawn(path, args, envp, stdio);
         if(pid == INVALID_PID_VALUE) {
-            ::close(stdio[0]);
+            fsys::release(stdio[0]);
             fsys::close();
             return;
         }
@@ -94,7 +94,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
         inherit(fd, false);
         pid = shell::spawn(path, args, envp, stdio);
         if(pid == INVALID_PID_VALUE) {
-            ::close(stdio[1]);
+            fsys::release(stdio[1]);
             fsys::close();
             return;
         }
@@ -113,7 +113,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
         inherit(fd, false);
         pid = shell::spawn(path, args, envp, stdio);
         if(pid == INVALID_PID_VALUE) {
-            ::close(pair[1]);
+            fsys::release(pair[1]);
             fsys::close();
             return;
         }
@@ -132,7 +132,6 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
         fd_t child = CreateFile(buf, GENERIC_READ|GENERIC_WRITE, 0, NULL,
             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if(child == INVALID_HANDLE_VALUE) {
-failed:
             CloseHandle(fd);
             ::remove(buf);
             return;

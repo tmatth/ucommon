@@ -318,7 +318,7 @@ void shell::set0(char *argv0)
 
 #ifdef  _MSWINDOWS_
     char *ext = strrchr(_argv0, '.');
-    if(case_eq(ext, ".exe") || case_eq(ext, ".com"))
+    if(eq_case(ext, ".exe") || eq_case(ext, ".com"))
         *ext = 0;
 #endif
 
@@ -930,9 +930,9 @@ static void pathfinder(const char *name, char *buf, size_t size)
     while(NULL != (element = String::token(path, &tokbuf, ";"))) {
         snprintf(buf, sizeof(buf), "%s\\%s", element, name);
         ext = strrchr(buf, '.');
-        if(!ext || (!case_eq(ext, ".exe") && !case_eq(ext, ".com")))
+        if(!ext || (!eq_case(ext, ".exe") && !eq_case(ext, ".com")))
             String::add(buf, size, ".exe");
-        if(fsys::isfile(buf))
+        if(fsys::is_file(buf))
             return;
     }
 
@@ -940,7 +940,7 @@ static void pathfinder(const char *name, char *buf, size_t size)
 
 tail:
     ext = strrchr(buf, '.');
-    if(!ext || (!case_eq(ext, ".exe") && !case_eq(ext, ".com")))
+    if(!ext || (!eq_case(ext, ".exe") && !eq_case(ext, ".com")))
         String::add(buf, size, ".exe");
 }
 
@@ -1011,7 +1011,7 @@ String shell::path(path_t id)
         }
         break;
     case SYSTEM_TEMP:
-        fsys::create("c:\\temp", fsys::TEMPORARY);
+        fsys::create("c:\\temp", fsys::DIR_TEMPORARY);
         result ^= "c:\\temp";
         break;
     case PROGRAM_TEMP:
@@ -1396,7 +1396,7 @@ char *shell::getpass(const char *prompt, char *buffer, size_t size)
 
 int shell::inkey(const char *prompt)
 {
-    if(prompt && fsys::istty(shell::input()))
+    if(prompt && fsys::is_tty(shell::input()))
         fputs(prompt, stdout);
     else
         return 0;
@@ -1415,7 +1415,7 @@ char *shell::getline(const char *prompt, char *buffer, size_t size)
 {
     unsigned pos = 0;
 
-    if(!fsys::istty(shell::input()))
+    if(!fsys::is_tty(shell::input()))
         return fgets(buffer, size, stdin);
 
     fputs(prompt, stdout);

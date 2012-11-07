@@ -914,7 +914,7 @@ void cidr::set(const char *cp)
         slen = sizeof(saddr);
         paddr = (struct sockaddr_in6 *)&saddr;
         WSAStringToAddress((LPSTR)cbuf, AF_INET6, NULL, &saddr, &slen);
-        network.ipv6 = paddr->sin6_addr;
+        Network.ipv6 = paddr->sin6_addr;
 #else
         inet_pton(AF_INET6, cbuf, &Network.ipv6);
 #endif
@@ -2411,9 +2411,9 @@ bool Socket::connected(void) const
     return true;
 }
 
-bool Socket::pending(unsigned qio) const
+bool Socket::is_pending(unsigned qio) const
 {
-    if(getPending() >= qio)
+    if(pending() >= qio)
         return true;
 
     return false;
@@ -2942,14 +2942,14 @@ char *Socket::query(const struct sockaddr *addr, char *name, socklen_t size)
         struct sockaddr_in6 saddr6;
         memcpy(&saddr6, addr, sizeof(saddr6));
         saddr6.sin6_port = 0;
-        WSAAddressToString((const struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
+        WSAAddressToString((struct sockaddr *)&saddr6, sizeof(saddr6), NULL, name, &slen);
         return name;
 #endif
     case AF_INET:
         struct sockaddr_in saddr;
         memcpy(&saddr, addr, sizeof(saddr));
         saddr.sin_port = 0;
-        WSAAddressToString((const struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
+        WSAAddressToString((struct sockaddr *)&saddr, sizeof(saddr), NULL, name, &slen);
         return name;
 #else
 #ifdef  HAVE_INET_NTOP

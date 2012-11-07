@@ -676,7 +676,7 @@ public:
      * @param value to test for.
      * @return true if at least that many bytes waiting in receive queue.
      */
-    bool pending(unsigned value) const;
+    bool is_pending(unsigned value) const;
 
     /**
      * Test if socket is connected.
@@ -720,7 +720,7 @@ public:
      * Get the number of bytes of data in the socket receive buffer.
      * @return bytes pending.
      */
-    inline unsigned getPending(void) const
+    inline unsigned pending(void) const
         {return pending(so);};
 
     /**

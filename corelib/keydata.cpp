@@ -203,7 +203,7 @@ void keyfile::load(HKEY keys, keydata *section, const char *path)
     DWORD index = 0;
     TCHAR keyvalue[256];
     TCHAR keyname[4096];
-    DWORD size = sizeof(keyname);
+    DWORD ksize = sizeof(keyname);
     DWORD vsize, vtype;
     FILETIME fTime;
     HKEY subkey;
@@ -218,27 +218,27 @@ void keyfile::load(HKEY keys, keydata *section, const char *path)
         return;
     }
 
-    while(!section && RegEnumKeyEx(keys, index++, keyname, &size, NULL, NULL, NULL, &fTime) == ERROR_SUCCESS) {
+    while(!section && RegEnumKeyEx(keys, index++, keyname, &ksize, NULL, NULL, NULL, &fTime) == ERROR_SUCCESS) {
         if(RegOpenKeyEx(keys, keyname, 0, KEY_READ, &subkey) == ERROR_SUCCESS) {
             section = create(keyname);
             load(subkey, section);
             RegCloseKey(subkey);
         }
-        size = sizeof(keyname);
+        ksize = sizeof(keyname);
     }
     index = 0;
     vsize = sizeof(keyvalue);
-    if(vsize > getAlloc() - 64)
-        vsize = getAlloc() - 64;
-    while((RegEnumValue(keys, index++, keyname, &size, NULL, &vtype, (BYTE *)keyvalue, &vsize) == ERROR_SUCCESS) && (vtype == REG_SZ) && (keyname[0] != 0)) {
+    if(vsize > size() - 64)
+        vsize = size() - 64;
+    while((RegEnumValue(keys, index++, keyname, &ksize, NULL, &vtype, (BYTE *)keyvalue, &vsize) == ERROR_SUCCESS) && (vtype == REG_SZ) && (keyname[0] != 0)) {
         if(section)
             section->set(keyname, keyvalue);
         else
             defaults->set(keyname, keyvalue);
-        size = sizeof(keyname);
+        ksize = sizeof(keyname);
         vsize = sizeof(keyvalue);
-        if(vsize > getAlloc() - 64)
-            vsize = getAlloc() - 64;
+        if(vsize > size() - 64)
+            vsize = size() - 64;
     }
 }
 

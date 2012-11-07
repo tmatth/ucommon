@@ -726,7 +726,7 @@ public:
     /**
      * Detach current process to daemon for service entry.
      */
-    static void detach(mainproc_t mainentry = (mainproc_t)NULL);
+    void detach(mainproc_t mainentry = (mainproc_t)NULL);
 
     /**
      * Make current process restartable.
