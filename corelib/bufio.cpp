@@ -41,12 +41,12 @@ BufferProtocol(), fsys()
     open(path, size);
 }
 
-bufio::bufio(const char *path, char **args, mode_t access, size_t size, char **envp) :
+bufio::bufio(const char *path, char **args, size_t size, char **envp) :
 BufferProtocol(), fsys()
 {
     pipename = NULL;
     pid = INVALID_PID_VALUE;
-    open(path, args, access, size, envp);
+    open(path, args, size, envp);
 }
 
 bufio::~bufio()
@@ -64,99 +64,68 @@ void bufio::_clear(void)
     error = 0;
 }
 
-void bufio::open(const char *path, char **args, mode_t bufmode, size_t size, char **envp)
+void bufio::open(const char *path, char **args, size_t size, char **envp)
 {
     bufio::close();
     _clear();
 
     fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
 
-    switch(bufmode)
-    {
-    case bufio::RDONLY:
-        error = fsys::pipe(fd, stdio[0]);
-        if(error)
-            return;
-        inherit(fd, false);
-        pid = shell::spawn(path, args, envp, stdio);
-        if(pid == INVALID_PID_VALUE) {
-            fsys::release(stdio[0]);
-            fsys::close();
-            return;
-        }
-        allocate(size, (BufferProtocol::mode_t)bufmode);
-        fsys::release(stdio[0]);
-        break;
-    case bufio::WRONLY:
-        error = fsys::pipe(stdio[1], fd);
-        if(error)
-            return;
-        inherit(fd, false);
-        pid = shell::spawn(path, args, envp, stdio);
-        if(pid == INVALID_PID_VALUE) {
-            fsys::release(stdio[1]);
-            fsys::close();
-            return;
-        }
-        allocate(size, (BufferProtocol::mode_t)bufmode);
-        fsys::release(stdio[1]);
-        break;
-    case bufio::RDWR:
 #if defined(HAVE_SOCKETPAIR)
-        int pair[2];
-        if(socketpair(AF_LOCAL, SOCK_STREAM, 0, pair)) {
-            error = errno;
-            return;
-        }
-        fd = pair[0];
-        stdio[0] = stdio[1] = pair[1];
-        inherit(fd, false);
-        pid = shell::spawn(path, args, envp, stdio);
-        if(pid == INVALID_PID_VALUE) {
-            fsys::release(pair[1]);
-            fsys::close();
-            return;
-        }
-        allocate(size, (BufferProtocol::mode_t)bufmode);
-        fsys::release(pair[1]);
-#elif defined(_MSWINDOWS_)
-        static int count;
-        char buf[96];
-        snprintf(buf, sizeof(buf), "\\\\.\\pipe\\pair-%ld-%d",
-            GetCurrentProcessId(), count++);
-        fd = CreateNamedPipe(buf, PIPE_ACCESS_DUPLEX,
-            PIPE_TYPE_BYTE | PIPE_NOWAIT,
-            PIPE_UNLIMITED_INSTANCES, size, size, 0, NULL);
-        if(fd == INVALID_HANDLE_VALUE)
-            return;
-        fd_t child = CreateFile(buf, GENERIC_READ|GENERIC_WRITE, 0, NULL,
-            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        if(child == INVALID_HANDLE_VALUE) {
-            CloseHandle(fd);
-            ::remove(buf);
-            return;
-        }
-
-        inherit(child, true);
-        inherit(fd, false);
-
-        DWORD pmode = PIPE_NOWAIT;
-        SetNamedPipeHandleState(fd, &pmode, NULL, NULL);
-        stdio[0] = child;
-        stdio[1] = child;
-        pid = shell::spawn(path, args, envp, stdio);
-        if(pid == INVALID_PID_VALUE) {
-            CloseHandle(child);
-            ::remove(buf);
-            fsys::close();
-            return;
-        }
-        allocate(size, (BufferProtocol::mode_t)bufmode);
-        fsys::release(child);
-        pipename = strdup(buf);
-#endif
-        return; // invalid
+    int pair[2];
+    if(socketpair(AF_LOCAL, SOCK_STREAM, 0, pair)) {
+        error = errno;
+        return;
     }
+    fd = pair[0];
+    stdio[0] = stdio[1] = pair[1];
+    inherit(fd, false);
+    pid = shell::spawn(path, args, envp, stdio);
+    if(pid == INVALID_PID_VALUE) {
+        fsys::release(pair[1]);
+        fsys::close();
+        return;
+    }
+    allocate(size);
+    fsys::release(pair[1]);
+#elif defined(_MSWINDOWS_)
+    static int count;
+    char buf[96];
+
+    snprintf(buf, sizeof(buf), "\\\\.\\pipe\\pair-%ld-%d",
+        GetCurrentProcessId(), count++);
+    fd = CreateNamedPipe(buf, PIPE_ACCESS_DUPLEX,
+        PIPE_TYPE_BYTE | PIPE_NOWAIT,
+        PIPE_UNLIMITED_INSTANCES, size, size, 0, NULL);
+    if(fd == INVALID_HANDLE_VALUE)
+        return;
+    fd_t child = CreateFile(buf, GENERIC_READ|GENERIC_WRITE, 0, NULL,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(child == INVALID_HANDLE_VALUE) {
+        CloseHandle(fd);
+        ::remove(buf);
+        return;
+    }
+
+    inherit(child, true);
+    inherit(fd, false);
+
+    DWORD pmode = PIPE_NOWAIT;
+
+    SetNamedPipeHandleState(fd, &pmode, NULL, NULL);
+    stdio[0] = child;
+    stdio[1] = child;
+    pid = shell::spawn(path, args, envp, stdio);
+    if(pid == INVALID_PID_VALUE) {
+        CloseHandle(child);
+        ::remove(buf);
+        fsys::close();
+        return;
+    }
+    allocate(size);
+    fsys::release(child);
+    pipename = strdup(buf);
+#endif
 }
 
 void bufio::open(const char *path, size_t size)

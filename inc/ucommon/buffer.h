@@ -90,11 +90,10 @@ public:
     /**
      * Construct a pipe buffer from an existing process.
      * @param path of existing process.
-     * @param access mode of pipe.
      * @param argv to pass.
      * @param envp to use.
      */
-    bufio(const char *path, char  **argv, mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
+    bufio(const char *path, char  **argv, size_t size = 512, char **envp = NULL);
 
     /**
      * Construct a buffer that opens an existing device.
@@ -113,11 +112,10 @@ public:
     /**
      * Construct a pipe buffer from an existing file.
      * @param path of existing process.
-     * @param access mode of pipe.
      * @param argv to pass.
      * @param envp to use.
      */
-    void open(const char *path, char **argv, mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
+    void open(const char *path, char **argv, size_t size = 512, char **envp = NULL);
 
     /**
      * Close the file, flush buffers.  Capture exit code in error for pipe.

@@ -1747,13 +1747,27 @@ bool fsys::is_hidden(const char *path)
 charfile::charfile(const char *file, const char *mode)
 {
     fp = NULL;
+    pid = INVALID_PID_VALUE;
     open(file, mode);
+}
+
+charfile::charfile(const char *file, char **argv, const char *mode, char **envp)
+{
+    fp = NULL;
+    pid = INVALID_PID_VALUE;
+    open(file, argv, mode, envp);
 }
 
 charfile::charfile()
 {
     fp = NULL;
-    opened = false;
+    pid = INVALID_PID_VALUE;
+}
+
+charfile::charfile(FILE *file)
+{
+    fp = file;
+    pid = INVALID_PID_VALUE;
 }
 
 charfile::~charfile()
@@ -1773,20 +1787,85 @@ bool charfile::is_tty(void)
     return false;
 }
 
+void charfile::open(const char *path, char **argv, const char *mode, char **envp)
+{
+    close();
+    fd_t fd;
+    fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
+
+#ifdef  _MSWINDOWS_
+    int _fmode;
+#endif
+
+    if(eq_case(mode, "w")) {
+        if(fsys::pipe(fd, stdio[0]))
+            return;
+        fsys::inherit(fd, false);
+        pid = shell::spawn(path, argv, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            fsys::release(stdio[0]);
+            fsys::release(fd);
+            return;
+        }
+        fsys::release(stdio[0]);
+#ifdef  _MSWINDOWS_
+        _fmode = _O_WRONLY;
+#endif
+    }
+    else if(eq_case(mode, "r")) {
+        if(fsys::pipe(stdio[1], fd))
+            return;
+        fsys::inherit(fd, false);
+        pid = shell::spawn(path, argv, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            fsys::release(stdio[1]);
+            fsys::release(fd);
+            return;
+        }
+#ifdef  _MSWINDOWS_
+        _fmode = _O_RDONLY;
+#endif
+    }
+    else
+        return;
+
+#ifdef  _MSWINDOWS_
+    int fdd = _open_osfhandle((intptr)fd, _fmode);
+    fp = _fdopen(fdd, mode);
+#else
+    fp = fdopen(fd, mode);
+#endif
+}
+
 void charfile::open(const char *path, const char *mode)
 {
     if(fp)
         fclose(fp);
 
     fp = fopen(path, mode);
-    opened = true;
 }
 
-void charfile::close(void)
+int charfile::cancel(void)
 {
-    if(fp && opened)
+    int result = 0;
+    if(pid != INVALID_PID_VALUE)
+        result = shell::cancel(pid);
+    pid = INVALID_PID_VALUE;
+    close();
+    return result;
+}
+
+int charfile::close(void)
+{
+    int error = 0;
+    if(pid != INVALID_PID_VALUE)
+        error = shell::wait(pid);
+
+    if(fp)
         fclose(fp);
     fp = NULL;
+    pid = INVALID_PID_VALUE;
+    return error;
 }
 
 size_t charfile::printf(const char *format, ...)

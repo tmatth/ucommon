@@ -896,7 +896,7 @@ class __EXPORT charfile : public CharacterProtocol
 {
 private:
     FILE *fp;
-    bool opened;
+    pid_t pid;
 
     int _putch(int code);
 
@@ -909,8 +909,7 @@ public:
      * Construct a charfile from an existing FILE pointer.
      * @param file to use.
      */
-    inline charfile(FILE *file)
-        {fp = file; opened = false;}
+    charfile(FILE *file);
 
     /**
      * Construct an open charfile based on a path and mode.
@@ -918,6 +917,15 @@ public:
      * @param mode of file.
      */
     charfile(const char *path, const char *mode);
+
+    /**
+     * Construct an open charfile based on a pipe.
+     * @param path of file to pipe.
+     * @param argv of executable.
+     * @param mode of file.
+     * @param envp to give executable.
+     */
+    charfile(const char *path, char **argv, const char *mode, char **envp = NULL);
 
     /**
      * Construct an unopened file.
@@ -954,9 +962,24 @@ public:
     void open(const char *path, const char *mode);
 
     /**
-     * Close an open file.
+     * Open an executable path.
+     * @param path of executable.
+     * @param argv to pass to executable.
+     * @param mode of pipe (only "r" and "w" are valid).
      */
-    void close(void);
+    void open(const char *path, char **argv, const char *mode, char **envp = NULL);
+
+    /**
+     * Close an open file.
+     * @return process exit code if pipe.
+     */
+    int close(void);
+
+    /**
+     * Cancel pipe and close file.
+     * @return process exit code if pipe.
+     */
+    int cancel(void);
 
     /**
      * Put a string into the file.
