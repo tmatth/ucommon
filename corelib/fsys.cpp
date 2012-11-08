@@ -1880,6 +1880,20 @@ int charfile::close(void)
     return error;
 }
 
+size_t charfile::scanf(const char *format, ...)
+{
+    if(!fp)
+        return 0;
+
+    va_list args;
+    va_start(args, format);
+    size_t result = vfscanf(fp, format, args);
+    va_end(args);
+    if(result == (size_t)EOF)
+        result = 0;
+    return result;
+}
+
 size_t charfile::printf(const char *format, ...)
 {
     if(!fp)

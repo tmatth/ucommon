@@ -1020,6 +1020,12 @@ public:
     size_t get(void *data, size_t size)
         { return fp == NULL ? 0 : fread(data, 1, size, fp);}
 
+    template<typename T> inline size_t read(T* data, size_t count)
+        { return fp == NULL ? 0 : fread(data, sizeof(T), count, fp);}
+
+    template<typename T> inline size_t write(const T* data, size_t count)
+        { return fp == NULL ? 0 : fwrite(data, sizeof(T), count, fp);}
+
     inline void get(bookmark_t& pos)
         { if(fp) fsetpos(fp, &pos);}
 
@@ -1029,6 +1035,9 @@ public:
     int err(void) const;
 
     bool eof(void) const;
+
+    template<typename T> inline void offset(long pos)
+        {if(fp) fseek(fp, sizeof(T) * pos, SEEK_CUR);}
 
     inline void seek(long offset)
         {if(fp) fseek(fp, offset, SEEK_SET);}
@@ -1042,7 +1051,12 @@ public:
     inline void rewind(void)
         {if(fp) ::rewind(fp);}
 
+    inline void flush(void)
+        {if(fp) ::fflush(fp);}
+
     size_t printf(const char *format, ...) __PRINTF(2, 3);
+
+    size_t scanf(const char *format, ...) __SCANF(2, 3);
 
     bool is_tty(void) const;
 };
