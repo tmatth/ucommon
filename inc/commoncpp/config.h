@@ -14,6 +14,7 @@
 // #include <streambuf>
 #include <iostream>
 
+#define COMMONCPP_HEADERS
 #define CCXX_NAMESPACES
 #define COMMONCPP_NAMESPACE ost
 #define NAMESPACE_COMMONCPP namespace ost {

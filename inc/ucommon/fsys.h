@@ -1086,31 +1086,6 @@ public:
     size_t save(const stringlist_t *list, size_t count = 0);
 };
 
-template<> inline size_t charfile::read<string_t&>(string_t& str)
-    { return readline(str);}
-
-template<> inline size_t charfile::write<const string_t&>(const string_t& str)
-    { return puts(str);}
-
-template<> inline size_t charfile::read<stringlist_t&>(stringlist_t& list)
-    { return load(&list);}
-
-template<> inline size_t charfile::write<const stringlist_t&>(const stringlist_t& list)
-    { return charfile::save(&list);}
-
-template<> inline size_t charfile::write<const stringlist_t>(const stringlist_t* list, size_t count)
-    { return charfile::save(list, count);}
-
-template<> inline size_t charfile::read<stringlist_t>(stringlist_t* list, size_t count)
-    { return charfile::load(list, count);}
-
-template<> inline void charfile::offset<string_t&>(long pos)
-    {if(fp) fseek(fp, pos, SEEK_CUR);}
-
-template<> inline void charfile::offset<stringlist_t&>(long pos)
-    {if(fp) fseek(fp, pos, SEEK_CUR);}
-
-
 String str(charfile& fp, strsize_t size);
 
 /**
@@ -1121,6 +1096,8 @@ typedef fsys fsys_t;
 typedef dir dirsys_t;
 
 typedef dso dso_t;
+
+typedef charfile file_t;
 
 extern charfile cstdin, cstdout, cstderr;
 
