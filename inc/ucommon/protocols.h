@@ -506,8 +506,6 @@ public:
         {release();};
 };
 
-typedef BufferProtocol  bufio;
-
 END_NAMESPACE
 
 #endif

@@ -26,14 +26,14 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-fbuf::fbuf() :
+bufio::bufio() :
 BufferProtocol(), fsys()
 {
     pipename = NULL;
     pid = INVALID_PID_VALUE;
 }
 
-fbuf::fbuf(const char *path, size_t size) :
+bufio::bufio(const char *path, size_t size) :
 BufferProtocol(), fsys()
 {
     pipename = NULL;
@@ -41,7 +41,7 @@ BufferProtocol(), fsys()
     open(path, size);
 }
 
-fbuf::fbuf(const char *path, char **args, bufio::mode_t access, size_t size, char **envp) :
+bufio::bufio(const char *path, char **args, mode_t access, size_t size, char **envp) :
 BufferProtocol(), fsys()
 {
     pipename = NULL;
@@ -49,24 +49,24 @@ BufferProtocol(), fsys()
     open(path, args, access, size, envp);
 }
 
-fbuf::~fbuf()
+bufio::~bufio()
 {
-    fbuf::close();
+    bufio::close();
 }
 
-int fbuf::_err(void) const
+int bufio::_err(void) const
 {
     return error;
 }
 
-void fbuf::_clear(void)
+void bufio::_clear(void)
 {
     error = 0;
 }
 
-void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t size, char **envp)
+void bufio::open(const char *path, char **args, mode_t bufmode, size_t size, char **envp)
 {
-    fbuf::close();
+    bufio::close();
     _clear();
 
     fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
@@ -84,7 +84,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t siz
             fsys::close();
             return;
         }
-        allocate(size, bufmode);
+        allocate(size, (BufferProtocol::mode_t)bufmode);
         fsys::release(stdio[0]);
         break;
     case bufio::WRONLY:
@@ -98,7 +98,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t siz
             fsys::close();
             return;
         }
-        allocate(size, bufmode);
+        allocate(size, (BufferProtocol::mode_t)bufmode);
         fsys::release(stdio[1]);
         break;
     case bufio::RDWR:
@@ -117,7 +117,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t siz
             fsys::close();
             return;
         }
-        allocate(size, bufmode);
+        allocate(size, (BufferProtocol::mode_t)bufmode);
         fsys::release(pair[1]);
 #elif defined(_MSWINDOWS_)
         static int count;
@@ -151,7 +151,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t siz
             fsys::close();
             return;
         }
-        allocate(size, bufmode);
+        allocate(size, (BufferProtocol::mode_t)bufmode);
         fsys::release(child);
         pipename = strdup(buf);
 #endif
@@ -159,9 +159,9 @@ void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t siz
     }
 }
 
-void fbuf::open(const char *path, size_t size)
+void bufio::open(const char *path, size_t size)
 {
-    fbuf::close();
+    bufio::close();
     _clear();
 
     fsys::open(path, fsys::DEVICE);
@@ -172,17 +172,17 @@ void fbuf::open(const char *path, size_t size)
     allocate(size);
 }
 
-int fbuf::cancel(void)
+int bufio::cancel(void)
 {
     int result = 0;
     if(pid != INVALID_PID_VALUE)
         result = shell::cancel(pid);
     pid = INVALID_PID_VALUE;
-    fbuf::close();
+    bufio::close();
     return result;
 }
 
-int fbuf::close(void)
+int bufio::close(void)
 {
     BufferProtocol::release();
     fsys::close();
@@ -198,9 +198,9 @@ int fbuf::close(void)
     return error;
 }
 
-fsys::offset_t fbuf::tell(void)
+fsys::offset_t bufio::tell(void)
 {
-    if(!fbuf::is_open())
+    if(!bufio::is_open())
         return 0;
 
     if(is_input())
@@ -212,11 +212,11 @@ fsys::offset_t fbuf::tell(void)
     return outpos + unsaved();
 }
 
-bool fbuf::trunc(offset_t offset)
+bool bufio::trunc(offset_t offset)
 {
     int seekerr;
 
-    if(!fbuf::is_open())
+    if(!bufio::is_open())
         return false;
 
     _clear();
@@ -233,11 +233,11 @@ bool fbuf::trunc(offset_t offset)
     return true;
 }
 
-bool fbuf::seek(offset_t offset)
+bool bufio::seek(offset_t offset)
 {
     int seekerr;
 
-    if(!fbuf::is_open())
+    if(!bufio::is_open())
         return false;
 
     _clear();
@@ -254,7 +254,7 @@ bool fbuf::seek(offset_t offset)
     return true;
 }
 
-size_t fbuf::_push(const char *buf, size_t size)
+size_t bufio::_push(const char *buf, size_t size)
 {
     ssize_t result;
 
@@ -302,7 +302,7 @@ size_t fbuf::_push(const char *buf, size_t size)
 #endif
 }
 
-size_t fbuf::_pull(char *buf, size_t size)
+size_t bufio::_pull(char *buf, size_t size)
 {
     ssize_t result;
 

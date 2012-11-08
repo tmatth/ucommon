@@ -54,7 +54,7 @@ NAMESPACE_UCOMMON
  * used to support bidirectional i/o for pipes and devices.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class fbuf : public BufferProtocol, private fsys
+class bufio : public BufferProtocol, private fsys
 {
 private:
     offset_t    inpos, outpos;
@@ -71,15 +71,21 @@ protected:
         {return fd;};
 
 public:
+    typedef enum {
+        RDONLY = BufferProtocol::RDONLY,
+        WRONLY = BufferProtocol::WRONLY,
+        RDWR = BufferProtocol::RDWR
+    }   mode_t;
+
     /**
      * Construct an unopened file buffer.
      */
-    fbuf();
+    bufio();
 
     /**
      * Destroy object and release all resources.
      */
-    ~fbuf();
+    ~bufio();
 
     /**
      * Construct a pipe buffer from an existing process.
@@ -88,14 +94,14 @@ public:
      * @param argv to pass.
      * @param envp to use.
      */
-    fbuf(const char *path, char  **argv, bufio::mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
+    bufio(const char *path, char  **argv, mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
 
     /**
      * Construct a buffer that opens an existing device.
      * @param path of existing device to open.
      * @param size of the stream buffer.
      */
-    fbuf(const char *path, size_t size = 512);
+    bufio(const char *path, size_t size = 512);
 
     /**
      * Construct a file buffer that opens an existing device.
@@ -111,7 +117,7 @@ public:
      * @param argv to pass.
      * @param envp to use.
      */
-    void open(const char *path, char **argv, bufio::mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
+    void open(const char *path, char **argv, mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
 
     /**
      * Close the file, flush buffers.  Capture exit code in error for pipe.
@@ -228,11 +234,6 @@ protected:
      */
     virtual bool _pending(void);
 };
-
-/**
- * Convenience type for buffered file operations.
- */
-typedef fbuf file_t;
 
 /**
  * Convenience type for pure tcp sockets.
