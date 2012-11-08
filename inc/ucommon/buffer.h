@@ -71,12 +71,6 @@ protected:
         {return fd;};
 
 public:
-    typedef enum {
-        RDONLY = BufferProtocol::RDONLY,
-        WRONLY = BufferProtocol::WRONLY,
-        RDWR = BufferProtocol::RDWR
-    }   mode_t;
-
     /**
      * Construct an unopened file buffer.
      */

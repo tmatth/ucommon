@@ -343,6 +343,12 @@ void dir::close(void)
 {
     error = 0;
 
+    if(tmp) {
+        ::remove(tmp);
+        free(tmp);
+        tmp = NULL;
+    }
+
     if(ptr) {
         if(::FindClose(fd)) {
             delete ptr;
@@ -1748,6 +1754,7 @@ charfile::charfile(const char *file, const char *mode)
 {
     fp = NULL;
     pid = INVALID_PID_VALUE;
+    tmp = NULL;
     open(file, mode);
 }
 
@@ -1755,18 +1762,21 @@ charfile::charfile(const char *file, char **argv, const char *mode, char **envp)
 {
     fp = NULL;
     pid = INVALID_PID_VALUE;
+    tmp = NULL;
     open(file, argv, mode, envp);
 }
 
 charfile::charfile()
 {
     fp = NULL;
+    tmp = NULL;
     pid = INVALID_PID_VALUE;
 }
 
 charfile::charfile(FILE *file)
 {
     fp = file;
+    tmp = NULL;
     pid = INVALID_PID_VALUE;
 }
 

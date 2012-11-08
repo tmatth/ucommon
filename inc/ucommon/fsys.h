@@ -897,6 +897,7 @@ class __EXPORT charfile : public CharacterProtocol
 private:
     FILE *fp;
     pid_t pid;
+    char *tmp;
 
     int _putch(int code);
 
