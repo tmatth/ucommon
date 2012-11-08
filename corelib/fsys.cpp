@@ -946,17 +946,22 @@ void fsys::open(const char *path, access_t access)
         break;
     }
     fd = ::open(path, flags);
-    if(fd == INVALID_HANDLE_VALUE)
+    if(fd == INVALID_HANDLE_VALUE) {
         error = remapError();
-#ifdef HAVE_POSIX_FADVISE
-    else {
-        // Linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
-        if(access == STREAM)
-            posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_SEQUENTIAL);
-        else if(access == RANDOM)
-            posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_RANDOM);
+        return;
     }
+#ifdef HAVE_POSIX_FADVISE
+    // Linux kernel bug prevents use of POSIX_FADV_NOREUSE in streaming...
+    if(access == STREAM)
+        posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_SEQUENTIAL);
+    else if(access == RANDOM)
+        posix_fadvise(fd, (off_t)0, (off_t)0, POSIX_FADV_RANDOM);
 #endif
+    if(access == DEVICE) {
+        flags = fcntl(fd, F_GETFL);
+        flags &= ~O_NONBLOCK;
+        fcntl(fd, F_SETFL, flags);
+    }
 }
 
 int fsys::info(const char *path, struct stat *ino)
