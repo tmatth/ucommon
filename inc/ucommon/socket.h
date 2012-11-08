@@ -1609,12 +1609,6 @@ public:
      * @return 0 on success, -1 on failure.
      */
     static int remote(socket_t socket, struct sockaddr_storage *address);
-
-    template<typename T> inline size_t writeto(const T& data, const struct sockaddr *addr = NULL)
-        {return writeto(&data, sizeof(T), addr);}
-
-    template<typename T> inline size_t readfrom(T& data, struct sockaddr *addr = NULL)
-        {return readfrom(&data, sizeof(T), addr);}
 };
 
 /**

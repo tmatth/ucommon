@@ -292,9 +292,6 @@ public:
      */
     int seek(offset_t offset);
 
-    template<typename T> inline int offset(long pos)
-        {return seek(pos * sizeof(T));}
-
     /**
      * Drop cached data from start of file.
      * @param size of region to drop or until end of file.
