@@ -1839,6 +1839,8 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
 #else
     fp = fdopen(fd, mode);
 #endif
+    if(!fp)
+        fsys::release(fd);
 }
 
 void charfile::open(const char *path, const char *mode)
