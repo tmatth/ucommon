@@ -1833,8 +1833,63 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
             fsys::release(fd);
             return;
         }
+        fsys::release(stdio[1]);
 #ifdef  _MSWINDOWS_
         _fmode = _O_RDONLY;
+#endif
+    }
+    else if(eq_case(mode, "r+") || eq_case(mode, "rw")) {
+#if defined(HAVE_SOCKETPAIR)
+        int pair[2];
+        if(socketpair(AF_LOCAL, SOCK_STREAM, 0, pair))
+            return;
+
+        fd = pair[0];
+        stdio[0] = stdio[1] = pair[1];
+        fsys::inherit(fd, false);
+        pid = shell::spawn(path, argv, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            fsys::release(pair[1]);
+            fsys::release(fd);
+            return;
+        }
+        fsys::release(pair[1]);
+#elif defined(_MSWINDOWS_)
+        static int count;
+        char buf[96];
+
+        snprintf(buf, sizeof(buf), "\\\\.\\pipe\\pair-%ld-%d",
+            GetCurrentProcessId(), count++);
+        fd = CreateNamedPipe(buf, PIPE_ACCESS_DUPLEX,
+            PIPE_TYPE_BYTE | PIPE_NOWAIT,
+            PIPE_UNLIMITED_INSTANCES, 1024, 1024, 0, NULL);
+        if(fd == INVALID_HANDLE_VALUE)
+            return;
+        fd_t child = CreateFile(buf, GENERIC_READ|GENERIC_WRITE, 0, NULL,
+            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if(child == INVALID_HANDLE_VALUE) {
+            CloseHandle(fd);
+            ::remove(buf);
+            return;
+        }
+
+        fsys::inherit(child, true);
+        fsys::inherit(fd, false);
+
+        DWORD pmode = PIPE_NOWAIT;
+
+        SetNamedPipeHandleState(fd, &pmode, NULL, NULL);
+        stdio[0] = child;
+        stdio[1] = child;
+        pid = shell::spawn(path, argv, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            CloseHandle(child);
+            CloseHandle(fd);
+            ::remove(buf);
+            return;
+        }
+        CloseHandle(child);
+        tmp = strdup(buf);
 #endif
     }
     else
