@@ -733,6 +733,11 @@ public:
     dso(const char *path);
 
     /**
+     * Destroy dso and release library.
+     */
+    ~dso();
+
+    /**
      * Map library object with library.
      * @param name of library to load.
      */

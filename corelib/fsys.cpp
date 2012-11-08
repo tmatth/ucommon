@@ -1142,6 +1142,11 @@ dso::dso(const char *path)
     map(path);
 }
 
+dso::~dso()
+{
+    release();
+}
+
 dir::dir() :
 fsys()
 {
@@ -1650,7 +1655,7 @@ dso::addr_t dso::find(const char *sym) const
 void dso::release(void)
 {
     shl_t image = (shl_t)ptr;
-    if(addr)
+    if(ptr)
         shl_unload(image);
     ptr = NULL;
 }
