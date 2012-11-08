@@ -131,20 +131,8 @@ class __EXPORT fsys
 protected:
     fd_t    fd;
     int     error;
-#ifdef  _MSWINDOWS_
-    WIN32_FIND_DATA *ptr;
-    HINSTANCE   mem;
-#else
-    void    *ptr;
-#endif
 
 public:
-#ifdef  _MSWINDOWS_
-    typedef int (FAR WINAPI *addr_t)();
-#else
-    typedef void *addr_t;
-#endif
-
     /**
      * Most of the common chmod values are predefined.
      */
@@ -250,14 +238,14 @@ public:
      * @return true if open.
      */
     inline operator bool() const
-        {return fd != INVALID_HANDLE_VALUE || ptr != NULL;}
+        {return fd != INVALID_HANDLE_VALUE;}
 
     /**
      * Test if file descriptor is closed.
      * @return true if closed.
      */
     inline bool operator!() const
-        {return fd == INVALID_HANDLE_VALUE && ptr == NULL;}
+        {return fd == INVALID_HANDLE_VALUE;}
 
     /**
      * Assign file descriptor by duplicating another descriptor.
@@ -673,13 +661,6 @@ public:
         {object.open(path, mode, access);};
 
     /**
-     * Load an unmaged plugin directly.
-     * @param path to plugin.
-     * @return error number or 0 on success.
-     */
-    static int load(const char *path);
-
-    /**
      * Execute a process and get exit code.
      * @param path to execute.
      * @param argv list.
@@ -687,27 +668,6 @@ public:
      * @return exit code.
      */
     static int exec(const char *path, char **argv, char **envp = NULL);
-
-    /**
-     * Load a plugin into memory.
-     * @param module for management.
-     * @param path to plugin.
-     */
-    static void load(fsys& module, const char *path);
-
-    /**
-     * unload a specific plugin.
-     * @param module to unload
-     */
-    static void unload(fsys& module);
-
-    /**
-     * Find symbol in loaded module.
-     * @param module to search.
-     * @param symbol to search for.
-     * @return address of symbol or NULL if not found.
-     */
-    static addr_t find(fsys& module, const char *symbol);
 
     static inline bool is_file(struct stat *inode)
         {return S_ISREG(inode->st_mode);}
@@ -732,11 +692,108 @@ public:
 };
 
 /**
+ * Convenience class for library plugins.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT dso
+{
+private:
+#ifdef  _MSWINDOWS_
+    HINSTANCE   ptr;
+#else
+    void    *ptr;
+#endif
+    int     error;
+
+public:
+#ifdef  _MSWINDOWS_
+    typedef int (FAR WINAPI *addr_t)();
+#else
+    typedef void *addr_t;
+#endif
+
+    /**
+     * Create dso object for use by load functions.
+     */
+    dso();
+
+    /**
+     * Create and map a dso object.
+     * @param path of library to map.
+     */
+    dso(const char *path);
+
+    /**
+     * Map library object with library.
+     * @param name of library to load.
+     */
+    void map(const char *path);
+
+    /**
+     * Release loaded library.
+     */
+    void release(void);
+
+    /**
+     * Load a plugin into memory.
+     * @param module for management.
+     * @param path to plugin.
+     */
+    inline static void load(dso& module, const char *path)
+        {return module.map(path);}
+
+    /**
+     * Load a library into memory.
+     * @param module for management.
+     * @param path to plugin.
+     */
+    static int load(const char *path);
+
+    /**
+     * unload a specific plugin.
+     * @param module to unload
+     */
+    inline static void unload(dso& module)
+        {module.release();}
+
+    /**
+     * Find symbol in loaded module.
+     * @param module to search.
+     * @param symbol to search for.
+     * @return address of symbol or NULL if not found.
+     */
+    addr_t find(const char *symbol) const;
+
+    inline int err(void) const
+        {return error;}
+
+    inline addr_t operator[](const char *symbol) const
+        {return find(symbol);}
+
+    inline addr_t operator()(const char *symbol) const
+        {return find(symbol);}
+
+    inline operator bool()
+        {return ptr != NULL;}
+
+    inline bool operator!()
+        {return ptr == NULL;}
+};
+
+/**
  * Convenience class for directories.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
 class __EXPORT dir : private fsys
 {
+private:
+#ifdef  _MSWINDOWS_
+    WIN32_FIND_DATA *ptr;
+    HINSTANCE   mem;
+#else
+    void    *ptr;
+#endif
+
 public:
     /**
      * Construct and open a directory path.
@@ -963,6 +1020,8 @@ String str(charfile& fp, strsize_t size);
 typedef fsys fsys_t;
 
 typedef dir dirsys_t;
+
+typedef dso dso_t;
 
 extern charfile cstdin, cstdout, cstderr;
 

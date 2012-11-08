@@ -790,7 +790,7 @@ private:
     const char *id;
     void *image;
 
-    typedef ucommon::fsys::addr_t addr_t;
+    typedef ucommon::dso::addr_t addr_t;
 
 protected:
     void loader(const char *filename, bool resolve);

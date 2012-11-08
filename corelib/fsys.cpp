@@ -632,7 +632,6 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
 
 fsys::fsys(const fsys& copy)
 {
-    ptr = NULL;
     error = 0;
     fd = INVALID_HANDLE_VALUE;
 
@@ -755,11 +754,6 @@ ssize_t fsys::read(void *buf, size_t len)
 
 int fsys::sync(void)
 {
-    if(ptr) {
-        error = EBADF;
-        return -1;
-    }
-
     int rtn = ::fsync(fd);
     if(rtn < 0)
         error = remapError();
@@ -770,11 +764,6 @@ int fsys::sync(void)
 
 ssize_t fsys::write(const void *buf, size_t len)
 {
-    if(ptr) {
-        error = EBADF;
-        return -1;
-    }
-
 #ifdef  __PTH__
     int rtn = pth_write(fd, buf, len);
 #else
@@ -1064,7 +1053,6 @@ bool fsys::is_executable(const char *path)
 fsys::fsys(const fsys& copy)
 {
     fd = INVALID_HANDLE_VALUE;
-    ptr = NULL;
     error = 0;
 
     if(copy.fd != INVALID_HANDLE_VALUE) {
@@ -1141,9 +1129,23 @@ int fsys::seek(offset_t pos)
 
 #endif
 
+dso::dso()
+{
+    ptr = 0;
+    error = 0;
+}
+
+dso::dso(const char *path)
+{
+    ptr = 0;
+    error = 0;
+    map(path);
+}
+
 dir::dir() :
 fsys()
 {
+    ptr = NULL;
 }
 
 dir::~dir()
@@ -1154,7 +1156,6 @@ dir::~dir()
 fsys::fsys()
 {
     fd = INVALID_HANDLE_VALUE;
-    ptr = NULL;
     error = 0;
 }
 
@@ -1167,7 +1168,6 @@ fsys()
 fsys::fsys(const char *path, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
-    ptr = NULL;
     error = 0;
     open(path, access);
 }
@@ -1175,7 +1175,6 @@ fsys::fsys(const char *path, access_t access)
 fsys::fsys(const char *path, unsigned fmode, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
-    ptr = NULL;
     error = 0;
     open(path, fmode, access);
 }
@@ -1411,11 +1410,11 @@ int fsys::rename(const char *oldpath, const char *newpath)
     return 0;
 }
 
-int fsys::load(const char *path)
+int dso::load(const char *path)
 {
-    fsys module;
+    dso module;
 
-    load(module, path);
+    module.map(path);
 #ifdef  _MSWINDOWS_
     if(module.mem) {
         module.mem = 0;
@@ -1505,24 +1504,27 @@ bool fsys::is_dir(const char *path)
 
 #ifdef  _MSWINDOWS_
 
-void fsys::load(fsys& module, const char *path)
+void dso::map(const char *path)
 {
-    module.error = 0;
-    module.mem = LoadLibrary(path);
-    if(!module.mem)
-        module.error = ENOEXEC;
+    error = 0;
+    ptr = LoadLibrary(path);
+    if(!ptr)
+        error = ENOEXEC;
 }
 
-void fsys::unload(fsys& module)
+void dso::release(void)
 {
-    if(module.mem)
-        FreeLibrary(module.mem);
-    module.mem = 0;
+    if(ptr)
+        FreeLibrary(ptr);
+    ptr = 0;
 }
 
-fsys::addr_t fsys::find(fsys& module, const char *sym)
+dso::addr_t dso::find(const char *sym) const
 {
-    return GetProcAddress(module.mem, sym);
+    if(ptr == 0)
+        return (dso::addr_t)NULL;
+
+    return GetProcAddress(ptr, sym);
 }
 
 #elif defined(HAVE_DLFCN_H)
@@ -1532,51 +1534,51 @@ fsys::addr_t fsys::find(fsys& module, const char *sym)
 #define RTLD_GLOBAL 0
 #endif
 
-void fsys::load(fsys& module, const char *path)
+void dso::map(const char *path)
 {
-    module.error = 0;
-    module.ptr = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
-    if(module.ptr == NULL)
-        module.error = ENOEXEC;
+    error = 0;
+    ptr = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+    if(ptr == NULL)
+        error = ENOEXEC;
 }
 
-void fsys::unload(fsys& module)
+void dso::release(void)
 {
-    if(module.ptr)
-        dlclose(module.ptr);
-    module.ptr = NULL;
+    if(ptr)
+        dlclose(ptr);
+    ptr = NULL;
 }
 
-fsys::addr_t fsys::find(fsys& module, const char *sym)
+dso::addr_t dso::find(const char *sym) const
 {
-    if(!module.ptr)
-        return (fsys::addr_t)NULL;
+    if(!ptr)
+        return (dso::addr_t)NULL;
 
-    return (fsys::addr_t)dlsym(module.ptr, (char *)sym);
+    return (dso::addr_t)dlsym(ptr, (char *)sym);
 }
 
 #elif HAVE_MACH_O_DYLD_H
 #include <mach-o/dyld.h>
 
-void fsys::load(fsys& module, const char *path)
+void dso::map(const char *path)
 {
     NSObjectFileImage oImage;
     NSSymbol sym = NULL;
     NSModule mod;
     void (*init)(void);
 
-    module.ptr = NULL;
-    module.error = 0;
+    ptr = NULL;
+    error = 0;
 
     if(NSCreateObjectFileImageFromFile(path, &oImage) != NSObjectFileImageSuccess) {
-        module.error = ENOEXEC;
+        error = ENOEXEC;
         return;
     }
 
     mod = NSLinkModule(oImage, path, NSLINKMODULE_OPTION_BINDNOW | NSLINKMODULE_OPTION_RETURN_ON_ERROR);
     NSDestroyObjectFileImage(oImage);
     if(mod == NULL) {
-        module.error = ENOEXEC;
+        error = ENOEXEC;
         return;
     }
 
@@ -1585,18 +1587,18 @@ void fsys::load(fsys& module, const char *path)
         init = (void (*)(void))NSAddressOfSymbol(sym);
         init();
     }
-    module.ptr = (void *)mod;
+    ptr = (void *)mod;
 }
 
-void fsys::unload(fsys& module)
+void dso::release(void)
 {
-    if(!module.ptr)
+    if(!ptr)
         return;
 
-    NSModule mod = (NSModule)module.ptr;
+    NSModule mod = (NSModule)ptr;
     NSSymbol sym;
     void (*fini)(void);
-    module.ptr = NULL;
+    ptr = NULL;
 
     sym = NSLookupSymbolInModule(mod, "__fini");
     if(sym != NULL) {
@@ -1606,65 +1608,68 @@ void fsys::unload(fsys& module)
     NSUnlinkModule(mod, NSUNLINKMODULE_OPTION_NONE);
 }
 
-fsys::addr_t fsys::find(fsys& module, const char *sym)
+dso::addr_t dso::find(const char *sym) const
 {
-    if(!module.ptr)
+    if(!ptr)
         return NULL;
 
-    NSModule mod = (NSModule)module.ptr;
+    NSModule mod = (NSModule)ptr;
     NSSymbol sym;
 
     sym = NSLookupSymbolInModule(mod, sym);
     if(sym != NULL) {
-        return (fsys::addr_t)NSAddressOfSymbol(sym);
+        return (dso::addr_t)NSAddressOfSymbol(sym);
 
-    return (fsys::addr_t)NULL;
+    return (dso::addr_t)NULL;
 }
 
 #elif HAVE_SHL_LOAD
 #include <dl.h>
 
-void fsys::load(fsys& module, const char *path)
+void dso::map(const char *path)
 {
-    module.error = 0;
-    module.ptr = (void *)shl_load(path, BIND_IMMEDIATE, 0l);
-    if(!module.ptr)
-        module.error = ENOEXEC;
+    error = 0;
+    ptr = (void *)shl_load(path, BIND_IMMEDIATE, 0l);
+    if(!ptr)
+        error = ENOEXEC;
 }
 
-fsys::addr_t fsys::find(fsys& module, const char *sym)
+dso::addr_t dso::find(const char *sym) const
 {
-    shl_t image = (shl_t)module.ptr;
+    if(!ptr)
+        return (dso::addr_t)NULL;
+
+    shl_t image = (shl_t)ptr;
 
     if(shl_findsym(&image, sym, 0, &value) == 0)
-        return (fsys::addr_t)value;
+        return (dso::addr_t)value;
 
-    return (fsys::addr_t)NULL;
+    return (dso::addr_t)NULL;
 }
 
-void fsys::unload(fsys& module)
+void dso::release(void)
 {
-    shl_t image = (shl_t)module.ptr;
+    shl_t image = (shl_t)ptr;
     if(addr)
         shl_unload(image);
-    module.ptr = NULL;
+    ptr = NULL;
 }
 
 #else
 
-void fsys::load(fsys& module, const char *path)
+void fsys::map(const char *path)
 {
-    module.error = ENOEXEC;
-    module.ptr = NULL;
+    error = ENOEXEC;
+    ptr = NULL;
 }
 
-void fsys::unload(mem_t addr)
+void dso::release(void)
 {
 }
 
-fsys::addr_t fsys::find(mem_t addr, const char *sym)
+dso::addr_t dso::find(const char *sym) const
 {
-    return (fsys::addr_t)NULL;
+    return (dso::addr_t)NULL;
 }
 
 #endif
@@ -1891,14 +1896,12 @@ String str(charfile& so, strsize_t size)
 fsys::fsys(fd_t handle)
 {
     fd = handle;
-    ptr = NULL;
     error = 0;
 }
 
 void fsys::set(fd_t handle)
 {
     close();
-    ptr = NULL;
     fd = handle;
     error = 0;
 }
@@ -1908,7 +1911,6 @@ fd_t fsys::release(void)
     fd_t save = fd;
 
     fd = INVALID_HANDLE_VALUE;
-    ptr = NULL;
     error = 0;
     return save;
 }
