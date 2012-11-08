@@ -1058,7 +1058,7 @@ public:
     bool eof(void) const;
 
     template<typename T> inline void offset(long pos)
-        {if(fp) fseek(fp, sizeof(T) * pos, SEEK_CUR);}
+        {if(fp) fseek(fp, sizeof(const T) * pos, SEEK_CUR);}
 
     inline void seek(long offset)
         {if(fp) fseek(fp, offset, SEEK_SET);}
@@ -1081,6 +1081,15 @@ public:
 
     bool is_tty(void) const;
 };
+
+template<> inline size_t charfile::read<string_t&>(string_t& str)
+    { return readline(str);}
+
+template<> inline size_t charfile::write<const string_t&>(const string_t& str)
+    { return puts(str);}
+
+template<> inline void charfile::offset<string_t&>(long pos)
+    {if(fp) fseek(fp, pos, SEEK_CUR);}
 
 String str(charfile& fp, strsize_t size);
 
