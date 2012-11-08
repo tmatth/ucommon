@@ -343,12 +343,6 @@ void dir::close(void)
 {
     error = 0;
 
-    if(tmp) {
-        ::remove(tmp);
-        free(tmp);
-        tmp = NULL;
-    }
-
     if(ptr) {
         if(::FindClose(fd)) {
             delete ptr;
@@ -1870,6 +1864,12 @@ int charfile::close(void)
     int error = 0;
     if(pid != INVALID_PID_VALUE)
         error = shell::wait(pid);
+
+    if(tmp) {
+        ::remove(tmp);
+        free(tmp);
+        tmp = NULL;
+    }
 
     if(fp)
         fclose(fp);
