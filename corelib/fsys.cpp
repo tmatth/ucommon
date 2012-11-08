@@ -1798,7 +1798,7 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
     fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
 
 #ifdef  _MSWINDOWS_
-    int _fmode;
+    int _fmode = 0;
 #endif
 
     if(eq_case(mode, "w")) {
@@ -1834,7 +1834,7 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
         return;
 
 #ifdef  _MSWINDOWS_
-    int fdd = _open_osfhandle((intptr)fd, _fmode);
+    int fdd = _open_osfhandle((intptr_t)fd, _fmode);
     fp = _fdopen(fdd, mode);
 #else
     fp = fdopen(fd, mode);

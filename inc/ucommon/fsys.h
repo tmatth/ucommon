@@ -896,7 +896,11 @@ class __EXPORT charfile : public CharacterProtocol
 {
 private:
     FILE *fp;
+#ifdef _MSWINDOWS_
+    HANDLE pid;
+#else
     pid_t pid;
+#endif
     char *tmp;
 
     int _putch(int code);
