@@ -314,12 +314,6 @@ public:
      */
     static bool is_tty(fd_t fd);
 
-    template<typename T> inline fsys& operator<<(const T& data)
-        {write(&data, sizeof(T)); return *this;}
-
-    template<typename T> inline fsys& operator>>(T& data)
-        {read(&data, sizeof(T)); return *this;}
-
     /**
      * Read data from descriptor or scan directory.
      * @param buffer to read into.
@@ -1044,17 +1038,17 @@ public:
     inline char *gets(char *data, size_t size)
         { return fp == NULL ? NULL : fgets(data, size, fp);}
 
-    template<typename T> inline charfile& operator<<(const T& data)
-        { if(fp) fwrite(&data, sizeof(T), 1, fp); return *this;}
-
-    template<typename T> inline charfile& operator>>(T& data)
-        { if(fp) fread(&data, sizeof(T), 1, fp); return *this;}
-
     template<typename T> inline size_t read(T* data, size_t count)
         { return fp == NULL ? 0 : fread(data, sizeof(T), count, fp);}
 
     template<typename T> inline size_t write(const T* data, size_t count)
         { return fp == NULL ? 0 : fwrite(data, sizeof(T), count, fp);}
+
+    template<typename T> inline size_t read(T& data)
+        { return fp == NULL ? 0 : fread(data, sizeof(T), 1, fp);}
+
+    template<typename T> inline size_t write(const T& data)
+        { return fp == NULL ? 0 : fwrite(data, sizeof(T), 1, fp);}
 
     inline void get(bookmark_t& pos)
         { if(fp) fsetpos(fp, &pos);}

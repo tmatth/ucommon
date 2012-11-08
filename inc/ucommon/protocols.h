@@ -462,12 +462,6 @@ public:
     inline int err(void)
         {return _err();}
 
-    template<typename T> inline BufferProtocol& operator<<(const T& data)
-        {put(&data, sizeof(T)); return *this;}
-
-    template<typename T> inline BufferProtocol& operator>>(T& data)
-        {get(&data, sizeof(T)); return *this;}
-
     template<typename T> inline size_t put(const T& data)
         {return put(&data, sizeof(T));}
 
