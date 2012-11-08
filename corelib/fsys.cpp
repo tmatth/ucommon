@@ -1416,8 +1416,8 @@ int fsys::load(const char *path)
 
     module.map(path);
 #ifdef  _MSWINDOWS_
-    if(module.mem) {
-        module.mem = 0;
+    if(module.ptr) {
+        module.ptr = 0;
         return 0;
     }
     return remapError();
