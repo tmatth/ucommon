@@ -535,6 +535,7 @@ void fsys::open(const char *path, access_t access)
         break;
     case DEVICE:
         smode = FILE_SHARE_READ;
+        attr |= FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING;
     case EXCLUSIVE:
         amode = GENERIC_READ | GENERIC_WRITE;
         break;
