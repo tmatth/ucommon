@@ -533,8 +533,9 @@ void fsys::open(const char *path, access_t access)
     case WRONLY:
         amode = GENERIC_WRITE;
         break;
-    case EXCLUSIVE:
     case DEVICE:
+        smode = FILE_SHARE_READ;
+    case EXCLUSIVE:
         amode = GENERIC_READ | GENERIC_WRITE;
         break;
     case RANDOM:
@@ -938,7 +939,7 @@ void fsys::open(const char *path, access_t access)
     case SHARED:
     case REWRITE:
     case DEVICE:
-        flags = O_RDWR;
+        flags = O_RDWR | O_NONBLOCK;
         break;
     case APPEND:
         flags = O_RDWR | O_APPEND;
