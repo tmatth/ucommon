@@ -342,6 +342,12 @@ public:
      */
     typedef linked_pointer<ObjectPager::member> iterator;
 
+    inline size_t size(void)
+        {return memalloc::size();}
+
+    inline unsigned pages(void)
+        {return memalloc::pages();}
+
 protected:
     /**
      * Gather index list.
@@ -557,6 +563,12 @@ public:
      */
     typedef linked_pointer<StringPager::member> iterator;
 
+    inline size_t size(void)
+        {return memalloc::size();}
+
+    inline unsigned pages(void)
+        {return memalloc::pages();}
+
 private:
     member *last;
     char **index;
@@ -621,6 +633,12 @@ public:
 
     inline const char *at(unsigned item) const
         {return StringPager::get(item);};
+
+    inline size_t size(void)
+        {return memalloc::size();}
+
+    inline unsigned pages(void)
+        {return memalloc::pages();}
 };
 
 /**

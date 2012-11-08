@@ -279,7 +279,7 @@ size_t charfile::readline(char *address, size_t size)
     address[0] = 0;
 
     if(!fp)
-        return false;
+        return 0;
 
     if(!fgets(address, size, fp) || feof(fp))
         return 0;
@@ -347,6 +347,45 @@ int charfile::_putch(int code)
         return EOF;
 
     return fputc(code, fp);
+}
+
+size_t charfile::load(stringlist_t *list, size_t count)
+{
+    if(!list || !fp)
+        return 0;
+
+    size_t used = 0;
+    size_t size = list->size() - 64;
+
+    char *tmp = (char *)malloc(size);
+    while(!count || used < count) {
+        if(feof(fp))
+            break;
+
+        if(!readline(tmp, size))
+            break;
+
+        ++used;
+        list->add(tmp);
+    }
+    free(tmp);
+    return used;
+}
+
+size_t charfile::save(const stringlist_t *list, size_t count)
+{
+    size_t used = 0;
+    if(!list || !fp)
+        return 0;
+
+    StringPager::iterator sp = list->begin();
+    while(is(sp) && (!count || used < count)) {
+        if(fprintf(fp, "%s\n", sp->get()) < 1)
+            break;
+        ++used;
+        sp.next();
+    }
+    return used;
 }
 
 String str(charfile& so, strsize_t size)

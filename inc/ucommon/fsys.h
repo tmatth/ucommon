@@ -1080,6 +1080,10 @@ public:
     size_t scanf(const char *format, ...) __SCANF(2, 3);
 
     bool is_tty(void) const;
+
+    size_t load(stringlist_t *list, size_t count = 0);
+
+    size_t save(const stringlist_t *list, size_t count = 0);
 };
 
 template<> inline size_t charfile::read<string_t&>(string_t& str)
@@ -1088,8 +1092,18 @@ template<> inline size_t charfile::read<string_t&>(string_t& str)
 template<> inline size_t charfile::write<const string_t&>(const string_t& str)
     { return puts(str);}
 
+template<> inline size_t charfile::read<stringlist_t&>(stringlist_t& list)
+    { return load(&list);}
+
+template<> inline size_t charfile::write<const stringlist_t&>(const stringlist_t& list)
+    { return charfile::save(&list);}
+
 template<> inline void charfile::offset<string_t&>(long pos)
     {if(fp) fseek(fp, pos, SEEK_CUR);}
+
+template<> inline void charfile::offset<stringlist_t&>(long pos)
+    {if(fp) fseek(fp, pos, SEEK_CUR);}
+
 
 String str(charfile& fp, strsize_t size);
 
