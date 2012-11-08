@@ -1785,7 +1785,7 @@ charfile::~charfile()
     close();
 }
 
-bool charfile::is_tty(void)
+bool charfile::is_tty(void) const
 {
 #ifdef  _MSWINDOWS_
     if(_isatty(_fileno(fp)))
@@ -1947,7 +1947,7 @@ size_t charfile::readline(String& s)
     return result;
 }
 
-bool charfile::eof(void)
+bool charfile::eof(void) const
 {
     if(!fp)
         return false;
@@ -1955,7 +1955,7 @@ bool charfile::eof(void)
     return feof(fp) != 0;
 }
 
-int charfile::err(void)
+int charfile::err(void) const
 {
     if(!fp)
         return EBADF;

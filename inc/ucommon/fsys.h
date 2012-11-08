@@ -1022,9 +1022,9 @@ public:
     inline void set(bookmark_t& pos)
         { if(fp) fgetpos(fp, &pos);}
 
-    int err(void);
+    int err(void) const;
 
-    bool eof(void);
+    bool eof(void) const;
 
     inline void seek(long offset)
         {if(fp) fseek(fp, offset, SEEK_SET);}
@@ -1040,7 +1040,7 @@ public:
 
     size_t printf(const char *format, ...) __PRINTF(2, 3);
 
-    bool is_tty(void);
+    bool is_tty(void) const;
 };
 
 String str(charfile& fp, strsize_t size);
