@@ -1410,7 +1410,7 @@ int fsys::rename(const char *oldpath, const char *newpath)
     return 0;
 }
 
-int dso::load(const char *path)
+int fsys::load(const char *path)
 {
     dso module;
 
