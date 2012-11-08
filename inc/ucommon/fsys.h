@@ -139,6 +139,12 @@ protected:
 #endif
 
 public:
+#ifdef  _MSWINDOWS_
+    typedef int (FAR WINAPI *addr_t)();
+#else
+    typedef void *addr_t;
+#endif
+
     /**
      * Most of the common chmod values are predefined.
      */
@@ -701,7 +707,7 @@ public:
      * @param symbol to search for.
      * @return address of symbol or NULL if not found.
      */
-    static void *find(fsys& module, const char *symbol);
+    static addr_t find(fsys& module, const char *symbol);
 
     static inline bool is_file(struct stat *inode)
         {return S_ISREG(inode->st_mode);}

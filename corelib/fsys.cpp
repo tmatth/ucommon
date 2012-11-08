@@ -1520,9 +1520,9 @@ void fsys::unload(fsys& module)
     module.mem = 0;
 }
 
-void *fsys::find(fsys& module, const char *sym)
+fsys::addr_t fsys::find(fsys& module, const char *sym)
 {
-    return (void *)GetProcAddress(module.mem, sym);
+    return GetProcAddress(module.mem, sym);
 }
 
 #elif defined(HAVE_DLFCN_H)
@@ -1547,12 +1547,12 @@ void fsys::unload(fsys& module)
     module.ptr = NULL;
 }
 
-void *fsys::find(fsys& module, const char *sym)
+fsys::addr_t fsys::find(fsys& module, const char *sym)
 {
     if(!module.ptr)
-        return NULL;
+        return (fsys::addr_t)NULL;
 
-    return dlsym(module.ptr, (char *)sym);
+    return (fsys::addr_t)dlsym(module.ptr, (char *)sym);
 }
 
 #elif HAVE_MACH_O_DYLD_H
@@ -1606,7 +1606,7 @@ void fsys::unload(fsys& module)
     NSUnlinkModule(mod, NSUNLINKMODULE_OPTION_NONE);
 }
 
-void *fsys::find(fsys& module, const char *sym)
+fsys::addr_t fsys::find(fsys& module, const char *sym)
 {
     if(!module.ptr)
         return NULL;
@@ -1616,9 +1616,9 @@ void *fsys::find(fsys& module, const char *sym)
 
     sym = NSLookupSymbolInModule(mod, sym);
     if(sym != NULL) {
-        return NSAddressOfSymbol(sym);
+        return (fsys::addr_t)NSAddressOfSymbol(sym);
 
-    return NULL;
+    return (fsys::addr_t)NULL;
 }
 
 #elif HAVE_SHL_LOAD
@@ -1627,19 +1627,19 @@ void *fsys::find(fsys& module, const char *sym)
 void fsys::load(fsys& module, const char *path)
 {
     module.error = 0;
-    module.ptr = (void *))shl_load(path, BIND_IMMEDIATE, 0l);
+    module.ptr = (void *)shl_load(path, BIND_IMMEDIATE, 0l);
     if(!module.ptr)
         module.error = ENOEXEC;
 }
 
-void *fsys::find(fsys& module, const char *sym)
+fsys::addr_t fsys::find(fsys& module, const char *sym)
 {
     shl_t image = (shl_t)module.ptr;
 
     if(shl_findsym(&image, sym, 0, &value) == 0)
-        return (void *)value;
+        return (fsys::addr_t)value;
 
-    return NULL;
+    return (fsys::addr_t)NULL;
 }
 
 void fsys::unload(fsys& module)
@@ -1662,9 +1662,9 @@ void fsys::unload(mem_t addr)
 {
 }
 
-void *fsys::find(mem_t addr, const char *sym)
+fsys::addr_t fsys::find(mem_t addr, const char *sym)
 {
-    return NULL;
+    return (fsys::addr_t)NULL;
 }
 
 #endif

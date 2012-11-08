@@ -64,14 +64,14 @@ void fbuf::_clear(void)
     error = 0;
 }
 
-void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, char **envp)
+void fbuf::open(const char *path, char **args, bufio::mode_t bufmode, size_t size, char **envp)
 {
     fbuf::close();
     _clear();
 
     fd_t stdio[3] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
 
-    switch(mode)
+    switch(bufmode)
     {
     case bufio::RDONLY:
         error = fsys::pipe(fd, stdio[0]);
@@ -84,7 +84,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, 
             fsys::close();
             return;
         }
-        allocate(size, mode);
+        allocate(size, bufmode);
         fsys::release(stdio[0]);
         break;
     case bufio::WRONLY:
@@ -98,7 +98,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, 
             fsys::close();
             return;
         }
-        allocate(size, mode);
+        allocate(size, bufmode);
         fsys::release(stdio[1]);
         break;
     case bufio::RDWR:
@@ -117,7 +117,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, 
             fsys::close();
             return;
         }
-        allocate(size, mode);
+        allocate(size, bufmode);
         fsys::release(pair[1]);
 #elif defined(_MSWINDOWS_)
         static int count;
@@ -140,8 +140,8 @@ void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, 
         inherit(child, true);
         inherit(fd, false);
 
-        DWORD mode = PIPE_NOWAIT;
-        SetNamedPipeHandleState(fd, &mode, NULL, NULL);
+        DWORD pmode = PIPE_NOWAIT;
+        SetNamedPipeHandleState(fd, &pmode, NULL, NULL);
         stdio[0] = child;
         stdio[1] = child;
         pid = shell::spawn(path, args, envp, stdio);
@@ -151,7 +151,7 @@ void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, 
             fsys::close();
             return;
         }
-        allocate(size, mode);
+        allocate(size, bufmode);
         fsys::release(child);
         pipename = strdup(buf);
 #endif

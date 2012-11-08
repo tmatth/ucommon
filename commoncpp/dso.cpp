@@ -268,32 +268,32 @@ bool DSO::isValid(void)
     return true;
 }
 
-void *DSO::operator[](const char *sym)
+DSO::addr_t DSO::operator[](const char *sym)
 {
 #if   defined(HAVE_SHL_LOAD)
     int value;
     shl_t handle = (shl_t)image;
 
     if(shl_findsym(&handle, sym, 0, &value) == 0)
-        return (void *)value;
+        return (DSO::addr_t)value;
     else
         return NULL;
 #elif defined(HAVE_MACH_DYLD)
     NSSymbol oSymbol = NSLookupSymbolInModule(oModule, sym);
     if(oSymbol)
-        return NSAddressOfSymbol(oSymbol);
+        return (DSO::addr_t)NSAddressOfSymbol(oSymbol);
     else
-        return NULL;
+        return (DSO::addr_t)NULL;
 #elif defined(_MSWINDOWS_)
-    void *addr = (void *)GetProcAddress(hImage, sym);
+    DSO::addr_t addr = GetProcAddress(hImage, sym);
     if(!addr)
         err = "symbol missing";
 
     return addr;
 #elif defined(HAVE_DLFCN_H)
-    return dlsym(image, (char *)sym);
+    return (DSO::addr_t)dlsym(image, (char *)sym);
 #else
-    return NULL;
+    return (DSO::addr_t)NULL;
 #endif
 }
 

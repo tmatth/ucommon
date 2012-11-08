@@ -790,6 +790,8 @@ private:
     const char *id;
     void *image;
 
+    typedef ucommon::fsys::addr_t addr_t;
+
 protected:
     void loader(const char *filename, bool resolve);
 
@@ -820,7 +822,7 @@ public:
     /**
      * Lookup a symbol in the loaded file.
      */
-    void* operator[](const char *sym);
+    addr_t operator[](const char *sym);
 
     static void dynunload(void);
 
