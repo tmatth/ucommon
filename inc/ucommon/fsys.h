@@ -119,90 +119,6 @@ typedef void *dir_t;
 typedef void *mem_t;
 
 /**
- * Convenience class for library plugins.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT dso
-{
-private:
-    friend class fsys;
-
-#ifdef  _MSWINDOWS_
-    HINSTANCE   ptr;
-#else
-    void    *ptr;
-#endif
-    int     error;
-
-public:
-#ifdef  _MSWINDOWS_
-    typedef int (FAR WINAPI *addr_t)();
-#else
-    typedef void *addr_t;
-#endif
-
-    /**
-     * Create dso object for use by load functions.
-     */
-    dso();
-
-    /**
-     * Create and map a dso object.
-     * @param path of library to map.
-     */
-    dso(const char *path);
-
-    /**
-     * Map library object with library.
-     * @param name of library to load.
-     */
-    void map(const char *path);
-
-    /**
-     * Release loaded library.
-     */
-    void release(void);
-
-    /**
-     * Load a plugin into memory.
-     * @param module for management.
-     * @param path to plugin.
-     */
-    inline static void map(dso& module, const char *path)
-        {return module.map(path);}
-
-    /**
-     * unload a specific plugin.
-     * @param module to unload
-     */
-    inline static void release(dso& module)
-        {module.release();}
-
-    /**
-     * Find symbol in loaded module.
-     * @param module to search.
-     * @param symbol to search for.
-     * @return address of symbol or NULL if not found.
-     */
-    addr_t find(const char *symbol) const;
-
-    inline int err(void) const
-        {return error;}
-
-    inline addr_t operator[](const char *symbol) const
-        {return find(symbol);}
-
-    inline addr_t operator()(const char *symbol) const
-        {return find(symbol);}
-
-    inline operator bool()
-        {return ptr != NULL;}
-
-    inline bool operator!()
-        {return ptr == NULL;}
-};
-
-/**
  * A container for generic and o/s portable threadsafe file system functions.
  * These are based roughly on their posix equivilents.  For libpth, the
  * system calls are wrapped.  The native file descriptor or handle may be
@@ -780,6 +696,90 @@ public:
 
     static inline bool is_sys(struct stat *inode)
         {return S_ISSOCK(inode->st_mode) || S_ISFIFO(inode->st_mode);}
+};
+
+/**
+ * Convenience class for library plugins.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT dso
+{
+private:
+    friend class fsys;
+
+#ifdef  _MSWINDOWS_
+    HINSTANCE   ptr;
+#else
+    void    *ptr;
+#endif
+    int     error;
+
+public:
+#ifdef  _MSWINDOWS_
+    typedef int (FAR WINAPI *addr_t)();
+#else
+    typedef void *addr_t;
+#endif
+
+    /**
+     * Create dso object for use by load functions.
+     */
+    dso();
+
+    /**
+     * Create and map a dso object.
+     * @param path of library to map.
+     */
+    dso(const char *path);
+
+    /**
+     * Map library object with library.
+     * @param name of library to load.
+     */
+    void map(const char *path);
+
+    /**
+     * Release loaded library.
+     */
+    void release(void);
+
+    /**
+     * Load a plugin into memory.
+     * @param module for management.
+     * @param path to plugin.
+     */
+    inline static void map(dso& module, const char *path)
+        {return module.map(path);}
+
+    /**
+     * unload a specific plugin.
+     * @param module to unload
+     */
+    inline static void release(dso& module)
+        {module.release();}
+
+    /**
+     * Find symbol in loaded module.
+     * @param module to search.
+     * @param symbol to search for.
+     * @return address of symbol or NULL if not found.
+     */
+    addr_t find(const char *symbol) const;
+
+    inline int err(void) const
+        {return error;}
+
+    inline addr_t operator[](const char *symbol) const
+        {return find(symbol);}
+
+    inline addr_t operator()(const char *symbol) const
+        {return find(symbol);}
+
+    inline operator bool()
+        {return ptr != NULL;}
+
+    inline bool operator!()
+        {return ptr == NULL;}
 };
 
 /**
