@@ -88,12 +88,11 @@ public:
      * @param argv to pass.
      * @param envp to use.
      */
-    fbuf(const char *path, char  **argv, shell::pmode_t access = shell::RDWR, size_t size = 512, char **envp = NULL);
+    fbuf(const char *path, char  **argv, bufio::mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
 
     /**
      * Construct a buffer that opens an existing device.
      * @param path of existing device to open.
-     * @param access mode of file (rw, rdonly, etc).
      * @param size of the stream buffer.
      */
     fbuf(const char *path, size_t size = 512);
@@ -101,7 +100,6 @@ public:
     /**
      * Construct a file buffer that opens an existing device.
      * @param path of existing file to open.
-     * @param access mode of file (rw, rdonly, etc).
      * @param size of the stream buffer.
      */
     void open(const char *path, size_t size = 512);
@@ -113,7 +111,7 @@ public:
      * @param argv to pass.
      * @param envp to use.
      */
-    void open(const char *path, char **argv, shell::pmode_t access = shell::RDWR, size_t size = 512, char **envp = NULL);
+    void open(const char *path, char **argv, bufio::mode_t access = bufio::RDWR, size_t size = 512, char **envp = NULL);
 
     /**
      * Close the file, flush buffers.  Capture exit code in error for pipe.

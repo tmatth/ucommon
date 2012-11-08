@@ -94,7 +94,7 @@ BufferProtocol::BufferProtocol()
     input = output = buffer = NULL;
 }
 
-BufferProtocol::BufferProtocol(size_t size, type_t mode)
+BufferProtocol::BufferProtocol(size_t size, mode_t mode)
 {
     end = true;
     eol = "\r\n";
@@ -121,7 +121,7 @@ void BufferProtocol::release(void)
     }
 }
 
-void BufferProtocol::allocate(size_t size, type_t mode)
+void BufferProtocol::allocate(size_t size, mode_t mode)
 {
     release();
     _clear();
@@ -130,19 +130,19 @@ void BufferProtocol::allocate(size_t size, type_t mode)
         return;
 
     switch(mode) {
-    case BUF_RDWR:
+    case RDWR:
         input = buffer = (char *)malloc(size * 2);
         if(buffer)
             output = buffer + size;
         else
             fault();
         break;
-    case BUF_RD:
+    case RDONLY:
         input = buffer = (char *)malloc(size);
         if(!buffer)
             fault();
         break;
-    case BUF_WR:
+    case WRONLY:
         output = buffer = (char *)malloc(size);
         if(!buffer)
             fault();

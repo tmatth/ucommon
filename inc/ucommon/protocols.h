@@ -178,7 +178,7 @@ public:
 class __EXPORT BufferProtocol : public CharacterProtocol
 {
 public:
-    typedef enum {BUF_RD, BUF_WR, BUF_RDWR} type_t;
+    typedef enum {RDONLY, WRONLY, RDWR} mode_t;
 
 private:
     const char *eol;
@@ -200,7 +200,7 @@ protected:
      * @param size of buffer to allocate.
      * @param access mode of buffer.
      */
-    BufferProtocol(size_t size, type_t access = BUF_RDWR);
+    BufferProtocol(size_t size, mode_t access = RDWR);
 
     /**
      * Destroy object by releasing buffer memory.
@@ -228,7 +228,7 @@ protected:
      * @param size of buffer to allocate.
      * @param access mode of buffer.
      */
-    void allocate(size_t size, type_t access = BUF_RDWR);
+    void allocate(size_t size, mode_t access = RDWR);
 
     /**
      * Release (free) buffer memory.
@@ -505,6 +505,8 @@ public:
     inline void operator--(void)
         {release();};
 };
+
+typedef BufferProtocol  bufio;
 
 END_NAMESPACE
 

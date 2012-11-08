@@ -41,7 +41,7 @@ BufferProtocol(), fsys()
     open(path, size);
 }
 
-fbuf::fbuf(const char *path, char **args, shell::pmode_t access, size_t size, char **envp) :
+fbuf::fbuf(const char *path, char **args, bufio::mode_t access, size_t size, char **envp) :
 BufferProtocol(), fsys()
 {
     pipename = NULL;
@@ -64,7 +64,7 @@ void fbuf::_clear(void)
     error = 0;
 }
 
-void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size, char **envp)
+void fbuf::open(const char *path, char **args, bufio::mode_t mode, size_t size, char **envp)
 {
     fbuf::close();
     _clear();
@@ -73,7 +73,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
 
     switch(mode)
     {
-    case shell::RD:
+    case bufio::RDONLY:
         error = fsys::pipe(fd, stdio[0]);
         if(error)
             return;
@@ -84,10 +84,10 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
             fsys::close();
             return;
         }
-        allocate(size, BUF_RD);
+        allocate(size, mode);
         fsys::release(stdio[0]);
         break;
-    case shell::WR:
+    case bufio::WRONLY:
         error = fsys::pipe(stdio[1], fd);
         if(error)
             return;
@@ -98,10 +98,10 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
             fsys::close();
             return;
         }
-        allocate(size, BUF_WR);
+        allocate(size, mode);
         fsys::release(stdio[1]);
         break;
-    default:
+    case bufio::RDWR:
 #if defined(HAVE_SOCKETPAIR)
         int pair[2];
         if(socketpair(AF_LOCAL, SOCK_STREAM, 0, pair)) {
@@ -117,7 +117,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
             fsys::close();
             return;
         }
-        allocate(size, BUF_RDWR);
+        allocate(size, mode);
         fsys::release(pair[1]);
 #elif defined(_MSWINDOWS_)
         static int count;
@@ -151,7 +151,7 @@ void fbuf::open(const char *path, char **args, shell::pmode_t mode, size_t size,
             fsys::close();
             return;
         }
-        allocate(size, BUF_RDWR);
+        allocate(size, mode);
         fsys::release(child);
         pipename = strdup(buf);
 #endif
@@ -169,7 +169,7 @@ void fbuf::open(const char *path, size_t size)
         return;
 
     inpos = outpos = 0;
-    allocate(size, BUF_RDWR);
+    allocate(size);
 }
 
 int fbuf::cancel(void)
@@ -398,7 +398,7 @@ void TCPBuffer::_buffer(size_t size)
 #endif
 
     if(size < 80) {
-        allocate(size, BUF_RDWR);
+        allocate(size);
         return;
     }
 
@@ -436,7 +436,7 @@ void TCPBuffer::_buffer(size_t size)
         Socket::sendwait(so, mss * 4);
 
 alloc:
-    allocate(size, BUF_RDWR);
+    allocate(size);
 }
 
 int TCPBuffer::_err(void) const

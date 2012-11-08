@@ -149,11 +149,6 @@ public:
 #endif
 
     /**
-     * Pipe I/O mode.
-     */
-    typedef enum {RD = BufferProtocol::BUF_RD, WR = BufferProtocol::BUF_WR, RDWR = BufferProtocol::BUF_RDWR} pmode_t;
-
-    /**
      * This can be used to get internationalized error messages.  The internal
      * text for shell parser errors are passed through here.
      * @param id of error message to use.
