@@ -1017,8 +1017,23 @@ public:
     inline size_t put(const void *data, size_t size)
         { return fp == NULL ? 0 : fwrite(data, 1, size, fp);}
 
-    size_t get(void *data, size_t size)
+    inline size_t get(void *data, size_t size)
         { return fp == NULL ? 0 : fread(data, 1, size, fp);}
+
+    inline int put(char value)
+        { return fp == NULL ? EOF : fputc(value, fp);}
+
+    inline int get(void)
+        { return fp == NULL ? EOF : fgetc(fp);}
+
+    inline int push(char value)
+        { return fp == NULL ? EOF : ungetc(value, fp);}
+
+    inline int puts(const char *data)
+        { return fp == NULL ? 0 : fputs(data, fp);}
+
+    inline char *gets(char *data, size_t size)
+        { return fp == NULL ? NULL : fgets(data, size, fp);}
 
     template<typename T> inline size_t read(T* data, size_t count)
         { return fp == NULL ? 0 : fread(data, sizeof(T), count, fp);}
