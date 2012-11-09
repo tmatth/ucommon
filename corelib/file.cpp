@@ -307,6 +307,13 @@ size_t file::putline(const char *data)
 
 size_t file::getline(char *address, size_t size)
 {
+    char nl0 = nl[0], nl1 = 0;
+
+    if(nl[1]) {
+        nl0 = nl[1];
+        nl1 = nl[0];
+    }
+
     address[0] = 0;
 
     if(!fp)
@@ -317,9 +324,9 @@ size_t file::getline(char *address, size_t size)
 
     size_t result = size = strlen(address);
 
-    if(address[size - 1] == '\n') {
+    if(address[size - 1] == nl0) {
         --size;
-        if(size && address[size - 1] == '\r')
+        if(size && address[size - 1] == nl1)
             --size;
     }
     address[size] = 0;
@@ -328,6 +335,12 @@ size_t file::getline(char *address, size_t size)
 
 size_t file::getline(String& s)
 {
+    char nl0 = nl[0], nl1 = 0;
+    if(nl[1]) {
+        nl0 = nl[1];
+        nl1 = nl[0];
+    }
+
     if(!s.c_mem())
         return true;
 
@@ -339,10 +352,10 @@ size_t file::getline(String& s)
     String::fix(s);
     size_t result = s.len();
 
-    if(s[-1] == '\n')
+    if(s[-1] == nl0)
         --s;
 
-    if(s[-1] == '\r')
+    if(nl1 && s[-1] == nl1)
         --s;
 
     return result;
