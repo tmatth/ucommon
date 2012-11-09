@@ -365,8 +365,10 @@ size_t charfile::load(stringlist_t *list, size_t count)
         if(!readline(tmp, size))
             break;
 
+        if(!list->filter(tmp, size))
+            break;
+
         ++used;
-        list->add(tmp);
     }
     free(tmp);
     return used;

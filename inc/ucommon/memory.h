@@ -368,7 +368,18 @@ private:
     LinkedObject *root;
 
 protected:
+    friend class charfile;
+
     virtual const char *invalid(void) const;
+
+    /**
+     * Filter text in a derived class.  The base class filter just
+     * does an add().
+     * @param text to filter.
+     * @param size of text buffer for transforms.
+     * @return false if end of data.
+     */
+    virtual bool filter(char *text, size_t size);
 
 public:
     /**
@@ -587,11 +598,13 @@ protected:
     const char *dir;
 
     /**
-     * Filter filenames in a derived class.
+     * Filter filenames in a derived class.  The default filter
+     * drops "." special files.
      * @param filename to filter.
+     * @param size of filename buffer.
      * @return true if include in final list.
      */
-    virtual bool filter(const char *filename);
+    virtual bool filter(char *filename, size_t size);
 
     /**
      * Load a directory path.

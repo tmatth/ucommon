@@ -415,6 +415,12 @@ memalloc(size)
     add(list);
 }
 
+bool StringPager::filter(char *buffer, size_t size)
+{
+    add(buffer);
+    return true;
+}
+
 unsigned StringPager::token(const char *text, const char *list, const char *quote, const char *end)
 {
     unsigned count = 0;
@@ -715,11 +721,11 @@ StringPager()
     load(path);
 }
 
-bool DirPager::filter(const char *fname)
+bool DirPager::filter(char *fname, size_t size)
 {
     if(*fname != '.')
-        return true;
-    return false;
+        add(fname);
+    return true;
 }
 
 void DirPager::operator=(const char *path)
@@ -743,8 +749,8 @@ bool DirPager::load(const char *path)
         return false;
 
     while(ds.read(buffer, sizeof(buffer)) > 0) {
-        if(filter(buffer))
-            add(buffer);
+        if(!filter(buffer, sizeof(buffer)))
+            break;
     }
 
     ds.close();
