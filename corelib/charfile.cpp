@@ -349,7 +349,7 @@ int charfile::_putch(int code)
     return fputc(code, fp);
 }
 
-size_t charfile::load(stringlist_t *list, size_t count)
+size_t charfile::load(StringPager *list, size_t count)
 {
     if(!list || !fp)
         return 0;
@@ -371,7 +371,7 @@ size_t charfile::load(stringlist_t *list, size_t count)
     return used;
 }
 
-size_t charfile::save(const stringlist_t *list, size_t count)
+size_t charfile::save(const StringPager *list, size_t count)
 {
     size_t used = 0;
     if(!list || !fp)

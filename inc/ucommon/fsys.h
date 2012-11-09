@@ -1081,9 +1081,9 @@ public:
 
     bool is_tty(void) const;
 
-    size_t load(stringlist_t *list, size_t count = 0);
+    size_t load(StringPager *list, size_t count = 0);
 
-    size_t save(const stringlist_t *list, size_t count = 0);
+    size_t save(const StringPager *list, size_t count = 0);
 };
 
 String str(charfile& fp, strsize_t size);
