@@ -44,13 +44,13 @@ file_t cstdin(stdin);
 file_t cstdout(stdout);
 file_t cstderr(stderr);
 
-file::file(const char *file, const char *mode)
+file::file(const char *file, const char *mode, size_t size)
 {
     fp = NULL;
     nl = "\n";
     pid = INVALID_PID_VALUE;
     tmp = NULL;
-    open(file, mode);
+    open(file, mode, size);
 }
 
 file::file(const char *file, char **argv, const char *mode, char **envp)
@@ -207,7 +207,7 @@ void file::open(const char *path, char **argv, const char *mode, char **envp)
         fsys::release(fd);
 }
 
-void file::open(const char *path, const char *mode)
+void file::open(const char *path, const char *mode, size_t size)
 {
     if(fp)
         fclose(fp);
@@ -218,6 +218,22 @@ void file::open(const char *path, const char *mode)
         nl = "\n";
 
     fp = fopen(path, mode);
+    if(!fp)
+        return;
+
+    switch(size)
+    {
+    case 2:
+        break;
+    case 0:
+        setvbuf(fp, NULL, _IONBF, 0);
+        break;
+    case 1:
+        setvbuf(fp, NULL, _IOLBF, 0);
+        break;
+    default:
+        setvbuf(fp, NULL, _IOFBF, size);
+    }
 }
 
 int file::cancel(void)

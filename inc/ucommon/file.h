@@ -85,8 +85,9 @@ public:
      * Construct an open file based on a path and mode.
      * @param path of file to open.
      * @param mode of file.
+     * @param size of buffer, 0 = none, 1 = line mode, 2 = default
      */
-    file(const char *path, const char *mode);
+    file(const char *path, const char *mode, size_t size = 2);
 
     /**
      * Construct an open file based on a pipe.
@@ -128,8 +129,9 @@ public:
      * Open file path.  If a file is already opened, it is closed.
      * @param path of file to open.
      * @param mode of file to open.
+     * @param size of buffering, 0 = none, 1 = line mode.
      */
-    void open(const char *path, const char *mode);
+    void open(const char *path, const char *mode, size_t size = 2);
 
     /**
      * Open an executable path.
