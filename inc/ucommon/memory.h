@@ -368,10 +368,9 @@ private:
     LinkedObject *root;
 
 protected:
-    friend class charfile;
-
     virtual const char *invalid(void) const;
 
+public:
     /**
      * Filter text in a derived class.  The base class filter just
      * does an add().
@@ -381,7 +380,6 @@ protected:
      */
     virtual bool filter(char *text, size_t size);
 
-public:
     /**
      * Member of string list.  This is exposed so that the list of strings
      * can be externally enumerated with linked_pointer<StringPager::member>
