@@ -417,7 +417,13 @@ memalloc(size)
 
 bool StringPager::filter(char *buffer, size_t size)
 {
-    add(buffer);
+    if(buffer && *buffer) {
+        size_t len = strlen(buffer);
+        if(buffer[len - 1] == '\n')
+            buffer[len - 1] = 0;
+        if(*buffer)
+            add(buffer);
+    }
     return true;
 }
 

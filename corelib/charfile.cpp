@@ -359,10 +359,7 @@ size_t charfile::load(stringlist_t *list, size_t count)
 
     char *tmp = (char *)malloc(size);
     while(!count || used < count) {
-        if(feof(fp))
-            break;
-
-        if(!readline(tmp, size))
+        if(!fgets(tmp, size, fp) || feof(fp))
             break;
 
         if(!list->filter(tmp, size))

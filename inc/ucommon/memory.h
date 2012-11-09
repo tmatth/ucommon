@@ -372,8 +372,8 @@ protected:
 
 public:
     /**
-     * Filter text in a derived class.  The base class filter just
-     * does an add().
+     * Filter text in a derived class.  The base class filter removes
+     * newlines at end of text and filters out empty strings.
      * @param text to filter.
      * @param size of text buffer for transforms.
      * @return false if end of data.
