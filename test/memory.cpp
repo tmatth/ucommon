@@ -30,11 +30,7 @@ extern "C" int main()
     stringlist_t mylist;
     stringlistitem_t *item;
 
-    char buf[8];
-
-    String::set(buf, sizeof(buf), "100\n");
-
-    mylist.filter(buf, 8);
+    mylist.add("100");
     mylist.add("050");
     mylist.add("300");
 
