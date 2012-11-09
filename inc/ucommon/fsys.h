@@ -902,6 +902,7 @@ private:
     pid_t pid;
 #endif
     char *tmp;
+    const char *nl;
 
     int _putch(int code);
 
@@ -987,11 +988,11 @@ public:
     int cancel(void);
 
     /**
-     * Put a string into the file.
+     * Put a string into the file.  A newline will be added.
      * @param string to write.
      * @return number of characters written.
      */
-    size_t put(const char *string);
+    size_t putline(const char *string);
 
     /**
      * Read a line of input from the file.  This clears the newline
@@ -1002,7 +1003,7 @@ public:
      * @param size of buffer.
      * @return true if data read, 0 if at end of file.
      */
-    size_t readline(char *string, size_t size);
+    size_t getline(char *string, size_t size);
 
     /**
      * Read a string of input from the file.  This clears the newline
@@ -1012,7 +1013,7 @@ public:
      * @param string to write.
      * @return true if data read, 0 if at end of file.
      */
-    size_t readline(String& string);
+    size_t getline(String& string);
 
     inline size_t put(const void *data, size_t size)
         { return fp == NULL ? 0 : fwrite(data, 1, size, fp);}

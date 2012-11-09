@@ -46,6 +46,7 @@ charfile cstderr(stderr);
 charfile::charfile(const char *file, const char *mode)
 {
     fp = NULL;
+    nl = "\n";
     pid = INVALID_PID_VALUE;
     tmp = NULL;
     open(file, mode);
@@ -54,6 +55,7 @@ charfile::charfile(const char *file, const char *mode)
 charfile::charfile(const char *file, char **argv, const char *mode, char **envp)
 {
     fp = NULL;
+    nl = "\n";
     pid = INVALID_PID_VALUE;
     tmp = NULL;
     open(file, argv, mode, envp);
@@ -62,6 +64,7 @@ charfile::charfile(const char *file, char **argv, const char *mode, char **envp)
 charfile::charfile()
 {
     fp = NULL;
+    nl = "\n";
     tmp = NULL;
     pid = INVALID_PID_VALUE;
 }
@@ -69,6 +72,7 @@ charfile::charfile()
 charfile::charfile(FILE *file)
 {
     fp = file;
+    nl = "\n";
     tmp = NULL;
     pid = INVALID_PID_VALUE;
 }
@@ -100,37 +104,7 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
     int _fmode = 0;
 #endif
 
-    if(eq_case(mode, "w")) {
-        if(fsys::pipe(fd, stdio[0]))
-            return;
-        fsys::inherit(fd, false);
-        pid = shell::spawn(path, argv, envp, stdio);
-        if(pid == INVALID_PID_VALUE) {
-            fsys::release(stdio[0]);
-            fsys::release(fd);
-            return;
-        }
-        fsys::release(stdio[0]);
-#ifdef  _MSWINDOWS_
-        _fmode = _O_WRONLY;
-#endif
-    }
-    else if(eq_case(mode, "r")) {
-        if(fsys::pipe(stdio[1], fd))
-            return;
-        fsys::inherit(fd, false);
-        pid = shell::spawn(path, argv, envp, stdio);
-        if(pid == INVALID_PID_VALUE) {
-            fsys::release(stdio[1]);
-            fsys::release(fd);
-            return;
-        }
-        fsys::release(stdio[1]);
-#ifdef  _MSWINDOWS_
-        _fmode = _O_RDONLY;
-#endif
-    }
-    else if(eq_case(mode, "r+") || eq_case(mode, "rw")) {
+    if(strchr(mode, '+')) {
 #if defined(HAVE_SOCKETPAIR)
         int pair[2];
         if(socketpair(AF_LOCAL, SOCK_STREAM, 0, pair))
@@ -184,8 +158,43 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
         tmp = strdup(buf);
 #endif
     }
+    else if(strchr(mode, 'w')) {
+        if(fsys::pipe(fd, stdio[0]))
+            return;
+        fsys::inherit(fd, false);
+        pid = shell::spawn(path, argv, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            fsys::release(stdio[0]);
+            fsys::release(fd);
+            return;
+        }
+        fsys::release(stdio[0]);
+#ifdef  _MSWINDOWS_
+        _fmode = _O_WRONLY;
+#endif
+    }
+    else if(strchr(mode, 'r')) {
+        if(fsys::pipe(stdio[1], fd))
+            return;
+        fsys::inherit(fd, false);
+        pid = shell::spawn(path, argv, envp, stdio);
+        if(pid == INVALID_PID_VALUE) {
+            fsys::release(stdio[1]);
+            fsys::release(fd);
+            return;
+        }
+        fsys::release(stdio[1]);
+#ifdef  _MSWINDOWS_
+        _fmode = _O_RDONLY;
+#endif
+    }
     else
         return;
+
+    if(strchr(mode, 't'))
+        nl = "\r\n";
+    else
+        nl = "\n";
 
 #ifdef  _MSWINDOWS_
     int fdd = _open_osfhandle((intptr_t)fd, _fmode);
@@ -201,6 +210,11 @@ void charfile::open(const char *path, const char *mode)
 {
     if(fp)
         fclose(fp);
+
+    if(strchr(mode, 't'))
+        nl = "\r\n";
+    else
+        nl = "\n";
 
     fp = fopen(path, mode);
 }
@@ -262,19 +276,19 @@ size_t charfile::printf(const char *format, ...)
     return result;
 }
 
-size_t charfile::put(const char *data)
+size_t charfile::putline(const char *data)
 {
     if(!fp)
         return 0;
 
-    int result = fputs(data, fp);
+    int result = fprintf(fp, "%s%s", data, nl);
     if(result < 0)
         result = 0;
 
     return (size_t)result;
 }
 
-size_t charfile::readline(char *address, size_t size)
+size_t charfile::getline(char *address, size_t size)
 {
     address[0] = 0;
 
@@ -295,7 +309,7 @@ size_t charfile::readline(char *address, size_t size)
     return result;
 }
 
-size_t charfile::readline(String& s)
+size_t charfile::getline(String& s)
 {
     if(!s.c_mem())
         return true;
@@ -359,7 +373,7 @@ size_t charfile::load(StringPager *list, size_t count)
 
     char *tmp = (char *)malloc(size);
     while(!count || used < count) {
-        if(!fgets(tmp, size, fp) || feof(fp))
+        if(!getline(tmp, size))
             break;
 
         if(!list->filter(tmp, size))
@@ -390,7 +404,7 @@ size_t charfile::save(const StringPager *list, size_t count)
 String str(charfile& so, strsize_t size)
 {
     String s(size);
-    so.readline(s.c_mem(), s.size());
+    so.getline(s.c_mem(), s.size());
     String::fix(s);
     return s;
 }
