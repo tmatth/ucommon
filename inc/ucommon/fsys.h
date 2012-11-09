@@ -24,8 +24,8 @@
  * @file ucommon/fsys.h
  */
 
-#ifndef _UCOMMON_FILE_H_
-#define _UCOMMON_FILE_H_
+#ifndef _UCOMMON_FSYS_H_
+#define _UCOMMON_FSYS_H_
 
 #ifndef _UCOMMON_CONFIG_H_
 #include <ucommon/platform.h>
@@ -107,11 +107,6 @@
 #endif
 
 NAMESPACE_UCOMMON
-
-/**
- * Convenience type for directory scan operations.
- */
-typedef void *dir_t;
 
 /**
  * Convenience type for loader operations.
@@ -888,219 +883,13 @@ public:
 };
 
 /**
- * Access standard files through character protocol.  This can also be
- * used as an alternative means to access files that manages file pointers.
- * @author David Sugar <dyfet@gnutelephony.org>
- */
-class __EXPORT charfile : public CharacterProtocol
-{
-private:
-    FILE *fp;
-#ifdef _MSWINDOWS_
-    HANDLE pid;
-#else
-    pid_t pid;
-#endif
-    char *tmp;
-    const char *nl;
-
-    int _putch(int code);
-
-    int _getch(void);
-
-public:
-    typedef ::fpos_t bookmark_t;
-
-    /**
-     * Construct a charfile from an existing FILE pointer.
-     * @param file to use.
-     */
-    charfile(FILE *file);
-
-    /**
-     * Construct an open charfile based on a path and mode.
-     * @param path of file to open.
-     * @param mode of file.
-     */
-    charfile(const char *path, const char *mode);
-
-    /**
-     * Construct an open charfile based on a pipe.
-     * @param path of file to pipe.
-     * @param argv of executable.
-     * @param mode of file.
-     * @param envp to give executable.
-     */
-    charfile(const char *path, char **argv, const char *mode, char **envp = NULL);
-
-    /**
-     * Construct an unopened file.
-     */
-    charfile();
-
-    /**
-     * Destroy object and close associated file.
-     */
-    ~charfile();
-
-    /**
-     * Test if file is opened.
-     * @return true if opened.
-     */
-    inline operator bool()
-        {return fp != NULL;}
-
-    /**
-     * Test if file is not opened.
-     * @return true if not opened.
-     */
-    inline bool operator !()
-        {return fp == NULL;}
-
-    inline operator FILE *()
-        {return fp;}
-
-    /**
-     * Open file path.  If a file is already opened, it is closed.
-     * @param path of file to open.
-     * @param mode of file to open.
-     */
-    void open(const char *path, const char *mode);
-
-    /**
-     * Open an executable path.
-     * @param path of executable.
-     * @param argv to pass to executable.
-     * @param mode of pipe (only "r" and "w" are valid).
-     */
-    void open(const char *path, char **argv, const char *mode, char **envp = NULL);
-
-    /**
-     * Close an open file.
-     * @return process exit code if pipe.
-     */
-    int close(void);
-
-    /**
-     * Cancel pipe and close file.
-     * @return process exit code if pipe.
-     */
-    int cancel(void);
-
-    /**
-     * Put a string into the file.  A newline will be added.
-     * @param string to write.
-     * @return number of characters written.
-     */
-    size_t putline(const char *string);
-
-    /**
-     * Read a line of input from the file.  This clears the newline
-     * character at the end and has consistent behavior with other
-     * ucommon file routines.  Because the newline is cleared, the
-     * string length may be shorter than the return size.
-     * @param string to write.
-     * @param size of buffer.
-     * @return true if data read, 0 if at end of file.
-     */
-    size_t getline(char *string, size_t size);
-
-    /**
-     * Read a string of input from the file.  This clears the newline
-     * character at the end and has consistent behavior with other
-     * ucommon file routines.  Because the newline is cleared, the
-     * string length may be shorter than the return size.
-     * @param string to write.
-     * @return true if data read, 0 if at end of file.
-     */
-    size_t getline(String& string);
-
-    inline size_t put(const void *data, size_t size)
-        { return fp == NULL ? 0 : fwrite(data, 1, size, fp);}
-
-    inline size_t get(void *data, size_t size)
-        { return fp == NULL ? 0 : fread(data, 1, size, fp);}
-
-    inline int put(char value)
-        { return fp == NULL ? EOF : fputc(value, fp);}
-
-    inline int get(void)
-        { return fp == NULL ? EOF : fgetc(fp);}
-
-    inline int push(char value)
-        { return fp == NULL ? EOF : ungetc(value, fp);}
-
-    inline int puts(const char *data)
-        { return fp == NULL ? 0 : fputs(data, fp);}
-
-    inline char *gets(char *data, size_t size)
-        { return fp == NULL ? NULL : fgets(data, size, fp);}
-
-    template<typename T> inline size_t read(T* data, size_t count)
-        { return fp == NULL ? 0 : fread(data, sizeof(T), count, fp);}
-
-    template<typename T> inline size_t write(const T* data, size_t count)
-        { return fp == NULL ? 0 : fwrite(data, sizeof(T), count, fp);}
-
-    template<typename T> inline size_t read(T& data)
-        { return fp == NULL ? 0 : fread(data, sizeof(T), 1, fp);}
-
-    template<typename T> inline size_t write(const T& data)
-        { return fp == NULL ? 0 : fwrite(data, sizeof(T), 1, fp);}
-
-    inline void get(bookmark_t& pos)
-        { if(fp) fsetpos(fp, &pos);}
-
-    inline void set(bookmark_t& pos)
-        { if(fp) fgetpos(fp, &pos);}
-
-    int err(void) const;
-
-    bool eof(void) const;
-
-    template<typename T> inline void offset(long pos)
-        {if(fp) fseek(fp, sizeof(const T) * pos, SEEK_CUR);}
-
-    inline void seek(long offset)
-        {if(fp) fseek(fp, offset, SEEK_SET);}
-
-    inline void move(long offset)
-        {if(fp) fseek(fp, offset, SEEK_CUR);}
-
-    inline void append(void)
-        {if (fp) fseek(fp, 0l, SEEK_END);}
-
-    inline void rewind(void)
-        {if(fp) ::rewind(fp);}
-
-    inline void flush(void)
-        {if(fp) ::fflush(fp);}
-
-    size_t printf(const char *format, ...) __PRINTF(2, 3);
-
-    size_t scanf(const char *format, ...) __SCANF(2, 3);
-
-    bool is_tty(void) const;
-
-    size_t load(StringPager *list, size_t count = 0);
-
-    size_t save(const StringPager *list, size_t count = 0);
-};
-
-String str(charfile& fp, strsize_t size);
-
-/**
  * Convience type for fsys.
  */
 typedef fsys fsys_t;
 
-typedef dir dirsys_t;
+typedef dir dir_t;
 
 typedef dso dso_t;
-
-typedef charfile file_t;
-
-extern charfile cstdin, cstdout, cstderr;
 
 inline bool is_exists(const char *path)
     {return fsys::is_exists(path);}

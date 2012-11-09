@@ -46,7 +46,7 @@ static void dirpath(bool middle, String path, bool top = true)
 {
     char filename[128];
     string_t subdir;
-    dirsys_t dir(path);
+    dir_t dir(path);
     unsigned count = 0;
 
     while(is(dir) && dir::read(dir, filename, sizeof(filename))) {

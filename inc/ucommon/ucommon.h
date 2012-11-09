@@ -105,6 +105,7 @@
 #include <ucommon/thread.h>
 #include <ucommon/containers.h>
 #include <ucommon/fsys.h>
+#include <ucommon/file.h>
 #include <ucommon/buffer.h>
 #include <ucommon/shell.h>
 #include <ucommon/xml.h>

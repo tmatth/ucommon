@@ -737,7 +737,7 @@ void DirPager::operator=(const char *path)
 
 bool DirPager::load(const char *path)
 {
-    dirsys_t ds;
+    dir_t ds;
     char buffer[128];
 
     if(!fsys::is_dir(path))

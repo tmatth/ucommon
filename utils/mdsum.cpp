@@ -137,7 +137,7 @@ static void scan(String path, bool top = true)
 {
     char filename[128];
     string_t filepath;
-    dirsys_t dir(path);
+    dir_t dir(path);
 
     while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))

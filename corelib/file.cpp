@@ -27,6 +27,7 @@
 #include <ucommon/export.h>
 #include <ucommon/thread.h>
 #include <ucommon/fsys.h>
+#include <ucommon/file.h>
 #include <ucommon/string.h>
 #include <ucommon/memory.h>
 #include <ucommon/shell.h>
@@ -39,11 +40,11 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-charfile cstdin(stdin);
-charfile cstdout(stdout);
-charfile cstderr(stderr);
+file_t cstdin(stdin);
+file_t cstdout(stdout);
+file_t cstderr(stderr);
 
-charfile::charfile(const char *file, const char *mode)
+file::file(const char *file, const char *mode)
 {
     fp = NULL;
     nl = "\n";
@@ -52,7 +53,7 @@ charfile::charfile(const char *file, const char *mode)
     open(file, mode);
 }
 
-charfile::charfile(const char *file, char **argv, const char *mode, char **envp)
+file::file(const char *file, char **argv, const char *mode, char **envp)
 {
     fp = NULL;
     nl = "\n";
@@ -61,7 +62,7 @@ charfile::charfile(const char *file, char **argv, const char *mode, char **envp)
     open(file, argv, mode, envp);
 }
 
-charfile::charfile()
+file::file()
 {
     fp = NULL;
     nl = "\n";
@@ -69,7 +70,7 @@ charfile::charfile()
     pid = INVALID_PID_VALUE;
 }
 
-charfile::charfile(FILE *file)
+file::file(FILE *file)
 {
     fp = file;
     nl = "\n";
@@ -77,12 +78,12 @@ charfile::charfile(FILE *file)
     pid = INVALID_PID_VALUE;
 }
 
-charfile::~charfile()
+file::~file()
 {
     close();
 }
 
-bool charfile::is_tty(void) const
+bool file::is_tty(void) const
 {
 #ifdef  _MSWINDOWS_
     if(_isatty(_fileno(fp)))
@@ -94,7 +95,7 @@ bool charfile::is_tty(void) const
     return false;
 }
 
-void charfile::open(const char *path, char **argv, const char *mode, char **envp)
+void file::open(const char *path, char **argv, const char *mode, char **envp)
 {
     close();
     fd_t fd;
@@ -206,7 +207,7 @@ void charfile::open(const char *path, char **argv, const char *mode, char **envp
         fsys::release(fd);
 }
 
-void charfile::open(const char *path, const char *mode)
+void file::open(const char *path, const char *mode)
 {
     if(fp)
         fclose(fp);
@@ -219,7 +220,7 @@ void charfile::open(const char *path, const char *mode)
     fp = fopen(path, mode);
 }
 
-int charfile::cancel(void)
+int file::cancel(void)
 {
     int result = 0;
     if(pid != INVALID_PID_VALUE)
@@ -229,7 +230,7 @@ int charfile::cancel(void)
     return result;
 }
 
-int charfile::close(void)
+int file::close(void)
 {
     int error = 0;
     if(pid != INVALID_PID_VALUE)
@@ -248,7 +249,7 @@ int charfile::close(void)
     return error;
 }
 
-size_t charfile::scanf(const char *format, ...)
+size_t file::scanf(const char *format, ...)
 {
     if(!fp)
         return 0;
@@ -262,7 +263,7 @@ size_t charfile::scanf(const char *format, ...)
     return result;
 }
 
-size_t charfile::printf(const char *format, ...)
+size_t file::printf(const char *format, ...)
 {
     if(!fp)
         return 0;
@@ -276,7 +277,7 @@ size_t charfile::printf(const char *format, ...)
     return result;
 }
 
-size_t charfile::putline(const char *data)
+size_t file::putline(const char *data)
 {
     if(!fp)
         return 0;
@@ -288,7 +289,7 @@ size_t charfile::putline(const char *data)
     return (size_t)result;
 }
 
-size_t charfile::getline(char *address, size_t size)
+size_t file::getline(char *address, size_t size)
 {
     address[0] = 0;
 
@@ -309,7 +310,7 @@ size_t charfile::getline(char *address, size_t size)
     return result;
 }
 
-size_t charfile::getline(String& s)
+size_t file::getline(String& s)
 {
     if(!s.c_mem())
         return true;
@@ -331,7 +332,7 @@ size_t charfile::getline(String& s)
     return result;
 }
 
-bool charfile::eof(void) const
+bool file::eof(void) const
 {
     if(!fp)
         return false;
@@ -339,7 +340,7 @@ bool charfile::eof(void) const
     return feof(fp) != 0;
 }
 
-int charfile::err(void) const
+int file::err(void) const
 {
     if(!fp)
         return EBADF;
@@ -347,7 +348,7 @@ int charfile::err(void) const
     return ferror(fp);
 }
 
-int charfile::_getch(void)
+int file::_getch(void)
 {
     if(!fp)
         return EOF;
@@ -355,7 +356,7 @@ int charfile::_getch(void)
     return fgetc(fp);
 }
 
-int charfile::_putch(int code)
+int file::_putch(int code)
 {
     if(!fp)
         return EOF;
@@ -363,7 +364,7 @@ int charfile::_putch(int code)
     return fputc(code, fp);
 }
 
-size_t charfile::load(StringPager *list, size_t count)
+size_t file::load(StringPager *list, size_t count)
 {
     if(!list || !fp)
         return 0;
@@ -385,7 +386,7 @@ size_t charfile::load(StringPager *list, size_t count)
     return used;
 }
 
-size_t charfile::save(const StringPager *list, size_t count)
+size_t file::save(const StringPager *list, size_t count)
 {
     size_t used = 0;
     if(!list || !fp)
@@ -401,7 +402,7 @@ size_t charfile::save(const StringPager *list, size_t count)
     return used;
 }
 
-String str(charfile& so, strsize_t size)
+String str(file& so, strsize_t size)
 {
     String s(size);
     so.getline(s.c_mem(), s.size());
