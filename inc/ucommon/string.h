@@ -960,22 +960,6 @@ public:
     String &operator%(const char *text);
 
     /**
-     * Scan input items from a string object.
-     * @param object to scan from.
-     * @param format string of input to scan.
-     * @return number of items scanned.
-     */
-    static int scanf(String& object, const char *format, ...) __SCANF(2, 3);
-
-    /**
-     * Print formatted items into a string object.
-     * @param object to print into.
-     * @param format string to print with.
-     * @return number of bytes written into object.
-     */
-    static strsize_t printf(String& object, const char *format, ...) __PRINTF(2, 3);
-
-    /**
      * Swap the cstring references between two strings.
      * @param object1 to swap.
      * @param object2 to swap.
@@ -1297,194 +1281,14 @@ public:
      * number of enhancements including support for quoted text that may
      * contain token separators within quotes.  The object is modified
      * as it is parsed.
-     * @param object to examine for tokens.
      * @param last token position or set to NULL for start of string.
      * @param list of characters to use as token separators.
      * @param quote pairs of characters for quoted text or NULL if not used.
      * @param end of line marker characters or NULL if not used.
      * @return token extracted from string or NULL if no more tokens found.
      */
-    inline static char *token(String& object, char **last, const char *list, const char *quote = NULL, const char *end = NULL)
-        {return token(object.c_mem(), last, list, quote, end);};
-
-    /**
-     * Scan input items from a string object.
-     * @param object to scan.
-     * @param format string of input to scan.
-     * @param args list to scan into.
-     * @return number of items scanned.
-     */
-    __SCANF(2,0) inline static int vscanf(String& object, const char *format, va_list args)
-        {return object.vscanf(format, args);}
-
-    /**
-     * Print items into a string object.
-     * @param object to print into.
-     * @param format string of print format.
-     * @param args list to print.
-     * @return number of bytes written to string.
-     */
-    __PRINTF(2,0) inline static strsize_t vprintf(String& object, const char *format, va_list args)
-        {return object.vprintf(format, args);}
-
-    /**
-     * Count all characters in the string object (strlen).
-     * @param object to count.
-     * @return count of characters.
-     */
-    inline static strsize_t len(String& object)
-        {return object.len();};
-
-    /**
-     * Get memory text buffer of string object.
-     * @param object to get string buffer from.
-     * @return writable string buffer.
-     */
-    inline static char *mem(String& object)
-        {return object.c_mem();};
-
-    /**
-     * Get the size of currently allocated space for string.
-     * @param object to examine.
-     * @return size allocated for text.
-     */
-    inline static strsize_t size(String& object)
-        {return object.size();};
-
-    /**
-     * Clear a string object.
-     * @param object to clear.
-     */
-    inline static void clear(String& object)
-        {object.clear();};
-
-    /**
-     * Count number of occurrences of characters in string object.
-     * @param object to examine.
-     * @param list of characters to find.
-     * @return count of instances of characters.
-     */
-    inline static unsigned ccount(String& object, const char *list)
-        {return object.ccount(list);};
-
-    /**
-     * Count all characters in the string object (strlen).
-     * @param object to count.
-     * @return count of characters.
-     */
-    inline static size_t count(String& object)
-        {return object.count();}
-
-    inline static String copy(String& object, strsize_t offset, strsize_t size)
-        {return object.copy(offset, size);}
-
-    inline static String left(String& object, strsize_t size)
-        {return object.left(size);}
-
-    inline static String right(String& object, strsize_t offset)
-        {return object.right(offset);}
-
-    inline static void cut(String& object, strsize_t offset, strsize_t size)
-        {object.cut(offset, size);}
-
-    inline static void paste(String& object, strsize_t offset, const char *text, strsize_t size = 0)
-        {object.paste(offset, text, size);}
-
-    /**
-     * Convert string object to upper case.
-     * @param object to modify.
-     */
-    inline static void upper(String& object)
-        {object.upper();}
-
-    /**
-     * Convert string object to lower case.
-     * @param object to modify.
-     */
-    inline static void lower(String& object)
-        {object.lower();}
-
-    /**
-     * Unquote a quoted string.  Removes lead and trailing quote marks.
-     * @param object to unquote.
-     * @param quote pairs of characters for open and close quote.
-     * @return true if string was quoted.
-     */
-    inline static bool unquote(String& object, const char *quote)
-        {return object.unquote(quote);}
-
-    /**
-     * Trim lead characters from the string.
-     * @param object to trim.
-     * @param list of characters to remove.
-     */
-    inline static void trim(String& object, const char *list)
-        {object.trim(list);}
-
-    /**
-     * Trim first character(s) from the string.
-     * @param object to chop.
-     * @param count of characters to remove.
-     */
-    inline static void trim(String& object, strsize_t count = 1)
-        {object.trim(count);}
-
-    /**
-     * Chop trailing characters from the string.
-     * @param object to chop.
-     * @param list of characters to remove.
-     */
-    inline static void chop(String& object, const char *list)
-        {object.chop(list);}
-
-    /**
-     * Chop last character(s) from the string.
-     * @param object to chop.
-     * @param count of characters to remove.
-     */
-    inline static void chop(String& object, strsize_t count = 1)
-        {object.chop(count);}
-
-    /**
-     * Strip lead and trailing characters from the string.
-     * @param object to strip.
-     * @param list of characters to remove.
-     */
-    inline static void strip(String& object, const char *list)
-        {object.strip(list);}
-
-    /**
-     * Find a character in the string.
-     * @param object to search.
-     * @param list of characters to search for.
-     * @return pointer to first occurrence of character.
-     */
-    inline static const char *find(String& object, const char *list)
-        {return object.find(list);}
-
-    inline static const char *search(String& object, const char *substring, unsigned instance = 0, unsigned flags = 0)
-        {return object.search(substring, instance, flags);}
-
-    inline static const char *search(String& object, regex& expr, unsigned instance = 0, unsigned flags = 0)
-        {return object.search(expr, instance, flags);}
-
-    inline static unsigned replace(String& object, regex& expr, const char *text, unsigned flags = 0)
-        {return object.replace(expr, text, flags);}
-
-    inline static unsigned replace(String& object, const char *match, const char *text, bool flag = false)
-        {return object.replace(match, text, flag);}
-
-    inline static bool search(regex& expr, const char *text, unsigned flags = 0)
-        {return expr.match(text, flags);}
-
-    /**
-     * Find last character in the string.
-     * @param object to search.
-     * @param list of characters to search for.
-     * @return pointer to last occurrence of character.
-     */
-    inline static const char *rfind(String& object, const char *list)
-        {return object.rfind(list);}
+    inline char *token(char **last, const char *list, const char *quote = NULL, const char *end = NULL)
+        {return token(c_mem(), last, list, quote, end);};
 
     /**
      * Convert string to a double value.
@@ -1492,8 +1296,8 @@ public:
      * @param pointer to update with end of parsed value.
      * @return double value of object.
      */
-    inline static double tod(String& object, char **pointer = NULL)
-        {return strtod(mem(object), pointer);}
+    inline double tod(char **pointer = NULL)
+        {return strtod(c_mem(), pointer);}
 
     /**
      * Convert string to a long value.
@@ -1501,8 +1305,8 @@ public:
      * @param pointer to update with end of parsed value.
      * @return long value of object.
      */
-    inline static long tol(String& object, char **pointer = NULL)
-        {return strtol(mem(object), pointer, 0);}
+    inline long tol(char **pointer = NULL)
+        {return strtol(c_mem(), pointer, 0);}
 
     /**
      * Convert text to a double value.

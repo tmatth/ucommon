@@ -604,15 +604,6 @@ public:
     void restart(char *argv0, char **argv, char **list);
 
     /**
-     * Parse shell arguments directly into a shell object.
-     * @param args table.
-     * @param string to parse.
-     * @return argument array.
-     */
-    inline static char **parse(shell &args, const char *string)
-        {return args.parse(string);}
-
-    /**
      * Get program name (argv0).
      */
     inline const char *argv0() const

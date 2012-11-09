@@ -387,7 +387,7 @@ static void scan(string_t path, string_t prefix)
     string_t subdir;
     dir_t dir(path);
 
-    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir.read(filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))
             continue;
 

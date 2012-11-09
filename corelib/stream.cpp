@@ -486,7 +486,7 @@ int pipestream::_getch(void)
         return EOF;
 
     if(bufsize == 1) {
-        rlen = fsys::read(rd, &ch, 1);
+        rlen = rd.read(&ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
                 close();
@@ -502,7 +502,7 @@ int pipestream::_getch(void)
         return (unsigned char)*gptr();
 
     rlen = (ssize_t)((gbuf + bufsize) - eback());
-    rlen = fsys::read(rd, eback(), rlen);
+    rlen = rd.read(eback(), rlen);
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
         if(rlen < 0)
@@ -529,7 +529,7 @@ int pipestream::_putch(int c)
             return 0;
 
         ch = (unsigned char)(c);
-        rlen = fsys::write(wr, &ch, 1);
+        rlen = wr.write(&ch, 1);
         if(rlen < 1) {
             if(rlen < 0)
                 close();
@@ -544,7 +544,7 @@ int pipestream::_putch(int c)
 
     req = (ssize_t)(pptr() - pbase());
     if(req) {
-        rlen = fsys::write(wr, pbase(), req);
+        rlen = wr.write(pbase(), req);
         if(rlen < 1) {
             if(rlen < 0)
                 close();
@@ -662,7 +662,7 @@ void filestream::seek(fsys::offset_t offset)
 {
     if(bufsize) {
         sync();
-        fsys::seek(fd, offset);
+        fd.seek(offset);
     }
 }
 
@@ -671,7 +671,7 @@ void filestream::close(void)
     sync();
 
     if(bufsize)
-        fsys::close(fd);
+        fd.close();
 
     StreamProtocol::release();
 }
@@ -711,7 +711,7 @@ void filestream::allocate(size_t size, fsys::access_t mode)
 void filestream::open(const char *fname, unsigned fmode, fsys::access_t access, size_t size)
 {
     close();
-    fsys::open(fd, fname, fmode, access);
+    fd.open(fname, fmode, access);
     if(is(fd))
         allocate(size, access);
 }
@@ -719,7 +719,7 @@ void filestream::open(const char *fname, unsigned fmode, fsys::access_t access, 
 void filestream::open(const char *fname, fsys::access_t access, size_t size)
 {
     close();
-    fsys::open(fd, fname, access);
+    fd.open(fname, access);
     if(is(fd))
         allocate(size, access);
 }
@@ -738,7 +738,7 @@ int filestream::_getch(void)
         return (unsigned char)*gptr();
 
     rlen = (ssize_t)((gbuf + bufsize) - eback());
-    rlen = fsys::read(fd, eback(), rlen);
+    rlen = fd.read(eback(), rlen);
     if(rlen < 1) {
 //      clear(ios::failbit | rdstate());
         if(rlen < 0)
@@ -764,7 +764,7 @@ int filestream::_putch(int c)
 
     req = (ssize_t)(pptr() - pbase());
     if(req) {
-        rlen = fsys::write(fd, pbase(), req);
+        rlen = fd.write(pbase(), req);
         if(rlen < 1) {
             if(rlen < 0)
                 close();

@@ -1453,30 +1453,6 @@ void String::fix(String &s)
     }
 }
 
-int String::scanf(String &s, const char *fmt, ...)
-{
-    assert(fmt != NULL);
-
-    int rtn;
-    va_list args;
-
-    va_start(args, fmt);
-    rtn = s.vscanf(fmt, args);
-    va_end(args);
-    return rtn;
-}
-
-strsize_t String::printf(String &s, const char *fmt, ...)
-{
-    assert(fmt != NULL);
-
-    va_list args;
-    va_start(args, fmt);
-    s.vprintf(fmt, args);
-    va_end(args);
-    return len(s);
-}
-
 void String::swap(String &s1, String &s2)
 {
     String::cstring *s = s1.str;

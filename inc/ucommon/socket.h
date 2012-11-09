@@ -1336,52 +1336,6 @@ public:
     static void release(socket_t socket);
 
     /**
-     * Send to socket object.
-     * @param socket object to send thru.
-     * @param buffer to send.
-     * @param size of buffer to send.
-     * @param address to send to or NULL if connected.
-     * @return number of bytes send, -1 if error.
-     */
-    inline static size_t writeto(Socket& socket, const char *buffer, size_t size, const struct sockaddr *address)
-        {return socket.writeto(buffer, size, address);};
-
-    /**
-     * receive from socket object.
-     * @param socket object to recv from.
-     * @param buffer to recv.
-     * @param size of buffer to recv.
-     * @param address receiving from or NULL if connected.
-     * @return number of bytes received, -1 if error.
-     */
-    inline static size_t readfrom(Socket& socket, char *buffer, size_t size, struct sockaddr_storage *address)
-        {return socket.readfrom(buffer, size, address);};
-
-    /**
-     * Connect a socket.
-     * @param socket object to connect.
-     * @param address list to connect to.
-     */
-    inline static void connectto(Socket& socket, const Socket::address &address)
-        {socket.connectto(address);};
-
-    /**
-     * Disconnect a connected socket.
-     * @param socket object to disconnect.
-     */
-    inline static void disconnect(Socket& socket)
-        {socket.disconnect();};
-
-    /**
-     * Accept connection through socket.
-     * @param socket object to accept from.
-     * @param address accepting from.
-     * @return socket accepted.
-     */
-    inline static Socket acceptfrom(Socket& socket, struct sockaddr_storage *address)
-        {return Socket(acceptfrom(socket.so, address));};
-
-    /**
      * Lookup and return the host name associated with a socket address.
      * @param address to lookup.
      * @param buffer to save hostname into.

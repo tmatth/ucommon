@@ -198,7 +198,7 @@ static void scan(String path, bool top = true)
     String filepath;
     dir_t dir(path);
 
-    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir.read(filename, sizeof(filename))) {
         if(*filename == '.' && (filename[1] == '.' || !filename[1]))
             continue;
 

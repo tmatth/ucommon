@@ -464,44 +464,6 @@ public:
     static bool is_hidden(const char *path);
 
     /**
-     * Read data from file descriptor or directory.
-     * @param descriptor to read from.
-     * @param buffer to read into.
-     * @param count of bytes to read.
-     * @return bytes transferred, -1 if error.
-     */
-    inline static ssize_t read(fsys& descriptor, void *buffer, size_t count)
-        {return descriptor.read(buffer, count);};
-
-    /**
-     * write data to file descriptor.
-     * @param descriptor to write to.
-     * @param buffer to write from.
-     * @param count of bytes to write.
-     * @return bytes transferred, -1 if error.
-     */
-    inline static ssize_t write(fsys& descriptor, const void *buffer, size_t count)
-        {return descriptor.write(buffer, count);};
-
-    /**
-     * Set the position of a file descriptor.
-     * @param descriptor to set.
-     * @param offset from start of file or "end" to append.
-     * @return error number or 0 on success.
-     */
-    inline static int seek(fsys& descriptor, offset_t offset)
-        {return descriptor.seek(offset);};
-
-    /**
-     * Drop cached data from a file descriptor.
-     * @param descriptor to set.
-     * @param size of region from start of file to drop or all.
-     * @return error number or 0 on success.
-     */
-    inline static int drop(fsys& descriptor, offset_t size)
-        {return descriptor.drop(size);};
-
-    /**
      * Open a file or directory.
      * @param path of file to open.
      * @param access mode of descriptor.
@@ -565,13 +527,6 @@ public:
     static int linkinfo(const char *path, char *buffer, size_t size);
 
     /**
-     * Close a file descriptor or directory directly.
-     * @param descriptor to close.
-     */
-    inline static void close(fsys& descriptor)
-        {descriptor.close();};
-
-    /**
      * Close a fsys resource.
      * @return error code as needed.
      */
@@ -583,15 +538,6 @@ public:
      */
     inline int err(void) const
         {return error;}
-
-    /**
-     * Open a file or directory.
-     * @param object to assign descriptor for opened file.
-     * @param path of file to open.
-     * @param access mode of descriptor.
-     */
-    inline static void open(fsys& object, const char *path, access_t access)
-        {object.open(path, access);};
 
     /**
      * Direct means to open a read-only file path and return a descriptor.
@@ -644,16 +590,6 @@ public:
      * @return null device handle.
      */
     static fd_t null(void);
-
-    /**
-     * create a file descriptor or directory directly.
-     * @param object to assign descriptor for created file.
-     * @param path of file to create.
-     * @param access mode of descriptor.
-     * @param mode of file if created.
-     */
-    inline static void open(fsys& object, const char *path, unsigned mode, access_t access)
-        {object.open(path, mode, access);};
 
     /**
      * Load a library into memory.
@@ -744,21 +680,6 @@ public:
     void release(void);
 
     /**
-     * Load a plugin into memory.
-     * @param module for management.
-     * @param path to plugin.
-     */
-    inline static void map(dso& module, const char *path)
-        {return module.map(path);}
-
-    /**
-     * unload a specific plugin.
-     * @param module to unload
-     */
-    inline static void release(dso& module)
-        {module.release();}
-
-    /**
      * Find symbol in loaded module.
      * @param module to search.
      * @param symbol to search for.
@@ -843,22 +764,6 @@ public:
     ssize_t read(char *buffer, size_t count);
 
     /**
-     * Read data from directory.
-     * @param descriptor to read from.
-     * @param buffer to read into.
-     * @param count of bytes to read.
-     * @return bytes transferred, -1 if error.
-     */
-    inline static ssize_t read(dir& descriptor, char *buffer, size_t count)
-        {return descriptor.read(buffer, count);};
-
-    inline static void close(dir& descriptor)
-        {descriptor.close();}
-
-    inline static void open(dir& descriptor, const char *path)
-        {descriptor.open(path);}
-
-    /**
      * Close and release directory object.
      */
     void close(void);
@@ -879,7 +784,6 @@ public:
      */
     inline bool operator!() const
         {return ptr == NULL;};
-
 };
 
 /**

@@ -49,7 +49,7 @@ static void dirpath(bool middle, String path, bool top = true)
     dir_t dir(path);
     unsigned count = 0;
 
-    while(is(dir) && dir::read(dir, filename, sizeof(filename))) {
+    while(is(dir) && dir.read(filename, sizeof(filename))) {
         if(*filename == '.')
             continue;
 

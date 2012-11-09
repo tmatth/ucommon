@@ -442,29 +442,6 @@ public:
      * Reset triggered conditional.
      */
     void reset(void);
-
-    /**
-     * Event function for external type.
-     * @param timed event object to signal.
-     */
-    inline static void signal(TimedEvent& timed)
-        {timed.signal();};
-
-    /**
-     * Event function to reset timer for external type.
-     * @param timed event object to reset.
-     */
-    inline static void reset(TimedEvent& timed)
-        {timed.reset();};
-
-    /**
-     * Event function for external type for waiting.
-     * @param timed event object to wait on.
-     * @param timeout to wait from last reset.
-     * @return true if signalled, false if timeout.
-     */
-    inline static bool wait(TimedEvent& timed, timeout_t timeout)
-        {return timed.wait(timeout);};
 };
 
 /**
@@ -504,20 +481,6 @@ public:
      * Release or decrease locking.
      */
     void release(void);
-
-    /**
-     * Convenience method to lock a recursive lock.
-     * @param rex lock to lock.
-     */
-    inline static void lock(RecursiveMutex& rex)
-        {rex.lock();};
-
-    /**
-     * Convenience method to unlock a recursive lock.
-     * @param rex lock to release.
-     */
-    inline static void release(RecursiveMutex& rex)
-        {rex.release();};
 };
 
 /**
@@ -700,31 +663,6 @@ public:
      * Release the lock.
      */
     void release(void);
-
-    /**
-     * Convenience function to modify (write lock) a rwlock.
-     * @param lock to modify.
-     * @param timeout to wait for lock.
-     * @return true if successful, false if timeout.
-     */
-    inline static bool modify(ThreadLock& lock, timeout_t timeout = Timer::inf)
-        {return lock.modify(timeout);};
-
-    /**
-     * Convenience function to access (read lock) a rwlock.
-     * @param lock to access.
-     * @param timeout to wait for lock.
-     * @return true if successful, false if timeout.
-     */
-    inline static bool access(ThreadLock& lock, timeout_t timeout = Timer::inf)
-        {return lock.access(timeout);};
-
-    /**
-     * Convenience function to release a rwlock.
-     * @param lock to release.
-     */
-    inline static void release(ThreadLock& lock)
-        {lock.release();};
 };
 
 /**
@@ -833,48 +771,6 @@ public:
      * Return an exclusive access lock back to share mode.
      */
     virtual void share(void);
-
-    /**
-     * Convenience function to modify lock.
-     * @param lock to acquire in write exclusive mode.
-     */
-    inline static void modify(ConditionalLock& lock)
-        {lock.modify();};
-
-    /**
-     * Convenience function to commit a modify lock.
-     * @param lock to commit.
-     */
-    inline static void commit(ConditionalLock& lock)
-        {lock.commit();};
-
-    /**
-     * Convenience function to release a shared lock.
-     * @param lock to release.
-     */
-    inline static void release(ConditionalLock& lock)
-        {lock.release();};
-
-    /**
-     * Convenience function to aqcuire a shared lock.
-     * @param lock to share.
-     */
-    inline static void access(ConditionalLock& lock)
-        {lock.access();};
-
-    /**
-     * Convenience function to convert lock to exclusive mode.
-     * @param lock to convert.
-     */
-    inline static void exclusive(ConditionalLock& lock)
-        {lock.exclusive();};
-
-    /**
-     * Convenience function to convert lock to shared access.
-     * @param lock to convert.
-     */
-    inline static void share(ConditionalLock& lock)
-        {lock.share();};
 };
 
 /**
@@ -944,31 +840,6 @@ public:
      * @return true if barrier reached, false if timer expired.
      */
     bool wait(timeout_t timeout);
-
-    /**
-     * Convenience function to wait at a barrier.
-     * @param sync object to wait at.
-     */
-    inline static void wait(barrier& sync)
-        {sync.wait();};
-
-    /**
-     * Convenience function to wait at a barrier with a timeout.
-     * @param sync object to wait at.
-     * @param timeout to wait in milliseconds.
-     * @return false if timer expired.
-     */
-    inline static bool wait(barrier& sync, timeout_t timeout)
-        {return sync.wait(timeout);};
-
-
-    /**
-     * Convenience function to set a barrier count.
-     * @param sync object to set.
-     * @param count of threads to set.
-     */
-    inline static void set(barrier& sync, unsigned count)
-        {sync.set(count);};
 };
 
 /**
@@ -1030,29 +901,6 @@ public:
      */
     inline void operator--(void)
         {release();};
-
-    /**
-     * Convenience class to wait on a semaphore.
-     * @param sync object to wait on.
-     */
-    inline static void wait(Semaphore& sync)
-        {sync.wait();};
-
-    /**
-     * Convenience class to wait on a semaphore.
-     * @param sync object to wait on.
-     * @param timeout in milliseconds.
-     * @return if success, false if timeout.
-     */
-    inline static bool wait(Semaphore& sync, timeout_t timeout)
-        {return sync.wait(timeout);};
-
-    /**
-     * Convenience class to release a semaphore.
-     * @param sync object to release.
-     */
-    inline static void release(Semaphore& sync)
-        {sync.release();};
 };
 
 /**
@@ -1164,53 +1012,11 @@ public:
         {pthread_mutex_unlock(&mlock);};
 
     /**
-     * Convenience function to acquire a mutex lock.
-     * @param lock to acquire.
-     */
-    inline static void acquire(Mutex& lock)
-        {pthread_mutex_lock(&lock.mlock);};
-
-    /**
-     * Convenience function to acquire a mutex lock.
-     * @param lock to acquire.
-     */
-    inline static void lock(Mutex& lock)
-        {pthread_mutex_lock(&lock.mlock);};
-
-    /**
-     * Convenience function to release an aquired mutex lock.
-     * @param lock to acquire.
-     */
-    inline static void unlock(Mutex& lock)
-        {pthread_mutex_unlock(&lock.mlock);};
-
-    /**
-     * Convenience function to release an aquired mutex lock.
-     * @param lock to acquire.
-     */
-    inline static void release(Mutex& lock)
-        {pthread_mutex_unlock(&lock.mlock);};
-
-    /**
      * Convenience function to acquire os native mutex lock directly.
      * @param lock to acquire.
      */
     inline static void acquire(pthread_mutex_t *lock)
         {pthread_mutex_lock(lock);};
-
-    /**
-     * Convenience function to acquire os native mutex lock directly.
-     * @param lock to acquire.
-     */
-    inline static void lock(pthread_mutex_t *lock)
-        {pthread_mutex_lock(lock);};
-
-    /**
-     * Convenience function to release os native mutex lock directly.
-     * @param lock to release.
-     */
-    inline static void unlock(pthread_mutex_t *lock)
-        {pthread_mutex_unlock(lock);};
 
     /**
      * Convenience function to release os native mutex lock directly.

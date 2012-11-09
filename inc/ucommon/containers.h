@@ -428,45 +428,7 @@ public:
      */
     size_t count(void);
 
-    /**
-     * Convenience function to remove an object from the stacl.
-     * @param stack to remove object from.
-     * @param object to remove.
-     * @return true if removed, false if not found.
-     */
-    static inline bool remove(Stack& stack, ObjectProtocol *object)
-        {return stack.remove(object);};
-
-    /**
-     * Convenience function to push object into the stack.
-     * @param stack to push into.
-     * @param object to push.
-     * @param timeout to wait if full.
-     * @return true if pusheded, false if timed out while full.
-     */
-    static inline bool push(Stack& stack, ObjectProtocol *object, timeout_t timeout = 0)
-        {return stack.push(object, timeout);};
-
-    /**
-     * Convenience function pull last object from the stack.
-     * @param stack to get from.
-     * @param timeout to wait if empty.
-     * @return last object or NULL if timed out empty.
-     */
-    static inline ObjectProtocol *pull(Stack& stack, timeout_t timeout = 0)
-        {return stack.pull(timeout);};
-
-    /**
-     * Convenience function to get count of objects in the stack.
-     * @param stack to count.
-     * @return number of objects in the stack.
-     */
-    static inline size_t count(Stack& stack)
-        {return stack.count();};
-
     const ObjectProtocol *peek(timeout_t timeout = 0);
-
-    static inline const ObjectProtocol *peek(Stack& stack, timeout_t timeout = 0);
 };
 
 /**
