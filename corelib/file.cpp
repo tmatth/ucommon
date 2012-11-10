@@ -319,7 +319,7 @@ size_t file::getline(char *address, size_t size)
     if(!fp)
         return 0;
 
-    if(!fgets(address, size, fp) || feof(fp))
+    if(!good() || !fgets(address, size, fp))
         return 0;
 
     size_t result = size = strlen(address);
@@ -344,7 +344,7 @@ size_t file::getline(String& s)
     if(!s.c_mem())
         return true;
 
-    if(!fgets(s.c_mem(), s.size(), fp) || feof(fp)) {
+    if(!good() || !fgets(s.c_mem(), s.size(), fp)) {
         s.clear();
         return false;
     }
@@ -393,6 +393,20 @@ int file::_putch(int code)
     return fputc(code, fp);
 }
 
+bool file::good(void)
+{
+    if(!fp)
+        return false;
+
+    if(ferror(fp))
+        return false;
+
+    if(feof(fp))
+        return false;
+
+    return true;
+}
+
 size_t file::load(StringPager *list, size_t count)
 {
     if(!list || !fp)
@@ -402,7 +416,7 @@ size_t file::load(StringPager *list, size_t count)
     size_t size = list->size() - 64;
 
     char *tmp = (char *)malloc(size);
-    while(!count || used < count) {
+    while(good() && (!count || used < count)) {
         if(!getline(tmp, size))
             break;
 
@@ -422,7 +436,7 @@ size_t file::save(const StringPager *list, size_t count)
         return 0;
 
     StringPager::iterator sp = list->begin();
-    while(is(sp) && (!count || used < count)) {
+    while(good() && is(sp) && (!count || used < count)) {
         if(fprintf(fp, "%s\n", sp->get()) < 1)
             break;
         ++used;

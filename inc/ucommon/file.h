@@ -148,6 +148,18 @@ public:
     int close(void);
 
     /**
+     * Clear error state.
+     */
+    inline void clear(void)
+        {if(fp) clearerr(fp);}
+
+    /**
+     * Check if file is good, no error or eof...
+     * @return bool if file stream is good.
+     */
+    bool good(void);
+
+    /**
      * Cancel pipe and close file.
      * @return process exit code if pipe.
      */
