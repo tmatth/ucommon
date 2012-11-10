@@ -438,17 +438,47 @@ public:
         {return fd.err();};
 };
 
-std::ostream& operator<< (std::ostream& out, const PrintFormat& format);
+/**
+ * At least with gcc, linking of stream operators was broken.  This provides
+ * an auxillory class to solve the issue.
+ */
+class __EXPORT _stream_operators
+{
+private:
+    inline _stream_operators() {};
 
-std::istream& operator>> (std::istream& inp, InputFormat& format);
+public:
+    static std::ostream& print(std::ostream& out, const PrintFormat& format);
 
-std::ostream& operator<< (std::ostream& out, const string_t& str);
+    static std::istream& input(std::istream& inp, InputFormat& format);
 
-std::istream& operator>> (std::istream& inp, string_t& str);
+    static std::ostream& print(std::ostream& out, const string_t& str);
 
-std::ostream& operator<< (std::ostream& out, const stringlist_t& list);
+    static std::istream& input(std::istream& inp, string_t& str);
 
-std::istream& operator>> (std::istream& in, stringlist_t& list);
+    static std::ostream& print(std::ostream& out, const stringlist_t& list);
+
+    static std::istream& input(std::istream& in, stringlist_t& list);
+
+};
+
+inline std::ostream& operator<< (std::ostream& out, const PrintFormat& format)
+        {return _stream_operators::print(out, format);}
+
+inline std::istream& operator>> (std::istream& inp, InputFormat& format)
+        {return _stream_operators::input(inp, format);}
+
+inline std::ostream& operator<< (std::ostream& out, const string_t& str)
+        {return _stream_operators::print(out, str);}
+
+inline std::istream& operator>> (std::istream& inp, string_t& str)
+        {return _stream_operators::input(inp, str);}
+
+inline std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
+        {return _stream_operators::print(out, list);}
+
+inline std::istream& operator>> (std::istream& in, stringlist_t& list)
+        {return _stream_operators::input(in, list);}
 
 END_NAMESPACE
 

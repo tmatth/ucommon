@@ -777,9 +777,7 @@ int filestream::overflow(int c)
     return c;
 }
 
-NAMESPACE_UCOMMON
-
-std::istream& operator>> (std::istream& inp, InputFormat& fmt)
+std::istream& _stream_operators::input(std::istream& inp, InputFormat& fmt)
 {
     int c = 0;
     while(!c && inp.good()) {
@@ -795,7 +793,7 @@ std::istream& operator>> (std::istream& inp, InputFormat& fmt)
     return inp;
 }
 
-std::ostream& operator<< (std::ostream& out, const PrintFormat& fmt)
+std::ostream& _stream_operators::print(std::ostream& out, const PrintFormat& fmt)
 {
     if(out.good()) {
         const char *cp = fmt.get();
@@ -808,19 +806,19 @@ std::ostream& operator<< (std::ostream& out, const PrintFormat& fmt)
     return out;
 }
 
-std::istream& operator>> (std::istream& inp, string_t& str)
+std::istream& _stream_operators::input(std::istream& inp, string_t& str)
 {
     inp.getline(str.c_mem(), str.size());
     return inp;
 }
 
-std::ostream& operator<< (std::ostream& out, const string_t& str)
+std::ostream& _stream_operators::print(std::ostream& out, const string_t& str)
 {
     out.write(str.c_str(), str.len());
     return out;
 }
 
-std::istream& operator>> (std::istream& inp, stringlist_t& list)
+std::istream& _stream_operators::input(std::istream& inp, stringlist_t& list)
 {
     size_t size = list.size() - 64;
 
@@ -834,7 +832,7 @@ std::istream& operator>> (std::istream& inp, stringlist_t& list)
     return inp;
 }
 
-std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
+std::ostream& _stream_operators::print(std::ostream& out, const stringlist_t& list)
 {
     StringPager::iterator sp = list.begin();
     while(is(sp) && out.good()) {
@@ -847,8 +845,6 @@ std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
     }
     return out;
 }
-
-END_NAMESPACE
 
 #endif
 

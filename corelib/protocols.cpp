@@ -542,67 +542,43 @@ ObjectProtocol *ObjectProtocol::copy(void)
     return this;
 }
 
-CharacterProtocol& CharacterProtocol::operator<<(const char& c)
+CharacterProtocol& _character_operators::print(CharacterProtocol& p, const char& c)
 {
-    put((int)c);
-    return *this;
+    p.put((int)c);
+    return p;
 }
 
-CharacterProtocol& CharacterProtocol::operator>>(char& c)
+CharacterProtocol& _character_operators::input(CharacterProtocol& p, char& c)
 {
-    int code = get();
+    int code = p.get();
     if(code == EOF)
         code = 0;
     c = code;
-    return *this;
+    return p;
 }
 
-CharacterProtocol& CharacterProtocol::operator<<(const char *str)
+CharacterProtocol& _character_operators::print(CharacterProtocol& p, const char *str)
 {
     if(!str)
-        putline("");
+        p.putline("");
     else
-        put(str);
-    return *this;
+        p.put(str);
+    return p;
 }
 
-CharacterProtocol& CharacterProtocol::operator>>(String& str)
+CharacterProtocol& _character_operators::input(CharacterProtocol& p, String& str)
 {
     if(str.c_mem())
-        getline(str.c_mem(), str.size());
-    return *this;
+        p.getline(str.c_mem(), str.size());
+    return p;
 }
 
-CharacterProtocol& CharacterProtocol::operator>>(StringPager& list)
-{
-    load(&list);
-    return *this;
-}
-
-CharacterProtocol& CharacterProtocol::operator<<(const StringPager& list)
-{
-    save(&list);
-    return *this;
-}
-
-CharacterProtocol& CharacterProtocol::operator>>(InputFormat& f)
-{
-    input(f);
-    return *this;
-}
-
-CharacterProtocol& CharacterProtocol::operator<<(const PrintFormat& f)
-{
-    print(f);
-    return *this;
-}
-
-CharacterProtocol& CharacterProtocol::operator<< (const long& v)
+CharacterProtocol& _character_operators::print(CharacterProtocol& p, const long& v)
 {
     char buf[40];
     snprintf(buf, sizeof(buf), "%ld", v);
-    put(buf);
-    return *this;
+    p.put(buf);
+    return p;
 }
 
 class __LOCAL _input_long : public InputFormat
@@ -644,10 +620,10 @@ int _input_long::put(char code)
     return 0;
 }
 
-CharacterProtocol& CharacterProtocol::operator>> (long& v)
+CharacterProtocol& _character_operators::input(CharacterProtocol& p, long& v)
 {
     _input_long lv(v);
-    input(lv);
-    return *this;
+    p.input(lv);
+    return p;
 }
 
