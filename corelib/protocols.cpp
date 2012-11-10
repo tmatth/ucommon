@@ -22,6 +22,7 @@
 #include <ucommon/string.h>
 #include <ucommon/memory.h>
 #include <stdlib.h>
+#include <ctype.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -593,6 +594,60 @@ CharacterProtocol& CharacterProtocol::operator>>(InputFormat& f)
 CharacterProtocol& CharacterProtocol::operator<<(const PrintFormat& f)
 {
     print(f);
+    return *this;
+}
+
+CharacterProtocol& CharacterProtocol::operator<< (const long& v)
+{
+    char buf[40];
+    snprintf(buf, sizeof(buf), "%ld", v);
+    put(buf);
+    return *this;
+}
+
+class __LOCAL _input_long : public InputFormat
+{
+public:
+    long* ref;
+    bool neg;
+    bool trig;
+
+    _input_long(long& v);
+
+    int put(char code);
+};
+
+_input_long::_input_long(long& v)
+{
+    ref = &v;
+    neg = trig = false;
+    v = 0l;
+}
+
+int _input_long::put(char code)
+{
+    if(code == '-') {
+        if(neg)
+            return code;
+        neg = true;
+        return 0;
+    }
+
+    if(!isdigit(code))
+        return code;
+
+    *ref = (*ref * 10l) + (code - '0');
+    if(neg && !trig) {
+        trig = true;
+        *ref = -*ref;
+    }
+    return 0;
+}
+
+CharacterProtocol& CharacterProtocol::operator>> (long& v)
+{
+    _input_long lv(v);
+    input(lv);
     return *this;
 }
 

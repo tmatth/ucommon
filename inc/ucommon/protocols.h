@@ -260,6 +260,10 @@ public:
     CharacterProtocol& operator<< (const StringPager& list);
 
     CharacterProtocol& operator>> (StringPager& list);
+
+    CharacterProtocol& operator<< (const long& value);
+
+    CharacterProtocol& operator>> (long& value);
 };
 
 /**
