@@ -37,6 +37,7 @@
 NAMESPACE_UCOMMON
 
 class String;
+class StringPager;
 
 class __EXPORT MemoryProtocol
 {
@@ -305,14 +306,14 @@ protected:
      * a "tell" offset.
      * @return offset of input buffer.
      */
-    inline size_t unread(void)
+    inline size_t input_pending(void)
         {return bufpos;};
 
     /**
      * Get current output position.  Sometimes used to help compute a
      * "trunc" operation.
      */
-    inline size_t unsaved(void)
+    inline size_t output_waiting(void)
         {return outsize;};
 
 public:
@@ -410,6 +411,21 @@ public:
      * @return true if end of data, false if input still buffered.
      */
     bool eof(void);
+
+    /**
+     * Load input to a string list.  The string list filter method is used to
+     * control loading.
+     * @param list to load into.
+     * @return number of items loaded.
+     */
+    size_t load(StringPager *list);
+
+    /**
+     * Save output from a string list.
+     * @param list to save from.
+     * @return number of items loaded.
+     */
+    size_t save(const StringPager *list);
 
     /**
      * See if buffer open.

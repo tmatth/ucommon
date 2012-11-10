@@ -116,7 +116,7 @@ bool SSLBuffer::_pending(void)
     if(so == INVALID_SOCKET)
         return false;
 
-    if(unread())
+    if(input_pending())
         return true;
 
     if(ssl && SSL_pending((SSL *)ssl))

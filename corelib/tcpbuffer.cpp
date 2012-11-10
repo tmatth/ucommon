@@ -180,7 +180,7 @@ size_t TCPBuffer::_pull(char *address, size_t len)
 
 bool TCPBuffer::_pending(void)
 {
-    if(unread())
+    if(input_pending())
         return true;
 
     if(is_input() && iowait && iowait != Timer::inf)

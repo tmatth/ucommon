@@ -20,6 +20,7 @@
 #include <ucommon/export.h>
 #include <ucommon/protocols.h>
 #include <ucommon/string.h>
+#include <ucommon/memory.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -409,6 +410,40 @@ size_t BufferProtocol::getline(char *string, size_t size)
     if(!eof)
         ++count;
     return count;
+}
+
+size_t BufferProtocol::load(StringPager *list)
+{
+    if(!list || !input)
+        return 0;
+
+    size_t used = 0;
+    size_t size = list->size() - 64;
+
+    char *tmp = (char *)malloc(size);
+    while(getline(tmp, size)) {
+        if(!list->filter(tmp, size))
+            break;
+
+        ++used;
+    }
+    free(tmp);
+    return used;
+}
+
+size_t BufferProtocol::save(const StringPager *list)
+{
+    size_t used = 0;
+    if(!list || !output)
+        return 0;
+
+    StringPager::iterator sp = list->begin();
+    while(is(sp)) {
+        putline(sp->get());
+        ++used;
+        sp.next();
+    }
+    return used;
 }
 
 void BufferProtocol::reset(void)
