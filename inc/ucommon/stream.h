@@ -33,10 +33,6 @@
 #include <ucommon/protocols.h>
 #endif
 
-#ifndef _UCOMMON_FORMAT_H_
-#include <ucommon/format.h>
-#endif
-
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif
@@ -448,9 +444,9 @@ private:
     inline _stream_operators() {};
 
 public:
-    static std::ostream& print(std::ostream& out, const PrintFormat& format);
+    static std::ostream& print(std::ostream& out, const PrintProtocol& format);
 
-    static std::istream& input(std::istream& inp, InputFormat& format);
+    static std::istream& input(std::istream& inp, InputProtocol& format);
 
     static std::ostream& print(std::ostream& out, const string_t& str);
 
@@ -462,10 +458,10 @@ public:
 
 };
 
-inline std::ostream& operator<< (std::ostream& out, const PrintFormat& format)
+inline std::ostream& operator<< (std::ostream& out, const PrintProtocol& format)
         {return _stream_operators::print(out, format);}
 
-inline std::istream& operator>> (std::istream& inp, InputFormat& format)
+inline std::istream& operator>> (std::istream& inp, InputProtocol& format)
         {return _stream_operators::input(inp, format);}
 
 inline std::ostream& operator<< (std::ostream& out, const string_t& str)

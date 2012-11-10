@@ -31,10 +31,6 @@
 #include <ucommon/protocols.h>
 #endif
 
-#ifndef _UCOMMON_FORMAT_H_
-#include <ucommon/format.h>
-#endif
-
 #ifndef _UCOMMON_SOCKET_H_
 #include <ucommon/socket.h>
 #endif

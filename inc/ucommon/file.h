@@ -31,10 +31,6 @@
 #include <ucommon/protocols.h>
 #endif
 
-#ifndef _UCOMMON_FORMAT_H_
-#include <ucommon/format.h>
-#endif
-
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif

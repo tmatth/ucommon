@@ -34,10 +34,6 @@
 #include <ucommon/cpr.h>
 #endif
 
-#ifndef _UCOMMON_FORMAT_H_
-#include <ucommon/format.h>
-#endif
-
 NAMESPACE_UCOMMON
 
 class String;
@@ -133,6 +129,40 @@ public:
 };
 
 /**
+ * Used for forming stream output.  We would create a derived class who's
+ * constructor creates an internal string object, and a single method to
+ * extract that string.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT PrintProtocol
+{
+public:
+    /**
+     * Extract formatted string for object.
+     */
+    virtual const char *get(void) const = 0;
+};
+
+/**
+ * Used for processing input.  We create a derived class that processes a
+ * single character of input, and returns a status value.  EOF means it
+ * accepts no more input and any value other than 0 is a character to also
+ * unget.  Otherwise 0 is good to accept more input.  The constructor is
+ * used to reference a final destination object in the derived class.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT InputProtocol
+{
+public:
+    /**
+     * Extract formatted string for object.
+     * @param character code we are pushing.
+     * @return 0 to keep processing, EOF if done, or char to unget.
+     */
+    virtual int put(char code) = 0;
+};
+
+/**
  * Common character processing protocol.  This is used to access a character
  * from some type of streaming buffer or memory object.
  * @author David Sugar <dyfet@gnutelephony.org>
@@ -193,9 +223,9 @@ public:
     inline int put(int code)
         {return _putch(code);};
 
-    size_t print(const PrintFormat& format);
+    size_t print(const PrintProtocol& format);
 
-    size_t input(InputFormat& format);
+    size_t input(InputProtocol& format);
 
     /**
      * Get text as a line of input from the buffer.  The eol character(s)
@@ -585,10 +615,10 @@ inline CharacterProtocol& operator>> (CharacterProtocol& p, char& ch)
 inline CharacterProtocol& operator>> (CharacterProtocol& p, String& str)
     {return _character_operators::input(p, str);}
 
-inline CharacterProtocol& operator<< (CharacterProtocol& p, const PrintFormat& format)
+inline CharacterProtocol& operator<< (CharacterProtocol& p, const PrintProtocol& format)
     {p.print(format); return p;}
 
-inline CharacterProtocol& operator>> (CharacterProtocol& p, InputFormat& format)
+inline CharacterProtocol& operator>> (CharacterProtocol& p, InputProtocol& format)
     {p.input(format); return p;}
 
 inline CharacterProtocol& operator<< (CharacterProtocol& p, const StringPager& list)

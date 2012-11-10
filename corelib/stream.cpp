@@ -777,7 +777,7 @@ int filestream::overflow(int c)
     return c;
 }
 
-std::istream& _stream_operators::input(std::istream& inp, InputFormat& fmt)
+std::istream& _stream_operators::input(std::istream& inp, InputProtocol& fmt)
 {
     int c = 0;
     while(!c && inp.good()) {
@@ -793,7 +793,7 @@ std::istream& _stream_operators::input(std::istream& inp, InputFormat& fmt)
     return inp;
 }
 
-std::ostream& _stream_operators::print(std::ostream& out, const PrintFormat& fmt)
+std::ostream& _stream_operators::print(std::ostream& out, const PrintProtocol& fmt)
 {
     if(out.good()) {
         const char *cp = fmt.get();

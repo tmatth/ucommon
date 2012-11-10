@@ -411,7 +411,7 @@ size_t CharacterProtocol::getline(char *string, size_t size)
     return count;
 }
 
-size_t CharacterProtocol::print(const PrintFormat& f)
+size_t CharacterProtocol::print(const PrintProtocol& f)
 {
     const char *cp = f.get();
 
@@ -421,7 +421,7 @@ size_t CharacterProtocol::print(const PrintFormat& f)
     return put(cp);
 }
 
-size_t CharacterProtocol::input(InputFormat& f)
+size_t CharacterProtocol::input(InputProtocol& f)
 {
     int c;
     size_t count = 0;
@@ -581,7 +581,7 @@ CharacterProtocol& _character_operators::print(CharacterProtocol& p, const long&
     return p;
 }
 
-class __LOCAL _input_long : public InputFormat
+class __LOCAL _input_long : public InputProtocol
 {
 public:
     long* ref;
