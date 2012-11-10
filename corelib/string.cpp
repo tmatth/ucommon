@@ -203,7 +203,7 @@ strsize_t String::size(void) const
     return str->max;
 }
 
-strsize_t String::len(void)
+strsize_t String::len(void) const
 {
     if(!str)
         return 0;

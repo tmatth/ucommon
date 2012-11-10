@@ -54,18 +54,18 @@
 NAMESPACE_UCOMMON
 
 /**
- * Common stream protocol for std C++ i/o classes.  This both binds the
+ * Common stream buffer for std C++ i/o classes.    This both binds the
  * character protocol to iostream and offers a common base class for all
  * other c++ stdlib based streaming classes.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT StreamProtocol : protected std::streambuf, public std::iostream, public CharacterProtocol
+class __EXPORT StreamBuffer : protected std::streambuf, public std::iostream, public CharacterProtocol
 {
 protected:
     size_t bufsize;
     char *gbuf, *pbuf;
 
-    StreamProtocol();
+    StreamBuffer();
 
     int underflow();
 
@@ -110,7 +110,7 @@ public:
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT tcpstream : public StreamProtocol
+class __EXPORT tcpstream : public StreamBuffer
 {
 private:
     __LOCAL void allocate(unsigned size);
@@ -231,7 +231,7 @@ public:
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT pipestream : public StreamProtocol
+class __EXPORT pipestream : public StreamBuffer
 {
 public:
     typedef enum {
@@ -337,7 +337,7 @@ public:
  *
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT filestream : public StreamProtocol
+class __EXPORT filestream : public StreamBuffer
 {
 public:
     typedef enum {
@@ -437,6 +437,14 @@ public:
     inline int err(void) const
         {return fd.err();};
 };
+
+std::ostream& operator<< (std::ostream& out, const string_t& str);
+
+std::istream& operator>> (std::istream& inp, string_t& str);
+
+std::ostream& operator<< (std::ostream& out, const stringlist_t& list);
+
+std::istream& operator>> (std::istream& in, stringlist_t& list);
 
 END_NAMESPACE
 

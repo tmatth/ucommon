@@ -44,7 +44,7 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace std;
 
-StreamProtocol::StreamProtocol() :
+StreamBuffer::StreamBuffer() :
 streambuf(),
 #ifdef OLD_STDCPP
     iostream()
@@ -59,17 +59,17 @@ streambuf(),
 #endif
 }
 
-int StreamProtocol::overflow(int code)
+int StreamBuffer::overflow(int code)
 {
     return _putch(code);
 }
 
-int StreamProtocol::underflow()
+int StreamBuffer::underflow()
 {
     return _getch();
 }
 
-int StreamProtocol::uflow()
+int StreamBuffer::uflow()
 {
     int ret = underflow();
 
@@ -82,7 +82,7 @@ int StreamProtocol::uflow()
     return ret;
 }
 
-void StreamProtocol::allocate(size_t size)
+void StreamBuffer::allocate(size_t size)
 {
     if(gbuf)
         delete[] gbuf;
@@ -109,7 +109,7 @@ void StreamProtocol::allocate(size_t size)
     setp(pbuf, pbuf + size);
 }
 
-void StreamProtocol::release(void)
+void StreamBuffer::release(void)
 {
     if(gbuf)
         delete[] gbuf;
@@ -122,7 +122,7 @@ void StreamProtocol::release(void)
     clear();
 }
 
-int StreamProtocol::sync(void)
+int StreamBuffer::sync(void)
 {
     if(!bufsize)
         return 0;
@@ -133,21 +133,21 @@ int StreamProtocol::sync(void)
 }
 
 tcpstream::tcpstream(const tcpstream &copy) :
-StreamProtocol()
+StreamBuffer()
 {
     so = Socket::create(Socket::family(copy.so), SOCK_STREAM, IPPROTO_TCP);
     timeout = copy.timeout;
 }
 
 tcpstream::tcpstream(int family, timeout_t tv) :
-StreamProtocol()
+StreamBuffer()
 {
     so = Socket::create(family, SOCK_STREAM, IPPROTO_TCP);
     timeout = tv;
 }
 
 tcpstream::tcpstream(Socket::address& list, unsigned segsize, timeout_t tv) :
-StreamProtocol()
+StreamBuffer()
 {
     so = Socket::create(list.family(), SOCK_STREAM, IPPROTO_TCP);
     timeout = tv;
@@ -155,7 +155,7 @@ StreamProtocol()
 }
 
 tcpstream::tcpstream(const TCPServer *server, unsigned segsize, timeout_t tv) :
-StreamProtocol()
+StreamBuffer()
 {
     so = server->accept();
     timeout = tv;
@@ -173,7 +173,7 @@ tcpstream::~tcpstream()
 
 void tcpstream::release(void)
 {
-    StreamProtocol::release();
+    StreamBuffer::release();
     Socket::release(so);
 }
 
@@ -408,16 +408,16 @@ void tcpstream::allocate(unsigned mss)
         Socket::sendwait(so, mss * 4);
 
 allocate:
-    StreamProtocol::allocate(size);
+    StreamBuffer::allocate(size);
 }
 
 pipestream::pipestream() :
-StreamProtocol()
+StreamBuffer()
 {
 }
 
 pipestream::pipestream(const char *cmd, access_t access, char **args, char **envp, size_t size) :
-StreamProtocol()
+StreamBuffer()
 {
     open(cmd, access, args, envp, size);
 }
@@ -443,7 +443,7 @@ void pipestream::release(void)
     if(pbuf)
         fsys::release(wr);
 
-    StreamProtocol::release();
+    StreamBuffer::release();
 }
 
 void pipestream::allocate(size_t size, access_t mode)
@@ -628,12 +628,12 @@ int pipestream::close(void)
 }
 
 filestream::filestream() :
-StreamProtocol()
+StreamBuffer()
 {
 }
 
 filestream::filestream(const filestream& copy) :
-StreamProtocol()
+StreamBuffer()
 {
     if(copy.bufsize)
         fd = copy.fd;
@@ -642,13 +642,13 @@ StreamProtocol()
 }
 
 filestream::filestream(const char *filename, fsys::access_t mode, size_t size) :
-StreamProtocol()
+StreamBuffer()
 {
     open(filename, mode, size);
 }
 
 filestream::filestream(const char *filename, unsigned mode, fsys::access_t access, size_t size) :
-StreamProtocol()
+StreamBuffer()
 {
     open(filename, mode, access, size);
 }
@@ -673,7 +673,7 @@ void filestream::close(void)
     if(bufsize)
         fd.close();
 
-    StreamProtocol::release();
+    StreamBuffer::release();
 }
 
 void filestream::allocate(size_t size, fsys::access_t mode)
@@ -786,6 +786,50 @@ int filestream::_putch(int c)
     }
     return c;
 }
+
+NAMESPACE_UCOMMON
+
+std::istream& operator>> (std::istream& inp, string_t& str)
+{
+    inp.getline(str.c_mem(), str.size());
+    return inp;
+}
+
+std::ostream& operator<< (std::ostream& out, const string_t& str)
+{
+    out.write(str.c_str(), str.len());
+    return out;
+}
+
+std::istream& operator>> (std::istream& inp, stringlist_t& list)
+{
+    size_t size = list.size() - 64;
+
+    char *tmp = (char *)malloc(size);
+    while(inp.good()) {
+        inp.getline(tmp, size);
+        if(!list.filter(tmp, size))
+            break;
+    }
+    free(tmp);
+    return inp;
+}
+
+std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
+{
+    StringPager::iterator sp = list.begin();
+    while(is(sp) && out.good()) {
+        const char *cp = sp->get();
+        size_t size = strlen(cp);
+        if(size)
+            out.write(cp, size);
+        out.put('\n');
+        sp.next();
+    }
+    return out;
+}
+
+END_NAMESPACE
 
 #endif
 

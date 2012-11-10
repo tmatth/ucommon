@@ -683,7 +683,7 @@ public:
      * Get length of string.
      * @return length of string.
      */
-    strsize_t len(void);
+    strsize_t len(void) const;
 
     /**
      * Get filler character used for field array strings.
