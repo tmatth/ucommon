@@ -59,16 +59,6 @@ streambuf(),
 #endif
 }
 
-int StreamBuffer::overflow(int code)
-{
-    return _putch(code);
-}
-
-int StreamBuffer::underflow()
-{
-    return _getch();
-}
-
 int StreamBuffer::uflow()
 {
     int ret = underflow();
@@ -199,7 +189,7 @@ ssize_t tcpstream::_write(const char *buffer, size_t size)
     return Socket::sendto(so, buffer, size);
 }
 
-int tcpstream::_getch(void)
+int tcpstream::underflow(void)
 {
     ssize_t rlen = 1;
     unsigned char ch;
@@ -246,7 +236,7 @@ int tcpstream::_getch(void)
     return (unsigned char) *gptr();
 }
 
-int tcpstream::_putch(int c)
+int tcpstream::overflow(int c)
 {
     unsigned char ch;
     ssize_t rlen, req;
@@ -477,7 +467,7 @@ void pipestream::allocate(size_t size, access_t mode)
         setp(pbuf, pbuf + size);
 }
 
-int pipestream::_getch(void)
+int pipestream::underflow(void)
 {
     ssize_t rlen = 1;
     unsigned char ch;
@@ -516,7 +506,7 @@ int pipestream::_getch(void)
     return (unsigned char) *gptr();
 }
 
-int pipestream::_putch(int c)
+int pipestream::overflow(int c)
 {
     unsigned char ch;
     ssize_t rlen, req;
@@ -724,7 +714,7 @@ void filestream::open(const char *fname, fsys::access_t access, size_t size)
         allocate(size, access);
 }
 
-int filestream::_getch(void)
+int filestream::underflow(void)
 {
     ssize_t rlen = 1;
 
@@ -752,7 +742,7 @@ int filestream::_getch(void)
     return (unsigned char) *gptr();
 }
 
-int filestream::_putch(int c)
+int filestream::overflow(int c)
 {
     ssize_t rlen, req;
 

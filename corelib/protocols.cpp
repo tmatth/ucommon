@@ -232,6 +232,7 @@ size_t CharacterProtocol::put(const char *address, size_t size)
         if(_putch(*address) == EOF)
             break;
         ++count;
+        ++address;
     }
 
     return count;
@@ -409,34 +410,14 @@ size_t CharacterProtocol::getline(char *string, size_t size)
     return count;
 }
 
-size_t CharacterProtocol::endl(void)
-{
-    size_t count = 0;
-    const char *cp = eol;
-
-    while(cp && *cp) {
-        if(_putch(*cp) == EOF)
-            break;
-        ++cp;
-        ++count;
-    }
-    return count;
-}
-
 size_t CharacterProtocol::print(const PrintFormat& f)
 {
-    size_t count = 0;
     const char *cp = f.get();
 
     if(cp == NULL)
-        endl();
-    else while(cp && *cp) {
-        if(_putch(*cp) == EOF)
-            break;
-        ++cp;
-        ++count;
-    }
-    return count;
+        return put(eol);
+
+    return put(cp);
 }
 
 size_t CharacterProtocol::input(InputFormat& f)
@@ -560,33 +541,58 @@ ObjectProtocol *ObjectProtocol::copy(void)
     return this;
 }
 
-CharacterProtocol& operator<<(CharacterProtocol& p, const char& c)
+CharacterProtocol& CharacterProtocol::operator<<(const char& c)
 {
-    p.put((int)c);
-    return p;
+    put((int)c);
+    return *this;
 }
 
-CharacterProtocol& operator>>(CharacterProtocol& p, char& c)
+CharacterProtocol& CharacterProtocol::operator>>(char& c)
 {
-    int code = p.get();
+    int code = get();
     if(code == EOF)
         code = 0;
     c = code;
-    return p;
+    return *this;
 }
 
-CharacterProtocol& operator<<(CharacterProtocol& p, const char *str)
+CharacterProtocol& CharacterProtocol::operator<<(const char *str)
 {
     if(!str)
-        p.endl();
+        putline("");
     else
-        p.put(str);
-    return p;
+        put(str);
+    return *this;
 }
 
-CharacterProtocol& operator>>(CharacterProtocol& p, String& str)
+CharacterProtocol& CharacterProtocol::operator>>(String& str)
 {
     if(str.c_mem())
-        p.getline(str.c_mem(), str.size());
-    return p;
+        getline(str.c_mem(), str.size());
+    return *this;
 }
+
+CharacterProtocol& CharacterProtocol::operator>>(StringPager& list)
+{
+    load(&list);
+    return *this;
+}
+
+CharacterProtocol& CharacterProtocol::operator<<(const StringPager& list)
+{
+    save(&list);
+    return *this;
+}
+
+CharacterProtocol& CharacterProtocol::operator>>(InputFormat& f)
+{
+    input(f);
+    return *this;
+}
+
+CharacterProtocol& CharacterProtocol::operator<<(const PrintFormat& f)
+{
+    print(f);
+    return *this;
+}
+

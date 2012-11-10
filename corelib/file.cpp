@@ -40,9 +40,9 @@
 
 using namespace UCOMMON_NAMESPACE;
 
-file_t cstdin(stdin);
-file_t cstdout(stdout);
-file_t cstderr(stderr);
+file file::cin(stdin);
+file file::cout(stdout);
+file file::cerr(stderr);
 
 file::file(const char *file, const char *mode, size_t size) :
 CharacterProtocol()
@@ -309,16 +309,6 @@ int file::err(void) const
     return ferror(fp);
 }
 
-size_t file::endl(void)
-{
-    if(!fp)
-        return 0;
-
-    fputs(eol, fp);
-    fflush(fp);
-    return 1;
-}
-
 int file::_getch(void)
 {
     if(!fp)
@@ -347,13 +337,5 @@ bool file::good(void)
         return false;
 
     return true;
-}
-
-String str(file& so, strsize_t size)
-{
-    String s(size);
-    so.getline(s.c_mem(), s.size());
-    String::fix(s);
-    return s;
 }
 

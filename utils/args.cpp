@@ -35,11 +35,11 @@ static char suffix[80] = {0, 0};
 static void output(bool middle, const char *arg)
 {
     if(is(lines))
-        shell::printf("%s%s%s\n", prefix, arg, suffix);
+        file::cout << prefix << arg << suffix << "\n";
     else if(middle)
-        shell::printf("%c%s%s%s", *delim, prefix, arg, suffix);
+        file::cout << *delim << prefix << arg << suffix;
     else
-        shell::printf("%s%s%s", prefix, arg, suffix);
+        file::cout << prefix << arg << suffix;
 }
 
 static void dirpath(bool middle, String path, bool top = true)
@@ -135,7 +135,7 @@ PROGRAM_MAIN(argc, argv)
     }
 
     if(!lines)
-        shell::printf("\n");
+        file::cout << "\n";
 
     PROGRAM_EXIT(0);
 }

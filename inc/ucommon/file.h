@@ -75,10 +75,10 @@ private:
 
     int _getch(void);
 
-    size_t endl(void);
-
 public:
     typedef ::fpos_t bookmark_t;
+
+    static file cin, cout, cerr;
 
     /**
      * Construct a file from an existing FILE pointer.
@@ -238,14 +238,10 @@ public:
     bool is_tty(void) const;
 };
 
-String str(file& fp, strsize_t size);
-
 /**
  * Convience type for file.
  */
 typedef file file_t;
-
-extern file_t cstdin, cstdout, cstderr;
 
 END_NAMESPACE
 

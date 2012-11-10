@@ -71,10 +71,6 @@ protected:
 
     StreamBuffer();
 
-    int underflow();
-
-    int overflow(int code);
-
     /**
      * This streambuf method is used for doing unbuffered reads
      * through the establish tcp socket connection when in interactive mode.
@@ -88,19 +84,6 @@ protected:
     void release(void);
 
     void allocate(size_t size);
-
-    /**
-     * Get the next character.
-     * @return next character or EOF.
-     */
-    virtual int _getch(void) = 0;
-
-    /**
-     * Put the next character.
-     * @param code to put.
-     * @return code or EOF if cannot put.
-     */
-    virtual int _putch(int code) = 0;
 
 public:
     /**
@@ -154,7 +137,7 @@ protected:
      *
      * @return char from get buffer, EOF if not connected.
      */
-    int _getch(void);
+    int underflow(void);
 
     /**
      * This streambuf method is used to write the output
@@ -162,7 +145,7 @@ protected:
      * @param ch char to push through.
      * @return char pushed through.
      */
-    int _putch(int ch);
+    int overflow(int ch);
 
     inline socket_t getsocket(void) const
         {return so;}
@@ -275,7 +258,7 @@ protected:
      *
      * @return char from get buffer, EOF if not connected.
      */
-    int _getch(void);
+    int underflow(void);
 
     /**
      * This streambuf method is used to write the output
@@ -284,7 +267,7 @@ protected:
      * @param ch char to push through.
      * @return char pushed through.
      */
-    int _putch(int ch);
+    int overflow(int ch);
 
 public:
     /**
@@ -376,7 +359,7 @@ protected:
      *
      * @return char from get buffer, EOF if not connected.
      */
-    int _getch(void);
+    int underflow(void);
 
     /**
      * This streambuf method is used to write the output
@@ -385,7 +368,7 @@ protected:
      * @param ch char to push through.
      * @return char pushed through.
      */
-    int _putch(int ch);
+    int overflow(int ch);
 
 public:
     /**

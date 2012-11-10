@@ -179,12 +179,6 @@ public:
     virtual ~CharacterProtocol();
 
     /**
-     * Write eol.  May also be used in derived class to flush buffer.
-     * @return bytes written.
-     */
-    virtual size_t endl(void);
-
-    /**
      * Get the next character.
      * @return next character or EOF.
      */
@@ -250,6 +244,22 @@ public:
      * @return number of items loaded.
      */
     size_t save(const StringPager *list);
+
+    CharacterProtocol& operator<< (const char& ch);
+
+    CharacterProtocol& operator>> (char& ch);
+
+    CharacterProtocol& operator<< (const char *str);
+
+    CharacterProtocol& operator>> (String& str);
+
+    CharacterProtocol& operator<< (const PrintFormat& format);
+
+    CharacterProtocol& operator>> (InputFormat& format);
+
+    CharacterProtocol& operator<< (const StringPager& list);
+
+    CharacterProtocol& operator>> (StringPager& list);
 };
 
 /**
@@ -390,6 +400,9 @@ protected:
         {return outsize;};
 
 public:
+    const char *endl(void)
+        {return eol;}
+
     /**
      * Get memory from the buffer.  This method will become "get()" in
      * abi 4 and may become a protected method.
@@ -551,14 +564,6 @@ public:
     inline void operator--(void)
         {release();};
 };
-
-CharacterProtocol& operator<< (CharacterProtocol& io, const char& ch);
-
-CharacterProtocol& operator>> (CharacterProtocol& io, char& ch);
-
-CharacterProtocol& operator<< (CharacterProtocol& io, const char *str);
-
-CharacterProtocol& operator>> (CharacterProtocol& io, String& str);
 
 END_NAMESPACE
 
