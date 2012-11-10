@@ -789,6 +789,30 @@ int filestream::_putch(int c)
 
 NAMESPACE_UCOMMON
 
+std::istream& operator>> (std::istream& inp, InputFormat& fmt)
+{
+    int c = 0;
+    while(!c && inp.good()) {
+        c = inp.get();
+        if(!inp.good())
+            break;
+        c = fmt.put(c);
+        if(!c)
+            continue;
+        if(c != EOF)
+            inp.putback(c);
+    }
+    return inp;
+}
+
+std::ostream& operator<< (std::ostream& out, const PrintFormat& fmt)
+{
+    const char *cp = fmt.get();
+    if(cp && out.good())
+        out.write(cp, strlen(cp));
+    return out;
+}
+
 std::istream& operator>> (std::istream& inp, string_t& str)
 {
     inp.getline(str.c_mem(), str.size());

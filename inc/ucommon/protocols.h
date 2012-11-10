@@ -190,6 +190,7 @@ private:
 
 protected:
     const char *format;
+    int back;
 
     /**
      * Construct an empty (unallocated) buffer.
@@ -300,6 +301,8 @@ protected:
     virtual int _getch(void);
 
     virtual int _putch(int ch);
+
+    void putback(int code);
 
     /**
      * Get current input position.  Sometimes used to help compute and report

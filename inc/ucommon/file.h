@@ -31,6 +31,10 @@
 #include <ucommon/protocols.h>
 #endif
 
+#ifndef _UCOMMON_FORMAT_H_
+#include <ucommon/format.h>
+#endif
+
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif
@@ -253,6 +257,11 @@ public:
 
     inline void flush(void)
         {if(fp) ::fflush(fp);}
+
+
+    size_t print(const PrintFormat& format);
+
+    size_t input(InputFormat& input);
 
     size_t printf(const char *format, ...) __PRINTF(2, 3);
 

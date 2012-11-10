@@ -33,6 +33,10 @@
 #include <ucommon/protocols.h>
 #endif
 
+#ifndef _UCOMMON_FORMAT_H_
+#include <ucommon/format.h>
+#endif
+
 #ifndef _UCOMMON_THREAD_H_
 #include <ucommon/thread.h>
 #endif
@@ -437,6 +441,10 @@ public:
     inline int err(void) const
         {return fd.err();};
 };
+
+std::ostream& operator<< (std::ostream& out, const PrintFormat& format);
+
+std::istream& operator>> (std::istream& inp, InputFormat& format);
 
 std::ostream& operator<< (std::ostream& out, const string_t& str);
 

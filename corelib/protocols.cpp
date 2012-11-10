@@ -130,6 +130,7 @@ void BufferProtocol::allocate(size_t size, mode_t mode)
     if(!size)
         return;
 
+    back = 0;
     switch(mode) {
     case RDWR:
         input = buffer = (char *)malloc(size * 2);
@@ -193,6 +194,11 @@ int BufferProtocol::_getch(void)
 {
     if(!input)
         return EOF;
+
+    if(back) {
+        back = 0;
+        return back;
+    }
 
     if(bufpos == insize) {
         if(end)

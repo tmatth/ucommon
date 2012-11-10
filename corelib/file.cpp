@@ -445,6 +445,34 @@ size_t file::save(const StringPager *list, size_t count)
     return used;
 }
 
+size_t file::print(const PrintFormat& f)
+{
+    if(!good())
+        return 0;
+
+    return fputs(f.get(), fp);
+}
+
+size_t file::input(InputFormat& f)
+{
+    int c;
+    size_t count = 0;
+
+    while(good() && ((c = fgetc(fp)) != EOF)) {
+        c = f.put(c);
+        if(c) {
+            if(c != EOF)
+                ungetc(c, fp);
+            else
+                ++count;
+            break;
+        }
+        ++count;
+    }
+    return count;
+}
+
+
 String str(file& so, strsize_t size)
 {
     String s(size);

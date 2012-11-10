@@ -87,6 +87,7 @@
 #include <ucommon/atomic.h>
 #include <ucommon/generics.h>
 #include <ucommon/protocols.h>
+#include <ucommon/format.h>
 #include <ucommon/object.h>
 #include <ucommon/string.h>
 #include <ucommon/counter.h>
