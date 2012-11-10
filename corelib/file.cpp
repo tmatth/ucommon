@@ -309,7 +309,7 @@ int file::err(void) const
     return ferror(fp);
 }
 
-size_t file::_endl(void)
+size_t file::endl(void)
 {
     if(!fp)
         return 0;

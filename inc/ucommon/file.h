@@ -75,7 +75,7 @@ private:
 
     int _getch(void);
 
-    size_t _endl(void);
+    size_t endl(void);
 
 public:
     typedef ::fpos_t bookmark_t;

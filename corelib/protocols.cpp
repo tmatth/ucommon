@@ -218,27 +218,20 @@ int BufferProtocol::_getch(void)
     return input[bufpos++];
 }
 
-size_t BufferProtocol::put(const char *address, size_t size)
+size_t CharacterProtocol::put(const char *address, size_t size)
 {
     size_t count = 0;
 
-    if(!output || !address)
+    if(!address)
         return 0;
 
     if(!size)
         size = strlen(address);
 
     while(count < size) {
-        if(outsize == bufsize) {
-            outsize = 0;
-            if(_push(output, bufsize) < bufsize) {
-                output = NULL;
-                end = true;     // marks a disconnection...
-                return count;
-            }
-        }
-
-        output[outsize++] = address[count++];
+        if(_putch(*address) == EOF)
+            break;
+        ++count;
     }
 
     return count;
@@ -416,7 +409,7 @@ size_t CharacterProtocol::getline(char *string, size_t size)
     return count;
 }
 
-size_t CharacterProtocol::_endl(void)
+size_t CharacterProtocol::endl(void)
 {
     size_t count = 0;
     const char *cp = eol;
@@ -436,7 +429,7 @@ size_t CharacterProtocol::print(const PrintFormat& f)
     const char *cp = f.get();
 
     if(cp == NULL)
-        _endl();
+        endl();
     else while(cp && *cp) {
         if(_putch(*cp) == EOF)
             break;
@@ -567,3 +560,33 @@ ObjectProtocol *ObjectProtocol::copy(void)
     return this;
 }
 
+CharacterProtocol& operator<<(CharacterProtocol& p, const char& c)
+{
+    p.put((int)c);
+    return p;
+}
+
+CharacterProtocol& operator>>(CharacterProtocol& p, char& c)
+{
+    int code = p.get();
+    if(code == EOF)
+        code = 0;
+    c = code;
+    return p;
+}
+
+CharacterProtocol& operator<<(CharacterProtocol& p, const char *str)
+{
+    if(!str)
+        p.endl();
+    else
+        p.put(str);
+    return p;
+}
+
+CharacterProtocol& operator>>(CharacterProtocol& p, String& str)
+{
+    if(str.c_mem())
+        p.getline(str.c_mem(), str.size());
+    return p;
+}

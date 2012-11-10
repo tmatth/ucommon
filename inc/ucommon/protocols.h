@@ -159,12 +159,6 @@ protected:
     virtual int _putch(int code) = 0;
 
     /**
-     * Write eol.  May also be used in derived class to flush buffer.
-     * @return bytes written.
-     */
-    virtual size_t _endl(void);
-
-    /**
      * Write to back buffer.  Mostly used for input format processing.
      * @param code to write into backbuffer.
      */
@@ -183,6 +177,12 @@ protected:
 
 public:
     virtual ~CharacterProtocol();
+
+    /**
+     * Write eol.  May also be used in derived class to flush buffer.
+     * @return bytes written.
+     */
+    virtual size_t endl(void);
 
     /**
      * Get the next character.
@@ -233,6 +233,8 @@ public:
      * @return total characters successfully written, including eol chars.
      */
     size_t putline(const char *string);
+
+    size_t put(const char *string, size_t count = 0);
 
     /**
      * Load input to a string list.  The string list filter method is used to
@@ -398,16 +400,6 @@ public:
     size_t get(char *address, size_t count);
 
     /**
-     * Put memory into the buffer.  If count is 0 then put as NULL
-     * terminated string.  This method will become "put()" in abi 4 and
-     * may become a protected method.
-     * @param address of characters to put into buffer.
-     * @param count of characters to put into buffer.
-     * @return number of characters actually written.
-     */
-    size_t put(const char *address, size_t count = 0);
-
-    /**
      * Get a character from the buffer.  If no data is available, return EOF.
      * @return character from buffer or eof.
      */
@@ -559,6 +551,14 @@ public:
     inline void operator--(void)
         {release();};
 };
+
+CharacterProtocol& operator<< (CharacterProtocol& io, const char& ch);
+
+CharacterProtocol& operator>> (CharacterProtocol& io, char& ch);
+
+CharacterProtocol& operator<< (CharacterProtocol& io, const char *str);
+
+CharacterProtocol& operator>> (CharacterProtocol& io, String& str);
 
 END_NAMESPACE
 
