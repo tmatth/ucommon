@@ -70,11 +70,12 @@ private:
     pid_t pid;
 #endif
     char *tmp;
-    const char *nl;
 
     int _putch(int code);
 
     int _getch(void);
+
+    size_t _endl(void);
 
 public:
     typedef ::fpos_t bookmark_t;
@@ -169,34 +170,6 @@ public:
      */
     int cancel(void);
 
-    /**
-     * Put a string into the file.  A newline will be added.
-     * @param string to write.
-     * @return number of characters written.
-     */
-    size_t putline(const char *string);
-
-    /**
-     * Read a line of input from the file.  This clears the newline
-     * character at the end and has consistent behavior with other
-     * ucommon file routines.  Because the newline is cleared, the
-     * string length may be shorter than the return size.
-     * @param string to write.
-     * @param size of buffer.
-     * @return true if data read, 0 if at end of file.
-     */
-    size_t getline(char *string, size_t size);
-
-    /**
-     * Read a string of input from the file.  This clears the newline
-     * character at the end and has consistent behavior with other
-     * ucommon file routines.  Because the newline is cleared, the
-     * string length may be shorter than the return size.
-     * @param string to write.
-     * @return true if data read, 0 if at end of file.
-     */
-    size_t getline(String& string);
-
     inline size_t put(const void *data, size_t size)
         { return fp == NULL ? 0 : fwrite(data, 1, size, fp);}
 
@@ -258,20 +231,11 @@ public:
     inline void flush(void)
         {if(fp) ::fflush(fp);}
 
-
-    size_t print(const PrintFormat& format);
-
-    size_t input(InputFormat& input);
-
     size_t printf(const char *format, ...) __PRINTF(2, 3);
 
     size_t scanf(const char *format, ...) __SCANF(2, 3);
 
     bool is_tty(void) const;
-
-    size_t load(StringPager *list, size_t count = 0);
-
-    size_t save(const StringPager *list, size_t count = 0);
 };
 
 String str(file& fp, strsize_t size);

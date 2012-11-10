@@ -807,9 +807,14 @@ std::istream& operator>> (std::istream& inp, InputFormat& fmt)
 
 std::ostream& operator<< (std::ostream& out, const PrintFormat& fmt)
 {
-    const char *cp = fmt.get();
-    if(cp && out.good())
-        out.write(cp, strlen(cp));
+    if(out.good()) {
+        const char *cp = fmt.get();
+
+        if(cp)
+            out.write(cp, strlen(cp));
+        else
+            out << std::endl;
+    }
     return out;
 }
 

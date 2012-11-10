@@ -44,36 +44,36 @@ file_t cstdin(stdin);
 file_t cstdout(stdout);
 file_t cstderr(stderr);
 
-file::file(const char *file, const char *mode, size_t size)
+file::file(const char *file, const char *mode, size_t size) :
+CharacterProtocol()
 {
     fp = NULL;
-    nl = "\n";
     pid = INVALID_PID_VALUE;
     tmp = NULL;
     open(file, mode, size);
 }
 
-file::file(const char *file, char **argv, const char *mode, char **envp)
+file::file(const char *file, char **argv, const char *mode, char **envp) :
+CharacterProtocol()
 {
     fp = NULL;
-    nl = "\n";
     pid = INVALID_PID_VALUE;
     tmp = NULL;
     open(file, argv, mode, envp);
 }
 
-file::file()
+file::file() :
+CharacterProtocol()
 {
     fp = NULL;
-    nl = "\n";
     tmp = NULL;
     pid = INVALID_PID_VALUE;
 }
 
-file::file(FILE *file)
+file::file(FILE *file) :
+CharacterProtocol()
 {
     fp = file;
-    nl = "\n";
     tmp = NULL;
     pid = INVALID_PID_VALUE;
 }
@@ -193,9 +193,9 @@ void file::open(const char *path, char **argv, const char *mode, char **envp)
         return;
 
     if(strchr(mode, 't'))
-        nl = "\r\n";
+        eol = "\r\n";
     else
-        nl = "\n";
+        eol = "\n";
 
 #ifdef  _MSWINDOWS_
     int fdd = _open_osfhandle((intptr_t)fd, _fmode);
@@ -213,9 +213,9 @@ void file::open(const char *path, const char *mode, size_t size)
         fclose(fp);
 
     if(strchr(mode, 't'))
-        nl = "\r\n";
+        eol = "\r\n";
     else
-        nl = "\n";
+        eol = "\n";
 
     fp = fopen(path, mode);
     if(!fp)
@@ -293,74 +293,6 @@ size_t file::printf(const char *format, ...)
     return result;
 }
 
-size_t file::putline(const char *data)
-{
-    if(!fp)
-        return 0;
-
-    int result = fprintf(fp, "%s%s", data, nl);
-    if(result < 0)
-        result = 0;
-
-    return (size_t)result;
-}
-
-size_t file::getline(char *address, size_t size)
-{
-    char nl0 = nl[0], nl1 = 0;
-
-    if(nl[1]) {
-        nl0 = nl[1];
-        nl1 = nl[0];
-    }
-
-    address[0] = 0;
-
-    if(!fp)
-        return 0;
-
-    if(!good() || !fgets(address, size, fp))
-        return 0;
-
-    size_t result = size = strlen(address);
-
-    if(address[size - 1] == nl0) {
-        --size;
-        if(size && address[size - 1] == nl1)
-            --size;
-    }
-    address[size] = 0;
-    return result;
-}
-
-size_t file::getline(String& s)
-{
-    char nl0 = nl[0], nl1 = 0;
-    if(nl[1]) {
-        nl0 = nl[1];
-        nl1 = nl[0];
-    }
-
-    if(!s.c_mem())
-        return true;
-
-    if(!good() || !fgets(s.c_mem(), s.size(), fp)) {
-        s.clear();
-        return false;
-    }
-
-    String::fix(s);
-    size_t result = s.len();
-
-    if(s[-1] == nl0)
-        --s;
-
-    if(nl1 && s[-1] == nl1)
-        --s;
-
-    return result;
-}
-
 bool file::eof(void) const
 {
     if(!fp)
@@ -375,6 +307,16 @@ int file::err(void) const
         return EBADF;
 
     return ferror(fp);
+}
+
+size_t file::_endl(void)
+{
+    if(!fp)
+        return 0;
+
+    fputs(eol, fp);
+    fflush(fp);
+    return 1;
 }
 
 int file::_getch(void)
@@ -406,72 +348,6 @@ bool file::good(void)
 
     return true;
 }
-
-size_t file::load(StringPager *list, size_t count)
-{
-    if(!list || !fp)
-        return 0;
-
-    size_t used = 0;
-    size_t size = list->size() - 64;
-
-    char *tmp = (char *)malloc(size);
-    while(good() && (!count || used < count)) {
-        if(!getline(tmp, size))
-            break;
-
-        if(!list->filter(tmp, size))
-            break;
-
-        ++used;
-    }
-    free(tmp);
-    return used;
-}
-
-size_t file::save(const StringPager *list, size_t count)
-{
-    size_t used = 0;
-    if(!list || !fp)
-        return 0;
-
-    StringPager::iterator sp = list->begin();
-    while(good() && is(sp) && (!count || used < count)) {
-        if(fprintf(fp, "%s\n", sp->get()) < 1)
-            break;
-        ++used;
-        sp.next();
-    }
-    return used;
-}
-
-size_t file::print(const PrintFormat& f)
-{
-    if(!good())
-        return 0;
-
-    return fputs(f.get(), fp);
-}
-
-size_t file::input(InputFormat& f)
-{
-    int c;
-    size_t count = 0;
-
-    while(good() && ((c = fgetc(fp)) != EOF)) {
-        c = f.put(c);
-        if(c) {
-            if(c != EOF)
-                ungetc(c, fp);
-            else
-                ++count;
-            break;
-        }
-        ++count;
-    }
-    return count;
-}
-
 
 String str(file& so, strsize_t size)
 {

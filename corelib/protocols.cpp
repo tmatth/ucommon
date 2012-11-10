@@ -88,7 +88,7 @@ void *MemoryRedirect::_alloc(size_t size)
     return target->_alloc(size);
 }
 
-BufferProtocol::BufferProtocol()
+BufferProtocol::BufferProtocol() : CharacterProtocol()
 {
     end = true;
     eol = "\r\n";
@@ -351,27 +351,28 @@ char *BufferProtocol::request(size_t size)
     return output + offset;
 }
 
-size_t BufferProtocol::putline(const char *string)
+size_t CharacterProtocol::putline(const char *string)
 {
     size_t count = 0;
 
-    if(string)
-        count += put(string);
+    while(string && *string && (EOF != _putch(*string)))
+        ++count;
 
-    if(eol)
-        count += put(eol);
+    string = eol;
+    while(string && *string && (EOF != _putch(*string)))
+        ++count;
 
     return count;
 }
 
-size_t BufferProtocol::getline(String& s)
+size_t CharacterProtocol::getline(String& s)
 {
     size_t result = getline(s.c_mem(), s.size() + 1);
     String::fix(s);
     return result;
 }
 
-size_t BufferProtocol::getline(char *string, size_t size)
+size_t CharacterProtocol::getline(char *string, size_t size)
 {
     size_t count = 0;
     unsigned eolp = 0;
@@ -379,16 +380,13 @@ size_t BufferProtocol::getline(char *string, size_t size)
     bool eof = false;
 
     if(!eols)
-        eols="\0";
+        eols = "\0";
 
     if(string)
         string[0] = 0;
 
-    if(!input || !string)
-        return 0;
-
     while(count < size - 1) {
-        int ch = BufferProtocol::_getch();
+        int ch = _getch();
         if(ch == EOF) {
             eolp = 0;
             eof = true;
@@ -418,11 +416,28 @@ size_t BufferProtocol::getline(char *string, size_t size)
     return count;
 }
 
+size_t CharacterProtocol::_endl(void)
+{
+    size_t count = 0;
+    const char *cp = eol;
+
+    while(cp && *cp) {
+        if(_putch(*cp) == EOF)
+            break;
+        ++cp;
+        ++count;
+    }
+    return count;
+}
+
 size_t CharacterProtocol::print(const PrintFormat& f)
 {
     size_t count = 0;
     const char *cp = f.get();
-    while(cp && *cp) {
+
+    if(cp == NULL)
+        _endl();
+    else while(cp && *cp) {
         if(_putch(*cp) == EOF)
             break;
         ++cp;
@@ -460,9 +475,9 @@ size_t CharacterProtocol::input(InputFormat& f)
     return count;
 }
 
-size_t BufferProtocol::load(StringPager *list)
+size_t CharacterProtocol::load(StringPager *list)
 {
-    if(!list || !input)
+    if(!list)
         return 0;
 
     size_t used = 0;
@@ -479,15 +494,14 @@ size_t BufferProtocol::load(StringPager *list)
     return used;
 }
 
-size_t BufferProtocol::save(const StringPager *list)
+size_t CharacterProtocol::save(const StringPager *list)
 {
     size_t used = 0;
-    if(!list || !output)
+    if(!list)
         return 0;
 
     StringPager::iterator sp = list->begin();
-    while(is(sp)) {
-        putline(sp->get());
+    while(is(sp) && putline(sp->get())) {
         ++used;
         sp.next();
     }
@@ -531,6 +545,12 @@ void LockingProtocol::_unlock(void)
 
 LockingProtocol::~LockingProtocol()
 {
+}
+
+CharacterProtocol::CharacterProtocol()
+{
+    back = 0;
+    eol = "\n";
 }
 
 CharacterProtocol::~CharacterProtocol()

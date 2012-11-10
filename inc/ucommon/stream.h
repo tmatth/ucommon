@@ -63,7 +63,7 @@ NAMESPACE_UCOMMON
  * other c++ stdlib based streaming classes.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT StreamBuffer : protected std::streambuf, public std::iostream, public CharacterProtocol
+class __EXPORT StreamBuffer : protected std::streambuf, public std::iostream
 {
 protected:
     size_t bufsize;
@@ -88,6 +88,19 @@ protected:
     void release(void);
 
     void allocate(size_t size);
+
+    /**
+     * Get the next character.
+     * @return next character or EOF.
+     */
+    virtual int _getch(void) = 0;
+
+    /**
+     * Put the next character.
+     * @param code to put.
+     * @return code or EOF if cannot put.
+     */
+    virtual int _putch(int code) = 0;
 
 public:
     /**

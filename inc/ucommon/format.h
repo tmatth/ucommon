@@ -64,7 +64,6 @@ public:
     virtual int put(char code) = 0;
 };
 
-
 END_NAMESPACE
 
 #endif

@@ -1033,19 +1033,22 @@ bool keyassoc::assign(const char *id, void *data)
     return true;
 }
 
-chartext::chartext()
+chartext::chartext() :
+CharacterProtocol()
 {
     pos = NULL;
     max = 0;
 }
 
-chartext::chartext(char *buf)
+chartext::chartext(char *buf) :
+CharacterProtocol()
 {
     pos = buf;
     max = 0;
 }
 
-chartext::chartext(char *buf, size_t size)
+chartext::chartext(char *buf, size_t size) :
+CharacterProtocol()
 {
     pos = buf;
     max = size;
@@ -1075,7 +1078,7 @@ int chartext::_putch(int code)
 }
 
 bufpager::bufpager(size_t ps) :
-memalloc(ps)
+memalloc(ps), CharacterProtocol()
 {
     first = last = current = freelist = NULL;
     ccount = 0;
@@ -1400,7 +1403,8 @@ void bufpager::reset(void)
     first = last = current = NULL;
 }
 
-charmem::charmem(char *mem, size_t size)
+charmem::charmem(char *mem, size_t size) :
+CharacterProtocol()
 {
     dynamic = false;
     buffer = NULL;

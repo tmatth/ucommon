@@ -140,7 +140,10 @@ public:
 class __EXPORT CharacterProtocol
 {
 protected:
+    const char *eol;
     int back;
+
+    CharacterProtocol();
 
     /**
      * Get the next character.
@@ -155,8 +158,28 @@ protected:
      */
     virtual int _putch(int code) = 0;
 
+    /**
+     * Write eol.  May also be used in derived class to flush buffer.
+     * @return bytes written.
+     */
+    virtual size_t _endl(void);
+
+    /**
+     * Write to back buffer.  Mostly used for input format processing.
+     * @param code to write into backbuffer.
+     */
     inline void putback(int code)
         {back = code;}
+
+    /**
+     * Set end of line marker.  Normally this is set to cr & lf, which
+     * actually supports both lf alone and cr/lf termination of lines.
+     * However, putline() will always add the full cr/lf if this mode is
+     * used.  This option only effects getline() and putline().
+     * @param string for eol for getline and putline.
+     */
+    inline void seteol(const char *string)
+        {eol = string;};
 
 public:
     virtual ~CharacterProtocol();
@@ -179,6 +202,52 @@ public:
     size_t print(const PrintFormat& format);
 
     size_t input(InputFormat& format);
+
+    /**
+     * Get text as a line of input from the buffer.  The eol character(s)
+     * are used to mark the end of a line.  Because the end of line character
+     * is stripped, the length of the string may be less than the actual
+     * count read.  If at the end of the file buffer and unable to read more
+     * data an error occured then 0 is returned.
+     * @param string to save input into.
+     * @param size limit of string to save.
+     * @return count of characters actually read or 0 if at end of data.
+     */
+    size_t getline(char *string, size_t size);
+
+    /**
+     * Get a string as a line of input from the buffer.  The eol character(s)
+     * are used to mark the end of a line.  Because the end of line character
+     * is stripped, the length of the string may be less than the actual
+     * count read.  If at the end of the file buffer and unable to read more
+     * data an error occured then 0 is returned.
+     * @param buffer to save input into.
+     * @return count of characters actually read or 0 if at end of data.
+     */
+    size_t getline(String& buffer);
+
+    /**
+     * Put a string as a line of output to the buffer.  The eol character is
+     * appended to the end.
+     * @param string to write.
+     * @return total characters successfully written, including eol chars.
+     */
+    size_t putline(const char *string);
+
+    /**
+     * Load input to a string list.  The string list filter method is used to
+     * control loading.
+     * @param list to load into.
+     * @return number of items loaded.
+     */
+    size_t load(StringPager *list);
+
+    /**
+     * Save output from a string list.
+     * @param list to save from.
+     * @return number of items loaded.
+     */
+    size_t save(const StringPager *list);
 };
 
 /**
@@ -195,7 +264,6 @@ public:
     typedef enum {RDONLY, WRONLY, RDWR} mode_t;
 
 private:
-    const char *eol;
     char *buffer;
     char *input, *output;
     size_t bufsize, bufpos, insize, outsize;
@@ -225,16 +293,6 @@ protected:
      * Allocation error handler.
      */
     virtual void fault(void) const;
-
-    /**
-     * Set end of line marker.  Normally this is set to cr & lf, which
-     * actually supports both lf alone and cr/lf termination of lines.
-     * However, putline() will always add the full cr/lf if this mode is
-     * used.  This option only effects getline() and putline().
-     * @param string for eol for getline and putline.
-     */
-    inline void seteol(const char *string)
-        {eol = string;};
 
     /**
      * Allocate I/O buffer(s) of specified size.  If a buffer is currently
@@ -389,56 +447,10 @@ public:
     void reset(void);
 
     /**
-     * Get text as a line of input from the buffer.  The eol character(s)
-     * are used to mark the end of a line.  Because the end of line character
-     * is stripped, the length of the string may be less than the actual
-     * count read.  If at the end of the file buffer and unable to read more
-     * data an error occured then 0 is returned.
-     * @param string to save input into.
-     * @param size limit of string to save.
-     * @return count of characters actually read or 0 if at end of data.
-     */
-    size_t getline(char *string, size_t size);
-
-    /**
-     * Get a string as a line of input from the buffer.  The eol character(s)
-     * are used to mark the end of a line.  Because the end of line character
-     * is stripped, the length of the string may be less than the actual
-     * count read.  If at the end of the file buffer and unable to read more
-     * data an error occured then 0 is returned.
-     * @param buffer to save input into.
-     * @return count of characters actually read or 0 if at end of data.
-     */
-    size_t getline(String& buffer);
-
-    /**
-     * Put a string as a line of output to the buffer.  The eol character is
-     * appended to the end.
-     * @param string to write.
-     * @return total characters successfully written, including eol chars.
-     */
-    size_t putline(const char *string);
-
-    /**
      * Check if at end of input.
      * @return true if end of data, false if input still buffered.
      */
     bool eof(void);
-
-    /**
-     * Load input to a string list.  The string list filter method is used to
-     * control loading.
-     * @param list to load into.
-     * @return number of items loaded.
-     */
-    size_t load(StringPager *list);
-
-    /**
-     * Save output from a string list.
-     * @param list to save from.
-     * @return number of items loaded.
-     */
-    size_t save(const StringPager *list);
 
     /**
      * See if buffer open.
