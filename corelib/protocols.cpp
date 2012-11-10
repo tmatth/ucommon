@@ -418,6 +418,48 @@ size_t BufferProtocol::getline(char *string, size_t size)
     return count;
 }
 
+size_t CharacterProtocol::print(const PrintFormat& f)
+{
+    size_t count = 0;
+    const char *cp = f.get();
+    while(cp && *cp) {
+        if(_putch(*cp) == EOF)
+            break;
+        ++cp;
+        ++count;
+    }
+    return count;
+}
+
+size_t CharacterProtocol::input(InputFormat& f)
+{
+    int c;
+    size_t count = 0;
+
+    for(;;) {
+        if(back) {
+            c = back;
+            back = 0;
+        }
+        else
+            c = _getch();
+
+        if(c == EOF)
+            break;
+
+        c = f.put(c);
+        if(c) {
+            if(c != EOF)
+                back = c;
+            else
+                ++count;
+            break;
+        }
+        ++count;
+    }
+    return count;
+}
+
 size_t BufferProtocol::load(StringPager *list)
 {
     if(!list || !input)

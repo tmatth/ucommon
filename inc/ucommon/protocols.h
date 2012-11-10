@@ -34,6 +34,10 @@
 #include <ucommon/cpr.h>
 #endif
 
+#ifndef _UCOMMON_FORMAT_H_
+#include <ucommon/format.h>
+#endif
+
 NAMESPACE_UCOMMON
 
 class String;
@@ -136,6 +140,8 @@ public:
 class __EXPORT CharacterProtocol
 {
 protected:
+    int back;
+
     /**
      * Get the next character.
      * @return next character or EOF.
@@ -148,6 +154,9 @@ protected:
      * @return code or EOF if cannot put.
      */
     virtual int _putch(int code) = 0;
+
+    inline void putback(int code)
+        {back = code;}
 
 public:
     virtual ~CharacterProtocol();
@@ -166,6 +175,10 @@ public:
      */
     inline int put(int code)
         {return _putch(code);};
+
+    size_t print(const PrintFormat& format);
+
+    size_t input(InputFormat& format);
 };
 
 /**
@@ -190,7 +203,6 @@ private:
 
 protected:
     const char *format;
-    int back;
 
     /**
      * Construct an empty (unallocated) buffer.
@@ -301,8 +313,6 @@ protected:
     virtual int _getch(void);
 
     virtual int _putch(int ch);
-
-    void putback(int code);
 
     /**
      * Get current input position.  Sometimes used to help compute and report
