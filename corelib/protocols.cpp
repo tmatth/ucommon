@@ -619,14 +619,37 @@ CharacterProtocol& _character_operators::print(CharacterProtocol& p, const long&
     return p;
 }
 
+CharacterProtocol& _character_operators::print(CharacterProtocol& p, const double& v)
+{
+    char buf[40];
+    snprintf(buf, sizeof(buf), "%f", v);
+    p.putchars(buf);
+    return p;
+}
+
+
 class __LOCAL _input_long : public InputProtocol
 {
 public:
     long* ref;
-    bool neg;
-    bool trig;
+    size_t pos;
+    char buf[32];
 
     _input_long(long& v);
+
+    int put(char code);
+};
+
+class __LOCAL _input_double : public InputProtocol
+{
+public:
+    double* ref;
+    bool dot;
+    bool e;
+    size_t pos;
+    char buf[60];
+
+    _input_double(double& v);
 
     int put(char code);
 };
@@ -634,33 +657,76 @@ public:
 _input_long::_input_long(long& v)
 {
     ref = &v;
-    neg = trig = false;
     v = 0l;
+    pos = 0;
+}
+
+_input_double::_input_double(double& v)
+{
+    dot = e = false;
+    v = 0.0;
+    pos = 0;
+    ref = &v;
 }
 
 int _input_long::put(char code)
 {
-    if(code == '-') {
-        if(neg)
-            return code;
-        neg = true;
-        return 0;
+    if(code == '-' && !pos)
+        goto valid;
+
+    if(isdigit(code) && pos < sizeof(buf) - 1)
+        goto valid;
+
+    buf[pos] = 0;
+    if(pos)
+        sscanf(buf, "%ld", ref);
+
+    return code;
+
+valid:
+    buf[pos++] = code;
+    return 0;
+}
+
+int _input_double::put(char code)
+{
+    if(code == '-' && !pos)
+        goto valid;
+
+    if(code == 'e' && !e) {
+        e = true;
+        goto valid;
     }
 
-    if(!isdigit(code))
-        return code;
-
-    *ref = (*ref * 10l) + (code - '0');
-    if(neg && !trig) {
-        trig = true;
-        *ref = -*ref;
+    if(code == '.' && !dot) {
+        dot = true;
+        goto valid;
     }
+
+    if(isdigit(code) && pos < sizeof(buf) - 1)
+        goto valid;
+
+    buf[pos] = 0;
+    if(pos)
+        sscanf(buf, "%lf", ref);
+
+    return code;
+
+valid:
+    buf[pos++] = code;
     return 0;
 }
 
 CharacterProtocol& _character_operators::input(CharacterProtocol& p, long& v)
 {
     _input_long lv(v);
+    p.input(lv);
+    return p;
+}
+
+CharacterProtocol& _character_operators::input(CharacterProtocol& p, double& v)
+{
+    _input_double lv(v);
     p.input(lv);
     return p;
 }

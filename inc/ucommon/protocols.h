@@ -595,6 +595,9 @@ public:
 
     static CharacterProtocol& input(CharacterProtocol& p, long& value);
 
+    static CharacterProtocol& print(CharacterProtocol& p, const double& value);
+
+    static CharacterProtocol& input(CharacterProtocol& p, double& value);
 };
 
 inline CharacterProtocol& operator<< (CharacterProtocol& p, const char *s)
@@ -627,6 +630,11 @@ inline CharacterProtocol& operator<< (CharacterProtocol& p, const long& value)
 inline CharacterProtocol& operator>> (CharacterProtocol& p, long& value)
     {return _character_operators::input(p, value);}
 
+inline CharacterProtocol& operator<< (CharacterProtocol& p, const double& value)
+    {return _character_operators::print(p, value);}
+
+inline CharacterProtocol& operator>> (CharacterProtocol& p, double& value)
+    {return _character_operators::input(p, value);}
 
 END_NAMESPACE
 
