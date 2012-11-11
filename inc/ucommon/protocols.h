@@ -258,7 +258,7 @@ public:
      */
     size_t putline(const char *string);
 
-    size_t put(const char *string, size_t count = 0);
+    size_t putchars(const char *string, size_t count = 0);
 
     /**
      * Load input to a string list.  The string list filter method is used to
@@ -418,8 +418,16 @@ public:
         {return eol;}
 
     /**
-     * Get memory from the buffer.  This method will become "get()" in
-     * abi 4 and may become a protected method.
+     * Put memory into the buffer.  If count is 0 then put as NULL
+     * terminated string.
+     * @param address of characters to put into buffer.
+     * @param count of characters to put into buffer.
+     * @return number of characters actually written.
+     */
+    size_t put(const char *address, size_t count = 0);
+
+    /**
+     * Get memory from the buffer.
      * @param address of characters save from buffer.
      * @param count of characters to get from buffer.
      * @return number of characters actually copied.

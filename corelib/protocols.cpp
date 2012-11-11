@@ -164,6 +164,30 @@ bool BufferProtocol::_blocking(void)
     return false;
 }
 
+size_t BufferProtocol::put(const char *address, size_t size)
+{
+    size_t count = 0;
+
+    if(!output || !address)
+        return 0;
+
+    if(!size)
+        size = strlen(address);
+
+    while(count < size) {
+        if(outsize == bufsize) {
+            outsize = 0;
+            if(_push(output, bufsize) < bufsize) {
+                output = NULL;
+                end = true;     // marks a disconnection...
+                return count;
+            }
+        }
+        output[outsize++] = address[count++];
+    }
+    return count;
+}
+
 size_t BufferProtocol::get(char *address, size_t size)
 {
     size_t count = 0;
@@ -219,7 +243,7 @@ int BufferProtocol::_getch(void)
     return input[bufpos++];
 }
 
-size_t CharacterProtocol::put(const char *address, size_t size)
+size_t CharacterProtocol::putchars(const char *address, size_t size)
 {
     size_t count = 0;
 
@@ -424,7 +448,7 @@ size_t CharacterProtocol::print(const PrintProtocol& f)
     if(cp == NULL)
         return putchar(0);
 
-    return put(cp);
+    return putchars(cp);
 }
 
 size_t CharacterProtocol::input(InputProtocol& f)
@@ -568,7 +592,7 @@ CharacterProtocol& _character_operators::print(CharacterProtocol& p, const char 
     if(!str)
         p.putline("");
     else
-        p.put(str);
+        p.putchars(str);
     return p;
 }
 
@@ -585,7 +609,7 @@ CharacterProtocol& _character_operators::print(CharacterProtocol& p, const long&
 {
     char buf[40];
     snprintf(buf, sizeof(buf), "%ld", v);
-    p.put(buf);
+    p.putchars(buf);
     return p;
 }
 
