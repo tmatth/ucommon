@@ -693,8 +693,12 @@ int _input_double::put(char code)
     if(code == '-' && !pos)
         goto valid;
 
-    if(code == 'e' && !e) {
+    if(code == '-' && buf[pos] == 'e')
+        goto valid;
+
+    if(tolower(code) == 'e' && !e) {
         e = true;
+        code = 'e';
         goto valid;
     }
 
