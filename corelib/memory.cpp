@@ -1512,6 +1512,12 @@ int charmem::_putch(int code)
         return EOF;
 
     buffer[out++] = code;
+
+    if(code == 0) {
+        out = size;
+        return EOF;
+    }
+
     buffer[out] = 0;
     return code;
 }
