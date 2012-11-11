@@ -244,6 +244,11 @@ int BufferProtocol::_putch(int ch)
     if(!output)
         return EOF;
 
+    if(ch == 0) {
+        flush();
+        return 0;
+    }
+
     if(outsize == bufsize) {
         outsize = 0;
         if(_push(output, bufsize) < bufsize) {
@@ -568,8 +573,10 @@ CharacterProtocol& _character_operators::print(CharacterProtocol& p, const char 
 
 CharacterProtocol& _character_operators::input(CharacterProtocol& p, String& str)
 {
-    if(str.c_mem())
+    if(str.c_mem()) {
         p.getline(str.c_mem(), str.size());
+        String::fix(str);
+    }
     return p;
 }
 
