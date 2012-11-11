@@ -424,7 +424,7 @@ public:
      * @param count of characters to put into buffer.
      * @return number of characters actually written.
      */
-    size_t put(const char *address, size_t count = 0);
+    size_t put(const void *address, size_t count);
 
     /**
      * Get memory from the buffer.
@@ -432,22 +432,36 @@ public:
      * @param count of characters to get from buffer.
      * @return number of characters actually copied.
      */
-    size_t get(char *address, size_t count);
+    size_t get(void *address, size_t count);
+
+    /**
+     * Get string from buffer.  Like fgets (and unlike getline) this returns
+     * the end of line as part of the output buffer.
+     * @param address of buffer to save into.
+     * @param size of save buffer.
+     * @return buffer on success, NULL on error or failure.
+     */
+    char *gets(char *address, size_t size);
 
     /**
      * Get a character from the buffer.  If no data is available, return EOF.
-     * @return character from buffer or eof.
+     * @return character from buffer or EOF.
      */
-    inline int getch(void)
-        {return _getch();}
-
+    int getc(void);
+        
     /**
      * Put a character into the buffer.
-     * @return character put into buffer or eof.
+     * @return character put into buffer or EOF.
      */
-    inline int putch(int ch)
-        {return _putch(ch);}
+    int putc(int ch);
 
+    /**
+     * Write a string to the buffer.
+     * @param string to write.
+     * @return count of bytes written.
+     */
+    size_t puts(const char *string);
+                
     /**
      * Print formatted string to the buffer.  The maximum output size is
      * the buffer size, and the operation flushes the buffer.
