@@ -42,7 +42,7 @@ const unsigned utf8::ucsize = sizeof(wchar_t);
 
 ucs4_t utf8::get(CharacterProtocol& cp)
 {
-    int ch = cp.get();
+    int ch = cp.getchar();
     unsigned count = 0;
     ucs4_t code;
 
@@ -76,7 +76,7 @@ ucs4_t utf8::get(CharacterProtocol& cp)
         return EOF;
 
     while(count--) {
-        ch = cp.get();
+        ch = cp.getchar();
         if(ch == EOF)
             return EOF;
         if((ch & 0xc0) != 0x80)
@@ -263,7 +263,7 @@ ucs4_t utf8::put(ucs4_t code, CharacterProtocol& cp)
     unsigned used = 0, count = 0;
 
     if(code < 0x80)
-        return cp.put(code);
+        return cp.putchar(code);
 
     if(code < 0x000007ff) {
         buffer[used++] = (code >> 6) | 0xc0;
@@ -297,7 +297,7 @@ ucs4_t utf8::put(ucs4_t code, CharacterProtocol& cp)
     }
 
     while(count < used) {
-        if(cp.put(buffer[count++]) == EOF)
+        if(cp.putchar(buffer[count++]) == EOF)
             return EOF;
     }
     return code;

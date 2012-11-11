@@ -185,7 +185,7 @@ bool XMLParser::parse(CharacterProtocol& io)
     int ch;
     unsigned char cp;
 
-    while((ch = io.get()) != EOF) {
+    while((ch = io.getchar()) != EOF) {
         switch(state) {
         case AMP:
             if((!bufpos && ch == '#') || isElement(ch)) {

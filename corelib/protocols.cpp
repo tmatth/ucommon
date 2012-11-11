@@ -245,6 +245,7 @@ int BufferProtocol::_putch(int ch)
         return EOF;
 
     if(ch == 0) {
+        put(eol);
         flush();
         return 0;
     }
@@ -421,7 +422,7 @@ size_t CharacterProtocol::print(const PrintProtocol& f)
     const char *cp = f.get();
 
     if(cp == NULL)
-        return put(eol);
+        return putchar(0);
 
     return put(cp);
 }
@@ -549,13 +550,13 @@ ObjectProtocol *ObjectProtocol::copy(void)
 
 CharacterProtocol& _character_operators::print(CharacterProtocol& p, const char& c)
 {
-    p.put((int)c);
+    p.putchar((int)c);
     return p;
 }
 
 CharacterProtocol& _character_operators::input(CharacterProtocol& p, char& c)
 {
-    int code = p.get();
+    int code = p.getchar();
     if(code == EOF)
         code = 0;
     c = code;

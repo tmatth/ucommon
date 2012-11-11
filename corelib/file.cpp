@@ -322,8 +322,9 @@ int file::_putch(int code)
     if(!fp)
         return EOF;
 
-    // pushing end of string through char protocol is a flush operation
+    // pushing end of string through char protocol as nl/flush operation
     if(code == 0) {
+        fputs(eol, fp);
         flush();
         return 0;
     }

@@ -212,7 +212,7 @@ public:
      * Get the next character.
      * @return next character or EOF.
      */
-    inline int get(void)
+    inline int getchar(void)
         {return _getch();};
 
     /**
@@ -220,7 +220,7 @@ public:
      * @param code to put.
      * @return code or EOF if cannot put.
      */
-    inline int put(int code)
+    inline int putchar(int code)
         {return _putch(code);};
 
     size_t print(const PrintProtocol& format);

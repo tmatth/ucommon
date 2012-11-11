@@ -2140,7 +2140,7 @@ String str(CharacterProtocol *p, strsize_t size)
     bool cr = false;
 
     while(--size) {
-        ch = p->get();
+        ch = p->getchar();
         if(ch == 0 || ch == EOF || ch == '\n')
             break;
 
