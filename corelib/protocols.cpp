@@ -169,67 +169,6 @@ bool BufferProtocol::_blocking(void)
     return false;
 }
 
-int BufferProtocol::putc(int code)
-{
-    char buf = code;
-    if(output && put(&buf, 1))
-        return buf;
-    return EOF;
-}
-
-size_t BufferProtocol::puts(const char *string)
-{
-    if(!string || !output)
-        return 0;
-    return put(string, strlen(string));
-}
-
-int BufferProtocol::getc(void)
-{
-    char code;
-    if(input && !end && _pull(&code, 1))
-        return code;
-    return EOF;
-}
-
-char *BufferProtocol::gets(char *buffer, size_t size)
-{
-    size_t count = 0, offset;
-    const char *ep = eol;
-    
-    while(*ep)
-        ++ep;
-
-    if(!input || end || !buffer || size < 2)
-        return NULL;
-
-    while(count < size - 1) {
-        if(!_pull(&buffer[count], 1))
-            break;
-        
-        ++count;
-        offset = 1;
-        if(buffer[count - offset] != *ep)
-            continue;
-
-        ++offset;
-        while(ep > eol && count > offset) {
-            if(buffer[count - offset] != *(ep - 1))
-                break;
-            --ep;
-            ++offset;
-        }
-        if(ep == eol)
-            break;
-    }
-    buffer[count] = 0;
-
-    if(!count && end)
-        return NULL;
-
-    return buffer;
-}
-
 size_t BufferProtocol::put(const void *address, size_t size)
 {
     size_t count = 0;
