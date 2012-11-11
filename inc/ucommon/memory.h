@@ -668,6 +668,7 @@ private:
     cpage_t *first, *last, *current, *freelist;
     unsigned cpos;
     unsigned long ccount;
+    bool eom;       /* null written or out of memory */
 
     virtual int _getch(void);
     virtual int _putch(int code);
@@ -742,11 +743,40 @@ public:
 
     bufpager(size_t page = 0);
 
+    /**
+     * Request character buffer to write into directly.
+     * @param iosize made available.
+     * @return pointer to buffer or NULL if out of memory.
+     */
     char *request(size_t *iosize);
 
+    /**
+     * Get pointer to copy character data.  The memory pointer is
+     * positioned at the next chunk automatically.
+     * @param iosize of data you can copy.
+     * @return to data from buffer or NULL if past end.
+     */
     char *copy(size_t *iosize);
 
+    /**
+     * Used to complete a request method.
+     * @param size of data actually written.
+     */
     void update(size_t size);
+
+    /**
+     * Check if can still save into buffer.
+     * @return true if buffer is full.
+     */
+    inline bool operator!()
+        {return eom;}
+
+    /**
+     * Check if can still save into buffer.  Used for is() function.
+     * @return true if pager can still store more.
+     */
+    inline operator bool()
+        {return !eom;}
 };
 
 /**

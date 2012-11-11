@@ -1071,6 +1071,12 @@ int chartext::_putch(int code)
     if(!pos || !max)
         return EOF;
 
+    if(code == 0) {
+        *(pos++) = 0;
+        max = 0;
+        return EOF;
+    }
+
     *(pos++) = code;
     *pos = 0;
     --max;
@@ -1083,6 +1089,7 @@ memalloc(ps), CharacterProtocol()
     first = last = current = freelist = NULL;
     ccount = 0;
     cpos = 0;
+    eom = false;
 }
 
 void bufpager::set(const char *text)
@@ -1093,6 +1100,9 @@ void bufpager::set(const char *text)
 
 void bufpager::put(const char *text, size_t iosize)
 {
+    if(eom)
+        return;
+
     while(text && (iosize--)) {
         if(!last || last->used == last->size) {
             cpage_t *next;
@@ -1161,6 +1171,9 @@ char *bufpager::copy(size_t *iosize)
 
 char *bufpager::request(size_t *iosize)
 {
+    if(eom)
+        return NULL;
+
     *iosize = 0;
     if(!last || last->used >= last->size) {
         cpage_t *next;
@@ -1170,8 +1183,10 @@ char *bufpager::request(size_t *iosize)
         }
         else {
             next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
-            if(!next)
+            if(!next) {
+                eom = true;
                 return NULL;
+            }
 
             page_t *p = page;
             unsigned size = 0;
@@ -1185,8 +1200,10 @@ char *bufpager::request(size_t *iosize)
             if(!p)
                 p = pager();
 
-            if(!p)
+            if(!p) {
+                eom = true;
                 return NULL;
+            }
 
             next->text = ((char *)(p)) + p->used;
             next->used = 0;
@@ -1233,6 +1250,8 @@ size_t bufpager::get(char *text, size_t iosize)
 
 void bufpager::add(const char *text)
 {
+    if(eom)
+        return;
 
     while(text && *text) {
         if(!last || last->used == last->size) {
@@ -1244,8 +1263,10 @@ void bufpager::add(const char *text)
             }
             else {
                 next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
-                if(!next)
+                if(!next) {
+                    eom = true;
                     return;
+                }
 
                 page_t *p = page;
                 unsigned size = 0;
@@ -1259,8 +1280,10 @@ void bufpager::add(const char *text)
                 if(!p)
                     p = pager();
 
-                if(!p)
+                if(!p) {
+                    eom = true;
                     return;
+                }
 
                 next->text = ((char *)(p)) + p->used;
                 next->used = 0;
@@ -1332,6 +1355,9 @@ int bufpager::_getch(void)
 
 int bufpager::_putch(int code)
 {
+    if(eom)
+        return EOF;
+
     if(!last || last->used == last->size) {
         cpage_t *next;
 
@@ -1341,8 +1367,10 @@ int bufpager::_putch(int code)
         }
         else {
             next = (cpage_t *)memalloc::_alloc(sizeof(cpage_t));
-            if(!next)
+            if(!next) {
+                eom = true;
                 return EOF;
+            }
 
             page_t *p = page;
             unsigned size = 0;
@@ -1356,8 +1384,10 @@ int bufpager::_putch(int code)
             if(!p)
                 p = pager();
 
-            if(!p)
+            if(!p) {
+                eom = true;
                 return EOF;
+            }
 
             next->text = ((char *)(p)) + p->used;
             next->used = 0;
@@ -1375,6 +1405,10 @@ int bufpager::_putch(int code)
 
     ++ccount;
     last->text[last->used++] = code;
+    if(code == 0) {
+        eom = true;
+        return EOF;
+    }
     return code;
 }
 
@@ -1392,6 +1426,7 @@ void bufpager::rewind(void)
 
 void bufpager::reset(void)
 {
+    eom = false;
     cpos = 0;
     ccount = 0;
     current = first;
