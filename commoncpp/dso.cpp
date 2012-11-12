@@ -285,7 +285,7 @@ DSO::addr_t DSO::operator[](const char *sym)
     else
         return (DSO::addr_t)NULL;
 #elif defined(_MSWINDOWS_)
-    DSO::addr_t addr = GetProcAddress(hImage, sym);
+    DSO::addr_t addr = (DSO::addr_t)GetProcAddress(hImage, sym);
     if(!addr)
         err = "symbol missing";
 

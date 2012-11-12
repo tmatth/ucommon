@@ -1533,7 +1533,7 @@ dso::addr_t dso::find(const char *sym) const
     if(ptr == 0)
         return (dso::addr_t)NULL;
 
-    return GetProcAddress(ptr, sym);
+    return (addr_t)GetProcAddress(ptr, sym);
 }
 
 #elif defined(HAVE_DLFCN_H)
