@@ -780,10 +780,12 @@ int filestream::overflow(int c)
 std::istream& _stream_operators::input(std::istream& inp, InputProtocol& fmt)
 {
     int c = 0;
-    while(!c && inp.good()) {
-        c = inp.get();
+    while(!c) {
         if(!inp.good())
-            break;
+            c = EOF;
+        else
+            c = inp.get();
+
         c = fmt._input(c);
         if(!c)
             continue;

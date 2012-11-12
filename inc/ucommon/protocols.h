@@ -159,7 +159,7 @@ public:
      * @param character code we are pushing.
      * @return 0 to keep processing, EOF if done, or char to unget.
      */
-    virtual int _input(char code) = 0;
+    virtual int _input(int code) = 0;
 };
 
 /**
