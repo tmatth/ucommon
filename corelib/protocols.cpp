@@ -470,9 +470,6 @@ size_t CharacterProtocol::input(InputProtocol& f)
         else
             c = _getch();
 
-        if(c == EOF)
-            break;
-
         c = f._input(c);
         if(c) {
             if(c != EOF)
@@ -637,7 +634,7 @@ public:
 
     _input_long(long& v);
 
-    int _input(char code);
+    int _input(int code);
 };
 
 class __LOCAL _input_double : public InputProtocol
@@ -651,7 +648,7 @@ public:
 
     _input_double(double& v);
 
-    int _input(char code);
+    int _input(int code);
 };
 
 _input_long::_input_long(long& v)
@@ -669,7 +666,7 @@ _input_double::_input_double(double& v)
     ref = &v;
 }
 
-int _input_long::_input(char code)
+int _input_long::_input(int code)
 {
     if(code == '-' && !pos)
         goto valid;
@@ -688,7 +685,7 @@ valid:
     return 0;
 }
 
-int _input_double::_input(char code)
+int _input_double::_input(int code)
 {
     if(code == '-' && !pos)
         goto valid;
