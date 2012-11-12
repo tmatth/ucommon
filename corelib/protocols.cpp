@@ -449,7 +449,7 @@ size_t CharacterProtocol::getline(char *string, size_t size)
 
 size_t CharacterProtocol::print(const PrintProtocol& f)
 {
-    const char *cp = f.getOutput();
+    const char *cp = f._print();
 
     if(cp == NULL)
         return putchar(0);
@@ -473,7 +473,7 @@ size_t CharacterProtocol::input(InputProtocol& f)
         if(c == EOF)
             break;
 
-        c = f.pushInput(c);
+        c = f._input(c);
         if(c) {
             if(c != EOF)
                 back = c;
@@ -637,7 +637,7 @@ public:
 
     _input_long(long& v);
 
-    int pushInput(char code);
+    int _input(char code);
 };
 
 class __LOCAL _input_double : public InputProtocol
@@ -651,7 +651,7 @@ public:
 
     _input_double(double& v);
 
-    int pushInput(char code);
+    int _input(char code);
 };
 
 _input_long::_input_long(long& v)
@@ -669,7 +669,7 @@ _input_double::_input_double(double& v)
     ref = &v;
 }
 
-int _input_long::pushInput(char code)
+int _input_long::_input(char code)
 {
     if(code == '-' && !pos)
         goto valid;
@@ -688,7 +688,7 @@ valid:
     return 0;
 }
 
-int _input_double::pushInput(char code)
+int _input_double::_input(char code)
 {
     if(code == '-' && !pos)
         goto valid;

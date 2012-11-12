@@ -140,7 +140,7 @@ public:
     /**
      * Extract formatted string for object.
      */
-    virtual const char *getOutput(void) const = 0;
+    virtual const char *_print(void) const = 0;
 };
 
 /**
@@ -159,7 +159,7 @@ public:
      * @param character code we are pushing.
      * @return 0 to keep processing, EOF if done, or char to unget.
      */
-    virtual int pushInput(char code) = 0;
+    virtual int _input(char code) = 0;
 };
 
 /**
