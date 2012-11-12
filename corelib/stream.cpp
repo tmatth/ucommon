@@ -784,7 +784,7 @@ std::istream& _stream_operators::input(std::istream& inp, InputProtocol& fmt)
         c = inp.get();
         if(!inp.good())
             break;
-        c = fmt.put(c);
+        c = fmt.pushInput(c);
         if(!c)
             continue;
         if(c != EOF)
@@ -796,7 +796,7 @@ std::istream& _stream_operators::input(std::istream& inp, InputProtocol& fmt)
 std::ostream& _stream_operators::print(std::ostream& out, const PrintProtocol& fmt)
 {
     if(out.good()) {
-        const char *cp = fmt.get();
+        const char *cp = fmt.getOutput();
 
         if(cp)
             out.write(cp, strlen(cp));
