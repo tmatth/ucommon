@@ -495,8 +495,8 @@ public:
     inline volatile const T *get(unsigned member)
         {return static_cast<const T*>(offset(member * sizeof(T)));};
 
-    inline void copy(unsigned member, T *buffer)
-        {MappedMemory::copy(member * sizeof(T), buffer, sizeof(T));};
+    inline void copy(unsigned member, T& buffer)
+        {MappedMemory::copy(member * sizeof(T), &buffer, sizeof(T));};
 
     /**
      * Get count of typed member objects held in this map.
