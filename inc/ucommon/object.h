@@ -78,6 +78,12 @@ protected:
      */
     virtual void dealloc(void);
 
+    /**
+     * Force reset of count.
+     */
+    inline void reset(void)
+        {count = 0;}
+
 public:
     /**
      * Test if the object has copied references.  This means that more than

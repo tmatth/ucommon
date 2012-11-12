@@ -1249,7 +1249,7 @@ bool Socket::address::insert(struct sockaddr *addr)
     }
 
     node = (struct addrinfo *)malloc(sizeof(struct addrinfo));
-    memset(node, 0, sizeof(node));
+    memset(node, 0, sizeof(struct addrinfo));
     node->ai_family = addr->sa_family;
     node->ai_addrlen = len(addr);
     node->ai_next = list;

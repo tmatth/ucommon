@@ -1073,15 +1073,13 @@ void Socket::setCompletion(bool immediate)
 #else
     int fflags = fcntl(so, F_GETFL);
 
-    switch( immediate ) {
-    case false:
-        fflags |= O_NONBLOCK;
-        fcntl(so, F_SETFL, fflags);
-        break;
-    case true:
+    if(immediate) {
         fflags &=~ O_NONBLOCK;
         fcntl(so, F_SETFL, fflags);
-        break;
+    }
+    else {
+        fflags |= O_NONBLOCK;
+        fcntl(so, F_SETFL, fflags);
     }
 #endif
 }

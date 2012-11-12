@@ -182,11 +182,16 @@ protected:
 
     OrderedObject *head, *tail;
 
+    void copy(const OrderedIndex& source);
+
 public:
     /**
      * Create and initialize an empty index.
      */
     OrderedIndex();
+
+    inline OrderedIndex(const OrderedIndex& source)
+        {copy(source);}
 
     /**
      * Destroy index.
@@ -276,6 +281,13 @@ public:
      */
     inline LinkedObject *operator*() const
         {return (LinkedObject*)(head);};
+
+    /**
+     * Assign ordered index.
+     * @param object to copy from.
+     */
+    OrderedIndex& operator=(const OrderedIndex& object)
+        {copy(object); return *this;}
 
     /**
      * Add object to our list.
@@ -1851,7 +1863,7 @@ public:
      * @return pointer to index root.
      */
     inline NamedObject **root(void)
-        {return static_cast<NamedObject*>(&head);};
+        {return static_cast<NamedObject**>(&head);};
 
     /**
      * Return first item in ordered list.  This is commonly used to
@@ -1931,102 +1943,6 @@ public:
      */
     typedef linked_pointer<T> iterator;
 };
-
-/**
- * Push a linked object onto a stack of linked objects.
- * @param stack to push object onto.
- * @param object to push onto stack.
- */
-inline void push(ObjectStack& stack, LinkedObject *object)
-    {stack.push(object);}
-
-/**
- * Add a linked object onto a stack of linked objects.
- * @param stack to push object onto.
- * @param object to push onto stack.
- */
-inline void add(ObjectStack& stack, LinkedObject *object)
-    {stack.push(object);}
-
-/**
- * Pop a linked object from a stack of linked objects.
- * @param stack to pull object from.
- * @return object pulled from stack or NULL if none.
- */
-inline LinkedObject *pop(ObjectStack& stack)
-    {return stack.pull();}
-
-/**
- * Pop a linked object from a stack of linked objects.
- * @param stack to pull object from.
- * @return object pulled from stack or NULL if none.
- */
-inline LinkedObject *pull(ObjectStack& stack)
-    {return stack.pull();}
-
-/**
- * Push a linked object onto a fifo of linked objects.
- * @param fifo to push object onto.
- * @param object to push onto fifo.
- */
-inline void push(OrderedIndex& fifo, LinkedObject *object)
-    {fifo.add((OrderedObject *)object);}
-
-/**
- * Add a linked object onto a fifo of linked objects.
- * @param fifo to push object onto.
- * @param object to push onto fifo.
- */
-inline void add(OrderedIndex& fifo, LinkedObject *object)
-    {fifo.add((OrderedObject *)object);}
-
-/**
- * Pop a linked object from a fifo of linked objects.
- * @param fifo to pull object from.
- * @return object pulled from stack or NULL if none.
- */
-inline LinkedObject *pop(OrderedIndex& fifo)
-    {return fifo.get();}
-
-/**
- * Pop a linked object from a fifo of linked objects.
- * @param fifo to pull object from.
- * @return object pulled from stack or NULL if none.
- */
-inline LinkedObject *pull(OrderedIndex& fifo)
-    {return fifo.get();}
-
-/**
- * Push a linked object to start of queue.
- * @param queue to push object into.
- * @param object to push onto fifo.
- */
-inline void push(ObjectQueue& queue, DLinkedObject *object)
-    {queue.add(object);}
-
-/**
- * Add a linked object to end of queue of objects.
- * @param queue to add object onto.
- * @param object to add onto queue.
- */
-inline void add(ObjectQueue& queue, DLinkedObject *object)
-    {queue.add(object);}
-
-/**
- * Pop a linked object from end of queue.
- * @param queue to pop object from.
- * @return object popped from queue or NULL if none.
- */
-inline DLinkedObject *pop(ObjectQueue& queue)
-    {return (DLinkedObject *)queue.pop();}
-
-/**
- * Pull a linked object from start of a queue.
- * @param queue to pull object from.
- * @return object pulled from queue or NULL if none.
- */
-inline DLinkedObject *pull(ObjectQueue& queue)
-    {return (DLinkedObject *)queue.pull();}
 
 /**
  * Convenience typedef for root pointers of single linked lists.

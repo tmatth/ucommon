@@ -420,7 +420,7 @@ Socket::Error UDPSocket::join(const IPV4Multicast &ia,int InterfaceIndex)
 
     getsockname(so, (struct sockaddr *)&myaddr, &len);
     memset(&group, 0, sizeof(group));
-    memcpy(&group.imr_address, &myaddr.sin_addr, sizeof(&myaddr.sin_addr));
+    memcpy(&group.imr_address, &myaddr.sin_addr, sizeof(myaddr.sin_addr));
     group.imr_multiaddr = ia.getAddress();
     group.imr_ifindex   = InterfaceIndex;
     setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));

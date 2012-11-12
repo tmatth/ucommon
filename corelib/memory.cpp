@@ -791,6 +791,12 @@ LinkedObject(NULL), CountedObject()
 {
 }
 
+void PagerObject::reset(void)
+{
+    CountedObject::reset();
+    LinkedObject::next = NULL;
+}
+
 void PagerObject::dealloc(void)
 {
     pager->put(this);
@@ -835,7 +841,8 @@ PagerObject *PagerPool::get(size_t size)
 
     if(!ptr)
         ptr = new((caddr_t)(_alloc(size))) PagerObject;
-    memset(ptr, 0, size);
+    else
+        ptr->reset();
     ptr->pager = this;
     return ptr;
 }

@@ -581,7 +581,7 @@ NamedTree::NamedTree(const NamedTree& source)
 {
     id = source.id;
     parent = NULL;
-    memcpy(&child, &source.child, sizeof(child));
+    child = source.child;
 }
 
 NamedTree::NamedTree(NamedTree *p, char *nid) :
@@ -984,6 +984,12 @@ OrderedIndex::OrderedIndex()
 OrderedIndex::~OrderedIndex()
 {
     head = tail = NULL;
+}
+
+void OrderedIndex::copy(const OrderedIndex& source)
+{
+    head = source.head;
+    tail = source.tail;
 }
 
 void OrderedIndex::operator*=(OrderedObject *object)

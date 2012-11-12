@@ -839,6 +839,11 @@ protected:
     PagerObject();
 
     /**
+     * Reset state of object.
+     */
+    void reset(void);
+
+    /**
      * Release a pager object reference.
      */
     void release(void);
@@ -1259,12 +1264,6 @@ public:
      * @param heap pager to use.  If NULL, uses global heap.
      */
     inline pager(mempager *heap = NULL) : MemoryRedirect(heap), PagerPool() {};
-
-    /**
-     * Purge managed objects.
-     */
-    inline ~pager()
-        {mempager::purge();};
 
     /**
      * Create a managed object by casting reference.
