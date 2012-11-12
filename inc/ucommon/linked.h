@@ -758,11 +758,6 @@ public:
      */
     inline void relist(NamedTree *trunk = NULL)
         {relistTail(trunk);};
-
-    /**
-     * Clear object state.
-     */
-    void reset(void);
 };
 
 /**

@@ -601,15 +601,6 @@ NamedTree::~NamedTree()
     purge();
 }
 
-void NamedTree::reset(void)
-{
-    child.reset();
-
-    parent = NULL;
-    next = NULL;
-    id = NULL;
-}
-
 NamedTree *NamedTree::getChild(const char *tid) const
 {
     assert(tid != NULL && *tid != 0);
