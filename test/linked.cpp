@@ -69,15 +69,15 @@ extern "C" int main()
     assert(ov2.value == 2);
 
     objstack_t st;
-    push(st, &ov1);
-    push(st, &ov2);
-    push(st, &ov3);
+    st.push(&ov1);
+    st.push(&ov2);
+    st.push(&ov3);
 
-    member *mv = (member *)pop(st);
+    member *mv = (member *)st.pop();
     assert(mv->value == 3);
-    pop(st);
-    pop(st);
-    assert(NULL == pop(st));
+    st.pop();
+    st.pop();
+    assert(NULL == st.pop());
 
     objqueue<member> que;
     que.add(&ov1);
