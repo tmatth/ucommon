@@ -621,8 +621,6 @@ protected:
      */
     void purge(void);
 
-    void reset(void);
-
 public:
     /**
      * Find a child node of our object with the specified name.  This will
@@ -760,6 +758,11 @@ public:
      */
     inline void relist(NamedTree *trunk = NULL)
         {relistTail(trunk);};
+
+    /**
+     * Clear object state.
+     */
+    void reset(void);
 };
 
 /**
