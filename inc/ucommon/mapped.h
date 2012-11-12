@@ -173,7 +173,7 @@ public:
      * Get starting address of mapped segment.
      * @return starting address of mapped segment.
      */
-    inline caddr_t start(void)
+    inline caddr_t addr(void)
         {return map;};
 
     /**
@@ -334,7 +334,7 @@ public:
      * Get member size of typed objects that can be held in mapped vector.
      * @return members mapped in segment.
      */
-    inline unsigned size(void)
+    inline unsigned max(void)
         {return (unsigned)(size / sizeof(T));};
 };
 
