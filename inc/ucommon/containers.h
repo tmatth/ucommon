@@ -297,51 +297,6 @@ public:
      * @return number of objects in queue.
      */
     size_t count(void);
-
-    /**
-     * Convenience function to remove an object from the queue.
-     * @param queue to remove object from.
-     * @param object to remove.
-     * @return true if removed, false if not found.
-     */
-    static bool remove(Queue& queue, ObjectProtocol *object)
-        {return queue.remove(object);};
-
-    /**
-     * Convenience function to post object into the queue.
-     * @param queue to post into.
-     * @param object to post.
-     * @param timeout to wait if full.
-     * @return true if posted, false if timed out while full.
-     */
-    static bool post(Queue& queue, ObjectProtocol *object, timeout_t timeout = 0)
-        {return queue.post(object, timeout);};
-
-    /**
-     * Convenience function get first object from the queue.
-     * @param queue to get from.
-     * @param timeout to wait if empty.
-     * @return first object or NULL if timed out empty.
-     */
-    static ObjectProtocol *fifo(Queue& queue, timeout_t timeout = 0)
-        {return queue.fifo(timeout);};
-
-    /**
-     * Convenience function get last object from the queue.
-     * @param queue to get from.
-     * @param timeout to wait if empty.
-     * @return last object or NULL if timed out empty.
-     */
-    static ObjectProtocol *lifo(Queue& queue, timeout_t timeout = 0)
-        {return queue.lifo(timeout);};
-
-    /**
-     * Convenience function to get count of objects in the queue.
-     * @param queue to count.
-     * @return number of objects in the queue.
-     */
-    static size_t count(Queue& queue)
-        {return queue.count();};
 };
 
 /**
@@ -729,56 +684,6 @@ typedef Stack stack_t;
  * Convenience type for using thread-safe object fifo (queue).
  */
 typedef Queue fifo_t;
-
-/**
- * Convenience function to push an object onto a stack.
- * @param stack to push into.
- * @param object to push.
- */
-inline void push(stack_t &stack, ObjectProtocol *object)
-    {stack.push(object);}
-
-/**
- * Convenience function to pull an object from a stack.
- * @param stack to pull from.
- * @param timeout to wait to pull.
- * @return object pulled.
- */
-inline ObjectProtocol *pull(stack_t &stack, timeout_t timeout = Timer::inf)
-    {return stack.pull(timeout);}
-
-/**
- * Convenience function to remove an object from a stack.
- * @param stack to remove from.
- * @param object to remove.
- */
-inline void remove(stack_t &stack, ObjectProtocol *object)
-    {stack.remove(object);}
-
-/**
- * Convenience function to push an object onto a fifo.
- * @param fifo to push into.
- * @param object to push.
- */
-inline void push(fifo_t &fifo, ObjectProtocol *object)
-    {fifo.post(object);}
-
-/**
- * Convenience function to pull an object from a fifo.
- * @param fifo to pull from.
- * @param timeout to wait to pull.
- * @return object pulled.
- */
-inline ObjectProtocol *pull(fifo_t &fifo, timeout_t timeout = Timer::inf)
-    {return fifo.fifo(timeout);}
-
-/**
- * Convenience function to remove an object from a fifo.
- * @param fifo to remove from.
- * @param object to remove.
- */
-inline void remove(fifo_t &fifo, ObjectProtocol *object)
-    {fifo.remove(object);}
 
 END_NAMESPACE
 
