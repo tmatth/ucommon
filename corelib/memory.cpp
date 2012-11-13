@@ -295,7 +295,7 @@ void *ObjectPager::pull(void)
         last = NULL;
     }
     else
-        root = mem->next;
+        root = mem->Next;
     index = NULL;
     return result;
 }
@@ -333,10 +333,10 @@ void *ObjectPager::pop(void)
 
     linked_pointer<member> np = root;
     while(is(np)) {
-        if(np->next == last) {
+        if(np->Next == last) {
             out = last->mem;
             last = *np;
-            np->next = NULL;
+            np->Next = NULL;
             --members;
             break;
         }
@@ -451,9 +451,9 @@ String StringPager::join(const char *prefix, const char *middle, const char *suf
     linked_pointer<member> mp = root;
     while(is(mp)) {
         tmp += mp->text;
-        if(mp->next && middle && *middle)
+        if(mp->Next && middle && *middle)
             tmp += middle;
-        else if(mp->next == NULL && suffix && *suffix)
+        else if(mp->Next == NULL && suffix && *suffix)
             tmp += suffix;
         mp.next();
     }
@@ -563,7 +563,7 @@ const char *StringPager::pull(void)
         last = NULL;
     }
     else
-        root = mem->next;
+        root = mem->Next;
     index = NULL;
     return result;
 }
@@ -605,10 +605,10 @@ const char *StringPager::pop(void)
 
     linked_pointer<member> np = root;
     while(is(np)) {
-        if(np->next == last) {
+        if(np->Next == last) {
             out = last->text;
             last = *np;
-            np->next = NULL;
+            np->Next = NULL;
             --members;
             break;
         }
@@ -794,7 +794,7 @@ LinkedObject(NULL), CountedObject()
 void PagerObject::reset(void)
 {
     CountedObject::reset();
-    LinkedObject::next = NULL;
+    LinkedObject::Next = NULL;
 }
 
 void PagerObject::dealloc(void)
@@ -835,7 +835,7 @@ PagerObject *PagerPool::get(size_t size)
     pthread_mutex_lock(&mutex);
     ptr = static_cast<PagerObject *>(freelist);
     if(ptr)
-        freelist = ptr->next;
+        freelist = ptr->Next;
 
     pthread_mutex_unlock(&mutex);
 
@@ -856,7 +856,7 @@ NamedObject(assoc->root, strdup(kid), max)
 
     String::set(text, bufsize, kid);
     data = NULL;
-    id = text;
+    Id = text;
 }
 
 keyassoc::keyassoc(unsigned pathmax, size_t strmax, size_t ps) :

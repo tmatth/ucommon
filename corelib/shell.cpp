@@ -106,7 +106,7 @@ shell::Option::Option(char shortopt, const char *longopt, const char *value, con
 LinkedObject()
 {
     if(olast) {
-        olast->next = this;
+        olast->Next = this;
         olast = this;
     }
     else

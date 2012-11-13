@@ -183,14 +183,14 @@ LinkedObject::~LinkedObject()
 
 void LinkedObject::purge(LinkedObject *root)
 {
-    LinkedObject *next;
+    LinkedObject *after;
 
     assert(root != NULL);
 
     while(root) {
-        next = root->next;
+        after = root->Next;
         root->release();
-        root = next;
+        root = after;
     }
 }
 
@@ -201,7 +201,7 @@ bool LinkedObject::is_member(LinkedObject *list) const
     while(list) {
         if(list == this)
             return true;
-        list = list->next;
+        list = list->Next;
     }
     return false;
 }
@@ -210,7 +210,7 @@ void LinkedObject::enlist(LinkedObject **root)
 {
     assert(root != NULL);
 
-    next = *root;
+    Next = *root;
     *root = this;
 }
 
@@ -218,31 +218,31 @@ void LinkedObject::delist(LinkedObject **root)
 {
     assert(root != NULL);
 
-    LinkedObject *prev = NULL, *node = *root;
+    LinkedObject *prior = NULL, *node = *root;
 
     while(node && node != this) {
-        prev = node;
-        node = node->next;
+        prior = node;
+        node = node->Next;
     }
 
     if(!node)
         return;
 
-    if(!prev)
-        *root = next;
+    if(!prior)
+        *root = Next;
     else
-        prev->next = next;
+        prior->Next = Next;
 }
 
 void ReusableObject::release(void)
 {
-    next = (LinkedObject *)nil;
+    Next = (LinkedObject *)nil;
 }
 
 NamedObject::NamedObject() :
 OrderedObject()
 {
-    id = NULL;
+    Id = NULL;
 }
 
 NamedObject::NamedObject(OrderedIndex *root, char *nid) :
@@ -251,28 +251,28 @@ OrderedObject()
     assert(root != NULL);
     assert(nid != NULL && *nid != 0);
 
-    NamedObject *node = static_cast<NamedObject*>(root->head), *prev = NULL;
+    NamedObject *node = static_cast<NamedObject*>(root->head), *prior = NULL;
 
     while(node) {
         if(node->equal(nid)) {
-            if(prev)
-                prev->next = node->getNext();
+            if(prior)
+                prior->Next = node->getNext();
             else
                 root->head = node->getNext();
             node->release();
             break;
         }
-        prev = node;
+        prior = node;
         node = node->getNext();
     }
-    next = NULL;
-    id = nid;
+    Next = NULL;
+    Id = nid;
     if(!root->head)
         root->head = this;
     if(!root->tail)
         root->tail = this;
     else
-        root->tail->next = this;
+        root->tail->Next = this;
 }
 
 // One thing to watch out for is that the id is freed in the destructor.
@@ -286,7 +286,7 @@ OrderedObject()
     assert(nid != NULL && *nid != 0);
     assert(max > 0);
 
-    id = NULL;
+    Id = NULL;
     add(root, nid, max);
 }
 
@@ -298,7 +298,7 @@ void NamedObject::add(NamedObject **root, char *nid, unsigned max)
 
     clearId();
 
-    NamedObject *node, *prev = NULL;
+    NamedObject *node, *prior = NULL;
 
     if(max < 2)
         max = 0;
@@ -308,31 +308,31 @@ void NamedObject::add(NamedObject **root, char *nid, unsigned max)
     node = root[max];
     while(node) {
         if(node && node->equal(nid)) {
-            if(prev) {
-                prev->next = this;
-                next = node->next;
+            if(prior) {
+                prior->Next = this;
+                Next = node->Next;
             }
             else
                 root[max] = node->getNext();
             node->release();
             break;
         }
-        prev = node;
+        prior = node;
         node = node->getNext();
     }
 
     if(!node) {
-        next = root[max];
+        Next = root[max];
         root[max] = this;
     }
-    id = nid;
+    Id = nid;
 }
 
 void NamedObject::clearId(void)
 {
-    if(id) {
-        free(id);
-        id = NULL;
+    if(Id) {
+        free(Id);
+        Id = NULL;
     }
 }
 
@@ -350,14 +350,14 @@ NamedObject::~NamedObject()
 
 void LinkedObject::retain(void)
 {
-    next = this;
+    Next = this;
 }
 
 
 void LinkedObject::release(void)
 {
-    if(next != this) {
-        next = this;
+    if(Next != this) {
+        Next = this;
         delete this;
     }
 }
@@ -365,7 +365,7 @@ void LinkedObject::release(void)
 LinkedObject *LinkedObject::getIndexed(LinkedObject *root, unsigned index)
 {
     while(index-- && root != NULL)
-        root = root->next;
+        root = root->Next;
 
     return root;
 }
@@ -377,7 +377,7 @@ unsigned LinkedObject::count(const LinkedObject *root)
     unsigned c = 0;
     while(root) {
         ++c;
-        root = root->next;
+        root = root->Next;
     }
     return c;
 }
@@ -400,9 +400,9 @@ int NamedObject::compare(const char *cid) const
     assert(cid != NULL && *cid != 0);
 
 #ifdef  HAVE_STRCOLL
-    return strcoll(id, cid);
+    return strcoll(Id, cid);
 #else
-    return strcmp(id, cid);
+    return strcmp(Id, cid);
 #endif
 }
 
@@ -453,10 +453,10 @@ NamedObject *NamedObject::skip(NamedObject **idx, NamedObject *rec, unsigned max
     assert(max > 0);
 
     unsigned key = 0;
-    if(rec && !rec->next)
-        key = keyindex(rec->id, max) + 1;
+    if(rec && !rec->Next)
+        key = keyindex(rec->Id, max) + 1;
 
-    if(!rec || !rec->next) {
+    if(!rec || !rec->Next) {
         while(key < max && !idx[key])
             ++key;
         if(key >= max)
@@ -498,7 +498,7 @@ unsigned NamedObject::count(NamedObject **idx, unsigned max)
         node = idx[max];
         while(node) {
             ++count;
-            node = node->next;
+            node = node->Next;
         }
     }
     return count;
@@ -561,7 +561,7 @@ NamedObject *NamedObject::remove(NamedObject **root, const char *id)
     if(prior == NULL)
         *root = node->getNext();
     else
-        prior->next = node->getNext();
+        prior->Next = node->getNext();
 
     return node;
 }
@@ -571,33 +571,33 @@ NamedObject *NamedObject::remove(NamedObject **root, const char *id)
 // a malloc'd or strdup'd string.
 
 NamedTree::NamedTree(char *nid) :
-NamedObject(), child()
+NamedObject(), Child()
 {
-    id = nid;
-    parent = NULL;
+    Id = nid;
+    Parent = NULL;
 }
 
 NamedTree::NamedTree(const NamedTree& source)
 {
-    id = source.id;
-    parent = NULL;
-    child = source.child;
+    Id = source.Id;
+    Parent = NULL;
+    Child = source.Child;
 }
 
 NamedTree::NamedTree(NamedTree *p, char *nid) :
-NamedObject(), child()
+NamedObject(), Child()
 {
     assert(p != NULL);
     assert(nid != NULL && *nid != 0);
 
-    enlistTail(&p->child);
-    id = nid;
-    parent = p;
+    enlistTail(&p->Child);
+    Id = nid;
+    Parent = p;
 }
 
 NamedTree::~NamedTree()
 {
-    id = NULL;
+    Id = NULL;
     purge();
 }
 
@@ -605,10 +605,10 @@ NamedTree *NamedTree::getChild(const char *tid) const
 {
     assert(tid != NULL && *tid != 0);
 
-    linked_pointer<NamedTree> node = child.begin();
+    linked_pointer<NamedTree> node = Child.begin();
 
     while(node) {
-        if(!strcmp(node->id, tid))
+        if(eq(node->Id, tid))
             return *node;
         node.next();
     }
@@ -618,26 +618,26 @@ NamedTree *NamedTree::getChild(const char *tid) const
 void NamedTree::relistTail(NamedTree *trunk)
 {
     // if moving to same place, just return...
-    if(parent == trunk)
+    if(Parent == trunk)
         return;
 
-    if(parent)
-        delist(&parent->child);
-    parent = trunk;
-    if(parent)
-        enlistTail(&parent->child);
+    if(Parent)
+        delist(&Parent->Child);
+    Parent = trunk;
+    if(Parent)
+        enlistTail(&Parent->Child);
 }
 
 void NamedTree::relistHead(NamedTree *trunk)
 {
-    if(parent == trunk)
+    if(Parent == trunk)
         return;
 
-    if(parent)
-        delist(&parent->child);
-    parent = trunk;
-    if(parent)
-        enlistHead(&parent->child);
+    if(Parent)
+        delist(&Parent->Child);
+    Parent = trunk;
+    if(Parent)
+        enlistHead(&Parent->Child);
 }
 
 NamedTree *NamedTree::path(const char *tid) const
@@ -653,9 +653,9 @@ NamedTree *NamedTree::path(const char *tid) const
         return const_cast<NamedTree*>(this);
 
     while(*tid == '.') {
-        if(!node->parent)
+        if(!node->Parent)
             return NULL;
-        node = node->parent;
+        node = node->Parent;
 
         ++tid;
     }
@@ -679,10 +679,10 @@ NamedTree *NamedTree::getLeaf(const char *tid) const
 {
     assert(tid != NULL && *tid != 0);
 
-    linked_pointer<NamedTree> node = child.begin();
+    linked_pointer<NamedTree> node = Child.begin();
 
     while(node) {
-        if(node->is_leaf() && !strcmp(node->id, tid))
+        if(node->is_leaf() && eq(node->Id, tid))
             return *node;
         node.next();
     }
@@ -693,11 +693,11 @@ NamedTree *NamedTree::leaf(const char *tid) const
 {
     assert(tid != NULL && *tid != 0);
 
-    linked_pointer<NamedTree> node = child.begin();
+    linked_pointer<NamedTree> node = Child.begin();
     NamedTree *obj;
 
     while(node) {
-        if(node->is_leaf() && !strcmp(node->id, tid))
+        if(node->is_leaf() && eq(node->Id, tid))
             return *node;
         obj = NULL;
         if(!node->is_leaf())
@@ -713,12 +713,12 @@ NamedTree *NamedTree::find(const char *tid) const
 {
     assert(tid != NULL && *tid != 0);
 
-    linked_pointer<NamedTree> node = child.begin();
+    linked_pointer<NamedTree> node = Child.begin();
     NamedTree *obj;
 
     while(node) {
         if(!node->is_leaf()) {
-            if(!strcmp(node->id, tid))
+            if(eq(node->Id, tid))
                 return *node;
             obj = node->find(tid);
             if(obj)
@@ -733,7 +733,7 @@ void NamedTree::setId(char *nid)
 {
     assert(nid != NULL && *nid != 0);
 
-    id = nid;
+    Id = nid;
 }
 
 // If you remove the tree node, the id is NULL'd also.  This keeps the
@@ -741,23 +741,23 @@ void NamedTree::setId(char *nid)
 
 void NamedTree::remove(void)
 {
-    if(parent)
-        delist(&parent->child);
+    if(Parent)
+        delist(&Parent->Child);
 
-    id = NULL;
+    Id = NULL;
 }
 
 void NamedTree::purge(void)
 {
-    linked_pointer<NamedTree> node = child.begin();
+    linked_pointer<NamedTree> node = Child.begin();
     NamedTree *obj;
 
-    if(parent)
-        delist(&parent->child);
+    if(Parent)
+        delist(&Parent->Child);
 
     while(node) {
         obj = *node;
-        obj->parent = NULL; // save processing
+        obj->Parent = NULL; // save processing
         node = obj->getNext();
         delete obj;
     }
@@ -769,7 +769,7 @@ void NamedTree::purge(void)
 
 LinkedObject::LinkedObject()
 {
-    next = 0;
+    Next = 0;
 }
 
 OrderedObject::OrderedObject() : LinkedObject()
@@ -780,7 +780,7 @@ OrderedObject::OrderedObject(OrderedIndex *root) :
 LinkedObject()
 {
     assert(root != NULL);
-    next = NULL;
+    Next = NULL;
     enlistTail(root);
 }
 
@@ -788,32 +788,32 @@ void OrderedObject::delist(OrderedIndex *root)
 {
     assert(root != NULL);
 
-    OrderedObject *prev = NULL, *node;
+    OrderedObject *prior = NULL, *node;
 
     node = root->head;
 
     while(node && node != this) {
-        prev = node;
+        prior = node;
         node = node->getNext();
     }
 
     if(!node)
         return;
 
-    if(!prev)
+    if(!prior)
         root->head = getNext();
     else
-        prev->next = next;
+        prior->Next = Next;
 
     if(this == root->tail)
-        root->tail = prev;
+        root->tail = prior;
 }
 
 void OrderedObject::enlist(OrderedIndex *root)
 {
     assert(root != NULL);
 
-    next = NULL;
+    Next = NULL;
     enlistTail(root);
 }
 
@@ -824,7 +824,7 @@ void OrderedObject::enlistTail(OrderedIndex *root)
     if(root->head == NULL)
         root->head = this;
     else if(root->tail)
-        root->tail->next = this;
+        root->tail->Next = this;
 
     root->tail = this;
 }
@@ -833,26 +833,26 @@ void OrderedObject::enlistHead(OrderedIndex *root)
 {
     assert(root != NULL);
 
-    next = NULL;
+    Next = NULL;
     if(root->tail == NULL)
         root->tail = this;
     else if(root->head)
-        next = root->head;
+        Next = root->head;
 
     root->head = this;
 }
 
 LinkedList::LinkedList()
 {
-    root = 0;
-    prev = 0;
-    next = 0;
+    Root = 0;
+    Prev = 0;
+    Next = 0;
 }
 
 LinkedList::LinkedList(OrderedIndex *r)
 {
-    root = NULL;
-    next = prev = 0;
+    Root = NULL;
+    Next = Prev = 0;
     if(r)
         enlist(r);
 }
@@ -875,60 +875,61 @@ void LinkedList::insertHead(LinkedList *o)
 {
     assert(o != NULL);
 
-    if(o->root)
+    if(o->Root)
         o->delist();
 
-    if(prev) {
-        o->next = this;
-        o->prev = prev;
+    if(Prev) {
+        o->Next = this;
+        o->Prev = Prev;
     }
     else {
-        root->head = o;
-        o->prev = NULL;
+        Root->head = o;
+        o->Prev = NULL;
     }
-    o->root = root;
-    o->next = this;
-    prev = o;
+    o->Root = Root;
+    o->Next = this;
+    Prev = o;
 }
 
 void LinkedList::insertTail(LinkedList *o)
 {
     assert(o != NULL);
 
-    if(o->root)
+    if(o->Root)
         o->delist();
 
-    if(next) {
-        o->prev = this;
-        o->next = next;
+    if(Next) {
+        o->Prev = this;
+        o->Next = Next;
     }
     else {
-        root->tail = o;
-        o->next = NULL;
+        Root->tail = o;
+        o->Next = NULL;
     }
-    o->root = root;
-    o->prev = this;
-    next = o;
+    o->Root = Root;
+    o->Prev = this;
+    Next = o;
 }
 
 void LinkedList::enlistHead(OrderedIndex *r)
 {
     assert(r != NULL);
 
-    if(root)
+    if(Root)
         delist();
-    root = r;
-    prev = 0;
-    next = 0;
 
-    if(!root->tail) {
-        root->tail = root->head = static_cast<OrderedObject *>(this);
+    Root = r;
+    Prev = 0;
+    Next = 0;
+
+    if(!Root->tail) {
+        Root->tail = Root->head = static_cast<OrderedObject *>(this);
         return;
     }
 
-    next = static_cast<LinkedList *>(root->head);
-    ((LinkedList*)next)->prev = this;
-    root->head = static_cast<OrderedObject *>(this);
+    Next = static_cast<LinkedList *>(Root->head);
+    ((LinkedList*)Next)->Prev = this;
+    Root->head = static_cast<OrderedObject *>(this);
 }
 
 
@@ -936,39 +937,40 @@ void LinkedList::enlistTail(OrderedIndex *r)
 {
     assert(r != NULL);
 
-    if(root)
+    if(Root)
         delist();
-    root = r;
-    prev = 0;
-    next = 0;
 
-    if(!root->head) {
-        root->head = root->tail = static_cast<OrderedObject *>(this);
+    Root = r;
+    Prev = 0;
+    Next = 0;
+
+    if(!Root->head) {
+        Root->head = Root->tail = static_cast<OrderedObject *>(this);
         return;
     }
 
-    prev = static_cast<LinkedList *>(root->tail);
-    prev->next = this;
-    root->tail = static_cast<OrderedObject *>(this);
+    Prev = static_cast<LinkedList *>(Root->tail);
+    Prev->Next = this;
+    Root->tail = static_cast<OrderedObject *>(this);
 }
 
 void LinkedList::delist(void)
 {
-    if(!root)
+    if(!Root)
         return;
 
-    if(prev)
-        prev->next = next;
-    else if(root->head == static_cast<OrderedObject *>(this))
-        root->head = static_cast<OrderedObject *>(next);
+    if(Prev)
+        Prev->Next = Next;
+    else if(Root->head == static_cast<OrderedObject *>(this))
+        Root->head = static_cast<OrderedObject *>(Next);
 
-    if(next)
-        (static_cast<LinkedList *>(next))->prev = prev;
-    else if(root->tail == static_cast<OrderedObject *>(this))
-        root->tail = static_cast<OrderedObject *>(prev);
+    if(Next)
+        (static_cast<LinkedList *>(Next))->Prev = Prev;
+    else if(Root->tail == static_cast<OrderedObject *>(this))
+        Root->tail = static_cast<OrderedObject *>(Prev);
 
-    root = 0;
-    next = prev = 0;
+    Root = 0;
+    Next = Prev = 0;
 }
 
 LinkedList::~LinkedList()
@@ -1044,18 +1046,18 @@ void OrderedIndex::unlock_index(void)
 
 DLinkedObject::DLinkedObject() : OrderedObject()
 {
-    prev = NULL;
+    Prev = NULL;
 }
 
 void DLinkedObject::delist(void)
 {
-    if(prev)
-        prev->next = next;
+    if(Prev)
+        Prev->Next = Next;
 
-    if(next)
-        ((DLinkedObject *)next)->prev = prev;
+    if(Next)
+        ((DLinkedObject *)Next)->Prev = Prev;
 
-    next = prev = NULL;
+    Next = Prev = NULL;
 }
 
 ObjectQueue::ObjectQueue() :
@@ -1066,11 +1068,11 @@ void ObjectQueue::add(DLinkedObject *object)
     assert(object);
 
     if(tail) {
-        ((DLinkedObject *)tail)->next = object;
-        object->prev = (DLinkedObject *)tail;
+        ((DLinkedObject *)tail)->Next = object;
+        object->Prev = (DLinkedObject *)tail;
     }
 
-    object->next = NULL;
+    object->Next = NULL;
     tail = object;
     if(!head)
         head = tail;
@@ -1081,10 +1083,10 @@ void ObjectQueue::push(DLinkedObject *object)
     assert(object);
 
     if(head) {
-        ((DLinkedObject *)head)->prev = object;
-        object->next = (DLinkedObject *)head;
+        ((DLinkedObject *)head)->Prev = object;
+        object->Next = (DLinkedObject *)head;
     }
-    object->prev = NULL;
+    object->Prev = NULL;
     head = object;
     if(!tail)
         tail = head;
@@ -1097,7 +1099,7 @@ DLinkedObject *ObjectQueue::pull(void)
     if(!obj)
         return NULL;
 
-    head = (OrderedObject *)(obj->next);
+    head = (OrderedObject *)(obj->Next);
     if(!head)
         tail = NULL;
     obj->delist();
@@ -1111,7 +1113,7 @@ DLinkedObject *ObjectQueue::pop(void)
     if(!obj)
         return NULL;
 
-    tail = (OrderedObject *)(obj->prev);
+    tail = (OrderedObject *)(obj->Prev);
     if(!tail)
         head = NULL;
     obj->delist();
@@ -1127,7 +1129,7 @@ LinkedObject **OrderedIndex::index(void) const
     node = head;
     while(node) {
         op[idx++] = node;
-        node = node->next;
+        node = node->Next;
     }
     op[idx] = NULL;
     return op;
@@ -1141,7 +1143,7 @@ LinkedObject *OrderedIndex::find(unsigned index) const
     node = head;
 
     while(node && ++count < index)
-        node = node->next;
+        node = node->Next;
 
     return node;
 }
@@ -1154,7 +1156,7 @@ unsigned OrderedIndex::count(void) const
     node = head;
 
     while(node) {
-        node = node->next;
+        node = node->Next;
         ++count;
     }
     return count;
@@ -1174,7 +1176,7 @@ void ObjectStack::push(LinkedObject *list)
 {
     assert(list != NULL);
 
-    list->next = root;
+    list->Next = root;
     root = list;
 }
 
@@ -1185,8 +1187,8 @@ LinkedObject *ObjectStack::pull(void)
     obj = root;
 
     if(obj) {
-        root = obj->next;
-        obj->next = NULL;
+        root = obj->Next;
+        obj->Next = NULL;
     }
 
     return obj;

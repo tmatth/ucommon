@@ -59,7 +59,7 @@ protected:
     friend class NamedObject;
     friend class ObjectStack;
 
-    LinkedObject *next;
+    LinkedObject *Next;
 
     /**
      * Construct base class attached to a chain of objects.
@@ -137,7 +137,7 @@ public:
      * @return next linked object in list.
      */
     inline LinkedObject *getNext(void) const
-        {return next;};
+        {return Next;};
 };
 
 /**
@@ -376,7 +376,7 @@ protected:
     void delist(void);
 
 private:
-    DLinkedObject *prev;
+    DLinkedObject *Prev;
 };
 
 /**
@@ -396,7 +396,7 @@ private:
 class __EXPORT NamedObject : public OrderedObject
 {
 protected:
-    char *id;
+    char *Id;
 
     /**
      * Create an empty unnamed cell object.
@@ -539,7 +539,7 @@ public:
      * @return name id.
      */
     inline char *getId(void) const
-        {return id;};
+        {return Id;};
 
     /**
      * Compare the name of our object to see if equal.  This is a virtual
@@ -585,8 +585,8 @@ public:
 class __EXPORT NamedTree : public NamedObject
 {
 protected:
-    NamedTree *parent;
-    OrderedIndex child;
+    NamedTree *Parent;
+    OrderedIndex Child;
 
     /**
      * Create a stand-alone or root tree node, with an optional name.
@@ -675,14 +675,14 @@ public:
      * @return first child node or NULL if no children.
      */
     inline NamedTree *getFirst(void) const
-        {return static_cast<NamedTree *>(child.begin());};
+        {return static_cast<NamedTree *>(Child.begin());};
 
     /**
      * Get parent node we are listed as a child on.
      * @return parent node or NULL if none.
      */
     inline NamedTree *getParent(void) const
-        {return parent;};
+        {return Parent;};
 
     /**
      * Get child by index number.
@@ -690,28 +690,28 @@ public:
      * @return indexed child node.
      */
     inline NamedTree *getIndexed(unsigned index) const
-        {return static_cast<NamedTree *>(child.getIndexed(index));};
+        {return static_cast<NamedTree *>(Child.getIndexed(index));};
 
     /**
      * Get the ordered index of our child nodes.
      * @return ordered index of our children.
      */
     inline OrderedIndex *getIndex(void) const
-        {return const_cast<OrderedIndex*>(&child);};
+        {return const_cast<OrderedIndex*>(&Child);};
 
     /**
      * Test if this node has a name.
      * @return true if name is set.
      */
     inline operator bool() const
-        {return (id != NULL);};
+        {return (Id != NULL);};
 
     /**
      * Test if this node is unnamed.
      * @return false if name is set.
      */
     inline bool operator!() const
-        {return (id == NULL);};
+        {return (Id == NULL);};
 
     /**
      * Set or replace the name id of this node.  This will free the string
@@ -731,14 +731,14 @@ public:
      * @return true if node contains child nodes.
      */
     inline bool is_leaf(void) const
-        {return (child.begin() == NULL);};
+        {return (Child.begin() == NULL);};
 
     /**
      * Test if node is root node.
      * @return true if node is root node.
      */
     inline bool is_root(void) const
-        {return (parent == NULL);};
+        {return (Parent == NULL);};
 
     /**
      * Add leaf to a trunk, by order.  If NULL, just remove.
@@ -771,8 +771,8 @@ class __EXPORT LinkedList : public OrderedObject
 protected:
     friend class ObjectQueue;
 
-    LinkedList *prev;
-    OrderedIndex *root;
+    LinkedList *Prev;
+    OrderedIndex *Root;
 
     /**
      * Construct and add our object to an existing double linked list at end.
@@ -823,21 +823,21 @@ public:
      * @return true if we are the first node in a list.
      */
     inline bool is_head(void) const
-        {return root->head == (OrderedObject *)this;};
+        {return Root->head == (OrderedObject *)this;};
 
     /**
      * Test if we are at the end of a list.
      * @return true if we are the last node in a list.
      */
     inline bool is_tail(void) const
-        {return root->tail == (OrderedObject *)this;};
+        {return Root->tail == (OrderedObject *)this;};
 
     /**
      * Get previous node in the list for reverse iteration.
      * @return previous node in list.
      */
     inline LinkedList *getPrev(void) const
-        {return prev;};
+        {return Prev;};
 
     /**
      * Get next node in the list when iterating.
@@ -1613,7 +1613,7 @@ public:
      * @return true if value pointer is not NULL and there are no children.
      */
     inline bool is_attribute(void) const
-        {return (!child.begin() && value != NULL);};
+        {return (!Child.begin() && value != NULL);};
 
     /**
      * Get the pointer of a pointer based value tree.
@@ -1656,14 +1656,14 @@ public:
      * @return node or NULL if past end.
      */
     inline treemap *getIndexed(unsigned index) const
-        {return static_cast<treemap*>(child.getIndexed(index));};
+        {return static_cast<treemap*>(Child.getIndexed(index));};
 
     /**
      * Get the typed parent node for our node.
      * @return parent node or NULL if root of tree.
      */
     inline treemap *getParent(void) const
-        {return static_cast<treemap*>(parent);};
+        {return static_cast<treemap*>(Parent);};
 
     /**
      * Get direct typed child node of our node of specified name.  This

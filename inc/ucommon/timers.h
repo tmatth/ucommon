@@ -354,7 +354,7 @@ public:
          * @return timer queue or NULL if not attached.
          */
         inline TimerQueue *list(void)
-            {return static_cast<TimerQueue*>(root);};
+            {return static_cast<TimerQueue*>(Root);};
     };
 
 protected:

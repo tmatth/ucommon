@@ -252,7 +252,7 @@ public:
         friend class ObjectPager;
 
         inline void set(member *node)
-            {next = node;};
+            {Next = node;};
 
         inline void *get(void) const
             {return mem;};
@@ -395,7 +395,7 @@ public:
         friend class StringPager;
 
         inline void set(member *node)
-            {next = node;};
+            {Next = node;};
 
         member(LinkedObject **root, const char *data);
         member(const char *data);
