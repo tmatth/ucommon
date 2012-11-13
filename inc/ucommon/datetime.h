@@ -986,6 +986,11 @@ typedef DateTimeString  datetimestring_t;
  */
 typedef Date        date_t;
 
+/**
+ * Convenience type for using Time object.
+ */
+typedef Time        tod_t;
+
 END_NAMESPACE
 
 #endif
