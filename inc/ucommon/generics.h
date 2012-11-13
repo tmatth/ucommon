@@ -507,7 +507,7 @@ inline void zero(T& object)
     {memset((void *)&object, 0, sizeof(T)); new((caddr_t)&object) T;}
 
 /**
- * Convenience function to copy static class.
+ * Convenience function to copy class.
  * @param target to copy into.
  * @param source to copy from.
  */
@@ -516,14 +516,13 @@ inline void copy(T& target, const T& source)
     {memcpy((void *)&target, (void *)&source, sizeof(T));}
 
 /**
- * Convenience function to copy dynamic class.  We init baseclass type.
+ * Convenience function to store object pointer into object.
  * @param target to copy into.
  * @param source to copy from.
  */
-template<typename T, typename B>
-inline void copy(T& target, const T& source)
-    {memcpy((void *)&target, (void *)&source, sizeof(T)); new((caddr_t)static_cast<B*>(&target)) B;}
-
+template<typename T>
+inline void store(T& target, const T* source)
+    {memcpy((void *)&target, (void *)source, sizeof(T));}
 
 /**
  * Convenience function to swap objects.
