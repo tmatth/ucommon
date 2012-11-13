@@ -159,8 +159,9 @@ public:
      * @param offset from start of segment.
      * @param buffer to copy into.
      * @param size of object to copy.
+     * @return true on success.
      */
-    void copy(size_t offset, void *buffer, size_t size) const;
+    bool copy(size_t offset, void *buffer, size_t size) const;
 
     /**
      * Get size of mapped segment.

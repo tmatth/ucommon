@@ -491,6 +491,41 @@ inline void dupfree<char*>(char* object)
     {::free(object);}
 
 /**
+ * Convenience function to reset an existing object.
+ * @param object type to reset.
+ */
+template<typename T>
+inline void reset(T& object)
+    {new((caddr_t)&object) T;}
+
+/**
+ * Convenience function to zero an object and restore type info.
+ * @param object to zero in memory.
+ */
+template<typename T>
+inline void zero(T& object)
+    {memset((void *)&object, 0, sizeof(T)); new((caddr_t)&object) T;}
+
+/**
+ * Convenience function to copy static class.
+ * @param target to copy into.
+ * @param source to copy from.
+ */
+template<typename T>
+inline void copy(T& target, const T& source)
+    {memcpy((void *)&target, (void *)&source, sizeof(T));}
+
+/**
+ * Convenience function to copy dynamic class.  We init baseclass type.
+ * @param target to copy into.
+ * @param source to copy from.
+ */
+template<typename T, typename B>
+inline void copy(T& target, const T& source)
+    {memcpy((void *)&target, (void *)&source, sizeof(T)); new((caddr_t)static_cast<B*>(&target)) B;}
+
+
+/**
  * Convenience function to swap objects.
  * @param o1 to swap.
  * @param o2 to swap.
