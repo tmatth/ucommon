@@ -971,6 +971,27 @@ public:
     void set(void);
 };
 
+class __EXPORT isotime : public PrintProtocol, public InputProtocol
+{
+private:
+    Date *d;
+    Time *t;
+
+    enum {DATE, TIME, DATETIME} mode;
+    char buf[32];
+    unsigned pos;
+
+protected:
+    const char *_print(void) const;
+
+    int _input(int code);
+
+public:
+    isotime(Date& date, Time& time);
+    isotime(Date& date);
+    isotime(Time& time);
+};
+
 /**
  * Convenience type for using DateTime object.
  */
