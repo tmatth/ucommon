@@ -459,7 +459,7 @@ void *MappedMemory::sbrk(size_t len)
 
 bool MappedMemory::copy(size_t offset, void *buffer, size_t bufsize) const
 {
-    if(!map || offset + bufsize >= size) {
+    if(!map || (offset + bufsize > size)) {
         fault();
         return false;
     }
