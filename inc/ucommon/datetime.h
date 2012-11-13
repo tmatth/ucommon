@@ -41,6 +41,11 @@
 #include <ucommon/string.h>
 #endif
 
+#ifndef _MSWINDOWS_
+#include <unistd.h>
+#include <sys/time.h>
+#endif
+
 #include <time.h>
 
 #define DATE_STRING_SIZE        10
@@ -1014,7 +1019,7 @@ typedef Date        date_t;
 typedef Time        tod_t;
 
 extern "C" {
-    __EXPORT long tzoffset(void);
+    __EXPORT long tzoffset(struct timezone *tz = NULL);
 }
 
 END_NAMESPACE

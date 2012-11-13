@@ -1094,13 +1094,13 @@ final:
 }
 
 extern "C" {
-    long tzoffset(void)
+    long tzoffset(struct timezone *tz)
     {
         struct timeval now;
         time_t t1, t2 = 0;
         struct tm t;
         
-        gettimeofday(&now, NULL);
+        gettimeofday(&now, tz);
         t1 = now.tv_sec;
 
 #ifdef  HAVE_GMTIME_R
