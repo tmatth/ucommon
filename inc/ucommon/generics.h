@@ -495,7 +495,7 @@ inline void dupfree<char*>(char* object)
  * @param object type to reset.
  */
 template<typename T>
-inline void reset(T& object)
+inline void reset_unsafe(T& object)
     {new((caddr_t)&object) T;}
 
 /**
@@ -503,7 +503,7 @@ inline void reset(T& object)
  * @param object to zero in memory.
  */
 template<typename T>
-inline void zero(T& object)
+inline void zero_unsafe(T& object)
     {memset((void *)&object, 0, sizeof(T)); new((caddr_t)&object) T;}
 
 /**
@@ -512,7 +512,7 @@ inline void zero(T& object)
  * @param source to copy from.
  */
 template<typename T>
-inline void copy(T* target, const T* source)
+inline void copy_unsafe(T* target, const T* source)
     {memcpy((void *)target, (void *)source, sizeof(T));}
 
 /**
@@ -521,7 +521,7 @@ inline void copy(T* target, const T* source)
  * @param source to copy from.
  */
 template<typename T>
-inline void store(T& target, const T* source)
+inline void store_unsafe(T& target, const T* source)
     {memcpy((void *)&target, (void *)source, sizeof(T));}
 
 /**
