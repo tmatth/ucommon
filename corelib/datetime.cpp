@@ -23,6 +23,7 @@
 #include <ucommon/datetime.h>
 #include <ucommon/thread.h>
 #include <stdlib.h>
+#include <ctype.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -726,7 +727,7 @@ DateTime::DateTime(const char *a_str, size_t size)
 
 DateTime::DateTime(int year, unsigned month, unsigned day,
            int hour, int minute, int second) :
-  Date(year, month, day), Time(hour, minute, second)
+    Date(year, month, day), Time(hour, minute, second)
 {}
 
 DateTime::DateTime() : Date(), Time()
@@ -1021,5 +1022,73 @@ void DateTimeString::set(void)
 {
     DateTime::set();
     update();
+}
+
+isotime::isotime(Time& time)
+{
+    t = &time;
+    pos = 0;
+    mode = TIME;
+    time.put(buf);
+}
+
+isotime::isotime(Date& date)
+{
+    d = &date;
+    pos = 0;
+    mode = DATE;
+    date.put(buf);
+}
+
+isotime::isotime(Date& date, Time& time)
+{
+    d = &date;
+    t = &time;
+    pos = 0;
+    mode = DATETIME;
+    date.put(buf);
+    buf[10] = ' ';
+    time.put(buf + 11);
+}
+
+const char *isotime::_print(void) const
+{
+    return buf;
+}
+
+int isotime::_input(int code)
+{
+    if(isdigit(buf[pos]) && isdigit(code)) {
+        buf[pos++] = code;
+        if(buf[pos] == 0) {
+            code = EOF;
+            goto final;
+        }
+        return 0;
+    }
+
+    if(code == buf[pos]) {
+        ++pos;
+        return 0;
+    }
+
+final:
+    buf[pos] = 0;
+
+    switch(mode) {
+    case DATE:
+        d->set(buf);
+        break;
+    case TIME:
+        t->set(buf);
+        break;
+    case DATETIME:
+        buf[10] = 0;
+        d->set(buf);
+        t->set(buf + 11);
+        break;
+    };
+
+    return code;
 }
 
