@@ -512,8 +512,8 @@ inline void zero(T& object)
  * @param source to copy from.
  */
 template<typename T>
-inline void copy(T& target, const T& source)
-    {memcpy((void *)&target, (void *)&source, sizeof(T));}
+inline void copy(T* target, const T* source)
+    {memcpy((void *)target, (void *)source, sizeof(T));}
 
 /**
  * Convenience function to store object pointer into object.
