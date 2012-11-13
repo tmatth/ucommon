@@ -26,12 +26,12 @@ using namespace UCOMMON_NAMESPACE;
 extern int _posix_clocking;
 #endif
 
-static long difftime(time_t ref)
+static long _difftime(time_t ref)
 {
     time_t now;
     time(&now);
 
-    return (long)(ref - now);
+    return (long)difftime(ref, now);
 }
 
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
@@ -144,7 +144,7 @@ Timer::Timer(const Timer& copy)
 Timer::Timer(time_t in)
 {
     set();
-    timer.tv_sec += difftime(in);
+    timer.tv_sec += _difftime(in);
 }
 
 #ifdef  _MSWINDOWS_
@@ -179,7 +179,7 @@ void Timer::set(timeout_t timeout)
 void Timer::set(time_t time)
 {
     set();
-    timer.tv_sec += difftime(time);
+    timer.tv_sec += _difftime(time);
 }
 
 void TimerQueue::event::attach(TimerQueue *tq)
@@ -417,7 +417,7 @@ Timer& Timer::operator+=(time_t abs)
 {
     if(!is_active())
         set();
-    timer.tv_sec += difftime(abs);
+    timer.tv_sec += _difftime(abs);
     updated = true;
     return *this;
 }
@@ -426,7 +426,7 @@ Timer& Timer::operator-=(time_t abs)
 {
     if(!is_active())
         set();
-    timer.tv_sec -= difftime(abs);
+    timer.tv_sec -= _difftime(abs);
     return *this;
 }
 
@@ -440,7 +440,7 @@ Timer& Timer::operator=(time_t abs)
     if(!abs)
         return *this;
 
-    timer.tv_sec += difftime(abs);
+    timer.tv_sec += _difftime(abs);
     updated = true;
     return *this;
 }
