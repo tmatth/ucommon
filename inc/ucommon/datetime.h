@@ -343,10 +343,11 @@ protected:
     long seconds;
 
 protected:
-    void set(int hour, int minute = 0, int second = 0);
     virtual void update(void);
 
 public:
+    void set(int hour, int minute = 0, int second = 0);
+
     /**
      * Constant for number of seconds in a day.
      */
@@ -1011,6 +1012,10 @@ typedef Date        date_t;
  * Convenience type for using Time object.
  */
 typedef Time        tod_t;
+
+extern "C" {
+    __EXPORT long tzoffset(void);
+}
 
 END_NAMESPACE
 

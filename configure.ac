@@ -351,7 +351,7 @@ if test "$threading" = "none" ; then
     fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r localtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit realpath symlink readlink waitpid wait4 ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r localtime_r gmtime_r posix_fadvise ftruncate pwrite setpgrp setlocale gettext execvp atexit realpath symlink readlink waitpid wait4 ; do
     found="no"
     AC_CHECK_FUNC($func,[
         found=$func
@@ -384,6 +384,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r loc
         ;;
     ftok)
         AC_DEFINE(HAVE_FTOK, [1], [has ftok])
+        ;;
+    gmtime_r)
+        AC_DEFINE(HAVE_GMTIME_R, [1], [has localtime_r])
         ;;
     localtime_r)
         AC_DEFINE(HAVE_LOCALTIME_R, [1], [has localtime_r])

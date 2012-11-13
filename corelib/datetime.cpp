@@ -22,6 +22,7 @@
 #include <ucommon/string.h>
 #include <ucommon/datetime.h>
 #include <ucommon/thread.h>
+#include <ucommon/timers.h>
 #include <stdlib.h>
 #include <ctype.h>
 #ifdef HAVE_UNISTD_H
@@ -1090,5 +1091,27 @@ final:
     };
 
     return code;
+}
+
+extern "C" {
+    long tzoffset(void)
+    {
+        struct timeval now;
+        time_t t1, t2 = 0;
+        struct tm t;
+        
+        gettimeofday(&now, NULL);
+        t1 = now.tv_sec;
+
+#ifdef  HAVE_GMTIME_R
+        gmtime_r(&t1, &t);
+#else
+        t = *gmtime(&t1);
+#endif
+
+        t.tm_isdst = 0;
+        t2 = mktime(&t);
+        return (time_t)difftime(t1, t2);
+    } 
 }
 
