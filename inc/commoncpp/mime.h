@@ -54,8 +54,8 @@
 
 NAMESPACE_COMMONCPP
 
-class __EXPORT MIMEMultipart;
-class __EXPORT MIMEItemPart;
+class MIMEMultipart;
+class MIMEItemPart;
 
 /**
  * A container class for multi-part MIME document objects which can
@@ -67,7 +67,7 @@ class __EXPORT MIMEItemPart;
 class __EXPORT MIMEMultipart
 {
 protected:
-    friend class __EXPORT MIMEItemPart;
+    friend class MIMEItemPart;
     char boundry[8];
     char mtype[80];
     char *header[16];

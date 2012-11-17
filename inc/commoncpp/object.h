@@ -51,8 +51,8 @@
 
 NAMESPACE_COMMONCPP
 
-class __EXPORT MapObject;
-class __EXPORT MapIndex;
+class MapObject;
+class MapIndex;
 
 /**
  * A reference countable object.  This is used in association with smart

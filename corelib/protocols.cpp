@@ -732,3 +732,10 @@ CharacterProtocol& _character_operators::input(CharacterProtocol& p, double& v)
     return p;
 }
 
+PrintProtocol::~PrintProtocol()
+{
+}
+
+InputProtocol::~InputProtocol()
+{
+}

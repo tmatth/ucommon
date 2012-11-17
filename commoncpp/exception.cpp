@@ -91,7 +91,7 @@ const char* IOException::getSystemErrorString() const throw()
         _systemErrorString = new char[errStrSize];
 #ifndef _MSWINDOWS_
 #ifdef  HAVE_STRERROR_R
-#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+#if ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !defined(_GNU_SOURCE) || !defined(APPLE))
     assert(strerror_r(_systemError, _systemErrorString, errStrSize) == 0);
 #else
     _systemErrorString = strerror_r(_systemError, _systemErrorString, errStrSize);

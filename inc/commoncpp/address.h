@@ -79,7 +79,7 @@ NAMESPACE_COMMONCPP
  */
 typedef unsigned short tpport_t;
 
-class __EXPORT IPV4Host;
+class IPV4Host;
 
 /**
  * Classes derived from IPV4Address would require an specific
@@ -660,7 +660,7 @@ inline struct in_addr getaddress(const IPV4Address &ia)
 
 #ifdef  CCXX_IPV6
 
-class __EXPORT IPV6Host;
+class IPV6Host;
 
 /**
  * Classes derived from IPV6Address would require an specific

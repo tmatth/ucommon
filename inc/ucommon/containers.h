@@ -340,7 +340,7 @@ public:
     /**
      * Destroy queue.  If no pager is used, then frees heap.
      */
-    ~Stack();
+    virtual ~Stack();
 
     /**
      * Remove a specific object pointer for the queue.  This can remove

@@ -52,6 +52,9 @@ NAMESPACE_UCOMMON
  */
 class __EXPORT UnlockAccess
 {
+public:
+    virtual ~UnlockAccess();
+
 protected:
     virtual void _unlock(void) = 0;
 };

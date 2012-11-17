@@ -21,6 +21,10 @@
 
 using namespace UCOMMON_NAMESPACE;
 
+UnlockAccess::~UnlockAccess()
+{
+}
+
 SharedAccess::~SharedAccess()
 {
 }

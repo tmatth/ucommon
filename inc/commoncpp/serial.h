@@ -597,8 +597,8 @@ public:
 
 //  Not support this right now.......
 //
-class __EXPORT SerialPort;
-class __EXPORT SerialService;
+class SerialPort;
+class SerialService;
 
 /**
  * The serial port is an internal class which is attached to and then

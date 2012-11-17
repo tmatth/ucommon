@@ -137,6 +137,8 @@ public:
 class __EXPORT PrintProtocol
 {
 public:
+    virtual ~PrintProtocol();
+
     /**
      * Extract formatted string for object.
      */
@@ -154,6 +156,8 @@ public:
 class __EXPORT InputProtocol
 {
 public:
+    virtual ~InputProtocol();
+
     /**
      * Extract formatted string for object.
      * @param character code we are pushing.
