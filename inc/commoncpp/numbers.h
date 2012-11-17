@@ -28,7 +28,7 @@ public:
 
     inline Date(const char *ptr, size_t size = 0) : ucommon::Date(ptr, size) {};
 
-    inline Date(int y, unsigned m = 1, unsigned d = 1) : ucommon::Date(y, m, d) {};
+    inline Date(int y, unsigned m, unsigned d) : ucommon::Date(y, m, d) {};
 
     inline Date(const Date& object) : ucommon::Date(object) {};
 

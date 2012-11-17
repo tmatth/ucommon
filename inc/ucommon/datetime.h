@@ -119,7 +119,7 @@ public:
      * @param month of date (1-12).
      * @param day of month (1-31).
      */
-    Date(int year, unsigned month = 1, unsigned day = 1);
+    Date(int year, unsigned month, unsigned day);
 
     /**
      * Create a julian date object from another object.
