@@ -313,8 +313,12 @@ typedef char *caddr_t;
 #include <sys/types.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #endif
+
+#undef  getchar
+#undef  putchar
 
 #ifndef _GNU_SOURCE
 typedef void (*sighandler_t)(int);  /**< Convenient typedef for signal handlers. */
@@ -322,11 +326,8 @@ typedef void (*sighandler_t)(int);  /**< Convenient typedef for signal handlers.
 typedef unsigned long timeout_t;    /**< Typedef for millisecond timer values. */
 
 #include <stdlib.h>
-#include <stdio.h>
+#include <ctype.h>
 #include <errno.h>
-
-#undef  getchar
-#undef  putchar
 
 #ifdef  _MSWINDOWS_
 #ifndef ENETDOWN

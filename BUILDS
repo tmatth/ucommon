@@ -86,16 +86,13 @@ through the pth I/O functions.
 
 Recent Platforms and Versions Tested:
 
-GNU/Linux gcc 4.5	4.0.0	x86_64
-GNU/Linux gcc 4.4	4.0.0	x86_64
-GNU/Linux gcc 4.3	3.4.0	x86_64
-GNU/Linux gcc 4.2	3.0.2	i386
-GNU/Linux gcc 2.95	1.9.0	i386		can only build without stdcpp?
-OpenBSD4			4.0.0	i386
-NetBSD5				4.0.0	i386		
-OpenSolaris sunwpro	4.0.0	x86			(double) conversion of DateTime fails
-OS/X				3.1.0	ppc, x86	
+GNU/Linux gcc		6.0.0	x86, x86_64, arm, mipsel
+GNU/Linux clang		6.0.0	x86_64
+OpenBSD4		6.0.0	i386
+NetBSD5			4.0.0	i386		
+OpenSolaris sunwpro	4.0.0	x86	    (double) conv of DateTime fails
+OS/X			6.0.0	ppc, x86	
 QNX (gcc 2.95)		1.8.1	i386
-MingW32/cross		4.0.0	i386		ipv6 support broken in wine unit tests
-Cygwin				1.8.0	i386
+MingW/cross		6.0.0	i386, x86   ipv6 broken in wine unit tests
+Cygwin			1.8.0	i386
 
