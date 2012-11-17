@@ -293,17 +293,17 @@ int BufferProtocol::_putch(int ch)
     return ch;
 }
 
-size_t BufferProtocol::printf(const char *format, ...)
+size_t BufferProtocol::printf(const char *pformat, ...)
 {
     va_list args;
     int result;
     size_t count;
 
-    if(!flush() || !output || !format)
+    if(!flush() || !output || !pformat)
         return 0;
 
-    va_start(args, format);
-    result = vsnprintf(output, bufsize, format, args);
+    va_start(args, pformat);
+    result = vsnprintf(output, bufsize, pformat, args);
     va_end(args);
     if(result < 1)
         return 0;

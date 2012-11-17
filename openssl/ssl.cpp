@@ -54,7 +54,7 @@ SSLBuffer::~SSLBuffer()
     release();
 }
 
-void SSLBuffer::open(const char *host, const char *service, size_t bufsize)
+void SSLBuffer::open(const char *host, const char *service, size_t size)
 {
     if(server) {
         ioerr = EBADF;
@@ -62,7 +62,7 @@ void SSLBuffer::open(const char *host, const char *service, size_t bufsize)
     }
 
     close();
-    TCPBuffer::open(host, service, bufsize);
+    TCPBuffer::open(host, service, size);
 
     if(!is_open() || !ssl)
         return;

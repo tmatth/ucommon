@@ -1785,9 +1785,11 @@ static void exit_handler(void)
     }
 }
 
-static void abort_handler(int signo)
-{
-    exit_handler();
+extern "C" {
+    static void abort_handler(int signo)
+    {
+        exit_handler();
+    }
 }
 
 void shell::exiting(exitproc_t handler)

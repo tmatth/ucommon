@@ -56,13 +56,13 @@ sstream::~sstream()
     release();
 }
 
-void sstream::open(const char *host, const char *service, size_t bufsize)
+void sstream::open(const char *host, const char *service, size_t size)
 {
     if(server)
         return;
 
     close();
-    tcpstream::open(host, service, bufsize);
+    tcpstream::open(host, service, size);
 
     if(!is_open() || !ssl)
         return;

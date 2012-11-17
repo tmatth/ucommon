@@ -415,7 +415,7 @@ class __EXPORT AppLog : protected streambuf, public ostream
      */
     AppLog& operator<< (ostream& (*pfManipulator)(ostream&));
 
-    friend  ostream& operator << (ostream &out, AppLog & al)
+    friend  ostream& operator << (ostream &os, AppLog & al)
     {
       return al;
     }

@@ -260,14 +260,14 @@ memalloc(size)
     typesize = objsize;
 }
 
-void *ObjectPager::get(unsigned index) const
+void *ObjectPager::get(unsigned ind) const
 {
     linked_pointer<member> list = root;
 
-    if(index >= members)
+    if(ind >= members)
         return invalid();
 
-    while(index--)
+    while(ind--)
         list.next();
 
     return list->mem;
@@ -425,13 +425,13 @@ unsigned StringPager::token(const char *text, const char *list, const char *quot
 {
     unsigned count = 0;
     const char *result;
-    char *last = NULL;
+    char *lastp = NULL;
 
     if(!text || !*text)
         return 0;
 
     strdup_t tmp = strdup(text);
-    while(NULL != (result = String::token(tmp, &last, list, quote, end))) {
+    while(NULL != (result = String::token(tmp, &lastp, list, quote, end))) {
         ++count;
         add(result);
     }
@@ -507,13 +507,13 @@ unsigned StringPager::split(const char *text, const char *string, unsigned flags
     return count;
 }
 
-void StringPager::set(unsigned index, const char *text)
+void StringPager::set(unsigned ind, const char *text)
 {
     linked_pointer<member> list = root;
 
-    if(index >= members)
+    if(ind >= members)
 
-    while(index--)
+    while(ind--)
         list.next();
 
     size_t size = strlen(text) + 1;
@@ -527,14 +527,14 @@ const char *StringPager::invalid(void) const
     return NULL;
 }
 
-const char *StringPager::get(unsigned index) const
+const char *StringPager::get(unsigned ind) const
 {
     linked_pointer<member> list = root;
 
-    if(index >= members)
+    if(ind >= members)
         return invalid();
 
-    while(index--)
+    while(ind--)
         list.next();
 
     return list->get();
@@ -648,24 +648,24 @@ void StringPager::set(char **list)
 void StringPager::push(char **list)
 {
     const char *cp;
-    unsigned index = 0;
+    unsigned ind = 0;
 
     if(!list)
         return;
 
-    while(NULL != (cp = list[index++]))
+    while(NULL != (cp = list[ind++]))
         push(cp);
 }
 
 void StringPager::add(char **list)
 {
     const char *cp;
-    unsigned index = 0;
+    unsigned ind = 0;
 
     if(!list)
         return;
 
-    while(NULL != (cp = list[index++]))
+    while(NULL != (cp = list[ind++]))
         add(cp);
 }
 
@@ -1321,16 +1321,16 @@ char *bufpager::dup(void)
         return NULL;
 
     unsigned long index = 0, pos = 0;
-    cpage_t *page = first;
+    cpage_t *cpage = first;
 
-    while(index < ccount && page) {
-        if(pos >= page->used) {
-            if(!page->next)
+    while(index < ccount && cpage) {
+        if(pos >= cpage->used) {
+            if(!cpage->next)
                 break;
-            page = page->next;
+            cpage = cpage->next;
             pos = 0l;
         }
-        text[index++] = page->text[pos++];
+        text[index++] = cpage->text[pos++];
     }
     text[index] = 0;
     return text;
@@ -1445,12 +1445,12 @@ void bufpager::reset(void)
     first = last = current = NULL;
 }
 
-charmem::charmem(char *mem, size_t size) :
+charmem::charmem(char *memaddr, size_t memsize) :
 CharacterProtocol()
 {
     dynamic = false;
     buffer = NULL;
-    set(mem, size);
+    set(memaddr, memsize);
 }
 
 charmem::charmem(size_t memsize)
