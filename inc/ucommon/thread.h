@@ -2037,6 +2037,13 @@ inline bool _rw_release_(const void *obj)
     return false;
 }
 
+#define ENTER_EXCLUSIVE \
+    do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
+        pthread_mutex_lock(&__sync__);
+
+#define LEAVE_EXCLUSIVE \
+    pthread_mutex_unlock(&__sync__);} while(0);
+
 #define SYNC(obj) for(bool _sync_flag_ = _sync_protect_(obj); _sync_flag_; _sync_flag_ = _sync_release_(obj))
 
 #define SHARED(obj) for(bool _sync_flag_ = _rw_reader_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
