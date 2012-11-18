@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #if _POSIX_PRIORITY_SCHEDULING > 0
 #include <sched.h>
