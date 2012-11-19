@@ -1171,6 +1171,7 @@ fsys::fsys()
 dir::dir(const char *path) :
 fsys()
 {
+    ptr = NULL;
     open(path);
 }
 
