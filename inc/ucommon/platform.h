@@ -327,6 +327,7 @@ typedef unsigned long timeout_t;    /**< Typedef for millisecond timer values. *
 
 #include <stdlib.h>
 #include <ctype.h>
+#include <limits.h>
 #include <errno.h>
 
 #ifdef  _MSWINDOWS_
