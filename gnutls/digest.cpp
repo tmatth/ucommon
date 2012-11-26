@@ -115,8 +115,10 @@ const char *Digest::c_str(void)
 
 void Digest::reset(void)
 {
+    unsigned char temp[MAX_DIGEST_HASHSIZE / 8];
+
     if(context) {
-        gnutls_hash_deinit((MD_CTX)context, buffer);
+        gnutls_hash_deinit((MD_CTX)context, temp);
         context = NULL;
     }
     if(hashid == 0)

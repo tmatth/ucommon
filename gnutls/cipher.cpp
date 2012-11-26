@@ -41,22 +41,24 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 
 void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
-    if(hashid == GCRY_MD_NONE || algoid == GCRY_CIPHER_NONE) {
+    if(!hashid || algoid == GCRY_CIPHER_NONE) {
         keysize = 0;
         return;
     }
 
-    gcry_md_hd_t mdc;
-    if(gcry_md_open(&mdc, hashid, 0) != 0) {
+    size_t kpos = 0, ivpos = 0;
+    size_t mdlen = gnutls_hash_get_len((MD_ID)hashid);
+    size_t tlen = strlen(text);
+
+    if(!hashid || !mdlen) {
         clear();
         return;
     }
 
-    size_t kpos = 0, ivpos = 0;
-    size_t mdlen = gcry_md_get_algo_dlen(hashid);
-    size_t tlen = strlen(text);
-
     char previous[MAX_DIGEST_HASHSIZE / 8];
+    unsigned char temp[MAX_DIGEST_HASHSIZE / 8];
+    MD_CTX mdc;
+
     unsigned prior = 0;
     unsigned loop;
 
@@ -67,24 +69,21 @@ void Cipher::Key::assign(const char *text, size_t size, const unsigned char *sal
         count = _rounds;
 
     do {
-        gcry_md_reset(mdc);
+        gnutls_hash_init(&mdc, (MD_ID)hashid);
 
         if(prior++)
-            gcry_md_write(mdc, previous, mdlen);
+            gnutls_hash(mdc, previous, mdlen);
 
-        gcry_md_write(mdc, (const char *)text, tlen);
+        gnutls_hash(mdc, text, tlen);
 
         if(salt)
-            gcry_md_write(mdc, (const char *)salt, 8);
+            gnutls_hash(mdc, salt, 8);
 
-        gcry_md_final(mdc);
-        memcpy(previous, gcry_md_read(mdc, hashid), mdlen);
+        gnutls_hash_deinit(mdc, previous);
 
         for(loop = 1; loop < count; ++loop) {
-            gcry_md_reset(mdc);
-            gcry_md_write(mdc, previous, mdlen);
-            gcry_md_final(mdc);
-            memcpy(previous, gcry_md_read(mdc, hashid), mdlen);
+            memcpy(temp, previous, mdlen);
+            gnutls_hash_fast((MD_ID)hashid, temp, mdlen, previous); 
         }
 
         size_t pos = 0;
@@ -93,7 +92,6 @@ void Cipher::Key::assign(const char *text, size_t size, const unsigned char *sal
         while(ivpos < blksize && pos < mdlen)
             ivbuf[ivpos++] = previous[pos++];
     } while(kpos < keysize || ivpos < blksize);
-    gcry_md_close(mdc);
 }
 
 void Cipher::Key::assign(const char *text, size_t size)
@@ -125,7 +123,7 @@ void Cipher::Key::set(const char *cipher, const char *digest)
     if(eq_case(digest, "sha"))
         digest = "sha1";
 
-    hashid = gcry_md_map_name(digest);
+    hashid = context::map_digest(digest);
 }
 
 void Cipher::Key::set(const char *cipher)
@@ -165,7 +163,7 @@ void Cipher::Key::set(const char *cipher)
 void Cipher::Key::clear()
 {
     algoid = GCRY_CIPHER_NONE;
-    hashid = GCRY_MD_NONE;
+    hashid = 0;
     keysize = blksize = 0;
     zerofill(keybuf, sizeof(keybuf));
     zerofill(ivbuf, sizeof(ivbuf));
@@ -278,8 +276,6 @@ size_t Cipher::puts(const char *text)
 
 size_t Cipher::put(const unsigned char *data, size_t size)
 {
-    gcry_error_t errcode;
-
     if(size % keys.iosize() || !bufaddr)
         return 0;
 
@@ -294,10 +290,10 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 
     switch(bufmode) {
     case Cipher::ENCRYPT:
-        errcode = gcry_cipher_encrypt((CIPHER_CTX)context, bufaddr + bufpos, size, data, size);
+        gcry_cipher_encrypt((CIPHER_CTX)context, bufaddr + bufpos, size, data, size);
         break;
     case Cipher::DECRYPT:
-        errcode = gcry_cipher_decrypt((CIPHER_CTX)context, bufaddr + bufpos, size, data, size);
+        gcry_cipher_decrypt((CIPHER_CTX)context, bufaddr + bufpos, size, data, size);
     }
 
     count += size;
