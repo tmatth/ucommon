@@ -18,42 +18,6 @@
 #include "local.h"
 
 extern "C" {
-#ifndef _MSWINDOWS_
-    static int gcrypt_mutex_init(void **mp)
-    {
-        if(mp)
-            *mp = new mutex_t();
-        return 0;
-    }
-
-    static int gcrypt_mutex_destroy(void **mp)
-    {
-        if(mp && *mp)
-            delete (mutex_t *)(*mp);
-        return 0;
-    }
-
-    static int gcrypt_mutex_lock(void **mp)
-    {
-        mutex_t *m = (mutex_t *)(*mp);
-        m->acquire();
-        return 0;
-    }
-
-    static int gcrypt_mutex_unlock(void **mp)
-    {
-        mutex_t *m = (mutex_t *)(*mp);
-        m->release();
-        return 0;
-    }
-
-    static struct gcry_thread_cbs gcrypt_threading = {
-        GCRY_THREAD_OPTION_PTHREAD, NULL,
-        gcrypt_mutex_init, gcrypt_mutex_destroy,
-        gcrypt_mutex_lock, gcrypt_mutex_unlock
-    };
-#endif
-
     static void secure_shutdown(void)
     {
         gnutls_global_deinit();
@@ -74,10 +38,6 @@ bool secure::init(void)
     if(!initialized) {
         Thread::init();
         Socket::init();
-
-#ifndef _MSWINDOWS_
-        gcry_control(GCRYCTL_SET_THREAD_CBS, &gcrypt_threading);
-#endif
 
         gnutls_global_init();
         gnutls_priority_init (&context::priority_cache, "NORMAL", NULL);

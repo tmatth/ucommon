@@ -20,20 +20,150 @@
 static const unsigned char *_salt = NULL;
 static unsigned _rounds = 1;
 
+int context::map_cipher(const char *cipher)
+{
+    char algoname[64];
+
+    enum {
+        NONE, CBC, ECB, CFB, OFB, GCM
+    } modeid;
+
+    String::set(algoname, sizeof(algoname), cipher);
+    char *fpart = strchr(algoname, '-');
+    char *lpart = strrchr(algoname, '-');
+
+    modeid = NONE;
+
+    if(lpart) {
+        if(fpart != lpart)
+            *(fpart++) = 0;
+        else
+            ++fpart;
+
+        *(lpart++) = 0;
+        if(eq_case(lpart, "cbc"))
+            modeid = CBC;
+        else if(eq_case(lpart, "ecb"))
+            modeid = ECB;
+        else if(eq_case(lpart, "cfb") || eq_case(lpart, "pgp"))
+            modeid = CFB;
+        else if(eq_case(lpart, "ofb"))
+            modeid = OFB;
+        else if(eq_case(lpart, "gcm"))
+            modeid = GCM;
+        else
+            modeid = NONE;    
+    }
+    else if(eq_case(cipher, "aes128") || eq_case(cipher, "aes"))
+        return GNUTLS_CIPHER_AES_128_CBC;
+    else if(eq_case(cipher, "aes256"))
+        return GNUTLS_CIPHER_AES_256_CBC;
+    else if(eq_case(cipher, "aes192"))
+        return GNUTLS_CIPHER_AES_192_CBC;
+    else if(eq_case(cipher, "arcfour") || eq_case(cipher, "arc4"))
+        return GNUTLS_CIPHER_ARCFOUR_128;
+    else if(eq_case(cipher, "des"))
+        return GNUTLS_CIPHER_DES_CBC;
+    else if(eq_case(cipher, "3des"))
+        return GNUTLS_CIPHER_3DES_CBC;
+    else if(eq_case(cipher, "rc2"))
+        return GNUTLS_CIPHER_RC2_40_CBC;
+    else if(eq_case(cipher, "idea"))
+        return GNUTLS_CIPHER_IDEA_PGP_CFB;
+    else if(eq_case(cipher, "twofish") || eq_case(cipher, "2fish"))
+        return GNUTLS_CIPHER_TWOFISH_PGP_CFB;
+    else if(eq_case(cipher, "blowfish"))
+        return GNUTLS_CIPHER_BLOWFISH_PGP_CFB;
+
+    else if(eq_case(algoname, "cast") || eq_case(algoname, "cast5"))
+        return GNUTLS_CIPHER_CAST5_PGP_CFB;
+
+    switch(modeid) {
+    case CFB:
+        if(eq_case(algoname, "aes")) {
+            if(atoi(fpart) == 128)
+                return GNUTLS_CIPHER_AES128_PGP_CFB;
+            if(atoi(fpart) == 192)
+                return GNUTLS_CIPHER_AES192_PGP_CFB;
+            if(atoi(fpart) == 256)
+                return GNUTLS_CIPHER_AES256_PGP_CFB;
+            return 0;
+        }
+
+        if(eq_case(algoname, "idea"))
+            return GNUTLS_CIPHER_IDEA_PGP_CFB;
+        if(eq_case(algoname, "3des"))
+            return GNUTLS_CIPHER_3DES_PGP_CFB;
+        if(eq_case(algoname, "cast") || eq_case(algoname, "cast5"))
+            return GNUTLS_CIPHER_CAST5_PGP_CFB;
+        if(eq_case(algoname, "twofish") || eq_case(algoname, "2fish"))
+            return GNUTLS_CIPHER_TWOFISH_PGP_CFB;
+        if(eq_case(algoname, "blowfish"))
+            return GNUTLS_CIPHER_BLOWFISH_PGP_CFB;
+        if(eq_case(algoname, "sk"))
+            return GNUTLS_CIPHER_SAFER_SK128_PGP_CFB;
+        return 0;
+    case GCM:
+        if(eq_case(algoname, "aes")) {
+            if(atoi(fpart) == 128)
+                return GNUTLS_CIPHER_AES_128_GCM;
+            if(atoi(fpart) == 256)
+                return GNUTLS_CIPHER_AES_256_GCM;
+            return 0;
+        }
+        return 0;
+    case CBC:
+        if(eq_case(algoname, "aes")) {
+            if(atoi(fpart) == 128)
+                return GNUTLS_CIPHER_AES_128_CBC;
+            if(atoi(fpart) == 192)
+                return GNUTLS_CIPHER_AES_192_CBC;
+            if(atoi(fpart) == 256)
+                return GNUTLS_CIPHER_AES_256_CBC;
+            return 0;
+        }
+        if(eq_case(algoname, "camellia")) {
+            if(atoi(fpart) == 128)
+                return GNUTLS_CIPHER_CAMELLIA_128_CBC;
+            if(atoi(fpart) == 256)
+                return GNUTLS_CIPHER_CAMELLIA_256_CBC;
+            return 0;
+        }
+        if(eq_case(algoname, "3des"))
+            return GNUTLS_CIPHER_3DES_CBC;
+        if(eq_case(algoname, "des"))
+            return GNUTLS_CIPHER_DES_CBC;
+        if(eq_case(algoname, "rc2"))
+            return GNUTLS_CIPHER_RC2_40_CBC;
+        return 0;
+    default:
+        if(eq_case(algoname, "arc4") || eq_case(algoname, "arcfour")) {
+            if(atoi(fpart) == 40)
+                return GNUTLS_CIPHER_ARCFOUR_40;
+            if(atoi(fpart) == 128)
+                return GNUTLS_CIPHER_ARCFOUR_128;
+        }
+        return 0;
+    }
+}
+
 Cipher::Key::Key(const char *cipher)
 {
+    hashid = algoid = 0;
     secure::init();
     set(cipher);
 }
 
 Cipher::Key::Key(const char *cipher, const char *digest)
 {
+    hashid = algoid = 0;
     secure::init();
     set(cipher, digest);
 }
 
 Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
+    hashid = algoid = 0;
     secure::init();
     set(cipher, digest);
     assign(text, size, salt, count);
@@ -41,7 +171,7 @@ Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_
 
 void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
-    if(!hashid || algoid == GCRY_CIPHER_NONE) {
+    if(!hashid || !algoid) {
         keysize = 0;
         return;
     }
@@ -120,49 +250,22 @@ void Cipher::Key::set(const char *cipher, const char *digest)
 {
     set(cipher);
 
-    if(eq_case(digest, "sha"))
-        digest = "sha1";
-
     hashid = context::map_digest(digest);
 }
 
 void Cipher::Key::set(const char *cipher)
 {
     clear();
+    
+    algoid = context::map_cipher(cipher);
 
-    char algoname[64];
-
-    String::set(algoname, sizeof(algoname), cipher);
-    char *fpart = strchr(algoname, '-');
-    char *lpart = strrchr(algoname, '-');
-
-    modeid = GCRY_CIPHER_MODE_CBC;
-
-    if(lpart && lpart != fpart) {
-        *(lpart++) = 0;
-        if(eq_case(lpart, "cbc"))
-            modeid = GCRY_CIPHER_MODE_CBC;
-        else if(eq_case(lpart, "ecb"))
-            modeid = GCRY_CIPHER_MODE_ECB;
-        else if(eq_case(lpart, "cfb"))
-            modeid = GCRY_CIPHER_MODE_CFB;
-        else if(eq_case(lpart, "ofb"))
-            modeid = GCRY_CIPHER_MODE_OFB;
-        else
-            modeid = GCRY_CIPHER_MODE_NONE;
-    }
-
-    algoid = gcry_cipher_map_name(algoname);
-
-    if(algoid != GCRY_CIPHER_NONE) {
-        (void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_KEYLEN, NULL, &keysize);
-        (void)gcry_cipher_algo_info(algoid, GCRYCTL_GET_BLKLEN, NULL, &blksize);
-    }
+    if(algoid)
+        blksize = keysize = gnutls_cipher_get_block_size((CIPHER_ID)algoid);
 }
 
 void Cipher::Key::clear()
 {
-    algoid = GCRY_CIPHER_NONE;
+    algoid = 0;
     hashid = 0;
     keysize = blksize = 0;
     zerofill(keybuf, sizeof(keybuf));
@@ -198,24 +301,14 @@ void Cipher::release(void)
 {
     keys.clear();
     if(context) {
-        gcry_cipher_close((CIPHER_CTX)context);
+        gnutls_cipher_deinit((CIPHER_CTX)context);
         context = NULL;
     }
 }
 
 bool Cipher::has(const char *cipher)
 {
-    // eliminate issues with algo-size-mode formed algo strings...
-
-    char algoname[64];
-
-    String::set(algoname, sizeof(algoname), cipher);
-    char *fpart = strchr(algoname, '-');
-    char *lpart = strrchr(algoname, '-');
-    if(lpart && lpart != fpart)
-        *(lpart++) = 0;
-
-    return gcry_cipher_map_name(algoname) != GCRY_CIPHER_NONE;
+    return context::map_cipher(cipher) != 0;
 }
 
 size_t Cipher::flush(void)
@@ -250,9 +343,7 @@ void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
     if(!keys.keysize)
         return;
 
-    gcry_cipher_open((CIPHER_CTX *)&context, keys.algoid, keys.modeid,0);
-    gcry_cipher_setkey((CIPHER_CTX)context, keys.keybuf, keys.keysize);
-    gcry_cipher_setiv((CIPHER_CTX)context, keys.ivbuf, keys.blksize);
+    gnutls_cipher_init((CIPHER_CTX *)&context, (CIPHER_ID)keys.algoid, (CIPHER_KEYDATA *)keys.keybuf, (CIPHER_KEYDATA *)keys.ivbuf);
 }
 
 size_t Cipher::puts(const char *text)
@@ -290,10 +381,10 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 
     switch(bufmode) {
     case Cipher::ENCRYPT:
-        gcry_cipher_encrypt((CIPHER_CTX)context, bufaddr + bufpos, size, data, size);
+        gnutls_cipher_encrypt2((CIPHER_CTX)context, data, size, bufaddr + bufpos, size);
         break;
     case Cipher::DECRYPT:
-        gcry_cipher_decrypt((CIPHER_CTX)context, bufaddr + bufpos, size, data, size);
+        gnutls_cipher_decrypt2((CIPHER_CTX)context, data, size, bufaddr + bufpos, size);
     }
 
     count += size;

@@ -21,7 +21,6 @@
 #include <ucommon/secure.h>
 #include <gnutls/gnutls.h>
 #include <gnutls/crypto.h>
-#include <gcrypt.h>
 
 #ifdef  _MSWINDOWS_
 #include <wincrypt.h>
@@ -48,12 +47,15 @@ public:
     static gnutls_session_t session(context *ctx);
 
     static int map_digest(const char *type);
+    static int map_cipher(const char *type);
 };
 
 typedef gnutls_session_t SSL;
 typedef gnutls_digest_algorithm_t MD_ID;
 typedef gnutls_hash_hd_t MD_CTX;
-typedef gcry_cipher_hd_t CIPHER_CTX;
+typedef gnutls_cipher_hd_t CIPHER_CTX;
+typedef gnutls_cipher_algorithm_t CIPHER_ID;
+typedef gnutls_datum_t CIPHER_KEYDATA;
 typedef context *SSL_CTX;
 
 END_NAMESPACE

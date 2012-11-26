@@ -10,7 +10,7 @@
 
 AC_INIT(autogen.sh)
 
-VERSION="6.0.0"
+VERSION="6.0.1"
 LT_VERSION="6:0:0"
 OPENSSL_REQUIRES="0.9.7"
 
@@ -650,7 +650,7 @@ AC_ARG_WITH(pkg-config,
     ])
     AC_CHECK_HEADERS(openssl/fips.h)
     AC_CHECK_LIB(gnutls, gnutls_init, [
-        GNUTLS_LIBS="-lgnutls -lgcrypt"
+        GNUTLS_LIBS="-lgnutls"
     ])
 ])
 

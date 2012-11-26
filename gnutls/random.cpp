@@ -30,13 +30,13 @@ bool Random::seed(const unsigned char *buf, size_t size)
 
 size_t Random::key(unsigned char *buf, size_t size)
 {
-    gcry_randomize(buf, size, GCRY_VERY_STRONG_RANDOM);
+    gnutls_rnd(GNUTLS_RND_KEY, buf, size);
     return 0;
 }
 
 size_t Random::fill(unsigned char *buf, size_t size)
 {
-    gcry_randomize(buf, size, GCRY_STRONG_RANDOM);
+    gnutls_rnd(GNUTLS_RND_RANDOM, buf, size);
     return 0;
 }
 
