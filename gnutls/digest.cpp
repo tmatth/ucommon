@@ -27,9 +27,9 @@ Digest::Digest()
 
 Digest::Digest(const char *type)
 {
-    hashtype = NULL;
     context = NULL;
     bufsize = 0;
+    hashid = 0;
     textbuf[0] = 0;
 
     set(type);
@@ -43,12 +43,31 @@ Digest::~Digest()
 void Digest::release(void)
 {
     if(context) {
-        gcry_md_close((MD_CTX)context);
+        gnutls_hash_deinit((MD_CTX)context, buffer);
         context = NULL;
     }
 
     bufsize = 0;
     textbuf[0] = 0;
+    hashid = 0;
+}
+
+int context::map_digest(const char *type)
+{
+    if(eq_case(type, "sha") || eq_case(type, "sha1")) 
+        return GNUTLS_DIG_SHA1;
+    else if(eq_case(type, "sha256"))
+        return GNUTLS_DIG_SHA256;
+    else if(eq_case(type, "sha512"))
+        return GNUTLS_DIG_SHA512;
+    else if(eq_case(type, "md5"))
+        return GNUTLS_DIG_MD5;
+    else if(eq_case(type, "md2"))
+        return GNUTLS_DIG_MD2;
+    else if(eq_case(type, "rmd160"))
+        return GNUTLS_DIG_RMD160;
+    else
+        return 0;
 }
 
 void Digest::set(const char *type)
@@ -57,30 +76,32 @@ void Digest::set(const char *type)
 
     release();
 
-    if(eq_case(type, "sha"))
-        type = "sha1";
-
-    hashid = gcry_md_map_name(type);
-    if(hashid == GCRY_MD_NONE)
+    hashid = context::map_digest(type);
+    
+    if(!hashid || gnutls_hash_get_len((MD_ID)hashid) < 1) {
+        hashid = 0;
         return;
+    }
 
-    gcry_md_open((MD_CTX *)&context, hashid, 0);
+    gnutls_hash_init((MD_CTX *)&context, (MD_ID)hashid);
 }
 
 bool Digest::has(const char *type)
 {
-    if(eq_case(type, "sha"))
-        type = "sha1";
+    MD_ID id = (MD_ID)context::map_digest(type);
 
-    return gcry_md_map_name(type) != GCRY_MD_NONE;
+    if(!id || (gnutls_hash_get_len(id) < 1))
+        return false;
+
+    return true;
 }
 
 bool Digest::put(const void *address, size_t size)
 {
-    if(!context)
+    if(!context || hashid == 0)
         return false;
 
-    gcry_md_write((MD_CTX)context, address, size);
+    gnutls_hash((MD_CTX)context, address, size);
     return true;
 }
 
@@ -94,15 +115,14 @@ const char *Digest::c_str(void)
 
 void Digest::reset(void)
 {
-    if(!context) {
-        if(hashid == GCRY_MD_NONE)
-            return;
-
-        gcry_md_open((MD_CTX *)&context, hashid, 0);
+    if(context) {
+        gnutls_hash_deinit((MD_CTX)context, buffer);
+        context = NULL;
     }
-    else
-        gcry_md_reset((MD_CTX)context);
+    if(hashid == 0)
+        return;
 
+    gnutls_hash_init((MD_CTX *)&context, (MD_ID)hashid);
     bufsize = 0;
 }
 
@@ -110,19 +130,21 @@ void Digest::recycle(bool bin)
 {
     unsigned size = bufsize;
 
-    if(!context)
+    if(!context || hashid == 0)
         return;
 
-    if(!bufsize) {
-        gcry_md_final((MD_CTX)context);
-        size = gcry_md_get_algo_dlen(hashid);
-        memcpy(buffer, gcry_md_read((MD_CTX)context, hashid), size);
-    }
+    if(!bufsize)
+        gnutls_hash_output((MD_CTX)context, buffer);
 
-    gcry_md_reset((MD_CTX)context);
+    Digest::reset();
+
+    size = gnutls_hash_get_len((MD_ID)hashid);
+
+    if(!size || !context || !hashid)
+        return;
 
     if(bin)
-        gcry_md_write((MD_CTX)context, buffer, size);
+        gnutls_hash((MD_CTX)context, buffer, size);
     else {
         unsigned count = 0;
 
@@ -132,7 +154,7 @@ buffer[count]);
             ++count;
 
         }
-        gcry_md_write((MD_CTX)context, textbuf, size * 2);
+        gnutls_hash((MD_CTX)context, textbuf, size * 2);
     }
     bufsize = 0;
 }
@@ -145,13 +167,11 @@ const unsigned char *Digest::get(void)
     if(bufsize)
         return buffer;
 
-    if(!context)
+    if(!context || hashid == 0)
         return NULL;
 
-    gcry_md_final((MD_CTX)context);
-    size = gcry_md_get_algo_dlen(hashid);
-    memcpy(buffer, gcry_md_read((MD_CTX)context, hashid), size);
-
+    gnutls_hash_output((MD_CTX)context, buffer);
+    size = gnutls_hash_get_len((MD_ID)hashid);
     release();
 
     bufsize = size;

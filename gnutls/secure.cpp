@@ -73,7 +73,7 @@ bool secure::init(void)
 
     if(!initialized) {
         Thread::init();
-        Socket::init(progname);
+        Socket::init();
 
 #ifndef _MSWINDOWS_
         gcry_control(GCRYCTL_SET_THREAD_CBS, &gcrypt_threading);

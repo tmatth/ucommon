@@ -122,7 +122,7 @@ void Cipher::Key::set(const char *cipher, const char *digest)
 {
     set(cipher);
 
-    if(case_eq(digest, "sha"))
+    if(eq_case(digest, "sha"))
         digest = "sha1";
 
     hashid = gcry_md_map_name(digest);
@@ -142,13 +142,13 @@ void Cipher::Key::set(const char *cipher)
 
     if(lpart && lpart != fpart) {
         *(lpart++) = 0;
-        if(case_eq(lpart, "cbc"))
+        if(eq_case(lpart, "cbc"))
             modeid = GCRY_CIPHER_MODE_CBC;
-        else if(case_eq(lpart, "ecb"))
+        else if(eq_case(lpart, "ecb"))
             modeid = GCRY_CIPHER_MODE_ECB;
-        else if(case_eq(lpart, "cfb"))
+        else if(eq_case(lpart, "cfb"))
             modeid = GCRY_CIPHER_MODE_CFB;
-        else if(case_eq(lpart, "ofb"))
+        else if(eq_case(lpart, "ofb"))
             modeid = GCRY_CIPHER_MODE_OFB;
         else
             modeid = GCRY_CIPHER_MODE_NONE;

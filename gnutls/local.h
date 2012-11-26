@@ -20,6 +20,7 @@
 #include <ucommon/export.h>
 #include <ucommon/secure.h>
 #include <gnutls/gnutls.h>
+#include <gnutls/crypto.h>
 #include <gcrypt.h>
 
 #ifdef  _MSWINDOWS_
@@ -45,10 +46,13 @@ public:
     static gnutls_priority_t priority_cache;
 
     static gnutls_session_t session(context *ctx);
+
+    static int map_digest(const char *type);
 };
 
 typedef gnutls_session_t SSL;
-typedef gcry_md_hd_t MD_CTX;
+typedef gnutls_digest_algorithm_t MD_ID;
+typedef gnutls_hash_hd_t MD_CTX;
 typedef gcry_cipher_hd_t CIPHER_CTX;
 typedef context *SSL_CTX;
 

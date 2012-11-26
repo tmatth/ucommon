@@ -1,3 +1,7 @@
+from ucommon 6.0.0 to 6.0.1
+- fixes for gnutls support
+- elimination of gcrypt in gnutls
+
 from ucommon 5.5.1 to 6.0.0
 - new version 6 api
 - fixed string + concat operation
