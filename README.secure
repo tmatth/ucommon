@@ -10,7 +10,7 @@ platform of choice.
 We strive to maintain feature parity between the gnutls and openssl crypto
 implementations.  We may also add nss as a secure backend in the future.
 Programming to the GNU uCommon C++ secure api is intended to avoid the need
-entirely of using openssl, gcrypt, or other library specific functions.  This
+entirely of using openssl, gnutls, or other library specific functions.  This
 means the total size of the secure library will grow as we add additional
 common features, such as pki support. In the past as there has been no
 generally agreed upon crypto library, so developers building new apps would use
