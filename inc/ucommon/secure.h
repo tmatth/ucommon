@@ -894,6 +894,70 @@ public:
         {return strlen(buffer);}
 };
 
+/**
+ * A template to create a random generated key of specified size.  The
+ * key memory is cleared when the object is destroyed.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template<size_t S>
+class keyrandom
+{
+private:
+    unsigned char buffer[S];
+
+    /**
+     * Disable copy constructor.
+     */
+    inline keyrandom(const keyrandom& copy) {};
+
+public:
+    /**
+     * Create a new character buffer with an empty string.
+     */
+    inline keyrandom()
+        {Random::key(buffer, S);}
+
+    /**
+     * Clear memory when destroyed.
+     */
+    inline ~keyrandom()
+        {memset(buffer, 0, S);}
+
+    /**
+     * Update with new random key.
+     */
+    inline void update(void)
+        {Random::key(buffer, S);}
+
+    /**
+     * Clear current key memory.
+     */
+    inline void clear(void)
+        {memset(buffer, 0, S);}
+
+    /**
+     * Get text by casting reference.
+     * @return pointer to text in object.
+     */
+    inline operator unsigned char *()
+        {return buffer;}
+
+    /**
+     * Get text by object pointer reference.
+     * @return pointer to text in object.
+     */
+    inline unsigned char *operator*()
+        {return buffer;}
+
+    /**
+     * Get allocated size of the object.
+     * @return allocated size.
+     */
+    inline size_t size(void) const
+        {return S;}
+};
+
+
 #endif
 
 END_NAMESPACE

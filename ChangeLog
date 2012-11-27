@@ -1,6 +1,6 @@
 from ucommon 6.0.1 to 6.0.2
 - digest stream operators
-- auto memory erasing keystring template
+- auto memory erasing keystring and keyrandom template
 
 from ucommon 6.0.0 to 6.0.1
 - fixes for gnutls support
