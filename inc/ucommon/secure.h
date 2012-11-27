@@ -774,6 +774,108 @@ public:
         {return bio != NULL;}
 };
 
+/**
+ * A template to create a string array that automatically erases.
+ * This is a mini string/stringbuf class that supports a subset of
+ * functionality but does not require a complex supporting object.  Like
+ * stringbuf, this can be used to create local string variables.  When
+ * the object falls out of scope it's memory is reset.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+template<size_t S>
+class keystring
+{
+private:
+    char buffer[S];
+
+public:
+    /**
+     * Create a new character buffer with an empty string.
+     */
+    inline keystring()
+        {buffer[0] = 0;};
+
+    /**
+     * Create a character buffer with assigned text.  If the text is
+     * larger than the size of the object, it is truncated.
+     * @param text to assign.
+     */
+    inline keystring(const char *text)
+        {String::set(buffer, S, text);};
+
+    /**
+     * Clear memory when destroyed.
+     */
+    inline ~keystring()
+        {memset(buffer, 0, S);}
+
+    /**
+     * Assign null terminated text to the object.
+     * @param text to assign.
+     */
+    inline void operator=(const char *text)
+        {String::set(buffer, S, text);};
+
+    /**
+     * Concatenate text into the object.  If the text is larger than the
+     * size of the object, then it is truncated.
+     * @param text to append.
+     */
+    inline void operator+=(const char *text)
+        {String::add(buffer, S, text);};
+
+    /**
+     * Test if data is contained in the object.
+     * @return true if there is text.
+     */
+    inline operator bool() const
+        {return buffer[0];};
+
+    /**
+     * Test if the object is empty.
+     * @return true if the object is empty.
+     */
+    inline bool operator!() const
+        {return buffer[0] == 0;};
+
+    /**
+     * Get text by casting reference.
+     * @return pointer to text in object.
+     */
+    inline operator char *()
+        {return buffer;};
+
+    /**
+     * Get text by object pointer reference.
+     * @return pointer to text in object.
+     */
+    inline char *operator*()
+        {return buffer;};
+
+    /**
+     * Array operator to get a character from the object.
+     * @param offset of character in string buffer.
+     * @return character at offset.
+     */
+    inline char operator[](size_t offset) const
+        {return buffer[offset];};
+
+    /**
+     * Get a pointer to an offset in the object by expression operator.
+     * @param offset of character in string buffer.
+     * @return pointer to offset in object.
+     */
+    inline char *operator()(size_t offset)
+        {return buffer + offset;};
+
+    /**
+     * Get allocated size of the object.
+     * @return allocated size.
+     */
+    inline size_t size(void) const
+        {return S;};
+};
+
 #endif
 
 END_NAMESPACE

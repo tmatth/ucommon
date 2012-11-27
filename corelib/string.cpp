@@ -675,6 +675,14 @@ void String::lower(void)
         lower(str->text);
 }
 
+void String::erase(void)
+{
+    if(str) {
+        memset(str->text, 0, str->max);
+        str->fix();
+    }
+}
+
 strsize_t String::offset(const char *s) const
 {
     if(!str || !s)
@@ -1725,6 +1733,14 @@ void String::lower(char *str)
         *str = tolower(*str);
         ++str;
     }
+}
+
+void String::erase(char *str)
+{
+    if(!str || *str == 0)
+        return;
+
+    memset(str, 0, strlen(str));
 }
 
 unsigned String::ccount(const char *str, const char *clist)

@@ -542,6 +542,11 @@ public:
     void lower(void);
 
     /**
+     * Erase string memory.
+     */
+    void erase(void);
+
+    /**
      * Count number of occurrences of characters in string.
      * @param list of characters to find.
      * @return count of instances of characters in string.
@@ -971,6 +976,12 @@ public:
      * @param object to fix.
      */
     static void fix(String& object);
+
+    /**
+     * Erase string memory.  Often used to clear out passwords.
+     * @param text string to erase.
+     */
+    static void erase(char *text);
 
     /**
      * Convert null terminated text to lower case.
