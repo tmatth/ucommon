@@ -17,74 +17,6 @@
 
 #include "local.h"
 
-HMAC::Key::Key(const char *digest)
-{
-    secure::init();
-
-    set(digest);
-}
-
-HMAC::Key::Key(const char *digest, const char *key)
-{
-    secure::init();
-    set(digest);
-    assign(key);
-}
-
-void HMAC::Key::assign(const char *text, size_t size)
-{
-    digest_t digest;
-
-    if(!text)
-        return;
-
-    if(!size)
-        size = strlen(text);
-
-    if(!hmacid)
-        return;
-
-    keysize = 64;
-    if(size > keysize) {
-        digest = algoname;
-        digest.put(text, size);
-        text = (const char *)digest.get();
-        size = digest.size();        
-    }
-    
-    if(size > 64)
-        size = 64;
-
-    memcpy(keybuf, text, size);
-    while(size < 64)
-        keybuf[size++] = 0; 
-}
-
-HMAC::Key::Key()
-{
-    secure::init();
-    clear();
-}
-
-HMAC::Key::~Key()
-{
-    clear();
-}
-
-void HMAC::Key::set(const char *digest)
-{
-    hmacid = context::map_hmac(digest);
-    String::set(algoname, sizeof(algoname), digest);
-}
-
-void HMAC::Key::clear(void)
-{
-    hmactype = NULL;
-    keysize = 0;
-
-    zerofill(keybuf, sizeof(keybuf));
-}
-
 HMAC::HMAC()
 {
     hmacid = 0;
@@ -93,14 +25,14 @@ HMAC::HMAC()
     textbuf[0] = 0;
 }
 
-HMAC::HMAC(key_t key)
+HMAC::HMAC(const char *digest, const char *key, size_t len)
 {
     context = NULL;
     bufsize = 0;
     hmacid = 0;
     textbuf[0] = 0;
 
-    set(key);
+    set(digest, key, len);
 }
 
 HMAC::~HMAC()
@@ -142,17 +74,21 @@ int context::map_hmac(const char *type)
         return 0;
 }
 
-void HMAC::set(key_t key)
+void HMAC::set(const char *digest, const char *key, size_t len)
 {
     secure::init();
 
     release();
 
-    if(!key->keysize)
+    if(!len)
+        len = strlen(key);
+
+    if(!len)
         return;
 
-    hmacid = key->hmacid;
-    gnutls_hmac_init((HMAC_CTX *)&context, (MD_ID)hmacid, key->keybuf, key->keysize);
+    hmacid = context::map_hmac(digest);
+    if(hmacid)
+        gnutls_hmac_init((HMAC_CTX *)&context, (MD_ID)hmacid, key, len);
 }
 
 bool HMAC::has(const char *type)

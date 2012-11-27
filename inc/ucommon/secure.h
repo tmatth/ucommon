@@ -546,64 +546,11 @@ private:
     unsigned char buffer[MAX_DIGEST_HASHSIZE / 8];
     char textbuf[MAX_DIGEST_HASHSIZE / 8 + 1];
 
-    /**
-     * HMAC key.
-     * @author David Sugar <dyfet@gnutelephony.org>
-     */
-    class __SHARED Key
-    {
-    protected:
-        friend class HMAC;
-
-        union {
-            const void *hmactype;
-            int hmacid;
-        };
-
-        char algoname[32];
-
-        // assume 512 bit cipher keys possible...
-        unsigned char keybuf[MAX_CIPHER_KEYSIZE / 8];
-
-        // generated keysize
-        size_t keysize;
-
-        Key();
-
-        void set(const char *hmac);
-
-    public:
-        Key(const char *hmac);
-
-        Key(const char *hmac, const char *text);
-
-        ~Key();
-
-        void assign(const char *key, size_t size = 0);
-
-        void clear(void);
-
-        inline size_t size(void)
-            {return keysize;};
-
-        inline operator bool()
-            {return keysize > 0;};
-
-        inline bool operator!()
-            {return keysize == 0;};
-
-        inline Key& operator=(const char *pass)
-            {assign(pass); return *this;};
-
-    };
-
-    typedef Key *key_t;
-
 protected:
     void release(void);
 
 public:
-    HMAC(key_t key);
+    HMAC(const char *digest, const char *key, size_t keylen = 0);
 
     HMAC();
 
@@ -639,10 +586,7 @@ public:
     inline operator String()
         {return String(c_str());};
 
-    void set(key_t key);
-
-    inline void operator=(key_t id)
-        {set(id);};
+    void set(const char *digest, const char *key, size_t len);
 
     inline bool operator *=(const char *text)
         {return puts(text);};

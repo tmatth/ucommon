@@ -17,49 +17,6 @@
 
 #include "local.h"
 
-HMAC::Key::Key(const char *digest)
-{
-    secure::init();
-
-    set(digest);
-}
-
-HMAC::Key::Key(const char *digest, const char *key)
-{
-    secure::init();
-    set(digest);
-    assign(key);
-}
-
-void HMAC::Key::assign(const char *text, size_t size)
-{
-    keysize = 0;
-}
-
-HMAC::Key::Key()
-{
-    secure::init();
-    clear();
-}
-
-HMAC::Key::~Key()
-{
-    clear();
-}
-
-void HMAC::Key::set(const char *digest)
-{
-    hmacid = 0;
-}
-
-void HMAC::Key::clear(void)
-{
-    hmacid = 0;
-    keysize = 0;
-
-    zerofill(keybuf, sizeof(keybuf));
-}
-
 HMAC::HMAC()
 {
     hmactype = (void *)" ";
@@ -68,14 +25,14 @@ HMAC::HMAC()
     textbuf[0] = 0;
 }
 
-HMAC::HMAC(key_t key)
+HMAC::HMAC(const char *digest, const char *key, size_t len)
 {
     hmactype = (void *)" ";
     context = NULL;
     bufsize = 0;
     textbuf[0] = 0;
 
-    set(key);
+    set(digest, key, len);
 }
 
 HMAC::~HMAC()
@@ -88,7 +45,7 @@ bool HMAC::has(const char *id)
     return false;
 }
 
-void HMAC::set(key_t key)
+void HMAC::set(const char *digest, const char *key, size_t len)
 {
     release();
 }

@@ -17,78 +17,6 @@
 
 #include "local.h"
 
-HMAC::Key::Key(const char *digest)
-{
-    secure::init();
-
-    set(digest);
-}
-
-HMAC::Key::Key(const char *digest, const char *key)
-{
-    secure::init();
-    set(digest);
-    assign(key);
-}
-
-void HMAC::Key::assign(const char *text, size_t size)
-{
-    digest_t digest;
-
-    if(!text)
-        return;
-
-    if(!size)
-        size = strlen(text);
-
-    if(!hmactype)
-        return;
-
-    keysize = 64;
-    if(size > keysize) {
-        digest = algoname;
-        digest.put(text, size);
-        text = (const char *)digest.get();
-        size = digest.size();        
-    }
-    
-    if(size > 64)
-        size = 64;
-
-    memcpy(keybuf, text, size);
-    while(size < 64)
-        keybuf[size++] = 0; 
-}
-
-HMAC::Key::Key()
-{
-    secure::init();
-    clear();
-}
-
-HMAC::Key::~Key()
-{
-    clear();
-}
-
-void HMAC::Key::set(const char *digest)
-{
-    // never use sha0...
-    if(eq_case(digest, "sha"))
-        digest = "sha1";
-
-    String::set(algoname, sizeof(algoname), digest);
-    hmactype = EVP_get_digestbyname(digest);
-}
-
-void HMAC::Key::clear(void)
-{
-    hmactype = NULL;
-    keysize = 0;
-
-    zerofill(keybuf, sizeof(keybuf));
-}
-
 HMAC::HMAC()
 {
     hmactype = NULL;
@@ -97,14 +25,14 @@ HMAC::HMAC()
     textbuf[0] = 0;
 }
 
-HMAC::HMAC(key_t key)
+HMAC::HMAC(const char *digest, const char *key, size_t len)
 {
     hmactype = NULL;
     context = NULL;
     bufsize = 0;
     textbuf[0] = 0;
 
-    set(key);
+    set(digest, key, len);
 }
 
 HMAC::~HMAC()
@@ -117,17 +45,20 @@ bool HMAC::has(const char *id)
     return (EVP_get_digestbyname(id) != NULL);
 }
 
-void HMAC::set(key_t key)
+void HMAC::set(const char *digest, const char *key, size_t len)
 {
     secure::init();
 
     release();
 
-    hmactype = key->hmactype;
-    if(hmactype && key->keysize) {
+    if(!len)
+        len = strlen(key);
+
+    hmactype = EVP_get_digestbyname(digest);
+    if(hmactype && len) {
         context = new HMAC_CTX;
         HMAC_CTX_init((HMAC_CTX *)context);
-        HMAC_Init((HMAC_CTX *)context, key->keybuf, key->keysize, (const EVP_MD *)hmactype);
+        HMAC_Init((HMAC_CTX *)context, key, len, (const EVP_MD *)hmactype);
     }
 }
 
