@@ -1543,7 +1543,7 @@ public:
      * @param offset of character in string buffer.
      * @return character at offset.
      */
-    inline char operator[](size_t offset) const
+    inline char& operator[](size_t offset) const
         {return buffer[offset];}
 
     /**
@@ -1560,6 +1560,13 @@ public:
      */
     inline size_t size(void) const
         {return S;}
+
+    /**
+     * Get current length of string.
+     * @return length of string.
+     */
+    inline size_t len(void) const
+        {return strlen(buffer);}
 };
 
 /**
