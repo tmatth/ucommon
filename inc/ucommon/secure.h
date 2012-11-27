@@ -455,6 +455,18 @@ public:
     inline bool puts(const char *str)
         {return put(str, strlen(str));};
 
+    inline Digest &operator<<(const char *str)
+        {puts(str); return *this;}
+
+    inline Digest &operator<<(int16_t value)
+        {int16_t v = htons(value); put(&v, 2); return *this;}
+
+    inline Digest &operator<<(int32_t value)
+        {int32_t v = htonl(value); put(&v, 4); return *this;}
+
+    inline Digest &operator<<(const PrintProtocol& p)
+        {const char *cp = p._print(); if(cp) puts(cp); return *this;}
+
     bool put(const void *memory, size_t size);
 
     inline unsigned size() const
@@ -512,6 +524,147 @@ public:
     static void uuid(char *string, const char *name, const unsigned char *ns = NULL);
 
     static String uuid(const char *name, const unsigned char *ns = NULL);
+};
+
+/**
+ * A cryptographic message authentication code class.  This class can support 
+ * md5 digests, sha1, sha256, etc, depending on what the underlying library 
+ * supports.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __SHARED HMAC
+{
+private:
+    void *context;
+
+    union {
+        const void *hmactype;
+        int hmacid;
+    };
+
+    unsigned bufsize;
+    unsigned char buffer[MAX_DIGEST_HASHSIZE / 8];
+    char textbuf[MAX_DIGEST_HASHSIZE / 8 + 1];
+
+    /**
+     * HMAC key.
+     * @author David Sugar <dyfet@gnutelephony.org>
+     */
+    class __SHARED Key
+    {
+    protected:
+        friend class HMAC;
+
+        union {
+            const void *hmactype;
+            int hmacid;
+        };
+
+        char algoname[32];
+
+        // assume 512 bit cipher keys possible...
+        unsigned char keybuf[MAX_CIPHER_KEYSIZE / 8];
+
+        // generated keysize
+        size_t keysize;
+
+        Key();
+
+        void set(const char *hmac);
+
+    public:
+        Key(const char *hmac);
+
+        Key(const char *hmac, const char *text);
+
+        ~Key();
+
+        void assign(const char *key, size_t size = 0);
+
+        void clear(void);
+
+        inline size_t size(void)
+            {return keysize;};
+
+        inline operator bool()
+            {return keysize > 0;};
+
+        inline bool operator!()
+            {return keysize == 0;};
+
+        inline Key& operator=(const char *pass)
+            {assign(pass); return *this;};
+
+    };
+
+    typedef Key *key_t;
+
+protected:
+    void release(void);
+
+public:
+    HMAC(key_t key);
+
+    HMAC();
+
+    ~HMAC();
+
+    inline bool puts(const char *str)
+        {return put(str, strlen(str));};
+
+    inline HMAC &operator<<(const char *str)
+        {puts(str); return *this;}
+
+    inline HMAC &operator<<(int16_t value)
+        {int16_t v = htons(value); put(&v, 2); return *this;}
+
+    inline HMAC &operator<<(int32_t value)
+        {int32_t v = htonl(value); put(&v, 4); return *this;}
+
+    inline HMAC &operator<<(const PrintProtocol& p)
+        {const char *cp = p._print(); if(cp) puts(cp); return *this;}
+
+    bool put(const void *memory, size_t size);
+
+    inline unsigned size() const
+        {return bufsize;};
+
+    const unsigned char *get(void);
+
+    const char *c_str(void);
+
+    inline String str(void)
+        {return String(c_str());};
+
+    inline operator String()
+        {return String(c_str());};
+
+    void set(key_t key);
+
+    inline void operator=(key_t id)
+        {set(id);};
+
+    inline bool operator *=(const char *text)
+        {return puts(text);};
+
+    inline bool operator +=(const char *text)
+        {return puts(text);};
+
+    inline const char *operator*()
+        {return c_str();};
+
+    inline bool operator!() const
+        {return !bufsize && context == NULL;};
+
+    inline operator bool() const
+        {return bufsize > 0 || context != NULL;};
+
+    /**
+     * Test to see if a specific digest type is supported.
+     * @param name of digest we want to check.
+     * @return true if supported, false if not.
+     */
+    static bool has(const char *name);
 };
 
 /**
@@ -608,6 +761,11 @@ typedef SSLBuffer ssl_t;
  * Convenience type for generic digests.
  */
 typedef Digest digest_t;
+
+/**
+ * Convenience type for generic digests.
+ */
+typedef HMAC hmac_t;
 
 /**
  * Convenience type for generic ciphers.

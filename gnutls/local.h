@@ -48,9 +48,12 @@ public:
 
     static int map_digest(const char *type);
     static int map_cipher(const char *type);
+    static int map_hmac(const char *type);
 };
 
 typedef gnutls_session_t SSL;
+typedef gnutls_mac_algorithm_t HMAC_ID;
+typedef gnutls_hmac_hd_t HMAC_CTX;
 typedef gnutls_digest_algorithm_t MD_ID;
 typedef gnutls_hash_hd_t MD_CTX;
 typedef gnutls_cipher_hd_t CIPHER_CTX;

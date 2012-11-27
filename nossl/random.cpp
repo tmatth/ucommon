@@ -141,7 +141,7 @@ bool Random::status(void)
 #ifdef  _MSWINDOWS_
     return true;
 #else
-    if(fsys::isfile("/dev/random"))
+    if(fsys::is_file("/dev/random"))
         return true;
 
     return false;

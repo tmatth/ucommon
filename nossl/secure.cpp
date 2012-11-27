@@ -158,7 +158,7 @@ int secure::oscerts(const char *pathname)
 }
 #endif
 
-secure::server_t secure::server(const char *ca)
+secure::server_t secure::server(const char *cert, const char *key)
 {
     return NULL;
 }

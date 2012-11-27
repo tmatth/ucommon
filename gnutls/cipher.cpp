@@ -272,7 +272,7 @@ void Cipher::Key::clear()
     zerofill(ivbuf, sizeof(ivbuf));
 }
 
-Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
+Cipher::Cipher(const key_t key, mode_t mode, unsigned char *address, size_t size)
 {
     bufaddr = NULL;
     bufsize = bufpos = 0;
@@ -331,7 +331,7 @@ void Cipher::set(unsigned char *address, size_t size)
     bufpos = 0;
 }
 
-void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
+void Cipher::set(const key_t key, mode_t mode, unsigned char *address, size_t size)
 {
     release();
 
