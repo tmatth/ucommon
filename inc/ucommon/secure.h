@@ -788,6 +788,11 @@ class keystring
 private:
     char buffer[S];
 
+    /**
+     * Disable copy constructor.
+     */
+    inline keystring(const keystring& copy) {};
+
 public:
     /**
      * Create a new character buffer with an empty string.
