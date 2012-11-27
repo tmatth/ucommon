@@ -810,6 +810,12 @@ public:
         {memset(buffer, 0, S);}
 
     /**
+     * Clear current key memory.
+     */
+    inline void clear(void)
+        {memset(buffer, 0, S);}
+
+    /**
      * Assign null terminated text to the object.
      * @param text to assign.
      */
