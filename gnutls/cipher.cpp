@@ -226,8 +226,10 @@ void Cipher::Key::set(const char *cipher)
     
     algoid = context::map_cipher(cipher);
 
-    if(algoid)
-        blksize = keysize = gnutls_cipher_get_block_size((CIPHER_ID)algoid);
+    if(algoid) {
+        blksize = gnutls_cipher_get_block_size((CIPHER_ID)algoid);
+        keysize = gnutls_cipher_get_key_size((CIPHER_ID)algoid);
+    }
 }
 
 void Cipher::push(unsigned char *address, size_t size)
