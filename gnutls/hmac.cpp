@@ -98,7 +98,6 @@ const unsigned char *HMAC::get(void)
     if(!context || hmacid == 0)
         return NULL;
 
-    gnutls_hmac_output((HMAC_CTX)context, buffer);
     size = gnutls_hmac_get_len((HMAC_ID)hmacid);
     release();
 
