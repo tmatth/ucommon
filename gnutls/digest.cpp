@@ -104,10 +104,13 @@ void Digest::recycle(bool bin)
     if(!context || hashid == 0)
         return;
 
-    if(!bufsize)
-        gnutls_hash_output((MD_CTX)context, buffer);
-
-    Digest::reset();
+    if(!bufsize) {
+        gnutls_hash_deinit((MD_CTX)context, buffer);
+        context = NULL;
+        gnutls_hash_init((MD_CTX *)&context, (MD_ID)hashid);
+    }
+    else
+        Digest::reset();
 
     size = gnutls_hash_get_len((MD_ID)hashid);
 
@@ -141,10 +144,9 @@ const unsigned char *Digest::get(void)
     if(!context || hashid == 0)
         return NULL;
 
-    gnutls_hash_output((MD_CTX)context, buffer);
+    gnutls_hash_deinit((MD_CTX)context, buffer);
     size = gnutls_hash_get_len((MD_ID)hashid);
-    release();
-
+    context = NULL;
     bufsize = size;
 
     while(count < bufsize) {
