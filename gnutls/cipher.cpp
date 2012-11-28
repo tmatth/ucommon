@@ -147,28 +147,6 @@ int context::map_cipher(const char *cipher)
     }
 }
 
-Cipher::Key::Key(const char *cipher)
-{
-    hashid = algoid = 0;
-    secure::init();
-    set(cipher);
-}
-
-Cipher::Key::Key(const char *cipher, const char *digest)
-{
-    hashid = algoid = 0;
-    secure::init();
-    set(cipher, digest);
-}
-
-Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned count)
-{
-    hashid = algoid = 0;
-    secure::init();
-    set(cipher, digest);
-    assign(text, size, salt, count);
-}
-
 void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned count)
 {
     if(!hashid || !algoid) {
@@ -229,17 +207,6 @@ void Cipher::Key::assign(const char *text, size_t size)
     assign(text, size, _salt, _rounds);
 }
 
-Cipher::Key::Key()
-{
-    secure::init();
-    clear();
-}
-
-Cipher::Key::~Key()
-{
-    clear();
-}
-
 void Cipher::Key::options(const unsigned char *salt, unsigned rounds)
 {
     _salt = salt;
@@ -263,36 +230,6 @@ void Cipher::Key::set(const char *cipher)
         blksize = keysize = gnutls_cipher_get_block_size((CIPHER_ID)algoid);
 }
 
-void Cipher::Key::clear()
-{
-    algoid = 0;
-    hashid = 0;
-    keysize = blksize = 0;
-    zerofill(keybuf, sizeof(keybuf));
-    zerofill(ivbuf, sizeof(ivbuf));
-}
-
-Cipher::Cipher(const key_t key, mode_t mode, unsigned char *address, size_t size)
-{
-    bufaddr = NULL;
-    bufsize = bufpos = 0;
-    context = NULL;
-    set(key, mode, address, size);
-}
-
-Cipher::Cipher()
-{
-    bufaddr = NULL;
-    bufsize = bufpos = 0;
-    context = NULL;
-}
-
-Cipher::~Cipher()
-{
-    flush();
-    release();
-}
-
 void Cipher::push(unsigned char *address, size_t size)
 {
 }
@@ -311,26 +248,6 @@ bool Cipher::has(const char *cipher)
     return context::map_cipher(cipher) != 0;
 }
 
-size_t Cipher::flush(void)
-{
-    size_t total = bufpos;
-
-    if(bufpos && bufsize) {
-        push(bufaddr, bufpos);
-        bufpos = 0;
-    }
-    bufaddr = NULL;
-    return total;
-}
-
-void Cipher::set(unsigned char *address, size_t size)
-{
-    flush();
-    bufaddr = address;
-    bufsize = size;
-    bufpos = 0;
-}
-
 void Cipher::set(const key_t key, mode_t mode, unsigned char *address, size_t size)
 {
     release();
@@ -344,25 +261,6 @@ void Cipher::set(const key_t key, mode_t mode, unsigned char *address, size_t si
         return;
 
     gnutls_cipher_init((CIPHER_CTX *)&context, (CIPHER_ID)keys.algoid, (CIPHER_KEYDATA *)keys.keybuf, (CIPHER_KEYDATA *)keys.ivbuf);
-}
-
-size_t Cipher::puts(const char *text)
-{
-    char padbuf[64];
-    if(!text || !bufaddr)
-        return 0;
-
-    size_t len = strlen(text) + 1;
-    unsigned pad = len % keys.iosize();
-
-    size_t count = put((const unsigned char *)text, len - pad);
-    if(pad) {
-        memcpy(padbuf, text + len - pad, pad);
-        memset(padbuf + pad, 0, keys.iosize() - pad);
-        count += put((const unsigned char *)padbuf, keys.iosize());
-        zerofill(padbuf, sizeof(padbuf));
-    }
-    return flush();
 }
 
 size_t Cipher::put(const unsigned char *data, size_t size)
@@ -439,12 +337,4 @@ size_t Cipher::pad(const unsigned char *data, size_t size)
     return size;
 }
 
-size_t Cipher::process(unsigned char *buf, size_t len, bool flag)
-{
-    set(buf);
-    if(flag)
-        return pad(buf, len);
-    else
-        return put(buf, len);
-}
 

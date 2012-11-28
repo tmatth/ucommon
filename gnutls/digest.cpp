@@ -17,29 +17,6 @@
 
 #include "local.h"
 
-Digest::Digest()
-{
-    hashid = 0;
-    context = NULL;
-    bufsize = 0;
-    textbuf[0] = 0;
-}
-
-Digest::Digest(const char *type)
-{
-    context = NULL;
-    bufsize = 0;
-    hashid = 0;
-    textbuf[0] = 0;
-
-    set(type);
-}
-
-Digest::~Digest()
-{
-    release();
-}
-
 void Digest::release(void)
 {
     if(context) {
@@ -103,14 +80,6 @@ bool Digest::put(const void *address, size_t size)
 
     gnutls_hash((MD_CTX)context, address, size);
     return true;
-}
-
-const char *Digest::c_str(void)
-{
-    if(!bufsize)
-        get();
-
-    return textbuf;
 }
 
 void Digest::reset(void)
@@ -184,35 +153,5 @@ buffer[count]);
         ++count;
     }
     return buffer;
-}
-
-void Digest::uuid(char *str, const char *name, const unsigned char *ns)
-{
-    unsigned mask = 0x50;
-    const char *type = "sha1";
-    if(!has("sha1")) {
-        mask = 0x30;
-        type = "md5";
-    }
-
-    Digest md(type);
-    if(ns)
-        md.put(ns, 16);
-    md.puts(name);
-    unsigned char *buf = (unsigned char *)md.get();
-
-    buf[6] &= 0x0f;
-    buf[6] |= mask;
-    buf[8] &= 0x3f;
-    buf[8] |= 0x80;
-
-    String::hexdump(buf, str, "4-2-2-2-6");
-}
-
-String Digest::uuid(const char *name, const unsigned char *ns)
-{
-    char buf[38];
-    uuid(buf, name, ns);
-    return String(buf);
 }
 

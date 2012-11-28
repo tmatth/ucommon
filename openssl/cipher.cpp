@@ -20,25 +20,15 @@
 static const unsigned char *_salt = NULL;
 static unsigned _rounds = 1;
 
-Cipher::Key::Key(const char *cipher)
+void Cipher::Key::assign(const char *text, size_t size)
 {
-    secure::init();
-
-    set(cipher);
+    assign(text, size, _salt, _rounds);
 }
 
-Cipher::Key::Key(const char *cipher, const char *digest)
+void Cipher::Key::options(const unsigned char *salt, unsigned rounds)
 {
-    secure::init();
-    set(cipher, digest);
-}
-
-Cipher::Key::Key(const char *cipher, const char *digest, const char *text, size_t size, const unsigned char *salt, unsigned rounds)
-{
-    secure::init();
-
-    set(cipher, digest);
-    assign(text, size, salt, rounds);
+    _salt = salt;
+    _rounds = rounds;
 }
 
 void Cipher::Key::assign(const char *text, size_t size, const unsigned char *salt, unsigned rounds)
@@ -57,28 +47,6 @@ void Cipher::Key::assign(const char *text, size_t size, const unsigned char *sal
 
     if(EVP_BytesToKey((const EVP_CIPHER*)algotype, (const EVP_MD*)hashtype, salt, (const unsigned char *)text, size, rounds, keybuf, ivbuf) < (int)keysize)
         keysize = 0;
-}
-
-void Cipher::Key::assign(const char *text, size_t size)
-{
-    assign(text, size, _salt, _rounds);
-}
-
-Cipher::Key::Key()
-{
-    secure::init();
-    clear();
-}
-
-Cipher::Key::~Key()
-{
-    clear();
-}
-
-void Cipher::Key::options(const unsigned char *salt, unsigned rounds)
-{
-    _salt = salt;
-    _rounds = rounds;
 }
 
 void Cipher::Key::set(const char *cipher, const char *digest)
@@ -113,36 +81,6 @@ void Cipher::Key::set(const char *cipher)
     blksize = EVP_CIPHER_block_size((const EVP_CIPHER*)algotype);
 }
 
-void Cipher::Key::clear(void)
-{
-    algotype = NULL;
-    hashtype = NULL;
-    keysize = blksize = 0;
-
-    zerofill(keybuf, sizeof(keybuf));
-    zerofill(ivbuf, sizeof(ivbuf));
-}
-
-Cipher::Cipher(key_t key, mode_t mode, unsigned char *address, size_t size)
-{
-    bufaddr = NULL;
-    bufsize = bufpos = 0;
-    context = NULL;
-    set(key, mode, address, size);
-}
-
-Cipher::Cipher()
-{
-    bufaddr = NULL;
-    bufsize = bufpos = 0;
-    context = NULL;
-}
-
-Cipher::~Cipher()
-{
-    flush();
-    release();
-}
 
 bool Cipher::has(const char *id)
 {
@@ -170,45 +108,6 @@ void Cipher::release(void)
         delete (EVP_CIPHER_CTX*)context;
         context = NULL;
     }
-}
-
-size_t Cipher::flush(void)
-{
-    size_t total = bufpos;
-
-    if(bufpos && bufsize) {
-        push(bufaddr, bufpos);
-        bufpos = 0;
-    }
-    bufaddr = NULL;
-    return total;
-}
-
-size_t Cipher::puts(const char *text)
-{
-    char padbuf[64];
-    if(!text || !bufaddr)
-        return 0;
-
-    size_t len = strlen(text) + 1;
-    unsigned pad = len % keys.iosize();
-
-    size_t count = put((const unsigned char *)text, len - pad);
-    if(pad) {
-        memcpy(padbuf, text + len - pad, pad);
-        memset(padbuf + pad, 0, keys.iosize() - pad);
-        count += put((const unsigned char *)padbuf, keys.iosize());
-        zerofill(padbuf, sizeof(padbuf));
-    }
-    return flush();
-}
-
-void Cipher::set(unsigned char *address, size_t size)
-{
-    flush();
-    bufsize = size;
-    bufaddr = address;
-    bufpos = 0;
 }
 
 void Cipher::set(key_t key, mode_t mode, unsigned char *address, size_t size)
@@ -297,14 +196,5 @@ size_t Cipher::pad(const unsigned char *data, size_t size)
 
     flush();
     return size;
-}
-
-size_t Cipher::process(unsigned char *buf, size_t len, bool flag)
-{
-    set(buf);
-    if(flag)
-        return pad(buf, len);
-    else
-        return put(buf, len);
 }
 

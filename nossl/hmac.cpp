@@ -17,29 +17,6 @@
 
 #include "local.h"
 
-HMAC::HMAC()
-{
-    hmactype = (void *)" ";
-    context = NULL;
-    bufsize = 0;
-    textbuf[0] = 0;
-}
-
-HMAC::HMAC(const char *digest, const char *key, size_t len)
-{
-    hmactype = (void *)" ";
-    context = NULL;
-    bufsize = 0;
-    textbuf[0] = 0;
-
-    set(digest, key, len);
-}
-
-HMAC::~HMAC()
-{
-    release();
-}
-
 bool HMAC::has(const char *id)
 {
     return false;
@@ -61,14 +38,6 @@ void HMAC::release(void)
 bool HMAC::put(const void *address, size_t size)
 {
     return false;
-}
-
-const char *HMAC::c_str(void)
-{
-    if(!bufsize)
-        get();
-
-    return textbuf;
 }
 
 const unsigned char *HMAC::get(void)

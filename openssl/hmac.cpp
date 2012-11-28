@@ -17,29 +17,6 @@
 
 #include "local.h"
 
-HMAC::HMAC()
-{
-    hmactype = NULL;
-    context = NULL;
-    bufsize = 0;
-    textbuf[0] = 0;
-}
-
-HMAC::HMAC(const char *digest, const char *key, size_t len)
-{
-    hmactype = NULL;
-    context = NULL;
-    bufsize = 0;
-    textbuf[0] = 0;
-
-    set(digest, key, len);
-}
-
-HMAC::~HMAC()
-{
-    release();
-}
-
 bool HMAC::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
@@ -83,14 +60,6 @@ bool HMAC::put(const void *address, size_t size)
 
     HMAC_Update((HMAC_CTX *)context, (const unsigned char *)address, size);
     return true;
-}
-
-const char *HMAC::c_str(void)
-{
-    if(!bufsize)
-        get();
-
-    return textbuf;
 }
 
 const unsigned char *HMAC::get(void)
