@@ -262,7 +262,13 @@ void Cipher::set(const key_t key, mode_t mode, unsigned char *address, size_t si
     if(!keys.keysize)
         return;
 
-    gnutls_cipher_init((CIPHER_CTX *)&context, (CIPHER_ID)keys.algoid, (CIPHER_KEYDATA *)keys.keybuf, (CIPHER_KEYDATA *)keys.ivbuf);
+    gnutls_datum_t keyinfo, ivinfo;
+    keyinfo.data = keys.keybuf;
+    keyinfo.size = keys.keysize;
+    ivinfo.data = keys.ivbuf;
+    ivinfo.size = keys.blksize;
+
+    gnutls_cipher_init((CIPHER_CTX *)&context, (CIPHER_ID)keys.algoid, &keyinfo, &ivinfo);
 }
 
 size_t Cipher::put(const unsigned char *data, size_t size)
