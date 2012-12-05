@@ -25,7 +25,7 @@ int context::map_cipher(const char *cipher)
     char algoname[64];
 
     enum {
-        NONE, CBC, ECB, CFB, OFB, GCM
+        NONE, CBC, ECB, CFB, OFB
     } modeid;
 
     String::set(algoname, sizeof(algoname), cipher);
@@ -49,8 +49,6 @@ int context::map_cipher(const char *cipher)
             modeid = CFB;
         else if(eq_case(lpart, "ofb"))
             modeid = OFB;
-        else if(eq_case(lpart, "gcm"))
-            modeid = GCM;
         else
             modeid = NONE;    
     }
@@ -102,15 +100,6 @@ int context::map_cipher(const char *cipher)
             return GNUTLS_CIPHER_BLOWFISH_PGP_CFB;
         if(eq_case(algoname, "sk"))
             return GNUTLS_CIPHER_SAFER_SK128_PGP_CFB;
-        return 0;
-    case GCM:
-        if(eq_case(algoname, "aes")) {
-            if(atoi(fpart) == 128)
-                return GNUTLS_CIPHER_AES_128_GCM;
-            if(atoi(fpart) == 256)
-                return GNUTLS_CIPHER_AES_256_GCM;
-            return 0;
-        }
         return 0;
     case CBC:
         if(eq_case(algoname, "aes")) {
@@ -287,7 +276,7 @@ size_t Cipher::put(const unsigned char *data, size_t size)
 
     switch(bufmode) {
     case Cipher::ENCRYPT:
-        gnutls_cipher_encrypt2((CIPHER_CTX)context, data, size, bufaddr + bufpos, size);
+        gnutls_cipher_encrypt2((CIPHER_CTX)context, (void *)data, size, bufaddr + bufpos, size);
         break;
     case Cipher::DECRYPT:
         gnutls_cipher_decrypt2((CIPHER_CTX)context, data, size, bufaddr + bufpos, size);
