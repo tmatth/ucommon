@@ -17,6 +17,20 @@
 
 #include "local.h"
 
+// for older/broken versions of gnutls_hmac_init headers
+
+class multicode
+{
+public:
+    int code;
+
+    inline operator HMAC_ID()
+        {return (HMAC_ID)code;}
+
+    inline operator MD_ID()
+        {return (MD_ID)code;}
+};
+
 void HMAC::release(void)
 {
     if(context) {
@@ -64,8 +78,12 @@ void HMAC::set(const char *digest, const char *key, size_t len)
         return;
 
     hmacid = context::map_hmac(digest);
+
+    multicode id;
+    id.code = hmacid;
+
     if(hmacid)
-        gnutls_hmac_init((HMAC_CTX *)&context, (MD_ID)hmacid, key, len);
+        gnutls_hmac_init((HMAC_CTX *)&context, id, key, len);
 }
 
 bool HMAC::has(const char *type)
