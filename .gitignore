@@ -50,6 +50,7 @@ directive
 *~
 *.rpm
 *.tar.gz
+*.cbp
 test/ucommon[A-Z]*
 test/demo[A-Z]*
 utils/args

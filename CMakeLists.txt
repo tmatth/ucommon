@@ -584,4 +584,9 @@ install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT librarie
 install(TARGETS ucommon-args ucommon-pdetach usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
 install(FILES ${ucommon_man} DESTINATION ${INSTALL_MANDIR}/man1)
 
-
+if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
+    add_custom_target(uninstall
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND xargs <install_manifest.txt
+    )
+endif()
