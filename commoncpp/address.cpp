@@ -241,7 +241,7 @@ bool IPV4Address::operator==(const IPV4Address &a) const
     for(s = 0; s < smaller->addr_count; s++) {
         // bool found = false;
         for(l = 0; l < larger->addr_count &&
-            memcmp((char *)&ipaddr[s], (char *)&a.ipaddr[l], sizeof(struct in_addr)); l++);
+            memcmp((char *)&smaller->ipaddr[s], (char *)&larger->ipaddr[l], sizeof(struct in_addr)); l++); 
         if(l == larger->addr_count) return false;
     }
     return true;
