@@ -1,3 +1,6 @@
+from ucommon 6.0.4 to 6.0.5
+- additional constructors to pass pre-allocated memory
+
 from ucommon 6.0.3 to 6.0.4
 - fix for address list comparison issue
 

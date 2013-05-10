@@ -465,6 +465,18 @@ void MemVector::cow(vectorsize_t adj)
 {
 }
 
+ArrayReuse::ArrayReuse(size_t size, unsigned c, void *memory) :
+ReusableAllocator()
+{
+    assert(c > 0 && size > 0 && memory != NULL);
+
+    objsize = size;
+    count = 0;
+    limit = c;
+    used = 0;
+    mem = (caddr_t)memory;
+}
+
 ArrayReuse::ArrayReuse(size_t size, unsigned c) :
 ReusableAllocator()
 {

@@ -51,6 +51,7 @@ private:
 
 protected:
     ArrayReuse(size_t objsize, unsigned c);
+    ArrayReuse(size_t objsize, unsigned c, void *memory);
 
 public:
     /**
@@ -496,6 +497,14 @@ public:
      */
     inline array_reuse(unsigned count) :
         ArrayReuse(sizeof(T), count) {};
+
+    /**
+     * Create reusable objects of specific type in preallocated memory.
+     * @param count of objects of specified type in memory.
+     * @param memory to use.
+     */
+    inline array_reuse(unsigned count, void *memory) :
+        ArrayReuse(sizeof(T), count, memory) {};
 
     /**
      * Test if typed objects available in heap or re-use list.
