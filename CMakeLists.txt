@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 6.0.4)
+set (VERSION 6.0.5)
 
 set(RC_VERSION ${VERSION})
 STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
