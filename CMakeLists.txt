@@ -82,13 +82,14 @@ elseif(WIN32)
     option(BUILD_STDLIB "Set to OFF to disable C++ stdlib" ON)
     set(POSIX_TIMERS OFF CACHE BOOL "does not use posix timers" FORCE)
     set(GCC_ATOMICS OFF CACHE BOOL "does not use gcc atomics" FORCE)
-    MARK_AS_ADVANCED(POSIX_TIMERS GCC_ATOMICS)
 else()
     option(BUILD_STATIC "Set to ON to build static libraries" OFF)
     option(BUILD_STDLIB "Set to OFF to disable C++ stdlib" ON)
     option(POSIX_TIMERS "Set to ON to enable" OFF)
     option(GCC_ATOMICS "Set to ON to enable" OFF)
 endif()
+
+MARK_AS_ADVANCED(POSIX_TIMERS GCC_ATOMICS)
 
 option(BUILD_TESTING "Set to ON to build test programs" OFF)
 
