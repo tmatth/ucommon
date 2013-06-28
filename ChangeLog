@@ -1,3 +1,6 @@
+from ucommon 6.0.5 to 6.0.6
+- small cleanup of useless validator assignments
+
 from ucommon 6.0.4 to 6.0.5
 - additional constructors to pass pre-allocated memory
 
