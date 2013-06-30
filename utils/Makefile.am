@@ -10,7 +10,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
-INCLUDES = -I$(top_srcdir)/inc
+AM_CPPFLAGS = -I$(top_srcdir)/inc
 LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 

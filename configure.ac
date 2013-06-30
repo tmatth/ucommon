@@ -8,9 +8,9 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-AC_INIT(autogen.sh)
+AC_INIT([ucommon],[6.0.6])
+AC_CONFIG_SRCDIR([inc/ucommon/ucommon.h])
 
-VERSION="6.0.6"
 LT_VERSION="6:2:0"
 OPENSSL_REQUIRES="0.9.7"
 
@@ -22,7 +22,7 @@ AC_PROG_CXXCPP
 AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
-AM_INIT_AUTOMAKE(ucommon, [$VERSION])
+AM_INIT_AUTOMAKE([dist-shar dist-zip])
 AM_CONFIG_HEADER(ucommon-config.h)
 
 AC_C_RESTRICT
