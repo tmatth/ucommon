@@ -37,7 +37,7 @@ class __LOCAL context : public secure
 public:
     ~context();
 
-    gnutls_connection_end_t connect;
+    unsigned int connect;
     gnutls_credentials_type_t xtype;
     gnutls_certificate_credentials_t xcred;
     gnutls_dh_params_t dh;
