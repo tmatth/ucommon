@@ -27,7 +27,7 @@ TCPBuffer(tcp, size)
     if(!is_open() || !ssl)
         return;
 
-    gnutls_transport_set_ptr((SSL)ssl, (gnutls_transport_ptr_t) so);
+    gnutls_transport_set_ptr((SSL)ssl, reinterpret_cast<gnutls_transport_ptr_t>( so));
     int result = gnutls_handshake((SSL)ssl);
 
     if(result >= 0)
@@ -67,7 +67,7 @@ void SSLBuffer::open(const char *host, const char *service, size_t size)
     if(!is_open() || !ssl)
         return;
 
-    gnutls_transport_set_ptr((SSL)ssl, (gnutls_transport_ptr_t) so);
+    gnutls_transport_set_ptr((SSL)ssl, reinterpret_cast<gnutls_transport_ptr_t>(so));
     int result = gnutls_handshake((SSL)ssl);
 
     if(result >= 0)
