@@ -777,6 +777,9 @@ public:
     inline int err(void) const
         {return fsys::err();}
 
+    inline void reset(void)
+        {fsys::reset();}
+
     /**
      * Test if file descriptor is open.
      * @return true if open.
