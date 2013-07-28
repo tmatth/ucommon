@@ -830,6 +830,8 @@ int fsys::close(void)
         else
             error = remapError();
     }
+    else
+        return EBADF;   // not opened, but state still error free
     return error;
 }
 
