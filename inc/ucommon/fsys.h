@@ -229,6 +229,12 @@ public:
         {return fd;}
 
     /**
+     * Reset error flag.
+     */
+    inline void reset(void)
+        {error = 0;}
+
+    /**
      * Test if file descriptor is open.
      * @return true if open.
      */

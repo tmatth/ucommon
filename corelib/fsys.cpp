@@ -457,6 +457,7 @@ void fsys::release(fd_t fd)
 void dir::open(const char *path)
 {
     close();
+    error = 0;
 
     char tpath[256];
     DWORD attr = GetFileAttributes(path);
@@ -486,6 +487,7 @@ void fsys::open(const char *path, access_t access)
     char buf[128];
 
     close();
+    error = 0;
 
     if(access == DEVICE) {
 #ifdef  _MSWINDOWS_
@@ -568,6 +570,9 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
     DWORD attr = FILE_ATTRIBUTE_NORMAL;
 
     fmode &= 0666;
+
+    close();
+    error = 0;
 
     const char *cp = strrchr(path, '\\');
     const char *cp2 = strrchr(path, '/');
@@ -855,6 +860,7 @@ void fsys::open(const char *path, unsigned fmode, access_t access)
     unsigned flags = 0;
 
     close();
+    error = 0;
 
     switch(access)
     {
@@ -907,6 +913,7 @@ int dir::create(const char *path, unsigned perms)
 void dir::open(const char *path)
 {
     close();
+    error = 0;
 
     ptr = opendir(path);
     if(!ptr)
@@ -918,6 +925,7 @@ void fsys::open(const char *path, access_t access)
     unsigned flags = 0;
 
     close();
+    error = 0;
 
     switch(access)
     {
@@ -1178,14 +1186,12 @@ fsys()
 fsys::fsys(const char *path, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
-    error = 0;
     open(path, access);
 }
 
 fsys::fsys(const char *path, unsigned fmode, access_t access)
 {
     fd = INVALID_HANDLE_VALUE;
-    error = 0;
     open(path, fmode, access);
 }
 
