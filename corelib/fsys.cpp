@@ -830,8 +830,6 @@ int fsys::close(void)
         else
             error = remapError();
     }
-    else
-        error = EBADF;
     return error;
 }
 
