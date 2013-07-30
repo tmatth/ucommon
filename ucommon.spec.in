@@ -90,6 +90,7 @@ html browsable.
 %{_bindir}/args
 %{_bindir}/car
 %{_bindir}/pdetach
+%{_bindir}/keywait
 %{_bindir}/scrub-files
 %{_bindir}/mdsum
 %{_bindir}/sockaddr
