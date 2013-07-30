@@ -456,6 +456,11 @@ add_dependencies(usecure-car usecure ucommon)
 set_target_properties(usecure-car PROPERTIES OUTPUT_NAME car)
 target_link_libraries(usecure-car usecure ucommon ${SECURE_LIBS} ${UCOMMON_LIBS} ${WITH_LIBS})
 
+add_executable(ucommon-keywait utils/keywait.cpp)
+add_dependencies(ucommon-keywait ucommon)
+set_target_properties(ucommon-keywait PROPERTIES OUTPUT_NAME keywait)
+target_link_libraries(ucommon-keywait ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
+
 add_executable(ucommon-pdetach utils/pdetach.cpp)
 add_dependencies(ucommon-pdetach ucommon)
 set_target_properties(ucommon-pdetach PROPERTIES OUTPUT_NAME pdetach)
@@ -582,7 +587,7 @@ if(BUILD_STDLIB)
 endif()
 
 install(TARGETS ucommon usecure DESTINATION ${INSTALL_LIBDIR} COMPONENT libraries)
-install(TARGETS ucommon-args ucommon-pdetach usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
+install(TARGETS ucommon-args ucommon-pdetach ucommon-keywait usecure-car usecure-scrub usecure-mdsum ucommon-sockaddr usecure-zerofill DESTINATION ${INSTALL_BINDIR})
 install(FILES ${ucommon_man} DESTINATION ${INSTALL_MANDIR}/man1)
 
 if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
