@@ -14,7 +14,7 @@ Version: @VERSION@
 Release: 0%{?dist}
 License: LGPLv3+
 URL: http://www.gnu.org/software/commoncpp
-Source0: http://www.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.bz2
+Source0: http://dev.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: doxygen graphviz-gd openssl-devel
 Group: System Environment/Libraries
