@@ -19,6 +19,7 @@ Dart*
 config.h
 args
 car
+keywait
 mdsum
 pdetach
 sockaddr
@@ -50,6 +51,7 @@ directive
 *~
 *.rpm
 *.tar.gz
+*.shar.gz
 *.cbp
 test/ucommon[A-Z]*
 test/demo[A-Z]*
