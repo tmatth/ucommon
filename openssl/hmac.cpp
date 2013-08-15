@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+NAMESPACE_UCOMMON
+
 bool HMAC::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
@@ -33,7 +35,7 @@ void HMAC::set(const char *digest, const char *key, size_t len)
 
     hmactype = EVP_get_digestbyname(digest);
     if(hmactype && len) {
-        context = new HMAC_CTX;
+        context = new ::HMAC_CTX;
         HMAC_CTX_init((HMAC_CTX *)context);
         HMAC_Init((HMAC_CTX *)context, key, len, (const EVP_MD *)hmactype);
     }
@@ -89,3 +91,4 @@ buffer[count]);
     return buffer;
 }
 
+END_NAMESPACE
