@@ -20,7 +20,7 @@
 #include <ucommon/export.h>
 #include <ucommon/secure.h>
 #include <openssl/ssl.h>
-#include <openssl/evp.h>
+#include <openssl/hmac.h>
 #include <openssl/rand.h>
 
 #ifdef  _MSWINDOWS_

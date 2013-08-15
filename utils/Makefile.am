@@ -15,13 +15,15 @@ LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
 man_MANS = args.1 scrub-files.1 mdsum.1 zerofill.1 car.1 sockaddr.1 pdetach.1
-bin_PROGRAMS = args scrub-files mdsum zerofill car sockaddr pdetach
+bin_PROGRAMS = args scrub-files mdsum zerofill car sockaddr pdetach keywait
 
 args_SOURCES = args.cpp
 
 sockaddr_SOURCES = sockaddr.cpp
 
 pdetach_SOURCES = pdetach.cpp
+
+keywait_SOURCES = keywait.cpp
 
 scrub_files_SOURCES = scrub.cpp
 scrub_files_LDFLAGS = @SECURE_LOCAL@

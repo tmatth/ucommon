@@ -97,6 +97,7 @@ make install DESTDIR=%{buildroot}
 %defattr(-,root,root,-)
 %{_bindir}/args
 %{_bindir}/car
+%{_bindir}/keywait
 %{_bindir}/scrub-files
 %{_bindir}/mdsum
 %{_bindir}/sockaddr
