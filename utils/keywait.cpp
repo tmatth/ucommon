@@ -17,11 +17,11 @@
 
 #include <ucommon/secure.h>
 
-#ifndef  _MSWINDOWS_
-
+#ifdef  _MSWINDOWS_
+#include <conio.h>
+#else
 #include <unistd.h>
 #include <termios.h>
-
 #endif
 
 using namespace UCOMMON_NAMESPACE;
@@ -30,7 +30,12 @@ static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::numericopt timeout('t', "--timeout", _TEXT("optional keyboard input timeout"), "seconds", 0);
 
-#ifndef _MSWINDOWS_
+#ifdef _MSWINDOWS_
+
+HANDLE input;
+DWORD mode;
+
+#else
 
 static struct termios orig, current;
 
@@ -43,6 +48,12 @@ static void cleanup(void)
 static void keyflush(void)
 {
 #ifdef  _MSWINDOWS_
+    TCHAR ch;
+    DWORD count;
+
+    while(WaitForSingleObject(input, 20) == WAIT_OBJECT_0) {
+        ReadConsole(input, &ch, 1, &count, NULL);
+    }
 #else
     fd_set inp;
     struct timeval tv;
@@ -68,6 +79,7 @@ PROGRAM_MAIN(argc, argv)
     bool nl = false;
 
     unsigned count = 0;
+    int excode = 2;
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: keywait [options] [text]"));
@@ -84,6 +96,23 @@ PROGRAM_MAIN(argc, argv)
     }
 
 #ifdef  _MSWINDOWS_
+    input = GetStdHandle(STD_INPUT_HANDLE);
+    GetConsoleMode(input, &mode);
+    SetConsoleMode(input, 0);
+
+    keyflush();
+
+    DWORD timer = INFINITE;
+
+    if(is(timeout))
+        timer = *timeout;
+
+    if(WaitForSingleObject(input, timer) == WAIT_OBJECT_0) {
+        keyflush();
+        excode = 0;
+    }
+    else
+        excode = 1;
 
 #else
     tcgetattr(0, &orig);
@@ -92,7 +121,6 @@ PROGRAM_MAIN(argc, argv)
     tcgetattr(0, &current);
     cfmakeraw(&current);
     tcsetattr(0, TCSANOW, &current);
-    int excode = 2;
     fd_set inp;
     struct timeval tv = {0, 0};
     struct timeval *tvp = NULL;
