@@ -114,6 +114,8 @@ PROGRAM_MAIN(argc, argv)
     else
         excode = 1;
 
+    SetConsoleMode(input, mode);
+
 #else
     tcgetattr(0, &orig);
     shell::exiting(&cleanup);
