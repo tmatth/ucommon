@@ -102,7 +102,6 @@ make install DESTDIR=%{buildroot}
 %{_bindir}/mdsum
 %{_bindir}/sockaddr
 %{_bindir}/zerofill
-%{_bindir}/keywait
 %{_mandir}/man1/args.*
 %{_mandir}/man1/car.*
 %{_mandir}/man1/scrub-files.*
