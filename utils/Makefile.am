@@ -14,7 +14,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/inc
 LDADD = ../corelib/libucommon.la @UCOMMON_LIBS@ @UCOMMON_CLINK@
 EXTRA_DIST = *.1
 
-man_MANS = args.1 scrub-files.1 mdsum.1 zerofill.1 car.1 sockaddr.1 pdetach.1
+man_MANS = args.1 scrub-files.1 mdsum.1 zerofill.1 car.1 sockaddr.1 \
+	pdetach.1 keywait.1
 bin_PROGRAMS = args scrub-files mdsum zerofill car sockaddr pdetach keywait
 
 args_SOURCES = args.cpp

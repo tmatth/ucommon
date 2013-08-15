@@ -1,0 +1,53 @@
+.\" keywait - pause and wait for keyboard input
+.\" Copyright (c) 2013 David Sugar <dyfet@gnutelephony.org>
+.\"
+.\" This manual page is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc.,59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+.\"
+.\" This manual page is written especially for Debian GNU/Linux.
+.\"
+.TH keywait "1" "August 2013" "GNU uCommon" "GNU Telephony"
+.SH NAME
+keywait \- pause and wait for input.
+.SH SYNOPSIS
+.B keywait
+.RI [ options ]
+.RI [ prompt ]
+.br
+.SH DESCRIPTION
+Pause and wait for keyboard input.  A prompt can be displayed to the user, 
+and the timeout to wait for keyboard input can be specified.  Before waiting
+any pending input is automatically flushed.  If no timeout is specified then
+keywait will wait forever.
+.SH OPTIONS
+.TP
+.BI \-\-timeout= seconds
+Specify number of seconds to wait for input.
+.TP
+.B \-\-help
+Outputs help screen for the user.
+.SH EXIT CODES
+Returns 0 if keyboard entry was received.  1 if timeout.  2 for any error.
+.SH AUTHOR
+.B keywait
+was written by David Sugar <dyfet@gnutelephony.org>.
+.SH "REPORTING BUGS"
+Report bugs to bug-commoncpp@gnu.org.
+.SH COPYRIGHT
+Copyright \(co 2013 David Sugar, Tycho Softworks.
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.
+
