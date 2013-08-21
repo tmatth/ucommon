@@ -50,6 +50,13 @@
 #include <sys/filio.h>
 #endif
 
+#ifdef  HAVE_RULI_H
+extern "C" {
+#include <ruli.h>
+#define getaddrinfo(h, s, hint, res) ruli_getaddrinfo(h, s, hint, res)
+}
+#endif
+
 #if defined(HAVE_POLL) && defined(POLLRDNORM)
 #define USE_POLL
 #endif

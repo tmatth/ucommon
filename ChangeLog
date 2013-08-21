@@ -1,6 +1,6 @@
 from ucommon 6.0.7 to 6.0.8
 - keywait utility added
-- small change to openssl hmac for improved portability
+- optional libruli support for srv resolver
 
 from ucommon 6.0.6 to 6.0.7
 - error state in fsys open fixed

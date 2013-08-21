@@ -320,6 +320,11 @@ check_include_files(sys/param.h HAVE_SYS_PARAM_H)
 check_include_files(sys/file.h HAVE_SYS_FILE_H)
 check_include_files(sys/lockf.h HAVE_SYS_LOCKF_H)
 check_include_files(regex.h HAVE_REGEX_H)
+check_include_files(ruli.h HAVE_RULI_H)
+
+if(HAVE_RULI_H)
+    set(UCOMMON_LIBS ${UCOMMON_LIBS} "ruli")
+endif()
 
 if(HAVE_REGEX_H)
     check_library_exists(regex regfree "" HAVE_REGEX_LIB)

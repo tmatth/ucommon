@@ -93,6 +93,7 @@
 #cmakedefine HAVE_TERMIOS_H 1
 #cmakedefine HAVE_TERMIO_H 1
 #cmakedefine HAVE_OPENSSL_FIPS_H 1
+#cmakedefine HAVE_RULI_H 1
 
 #cmakedefine POSIX_TIMERS 1
 #cmakedefine GCC_ATOMICS 1

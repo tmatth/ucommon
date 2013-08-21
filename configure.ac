@@ -158,6 +158,11 @@ AC_CHECK_HEADERS(stdint.h poll.h sys/mman.h sys/shm.h sys/poll.h sys/timeb.h end
 AC_CHECK_HEADERS(mach/clock.h mach-o/dyld.h linux/version.h sys/inotify.h sys/event.h syslog.h sys/wait.h termios.h termio.h fcntl.h unistd.h)
 AC_CHECK_HEADERS(sys/param.h sys/lockf.h sys/file.h dlfcn.h)
 
+AC_CHECK_HEADER(ruli.h, [
+    AC_DEFINE(HAVE_RULI_H, [1], [have ruli header])
+    UCOMMON_LIBS="$UCOMMON_LIBS -lruli"
+])
+
 AC_CHECK_HEADER(regex.h, [
     AC_DEFINE(HAVE_REGEX_H, [1], [have regex header])
     AC_CHECK_LIB(regex, regfree, [
