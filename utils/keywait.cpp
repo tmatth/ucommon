@@ -67,7 +67,8 @@ static void keyflush(void)
         tv.tv_sec = 0;
         if(select(1, &inp, NULL, NULL, &tv) <= 0)
             break;
-        ::read(0, &ch, 1);
+        if(::read(0, &ch, 1) < 1)
+            break;
     }
 #endif
 }
