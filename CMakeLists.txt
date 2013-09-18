@@ -322,11 +322,6 @@ check_include_files(sys/lockf.h HAVE_SYS_LOCKF_H)
 check_include_files(regex.h HAVE_REGEX_H)
 
 # we are making this optional in automake, not default...
-# check_include_files(ruli.h HAVE_RULI_H)
-
-if(HAVE_RULI_H)
-    set(UCOMMON_LIBS ${UCOMMON_LIBS} "ruli")
-endif()
 
 if(HAVE_REGEX_H)
     check_library_exists(regex regfree "" HAVE_REGEX_LIB)
