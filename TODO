@@ -1,9 +1,12 @@
-Proposed changes (likely deferred to 6.0.0)
+Proposed changes for 6.1.0:
+
+	portable shell::pass to get pins with *'s
+
+	siot merged into ucommon for serial device support.
 
 	fsys.cpp & file.cpp split into part that truly requires
 	_XOPEN_SOURCE >= 600 and rest
 
-	
 	FetchProtocol for string >> operator?
 
 	Use NSPR as an alternate thread runtime base like we do with GNU pth...
