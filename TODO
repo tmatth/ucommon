@@ -1,5 +1,7 @@
 Proposed changes for 6.1.0:
 
+	srvaddress type
+
 	portable shell::pass to get pins with *'s
 
 	siot merged into ucommon for serial device support.
