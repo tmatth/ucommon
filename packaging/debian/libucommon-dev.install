@@ -1,0 +1,8 @@
+usr/include/ucommon/*
+usr/include/commoncpp/*
+usr/lib/lib*.so
+usr/lib/pkgconfig/*
+usr/bin/ucommon-config
+usr/bin/commoncpp-config
+usr/share/man/man1/ucommon-config.*
+usr/share/man/man1/commoncpp-config.*

@@ -1,0 +1,468 @@
+ucommon (6.0.8-0gt1) UNRELEASED; urgency=low
+
+  * added keywait utility
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 21 Aug 2013 14:38:33 -0400
+
+ucommon (6.0.7-0gt1) UNRELEASED; urgency=medium
+
+  * Fix for error state in fsys
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 28 Jul 2013 06:32:52 -0400
+
+ucommon (6.0.5-0gt1) UNRELEASED; urgency=low
+
+  * Extended reusable object for pre-setting memory
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 16 May 2013 14:41:53 -0400
+
+ucommon (6.0.4-0gt1) UNRELEASED; urgency=low
+
+  * Fixed address list issue
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 05 May 2013 07:24:24 -0400
+
+ucommon (6.0.2-0gt1) UNRELEASED; urgency=low
+
+  * HMAC and self-clearing key support added
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 28 Nov 2012 08:11:00 -0400
+
+ucommon (6.0.0-0gt1) UNRELEASED; urgency=low
+
+  * New version 6 abi
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 16 Nov 2012 10:46:58 -0400
+
+ucommon (5.5.0-0gt1) UNRELEASED; urgency=low
+
+  * New classes mapof and listof introduced
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 06 Aug 2012 08:25:58 -0400
+
+ucommon (5.4.3-0gt1) UNRELEASED; urgency=medium
+
+  * Bug fixes for threading queue and stack
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 05 Jul 2012 10:06:56 -0400
+
+ucommon (5.4.2-0gt1) UNRELEASED; urgency=low
+
+  * Updated for bugfixes for commoncpp address and ConditionalAccess
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 27 Jun 2012 06:28:41 -0400
+
+ucommon (5.4.0-0gt1) UNRELEASED; urgency=low
+
+  * String and process api's extended and clarified, transitional to 6.0
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 22 Jun 2012 09:34:18 -0400
+
+ucommon (5.3.0-0gt1) UNRELEASED; urgency=low
+
+  * Updated for new ucommon release
+    - expansion of stringlist_t and bufpager uses
+    - new debian compatible package numbering
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 18 May 2012 14:21:00 -0400
+
+ucommon (5.2.2-1) UNRELEASED; urgency=low
+
+  * expanded commoncpp support library for older object linking and maps
+  * fixed stringpager api and added directory pager.
+  * honors collation
+  * no -L or -I paths in default install
+
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 31 Mar 2012 08:59:01 -0400
+
+ucommon (5.2.1-1) UNRELEASED; urgency=low
+
+  * shell::release added to api 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 11 Feb 2012 07:17:03 -0500
+
+ucommon (5.2.0-1) UNRELEASED; urgency=low
+
+  * New pdetach utility
+  * Expanded commoncpp support
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 19 Jan 2012 16:49:33 -0500
+
+ucommon (5.1.2-1) UNRELEASED; urgency=low
+
+  * Updated copyright info on commoncpp part; has runtime exception
+  * Standardized manpages
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 15 Jan 2012 12:30:17 -0500
+
+ucommon (5.1.0-1) UNRELEASED; urgency=low
+
+  * Revised api with stringpager, new container operations
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 18 Dec 2011 06:35:09 -0500
+
+ucommon (5.0.7-1) UNRELEASED; urgency=low
+
+  * joinable thread self join modified to cleanup thread state
+  * xopen patch from debian for posix_fadvise now upstream
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 12 Nov 2011 10:34:28 -0500
+
+ucommon (5.0.6-1) UNRELEASED; urgency=low
+
+  * expanded generic api classes
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 30 Sep 2011 04:57:56 -0400
+
+ucommon (5.0.5-1) UNRELEASED; urgency=medium
+
+  * rename scrub to scrub-files
+  * fix for commoncpp parent thread
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 25 Jul 2011 12:46:58 -0400
+
+ucommon (5.0.4-1) UNRELEASED; urgency=medium
+
+  * Template issue fix for use with std templates.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 11 Jul 2011 04:07:56 -0400
+
+ucommon (5.0.3-2) UNRELEASED; urgency=low
+
+  * Separated package arch and indep builds
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 28 Jun 2011 04:51:46 -0400
+
+ucommon (5.0.3-1) UNRELEASED; urgency=low
+
+  * Added linked_pointer address list support and sockaddr util
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 15 Jun 2011 04:56:23 -0400
+
+ucommon (5.0.2-1) UNRELEASED; urgency=low
+
+  * Added car archiver
+  * Extended API for better cipher key management and interactive shell apps
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 11 Jun 2011 08:59:56 -0400
+
+ucommon (5.0.0-1) UNRELEASED; urgency=low
+
+  * New api release
+  * Merged commoncpp codebase into ucommon
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 21 May 2011 07:22:14 -0400
+
+ucommon (4.3.3-1) UNRELEASED; urgency=low
+
+  * New generics for dup
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 08 May 2011 14:31:14 -0400
+
+ucommon (4.3.2-1) UNRELEASED; urgency=low
+
+  * Further extension of file handling and string processing functions
+  * Critical bug fixes for named list handling and sorting.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 24 Apr 2011 07:48:29 -0400
+
+ucommon (4.3.1-1) UNRELEASED; urgency=low
+
+  * Bug fixes, and clarification of paths and file linking.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 05 Apr 2011 05:47:00 -0400
+
+ucommon (4.3.0-1) UNRELEASED; urgency=low
+
+  * Many enhancements to both keyfile and fsys.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 02 Apr 2011 15:54:05 -0400
+
+ucommon (4.2.1-1) UNRELEASED; urgency=low
+
+  * Added keyfile save and copy constructors.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 26 Mar 2011 18:16:23 -0400
+
+ucommon (4.2.0-1) UNRELEASED; urgency=low
+
+  * Abi changes for clarification of linked objects.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 20 Mar 2011 11:14:15 -0400
+
+ucommon (4.1.6-1) UNRELEASED; urgency=low
+
+  * Revised permission model for memory mapped objects.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 26 Feb 2011 11:25:19 -0500
+
+ucommon (4.1.5-1) UNRELEASED; urgency=low
+
+  * Posix timers no longer default configuration
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 20 Feb 2011 07:02:12 -0500
+
+ucommon (4.1.3-1) UNRELEASED; urgency=low
+
+  * Further timer fixes 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 17 Feb 2011 19:16:32 -0500
+
+ucommon (4.1.2-1) UNRELEASED; urgency=low
+
+  * Fixes for posix timers
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 16 Feb 2011 18:41:43 -0500
+
+ucommon (4.1.1-1) UNRELEASED; urgency=low
+
+  * Lot's of API cleanup.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 12 Feb 2011 14:58:04 -0500
+
+ucommon (4.0.4-1) UNRELEASED; urgency=low
+
+  * Cipher key management derivable.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 09 Dec 2010 15:15:28 -0500
+
+ucommon (4.0.3-1) UNRELEASED; urgency=low
+
+  * Fixed some issues with header macros.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 14 Oct 2010 16:32:05 -0400
+
+ucommon (4.0.2-1) UNRELEASED; urgency=low
+
+  * New bin utilities including scrub and mdsum.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 30 Sep 2010 11:31:06 -0400
+
+ucommon (4.0.1-2) UNRELEASED; urgency=low
+
+  * Fixed config script library name.
+  * Make libucommon-dev require libssl-dev.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 29 Sep 2010 08:53:07 -0400
+
+ucommon (4.0.0-1) UNRELEASED; urgency=low
+
+  * New ABI release.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 21 Sep 2010 16:55:54 -0400
+
+ucommon (3.4.0-1) UNRELEASED; urgency=low
+
+  * Consolidated runtime for secure support
+    - ccscript moved to bayonne
+    - ccaudio detached
+    - uccsecure now in primary library package
+    - no need for ccscript doc generation support
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 18 Sep 2010 13:01:05 -0400
+
+ucommon (3.3.7-1) UNRELEASED; urgency=low
+
+  * Fix for gnutls and configure changes.  None effecting debian.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 10 Sep 2010 10:29:00 -0400
+
+ucommon (3.3.6-1) UNRELEASED; urgency=low
+
+  * Grouping operator added. 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 07 Sep 2010 13:29:13 -0400
+
+ucommon (3.3.5-1) UNRELEASED; urgency=low
+
+  * Small fix for gettext detection.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 11 Aug 2010 01:44:37 -0400
+
+ucommon (3.3.4-1) UNRELEASED; urgency=high
+
+  * shell::getsym was broken.
+  * casting issues with String to c-string.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 10 Aug 2010 15:21:45 -0400
+
+ucommon (3.3.3-1) UNRELEASED; urgency=low
+
+  * More complete numeric to string expressions.
+  * Process detach handling. 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 08 Aug 2010 22:39:11 -0400
+
+ucommon (3.3.2-1) UNRELEASED; urgency=low
+
+  * shell debug messages, symbols space, and debugger hooks.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 06 Aug 2010 15:57:09 -0400
+
+ucommon (3.3.1-1) UNRELEASED; urgency=medium
+
+  * Logging added.
+  * Some string operations fixed.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 05 Aug 2010 21:06:15 -0400
+
+ucommon (3.3.0-1) UNRELEASED; urgency=low
+
+  * Internationalization support.
+  * Reorganization of ucommon-audiotools into ucommon-bin.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 01 Aug 2010 23:52:07 -0400
+
+ucommon (3.2.2-1) UNRELEASED; urgency=low
+
+  * Xml parsing of streams and new digest methods.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 31 Jul 2010 10:12:40 -0400
+
+ucommon (3.2.1-2) UNRELEASED; urgency=low
+
+  * No libssl dependency in secure.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 25 Jul 2010 19:21:13 -0400
+
+ucommon (3.2.1-1) UNRELEASED; urgency=low
+
+  * API extensions for uuid generation and better shell parsing.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 11 Jul 2010 20:22:01 -0400
+
+ucommon (3.2.0-1) UNRELEASED; urgency=low
+
+  * Shell parsing enhanced and pipe i/o added.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 03 Jul 2010 15:53:16 -0400
+
+ucommon (3.1.2-1) UNRELEASED; urgency=medium
+
+  * Fixed shell option parsing.
+  * Secure API expanded to better cover multiple libraries.
+  * Proper key erasure when secure objects are released.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 26 Jun 2010 21:37:43 -0400
+
+ucommon (3.1.0-1) UNRELEASED; urgency=low
+
+  * Secure crytographic library added to framework
+  * Documentation improved 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 22 Jun 2010 21:49:37 -0400
+
+ucommon (3.0.6-1) UNRELEASED; urgency=low
+
+  * Some extensions of the Socket class to improve abi coverage.
+  * Optional support for socks proxy (not currently built).
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 20 Jun 2010 13:21:13 -0400
+
+ucommon (3.0.5-1) UNRELEASED; urgency=high
+
+  * Some critical fixes for io buffering and method name collisions.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 14 Jun 2010 22:49:54 -0400
+
+ucommon (3.0.4-1) UNRELEASED; urgency=low
+
+  * Changes to tcp streaming for ssl adaption.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 11 Jun 2010 17:20:22 -0400
+
+ucommon (3.0.3-1) UNRELEASED; urgency=high
+
+  * Standardized name resolution.
+  * New buffered I/O classes introduced.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Thu, 10 Jun 2010 13:44:21 -0400
+
+ucommon (3.0.2-1) UNRELEASED; urgency=low
+
+  * New atomic class support and utf8 character file ops.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 09 Jun 2010 03:07:45 -0400
+
+ucommon (3.0.1-1) UNRELEASED; urgency=medium
+
+  * Threaded queue management and reuse templates and related bugs fixed.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 06 Jun 2010 12:15:38 -0400
+
+ucommon (3.0.0-1) UNRELEASED; urgency=low
+
+  * Merged ccscript and ccaudio into single ucommon framework package
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 01 Jun 2010 21:43:12 -0400
+
+ucommon (2.1.4-1) UNRELEASED; urgency=low
+
+  * new utf8_pointer string class and further unicode support
+  * new component access api for datetime objects
+  * New object containers for object lists, fifo's, and queues 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 18 May 2010 17:19:58 -0400
+
+ucommon (2.1.3-1) UNRELEASED; urgency=low
+
+  * unicode api and string class added
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 02 May 2010 20:23:55 -0400
+
+ucommon (2.1.2-1) UNRELEASED; urgency=low
+
+  * enhanced datetime api
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 25 Apr 2010 12:17:14 -0400
+
+ucommon (2.1.1-1) UNRELEASED; urgency=high
+
+  * fixed time string conversion and added string fields.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 30 Mar 2010 08:11:49 -0400
+
+ucommon (2.1.0-1) UNRELEASED; urgency=low
+
+  * packaging rewritten for dh7
+  * abi release bumped to libucommon3 for ucommon-2.1
+  * other changes to be noted at release....
+
+ -- David Sugar <dyfet@gnutelephony.org>  Tue, 23 Feb 2010 09:01:23 -0500
+
+ucommon (2.0.8-1) UNRELEASED; urgency=low
+
+  * added cmake build support
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 16 Jan 2010 17:29:56 -0500
+
+ucommon (2.0.7-1) UNRELEASED; urgency=low
+
+  * modified for gcc 4.4 strict aliasing
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 30 Nov 2009 07:41:40 -0500
+
+ucommon (2.0.6-1) UNRELEASED; urgency=low
+
+  *  fix for ucommon-config install and addition of ucommon-config man page.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 20 Jul 2009 09:12:10 -0400
+
+ucommon (2.0.5-1) UNRELEASED; urgency=low
+
+  * code cleanup, missing stack and queue destructors added
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 29 Apr 2009 14:32:22 -0400
+
+ucommon (2.0.4-3) UNRELEASED; urgency=low
+
+  * Fixed package for newer debhelper/cdbs requirements per Lintian.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 13 Apr 2009 11:52:24 -0400
+
+ucommon (2.0.4-2) UNRELEASED; urgency=low
+
+  * Initial Ubuntu ppa distribution.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 08 Mar 2009 21:33:11 -0400

@@ -1,0 +1,9 @@
+Document: libucommon-dev
+Title: libucommon framework documentation
+Abstract: Documentation of ucommon class framework.
+Section: Programming
+
+Format: HTML
+Index: /usr/share/doc/libucommon-dev/framework/index.html
+Files: /usr/share/doc/libucommon-dev/framework/*
+

@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+
+# Ensure at build time that the library has no dependencies on undefined
+# symbols, and speed up loading.  Make sure we use full build flags.
+LDFLAGS = $(shell dpkg-buildflags --get LDFLAGS)
+CPPFLAGS = $(shell dpkg-buildflags --get CPPFLAGS)
+CXXFLAGS = $(shell dpkg-buildflags --get CXXFLAGS)
+CFLAGS = $(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS += -Wl,-z,defs -Wl,--as-needed
+
+DEB_DH_INSTALL_ARGS := --sourcedir=debian/tmp
+DEB_DH_STRIP_ARGS := --dbg-package=libucommon6-dbg
+DEB_INSTALL_DOCS_ALL :=
+DEB_INSTALL_CHANGELOG_ALL := ChangeLog
+DEBIAN_DIR := $(shell echo ${MAKEFILE_LIST} | awk '{print $$1}' | xargs dirname )
+
+%:
+	dh $@
+
+.PHONY: override_dh_strip override_dh_auto_configure
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--disable-silent-rules --with-crypto=ssl --with-pkg-config \
+		CFLAGS="$(CFLAGS) $(CPPFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" \
+		LDFLAGS="$(LDFLAGS)"
+
+override_dh_strip:
+	dh_strip $(DEB_DH_STRIP_ARGS)
+
+binary-indep: 
+	dh --before dh_install $@ 
+	$(MAKE) doxy
+	mkdir -p debian/tmp/usr/share/doc/libucommon-dev/framework
+	cp doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
+	dh_install -i 
+	dh --remaining $@ 
+
+binary:	binary-arch binary-indep 
