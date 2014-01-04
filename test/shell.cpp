@@ -1,4 +1,4 @@
-// Copyright (C) 2009-2010 David Sugar, Tycho Softworks.
+// Copyright (C) 2009-2014 David Sugar, Tycho Softworks.
 //
 // This file is part of GNU uCommon C++.
 //

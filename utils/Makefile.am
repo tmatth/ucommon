@@ -1,4 +1,4 @@
-# Copyright (C) 2010 David Sugar, Tycho Softworks.
+# Copyright (C) 2010-2014 David Sugar, Tycho Softworks.
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
