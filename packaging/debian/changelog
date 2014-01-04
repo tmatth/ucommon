@@ -1,8 +1,9 @@
-ucommon (6.0.8-0gt1) UNRELEASED; urgency=low
+ucommon (6.1.0-0gt1) UNRELEASED; urgency=medium
 
   * added keywait utility
+  * fixes for generics and exception defaults
 
- -- David Sugar <dyfet@gnutelephony.org>  Wed, 21 Aug 2013 14:38:33 -0400
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 04 Jan 2014 04:38:33 -0400
 
 ucommon (6.0.7-0gt1) UNRELEASED; urgency=medium
 

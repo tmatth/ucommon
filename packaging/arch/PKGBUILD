@@ -2,7 +2,7 @@
 # Maintainer: Sergej Pupykin <pupykin.s+arch@gmail.com>
 
 pkgname=ucommon
-pkgver=6.0.8
+pkgver=6.1.0
 pkgrel=0
 pkgdesc="A light-weight C++ library to facilitate using C++ design patterns"
 arch=('i686' 'x86_64')
