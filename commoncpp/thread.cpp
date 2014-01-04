@@ -629,7 +629,7 @@ int MutexCounter::operator--()
         rtn = --counter;
         if(!rtn) {
             leaveMutex();
-            THROW(mc);
+            THROW(counter);
         }
     }
     leaveMutex();

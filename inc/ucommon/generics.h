@@ -31,11 +31,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef  NEW_STDLIB
+#ifdef  NEW_STDCPP
 #include <stdexcept>
 #endif
 
-#if defined(NEW_STDLIB) || defined(OLD_STDLIB)
+#if defined(NEW_STDCPP) || defined(OLD_STDCPP)
 #define THROW(x)    throw x
 #define THROWS(x)   throw(x)
 #define THROWS_ANY  throw()

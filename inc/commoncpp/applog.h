@@ -133,7 +133,11 @@ class __EXPORT AppLogException : public ost::Exception
      * Constructor.
      * @param what_arg exception string
      */
+    AppLogException(const char *what_arg) : ost::Exception(what_arg) {};
+
+// needed for linking older binaries...
     AppLogException(String &what_arg) : ost::Exception(what_arg) {};
+
 
 };
 #endif
