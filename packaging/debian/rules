@@ -30,11 +30,12 @@ override_dh_strip:
 	dh_strip $(DEB_DH_STRIP_ARGS)
 
 binary-indep: 
-	dh --before dh_install $@ 
+#	dh --before dh_install $@ 
 	$(MAKE) doxy
 	mkdir -p debian/tmp/usr/share/doc/libucommon-dev/framework
 	cp doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
-	dh_install -i 
-	dh --remaining $@ 
+#	dh_install -i 
+#	dh --remaining $@ 
+	dh $@
 
 binary:	binary-arch binary-indep 
