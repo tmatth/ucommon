@@ -36,13 +36,12 @@ binary-indep:
 	cp -a doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
 	mkdir -p debian/ucommon-doc/usr/share/doc/libucommon-dev/framework
 	cp -a doc/html/* debian/ucommon-doc/usr/share/doc/libucommon-dev/framework
-	echo doc
-	ls doc/html
-	echo debian tmp
-	ls debian/tmp/usr/share/doc
-	echo debian
-	ls debian
-#	dh_install -i 
+	echo debian tmp ****
+	ls debian/tmp
+	ls debian/ucommon-doc
+	echo deb
+	ls debian/tmp/usr/share/doc/libucommon-dev
+	echo debian ****
 #	dh --remaining $@ 
 	dh $@
 
