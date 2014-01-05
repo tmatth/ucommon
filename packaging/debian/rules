@@ -33,7 +33,9 @@ binary-indep:
 #	dh --before dh_install $@ 
 	$(MAKE) doxy
 	mkdir -p debian/tmp/usr/share/doc/libucommon-dev/framework
-	cp doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
+	cp -a doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
+	mkdir -p debian/ucommon-doc/usr/share/doc/libucommon-dev/framework
+	cp -a doc/html/* debian/ucommon-doc/usr/share/doc/libucommon-dev/framework
 #	dh_install -i 
 #	dh --remaining $@ 
 	dh $@
