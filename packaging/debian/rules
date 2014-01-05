@@ -15,7 +15,7 @@ DEB_INSTALL_CHANGELOG_ALL := ChangeLog
 DEBIAN_DIR := $(shell echo ${MAKEFILE_LIST} | awk '{print $$1}' | xargs dirname )
 
 %:
-	dh $@
+	dh $@ --parallel
 
 .PHONY: override_dh_strip override_dh_auto_configure
 
@@ -30,19 +30,11 @@ override_dh_strip:
 	dh_strip $(DEB_DH_STRIP_ARGS)
 
 binary-indep: 
-#	dh --before dh_install $@ 
+	dh --before dh_install $@ 
 	$(MAKE) doxy
 	mkdir -p debian/tmp/usr/share/doc/libucommon-dev/framework
-	cp -a doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
-	mkdir -p debian/ucommon-doc/usr/share/doc/libucommon-dev/framework
-	cp -a doc/html/* debian/ucommon-doc/usr/share/doc/libucommon-dev/framework
-	echo debian tmp ****
-	ls debian/tmp
-	ls debian/ucommon-doc
-	echo deb
-	ls debian/tmp/usr/share/doc/libucommon-dev
-	echo debian ****
-#	dh --remaining $@ 
-	dh $@
+	cp doc/html/* debian/tmp/usr/share/doc/libucommon-dev/framework
+	dh_install -i 
+	dh $@ --after dh_install 
 
 binary:	binary-arch binary-indep 
