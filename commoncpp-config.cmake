@@ -13,6 +13,7 @@ prefix=${CMAKE_INSTALL_PREFIX}
 exec_prefix=${CMAKE_INSTALL_PREFIX}/bin
 includedir=${CMAKE_INSTALL_PREFIX}/include
 libdir=${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
+modflags="${MODULE_FLAGS}"
 
 usage()
 {
@@ -95,6 +96,9 @@ while test $# -gt 0; do
         echo ${CMAKE_INSTALL_PREFIX}/include
         ;;
 
+    --modflags | --module)
+        echo $modflags
+        ;;
     *)
         usage
         exit 1

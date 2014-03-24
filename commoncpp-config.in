@@ -12,6 +12,7 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@
+modflags="@MODULE_FLAGS@"
 
 if [ "`ldd /bin/sh | grep lib64`" = "" ]
 then
@@ -100,7 +101,9 @@ while test $# -gt 0; do
     --includes)
         echo @UCOMMON_INCLUDES@
         ;;
-
+    --modflags|--module)
+        echo $modflags
+        ;;
     *)
         usage
         exit 1

@@ -36,6 +36,7 @@ UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 OPENSSL_LINK=""
+MODULE_FLAGS="-module -shared"
 
 CHECKFLAGS="$CHECKFLAGS"
 
@@ -101,6 +102,15 @@ if test -z "$enable_stdcpp" ; then
         ;;
     esac
 fi
+
+case "$target_os" in
+osf*|cygwin*|mingw*)
+    MODULE_FLAGS="-module -shared -no-undefined"
+    ;;
+darwin*)
+    MODULE_FLAGS="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
+    ;;
+esac
 
 AC_ARG_ENABLE(posix-timers,
     AC_HELP_STRING([--enable-posix-timers],
@@ -734,6 +744,7 @@ AC_PATH_PROG(DOXYGEN, doxygen, doxygen)
 AC_SUBST(DOXYGEN)
 AC_SUBST(CHECKFLAGS)
 AC_SUBST(CXXFLAGS)
+AC_SUBST(MODULE_FLAGS)
 AC_SUBST(UCOMMON_VISIBILITY)
 AC_SUBST(UCOMMON_INCLUDES)
 AC_SUBST(UCOMMON_LOCALE)

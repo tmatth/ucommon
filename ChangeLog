@@ -1,3 +1,6 @@
+from ucommon 6.1.0 to 6.1.1
+- module flag support for older commoncpp packages
+
 from ucommon 6.0.7 to 6.1.0
 - small fixes based on notes from Tristan
 - exception behavior is changed (fixed) for commoncpp

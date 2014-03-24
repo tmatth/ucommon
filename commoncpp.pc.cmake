@@ -1,6 +1,7 @@
 prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
 includedir=${CMAKE_INSTALL_PREFIX}/include
+modflags=${MODULE_FLAGS}
 
 Name: ucommon
 Description: GNU Common C++ class framework
