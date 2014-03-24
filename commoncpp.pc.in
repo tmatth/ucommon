@@ -1,8 +1,8 @@
 includes=@UCOMMON_INCLUDES@
 modflags=@MODULE_FLAGS@
 
-Name: ucommon
-Description: GNU Common C++ class framework
+Name: commoncpp
+Description: GNU Common C++ compat class framework
 Version: @VERSION@
 Libs:  -lcommoncpp -lucommon @UCOMMON_LINKED@
 Cflags: @UCOMMON_FLAGS@
