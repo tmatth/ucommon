@@ -33,6 +33,7 @@ Known values for OPTION are:
   --libs        print library linking information
   --cflags      print pre-processor and compiler flags
   --includes    print framework include directory
+  --modflags    print module link options
   --plugins     print framework plugin directory
   --help        display this help and exit
   --version     output version information
