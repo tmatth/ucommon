@@ -1,5 +1,5 @@
 includes=@UCOMMON_INCLUDES@
-modflags=@MODULE_FLAGS@
+modflags="@MODULE_FLAGS@"
 
 Name: commoncpp
 Description: GNU Common C++ compat class framework

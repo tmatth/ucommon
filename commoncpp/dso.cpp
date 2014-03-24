@@ -152,8 +152,6 @@ void DSO::loader(const char *filename, bool flag)
     err = "none";
     image = NULL;
 
-    fprintf(stderr, "**** HERE %s\n", filename);
-
     switch(NSCreateObjectFileImageFromFile(filename, &oImage)) {
     case NSObjectFileImageSuccess:
         break;
