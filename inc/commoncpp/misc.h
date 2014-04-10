@@ -80,6 +80,9 @@ public:
 
 	inline int getPages(void)
 		{return pages();}
+
+    inline void purge(void)
+        {memalloc::purge();}
 };
 
 /**

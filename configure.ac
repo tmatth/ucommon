@@ -36,7 +36,7 @@ UCOMMON_CLINK=""
 UCOMMON_LIBC="-lc"
 UCOMMON_LIBS=""
 OPENSSL_LINK=""
-MODULE_FLAGS="-module -shared"
+MODULE_FLAGS="-module -shared -avoid-version"
 
 CHECKFLAGS="$CHECKFLAGS"
 
@@ -105,7 +105,7 @@ fi
 
 case "$target_os" in
 osf*|cygwin*|mingw*)
-    MODULE_FLAGS="-module -shared -no-undefined"
+    MODULE_FLAGS="-module -shared -no-undefined -avoid-version"
     ;;
 darwin*)
     MODULE_FLAGS="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
