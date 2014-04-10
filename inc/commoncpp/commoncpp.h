@@ -19,6 +19,7 @@
 #include <commoncpp/serial.h>
 #include <commoncpp/tokenizer.h>
 #include <commoncpp/object.h>
+#include <commoncpp/misc.h>
 
 #ifdef  NEW_STDCPP
 #include <commoncpp/applog.h>

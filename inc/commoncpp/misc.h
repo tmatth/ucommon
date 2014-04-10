@@ -36,111 +36,34 @@
 // If you do not wish that, delete this exception notice.
 //
 
-#include <ucommon-config.h>
+/**
+ * @file misc.h
+ * @short various miscellaneous classes historically used.
+ **/
+
+#ifndef COMMONCPP_MISC_H_
+#define COMMONCPP_MISC_H_
+
+#ifndef COMMONCPP_CONFIG_H_
 #include <commoncpp/config.h>
-#include <commoncpp/export.h>
-#include <commoncpp/thread.h>
-#include <commoncpp/socket.h>
-#include <commoncpp/exception.h>
-#include <commoncpp/mime.h>
-#include <commoncpp/misc.h>
+#endif
 
 NAMESPACE_COMMONCPP
-using namespace std;
 
-MIMEMultipart::MIMEMultipart(const char *mt)
+class __EXPORT MemPager : public ucommon::memalloc
 {
-    const char *cp = strchr(mt, '/');
-    if(cp)
-        mt = ++cp;
+public:
+	inline MemPager(size_t pagesize = 4096) : ucommon::memalloc(pagesize) {};
 
-    first = last = NULL;
-    header[1] = NULL;
-    header[0] = mtype;
-    setString(boundry, sizeof(boundry), "xyzzy");
-    snprintf(mtype, sizeof(mtype), "Content-Type: multipart/%s, boundry=%s", mt, boundry);
-}
+	inline void *alloc(size_t size)
+		{return _alloc(size);}
 
-MIMEMultipart::~MIMEMultipart()
-{}
+	inline void *first(size_t size)
+		{return _alloc(size);}
 
-void MIMEMultipart::head(std::ostream *out)
-{
-    char **list = header;
-
-    while(**list)
-        *out << *(list++) << "\r\n";
-
-    out->flush();
-}
-
-void MIMEMultipart::body(std::ostream *out)
-{
-    MIMEItemPart *item = first;
-
-    while(item) {
-        *out << "--" << boundry << "\r\n";
-        item->head(out);
-        *out << "\r\n";
-        item->body(out);
-        item = item->next;
-    }
-    *out << "--" << boundry << "--\r\n";
-    out->flush();
-}
-
-MIMEItemPart::MIMEItemPart(MIMEMultipart *m, const char *ct)
-{
-    if(m->last) {
-        m->last->next = this;
-        m->last = this;
-    }
-    else
-        m->first = m->last = this;
-    next = NULL;
-    ctype = ct;
-}
-
-MIMEItemPart::~MIMEItemPart()
-{}
-
-MIMEMultipartForm::MIMEMultipartForm() :
-MIMEMultipart("form-data")
-{}
-
-MIMEMultipartForm::~MIMEMultipartForm()
-{}
-
-void MIMEItemPart::head(std::ostream *out)
-{
-    *out << "Content-Type: " << ctype << "\r" << endl;
-}
-
-MIMEFormData::MIMEFormData(MIMEMultipartForm *m, const char *n, const char *v) :
-MIMEItemPart(m, "")
-{
-    name = n;
-    content = v;
-}
-
-MIMEFormData::~MIMEFormData()
-{}
-
-void MIMEFormData::head(std::ostream *out)
-{
-    *out << "Content-Disposition: form-data; name=\"" << name << "\"\r\n";
-}
-
-void MIMEFormData::body(std::ostream *out)
-{
-    *out << content << "\r\n";
-}
+	inline int getPages(void)
+		{return pages();}
+};
 
 END_NAMESPACE
-
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */
+#endif
