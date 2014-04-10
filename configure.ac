@@ -105,7 +105,7 @@ fi
 
 case "$target_os" in
 osf*|cygwin*|mingw*)
-    MODULE_FLAGS="-module -shared -no-undefined -avoid-version"
+    MODULE_FLAGS="-module -shared -no-undefined"
     ;;
 darwin*)
     MODULE_FLAGS="-dynamic -bundle -undefined suppress -flat_namespace -read_only_relocs suppress"
