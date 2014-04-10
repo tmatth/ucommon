@@ -72,6 +72,9 @@ public:
 
 	char *alloc(const char *str);
 
+    inline char *first(const char *str)
+        {return alloc(str);}
+
 	inline void *first(size_t size)
 		{return _alloc(size);}
 
