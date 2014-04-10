@@ -48,9 +48,21 @@
 #include <commoncpp/config.h>
 #endif
 
+#define KEYDATA_INDEX_SIZE  97
+#define KEYDATA_PAGER_SIZE  512
+#if defined(PATH_MAX)
+#if PATH_MAX > 512
+#define KEYDATA_PATH_SIZE   512
+#else
+#define KEYDATA_PATH_SIZE   PATH_MAX
+#endif
+#else
+#define KEYDATA_PATH_SIZE   256
+#endif
+
 NAMESPACE_COMMONCPP
 
-class __EXPORT MemPager : public ucommon::memalloc
+class __EXPORT MemPager : private ucommon::memalloc
 {
 public:
 	inline MemPager(size_t pagesize = 4096) : ucommon::memalloc(pagesize) {};
@@ -58,11 +70,45 @@ public:
 	inline void *alloc(size_t size)
 		{return _alloc(size);}
 
+	char *alloc(const char *str);
+
 	inline void *first(size_t size)
 		{return _alloc(size);}
 
 	inline int getPages(void)
 		{return pages();}
+};
+
+/**
+ * This class is used to associate (object) pointers with named strings.
+ * A virtual is used to allocate memory which can be overriden in the
+ * derived class.
+ *
+ * @author David Sugar <dyfet@ostel.com>
+ * @short associate names with pointers.
+ */
+class __EXPORT Assoc
+{
+private:
+    struct entry {
+        const char *id;
+        entry *next;
+        void *data;
+    };
+
+    entry *entries[KEYDATA_INDEX_SIZE];
+
+protected:
+    Assoc();
+    virtual ~Assoc();
+
+    void clear(void);
+
+    virtual void *getMemory(size_t size) = 0;
+
+public:
+    void *getPointer(const char *id) const;
+    void setPointer(const char *id, void *data);
 };
 
 END_NAMESPACE

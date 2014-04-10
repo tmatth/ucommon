@@ -46,6 +46,63 @@
 NAMESPACE_COMMONCPP
 using namespace std;
 
+static unsigned getIndex(const char *id)
+{
+    unsigned idx = 0;
+    while(*id)
+        idx = (idx << 1) ^ (*(id++) & 0x1f);
+
+    return idx % KEYDATA_INDEX_SIZE;
+}
+
+char *MemPager::alloc(const char *str)
+{
+    size_t len = strlen(str) + 1;
+    char *cp = (char *)_alloc(len);
+    if(cp)
+	    strcpy(cp, str);
+    return cp;
+}
+
+Assoc::Assoc()
+{
+    clear();
+}
+
+Assoc::~Assoc()
+{
+}
+
+void Assoc::clear(void)
+{
+    memset(&entries, 0, sizeof(entries));
+}
+
+void Assoc::setPointer(const char *id, void *data)
+{
+    unsigned idx = getIndex(id);
+    entry *e = (entry *)getMemory(sizeof(entry));
+    e->id = (const char *)getMemory(strlen(id) + 1);
+    strcpy((char *)e->id, id);
+    e->data = data;
+    e->next = entries[idx];
+    entries[idx] = e;
+}
+
+void *Assoc::getPointer(const char *id) const
+{
+    entry *e = entries[getIndex(id)];
+
+    while(e) {
+        if(!stricmp(e->id, id))
+            break;
+        e = e->next;
+    }
+    if(e)
+        return e->data;
+    return NULL;
+}
+
 END_NAMESPACE
 
 /** EMACS **
