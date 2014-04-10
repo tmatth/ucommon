@@ -103,6 +103,27 @@ void *Assoc::getPointer(const char *id) const
     return NULL;
 }
 
+SharedMemPager::SharedMemPager(size_t pg) :
+MemPager(pg), Mutex()
+{}
+
+void SharedMemPager::purge(void)
+{
+    enterMutex();
+    MemPager::purge();
+    leaveMutex();
+}
+
+void *SharedMemPager::alloc(size_t size)
+{
+    void *mem;
+
+    enterMutex();
+    mem = MemPager::alloc(size);
+    leaveMutex();
+    return mem;
+}
+
 END_NAMESPACE
 
 /** EMACS **

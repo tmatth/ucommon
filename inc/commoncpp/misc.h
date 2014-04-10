@@ -86,6 +86,42 @@ public:
 };
 
 /**
+ * The shared mempager uses a mutex to protect key access methods.
+ * This class is used when a mempager will be shared by multiple
+ * threads.
+ *
+ * @author David Sugar <dyfet@gnutelephony.org>
+ * @short mutex protected memory pager.
+ */
+class __EXPORT SharedMemPager : public MemPager, public Mutex
+{
+protected:
+    /**
+     * Create a mempager mutex pool.
+     *
+     * @param pagesize page size for allocation.
+     * @param name a name for the pool.
+     */
+    SharedMemPager(size_t pagesize = 4096);
+    /**
+     * Purge the memory pool while locked.
+     */
+    void purge(void);
+
+    /**
+     * Get the last memory page after locking.
+     *
+     * @return allocated memory space.
+     * @param size of request.
+     */
+    void* alloc(size_t size);
+
+    inline void *first(size_t size)
+        {return alloc(size);}
+};
+
+
+/**
  * This class is used to associate (object) pointers with named strings.
  * A virtual is used to allocate memory which can be overriden in the
  * derived class.

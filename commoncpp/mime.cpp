@@ -43,7 +43,6 @@
 #include <commoncpp/socket.h>
 #include <commoncpp/exception.h>
 #include <commoncpp/mime.h>
-#include <commoncpp/misc.h>
 
 NAMESPACE_COMMONCPP
 using namespace std;
