@@ -1305,8 +1305,11 @@ void SyncEvent::reset(void)
 void SyncEvent::wait(void)
 {
 	Conditional::lock();
-	if(!released)
+	if(!released) {
+		++pending;
 		Conditional::wait();
+		--pending;
+	}
 	Conditional::unlock();
 }
 
@@ -1314,8 +1317,11 @@ bool SyncEvent::wait(timeout_t timeout)
 {
 	bool result = true;
 	Conditional::lock();
-	if(!released)
+	if(!released) {
+		++pending;
 		result = Conditional::wait(timeout);
+		--pending;
+	}
 	Conditional::unlock();
 	return result;
 }
