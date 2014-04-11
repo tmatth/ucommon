@@ -860,9 +860,25 @@ protected:
 
 public:
     /**
-     * Construct a semaphore with an initial count of threads to permit.
+     * Construct a default semaphore.
+     * This is same as Semaphore(1,0), and provides a valid default since
+     * original default count=0 was actually invalid.
      */
-    Semaphore(unsigned count = 0);
+    Semaphore(void);
+
+    /**
+     * Construct a semaphore with an initial count of threads to permit.
+     * @param count of threads to permit, 1 or more.
+     */
+    Semaphore(unsigned count);
+
+    /**
+     * Construct a semaphore with an initial count of threads to permit.
+     * This alternate constructor also pre-sets available threads.
+     * @param count of threads to permit, 1 or more
+     * @param available thread slots at creation, rest set pre-used.
+     */
+    Semaphore(unsigned count, unsigned available);
 
     /**
      * Wait until the semphore usage count is less than the thread limit.

@@ -260,7 +260,7 @@ public:
 class __EXPORT Semaphore : private ucommon::Semaphore
 {
 public:
-    inline Semaphore(unsigned size=0) : ucommon::Semaphore(size) {};
+    inline Semaphore(unsigned size = 1) : ucommon::Semaphore(size, 0) {};
 
     inline bool wait(timeout_t timeout = 0)
         {return ucommon::Semaphore::wait(timeout);};
@@ -323,6 +323,9 @@ public:
 
     inline void reset(void)
         {ucommon::TimedEvent::reset();};
+
+    inline void set(timeout_t timeout = 0)
+        {ucommon::TimedEvent::set(timeout);}
 };
 
 class __EXPORT Thread : protected ucommon::JoinableThread

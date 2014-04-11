@@ -209,11 +209,29 @@ void Conditional::set(struct timespec *ts, timeout_t msec)
 Semaphore::Semaphore(unsigned limit) :
 Conditional()
 {
-    assert(limit > 0);
+	assert(limit > 0);
 
-    count = limit;
-    waits = 0;
-    used = 0;
+	waits = 0;
+	count = limit;
+	used = 0;
+}
+
+Semaphore::Semaphore(unsigned limit, unsigned avail) :
+Conditional()
+{
+	assert(limit > 0);
+	assert(avail <= limit);
+
+	count = limit;
+	waits = 0;
+	used = limit - avail;
+}
+
+Semaphore::Semaphore(void) :
+Conditional()
+{
+	count = used = 1;
+	waits = 0;
 }
 
 void Semaphore::_share(void)

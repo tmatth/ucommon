@@ -2,6 +2,7 @@ from ucommon 6.1.0 to 6.1.1
 - module flag support for older commoncpp packages
 - fix for commoncpp pc file
 - some additional original classes mapped to commoncpp
+- default Semaphore constructor now valid!
 
 from ucommon 6.0.7 to 6.1.0
 - small fixes based on notes from Tristan
