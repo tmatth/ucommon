@@ -3,6 +3,7 @@ from ucommon 6.1.0 to 6.1.1
 - fix for commoncpp pc file
 - some additional original classes mapped to commoncpp
 - default Semaphore constructor now valid!
+- new Sychronize object for syncing threads
 
 from ucommon 6.0.7 to 6.1.0
 - small fixes based on notes from Tristan

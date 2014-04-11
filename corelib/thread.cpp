@@ -1272,6 +1272,54 @@ void Mutex::_unlock(void)
     pthread_mutex_unlock(&mlock);
 }
 
+SyncEvent::SyncEvent(bool active) :
+Conditional()
+{
+	released = active;
+	pending = 0;
+}
+
+SyncEvent::~SyncEvent()
+{
+	release();
+}
+
+void SyncEvent::release(void)
+{
+	Conditional::lock();
+	released = true;
+	if(pending)
+		Conditional::broadcast();
+	Conditional::unlock();
+}
+
+void SyncEvent::reset(void)
+{
+	Conditional::lock();
+	if(pending)
+		Conditional::broadcast();
+	released = false;
+	Conditional::unlock();
+}
+
+void SyncEvent::wait(void)
+{
+	Conditional::lock();
+	if(!released)
+		Conditional::wait();
+	Conditional::unlock();
+}
+
+bool SyncEvent::wait(timeout_t timeout)
+{
+	bool result = true;
+	Conditional::lock();
+	if(!released)
+		result = Conditional::wait(timeout);
+	Conditional::unlock();
+	return result;
+}
+
 #ifdef  _MSWINDOWS_
 
 TimedEvent::TimedEvent() :

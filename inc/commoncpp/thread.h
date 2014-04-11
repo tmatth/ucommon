@@ -307,22 +307,43 @@ public:
         { sem.post(); }
 };
 
+class __EXPORT ThreadSync : private ucommon::SyncEvent
+{
+public:
+    inline ThreadSync() :ucommon:: SyncEvent() {};
+
+    inline ~ThreadSync()
+        {ucommon::SyncEvent::release();}
+
+    inline void wait(void)
+        {ucommon::SyncEvent::wait();}
+
+    inline bool wait(timeout_t timeout)
+        {return ucommon::SyncEvent::wait(timeout);}
+
+    inline void post(void)
+        {ucommon::SyncEvent::release();}
+
+    inline void reset(void)
+        {ucommon::SyncEvent::reset();}
+};
+
 class __EXPORT Event : private ucommon::TimedEvent
 {
 public:
-    inline Event() : TimedEvent() {};
+    inline Event() : ucommon::TimedEvent() {};
 
     inline void wait(void)
-        {ucommon::TimedEvent::wait();};
+        {ucommon::TimedEvent::wait();}
 
     inline bool wait(timeout_t timeout)
-        {return ucommon::TimedEvent::wait(timeout);};
+        {return ucommon::TimedEvent::wait(timeout);}
 
     inline void signal(void)
-        {ucommon::TimedEvent::signal();};
+        {ucommon::TimedEvent::signal();}
 
     inline void reset(void)
-        {ucommon::TimedEvent::reset();};
+        {ucommon::TimedEvent::reset();}
 
     inline void set(timeout_t timeout = 0)
         {ucommon::TimedEvent::set(timeout);}
