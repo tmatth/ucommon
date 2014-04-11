@@ -355,52 +355,6 @@ public:
 };
 
 /**
- * Synchronize thread execution.  This is used to make a number of
- * threads wait until the object is released.  Once released, all
- * pending threads are released.
- */
-class __EXPORT SyncEvent : private Conditional
-{
-private:
-    unsigned pending;
-    bool released;
-
-public:
-    /** 
-     * Create sychronize object.
-     * @param active to indicate if in release state.
-     */
-    SyncEvent(bool active = false);
-
-    /**
-     * Release threads and destroy.
-     */
-    ~SyncEvent();
-
-    /**
-     * Release any currently pending and future threads.
-     */
-    void release(void);
-
-    /**
-     * Release any currently pending threads, reactivate for new threads.
-     */
-    void reset(void);
-
-    /**
-     * Wait to synchronize.
-     */
-    void wait(void);
-
-    /**
-     * Wait to sychronize with timeout.
-     * @param timeout to wait.
-     * @return true if success, else timed out.
-     */
-    bool wait(timeout_t timeout);
-};
-
-/**
  * Event notification to manage scheduled realtime threads.  The timer
  * is advanced to sleep threads which then wakeup either when the timer
  * has expired or they are notified through the signal handler.  This can
@@ -906,25 +860,10 @@ protected:
 
 public:
     /**
-     * Construct a default semaphore.
-     * This is same as Semaphore(1,0), and provides a valid default since
-     * original default count=0 was actually invalid.
-     */
-    Semaphore(void);
-
-    /**
      * Construct a semaphore with an initial count of threads to permit.
-     * @param count of threads to permit, 1 or more.
+     * @param count of threads to permit, or special case 0 group release.
      */
-    Semaphore(unsigned count);
-
-    /**
-     * Construct a semaphore with an initial count of threads to permit.
-     * This alternate constructor also pre-sets available threads.
-     * @param count of threads to permit, 1 or more
-     * @param available thread slots at creation, rest set pre-used.
-     */
-    Semaphore(unsigned count, unsigned available);
+    Semaphore(unsigned count = 0);
 
     /**
      * Wait until the semphore usage count is less than the thread limit.
@@ -1898,11 +1837,6 @@ typedef ConditionalAccess accesslock_t;
  * Convenience type for using timed events.
  */
 typedef TimedEvent timedevent_t;
-
-/**
- * Convenience type for sychronize events.
- */
-typedef SyncEvent syncevent_t;
 
 /**
  * Convenience type for using exclusive mutex locks.

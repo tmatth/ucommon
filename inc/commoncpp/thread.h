@@ -251,22 +251,25 @@ public:
     void signal(bool broadcast);
 
     inline void enterMutex(void)
-        {ucommon::Conditional::lock();};
+        {ucommon::Conditional::lock();}
 
     inline void leaveMutex(void)
-        {ucommon::Conditional::unlock();};
+        {ucommon::Conditional::unlock();}
 };
 
 class __EXPORT Semaphore : private ucommon::Semaphore
 {
 public:
-    inline Semaphore(unsigned size = 1) : ucommon::Semaphore(size, 0) {};
+    inline Semaphore(unsigned size = 0) : ucommon::Semaphore(size) {};
 
-    inline bool wait(timeout_t timeout = 0)
-        {return ucommon::Semaphore::wait(timeout);};
+    inline bool wait(timeout_t timeout)
+        {return ucommon::Semaphore::wait(timeout);}
+
+    inline void wait(void)
+        {ucommon::Semaphore::wait();}
 
     inline void post(void)
-        {ucommon::Semaphore::release();};
+        {ucommon::Semaphore::release();}
 };
 
 /**
@@ -305,27 +308,6 @@ public:
     // this should be not-virtual
     inline ~SemaphoreLock()
         { sem.post(); }
-};
-
-class __EXPORT ThreadSync : private ucommon::SyncEvent
-{
-public:
-    inline ThreadSync() :ucommon:: SyncEvent() {};
-
-    inline ~ThreadSync()
-        {ucommon::SyncEvent::release();}
-
-    inline void wait(void)
-        {ucommon::SyncEvent::wait();}
-
-    inline bool wait(timeout_t timeout)
-        {return ucommon::SyncEvent::wait(timeout);}
-
-    inline void post(void)
-        {ucommon::SyncEvent::release();}
-
-    inline void reset(void)
-        {ucommon::SyncEvent::reset();}
 };
 
 class __EXPORT Event : private ucommon::TimedEvent

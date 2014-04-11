@@ -209,29 +209,9 @@ void Conditional::set(struct timespec *ts, timeout_t msec)
 Semaphore::Semaphore(unsigned limit) :
 Conditional()
 {
-	assert(limit > 0);
-
 	waits = 0;
 	count = limit;
 	used = 0;
-}
-
-Semaphore::Semaphore(unsigned limit, unsigned avail) :
-Conditional()
-{
-	assert(limit > 0);
-	assert(avail <= limit);
-
-	count = limit;
-	waits = 0;
-	used = limit - avail;
-}
-
-Semaphore::Semaphore(void) :
-Conditional()
-{
-	count = used = 1;
-	waits = 0;
 }
 
 void Semaphore::_share(void)
@@ -255,6 +235,8 @@ bool Semaphore::wait(timeout_t timeout)
         ++waits;
         result = Conditional::wait(&ts);
         --waits;
+		if(!count)
+			break;
     }
     if(result)
         ++used;
@@ -270,7 +252,8 @@ void Semaphore::wait(void)
         Conditional::wait();
         --waits;
     }
-    ++used;
+	if(count)
+	    ++used;
     unlock();
 }
 
@@ -279,8 +262,12 @@ void Semaphore::release(void)
     lock();
     if(used)
         --used;
-    if(waits)
-        signal();
+    if(waits) {
+		if(count)
+	        signal();
+		else
+			broadcast();
+	}
     unlock();
 }
 
@@ -1270,60 +1257,6 @@ void Mutex::_lock(void)
 void Mutex::_unlock(void)
 {
     pthread_mutex_unlock(&mlock);
-}
-
-SyncEvent::SyncEvent(bool active) :
-Conditional()
-{
-	released = active;
-	pending = 0;
-}
-
-SyncEvent::~SyncEvent()
-{
-	release();
-}
-
-void SyncEvent::release(void)
-{
-	Conditional::lock();
-	released = true;
-	if(pending)
-		Conditional::broadcast();
-	Conditional::unlock();
-}
-
-void SyncEvent::reset(void)
-{
-	Conditional::lock();
-	if(pending)
-		Conditional::broadcast();
-	released = false;
-	Conditional::unlock();
-}
-
-void SyncEvent::wait(void)
-{
-	Conditional::lock();
-	if(!released) {
-		++pending;
-		Conditional::wait();
-		--pending;
-	}
-	Conditional::unlock();
-}
-
-bool SyncEvent::wait(timeout_t timeout)
-{
-	bool result = true;
-	Conditional::lock();
-	if(!released) {
-		++pending;
-		result = Conditional::wait(timeout);
-		--pending;
-	}
-	Conditional::unlock();
-	return result;
 }
 
 #ifdef  _MSWINDOWS_
