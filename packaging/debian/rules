@@ -6,7 +6,8 @@ LDFLAGS = $(shell dpkg-buildflags --get LDFLAGS)
 CPPFLAGS = $(shell dpkg-buildflags --get CPPFLAGS)
 CXXFLAGS = $(shell dpkg-buildflags --get CXXFLAGS)
 CFLAGS = $(shell dpkg-buildflags --get CFLAGS)
-LDFLAGS += -Wl,-z,defs -Wl,--as-needed
+LDFLAGS += -Wl,-z,defs 
+#-Wl,--as-needed
 
 DEB_DH_INSTALL_ARGS := --sourcedir=debian/tmp
 DEB_DH_STRIP_ARGS := --dbg-package=libucommon6-dbg
