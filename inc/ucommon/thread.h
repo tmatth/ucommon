@@ -866,6 +866,13 @@ public:
     Semaphore(unsigned count = 0);
 
     /**
+     * Alternate onstructor with ability to preset available slots.
+     * @param count of threads to permit.
+     * @param avail instances not pre-locked.
+     */
+    Semaphore(unsigned count, unsigned avail);
+
+    /**
      * Wait until the semphore usage count is less than the thread limit.
      * Increase used count for our thread when unblocked.
      */

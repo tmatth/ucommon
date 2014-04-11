@@ -214,6 +214,17 @@ Conditional()
 	used = 0;
 }
 
+Semaphore::Semaphore(unsigned limit, unsigned avail) :
+Conditional()
+{
+	assert(limit > 0);
+	assert(avail <= limit);
+
+	waits = 0;
+	count = limit;
+	used = limit - avail;
+}
+
 void Semaphore::_share(void)
 {
     wait();
