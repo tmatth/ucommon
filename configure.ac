@@ -22,7 +22,7 @@ AC_PROG_CXXCPP
 AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
-AM_INIT_AUTOMAKE([dist-shar dist-zip])
+AM_INIT_AUTOMAKE([dist-shar dist-zip subdir-objects])
 AM_CONFIG_HEADER(ucommon-config.h)
 
 AC_C_RESTRICT
