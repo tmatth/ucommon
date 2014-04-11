@@ -249,7 +249,7 @@ bool Semaphore::wait(timeout_t timeout)
 		if(!count)
 			break;
     }
-    if(result)
+    if(result && count)
         ++used;
     unlock();
     return result;
