@@ -313,7 +313,7 @@ public:
     inline Event() : TimedEvent() {};
 
     inline void wait(void)
-        {ucommon::TimedEvent::wait(Timer::inf);};
+        {ucommon::TimedEvent::wait();};
 
     inline bool wait(timeout_t timeout)
         {return ucommon::TimedEvent::wait(timeout);};
