@@ -22,7 +22,7 @@ Package: libucommon-dev
 Section: libdevel
 Architecture: any
 Depends: libucommon6 (= ${binary:Version}),
-         ucommon-bin (= ${binary:Version}),
+         ucommon-utils (= ${binary:Version}),
          libssl-dev,
          ${misc:Depends}
 Suggests: pkg-config, ucommon-doc
@@ -40,9 +40,11 @@ Depends: libucommon6 (= ${binary:Version}),
 Description: debugging symbols for libucommon6
  This package contains the debugging symbols for libucommon6.
 
-Package: ucommon-bin
+Package: ucommon-utils
 Architecture: any
 Depends: libucommon6 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: ucommon-bin
+Replaces: ucommon-bin
 Description: ucommon system and support shell applications.
  This is a collection of command line tools that use various aspects of the
  ucommon library.

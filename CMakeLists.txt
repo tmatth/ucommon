@@ -281,6 +281,7 @@ check_function_exists(symlink HAVE_SYMLINK)
 check_function_exists(readlink HAVE_READLINK)
 check_function_exists(waitpid HAVE_WAITPID)
 check_function_exists(wait4 HAVE_WAIT4)
+check_function_exists(setgroups HAVE_SETGROUPS)
 
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(strings.h HAVE_STRINGS_H)

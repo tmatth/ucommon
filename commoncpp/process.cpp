@@ -314,6 +314,10 @@ bool Process::setUser(const char *id, bool grp)
     if(!pw)
         return false;
 
+#ifdef  HAVE_SETGROUPS
+    setgroups(0, NULL);
+#endif
+
     if(grp)
         if(setgid(pw->pw_gid))
             return false;

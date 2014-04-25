@@ -89,6 +89,7 @@
 #cmakedefine HAVE_READLINK 1
 #cmakedefine HAVE_WAITPID 1
 #cmakedefine HAVE_WAIT4 1
+#cmakedefine HAVE_SETGROUPS 1
 #cmakedefine HAVE_FCNTL_H 1
 #cmakedefine HAVE_TERMIOS_H 1
 #cmakedefine HAVE_TERMIO_H 1
