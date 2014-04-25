@@ -127,7 +127,7 @@ gnutls_session_t context::session(context *ctx)
 {
     SSL ssl = NULL;
     if(ctx && ctx->xcred && ctx->err() == secure::OK) {
-        gnutls_init(&ssl, ctx->connect);
+        gnutls_init(&ssl, (gnutls_connection_end_t) ctx->connect);
         switch(ctx->connect) {
         case GNUTLS_CLIENT:
             gnutls_priority_set_direct(ssl, "PERFORMANCE", NULL);
