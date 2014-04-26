@@ -51,12 +51,31 @@ else()
         endif()
     endif()
     set(MODULE_FLAGS "-module -shared -avoid-version")
-    set(INSTALL_SBINDIR sbin)
-    set(INSTALL_MANDIR share/man)
-    set(INSTALL_LOCALE share/locale)
-    set(INSTALL_DOCDIR share/doc/${PROJECT_NAME})
-    set(INSTALL_INFODIR share/info)
-    set(INSTALL_LIBDIR lib${LIB_SUFFIX})
+
+    if(NOT INSTALL_SBINDIR)
+        set(INSTALL_SBINDIR sbin)
+    endif()
+
+    if(NOT INSTALL_MANDIR)
+        set(INSTALL_MANDIR share/man)
+    endif()
+
+    if(NOT INSTALL_LOCALE)
+        set(INSTALL_LOCALE share/locale)
+    endif()
+
+    if(NOT INSTALL_DOCDIR)
+        set(INSTALL_DOCDIR share/doc/${PROJECT_NAME})
+    endif()
+
+    if(NOT INSTALL_INFODIR)
+        set(INSTALL_INFODIR share/info)
+    endif()
+
+    if(NOT INSTALL_LIBDIR)
+        set(INSTALL_LIBDIR lib${LIB_SUFFIX})
+    endif()
+
     set(SYSCONFDIR "/etc" CACHE PATH "config directory")
     set(STATEDIR "/var" CACHE PATH "state directory")
 endif()
