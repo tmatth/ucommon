@@ -26,13 +26,14 @@ set(RC_VERSION ${VERSION})
 STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
 set(RC_VERSION "${RC_VERSION},0")
 
-set(SOVERSION ${VERSION})
-STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
-if(WIN32)
-    set(LIB_VERSION ${VERSION})
+if(UNIX)
+    execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND "./cmake-abi.sh" OUTPUT_VARIABLE LIB_VERSION)
 else()
-    set(LIB_VERSION ${SOVERSION}.${ABI_COMPAT}.${ABI_RELEASE})
+    set(LIB_VERSION ${VERSION})
 endif()
+
+set(SOVERSION ${LIB_VERSION})
+STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
 
 # when we override default install prefix, assume full path is used...
 
