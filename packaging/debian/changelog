@@ -1,3 +1,10 @@
+ucommon (1:6.1.2-0gt1) UNRELEASED; urgency=low
+
+  * Use epoch as we build differently than debian
+  * Fixup of manpages, copyrights, and contact info
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 26 Apr 2014 12:17:38 -0400
+
 ucommon (6.1.1-0gt2) UNRELEASED; urgency=low
 
   * Improved debian compatibility

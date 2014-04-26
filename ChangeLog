@@ -1,3 +1,8 @@
+Changes from 6.1.1 to 6.1.2
+- updated contacts, fsf address, and copyright
+- revised cmake build
+- added setgroups
+
 from ucommon 6.1.0 to 6.1.1
 - module flag support for older commoncpp packages
 - fix for commoncpp pc file
