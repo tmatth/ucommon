@@ -19,6 +19,8 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
 set (VERSION 6.1.2)
+set (ABI_RELEASE 6)
+set (ABI_COMPAT 0)
 
 set(RC_VERSION ${VERSION})
 STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
@@ -26,6 +28,11 @@ set(RC_VERSION "${RC_VERSION},0")
 
 set(SOVERSION ${VERSION})
 STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
+if(WIN32)
+    set(LIB_VERSION ${VERSION})
+else()
+    set(LIB_VERSION ${SOVERSION}.${ABI_COMPAT}.${ABI_RELEASE})
+endif()
 
 # when we override default install prefix, assume full path is used...
 
@@ -455,17 +462,17 @@ configure_file(ucommon-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/ucommon-config
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(ucommon ${BUILD_RUNTIME_TYPE} ${common_src} ${ucommon_inc})
-set_target_properties(ucommon PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+set_target_properties(ucommon PROPERTIES VERSION ${LIB_VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(ucommon ${UCOMMON_LIBS} ${WITH_LIBS})
 
 add_library(usecure ${BUILD_LIBRARY_TYPE} ${secure_src} ${secure_inc})
-set_target_properties(usecure PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+set_target_properties(usecure PROPERTIES VERSION ${LIB_VERSION} SOVERSION ${SOVERSION})
 target_link_libraries(usecure ucommon ${WITH_LIBS} ${SECURE_LIBS} ${UCOMMON_LIBS})
 add_dependencies(usecure ucommon)
 
 if(BUILD_STDLIB)
     add_library(commoncpp ${BUILD_LIBRARY_TYPE} ${commoncpp_src} ${commoncpp_inc})
-    set_target_properties(commoncpp PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION})
+    set_target_properties(commoncpp PROPERTIES VERSION ${LIB_VERSION} SOVERSION ${SOVERSION})
     target_link_libraries(commoncpp ucommon ${UCOMMON_LIBS} ${WITH_LIBS} ${SECURE_LIBS})
     add_dependencies(commoncpp ucommon)
 endif()
