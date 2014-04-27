@@ -19,8 +19,7 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
 set (VERSION 6.1.2)
-set (ABI_RELEASE 6)
-set (ABI_COMPAT 0)
+set (PACKAGE ucommon)
 
 set(RC_VERSION ${VERSION})
 STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
@@ -623,6 +622,30 @@ install(TARGETS ucommon-args ucommon-pdetach ucommon-keywait usecure-car usecure
 install(FILES ${ucommon_man} DESTINATION ${INSTALL_MANDIR}/man1)
 
 if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
+    add_custom_target(cleandist
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}[-_]*.gz"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}_*.dsc"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}-*.rpm"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}[-_]*.deb"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/*${PACKAGE}*[-_]*.deb"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}-*.zip"
+        COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/*${PACKAGE}*.changes"
+    )
+
+    add_custom_target(srpm
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMAND rm -f *.rpm
+        COMMAND rpmbuild  -bs --nodeps --define "_sourcedir ." --define "_srcrpmdir ." --sign ${PACKAGE}.spec
+    )
+
+    add_custom_target(dist
+        DEPENDS cleandist
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMAND git archive --format tar --output="${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}-${VERSION}.tar" --prefix="${PACKAGE}-${VERSION}/" HEAD
+        COMMAND gzip "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE}-${VERSION}.tar"
+    )
+
     add_custom_target(uninstall
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         COMMAND xargs <install_manifest.txt
