@@ -50,41 +50,33 @@ if(WIN32)
     set(SYSCONFDIR "etc" CACHE PATH "config directory")
     set(STATEDIR "var" CACHE PATH "state directory")
 else()
-    if (NOT LIB_SUFFIX)
-        if (NOT EXISTS /etc/debian_version)
-            if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-                set(LIB_SUFFIX 64)
-            endif()
-        endif()
-    endif()
     set(MODULE_FLAGS "-module -shared -avoid-version")
-
-    if(NOT INSTALL_SBINDIR)
-        set(INSTALL_SBINDIR sbin)
-    endif()
-
-    if(NOT INSTALL_MANDIR)
-        set(INSTALL_MANDIR share/man)
-    endif()
-
-    if(NOT INSTALL_LOCALE)
-        set(INSTALL_LOCALE share/locale)
-    endif()
-
-    if(NOT INSTALL_DOCDIR)
-        set(INSTALL_DOCDIR share/doc/${PROJECT_NAME})
-    endif()
-
-    if(NOT INSTALL_INFODIR)
-        set(INSTALL_INFODIR share/info)
-    endif()
-
-    if(NOT INSTALL_LIBDIR)
-        set(INSTALL_LIBDIR lib${LIB_SUFFIX})
-    endif()
-
     set(SYSCONFDIR "/etc" CACHE PATH "config directory")
     set(STATEDIR "/var" CACHE PATH "state directory")
+endif()
+
+if(NOT INSTALL_SBINDIR)
+    set(INSTALL_SBINDIR sbin)
+endif()
+
+if(NOT INSTALL_MANDIR)
+    set(INSTALL_MANDIR share/man)
+endif()
+
+if(NOT INSTALL_LOCALE)
+    set(INSTALL_LOCALE share/locale)
+endif()
+
+if(NOT INSTALL_DOCDIR)
+    set(INSTALL_DOCDIR share/doc/${PROJECT_NAME})
+endif()
+
+if(NOT INSTALL_INFODIR)
+    set(INSTALL_INFODIR share/info)
+endif()
+
+if(NOT INSTALL_LIBDIR)
+    set(INSTALL_LIBDIR lib${LIB_SUFFIX})
 endif()
 
 set(UCOMMON_LOCALE ${CMAKE_INSTALL_PREFIX}/${INSTALL_LOCALE})

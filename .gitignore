@@ -1,4 +1,5 @@
 build/
+doc/
 autoconf/
 autom4te.cache/
 CMakeFiles/
@@ -53,6 +54,7 @@ directive
 *.tar.gz
 *.shar.gz
 *.cbp
+.dirstamp
 test/ucommon[A-Z]*
 test/demo[A-Z]*
 utils/args
