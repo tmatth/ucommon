@@ -51,6 +51,7 @@ directive
 *.spec
 *~
 *.rpm
+*.tar.xz
 *.tar.gz
 *.shar.gz
 *.cbp

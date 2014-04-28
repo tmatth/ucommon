@@ -38,11 +38,13 @@ dist-hook:  cleandist
 
 cleandist:
 	@rm -f ${PACKAGE}-[0-9]*.tar.gz
+	@rm -f ${PACKAGE}-[0-9]*.tar.xz
 	@rm -f ${PACKAGE}-[0-9]*.tar.bz2
 	@rm -f ${PACKAGE}-[0-9]*.shar.gz
 	@rm -f ${PACKAGE}-[0-9]*.zip
 	@rm -f *${PACKAGE}*.rpm
 	@rm -f *${PACKAGE}*.deb
+	@rm -f ${PACKAGE}_*.xz
 	@rm -f ${PACKAGE}_*.gz
 	@rm -f ${PACKAGE}_*.dsc
 	@rm -f *.changes
