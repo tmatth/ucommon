@@ -383,6 +383,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r loc
         ])
     ])
     case $found in
+    setgroups)
+        AC_DEFINE(HAVE_SETGROUPS, [1], [setgroups support])
+        ;;
     shm_open)
         AC_DEFINE(HAVE_SHM_OPEN, [1], [shared memory open])
         ;;
