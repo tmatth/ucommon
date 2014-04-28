@@ -1,4 +1,4 @@
-ucommon (1:6.1.2-0gt1) UNRELEASED; urgency=low
+ucommon (1:6.1.2-0) UNRELEASED; urgency=low
 
   * Use epoch as we build differently than debian
   * Fixup of manpages, copyrights, and contact info
