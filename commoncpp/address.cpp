@@ -519,7 +519,7 @@ validator(_validator), ipaddr(NULL), hostname(NULL)
     }
     addr_count = 1;
     ipaddr = new struct in6_addr[1];
-    memcpy(&ipaddr, &addr, sizeof(struct in6_addr));
+    memcpy(ipaddr, &addr, sizeof(struct in6_addr));
 }
 
 IPV6Address::IPV6Address(const IPV6Address &rhs) :
