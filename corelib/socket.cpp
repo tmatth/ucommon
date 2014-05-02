@@ -1483,8 +1483,8 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 
 #if defined(AF_UNIX) && !defined(_MSWINDOWS_)
     if(strchr(iface, '/')) {
-        struct sockaddr_un uaddr;
-        socklen_t len = unixaddr(&uaddr, iface);
+        struct sockaddr_storage uaddr;
+        socklen_t len = unixaddr((struct sockaddr_un *)&uaddr, iface);
         if(!type)
             type = SOCK_STREAM;
         so = create(AF_UNIX, type, 0);
@@ -2798,8 +2798,8 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
 
 #ifdef AF_UNIX
     if(strchr(host, '/')) {
-        struct sockaddr_un uaddr;
-        socklen_t len = unixaddr(&uaddr, host);
+        struct sockaddr_storage uaddr;
+        socklen_t len = unixaddr((struct sockaddr_un *)&uaddr, host);
         rtn = _bind_(so, (struct sockaddr *)&uaddr, len);
         goto exit;
     };
