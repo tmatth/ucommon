@@ -15,8 +15,7 @@ Release: 0%{?dist}
 License: LGPLv3+
 URL: http://www.gnu.org/software/commoncpp
 Source0: http://dev.gnutelephony.org/dist/tarballs/ucommon-%{version}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: doxygen graphviz-gd openssl-devel
+BuildRequires: doxygen graphviz-gd openssl-devel cmake
 Group: System Environment/Libraries
 Summary: Runtime library for portable C++ threading and sockets
 
@@ -30,21 +29,20 @@ objects, memory pools, and smart pointers.  uCommon introduces some new
 concepts for handling of thread locking and synchronization.
 
 %package bin
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Group: Applications/System
-Summary: ucommon system and support applications.
+Summary: GNU uCommon system and support applications
 
 %package devel
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-bin = %{version}-%{release}
-Requires: openssl-devel
+Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: openssl-devel%{?_isa}
 Requires: pkgconfig
 Group: Development/Libraries
-Summary: Headers for building ucommon applications
+Summary: Headers for building GNU uCommon applications
 
 %package doc
 Group: Documentation
-Summary: Generated class documentation for ucommon
+Summary: Generated class documentation for GNU uCommon
 
 %description bin
 This is a collection of command line tools that use various aspects of the
@@ -53,7 +51,7 @@ applications.
 
 %description devel
 This package provides header and support files needed for building
-applications that use the uCommon library and frameworks.
+applications that use the uCommon and commoncpp libraries.
 
 %description doc
 Generated class documentation for GNU uCommon library from header files,
@@ -62,21 +60,25 @@ html browsable.
 %prep
 %setup -q
 %build
+%cmake \
+      -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+      -DSYSCONFDIR=%{_sysconfdir} \
+      -DINSTALL_MANDIR=%{_mandir} \
+      -DINSTALL_INCLUDEDIR=%{_includedir} \
+      -DINSTALL_BINDIR=%{_bindir} \
+      -DINSTALL_SBINDIR=%{_sbindir} \
+      -DINSTALL_LIBEXEC=%{_libexecdir} \
+      -DINSTALL_LIBDIR=%{_libdir} \
+      .
 
-%configure --disable-static
 %{__make} %{?_smp_mflags}
 %{__rm} -rf doc/html
-%{__make} doxy
+%{__make} doc
 
 %install
-%{__rm} -rf %{buildroot}
 %{__make} DESTDIR=%{buildroot} INSTALL="install -p" install
 %{__chmod} 0755 %{buildroot}%{_bindir}/ucommon-config
 %{__chmod} 0755 %{buildroot}%{_bindir}/commoncpp-config
-%{__rm} %{buildroot}%{_libdir}/*.la
-
-%clean
-%{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
@@ -124,23 +126,4 @@ html browsable.
 %postun -p /sbin/ldconfig
 
 %changelog
-* Sat Sep 18 2010 - David Sugar <dyfet@gnutelephony.org> - 3.4.0-0
-- simplified packaging and better runtime focus.
-- ccscript moved to bayonne, ccaudio detached.
-
-* Sun Aug 01 2010 - David Sugar <dyfet@gnutelephony.org> - 3.3.0-0
-- internationalization bindings with gnu gettext support.
-- reorganized utils into ucommon-bin subpackage.
-
-* Fri Jun 04 2010 - David Sugar <dyfet@gnutelephony.org> - 3.0.0-0
-- merged ccscript and ccaudio with ucommon to create single framework.
-
-* Sun Jul 19 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.6-1
-- fixed ucommon-config upstream.
-
-* Tue May 05 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.5-4
-- removed static libraries, fixed other build issues (#498736)
-
-* Sun May 03 2009 - David Sugar <dyfet@gnutelephony.org> - 2.0.5-3
-- spec file prepared for redhat/fedora (#498736)
 
