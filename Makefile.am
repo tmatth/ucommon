@@ -31,6 +31,10 @@ doxy:
 	-rm -rf doc
 	$(DOXYGEN) Doxyfile
 
+srpm:
+	rm -f *.rpm
+	rpmbuild  -bs --nodeps --define "_sourcedir ." --define "_srcrpmdir ." --sign ucommon.spec
+
 clean-local:
 	-rm -rf doc
 
