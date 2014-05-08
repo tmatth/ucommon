@@ -1073,6 +1073,23 @@ struct ::addrinfo *Socket::query(const char *hp, const char *svc, int type, int 
     return result;
 }
 
+bool
+Socket::address::operator==(const address& other) const
+{
+    struct addrinfo *node = list;
+    struct addrinfo *node_o = other.list;
+
+    while(node && node_o) {
+        if(!equal(node->ai_addr, node_o->ai_addr))
+            return false;
+        node = node->ai_next;
+        node_o = node_o->ai_next;
+    }
+    if(node || node_o)
+        return false;
+    return true;
+}
+
 void Socket::address::set(const char *host, unsigned port)
 {
     assert(host != NULL && *host != 0);
@@ -1165,6 +1182,20 @@ int Socket::address::family(void) const
         return 0;
 
     return ap->sa_family;
+}
+
+void Socket::address::setPort(in_port_t port)
+{
+    struct sockaddr *ap;
+    struct addrinfo *lp;
+
+    lp = list;
+
+    while(lp) {
+        ap = lp->ai_addr;
+        setPort(ap, port);
+        lp = lp->ai_next;
+    }
 }
 
 struct sockaddr *Socket::address::get(int family) const
@@ -1275,6 +1306,51 @@ void Socket::address::copy(const struct addrinfo *addr)
         else
             list = node;
         last = node;
+    }
+}
+
+size_t Socket::address::getSize(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return 0;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return sizeof(sockaddr_in);
+    case AF_INET6:
+        return sizeof(sockaddr_in6);
+    default:
+        return 0;
+    }
+}
+
+in_port_t Socket::address::getPort(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return 0;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return reinterpret_cast<const sockaddr_in* >(address)->sin_port;
+    case AF_INET6:
+        return reinterpret_cast<const sockaddr_in6*>(address)->sin6_port;
+    default:
+        return 0;
+    }
+}
+
+void Socket::address::setPort(struct sockaddr *address, in_port_t port)
+{
+    if (address == NULL)
+        return;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        reinterpret_cast<sockaddr_in* >(address)->sin_port  = port;
+        break;
+    case AF_INET6:
+        reinterpret_cast<sockaddr_in6*>(address)->sin6_port = port;
+        break;
     }
 }
 
