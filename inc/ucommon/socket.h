@@ -406,6 +406,16 @@ public:
         ~address();
 
         /**
+         * Compare two address lists.
+         * @return true if the two lists are the same (same addresses
+         * in the same order).
+         */
+        bool operator==(const address& other) const;
+
+        inline bool equals(const address& other) const
+            {return *this == other;};
+
+        /**
          * Get the first socket address in our address list.
          * @return first socket address or NULL if none.
          */
@@ -447,6 +457,26 @@ public:
          * @return family of first socket address or 0 if none.
          */
         int family(void) const;
+
+        /**
+         * Get the address size of the first address.
+         * @return size in bytes of first socket address or 0 if none.
+         */
+        inline size_t getSize(void) const
+            {return getSize(get());}
+
+        /**
+         * Get the port of the first address .
+         * @return port of first socket address or 0 if none.
+         */
+        inline in_port_t getPort(void) const
+            {return getPort(get());}
+
+        /**
+         * Set the port of all addresses in the list.
+         * @param port the port to set.
+         */
+        void setPort(in_port_t port);
 
         /**
          * Find a specific socket address in our address list.
@@ -574,6 +604,25 @@ public:
          * @param service port or 0.
          */
         void set(const char *hostname, unsigned service = 0);
+
+        /**
+         * Returns the size of the socket address according to the family.
+         * @return size in bytes of the valid part of the socket address.
+         */
+        static size_t getSize(const struct sockaddr *address);
+
+        /**
+         * Returns the port of the socket address.
+         * @return port associated to the socket address.
+         */
+        static in_port_t getPort(const struct sockaddr *address);
+
+        /**
+         * Set the port of the socket address.
+         * @param address to edit.
+         * @param port to associate to the socket address.
+         */
+        static void setPort(struct sockaddr *address, in_port_t port);
 
         /**
          * Duplicate a socket address.
