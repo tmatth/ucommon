@@ -485,6 +485,21 @@ Socket::Error Socket::setLoopbackByFamily(bool enable, Family family)
     }
 }
 
+Socket::Error Socket::join(const ucommon::Socket::address &ia)
+{
+    switch(ucommon::Socket::join(ia)) {
+    case 0:
+        return errSuccess;
+    case ENOSYS:
+        return error(errMulticastDisabled,(char *)"Multicast not enabled on socket");
+    case EIO:
+        return error(errServiceUnavailable,(char *)"Multicast not supported");
+    case EBADF:
+    default:
+        return error(errNotConnected,(char *)"Invalid socket operation");
+    }
+}
+
 Socket::Error Socket::join(const IPV4Multicast &ia)
 {
 #ifdef  IP_ADD_MEMBERSHIP
@@ -527,6 +542,21 @@ Socket::Error Socket::join(const IPV6Multicast &ia)
 }
 
 #endif
+
+Socket::Error Socket::drop(const ucommon::Socket::address &ia)
+{
+    switch(ucommon::Socket::drop(ia)) {
+    case 0:
+        return errSuccess;
+    case ENOSYS:
+        return error(errMulticastDisabled,(char *)"Multicast not enabled on socket");
+    case EIO:
+        return error(errServiceUnavailable,(char *)"Multicast not supported");
+    case EBADF:
+    default:
+        return error(errNotConnected,(char *)"Invalid socket operation");
+    }
+}
 
 Socket::Error Socket::drop(const IPV4Multicast &ia)
 {
@@ -891,121 +921,113 @@ bool Socket::check(Family fam)
     return true;
 }
 
-IPV4Host Socket::getIPV4Sender(tpport_t *port) const
+ucommon::Socket::address Socket::getSender() const
 {
-    struct sockaddr_in from;
+    ucommon::Socket::address addr;
+    sockaddr_in6 from;
     char buf;
     socklen_t len = sizeof(from);
-    int rc = ::recvfrom(so, &buf, 1, MSG_PEEK,
-                (struct sockaddr *)&from, &len);
+    int rc = ::recvfrom(so, &buf, 1, MSG_PEEK, (sockaddr *)&from, &len);
 
 #ifdef _MSWINDOWS_
     if(rc < 1 && WSAGetLastError() != WSAEMSGSIZE) {
-        if(port)
-            *port = 0;
-
-        memset((void*) &from, 0, sizeof(from));
         error(errInput,(char *)"Could not read from socket",socket_errno);
+        return addr;
     }
 #else
     if(rc < 0) {
-        if(port)
-            *port = 0;
-
-        memset((void*) &from, 0, sizeof(from));
         error(errInput,(char *)"Could not read from socket",socket_errno);
+        return addr;
     }
 #endif
     else {
         if(rc < 1)
-            memset((void*) &from, 0, sizeof(from));
-
-        if(port)
-            *port = ntohs(from.sin_port);
+            return addr;
     }
 
-    return IPV4Host(from.sin_addr);
+    addr.insert((sockaddr *)&from);
+    return addr;
+}
+
+IPV4Host Socket::getIPV4Sender(tpport_t *port) const
+{
+    sockaddr_in* from = getSender();
+    if (from == NULL) {
+        if (port)
+            port = 0;
+        return IPV4Host(INADDR_ANY);
+    }
+
+    if (port)
+        *port = ntohs(from->sin_port);
+    return IPV4Host(from->sin_addr);
 }
 
 #ifdef  CCXX_IPV6
 IPV6Host Socket::getIPV6Sender(tpport_t *port) const
 {
-    struct sockaddr_in6 from;
-    char buf;
-    socklen_t len = sizeof(from);
-    int rc = ::recvfrom(so, &buf, 1, MSG_PEEK,
-                (struct sockaddr *)&from, &len);
-
-#ifdef _MSWINDOWS_
-    if(rc < 1 && WSAGetLastError() != WSAEMSGSIZE) {
-        if(port)
-            *port = 0;
-
-        memset((void*) &from, 0, sizeof(from));
-        error(errInput,(char *)"Could not read from socket",socket_errno);
-    }
-#else
-    if(rc < 0) {
-        if(port)
-            *port = 0;
-
-        memset((void*) &from, 0, sizeof(from));
-        error(errInput,(char *)"Could not read from socket",socket_errno);
-    }
-#endif
-    else {
-        if(rc < 1)
-            memset((void*) &from, 0, sizeof(from));
-
-        if(port)
-            *port = ntohs(from.sin6_port);
+    sockaddr_in6* from = getSender();
+    if (from == NULL) {
+        if (port)
+            port = 0;
+        return IPV6Host(in6addr_any);
     }
 
-    return IPV6Host(from.sin6_addr);
+    if (port)
+        *port = ntohs(from->sin6_port);
+    return IPV6Host(from->sin6_addr);
 }
 #endif
 
-IPV4Host Socket::getIPV4Local(tpport_t *port) const
+ucommon::Socket::address Socket::getLocal() const
 {
-    struct sockaddr_in addr;
+    ucommon::Socket::address saddr;
+    struct sockaddr_in6 addr;
     socklen_t len = sizeof(addr);
 
     if(getsockname(so, (struct sockaddr *)&addr, &len)) {
         error(errResourceFailure,(char *)"Could not get socket address",socket_errno);
-            if(port)
-            *port = 0;
-        memset(&addr.sin_addr, 0, sizeof(addr.sin_addr));
+        return saddr;
     }
-    else {
-        if(port)
-                *port = ntohs(addr.sin_port);
+    saddr.insert((sockaddr *)&addr);
+    return saddr;
+}
+
+IPV4Host Socket::getIPV4Local(tpport_t *port) const
+{
+    sockaddr_in* from = getLocal();
+    if (from == NULL) {
+        if (port)
+            port = 0;
+        return IPV4Host(INADDR_ANY);
     }
-    return IPV4Host(addr.sin_addr);
+
+    if (port)
+        *port = ntohs(from->sin_port);
+    return IPV4Host(from->sin_addr);
 }
 
 #ifdef  CCXX_IPV6
 IPV6Host Socket::getIPV6Local(tpport_t *port) const
 {
-    struct sockaddr_in6 addr;
-    socklen_t len = sizeof(addr);
+    sockaddr_in6* from = getLocal();
+    if (from == NULL) {
+        if (port)
+            port = 0;
+        return IPV6Host(in6addr_any);
+    }
 
-    if(getsockname(so, (struct sockaddr *)&addr, &len)) {
-        error(errResourceFailure,(char *)"Could not get socket address",socket_errno);
-            if(port)
-            *port = 0;
-        memset(&addr.sin6_addr, 0, sizeof(addr.sin6_addr));
-    }
-    else {
-        if(port)
-                *port = ntohs(addr.sin6_port);
-    }
-    return IPV6Host(addr.sin6_addr);
+    if (port)
+        *port = ntohs(from->sin6_port);
+    return IPV6Host(from->sin6_addr);
 }
 #endif
 
-IPV4Host Socket::getIPV4Peer(tpport_t *port) const
+
+ucommon::Socket::address Socket::getPeer() const
 {
-    struct sockaddr_in addr;
+    ucommon::Socket::address saddr;
+    struct sockaddr_in6 addr;
     socklen_t len = sizeof(addr);
 
     if(getpeername(so, (struct sockaddr *)&addr, &len)) {
@@ -1015,39 +1037,39 @@ IPV4Host Socket::getIPV4Peer(tpport_t *port) const
         else
 #endif
             error(errResourceFailure,(char *)"Could not get peer address",socket_errno);
-        if(port)
-            *port = 0;
-        memset(&addr.sin_addr, 0, sizeof(addr.sin_addr));
+        return saddr;
     }
-    else {
-        if(port)
-                *port = ntohs(addr.sin_port);
+    saddr.insert((sockaddr *)&addr);
+    return saddr;
+}
+
+IPV4Host Socket::getIPV4Peer(tpport_t *port) const
+{
+    sockaddr_in* from = getPeer();
+    if (from == NULL) {
+        if (port)
+            port = 0;
+        return IPV4Host(INADDR_ANY);
     }
-    return IPV4Host(addr.sin_addr);
+
+    if (port)
+        *port = ntohs(from->sin_port);
+    return IPV4Host(from->sin_addr);
 }
 
 #ifdef  CCXX_IPV6
 IPV6Host Socket::getIPV6Peer(tpport_t *port) const
 {
-    struct sockaddr_in6 addr;
-    socklen_t len = sizeof(addr);
+    sockaddr_in6* from = getPeer();
+    if (from == NULL) {
+        if (port)
+            port = 0;
+        return IPV6Host(in6addr_any);
+    }
 
-    if(getpeername(so, (struct sockaddr *)&addr, &len)) {
-#ifndef _MSWINDOWS_
-        if(errno == ENOTCONN)
-            error(errNotConnected,(char *)"Could not get peer address",socket_errno);
-        else
-#endif
-            error(errResourceFailure,(char *)"Could not get peer address",socket_errno);
-        if(port)
-            *port = 0;
-        memset(&addr.sin6_addr, 0, sizeof(addr.sin6_addr));
-    }
-    else {
-        if(port)
-                *port = ntohs(addr.sin6_port);
-    }
-    return IPV6Host(addr.sin6_addr);
+    if (port)
+        *port = ntohs(from->sin6_port);
+    return IPV6Host(from->sin6_addr);
 }
 #endif
 
