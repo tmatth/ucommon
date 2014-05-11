@@ -1331,9 +1331,9 @@ in_port_t Socket::address::getPort(const struct sockaddr *address)
 
     switch (address->sa_family) {
     case AF_INET:
-        return reinterpret_cast<const sockaddr_in* >(address)->sin_port;
+        return ntohs(reinterpret_cast<const sockaddr_in* >(address)->sin_port);
     case AF_INET6:
-        return reinterpret_cast<const sockaddr_in6*>(address)->sin6_port;
+        return ntohs(reinterpret_cast<const sockaddr_in6*>(address)->sin6_port);
     default:
         return 0;
     }
@@ -1346,10 +1346,10 @@ void Socket::address::setPort(struct sockaddr *address, in_port_t port)
 
     switch (address->sa_family) {
     case AF_INET:
-        reinterpret_cast<sockaddr_in* >(address)->sin_port  = port;
+        reinterpret_cast<sockaddr_in* >(address)->sin_port  = htons(port);
         break;
     case AF_INET6:
-        reinterpret_cast<sockaddr_in6*>(address)->sin6_port = port;
+        reinterpret_cast<sockaddr_in6*>(address)->sin6_port = htons(port);
         break;
     }
 }
