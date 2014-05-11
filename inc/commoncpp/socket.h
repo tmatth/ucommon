@@ -329,6 +329,7 @@ protected:
      * @return 0 (errSuccess) on success, else error code.
      * @param ia address of multicast group to join.
      */
+    Error join(const ucommon::Socket::address &ia);
     Error join(const IPV4Multicast &ia);
 #ifdef  CCXX_IPV6
     Error join(const IPV6Multicast &ia);
@@ -340,6 +341,7 @@ protected:
      * @return 0 (errSuccess) on success, else error code.
      * @param ia address of multicast group to drop.
      */
+    Error drop(const ucommon::Socket::address &ia);
     Error drop(const IPV4Multicast &ia);
 #ifdef  CCXX_IPV6
     Error drop(const IPV6Multicast &ia);
@@ -496,9 +498,11 @@ public:
      * @param port ptr to port number of sender.
      * @return host address, test with "isInetAddress()".
      */
+    ucommon::Socket::address getSender() const;
+
     virtual IPV4Host getIPV4Sender(tpport_t *port = NULL) const;
 
-    inline IPV4Host getSender(tpport_t *port = NULL) const
+    inline IPV4Host getSender(tpport_t *port) const
         {return getIPV4Sender(port);}
 
 #ifdef  CCXX_IPV6
@@ -514,9 +518,11 @@ public:
      * @param port ptr to port number of remote socket.
      * @return host address of remote socket.
      */
+    ucommon::Socket::address getPeer() const;
+
     IPV4Host getIPV4Peer(tpport_t *port = NULL) const;
 
-    inline IPV4Host getPeer(tpport_t *port = NULL) const
+    inline IPV4Host getPeer(tpport_t *port) const
         {return getIPV4Peer(port);}
 
 #ifdef  CCXX_IPV6
@@ -532,12 +538,14 @@ public:
      */
     IPV4Host getIPV4Local(tpport_t *port = NULL) const;
 
-    inline IPV4Host getLocal(tpport_t *port = NULL) const
+    inline IPV4Host getLocal(tpport_t *port) const
         {return getIPV4Local(port);}
 
 #ifdef  CCXX_IPV6
     IPV6Host getIPV6Local(tpport_t *port = NULL) const;
 #endif
+
+    ucommon::Socket::address getLocal() const;
 
     /**
      * Used to specify blocking mode for the socket.  A socket
