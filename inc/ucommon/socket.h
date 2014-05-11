@@ -412,6 +412,9 @@ public:
          */
         bool operator==(const address& other) const;
 
+        inline bool operator!=(const address& other) const
+            {return !(*this==other);}
+
         inline bool equals(const address& other) const
             {return *this == other;};
 
@@ -519,6 +522,37 @@ public:
         inline bool operator!() const
             {return list == NULL;};
 
+        /**
+         * Test if the first socket address is ADDR_ANY:
+         *   0.0.0.0 or ::0
+         * @return true if the address is one of the above.
+         */
+        inline bool isAny() const
+            {return isAny(get());}
+
+        /**
+         * Clear the address list and set the first address to be the
+         * ADDR_ANY of the current family, or of the specified family
+         * (if set).
+         * @param family: address family to set.
+         */
+        void setAny(int family = AF_UNSPEC);
+
+        /**
+         * Test if the first socket address is ADDR_LOOPBACK:
+         *   127.0.0.1 or ::1
+         * @return true if the address is one of the above.
+         */
+        inline bool isLoopback() const
+            {return isLoopback(get());}
+
+        /**
+         * Clear the address list and set the first address to be the
+         * ADDR_LOOPBACK of the current family, or of the specified family
+         * (if set).
+         * @param family: address family to set.
+         */
+        void setLoopback(int family = AF_UNSPEC);
 
         /**
          * Clear current object.
@@ -583,7 +617,7 @@ public:
          * @param address to insert into list.
          * @return true if inserted, false if duplicate.
          */
-        bool insert(struct sockaddr *address);
+        bool insert(const struct sockaddr *address);
 
         /**
          * Copy an existing addrinfo into our object.  This is also used
@@ -623,6 +657,30 @@ public:
          * @param port to associate to the socket address.
          */
         static void setPort(struct sockaddr *address, in_port_t port);
+
+        /**
+         * Test if the socket address is ADDR_ANY:
+         *   0.0.0.0 or ::0
+         * @return true if the address is one of the above.
+         */
+        static bool isAny(const struct sockaddr *address);
+
+        /**
+         * Get a ADDR_ANY socket address of the given family.
+         */
+        static sockaddr_storage any(int family);
+
+        /**
+         * Test if the socket address is ADDR_LOOPBACK:
+         *   127.0.0.1 or ::1
+         * @return true if the address is one of the above.
+         */
+        static bool isLoopback(const struct sockaddr *address);
+
+        /**
+         * Get a ADDR_LOOPBACK socket address of the given family.
+         */
+        static sockaddr_storage loopback(int family);
 
         /**
          * Duplicate a socket address.

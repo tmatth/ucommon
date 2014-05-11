@@ -1267,7 +1267,7 @@ unsigned Socket::address::remove(struct addrinfo *alist)
     return count;
 }
 
-bool Socket::address::insert(struct sockaddr *addr)
+bool Socket::address::insert(const struct sockaddr *addr)
 {
     assert(addr != NULL);
 
@@ -1352,6 +1352,87 @@ void Socket::address::setPort(struct sockaddr *address, in_port_t port)
         reinterpret_cast<sockaddr_in6*>(address)->sin6_port = htons(port);
         break;
     }
+}
+
+bool Socket::address::isAny(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return false;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return reinterpret_cast<const sockaddr_in*>(address)->sin_addr.s_addr == INADDR_ANY;
+    case AF_INET6:
+        return memcmp(
+            &reinterpret_cast<const sockaddr_in6*>(address)->sin6_addr, 
+            &in6addr_any, 
+            sizeof(in6addr_any)) == 0;
+    default:
+        return false;
+    }
+}
+
+bool Socket::address::isLoopback(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return false;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return reinterpret_cast<const sockaddr_in*>(address)->sin_addr.s_addr == htonl(INADDR_LOOPBACK);
+    case AF_INET6:
+        return memcmp(
+            &reinterpret_cast<const sockaddr_in6*>(address)->sin6_addr, 
+            &in6addr_loopback, 
+            sizeof(in6addr_loopback)) == 0;
+    default:
+        return false;
+    }
+}
+
+void Socket::address::setAny(int sa_family)
+{
+    if(sa_family == AF_UNSPEC)
+        sa_family = family();
+    clear();
+    const sockaddr_storage sa = Socket::address::any(sa_family);
+    insert(reinterpret_cast<const sockaddr*>(&sa));
+}
+
+void Socket::address::setLoopback(int sa_family)
+{
+    if(sa_family == AF_UNSPEC)
+        sa_family = family();
+    clear();
+    const sockaddr_storage sa = Socket::address::loopback(sa_family);
+    insert(reinterpret_cast<const sockaddr*>(&sa));
+}
+
+sockaddr_storage Socket::address::any(int family)
+{
+    sockaddr_storage sa;
+    memset(&sa, 0, sizeof(sockaddr_storage));
+    reinterpret_cast<sockaddr*>(&sa)->sa_family = family;
+    return sa;
+}
+
+sockaddr_storage Socket::address::loopback(int family)
+{
+    sockaddr_storage sa = any(family);
+
+    switch (family) {
+    case AF_INET:
+        reinterpret_cast<sockaddr_in*>(&sa)->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        break;
+    case AF_INET6:
+        memcpy(
+            &reinterpret_cast<sockaddr_in6*>(&sa)->sin6_addr, 
+            &in6addr_loopback, 
+            sizeof(in6addr_loopback));
+        break;
+    }
+
+    return sa;
 }
 
 struct sockaddr_in *Socket::address::ipv4(struct sockaddr *addr)
