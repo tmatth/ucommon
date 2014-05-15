@@ -30,8 +30,8 @@
 #define NAMESPACE_LOCAL namespace __secure__ {
 #define LOCAL_NAMESPACE __secure__
 
-NAMESPACE_LOCAL
-using namespace UCOMMON_NAMESPACE;
+namespace __secure__ {
+using namespace ucommon;
 
 class __LOCAL context : public secure
 {
@@ -43,6 +43,6 @@ public:
 
 END_NAMESPACE
 
-using namespace UCOMMON_NAMESPACE;
-using namespace LOCAL_NAMESPACE;
+using namespace ucommon;
+using namespace __secure__;
 

@@ -40,9 +40,7 @@
 
 #define UCOMMON_NAMESPACE   ucommon
 #define NAMESPACE_UCOMMON   namespace ucommon {
-#define NAMESPACE_EXTERN_C  extern "C" {
 #define END_NAMESPACE       }
-#define EXTERN_C            extern "C"
 
 #ifndef _REENTRANT
 #define _REENTRANT 1

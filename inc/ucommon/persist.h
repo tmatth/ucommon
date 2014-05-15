@@ -35,7 +35,7 @@
 #include <deque>
 #include <map>
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 #define NS_PREFIX   ucc::
 
 // This typedef allows us to declare NewPersistObjectFunction now
@@ -498,7 +498,7 @@ PersistEngine& operator >>(PersistEngine& ar, std::pair<x, y> &ob) throw(Persist
     return ar;
 }
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif
 #endif

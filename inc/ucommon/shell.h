@@ -50,7 +50,7 @@
 #undef  ERR
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A utility class for generic shell operations.  This includes utilities
@@ -864,6 +864,6 @@ typedef shell shell_t;
 inline  const char *_TEXT(const char *s)
     {return shell::text(s);}
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

@@ -144,7 +144,7 @@ struct sockaddr_storage
 #define DCCP_SOCKOPT_TX_CCID            14
 #define DCCP_SOCKOPT_RX_CCID            15
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A class to hold internet segment routing rules.  This class can be used
@@ -1940,6 +1940,6 @@ String str(Socket& so, strsize_t size);
 
 typedef TCPServer   tcpserv_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

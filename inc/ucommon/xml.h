@@ -31,7 +31,7 @@
 #ifndef _UCOMMON_XML_H_
 #define _UCOMMON_XML_H_
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * XML streaming parser.  This class implements a basic XML stream parser
@@ -145,6 +145,6 @@ protected:
         {return state == END;};
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

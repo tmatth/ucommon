@@ -34,7 +34,7 @@
 #include <ucommon/cpr.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 class String;
 class StringPager;
@@ -640,6 +640,6 @@ inline CharacterProtocol& operator<< (CharacterProtocol& p, const double& value)
 inline CharacterProtocol& operator>> (CharacterProtocol& p, double& value)
     {return _character_operators::input(p, value);}
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

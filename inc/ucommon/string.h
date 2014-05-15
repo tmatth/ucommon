@@ -62,7 +62,7 @@
 #define PGP_B64_WIDTH   64
 #define MIME_B64_WIDTH  76
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A convenience class for size of strings.
@@ -1785,7 +1785,6 @@ public:
         {return data + size;}
 };
 
-
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

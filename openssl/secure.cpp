@@ -197,10 +197,12 @@ secure::~secure()
 {
 }
 
+namespace __secure__ {
+
 context::~context()
 {
     if(ctx)
         SSL_CTX_free(ctx);
 }
 
-
+} // namespace __secure__

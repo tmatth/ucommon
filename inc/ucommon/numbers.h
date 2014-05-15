@@ -30,7 +30,7 @@
 #include <ucommon/platform.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A number manipulation class.  This is used to extract, convert,
@@ -235,6 +235,6 @@ inline const T (max)(const T& v1, const T& v2)
     return ((v1 > v2) ? v1 : v2);
 }
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

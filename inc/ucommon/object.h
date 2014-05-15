@@ -43,7 +43,7 @@
 
 #include <stdlib.h>
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A base class for reference counted objects.  Reference counted objects
@@ -479,6 +479,6 @@ inline void release(ObjectProtocol *object)
 inline ObjectProtocol *copy(ObjectProtocol *object)
     {return object->copy();}
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

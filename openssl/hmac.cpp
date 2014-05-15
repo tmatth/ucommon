@@ -17,8 +17,6 @@
 
 #include "local.h"
 
-NAMESPACE_UCOMMON
-
 bool HMAC::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
@@ -90,5 +88,3 @@ buffer[count]);
     }
     return buffer;
 }
-
-END_NAMESPACE

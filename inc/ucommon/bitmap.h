@@ -30,7 +30,7 @@
 #include <ucommon/platform.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A class to access bit fields in external bitmaps.  The actual bitmap this
@@ -126,6 +126,6 @@ public:
     void set(size_t offset, bool value);
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

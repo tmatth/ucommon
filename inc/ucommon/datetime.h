@@ -60,7 +60,7 @@
  */
 typedef struct tm   tm_t;
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 #ifdef __BORLANDC__
     using std::tm;
@@ -1018,10 +1018,10 @@ typedef Date        date_t;
  */
 typedef Time        tod_t;
 
+} // namespace ucommon
+
 extern "C" {
     __EXPORT long tzoffset(struct timezone *tz = NULL);
 }
-
-END_NAMESPACE
 
 #endif

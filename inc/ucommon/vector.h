@@ -33,7 +33,7 @@
 
 typedef unsigned short vectorsize_t;
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * An array of reusable objects.  This class is used to support the
@@ -747,6 +747,6 @@ public:
         {Vector::add(vector); return static_cast<Vector &>(*this);};
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

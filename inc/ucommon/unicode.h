@@ -36,7 +36,7 @@
 #include <ucommon/string.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * 32 bit unicode character code.  We may extract this from a ucs2 or utf8
@@ -560,6 +560,6 @@ typedef UString ustring_t;
  */
 typedef utf8_pointer utf8_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

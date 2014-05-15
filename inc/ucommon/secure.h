@@ -52,7 +52,7 @@
 #define MAX_CIPHER_KEYSIZE  512
 #define MAX_DIGEST_HASHSIZE 512
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Common secure socket support.  This offers common routines needed for
@@ -960,6 +960,6 @@ public:
 
 #endif
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif
