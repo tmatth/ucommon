@@ -18,9 +18,9 @@
 #include "local.h"
 
 #ifdef  _MSWINDOWS_
-NAMESPACE_LOCAL
+namespace __secure__
 HCRYPTPROV _handle = (HCRYPTPROV)NULL;
-END_NAMESPACE
+}
 #endif
 
 secure::~secure()
