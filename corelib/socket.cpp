@@ -3443,14 +3443,12 @@ String str(Socket& so, strsize_t size)
     return s;
 }
 
-NAMESPACE_UCOMMON
-
-struct sockaddr *_getaddrinfo(struct addrinfo *list)
+struct sockaddr *ucommon::_getaddrinfo(struct addrinfo *list)
 {
     return list->ai_addr;
 }
 
-struct addrinfo *_nextaddrinfo(struct addrinfo *list)
+struct addrinfo *ucommon::_nextaddrinfo(struct addrinfo *list)
 {
     if(!list)
         return NULL;
@@ -3458,13 +3456,11 @@ struct addrinfo *_nextaddrinfo(struct addrinfo *list)
     return list->ai_next;
 }
 
-socket_t _getaddrsock(struct addrinfo *list)
+socket_t ucommon::_getaddrsock(struct addrinfo *list)
 {
     if(!list)
         return INVALID_SOCKET;
 
     return ::socket(list->ai_family, list->ai_socktype, list->ai_protocol);
 }
-
-END_NAMESPACE
 

@@ -144,7 +144,7 @@ static const char *clearfifo(const char *pathname, int mode)
 }
 #endif
 
-NAMESPACE_COMMONCPP
+using namespace COMMONCPP_NAMESPACE;
 
 RandomFile::RandomFile(const char *name) : Mutex()
 {
@@ -1635,4 +1635,3 @@ char *File::getRealpath(const char *path, char *buffer, size_t size)
 
 #endif
 
-END_NAMESPACE

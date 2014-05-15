@@ -83,7 +83,7 @@
 #define DCCP_SOCKOPT_TX_CCID            14
 #define DCCP_SOCKOPT_RX_CCID            15
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 typedef socket_t    SOCKET;
 
@@ -649,6 +649,6 @@ public:
 
 #endif
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

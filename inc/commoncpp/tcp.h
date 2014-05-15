@@ -61,7 +61,7 @@
 #include <commoncpp/socket.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * TCP sockets are used for stream based connected sessions between two
@@ -607,6 +607,6 @@ public:
     virtual ~TCPSession();
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

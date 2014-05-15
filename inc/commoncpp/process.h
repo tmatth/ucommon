@@ -51,7 +51,7 @@
 #include <commoncpp/thread.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * A class for containing portable process related functions
@@ -305,6 +305,6 @@ public:
     bool isLocked(void);
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

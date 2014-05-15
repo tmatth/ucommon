@@ -55,7 +55,7 @@
 #include <iostream>
 #include <map>
 
-NAMESPACE_COMMONCPP
+namespace ost {
 using namespace std;
 /**
  * Produces a dump of a buffer in a hexdump way with its
@@ -579,6 +579,6 @@ __EXPORT inline AppLog &info(AppLog& sl)
  */
 __EXPORT extern AppLog alog;
 
-END_NAMESPACE
+} // namespace ost
 
 #endif //___APPLOG_H___

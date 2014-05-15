@@ -59,7 +59,7 @@
 #define KEYDATA_PATH_SIZE   256
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 class __EXPORT MemPager : private ucommon::memalloc
 {
@@ -152,5 +152,5 @@ public:
     void setPointer(const char *id, void *data);
 };
 
-END_NAMESPACE
+} // namespace ost
 #endif

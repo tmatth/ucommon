@@ -50,7 +50,7 @@
 #include <commoncpp/config.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * Used to create and manage referece counted pointers.
@@ -129,6 +129,6 @@ public:
     }
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

@@ -61,7 +61,7 @@
 #include <commoncpp/socket.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * UDP sockets implement the TCP SOCK_DGRAM UDP protocol.  They can be
@@ -579,6 +579,6 @@ public:
     Error disconnect(void);
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

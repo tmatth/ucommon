@@ -141,15 +141,12 @@ class logger : public ost::ThreadQueue
 
 };
 
-
 // mapping thread ID <-> logStruct (buffer)
 typedef std::map <cctid_t, logStruct> LogPrivateData;
 // map ident <-> levels
 typedef std::map <string, Slog::Level> IdentLevel;
 
-
-NAMESPACE_COMMONCPP
-class AppLogPrivate
+class ost::AppLogPrivate
 {
   public:
     // subscription and unsubsciption must be protected as well
@@ -179,7 +176,6 @@ class AppLogPrivate
         delete _pLogger;
     }
 };
-END_NAMESPACE
 
 const levelNamePair AppLogPrivate::_values[] =
 {

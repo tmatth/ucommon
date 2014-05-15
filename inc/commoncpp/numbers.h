@@ -49,6 +49,8 @@
 typedef ucommon::DateTimeString DateTimeString;
 typedef ucommon::DateNumber DateNumber;
 
+namespace ost {
+
 class __EXPORT Date : public ucommon::Date
 {
 protected:
@@ -188,6 +190,8 @@ public:
     inline static tm_t *glt(time_t *time = NULL)
         {return ucommon::DateTime::local(time);}
 };
+
+} // namespace ost
 
 #endif
 

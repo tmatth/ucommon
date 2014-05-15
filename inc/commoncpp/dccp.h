@@ -61,7 +61,7 @@
 #include <commoncpp/socket.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * DCCP sockets are used for stream based connected sessions between two
@@ -221,6 +221,6 @@ public:
     virtual ~DCCPSocket();
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

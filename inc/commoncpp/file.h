@@ -75,7 +75,7 @@
 # endif
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 typedef unsigned long pos_t;
 #ifndef _MSWINDOWS_
@@ -888,7 +888,7 @@ public:
 
 #endif
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
 

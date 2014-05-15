@@ -48,7 +48,7 @@
 #include <commoncpp/config.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 typedef ucommon::String String;
 
@@ -78,6 +78,6 @@ __EXPORT size_t strtrim(const char *cs, char *str, size_t len = 0);
 
 */
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
