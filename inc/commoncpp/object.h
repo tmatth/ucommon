@@ -71,7 +71,7 @@ protected:
      * The constructor simply initializes the count.
      */
     inline RefObject()
-        {refCount = 0;};
+        {refCount = 0;}
 
     /**
      * The destructor is called when the reference count returns
@@ -126,7 +126,7 @@ public:
      * Create an unattached pointer.
      */
     inline RefPointer()
-        {ref = NULL;};
+        {ref = NULL;}
 
     /**
      * Create a pointer attached to a reference counted object.
@@ -147,10 +147,10 @@ public:
     RefPointer& operator=(const RefObject &ref);
 
     inline void *operator*() const
-        {return getObject();};
+        {return getObject();}
 
     inline void *operator->() const
-        {return getObject();};
+        {return getObject();}
 
     void *getObject(void) const;
 
@@ -170,7 +170,7 @@ protected:
     LinkedSingle *nextObject;
 
     inline LinkedSingle()
-        {nextObject = NULL;};
+        {nextObject = NULL;}
 
     virtual ~LinkedSingle();
 
@@ -202,7 +202,7 @@ public:
      * @return next object in list.
      */
     inline LinkedSingle *getNext(void)
-        {return nextObject;};
+        {return nextObject;}
 
     /**
      * Insert object into chain.  This is a virtual because
@@ -229,7 +229,7 @@ protected:
     LinkedDouble *nextObject, *prevObject;
 
     inline LinkedDouble()
-        {nextObject = prevObject = NULL;};
+        {nextObject = prevObject = NULL;}
 
     virtual ~LinkedDouble();
 
@@ -289,7 +289,7 @@ public:
      * @return next object in list.
      */
     inline LinkedDouble *getNext(void)
-        {return nextObject;};
+        {return nextObject;}
 
     /**
      * Get prev object in the list.
@@ -297,7 +297,7 @@ public:
      * @return pointer to previous object.
      */
     inline LinkedDouble *getPrev(void)
-        {return prevObject;};
+        {return prevObject;}
 
   /**
    * Insert object into chain at given position, as indicated by \ref InsertMode;
@@ -335,7 +335,7 @@ protected:
     friend class MapObject;
     friend class MapIndex;
     unsigned range;
-  unsigned count;
+    unsigned count;
     MapObject **map;
 
     void cleanup(void);
@@ -369,7 +369,7 @@ public:
      * @return table range.
      */
     inline unsigned getRange(void)
-        {return range;};
+        {return range;}
 
     /**
      * Return the number of object stored in this table.
@@ -377,7 +377,7 @@ public:
      * @return table size.
      */
     inline unsigned getSize(void)
-        {return count;};
+        {return count;}
 
     /**
      * Lookup an object by id key.  It is returned as void * for
@@ -418,7 +418,7 @@ public:
      * @return pointer to found object or NULL.
      */
     void *getEnd()
-        {   return NULL;    };
+        {return NULL;}
 
     /**
      * Get next object from managed free list.  This returns as a
@@ -475,24 +475,21 @@ public :
     /**
      * Creates an empty map index (pointing to nothing).
      */
-    MapIndex() : thisObject(NULL)
-    {};
+    MapIndex() : thisObject(NULL) {}
 
     /**
      * Creates a map index pointing to a specific map object
      *
      * @param the indexed object
      */
-    MapIndex(MapObject* theObject) : thisObject(theObject)
-    {};
+    MapIndex(MapObject* theObject) : thisObject(theObject) {}
 
     /**
      * Creates a copy of a given map index
      *
      * @param the source index object
      */
-    MapIndex(const MapIndex& theIndex) : thisObject(theIndex.thisObject)
-    {};
+    MapIndex(const MapIndex& theIndex) : thisObject(theIndex.thisObject) {}
 
     /**
      * Dereference operator: the pointed object it is returned as void * for
@@ -500,8 +497,8 @@ public :
      *
      * @return pointer to indexed object.
      */
-  void* operator*() const
-  { return (void*)thisObject;   }
+    void* operator*() const
+        {return (void*)thisObject;}
 
     /**
      * Assignment operator to avoid implicit cast.
@@ -515,15 +512,15 @@ public :
      *
      * @return the object itself, as changed.
      */
-  MapIndex& operator++();           // prefix
+    MapIndex& operator++();           // prefix
 
     /**
      * Postfix increment operator, to be used in loops and such.
      *
      * @return the object itself, as changed.
      */
-  MapIndex  operator++(int)     // postfix
-    {   return this->operator++();  }
+    MapIndex  operator++(int)     // postfix
+        {return this->operator++();}
 
     /**
      * Comparison operator, between two MapIndex's.
@@ -531,22 +528,22 @@ public :
      * @return the object itself, as changed.
      */
     bool operator==(const MapIndex& theIndex) const
-    {   return thisObject == theIndex.thisObject;   };
+        {return thisObject == theIndex.thisObject;}
 
     bool operator!=(const MapIndex& theIndex) const
-    {   return !(*this == theIndex);    };
+        {return !(*this == theIndex);}
 
     /**
      * Comparison operator, between the MapIndex and a MapObject, useful to avoid
-   * casts for sake of clearness.
+     * casts for sake of clearness.
      *
      * @return the object itself, as changed.
      */
-    bool operator==(const MapObject* theObject) const
-    {   return thisObject == theObject; };
+     bool operator==(const MapObject* theObject) const
+        {return thisObject == theObject;}
 
     bool operator!=(const MapObject* theObject) const
-    {   return !(*this == theObject);   };
+        {return !(*this == theObject);}
 };
 
 /**

@@ -284,21 +284,21 @@ public:
      * @param vector to duplicate.
      */
     inline void set(Vector &vector)
-        {set(vector.list());};
+        {set(vector.list());}
 
     /**
      * Add (append) an existing vector to our vector.
      * @param vector to append.
      */
     inline void add(Vector &vector)
-        {add(vector.list());};
+        {add(vector.list());}
 
     /**
      * Return a pointer from the vector by array reference.
      * @param index of vector member pointer to return.
      */
     inline ObjectProtocol *operator[](int index)
-        {return get(index);};
+        {return get(index);}
 
     /**
      * Assign a member of the vector directly.
@@ -306,7 +306,7 @@ public:
      * @param pointer to object to assign to vector.
      */
     inline void operator()(vectorsize_t position, ObjectProtocol *pointer)
-        {set(position, pointer);};
+        {set(position, pointer);}
 
     /**
      * Retrieve a member of the vector directly.
@@ -314,35 +314,35 @@ public:
      * @return object pointer retrieved from vector.
      */
     inline ObjectProtocol *operator()(vectorsize_t position)
-        {return get(position);};
+        {return get(position);}
 
     /**
      * Append a member to the vector directly.
      * @param pointer to object to add to vector.
      */
     inline void operator()(ObjectProtocol *pointer)
-        {add(pointer);};
+        {add(pointer);}
 
     /**
      * Assign (copy) into our existing vector from another vector.
      * @param vector to assign from.
      */
     inline void operator=(Vector &vector)
-        {set(vector.list());};
+        {set(vector.list());}
 
     /**
      * Append into our existing vector from another vector.
      * @param vector to append from.
      */
     inline void operator+=(Vector &vector)
-        {add(vector.list());};
+        {add(vector.list());}
 
     /**
      * Concatenate into our existing vector from assignment list.
      * @param vector to append from.
      */
     inline Vector& operator+(Vector &vector)
-        {add(vector.list()); return *this;};
+        {add(vector.list()); return *this;}
 
     /**
      * Release vector and concat vector from another vector.
@@ -420,7 +420,7 @@ public:
      * @param vector to copy from.
      */
     inline void operator=(Vector &vector)
-        {set(vector);};
+        {set(vector);}
 
 };
 
@@ -436,19 +436,19 @@ public:
     /**
      * Create an empty vector for specified type.
      */
-    inline vectorof() : Vector() {};
+    inline vectorof() : Vector() {}
 
     /**
      * Create an empty vector of allocated size for specified type.
      * @param size of vector to allocate.
      */
-    inline vectorof(vectorsize_t size) : Vector(size) {};
+    inline vectorof(vectorsize_t size) : Vector(size) {}
 
     inline T& operator[](int index)
-        {return static_cast<T&>(Vector::get(index));};
+        {return static_cast<T&>(Vector::get(index));}
 
     inline const T& at(int index)
-        {return static_cast<const T&>(Vector::get(index));};
+        {return static_cast<const T&>(Vector::get(index));}
 
     /**
      * Retrieve a typed member of the vector directly.
@@ -456,21 +456,21 @@ public:
      * @return typed object pointer retrieved from vector.
      */
     inline T *operator()(vectorsize_t position)
-        {return static_cast<T *>(Vector::get(position));};
+        {return static_cast<T *>(Vector::get(position));}
 
     /**
      * Get the first typed object pointer contained in the vector.
      * @return first typed object pointer.
      */
     inline T *begin(void)
-        {return static_cast<T *>(Vector::begin());};
+        {return static_cast<T *>(Vector::begin());}
 
     /**
      * Get the last typed object pointer contained in the vector.
      * @return last typed object pointer.
      */
     inline T *end(void)
-        {return static_cast<T *>(Vector::end());};
+        {return static_cast<T *>(Vector::end());}
 
     /**
      * Concatenate typed vector in an expression.
@@ -478,7 +478,7 @@ public:
      * @return effective object to continue in expression.
      */
     inline Vector &operator+(Vector &vector)
-        {Vector::add(vector); return static_cast<Vector &>(*this);};
+        {Vector::add(vector); return static_cast<Vector &>(*this);}
 };
 
 /**
@@ -496,7 +496,7 @@ public:
      * @param count of objects of specified type to allocate.
      */
     inline array_reuse(unsigned count) :
-        ArrayReuse(sizeof(T), count) {};
+        ArrayReuse(sizeof(T), count) {}
 
     /**
      * Create reusable objects of specific type in preallocated memory.
@@ -504,28 +504,28 @@ public:
      * @param memory to use.
      */
     inline array_reuse(unsigned count, void *memory) :
-        ArrayReuse(sizeof(T), count, memory) {};
+        ArrayReuse(sizeof(T), count, memory) {}
 
     /**
      * Test if typed objects available in heap or re-use list.
      * @return true if objects still are available.
      */
     inline operator bool() const
-        {return avail();};
+        {return avail();}
 
     /**
      * Test if the entire heap has been allocated.
      * @return true if no objects are available.
      */
     inline bool operator!() const
-        {return !avail();};
+        {return !avail();}
 
     /**
      * Request immediately next available typed object from the heap.
      * @return typed object pointer or NULL if heap is empty.
      */
     inline T* request(void)
-        {return static_cast<T*>(ArrayReuse::request());};
+        {return static_cast<T*>(ArrayReuse::request());}
 
     /**
      * Get a typed object from the heap.  This function blocks when the
@@ -533,7 +533,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline T* get(void)
-        {return static_cast<T*>(ArrayReuse::get());};
+        {return static_cast<T*>(ArrayReuse::get());}
 
     /**
      * Create a typed object from the heap.  This function blocks when the
@@ -541,7 +541,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline T* create(void)
-        {return init<T>(static_cast<T*>(ArrayReuse::get()));};
+        {return init<T>(static_cast<T*>(ArrayReuse::get()));}
 
     /**
      * Get a typed object from the heap.  This function blocks until the
@@ -550,7 +550,7 @@ public:
      * @return typed object pointer from heap or NULL if timeout.
      */
     inline T* get(timeout_t timeout)
-        {return static_cast<T*>(ArrayReuse::get(timeout));};
+        {return static_cast<T*>(ArrayReuse::get(timeout));}
 
     /**
      * Create a typed object from the heap.  This function blocks until the
@@ -559,14 +559,14 @@ public:
      * @return typed object pointer from heap or NULL if timeout.
      */
     inline T* create(timeout_t timeout)
-        {return init<T>(static_cast<T*>(ArrayReuse::get(timeout)));};
+        {return init<T>(static_cast<T*>(ArrayReuse::get(timeout)));}
 
     /**
      * Release (return) a typed object back to the heap for re-use.
      * @param object to return.
      */
     inline void release(T *object)
-        {ArrayReuse::release(object);};
+        {ArrayReuse::release(object);}
 
     /**
      * Get a typed object from the heap by type casting reference.  This
@@ -574,7 +574,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline operator T*()
-        {return array_reuse::get();};
+        {return array_reuse::get();}
 
     /**
      * Get a typed object from the heap by pointer reference.  This
@@ -582,7 +582,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline T *operator*()
-        {return array_reuse::get();};
+        {return array_reuse::get();}
 };
 
 /**
@@ -603,21 +603,21 @@ public:
      * @param count of objects of specified type to allocate.
      */
     inline paged_reuse(mempager *pager, unsigned count) :
-        PagerReuse(pager, sizeof(T), count) {};
+        PagerReuse(pager, sizeof(T), count) {}
 
     /**
      * Test if typed objects available from the pager or re-use list.
      * @return true if objects still are available.
      */
     inline operator bool() const
-        {return PagerReuse::avail();};
+        {return PagerReuse::avail();}
 
     /**
      * Test if no objects are available for reuse or the pager.
      * @return true if no objects are available.
      */
     inline bool operator!() const
-        {return !PagerReuse::avail();};
+        {return !PagerReuse::avail();}
 
     /**
      * Get a typed object from the pager heap.  This function blocks when the
@@ -625,7 +625,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline T *get(void)
-        {return static_cast<T*>(PagerReuse::get());};
+        {return static_cast<T*>(PagerReuse::get());}
 
     /**
      * Get a typed object from the pager heap.  This function blocks when the
@@ -634,7 +634,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline T *create(void)
-        {return init<T>(static_cast<T*>(PagerReuse::get()));};
+        {return init<T>(static_cast<T*>(PagerReuse::get()));}
 
     /**
      * Get a typed object from the heap.  This function blocks until the
@@ -643,7 +643,7 @@ public:
      * @return typed object pointer from heap or NULL if timeout.
      */
     inline T *get(timeout_t timeout)
-        {return static_cast<T*>(PagerReuse::get(timeout));};
+        {return static_cast<T*>(PagerReuse::get(timeout));}
 
     /**
      * Create a typed object from the heap.  This function blocks until the
@@ -653,21 +653,21 @@ public:
      * @return typed object pointer from heap or NULL if timeout.
      */
     inline T *create(timeout_t timeout)
-        {return init<T>(static_cast<T*>(PagerReuse::get(timeout)));};
+        {return init<T>(static_cast<T*>(PagerReuse::get(timeout)));}
 
     /**
      * Request immediately next available typed object from the pager heap.
      * @return typed object pointer or NULL if heap is empty.
      */
     inline T *request(void)
-        {return static_cast<T*>(PagerReuse::request());};
+        {return static_cast<T*>(PagerReuse::request());}
 
     /**
      * Release (return) a typed object back to the pager heap for re-use.
      * @param object to return.
      */
     inline void release(T *object)
-        {PagerReuse::release(object);};
+        {PagerReuse::release(object);}
 
     /**
      * Get a typed object from the pager heap by type casting reference.  This
@@ -675,7 +675,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline T *operator*()
-        {return paged_reuse::get();};
+        {return paged_reuse::get();}
 
     /**
      * Get a typed object from the pager heap by pointer reference.  This
@@ -683,7 +683,7 @@ public:
      * @return typed object pointer from heap.
      */
     inline operator T*()
-        {return paged_reuse::get();};
+        {return paged_reuse::get();}
 };
 
 /**
@@ -703,7 +703,7 @@ public:
     /**
      * Construct fixed sized vector object in heap or stack.
      */
-    inline vectorbuf() : MemVector(buffer, S) {};
+    inline vectorbuf() : MemVector(buffer, S) {}
 
     /**
      * Get object pointer of specified type from fixed vector.
@@ -711,10 +711,10 @@ public:
      * @return typed object pointer of member.
      */
     inline const T& at(int index)
-        {return static_cast<const T&>(Vector::get(index));};
+        {return static_cast<const T&>(Vector::get(index));}
 
     inline T& operator[](int index)
-        {return static_cast<T&>(Vector::get(index));};
+        {return static_cast<T&>(Vector::get(index));}
 
     /**
      * Retrieve a typed member of the fixed vector directly.
@@ -722,21 +722,21 @@ public:
      * @return typed object pointer retrieved from vector.
      */
     inline T *operator()(vectorsize_t position)
-        {return static_cast<T *>(Vector::get(position));};
+        {return static_cast<T *>(Vector::get(position));}
 
     /**
      * Get the first typed object pointer contained in the fixed vector.
      * @return first typed object pointer.
      */
     inline T *begin(void)
-        {return static_cast<T *>(Vector::begin());};
+        {return static_cast<T *>(Vector::begin());}
 
     /**
      * Get the last typed object pointer contained in the fixed vector.
      * @return last typed object pointer.
      */
     inline T *end(void)
-        {return static_cast<T *>(Vector::end());};
+        {return static_cast<T *>(Vector::end());}
 
     /**
      * Concatenate fixed typed vector in an expression.
@@ -744,7 +744,7 @@ public:
      * @return effective object to continue in expression.
      */
     inline Vector &operator+(Vector &vector)
-        {Vector::add(vector); return static_cast<Vector &>(*this);};
+        {Vector::add(vector); return static_cast<Vector &>(*this);}
 };
 
 } // namespace ucommon

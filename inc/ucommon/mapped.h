@@ -128,14 +128,14 @@ public:
      * @return true if active map.
      */
     inline operator bool() const
-        {return (size != 0);};
+        {return (size != 0);}
 
     /**
      * Test if map is inactive.
      * @return true if map inactive.
      */
     inline bool operator!() const
-        {return (size == 0);};
+        {return (size == 0);}
 
     /**
      * Extend size of managed heap on shared memory segment.  This does not
@@ -168,14 +168,14 @@ public:
      * @return size of mapped segment.
      */
     inline size_t len(void)
-        {return size;};
+        {return size;}
 
     /**
      * Get starting address of mapped segment.
      * @return starting address of mapped segment.
      */
     inline caddr_t addr(void)
-        {return map;};
+        {return map;}
 
     /**
      * An API that allows "disabling" of publishing shared memory maps.
@@ -207,7 +207,7 @@ protected:
     MappedReuse(size_t osize);
 
     inline void create(const char *fname, unsigned count)
-        {MappedMemory::create(fname, count * objsize);};
+        {MappedMemory::create(fname, count * objsize);}
 
 public:
     /**
@@ -277,10 +277,10 @@ template <class T>
 class mapped_array : public MappedMemory
 {
 protected:
-    inline mapped_array() : MappedMemory() {};
+    inline mapped_array() : MappedMemory() {}
 
     inline void create(const char *fn, unsigned members)
-        {MappedMemory::create(fn, members * sizeof(T));};
+        {MappedMemory::create(fn, members * sizeof(T));}
 
 public:
     /**
@@ -292,21 +292,21 @@ public:
      * @param number of objects in the mapped vector.
      */
     inline mapped_array(const char *name, unsigned number) :
-        MappedMemory(name, number * sizeof(T)) {};
+        MappedMemory(name, number * sizeof(T)) {}
 
     /**
      * Initialize typed data in mapped array.  Assumes default constructor
      * for type.
      */
     inline void initialize(void)
-        {new((caddr_t)offset(0)) T[size / sizeof(T)];};
+        {new((caddr_t)offset(0)) T[size / sizeof(T)];}
 
     /**
      * Add mapped space while holding lock for one object.
      * @return address of object.
      */
     inline void *addLock(void)
-        {return sbrk(sizeof(T));};
+        {return sbrk(sizeof(T));}
 
     /**
      * Get typed pointer to member object of vector in mapped segment.
@@ -321,7 +321,7 @@ public:
      * @return address of object.
      */
     inline T *operator()(void)
-        {return static_cast<T*>(sbrk(sizeof(T)));};
+        {return static_cast<T*>(sbrk(sizeof(T)));}
 
     /**
      * Reference typed object of vector in mapped segment.
@@ -329,14 +329,14 @@ public:
      * @return typed reference.
      */
     inline T& operator[](unsigned member)
-        {return *(operator()(member));};
+        {return *(operator()(member));}
 
     /**
      * Get member size of typed objects that can be held in mapped vector.
      * @return members mapped in segment.
      */
     inline unsigned max(void)
-        {return (unsigned)(size / sizeof(T));};
+        {return (unsigned)(size / sizeof(T));}
 };
 
 /**
@@ -351,7 +351,7 @@ class mapped_reuse : public MappedReuse
 {
 protected:
     inline mapped_reuse() :
-        MappedReuse(sizeof(T)) {};
+        MappedReuse(sizeof(T)) {}
 
 public:
     /**
@@ -362,28 +362,28 @@ public:
      * @param number of objects in the mapped vector.
      */
     inline mapped_reuse(const char *name, unsigned number) :
-        MappedReuse(name, sizeof(T), number) {};
+        MappedReuse(name, sizeof(T), number) {}
 
     /**
      * Initialize typed data in mapped array.  Assumes default constructor
      * for type.
      */
     inline void initialize(void)
-        {new((caddr_t)pos(0)) T[size / sizeof(T)];};
+        {new((caddr_t)pos(0)) T[size / sizeof(T)];}
 
     /**
      * Check whether there are typed objects available to be allocated.
      * @return true if objects are available.
      */
     inline operator bool() const
-        {return MappedReuse::avail();};
+        {return MappedReuse::avail();}
 
     /**
      * Check whether there are typed objects available to be allocated.
      * @return true if no more typed objects are available.
      */
     inline bool operator!() const
-        {return !MappedReuse::avail();};
+        {return !MappedReuse::avail();}
 
     /**
      * Request a typed reusable object from the free list or mapped space.
@@ -391,7 +391,7 @@ public:
      * @return free object.
      */
     inline operator T*()
-        {return mapped_reuse::get();};
+        {return mapped_reuse::get();}
 
     /**
      * Request a typed reusable object from the free list or mapped space by
@@ -399,7 +399,7 @@ public:
      * @return free object.
      */
     inline T* operator*()
-        {return mapped_reuse::get();};
+        {return mapped_reuse::get();}
 
     /**
      * Get typed object from a specific member offset within the mapped segment.
@@ -407,7 +407,7 @@ public:
      * @return typed object pointer.
      */
     inline T *pos(size_t member)
-        {return static_cast<T*>(MappedReuse::offset(member * sizeof(T)));};
+        {return static_cast<T*>(MappedReuse::offset(member * sizeof(T)));}
 
     /**
      * Request a typed reusable object from the free list or mapped space.
@@ -415,7 +415,7 @@ public:
      * @return free typed object.
      */
     inline T *get(void)
-        {return static_cast<T*>(MappedReuse::get());};
+        {return static_cast<T*>(MappedReuse::get());}
 
     /**
      * Request a typed reusable object from the free list or mapped space.
@@ -425,7 +425,7 @@ public:
      * @return free typed object.
      */
     inline T *getTimed(timeout_t timeout)
-        {return static_cast<T*>(MappedReuse::getTimed(timeout));};
+        {return static_cast<T*>(MappedReuse::getTimed(timeout));}
 
     /**
      * Request a typed reusable object from the free list or mapped space.
@@ -433,7 +433,7 @@ public:
      * @return free typed object if available or NULL.
      */
     inline T *request(void)
-        {return static_cast<T*>(MappedReuse::request());};
+        {return static_cast<T*>(MappedReuse::request());}
 
     /**
      * Used to return a typed object to the reuse pool when the mutex lock is
@@ -441,7 +441,7 @@ public:
      * @param object being returned.
      */
     inline void removeLocked(T *object)
-        {MappedReuse::removeLocked(object);};
+        {MappedReuse::removeLocked(object);}
 
     /**
      * Used to get a typed object from the reuse pool when the mutex lock is
@@ -449,14 +449,14 @@ public:
      * @return typed object from pool or NULL if exhausted.
      */
     inline T *getLocked(void)
-        {return static_cast<T*>(MappedReuse::getLocked());};
+        {return static_cast<T*>(MappedReuse::getLocked());}
 
     /**
      * Used to release a typed object back to the reuse typed object pool.
      * @param object being released.
      */
     inline void release(T *object)
-        {ReusableAllocator::release(object);};
+        {ReusableAllocator::release(object);}
 };
 
 /**
@@ -475,7 +475,7 @@ public:
      * @param name of memory segment to map.
      */
     inline mapped_view(const char *name) :
-        MappedMemory(name) {};
+        MappedMemory(name) {}
 
     /**
      * Access typed member object in the mapped segment.
@@ -491,20 +491,20 @@ public:
      * @return typed object reference.
      */
     inline volatile const T &operator[](unsigned member)
-        {return *(operator()(member));};
+        {return *(operator()(member));}
 
     inline volatile const T *get(unsigned member)
-        {return static_cast<const T*>(offset(member * sizeof(T)));};
+        {return static_cast<const T*>(offset(member * sizeof(T)));}
 
     inline void copy(unsigned member, T& buffer)
-        {MappedMemory::copy(member * sizeof(T), &buffer, sizeof(T));};
+        {MappedMemory::copy(member * sizeof(T), &buffer, sizeof(T));}
 
     /**
      * Get count of typed member objects held in this map.
      * @return count of typed member objects.
      */
     inline unsigned count(void)
-        {return (unsigned)(size / sizeof(T));};
+        {return (unsigned)(size / sizeof(T));}
 };
 
 } // namespace ucommon

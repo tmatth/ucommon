@@ -99,7 +99,7 @@ class __EXPORT UDPSocket : public Socket
 {
 private:
     inline Error setKeepAlive(bool enable)
-        {return Socket::setKeepAlive(enable);};
+        {return Socket::setKeepAlive(enable);}
 
 protected:
 #ifdef  CCXX_IPV6
@@ -239,7 +239,7 @@ public:
      * @return number of bytes examined.
      */
     inline ssize_t peek(void *buf, size_t len)
-        {return ::recv(so, (char *)buf, len, MSG_PEEK);};
+        {return ::recv(so, (char *)buf, len, MSG_PEEK);}
 
     /**
      * Associate socket with a named connection
@@ -268,7 +268,7 @@ private:
     void setPeer(const IPV4Host &ia, tpport_t port);
 
     Error setBroadcast(bool enable)
-        {return Socket::setBroadcast(enable);};
+        {return Socket::setBroadcast(enable);}
 
 public:
     /**
@@ -395,7 +395,7 @@ protected:
         {return Socket::setMulticastByFamily(enable, family);}
 
     inline Error setTimeToLive(unsigned char ttl)
-        {return Socket::setTimeToLiveByFamily(ttl, family);};
+        {return Socket::setTimeToLiveByFamily(ttl, family);}
 
 public:
     /**
@@ -417,17 +417,17 @@ public:
      * @param timeout in milliseconds to wait.
      */
     inline bool isOutputReady(unsigned long timeout = 0l)
-        {return Socket::isPending(Socket::pendingOutput, timeout);};
+        {return Socket::isPending(Socket::pendingOutput, timeout);}
 
 
     inline Error setRouting(bool enable)
-        {return Socket::setRouting(enable);};
+        {return Socket::setRouting(enable);}
 
     inline Error setTypeOfService(Tos tos)
-        {return Socket::setTypeOfService(tos);};
+        {return Socket::setTypeOfService(tos);}
 
     inline Error setBroadcast(bool enable)
-        {return Socket::setBroadcast(enable);};
+        {return Socket::setBroadcast(enable);}
 };
 
 /**
@@ -477,7 +477,7 @@ protected:
      * @param timeout in milliseconds.
      */
     bool isPendingReceive(timeout_t timeout)
-        {return Socket::isPending(Socket::pendingInput, timeout);};
+        {return Socket::isPending(Socket::pendingInput, timeout);}
 
     /**
      * End receiver.
@@ -486,7 +486,7 @@ protected:
         {Socket::endSocket();}
 
     inline SOCKET getReceiver(void) const
-        {return so;};
+        {return so;}
 
     inline Error setRouting(bool enable)
         {return Socket::setRouting(enable);}
@@ -495,7 +495,7 @@ protected:
         {return Socket::setMulticastByFamily(enable, family);}
 
     inline Error join(const IPV4Multicast &ia)
-            {return Socket::join(ia);}
+        {return Socket::join(ia);}
 
 #ifdef  CCXX_IPV6
     inline Error join(const IPV6Multicast &ia)
@@ -503,7 +503,7 @@ protected:
 #endif
 
     inline Error drop(const IPV4Multicast &ia)
-            {return Socket::drop(ia);}
+        {return Socket::drop(ia);}
 
 #ifdef  CCXX_IPV6
     inline Error drop(const IPV6Multicast &ia)
@@ -519,7 +519,7 @@ public:
      * @param len size of data receive buffer.
      */
     inline ssize_t receive(void *buf, size_t len)
-        {return ::recv(so, (char *)buf, len, 0);};
+        {return ::recv(so, (char *)buf, len, 0);}
 
     /**
      * See if input queue has data packets available.
@@ -528,7 +528,7 @@ public:
      * @param timeout in milliseconds.
      */
     inline bool isInputReady(timeout_t timeout = TIMEOUT_INF)
-        {return Socket::isPending(Socket::pendingInput, timeout);};
+        {return Socket::isPending(Socket::pendingInput, timeout);}
 };
 
 /**

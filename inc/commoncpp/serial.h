@@ -139,8 +139,8 @@ private:
         bool linebuf: 1;
     } flags;
 
-    void    *   original;
-    void    *   current;
+    void *original;
+    void *current;
 
     /**
      * Used to properly initialize serial object.
@@ -148,9 +148,7 @@ private:
     void initSerial(void);
 
 protected:
-
-    fd_t    dev;
-
+    fd_t dev;
     int bufsize;
 
     /**
@@ -158,13 +156,13 @@ protected:
      *
      * @param fname Pathname of device to open
      */
-    void        open(const char *fname);
+    void open(const char *fname);
 
     /**
      * Closes the serial device.
      *
      */
-    void        close(void);
+    void close(void);
 
     /**
      * Reads from serial device.
@@ -199,7 +197,7 @@ protected:
      * @param err string or message to pass.
      */
     inline void error(char *err)
-        {error(errExtended, err);};
+        {error(errExtended, err);}
 
 
     /**
@@ -209,7 +207,7 @@ protected:
      * @param enable true to enable handler.
      */
     inline void setError(bool enable)
-        {flags.thrown = !enable;};
+        {flags.thrown = !enable;}
 
     /**
      * Set packet read mode and "size" of packet read buffer.
@@ -272,7 +270,7 @@ protected:
      * device.
      */
     Serial()
-        {initSerial();};
+        {initSerial();}
 
     /**
      * A serial object may be constructed from a named file on the
@@ -358,7 +356,7 @@ public:
      * @return error numbr of last Error.
      */
     inline Error getErrorNumber(void)
-        {return errid;};
+        {return errid;}
 
     /**
      * Often used by a "catch" to fetch the user set error string
@@ -367,7 +365,7 @@ public:
      * @return string for error message.
      */
     inline char *getErrorString(void)
-        {return errstr;};
+        {return errstr;}
 
     /**
      * Get the "buffer" size for buffered operations.  This can
@@ -377,7 +375,7 @@ public:
      * @return number of bytes used for buffering.
      */
     inline int getBufferSize(void)
-        {return bufsize;};
+        {return bufsize;}
 
     /**
      * Get the status of pending operations.  This can be used to
@@ -489,7 +487,7 @@ public:
      * @param to timeout to use.
      */
     inline void setTimeout(timeout_t to)
-        {timeout = to;};
+        {timeout = to;}
 
     /**
      * Set tty mode to buffered or "interactive".  When interactive,
@@ -564,7 +562,7 @@ public:
      * Test to see if stream is opened.
      */
     inline bool operator!()
-        {return (dev < 0);};
+        {return (dev < 0);}
 };
 
 /**
@@ -702,7 +700,7 @@ protected:
      * @param len of bytes to send.
      */
     inline int output(void *buf, int len)
-        {return aWrite((char *)buf, len);};
+        {return aWrite((char *)buf, len);}
 
     /**
      * Perform when output is available for sending data.
@@ -719,7 +717,8 @@ protected:
      * @param len of input buffer used.
      */
     inline int input(void *buf, int len)
-        {return aRead((char *)buf, len);};
+        {return aRead((char *)buf, len);}
+
 public:
     /**
      * Derived setTimer to notify the service thread pool of changes
@@ -847,7 +846,7 @@ public:
      * @return count of active ports.
      */
     inline int getCount(void)
-        {return count;};
+        {return count;}
 };
 
 #endif
@@ -856,16 +855,10 @@ public:
 class __EXPORT SerException : public IOException
 {
 public:
-    SerException(const String &str) : IOException(str) {};
+    SerException(const String &str) : IOException(str) {}
 };
 #endif
 
 } // namespace ost
 
 #endif
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */

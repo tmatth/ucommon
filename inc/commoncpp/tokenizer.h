@@ -162,8 +162,7 @@ public:
          * assignment operator.
          */
         // everything, but not responsible for the allocated token.
-        iterator &operator = (const iterator &i)
-        {
+        iterator &operator=(const iterator &i) {
             myTok = i.myTok;
             start = i.start; endp = i.endp; tokEnd = i.tokEnd;
             if ( token )
@@ -175,7 +174,7 @@ public:
         /**
          * shifts this iterator to the next token in the string.
          */
-        iterator &operator ++ () THROWS (NoSuchElementException);
+        iterator &operator++() THROWS (NoSuchElementException);
 
         /**
          * returns the immutable string this iterator
@@ -185,7 +184,7 @@ public:
          * invalidated for each iteration. If you need the token,
          * copy it (e.g. with strdup());
          */
-        const char*  operator *  () THROWS (NoSuchElementException);
+        const char*  operator*() THROWS (NoSuchElementException);
 
         /**
          * returns the next delimiter after the current token or
@@ -291,8 +290,7 @@ public:
      * returns a begin iterator with an alternate set of
      * delimiters.
      */
-    iterator begin(const char *d)
-    {
+    iterator begin(const char *d) {
         delim = d;
         return iterator(*this);
     }
@@ -308,9 +306,3 @@ public:
 
 #endif
 
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */

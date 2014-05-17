@@ -142,7 +142,7 @@ protected:
      * @return true if end of document.
      */
     bool end(void)
-        {return state == END;};
+        {return state == END;}
 };
 
 } // namespace ucommon

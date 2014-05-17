@@ -149,7 +149,7 @@ public:
     static int remapError(void);
 #else
     inline static int remapError(void)
-        {return errno;};
+        {return errno;}
 #endif
 
     /**
@@ -219,7 +219,7 @@ public:
      * @return low level file handle.
      */
     inline fd_t operator*() const
-        {return fd;};
+        {return fd;}
 
     /**
      * Get the descriptor from the object by casting reference.
@@ -272,7 +272,7 @@ public:
      * @return native os descriptor.
      */
     inline fd_t handle(void) const
-        {return fd;};
+        {return fd;}
 
     /**
      * Set with external descriptor.  Closes existing file if open.
@@ -481,7 +481,7 @@ public:
      * @param descriptor to assign.
      */
     inline void assign(fd_t descriptor)
-        {close(); fd = descriptor;};
+        {close(); fd = descriptor;}
 
     /**
      * Assign a descriptor directly.
@@ -489,7 +489,7 @@ public:
      * @param descriptor to assign.
      */
     inline static void assign(fsys& object, fd_t descriptor)
-        {object.close(); object.fd = descriptor;};
+        {object.close(); object.fd = descriptor;}
 
     /**
      * Open a file descriptor directly.
@@ -785,14 +785,14 @@ public:
      * @return true if open.
      */
     inline operator bool() const
-        {return ptr != NULL;};
+        {return ptr != NULL;}
 
     /**
      * Test if file descriptor is closed.
      * @return true if closed.
      */
     inline bool operator!() const
-        {return ptr == NULL;};
+        {return ptr == NULL;}
 };
 
 /**

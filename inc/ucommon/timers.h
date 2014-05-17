@@ -145,7 +145,7 @@ public:
      * @return 0 if expired or milliseconds still waiting.
      */
     inline timeout_t operator*() const
-        {return get();};
+        {return get();}
 
     /**
      * Check if timer has expired.
@@ -342,7 +342,7 @@ public:
          * @return milliseconds until timer expires.
          */
         inline timeout_t get(void) const
-            {return Timer::get();};
+            {return Timer::get();}
 
         /**
          * Notify timer queue that the timer has been updated.
@@ -354,7 +354,7 @@ public:
          * @return timer queue or NULL if not attached.
          */
         inline TimerQueue *list(void)
-            {return static_cast<TimerQueue*>(Root);};
+            {return static_cast<TimerQueue*>(Root);}
     };
 
 protected:

@@ -111,7 +111,7 @@ public:
 class __EXPORT ThrException : public Exception
 {
 public:
-    inline ThrException(const String &what_arg) : Exception(what_arg) {};
+    inline ThrException(const String &what_arg) : Exception(what_arg) {}
 };
 
 /**
@@ -123,13 +123,13 @@ public:
 class __EXPORT SyncException : public ThrException
 {
 public:
-    inline SyncException(const String &what_arg) : ThrException(what_arg) {};
+    inline SyncException(const String &what_arg) : ThrException(what_arg) {}
 };
 
 class __EXPORT InterruptException : public ThrException
 {
 public:
-    inline InterruptException() : ThrException("interrupted") {};
+    inline InterruptException() : ThrException("interrupted") {}
 };
 
 } // namespace ost

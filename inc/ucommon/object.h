@@ -91,21 +91,21 @@ public:
      * @return true if referenced by more than one object.
      */
     inline bool is_copied(void)
-        {return count > 1;};
+        {return count > 1;}
 
     /**
      * Test if the object has been referenced (retained) by anyone yet.
      * @return true if retained.
      */
     inline bool is_retained(void)
-        {return count > 0;};
+        {return count > 0;}
 
     /**
      * Return the number of active references (retentions) to our object.
      * @return number of references to our object.
      */
     inline unsigned copied(void)
-        {return count;};
+        {return count;}
 
     /**
      * Increase reference count when retained.
@@ -274,7 +274,7 @@ public:
      * Generate a sparse typed array of specified size.
      * @param size of array to create.
      */
-    inline sarray(unsigned size) : SparseObjects(size) {};
+    inline sarray(unsigned size) : SparseObjects(size) {}
 
     /**
      * Get typed member of array.  If the object does not exist, it is
@@ -292,14 +292,14 @@ public:
      * @return pointer to typed object.
      */
     inline T& operator[](unsigned offset)
-        {return get(offset);};
+        {return get(offset);}
 
     inline const T* at(unsigned offset)
         {return static_cast<const T&>(SparseObjects::get(offset));}
 
 private:
     __LOCAL ObjectProtocol *create(void)
-        {return new T;};
+        {return new T;}
 };
 
 /**
@@ -320,7 +320,7 @@ protected:
      * @param object to assign our value from.
      */
     inline void set(const T& object)
-        {value = object;};
+        {value = object;}
 
 public:
     T value;    /**< Embedded data value */
@@ -328,45 +328,45 @@ public:
     /**
      * Construct composite value object.
      */
-    inline object_value() : O() {};
+    inline object_value() : O() {}
 
     /**
      * Construct composite value object and assign from existing data value.
      * @param existing typed value to assign.
      */
     inline object_value(T& existing) : O()
-        {value = existing;};
+        {value = existing;}
 
     /**
      * Pointer reference to embedded data value.
      * @return embedded value.
      */
     inline T& operator*()
-        {return value;};
+        {return value;}
 
     /**
      * Assign embedded data value.
      * @param data value to assign.
      */
     inline void operator=(const T& data)
-        {value = data;};
+        {value = data;}
 
     /**
      * Retrieve data value by casting reference.
      * @return embedded value.
      */
     inline operator T&()
-        {return value;};
+        {return value;}
 
     inline T& operator()()
-        {return value;};
+        {return value;}
 
     /**
      * Set data value by expression reference.
      * @param data value to assign.
      */
     inline void operator()(T& data)
-        {value = data;};
+        {value = data;}
 };
 
 /**
@@ -388,74 +388,74 @@ public:
     /**
      * Create a pointer with no reference.
      */
-    inline object_pointer() : P() {};
+    inline object_pointer() : P() {}
 
     /**
      * Create a pointer with a reference to a heap object.
      * @param object we are referencing.
      */
-    inline object_pointer(T* object) : P(object) {};
+    inline object_pointer(T* object) : P(object) {}
 
     /**
      * Reference object we are pointing to through pointer indirection.
      * @return pointer to object we are pointing to.
      */
     inline T* operator*() const
-        {return static_cast<T*>(P::object);};
+        {return static_cast<T*>(P::object);}
 
     /**
      * Reference object we are pointing to through function reference.
      * @return object we are pointing to.
      */
     inline T& operator()() const
-        {return *(static_cast<T*>(P::object));};
+        {return *(static_cast<T*>(P::object));}
 
     /**
      * Reference member of object we are pointing to.
      * @return reference to member of pointed object.
      */
     inline T* operator->() const
-        {return static_cast<T*>(P::object);};
+        {return static_cast<T*>(P::object);}
 
     /**
      * Get pointer to object.
      * @return pointer or NULL if we are not referencing an object.
      */
     inline T* get(void) const
-        {return static_cast<T*>(P::object);};
+        {return static_cast<T*>(P::object);}
 
     /**
      * Iterate our pointer if we reference an array on the heap.
      * @return next object in array.
      */
     inline T* operator++()
-        {P::operator++(); return get();};
+        {P::operator++(); return get();}
 
     /**
      * Iterate our pointer if we reference an array on the heap.
      * @return previous object in array.
      */
     inline void operator--()
-        {P::operator--(); return get();};
+        {P::operator--(); return get();}
 
     /**
      * Perform assignment operator to existing object.
      * @param typed object to assign.
      */
     inline void operator=(T *typed)
-        {P::operator=((ObjectProtocol *)typed);};
+        {P::operator=((ObjectProtocol *)typed);}
 
     /**
      * See if pointer is set.
      */
     inline operator bool()
-        {return P::object != NULL;};
+        {return P::object != NULL;}
 
     /**
      * See if pointer is not set.
      */
     inline bool operator!()
-        {return P::object == NULL;};
+        {return P::object == NULL;}
 };
 
 /**

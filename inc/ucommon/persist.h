@@ -212,7 +212,7 @@ public:
      * writes a PersistObject from a reference.
      */
     inline void write(const PersistObject &object) throw(PersistException)
-        {write(&object); };
+        {write(&object);}
 
     /**
      * writes a PersistObject from a pointer.

@@ -203,14 +203,14 @@ public:
      * @return julian number.
      */
     inline operator long() const
-        {return get();};
+        {return get();}
 
     /**
      * Access julian value.
      * @return julian number of object.
      */
     inline long operator*() const
-        {return get();};
+        {return get();}
 
     /**
      * Expression operator to return an ISO date string for the current
@@ -265,7 +265,7 @@ public:
      * @return number of days difference.
      */
     inline long operator-(const Date &date)
-        {return (julian - date.julian);};
+        {return (julian - date.julian);}
 
     /**
      * Assign date from another date object.
@@ -321,14 +321,14 @@ public:
      * @return true if date is invalid.
      */
     inline bool operator!() const
-        {return !is_valid();};
+        {return !is_valid();}
 
     /**
      * Check if julian date is valid for is() expression.
      * @return true if date is valid.
      */
     inline operator bool() const
-        {return is_valid();};
+        {return is_valid();}
 };
 
 /**
@@ -470,14 +470,14 @@ public:
      * @return true if object is valid.
      */
     inline operator bool() const
-        {return is_valid();};
+        {return is_valid();}
 
     /**
      * Check if time object has valid value for ! operator.
      * @return true if object is not valid.
      */
     inline bool operator!() const
-        {return !is_valid();};
+        {return !is_valid();}
 
     /**
      * Get difference (in seconds) between two times.
@@ -505,14 +505,14 @@ public:
      * @return seconds.
      */
     inline operator long()
-        {return get();};
+        {return get();}
 
     /**
      * Get object time in seconds.
      * @return time in seconds.
      */
     inline long operator*() const
-        {return get();};
+        {return get();}
 
     /**
      * Convert to standard 24 hour time string.
@@ -801,7 +801,7 @@ public:
      * @return date as a number.
      */
     inline operator long() const
-        {return Date::get();};
+        {return Date::get();}
 
     /**
      * Set (update) the date and time with current date and time.
@@ -926,7 +926,7 @@ public:
      * @return string of datetime.
      */
     inline const char *c_str(void)
-        {return buffer;};
+        {return buffer;}
 
     /**
      * Cast to string.
@@ -934,7 +934,7 @@ public:
      * @return string of datetime.
      */
     inline operator const char *(void)
-        {return buffer;};
+        {return buffer;}
 
     /**
      * Set (update) the date and time with current date and time.

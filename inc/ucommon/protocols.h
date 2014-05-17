@@ -67,7 +67,7 @@ public:
      * @return alocated memory or NULL if not possible.
      */
     inline void *alloc(size_t size)
-        {return _alloc(size);};
+        {return _alloc(size);}
 
     /**
      * Allocate memory from the pager heap.  The size of the request must be
@@ -207,7 +207,7 @@ protected:
      * @param string for eol for getline and putline.
      */
     inline void seteol(const char *string)
-        {eol = string;};
+        {eol = string;}
 
 public:
     virtual ~CharacterProtocol();
@@ -217,7 +217,7 @@ public:
      * @return next character or EOF.
      */
     inline int getchar(void)
-        {return _getch();};
+        {return _getch();}
 
     /**
      * Put the next character.
@@ -225,7 +225,7 @@ public:
      * @return code or EOF if cannot put.
      */
     inline int putchar(int code)
-        {return _putch(code);};
+        {return _putch(code);}
 
     size_t print(const PrintProtocol& format);
 
@@ -408,14 +408,14 @@ protected:
      * @return offset of input buffer.
      */
     inline size_t input_pending(void)
-        {return bufpos;};
+        {return bufpos;}
 
     /**
      * Get current output position.  Sometimes used to help compute a
      * "trunc" operation.
      */
     inline size_t output_waiting(void)
-        {return outsize;};
+        {return outsize;}
 
 public:
     const char *endl(void)
@@ -584,7 +584,7 @@ public:
 class __EXPORT _character_operators
 {
 private:
-    inline _character_operators() {};
+    inline _character_operators() {}
 
 public:
     static CharacterProtocol& print(CharacterProtocol& p, const char *s);

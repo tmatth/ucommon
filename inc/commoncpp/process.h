@@ -241,7 +241,7 @@ public:
      * Return true if realtime scheduling.
      */
     static inline bool isRealtime(void)
-        {return rtflag;};
+        {return rtflag;}
 };
 
 /**
@@ -280,7 +280,7 @@ public:
      * Destroy the current lock and release it.
      */
     ~Lockfile()
-        {unlock();};
+        {unlock();}
 
     /**
      * Lock a system-wide name for this process.  If the lock

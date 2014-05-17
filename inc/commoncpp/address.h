@@ -94,12 +94,12 @@ public:
     /**
      * Constructor. Does not deal with any state.
      */
-    IPV4Validator() { };
+    IPV4Validator() { }
 
     /**
      * keeps compilers happy.
      */
-    virtual ~IPV4Validator() {};
+    virtual ~IPV4Validator() {}
 
     /**
      * Pure virtual application operator. Apply the validation
@@ -123,12 +123,12 @@ public:
     /**
      * Constructor. Does not deal with any state.
      */
-    IPV4MulticastValidator(){};
+    IPV4MulticastValidator(){}
 
     /**
      * Keeps compilers happy.
      */
-    virtual ~IPV4MulticastValidator(){};
+    virtual ~IPV4MulticastValidator(){}
 
     /**
      * Application operator. Apply the validation algorithm
@@ -157,7 +157,7 @@ public:
      * @return system binary coded address.
      */
     inline struct in_addr getNetwork(void) const
-        {return network;};
+        {return network;}
 
     /**
      * Get network mask associated with this cidr.
@@ -165,7 +165,7 @@ public:
      * @return system binary coded network mask.
      */
     inline struct in_addr getNetmask(void) const
-        {return netmask;};
+        {return netmask;}
 
     /**
      * Compute the broadcast address associated with this cidr.
@@ -218,10 +218,10 @@ public:
     bool isMember(const struct in_addr &inaddr) const;
 
     inline bool operator==(const struct sockaddr *a) const
-        {return isMember(a);};
+        {return isMember(a);}
 
     inline bool operator==(const struct in_addr &a) const
-        {return isMember(a);};
+        {return isMember(a);}
 };
 
 #ifdef  CCXX_IPV6
@@ -245,7 +245,7 @@ public:
      * @return system binary coded address.
      */
     inline struct in6_addr getNetwork(void) const
-        {return network;};
+        {return network;}
 
     /**
      * Get network mask associated with this cidr.
@@ -253,7 +253,7 @@ public:
      * @return system binary coded network mask.
      */
     inline struct in6_addr getNetmask(void) const
-        {return netmask;};
+        {return netmask;}
 
     /**
      * Compute the broadcast address associated with this cidr.
@@ -306,10 +306,10 @@ public:
     bool isMember(const struct in6_addr &inaddr) const;
 
     inline bool operator==(const struct sockaddr *sa) const
-        {return isMember(sa);};
+        {return isMember(sa);}
 
     inline bool operator==(const struct in6_addr &a) const
-        {return isMember(a);};
+        {return isMember(a);}
 };
 
 #endif
@@ -466,7 +466,7 @@ public:
         {return *this = (unsigned long) addr; }
 
     inline bool operator!() const
-        {return !isInetAddress();};
+        {return !isInetAddress();}
 
     /**
      * Compare two internet addresses to see if they are equal
@@ -675,12 +675,12 @@ public:
     /**
      * Constructor. Does not deal with any state.
      */
-    IPV6Validator() { };
+    IPV6Validator() { }
 
     /**
      * Keeps compilers happy.
      */
-    virtual ~IPV6Validator() {};
+    virtual ~IPV6Validator() {}
 
     /**
      * Pure virtual application operator. Apply the validation
@@ -703,12 +703,12 @@ public:
     /**
      * Constructor. Does not deal with any state.
      */
-    IPV6MulticastValidator(){};
+    IPV6MulticastValidator(){}
 
     /**
      * Keeps compilers happy...
      */
-    virtual ~IPV6MulticastValidator(){};
+    virtual ~IPV6MulticastValidator(){}
 
     /**
      * Application operator. Apply the validation algorithm
@@ -860,7 +860,7 @@ public:
     IPV6Address &operator=(const IPV6Address &rhs);
 
     inline bool operator!() const
-        {return !isInetAddress();};
+        {return !isInetAddress();}
 
     /**
      * Compare two internet addresses to see if they are equal

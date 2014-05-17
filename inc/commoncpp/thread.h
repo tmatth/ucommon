@@ -59,25 +59,25 @@ namespace ost {
 class __EXPORT Mutex : protected ucommon::RecursiveMutex
 {
 public:
-    inline Mutex() : RecursiveMutex() {};
+    inline Mutex() : RecursiveMutex() {}
 
     inline void enterMutex(void)
-        {RecursiveMutex::lock();};
+        {RecursiveMutex::lock();}
 
     inline void leaveMutex(void)
-        {RecursiveMutex::release();};
+        {RecursiveMutex::release();}
 
     inline bool tryEnterMutex(void)
-        {return RecursiveMutex::lock(0l);};
+        {return RecursiveMutex::lock(0l);}
 
     inline void enter(void)
-        {RecursiveMutex::lock();};
+        {RecursiveMutex::lock();}
 
     inline void leave(void)
-        {RecursiveMutex::release();};
+        {RecursiveMutex::release();}
 
     inline bool test(void)
-        {return RecursiveMutex::lock(0l);};
+        {return RecursiveMutex::lock(0l);}
 
 };
 
@@ -161,22 +161,22 @@ public:
 class __EXPORT ThreadLock : protected ucommon::ThreadLock
 {
 public:
-    inline ThreadLock() : ucommon::ThreadLock() {};
+    inline ThreadLock() : ucommon::ThreadLock() {}
 
     inline void readLock(void)
-        {ucommon::ThreadLock::access();};
+        {ucommon::ThreadLock::access();}
 
     inline void writeLock(void)
-        {ucommon::ThreadLock::modify();};
+        {ucommon::ThreadLock::modify();}
 
     inline void tryReadLock(void)
-        {ucommon::ThreadLock::access(0);};
+        {ucommon::ThreadLock::access(0);}
 
     inline void tryWriteLock(void)
-        {ucommon::ThreadLock::modify(0);};
+        {ucommon::ThreadLock::modify(0);}
 
     inline void unlock(void)
-        {ucommon::ThreadLock::release();};
+        {ucommon::ThreadLock::release();}
 };
 
 /**
@@ -264,7 +264,7 @@ public:
 class __EXPORT Conditional : private ucommon::Conditional
 {
 public:
-    inline Conditional() : ucommon::Conditional() {};
+    inline Conditional() : ucommon::Conditional() {}
 
     bool wait(timeout_t timeout, bool locked = false);
 
@@ -280,7 +280,7 @@ public:
 class __EXPORT Semaphore : private ucommon::Semaphore
 {
 public:
-    inline Semaphore(unsigned size = 0) : ucommon::Semaphore(size) {};
+    inline Semaphore(unsigned size = 0) : ucommon::Semaphore(size) {}
 
     inline bool wait(timeout_t timeout)
         {return ucommon::Semaphore::wait(timeout);}
@@ -333,7 +333,7 @@ public:
 class __EXPORT Event : private ucommon::TimedEvent
 {
 public:
-    inline Event() : ucommon::TimedEvent() {};
+    inline Event() : ucommon::TimedEvent() {}
 
     inline void wait(void)
         {ucommon::TimedEvent::wait();}
@@ -378,7 +378,7 @@ public:
     virtual ~Thread();
 
     inline void map(void)
-        {JoinableThread::map();};
+        {JoinableThread::map();}
 
     virtual void initial(void);
     virtual void notify(Thread *thread);
@@ -393,19 +393,19 @@ public:
     void exit(void);
 
     inline void join(void)
-        {JoinableThread::join();};
+        {JoinableThread::join();}
 
     inline void sync(void)
-        {Thread::exit();};
+        {Thread::exit();}
 
     static inline Thread *get(void)
-        {return (Thread *)JoinableThread::get();};
+        {return (Thread *)JoinableThread::get();}
 
     inline static void yield(void)
-        {ucommon::Thread::yield();};
+        {ucommon::Thread::yield();}
 
     inline static void sleep(timeout_t msec = TIMEOUT_INF)
-        {ucommon::Thread::sleep(msec);};
+        {ucommon::Thread::sleep(msec);}
 
     bool isRunning(void);
 
@@ -429,7 +429,7 @@ public:
      * Get the thread id.
      */
     inline pthread_t getId(void)
-        {return tid;};
+        {return tid;}
 };
 
 /**
@@ -466,19 +466,19 @@ class __EXPORT SysTime
 public:
     static time_t getTime(time_t *tloc = NULL);
     static time_t time(time_t *tloc)
-        { return getTime(tloc); };
+        {return getTime(tloc);}
 
     static int getTimeOfDay(struct timeval *tp);
     static int gettimeofday(struct timeval *tp, struct timezone *)
-        { return getTimeOfDay(tp); };
+        {return getTimeOfDay(tp);}
 
     static struct tm *getLocalTime(const time_t *clock, struct tm *result);
     static struct tm *locatime(const time_t *clock, struct tm *result)
-        { return getLocalTime(clock, result); };
+        {return getLocalTime(clock, result);}
 
     static struct tm *getGMTTime(const time_t *clock, struct tm *result);
     static struct tm *gmtime(const time_t *clock, struct tm *result)
-        { return getGMTTime(clock, result);};
+        {return getGMTTime(clock, result);}
 };
 
 /**
@@ -677,7 +677,7 @@ public:
      * @return size of buffer.
      */
     inline size_t getSize(void)
-        {return _size;};
+        {return _size;}
 
     /**
      * Return the current capacity in use for the buffer.  Free space
@@ -686,7 +686,7 @@ public:
      * @see #getSize
      */
     inline size_t getUsed(void)
-        {return _used;};
+        {return _used;}
 
     /**
      * Let one or more threads wait for an object to become available

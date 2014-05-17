@@ -61,17 +61,17 @@ protected:
         {put(buf);}
 
 public:
-    inline Date(time_t value) : ucommon::Date(value) {};
+    inline Date(time_t value) : ucommon::Date(value) {}
 
-    inline Date(struct tm *object) : ucommon::Date(object) {};
+    inline Date(struct tm *object) : ucommon::Date(object) {}
 
-    inline Date(const char *ptr, size_t size = 0) : ucommon::Date(ptr, size) {};
+    inline Date(const char *ptr, size_t size = 0) : ucommon::Date(ptr, size) {}
 
-    inline Date(int y, unsigned m, unsigned d) : ucommon::Date(y, m, d) {};
+    inline Date(int y, unsigned m, unsigned d) : ucommon::Date(y, m, d) {}
 
-    inline Date(const Date& object) : ucommon::Date(object) {};
+    inline Date(const Date& object) : ucommon::Date(object) {}
 
-    inline Date() : ucommon::Date() {};
+    inline Date() : ucommon::Date() {}
 
     inline int getYear(void) const
         {return year();}
@@ -108,15 +108,15 @@ protected:
         {put(buf);}
 
 public:
-    inline Time(time_t value) : ucommon::Time(value) {};
+    inline Time(time_t value) : ucommon::Time(value) {}
 
-    inline Time(tm_t *object) : ucommon::Time(object) {};
+    inline Time(tm_t *object) : ucommon::Time(object) {}
 
-    inline Time(const char *ptr, size_t size) : ucommon::Time(ptr, size) {};
+    inline Time(const char *ptr, size_t size) : ucommon::Time(ptr, size) {}
 
-    inline Time(int h, int m, int s) : ucommon::Time(h, m, s) {};
+    inline Time(int h, int m, int s) : ucommon::Time(h, m, s) {}
 
-    inline Time() : ucommon::Time() {};
+    inline Time() : ucommon::Time() {}
 
     inline int getHour(void) const
         {return hour();}
@@ -138,21 +138,21 @@ public:
 class __EXPORT DateTime : public ucommon::DateTime
 {
 public:
-    inline DateTime(time_t time) : ucommon::DateTime(time) {};
+    inline DateTime(time_t time) : ucommon::DateTime(time) {}
 
-    inline DateTime(struct tm *dt) : ucommon::DateTime(dt) {};
+    inline DateTime(struct tm *dt) : ucommon::DateTime(dt) {}
 
 
     inline DateTime(int year, unsigned month, unsigned day,
         int hour = 0, int minute = 0, int second = 0) :
-            ucommon::DateTime(year, month, day, hour, minute, second) {};
+            ucommon::DateTime(year, month, day, hour, minute, second) {}
 
     inline DateTime(const char *ptr, size_t size) :
-        ucommon::DateTime(ptr, size) {};
+        ucommon::DateTime(ptr, size) {}
 
-    inline DateTime(const DateTime& obj) : ucommon::DateTime(obj) {};
+    inline DateTime(const DateTime& obj) : ucommon::DateTime(obj) {}
 
-    inline DateTime() : ucommon::DateTime() {};
+    inline DateTime() : ucommon::DateTime() {}
 
     inline int getYear(void) const
         {return year();}
