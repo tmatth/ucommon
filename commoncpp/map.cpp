@@ -42,7 +42,7 @@
 #include <commoncpp/thread.h>
 #include <commoncpp/object.h>
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 MapIndex& MapIndex::operator=(MapObject *theObject)
 {
@@ -238,3 +238,5 @@ void MapObject::detach(void)
     table->leaveMutex();
     table = NULL;
 }
+
+} // namespace ost

@@ -21,6 +21,8 @@
 #include <openssl/fips.h>
 #endif
 
+namespace ucommon {
+
 static mutex_t *private_locks = NULL;
 
 extern "C" {
@@ -203,3 +205,4 @@ __context::~__context()
         SSL_CTX_free(ctx);
 }
 
+} // namespace ucommon

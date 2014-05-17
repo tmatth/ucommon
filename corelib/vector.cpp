@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 const vectorsize_t Vector::npos = (vectorsize_t)(-1);
 
@@ -673,4 +673,4 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
     return obj;
 }
 
-
+} // namespace ucommon

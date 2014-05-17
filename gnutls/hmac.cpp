@@ -19,7 +19,9 @@
 
 // for older/broken versions of gnutls_hmac_init headers
 
-class multicode
+namespace ucommon {
+
+class __LOCAL __multicode
 {
 public:
     int code;
@@ -79,7 +81,7 @@ void HMAC::set(const char *digest, const char *key, size_t len)
 
     hmacid = __context::map_hmac(digest);
 
-    multicode id;
+    __multicode id;
     id.code = hmacid;
 
     if(hmacid)
@@ -128,3 +130,5 @@ buffer[count]);
     }
     return buffer;
 }
+
+} // namespace ucommon

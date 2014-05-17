@@ -47,7 +47,7 @@
 #define MAX_SEM_VALUE 1000000
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
 extern int _posix_clocking;
@@ -937,3 +937,4 @@ void ThreadQueue::stopQueue(void)
 {
 }
 
+} // namespace ost

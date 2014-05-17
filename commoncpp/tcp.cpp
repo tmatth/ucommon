@@ -93,8 +93,10 @@ typedef int socklen_t;
 #define _IORET64
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
-using namespace std;
+namespace ost {
+using std::streambuf;
+using std::iostream;
+using std::ios;
 
 void TCPSocket::setSegmentSize(unsigned mss)
 {
@@ -1291,4 +1293,4 @@ void TCPSession::initial(void)
         exit();
 }
 
-
+} // namespace ost

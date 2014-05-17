@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 SSLBuffer::SSLBuffer(secure::client_t scontext) :
 TCPBuffer()
 {
@@ -162,3 +164,4 @@ bool SSLBuffer::_flush(void)
     return false;
 }
 
+} // namespace ucommon

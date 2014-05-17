@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 void Digest::release(void)
 {
     if(context) {
@@ -157,3 +159,4 @@ buffer[count]);
     return buffer;
 }
 
+} // namespace ucommon

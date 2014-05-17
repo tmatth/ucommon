@@ -21,6 +21,8 @@
 #include <fcntl.h>
 #endif
 
+namespace ucommon {
+
 void Random::seed(void)
 {
     time_t now;
@@ -106,3 +108,4 @@ bool Random::status(void)
 #endif
 }
 
+} // namespace ucommon

@@ -107,8 +107,8 @@ public:
         size_t count;
 
     public:
-        regex(const char *pattern, size_t slots = 1);
-        regex(size_t slots = 1);
+        regex(const char *pattern, size_t size = 1);
+        regex(size_t size = 1);
         ~regex();
 
         size_t offset(unsigned member);

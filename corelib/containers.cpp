@@ -24,7 +24,7 @@
 #include <ucommon/containers.h>
 #include <string.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 LinkedAllocator::LinkedAllocator() : Conditional()
 {
@@ -736,4 +736,4 @@ size_t Stack::count(void)
     return scount;
 }
 
-
+} // namespace ucommon

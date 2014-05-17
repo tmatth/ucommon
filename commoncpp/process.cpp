@@ -82,7 +82,7 @@
 #include <stdio.h>
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 bool Process::rtflag = false;
 
@@ -871,4 +871,4 @@ bool Lockfile::isLocked(void)
 
 #endif
 
-
+} // namespace ost

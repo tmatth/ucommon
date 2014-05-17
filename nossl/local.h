@@ -33,5 +33,3 @@ extern HCRYPTPROV __handle;
 #endif
 }
 
-using namespace ucommon;
-

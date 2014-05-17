@@ -19,6 +19,8 @@
 
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 
+namespace ucommon {
+
 sstream::sstream(secure::client_t context) :
 tcpstream()
 {
@@ -79,5 +81,7 @@ int sstream::sync()
 {
     return tcpstream::sync();
 }
+
+} // namespace ucommon
 
 #endif

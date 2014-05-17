@@ -24,6 +24,8 @@ extern "C" {
     }
 }
 
+namespace ucommon {
+
 gnutls_priority_t __context::priority_cache;
 
 bool secure::fips(void)
@@ -144,4 +146,4 @@ gnutls_session_t __context::session(__context *ctx)
     return ssl;
 }
 
-
+} // namespace ucommon

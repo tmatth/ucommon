@@ -92,7 +92,7 @@ typedef int socklen_t;
 #define _IORET64
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 #if defined(_MSWINDOWS_) && !defined(__MINGW32__)
 socket_t Socket::dupSocket(socket_t so, enum Socket::State state)
@@ -1174,3 +1174,4 @@ bool Socket::isActive(void) const
     return (state != INITIAL) ? true : false;
 }
 
+} // namespace ost

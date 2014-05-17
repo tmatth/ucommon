@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 Digest::Digest()
 {
     hashtype = NULL;
@@ -442,3 +444,4 @@ String Random::uuid(void)
     return String(buf);
 }
 
+} // namespace ucommon

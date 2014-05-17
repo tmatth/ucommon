@@ -42,7 +42,7 @@
 #include <commoncpp/thread.h>
 #include <commoncpp/object.h>
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 LinkedSingle::~LinkedSingle() {}
 
@@ -200,3 +200,4 @@ LinkedDouble &LinkedDouble::operator--()
     return *this;
 }
 
+} // namespace ost

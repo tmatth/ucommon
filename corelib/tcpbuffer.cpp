@@ -24,7 +24,7 @@
 #include <ucommon/string.h>
 #include <ucommon/shell.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 TCPBuffer::TCPBuffer() :
 BufferProtocol()
@@ -188,3 +188,5 @@ bool TCPBuffer::_pending(void)
 
     return Socket::wait(so, 0);
 }
+
+} // namespace ucommon

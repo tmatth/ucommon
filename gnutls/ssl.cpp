@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t scontext, size_t size) :
 TCPBuffer(tcp, size)
 {
@@ -128,3 +130,4 @@ size_t SSLBuffer::_pull(char *address, size_t size)
     return (size_t)result;
 }
 
+} // namespace ucommon

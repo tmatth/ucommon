@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 bool HMAC::has(const char *id)
 {
     return false;
@@ -48,3 +50,4 @@ const unsigned char *HMAC::get(void)
     return NULL;
 }
 
+} // namespace ucommon

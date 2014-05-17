@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 bool Digest::has(const char *id)
 {
     if(eq_case(id, "md5"))
@@ -186,3 +188,4 @@ const unsigned char *Digest::get(void)
     return buffer;
 }
 
+} // namespace ucommon

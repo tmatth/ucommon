@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 counter::counter()
 {
@@ -86,4 +86,4 @@ bool toggle::get(void)
     return v;
 }
 
-
+} // namespace ucommon

@@ -153,7 +153,7 @@ struct addrinfo {
 #define _listen_(so, count) ::listen(so, count)
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 typedef unsigned char   bit_t;
 
@@ -3443,12 +3443,12 @@ String str(Socket& so, strsize_t size)
     return s;
 }
 
-struct sockaddr *ucommon::_getaddrinfo(struct addrinfo *list)
+struct sockaddr *_getaddrinfo(struct addrinfo *list)
 {
     return list->ai_addr;
 }
 
-struct addrinfo *ucommon::_nextaddrinfo(struct addrinfo *list)
+struct addrinfo *_nextaddrinfo(struct addrinfo *list)
 {
     if(!list)
         return NULL;
@@ -3456,7 +3456,7 @@ struct addrinfo *ucommon::_nextaddrinfo(struct addrinfo *list)
     return list->ai_next;
 }
 
-socket_t ucommon::_getaddrsock(struct addrinfo *list)
+socket_t _getaddrsock(struct addrinfo *list)
 {
     if(!list)
         return INVALID_SOCKET;
@@ -3464,3 +3464,4 @@ socket_t ucommon::_getaddrsock(struct addrinfo *list)
     return ::socket(list->ai_family, list->ai_socktype, list->ai_protocol);
 }
 
+} // namespace ucommon

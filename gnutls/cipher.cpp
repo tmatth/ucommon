@@ -20,6 +20,8 @@
 static const unsigned char *_salt = NULL;
 static unsigned _rounds = 1;
 
+namespace ucommon {
+
 int __context::map_cipher(const char *cipher)
 {
     char algoname[64];
@@ -334,4 +336,4 @@ size_t Cipher::pad(const unsigned char *data, size_t size)
     return size;
 }
 
-
+} // namespace ucommon

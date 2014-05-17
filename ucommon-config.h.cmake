@@ -53,7 +53,8 @@
 #cmakedefine HAVE_LOCALTIME_R 1
 #cmakedefine HAVE_STRERROR_R 1
 #cmakedefine HAVE_MACH_CLOCK_H 1
-#cmakedefine HAVE_MACH_O_DYLD_H 1
+#cmakedefine HAVE_MACH_O_DYLD_H 1} // namespace
+
 #cmakedefine HAVE_MEMORY_H 1
 #cmakedefine HAVE_NANOSLEEP 1
 #cmakedefine HAVE_POLL_H 1

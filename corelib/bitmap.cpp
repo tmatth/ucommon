@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 bitmap::bitmap(size_t count)
 {
@@ -160,3 +160,5 @@ void bitmap::clear(void)
         }
     }
 }
+
+} // namespace ucommon

@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 bool Digest::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
@@ -131,3 +133,4 @@ const unsigned char *Digest::get(void)
     return buffer;
 }
 
+} // namespace ucommon

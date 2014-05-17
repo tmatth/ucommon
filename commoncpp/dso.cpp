@@ -45,12 +45,6 @@
 #include <commoncpp/file.h>
 #include <commoncpp/process.h>
 
-using namespace COMMONCPP_NAMESPACE;
-
-DSO *DSO::first = NULL;
-DSO *DSO::last = NULL;
-Mutex   DSO::mutex;
-
 #if defined(HAVE_DLFCN_H)
 
 extern "C" {
@@ -75,6 +69,12 @@ extern "C" {
 #ifdef  _MSWINDOWS_
 #define hImage ((HMODULE)(image))
 #endif
+
+namespace ost {
+
+DSO *DSO::first = NULL;
+DSO *DSO::last = NULL;
+Mutex   DSO::mutex;
 
 void DSO::dynunload(void)
 {
@@ -329,3 +329,4 @@ void DSO::setDebug(void)
 
 #endif
 
+} // namespace ost

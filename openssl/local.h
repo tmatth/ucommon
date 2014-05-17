@@ -39,5 +39,4 @@ public:
 
 } // namespace ucommon
 
-using namespace ucommon;
 

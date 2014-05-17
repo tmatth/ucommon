@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 bool HMAC::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
@@ -88,3 +90,5 @@ buffer[count]);
     }
     return buffer;
 }
+
+} // namespace ucommon

@@ -35,7 +35,7 @@ static int realtime_policy = SCHED_FIFO;
 
 static unsigned max_sharing = 0;
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
 extern int _posix_clocking;
@@ -2275,4 +2275,4 @@ pthread_t Thread::self(void)
 }
 #endif
 
-
+} // namespace ucommon

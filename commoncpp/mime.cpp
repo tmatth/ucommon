@@ -44,8 +44,9 @@
 #include <commoncpp/exception.h>
 #include <commoncpp/mime.h>
 
-NAMESPACE_COMMONCPP
-using namespace std;
+namespace ost {
+using std::ostream;
+using std::endl;
 
 MIMEMultipart::MIMEMultipart(const char *mt)
 {
@@ -63,7 +64,7 @@ MIMEMultipart::MIMEMultipart(const char *mt)
 MIMEMultipart::~MIMEMultipart()
 {}
 
-void MIMEMultipart::head(std::ostream *out)
+void MIMEMultipart::head(ostream *out)
 {
     char **list = header;
 
@@ -73,7 +74,7 @@ void MIMEMultipart::head(std::ostream *out)
     out->flush();
 }
 
-void MIMEMultipart::body(std::ostream *out)
+void MIMEMultipart::body(ostream *out)
 {
     MIMEItemPart *item = first;
 
@@ -110,7 +111,7 @@ MIMEMultipart("form-data")
 MIMEMultipartForm::~MIMEMultipartForm()
 {}
 
-void MIMEItemPart::head(std::ostream *out)
+void MIMEItemPart::head(ostream *out)
 {
     *out << "Content-Type: " << ctype << "\r" << endl;
 }
@@ -125,21 +126,14 @@ MIMEItemPart(m, "")
 MIMEFormData::~MIMEFormData()
 {}
 
-void MIMEFormData::head(std::ostream *out)
+void MIMEFormData::head(ostream *out)
 {
     *out << "Content-Disposition: form-data; name=\"" << name << "\"\r\n";
 }
 
-void MIMEFormData::body(std::ostream *out)
+void MIMEFormData::body(ostream *out)
 {
     *out << content << "\r\n";
 }
 
-END_NAMESPACE
-
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */
+} // namespace ost

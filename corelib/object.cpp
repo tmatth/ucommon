@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 CountedObject::CountedObject()
 {
@@ -177,4 +177,5 @@ ObjectProtocol *SparseObjects::get(unsigned pos)
     return vector[pos];
 }
 
+} // namespace ucommon
 

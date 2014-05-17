@@ -29,8 +29,7 @@
 #include <unistd.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
-
+namespace ucommon {
 #ifdef __BORLANDC__
 using std::time_t;
 using std::tm;
@@ -1115,3 +1114,4 @@ extern "C" {
     } 
 }
 
+} // namespace ucommon

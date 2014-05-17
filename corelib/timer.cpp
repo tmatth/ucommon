@@ -20,7 +20,7 @@
 #include <ucommon/timers.h>
 #include <ucommon/thread.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
 extern int _posix_clocking;
@@ -500,3 +500,5 @@ void TimerQueue::operator-=(event &te)
     if(te.list() == this)
         te.detach();
 }
+
+} // namespace ucommon

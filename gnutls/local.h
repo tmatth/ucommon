@@ -59,4 +59,3 @@ typedef __context *SSL_CTX;
 
 } // namespace ucommon
 
-using namespace ucommon;

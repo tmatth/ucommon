@@ -43,8 +43,7 @@
 #include <commoncpp/exception.h>
 #include <commoncpp/misc.h>
 
-NAMESPACE_COMMONCPP
-using namespace std;
+namespace ost {
 
 static unsigned getIndex(const char *id)
 {
@@ -124,7 +123,7 @@ void *SharedMemPager::alloc(size_t size)
     return mem;
 }
 
-END_NAMESPACE
+} // namespace ost
 
 /** EMACS **
  * Local variables:

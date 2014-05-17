@@ -29,7 +29,7 @@
 #include <string.h>
 #include <stdio.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 extern "C" {
 
@@ -1529,4 +1529,4 @@ int charmem::_putch(int code)
     return code;
 }
 
-
+} // namespace ucommon

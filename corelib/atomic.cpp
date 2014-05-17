@@ -20,7 +20,7 @@
 #include <ucommon/atomic.h>
 #include <ucommon/thread.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 atomic::counter::counter(long init)
 {
@@ -132,3 +132,5 @@ const bool atomic::simulated = true;
 #else
 const bool atomic::simulated = false;
 #endif
+
+} // namespace ucommon

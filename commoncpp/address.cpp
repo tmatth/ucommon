@@ -59,7 +59,8 @@
 #define __BYTE_ORDER    __LITTLE_ENDIAN
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
+using std::ostream;
 
 #if __BYTE_ORDER == __BIG_ENDIAN
 enum {
@@ -903,16 +904,11 @@ IPV6Address(address,&validator)
 
 #endif
 
-NAMESPACE_COMMONCPP
-using namespace std;
-
 ostream& operator<<(ostream &os, const IPV4Address &ia)
 {
     os << inet_ntoa(getaddress(ia));
     return os;
 }
-
-END_NAMESPACE
 
 typedef unsigned char   bit_t;
 
@@ -1209,3 +1205,4 @@ void IPV6Cidr::set(const char *cp)
 
 #endif
 
+} // namespace ost

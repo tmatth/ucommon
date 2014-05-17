@@ -21,7 +21,6 @@ namespace ucommon {
 #ifdef  _MSWINDOWS_
 HCRYPTPROV __handle = (HCRYPTPROV)NULL;
 #endif
-}
 
 secure::~secure()
 {
@@ -68,3 +67,4 @@ void secure::cipher(secure *context, const char *ciphers)
 {
 }
 
+} // namespace ucommon
