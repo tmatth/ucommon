@@ -49,7 +49,7 @@ bool Random::seed(const unsigned char *buf, size_t size)
 size_t Random::key(unsigned char *buf, size_t size)
 {
 #ifdef  _MSWINDOWS_
-    if((_handle != (HCRYPTPROV)NULL) && CryptGenRandom(_handle, size, buf))
+    if((__handle != (HCRYPTPROV)NULL) && CryptGenRandom(__handle, size, buf))
         return size;
     return 0;
 #else

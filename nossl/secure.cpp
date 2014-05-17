@@ -17,11 +17,11 @@
 
 #include "local.h"
 
+namespace ucommon {
 #ifdef  _MSWINDOWS_
-namespace __secure__
-HCRYPTPROV _handle = (HCRYPTPROV)NULL;
-}
+HCRYPTPROV __handle = (HCRYPTPROV)NULL;
 #endif
+}
 
 secure::~secure()
 {
@@ -38,17 +38,17 @@ bool secure::init(void)
     Socket::init();
 
 #ifdef  _MSWINDOWS_
-    if(_handle != (HCRYPTPROV)NULL)
+    if(__handle != (HCRYPTPROV)NULL)
         return false;
 
-    if(CryptAcquireContext(&_handle, NULL, NULL, PROV_RSA_FULL, 0))
+    if(CryptAcquireContext(&__handle, NULL, NULL, PROV_RSA_FULL, 0))
         return false;
     if(GetLastError() == (DWORD)NTE_BAD_KEYSET) {
-        if(CryptAcquireContext(&_handle, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
+        if(CryptAcquireContext(&__handle, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
             return false;
     }
 
-    _handle = (HCRYPTPROV)NULL;
+    __handle = (HCRYPTPROV)NULL;
 #endif
 
     return false;

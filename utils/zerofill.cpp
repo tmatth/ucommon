@@ -17,7 +17,7 @@
 
 #include <ucommon/secure.h>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);

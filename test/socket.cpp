@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
 static Socket::address testing("0.0.0.0");
 static Socket::address localhost("127.0.0.1", 4444);

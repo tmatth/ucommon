@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
 #define STR "this is a test of some text we wish to post"
 

@@ -27,18 +27,11 @@
 #include <wincrypt.h>
 #endif
 
-#define NAMESPACE_LOCAL namespace __secure__ {
-#define LOCAL_NAMESPACE __secure__
-
-NAMESPACE_LOCAL
-using namespace UCOMMON_NAMESPACE;
-
+namespace ucommon {
 #ifdef  _MSWINDOWS_
-extern HCRYPTPROV _handle;
+extern HCRYPTPROV __handle;
 #endif
+}
 
-END_NAMESPACE
-
-using namespace UCOMMON_NAMESPACE;
-using namespace LOCAL_NAMESPACE;
+using namespace ucommon;
 
