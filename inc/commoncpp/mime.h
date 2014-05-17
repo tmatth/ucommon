@@ -105,7 +105,7 @@ public:
      * @return array of headers.
      */
     char **getHeaders(void)
-        {return header;};
+        {return header;}
 };
 
 /**
@@ -214,9 +214,3 @@ public:
 } // namespace ost
 
 #endif
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */

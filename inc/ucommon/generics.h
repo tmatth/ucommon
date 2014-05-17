@@ -132,16 +132,16 @@ public:
         {release();}
 
     inline T& operator*() const
-        {return *object;};
+        {return *object;}
 
     inline T* operator->() const
-        {return object;};
+        {return object;}
 
     inline bool operator!() const
-        {return (counter == NULL);};
+        {return (counter == NULL);}
 
     inline operator bool() const
-        {return counter != NULL;};
+        {return counter != NULL;}
 };
 
 /**
@@ -229,19 +229,19 @@ public:
         {release();}
 
     inline T* operator*() const
-        {return array;};
+        {return array;}
 
     inline T& operator[](size_t offset) const
-        {return array[offset];};
+        {return array[offset];}
 
     inline T* operator()(size_t offset) const
-        {return &array[offset];};
+        {return &array[offset];}
 
     inline bool operator!() const
-        {return (counter == NULL);};
+        {return (counter == NULL);}
 
     inline operator bool() const
-        {return counter != NULL;};
+        {return counter != NULL;}
 };
 
 /**
@@ -265,19 +265,19 @@ public:
      * Construct a temporary object, create our stack frame reference.
      */
     inline temporary()
-        {object = NULL;};
+        {object = NULL;}
 
     /**
      * Disable copy constructor.
      */
     temporary(const temporary<T>&)
-        {::abort();};
+        {::abort();}
 
     /**
      * Construct an assigned pointer.
      */
     inline temporary(T *ptr)
-        {object = ptr;};
+        {object = ptr;}
 
     /**
      * Assign a temporary object.  This adds a pointer to an existing
@@ -309,20 +309,20 @@ public:
      * @return reference to heap resident object.
      */
     inline T& operator*() const
-        {return *object;};
+        {return *object;}
 
     /**
      * Access members of our heap object through our temporary.
      * @return member reference of heap object.
      */
     inline T* operator->() const
-        {return object;};
+        {return object;}
 
     inline operator bool() const
-        {return object != NULL;};
+        {return object != NULL;}
 
     inline bool operator!() const
-        {return object == NULL;};
+        {return object == NULL;}
 
     inline ~temporary() {
         if(object)
@@ -354,7 +354,7 @@ public:
      * Construct a temporary object, create our stack frame reference.
      */
     inline temp_array(size_t s)
-        {array =  new T[s]; size = s;};
+        {array =  new T[s]; size = s;}
 
     /**
      * Construct a temporary object with a copy of some initial value.
@@ -368,7 +368,7 @@ public:
     }
 
     inline void reset(size_t s)
-        {delete[] array; array = new T[s]; size = s;};
+        {delete[] array; array = new T[s]; size = s;}
 
     inline void reset(const T& initial, size_t s) {
         if(array)
@@ -388,13 +388,13 @@ public:
      * Disable copy constructor.
      */
     temp_array(const temp_array<T>&)
-        {::abort();};
+        {::abort();}
 
     inline operator bool() const
-        {return array != NULL;};
+        {return array != NULL;}
 
     inline bool operator!() const
-        {return array == NULL;};
+        {return array == NULL;}
 
     inline ~temp_array() {
         if(array)
@@ -431,13 +431,13 @@ public:
      * @param object to save.
      */
     inline save_restore(T& object)
-        {original = &object; temp = object;};
+        {original = &object; temp = object;}
 
     /**
      * Restore original when stack frame is released.
      */
     inline ~save_restore()
-        {*original = temp;};
+        {*original = temp;}
 };
 
 /**

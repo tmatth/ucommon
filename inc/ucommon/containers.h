@@ -410,13 +410,13 @@ public:
         {delete[] array;};
 
     inline T *get(void)
-        {return static_cast<T *>(LinkedAllocator::get());};
+        {return static_cast<T *>(LinkedAllocator::get());}
 
     inline T *get(timeout_t timeout)
-        {return static_cast<T *>(LinkedAllocator::get(timeout));};
+        {return static_cast<T *>(LinkedAllocator::get(timeout));}
 
     inline void release(T *node)
-        {LinkedAllocator::release(node);};
+        {LinkedAllocator::release(node);}
 };
 
 /**
@@ -439,7 +439,7 @@ public:
      * @param count of typed objects in the buffer.
      */
     inline bufferof(unsigned capacity) :
-        Buffer(sizeof(T), capacity) {};
+        Buffer(sizeof(T), capacity) {}
 
     /**
      * Get the next typed object from the buffer.  This blocks until an object
@@ -447,7 +447,7 @@ public:
      * @return pointer to next typed object from buffer.
      */
     inline T *get(void)
-        {return static_cast<T*>(get());};
+        {return static_cast<T*>(get());}
 
     /**
      * Get the next typed object from the buffer.
@@ -455,7 +455,7 @@ public:
      * @return pointer to next typed object in the buffer or NULL if timed out.
      */
     inline T *get(timeout_t timeout)
-        {return static_cast<T*>(get(timeout));};
+        {return static_cast<T*>(get(timeout));}
 
     /**
      * Put (copy) a typed object into the buffer.  This blocks while the buffer
@@ -472,7 +472,7 @@ public:
      * @return true if copied, false if timed out while full.
      */
     inline bool put(T *object, timeout_t timeout)
-        {return put(object, timeout);};
+        {return put(object, timeout);}
 
     /**
      * Copy the next typed object from the buffer.  This blocks until an object
@@ -480,7 +480,7 @@ public:
      * @param object pointer to copy typed object into.
      */
     inline void copy(T *object)
-        {copy(object);};
+        {copy(object);}
 
     /**
      * Copy the next typed object from the buffer.
@@ -489,7 +489,7 @@ public:
      * @return true if object copied, or false if timed out.
      */
     inline bool get(T *object, timeout_t timeout)
-        {return copy(object, timeout);};
+        {return copy(object, timeout);}
 
     /**
      * Examine past item in the buffer.  This is a typecast of the peek
@@ -498,7 +498,7 @@ public:
      * @return item pointer if valid or NULL.
      */
     inline const T& at(unsigned item)
-        {return static_cast<const T&>(Buffer::peek(item));};
+        {return static_cast<const T&>(Buffer::peek(item));}
 
     /**
      * Examine past item in the buffer.  This is a typecast of the peek
@@ -507,7 +507,7 @@ public:
      * @return item pointer if valid or NULL.
      */
     inline T&operator[](unsigned item)
-        {return static_cast<T&>(Buffer::peek(item));};
+        {return static_cast<T&>(Buffer::peek(item));}
 
     inline T* operator()(unsigned offset = 0)
         {return static_cast<T*>(Buffer::peek(offset));}
@@ -529,7 +529,7 @@ public:
      * @param memory pool for internal use of stack.
      * @param size of stack to construct.  Uses 0 if no size limit.
      */
-    inline stackof(mempager *memory, size_t size = 0) : Stack(memory, size) {};
+    inline stackof(mempager *memory, size_t size = 0) : Stack(memory, size) {}
 
     /**
      * Remove a specific typed object pointer for the stack.  This can remove
@@ -539,7 +539,7 @@ public:
      * @return true if object was removed, false if not found.
      */
     inline bool remove(T *object)
-        {return Stack::remove(object);};
+        {return Stack::remove(object);}
 
     /**
      * Push a typed object into the stack by it's pointer.  This can wait for
@@ -550,7 +550,7 @@ public:
      * @return true if object pushed, false if queue full and timeout expired.
      */
     inline bool push(T *object, timeout_t timeout = 0)
-        {return Stack::push(object);};
+        {return Stack::push(object);}
 
     /**
      * Get and remove last typed object posted to the stack.  This can wait for
@@ -560,7 +560,7 @@ public:
      * @return object from queue or NULL if empty and timed out.
      */
     inline T *pull(timeout_t timeout = 0)
-        {return static_cast<T *>(Stack::pull(timeout));};
+        {return static_cast<T *>(Stack::pull(timeout));}
 
     /**
      * Examine last typed object posted to the stack.  This can wait for
@@ -569,7 +569,7 @@ public:
      * @return object in queue or NULL if empty and timed out.
      */
     inline const T *peek(timeout_t timeout = 0)
-        {return static_cast<const T *>(Stack::peek(timeout));};
+        {return static_cast<const T *>(Stack::peek(timeout));}
 
     inline T* operator()(unsigned offset = 0)
         {return static_cast<T*>(Stack::get(offset));}
@@ -581,7 +581,7 @@ public:
      * @return item pointer if valid or NULL.
      */
     inline const T& at(unsigned offset = 0)
-        {return static_cast<const T&>(Stack::get(offset));};
+        {return static_cast<const T&>(Stack::get(offset));}
 
     /**
      * Examine past item in the stack.  This is a typecast of the peek
@@ -590,7 +590,7 @@ public:
      * @return item pointer if valid or NULL.
      */
     inline const T& operator[](unsigned offset)
-        {return static_cast<T&>(Stack::get(offset));};
+        {return static_cast<T&>(Stack::get(offset));}
 
 };
 
@@ -610,7 +610,7 @@ public:
      * @param memory pool for internal use by queue.
      * @param size of queue to construct.  Uses 0 if no size limit.
      */
-    inline queueof(mempager *memory, size_t size = 0) : Queue(memory, size) {};
+    inline queueof(mempager *memory, size_t size = 0) : Queue(memory, size) {}
 
     /**
      * Remove a specific typed object pointer for the queue.  This can remove
@@ -620,7 +620,7 @@ public:
      * @return true if object was removed, false if not found.
      */
     inline bool remove(T *object)
-        {return Queue::remove(object);};
+        {return Queue::remove(object);}
 
     /**
      * Post a typed object into the queue by it's pointer.  This can wait for
@@ -631,7 +631,7 @@ public:
      * @return true if object posted, false if queue full and timeout expired.
      */
     inline bool post(T *object, timeout_t timeout = 0)
-        {return Queue::post(object);};
+        {return Queue::post(object);}
 
     /**
      * Get and remove first typed object posted to the queue.  This can wait for
@@ -641,7 +641,7 @@ public:
      * @return object from queue or NULL if empty and timed out.
      */
     inline T *fifo(timeout_t timeout = 0)
-        {return static_cast<T *>(Queue::fifo(timeout));};
+        {return static_cast<T *>(Queue::fifo(timeout));}
 
     /**
      * Get and remove last typed object posted to the queue.  This can wait for
@@ -651,7 +651,7 @@ public:
      * @return object from queue or NULL if empty and timed out.
      */
     inline T *lifo(timeout_t timeout = 0)
-        {return static_cast<T *>(Queue::lifo(timeout));};
+        {return static_cast<T *>(Queue::lifo(timeout));}
 
     /**
      * Examine past item in the queue.  This is a typecast of the peek
@@ -660,7 +660,7 @@ public:
      * @return item pointer if valid or NULL.
      */
     inline const T& at(unsigned offset = 0)
-        {return static_cast<const T&>(Queue::get(offset));};
+        {return static_cast<const T&>(Queue::get(offset));}
 
     /**
      * Examine past item in the queue.  This is a typecast of the peek
@@ -669,7 +669,7 @@ public:
      * @return item pointer if valid or NULL.
      */
     inline T& operator[](unsigned offset)
-        {return static_cast<T&>(Queue::get(offset));};
+        {return static_cast<T&>(Queue::get(offset));}
 
     inline T* operator()(unsigned offset = 0)
         {return static_cast<T*>(Queue::get(offset));}

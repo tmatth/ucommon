@@ -174,7 +174,7 @@ public:
     {
     public:
         inline errormap(errmsg_t id, const char *text)
-            {shell::errmsg(id, text);};
+            {shell::errmsg(id, text);}
     };
 
     /**
@@ -241,19 +241,19 @@ public:
         flagopt(char short_option, const char *long_option = NULL, const char *help = NULL, bool single_use = true);
 
         inline operator bool()
-            {return counter > 0;};
+            {return counter > 0;}
 
         inline bool operator!()
-            {return counter == 0;};
+            {return counter == 0;}
 
         inline operator unsigned()
-            {return counter;};
+            {return counter;}
 
         inline unsigned operator*()
-            {return counter;};
+            {return counter;}
 
         inline void set(unsigned value = 1)
-            {counter = value;};
+            {counter = value;}
     };
 
     /**
@@ -290,19 +290,19 @@ public:
         stringopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "text", const char *def_text = NULL);
 
         inline void set(const char *string)
-            {text = string;};
+            {text = string;}
 
         inline operator bool()
-            {return used;};
+            {return used;}
 
         inline bool operator!()
-            {return !used;};
+            {return !used;}
 
         inline operator const char *()
-            {return text;};
+            {return text;}
 
         inline const char *operator*()
-            {return text;};
+            {return text;}
     };
 
     /**
@@ -325,19 +325,19 @@ public:
         charopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "char", char default_code = ' ');
 
         inline void set(char value)
-            {code = value;};
+            {code = value;}
 
         inline operator bool()
-            {return used;};
+            {return used;}
 
         inline bool operator!()
-            {return !used;};
+            {return !used;}
 
         inline operator char()
-            {return code;};
+            {return code;}
 
         inline char operator*()
-            {return code;};
+            {return code;}
     };
 
     /**
@@ -360,19 +360,19 @@ public:
         numericopt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
 
         inline void set(long value)
-            {number = value;};
+            {number = value;}
 
         inline operator bool()
-            {return used;};
+            {return used;}
 
         inline bool operator!()
-            {return !used;};
+            {return !used;}
 
         inline operator long()
-            {return number;};
+            {return number;}
 
         inline long operator*()
-            {return number;};
+            {return number;}
     };
 
     /**
@@ -397,19 +397,19 @@ public:
         counteropt(char short_option, const char *long_option = NULL, const char *help = NULL, const char *type = "numeric", long def_value = 0);
 
         inline void set(long value)
-            {number = value;};
+            {number = value;}
 
         inline operator bool()
-            {return used;};
+            {return used;}
 
         inline bool operator!()
-            {return !used;};
+            {return !used;}
 
         inline operator long()
-            {return number;};
+            {return number;}
 
         inline long operator*()
-            {return number;};
+            {return number;}
     };
 
     /**
@@ -635,7 +635,7 @@ public:
      * @param exitcode to use if true.
      */
     static inline int condition(bool test, int exitcode)
-        { return (test) ? exitcode : 0;};
+        { return (test) ? exitcode : 0;}
 
     /**
      * Print a debug message by debug level.
@@ -680,7 +680,7 @@ public:
     static size_t read(String& string);
 
     inline static size_t write(String& string)
-        {return writes(string.c_str());};
+        {return writes(string.c_str());}
 
     /**
      * Get saved internal argc count for items.  This may be items that
@@ -688,7 +688,7 @@ public:
      * @return count of remaining arguments.
      */
     inline unsigned argc(void) const
-        {return _argc;};
+        {return _argc;}
 
     /**
      * Get saved internal argv count for items in this shell object.  This
@@ -697,7 +697,7 @@ public:
      * @return list of remaining arguments.
      */
     inline char **argv(void) const
-        {return _argv;};
+        {return _argv;}
 
     /**
      * Return parser argv element.
@@ -705,7 +705,7 @@ public:
      * @return argument string.
      */
     inline const char *operator[](unsigned offset)
-        {return _argv[offset];};
+        {return _argv[offset];}
 
     static void exiting(exitproc_t);
 
@@ -778,7 +778,7 @@ public:
      * @return argc count.
      */
     inline unsigned operator()(void)
-        {return _argc;};
+        {return _argc;}
 
     /**
      * Text translation and localization.  This function does nothing but
@@ -815,23 +815,23 @@ public:
 #ifdef  _MSWINDOWS_
 
     static inline fd_t input(void)
-        {return GetStdHandle(STD_INPUT_HANDLE);};
+        {return GetStdHandle(STD_INPUT_HANDLE);}
 
     static inline fd_t output(void)
-        {return GetStdHandle(STD_OUTPUT_HANDLE);};
+        {return GetStdHandle(STD_OUTPUT_HANDLE);}
 
     static inline fd_t error(void)
-        {return GetStdHandle(STD_ERROR_HANDLE);};
+        {return GetStdHandle(STD_ERROR_HANDLE);}
 
 #else
     static inline fd_t input(void)
-        {return 0;};
+        {return 0;}
 
     static inline fd_t output(void)
-        {return 1;};
+        {return 1;}
 
     static inline fd_t error(void)
-        {return 2;};
+        {return 2;}
 #endif
 
     static int inkey(const char *prompt = NULL);

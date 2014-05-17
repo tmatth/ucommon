@@ -64,7 +64,7 @@ namespace ost {
 class __EXPORT MemPager : private ucommon::memalloc
 {
 public:
-	inline MemPager(size_t pagesize = 4096) : ucommon::memalloc(pagesize) {};
+    inline MemPager(size_t pagesize = 4096) : ucommon::memalloc(pagesize) {}
 
 	inline void *alloc(size_t size)
 		{return _alloc(size);}

@@ -42,6 +42,10 @@
 #ifndef COMMONCPP_APPLOG_H_
 #define COMMONCPP_APPLOG_H_
 
+#ifndef COMMONCPP_CONFIG_H_
+#include <commoncpp/config.h>
+#endif
+
 #ifndef COMMONCPP_SLOG_H_
 #include <commoncpp/slog.h>
 #endif
@@ -57,6 +61,7 @@
 
 namespace ost {
 using namespace std;
+
 /**
  * Produces a dump of a buffer in a hexdump way with its
  * code Ascii translation and relative buffer address.
@@ -132,12 +137,12 @@ class __EXPORT AppLogException : public ost::Exception
      * Constructor.
      * @param what_arg exception string
      */
-    AppLogException(const char *what_arg) : ost::Exception(what_arg) {};
+    AppLogException(const char *what_arg) : ost::Exception(what_arg) {}
 
 };
 #endif
 
-class AppLogPrivate;
+class __LOCAL AppLogPrivate;
 
 /**
  * Application logger is a class that implements a logger that can be used
@@ -188,12 +193,12 @@ class __EXPORT AppLog : protected streambuf, public ostream
         /**
          * Constructor.
          */
-        Ident() {};
+        Ident() {}
 
         /**
          * Desctructor.
          */
-        ~Ident() {};
+        ~Ident() {}
 
         /**
          * Copy constructor.
@@ -203,7 +208,7 @@ class __EXPORT AppLog : protected streambuf, public ostream
         /**
          * const char* constructor, provided for convenience.
          */
-        Ident(const char *str) : _ident(str) {};
+        Ident(const char *str) : _ident(str) {}
 
         /**
          * std::string cast.

@@ -111,13 +111,13 @@ public:
      * Fetch out the socket.
      */
     inline SOCKET getSocket(void)
-        {return so;};
+        {return so;}
 
     /**
      * Get the buffer size for servers.
      */
     inline int getSegmentSize(void)
-        {return segsize;};
+        {return segsize;}
 
     /**
      * A TCP "server" is created as a TCP socket that is bound
@@ -230,10 +230,10 @@ public:
      * Fetch out the socket.
      */
     inline SOCKET getSocket(void)
-        {return so;};
+        {return so;}
 
     inline int getSegmentSize(void)
-        {return segsize;};
+        {return segsize;}
 
     /**
      * A TCP "server" is created as a TCP socket that is bound
@@ -420,7 +420,7 @@ protected:
      * @return stream pointer of this object.
      */
     std::iostream *tcp(void)
-        {return ((std::iostream *)this);};
+        {return ((std::iostream *)this);}
 
 public:
     /**
@@ -479,7 +479,7 @@ public:
      * @param timer to change timeout.
      */
     inline void setTimeout(timeout_t timer)
-        {timeout = timer;};
+        {timeout = timer;}
 
 
     /**
@@ -521,7 +521,7 @@ public:
       * @return number of bytes examined.
       */
      inline ssize_t peek(void *buf, size_t len)
-         {return ::recv(so, (char *)buf, len, MSG_PEEK);};
+         {return ::recv(so, (char *)buf, len, MSG_PEEK);}
 
     /**
      * Return the size of the current stream buffering used.
@@ -529,7 +529,7 @@ public:
      * @return size of stream buffers.
      */
     inline size_t getBufferSize(void) const
-        {return bufsize;};
+        {return bufsize;}
 };
 
 /**

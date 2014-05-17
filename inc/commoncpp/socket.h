@@ -203,7 +203,7 @@ protected:
      * @param err string or message to pass.
      */
     inline void error(const char *err) const
-        {error(errExtended, err);};
+        {error(errExtended, err);}
 
     /**
      * This service is used to turn the error handler on or off for
@@ -212,7 +212,7 @@ protected:
      * @param enable true to enable handler.
      */
     inline void setError(bool enable)
-        {flags.thrown = !enable;};
+        {flags.thrown = !enable;}
 
     /**
      * Used as the default destructor for ending a socket.  This
@@ -611,7 +611,7 @@ public:
      * @return true if broadcast socket.
      */
     inline bool isBroadcast(void) const
-        {return flags.broadcast;};
+        {return flags.broadcast;}
 
     /**
      * Return if socket routing is enabled.
@@ -619,7 +619,7 @@ public:
      * @return true if routing enabled.
      */
     inline bool isRouted(void) const
-        {return flags.route;};
+        {return flags.route;}
 
 
     inline struct in_addr getaddress(const IPV4Address &ia)
@@ -641,10 +641,10 @@ private:
 
 public:
     inline SockException(const String &str, Socket::Error socketError, long systemError = 0) :
-        IOException(str, systemError), _socketError(socketError) {};
+        IOException(str, systemError), _socketError(socketError) {}
 
     inline Socket::Error getSocketError() const
-    { return _socketError; }
+        {return _socketError;}
 };
 
 #endif

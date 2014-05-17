@@ -249,7 +249,7 @@ public:
      * @param enable is the logging level to use for further output
      */
     inline void level(Level enable)
-        {_level = enable;};
+        {_level = enable;}
 
     /**
      * Enables or disables the echoing of the messages to clog in addition
@@ -257,35 +257,35 @@ public:
      * @param f true to enable, false to disable clog output
      */
     inline void clogEnable(bool f=true)
-        {_clogEnable = f;};
+        {_clogEnable = f;}
 
     inline Slog &warn(void)
-        {return operator()(Slog::levelWarning);};
+        {return operator()(Slog::levelWarning);}
 
     inline Slog &error(void)
-        {return operator()(Slog::levelError);};
+        {return operator()(Slog::levelError);}
 
     inline Slog &debug(void)
-        {return operator()(Slog::levelDebug);};
+        {return operator()(Slog::levelDebug);}
 
     inline Slog &emerg(void)
-        {return operator()(Slog::levelEmergency);};
+        {return operator()(Slog::levelEmergency);}
 
     inline Slog &alert(void)
-        {return operator()(Slog::levelAlert);};
+        {return operator()(Slog::levelAlert);}
 
     inline Slog &critical(void)
-        {return operator()(Slog::levelCritical);};
+        {return operator()(Slog::levelCritical);}
 
     inline Slog &notice(void)
-        {return operator()(Slog::levelNotice);};
+        {return operator()(Slog::levelNotice);}
 
     inline Slog &info(void)
-        {return operator()(Slog::levelInfo);};
+        {return operator()(Slog::levelInfo);}
 
 };
 
-extern __EXPORT Slog    slog;
+extern __EXPORT Slog slog;
 
 } // namespace ost
 

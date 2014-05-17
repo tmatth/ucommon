@@ -65,8 +65,7 @@ protected:
     unsigned *ptrCount;
     T *ptrObject;
 
-    void ptrDetach(void)
-    {
+    inline void ptrDetach(void) {
         if(ptrCount && --(*ptrCount)==0) {
             delete ptrObject;
             delete ptrCount;
@@ -76,14 +75,12 @@ protected:
     }
 
 public:
-    explicit Pointer(T* ptr = NULL) : ptrObject(ptr)
-    {
+    inline explicit Pointer(T* ptr = NULL) : ptrObject(ptr) {
         ptrCount = new unsigned;
         *ptrCount = 1;
     }
 
-    Pointer(const Pointer<T> &ref)
-    {
+    inline Pointer(const Pointer<T> &ref) {
         ptrObject = ref.ptrObject;
         ptrCount = ref.ptrCount;
         ++(*ptrCount);
@@ -93,8 +90,7 @@ public:
         {ptrDetach();}
 
 
-    Pointer& operator=(const Pointer<T> &ref)
-    {
+    inline Pointer& operator=(const Pointer<T> &ref) {
         if(this != &ref) {
             ptrDetach();
             ptrObject = ref.ptrObject;
@@ -105,22 +101,21 @@ public:
     }
 
     inline T& operator*() const
-        {return *ptrObject;};
+        {return *ptrObject;}
 
     inline T* getObject() const
-        {return ptrObject;};
+        {return ptrObject;}
 
     inline T* operator->() const
-        {return ptrObject;};
+        {return ptrObject;}
 
     inline bool operator!() const
-        {return (*ptrCount == 1);};
+        {return (*ptrCount == 1);}
 
     inline int operator++() const
-        {return ++(*ptrCount);};
+        {return ++(*ptrCount);}
 
-    int operator--() const
-    {
+    inline int operator--() const {
         if(*ptrCount == 1) {
             delete this;
             return 0;

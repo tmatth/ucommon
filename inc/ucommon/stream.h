@@ -188,14 +188,14 @@ public:
      * @return true if stream is active.
      */
     inline operator bool() const
-        {return so != INVALID_SOCKET && bufsize > 0;};
+        {return so != INVALID_SOCKET && bufsize > 0;}
 
     /**
      * See if stream is disconnected.
      * @return true if stream disconnected.
      */
     inline bool operator!() const
-        {return so == INVALID_SOCKET || bufsize == 0;};
+        {return so == INVALID_SOCKET || bufsize == 0;}
 
     /**
      * Open a stream connection to a tcp service.
@@ -291,14 +291,14 @@ public:
      * @return true if stream is active.
      */
     inline operator bool() const
-        {return (bufsize > 0);};
+        {return (bufsize > 0);}
 
     /**
      * See if stream is disconnected.
      * @return true if stream disconnected.
      */
     inline bool operator!() const
-        {return bufsize == 0;};
+        {return bufsize == 0;}
 
     /**
      * Open a stream connection to a pipe service.
@@ -397,14 +397,14 @@ public:
      * @return true if stream is active.
      */
     inline operator bool() const
-        {return (bufsize > 0);};
+        {return (bufsize > 0);}
 
     /**
      * See if stream is disconnected.
      * @return true if stream disconnected.
      */
     inline bool operator!() const
-        {return bufsize == 0;};
+        {return bufsize == 0;}
 
     /**
      * Open a stream connection to a tcp service.
@@ -431,7 +431,7 @@ public:
      * @return last error.
      */
     inline int err(void) const
-        {return fd.err();};
+        {return fd.err();}
 };
 
 /**
@@ -441,7 +441,7 @@ public:
 class __EXPORT _stream_operators
 {
 private:
-    inline _stream_operators() {};
+    inline _stream_operators() {}
 
 public:
     static std::ostream& print(std::ostream& out, const PrintProtocol& format);

@@ -96,7 +96,7 @@ public:
      * @return value string or NULL if not found.
      */
     inline const char *operator()(const char *id) const
-        {return get(id);};
+        {return get(id);}
 
     /**
      * Set a keyword and value in the keydata structure.  If the keyword
@@ -119,21 +119,21 @@ public:
      * @return name of keydata section.
      */
     inline const char *get(void) const
-        {return name;};
+        {return name;}
 
     /**
      * Get first value object, for iterative examinations.
      * @return first key value in chain.
      */
     inline keyvalue *begin(void) const
-        {return (keyvalue *)index.begin();};
+        {return (keyvalue *)index.begin();}
 
     /**
      * Get last value object, for iterative examinations.
      * @return first key value in chain.
      */
     inline keyvalue *end(void) const
-        {return (keyvalue*)index.end();};
+        {return (keyvalue*)index.end();}
 
     /**
      * Convenience typedef for iterative pointer.
@@ -219,31 +219,31 @@ public:
     keydata *get(const char *section) const;
 
     inline keydata *operator()(const char *section) const
-        {return get(section);};
+        {return get(section);}
 
     inline keydata *operator[](const char *section) const
-        {return get(section);};
+        {return get(section);}
 
     /**
      * Get the non-sectioned defaults if there are any.
      * @return default key section.
      */
     inline keydata *get(void) const
-        {return defaults;};
+        {return defaults;}
 
     /**
      * Get first keydata object, for iterative examinations.
      * @return first key value in chain.
      */
     inline keydata *begin(void) const
-        {return (keydata *)index.begin();};
+        {return (keydata *)index.begin();}
 
     /**
      * Get last keydata object, for iterative examinations.
      * @return first key value in chain.
      */
     inline keydata *end(void) const
-        {return (keydata *)index.end();};
+        {return (keydata *)index.end();}
 
     /**
      * Convenience typedef for iterative pointer.

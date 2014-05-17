@@ -67,21 +67,21 @@ public:
      * @return counter limit.
      */
     inline unsigned range(void)
-        {return cycle;};
+        {return cycle;}
 
     /**
      * Reference next counter value through pointer operation.
      * @return next counter value.
      */
     inline unsigned operator*()
-        {return get();};
+        {return get();}
 
     /**
      * Reference next counter value by casting to integer.
      * @return next counter value.
      */
     inline operator unsigned()
-        {return get();};
+        {return get();}
 
     /**
      * Assign the value of the counter.
@@ -116,7 +116,7 @@ public:
      * @param inc_offset in sequence to reset sequencing to.
      */
     inline void operator=(unsigned inc_offset)
-        {counter::operator=(inc_offset);};
+        {counter::operator=(inc_offset);}
 };
 
 /**
@@ -130,18 +130,18 @@ private:
 
 public:
     inline toggle()
-        {value = false;};
+        {value = false;}
 
     bool get(void);
 
     inline bool operator*()
-        {return get();};
+        {return get();}
 
     inline void operator=(bool v)
-        {value = v;};
+        {value = v;}
 
     inline operator bool()
-        {return get();};
+        {return get();}
 
 };
 
@@ -156,7 +156,7 @@ class sequence : public SeqCounter
 {
 protected:
     inline T *get(unsigned idx)
-        {return static_cast<T *>(SeqCounter::get(idx));};
+        {return static_cast<T *>(SeqCounter::get(idx));}
 
 public:
     /**
@@ -165,28 +165,28 @@ public:
      * @param size of list of typed values.
      */
     inline sequence(T *array, unsigned size) :
-        SeqCounter(array, sizeof(T), size) {};
+        SeqCounter(array, sizeof(T), size) {}
 
     /**
      * Return next typed member of the sequence.
      * @return next typed member of sequence.
      */
     inline T* get(void)
-        {return static_cast<T *>(SeqCounter::get());};
+        {return static_cast<T *>(SeqCounter::get());}
 
     /**
      * Return next typed member of the sequence by pointer reference.
      * @return next typed member of sequence.
      */
     inline T& operator*()
-        {return *get();};
+        {return *get();}
 
     /**
      * Return next typed member of the sequence by casted reference.
      * @return next typed member of sequence.
      */
     inline operator T&()
-        {return *get();};
+        {return *get();}
 
     /**
      * Return a specific typed member from the sequence list.
@@ -194,7 +194,7 @@ public:
      * @return typed value at the specified offset.
      */
     inline T& operator[](unsigned offset)
-        {return *get(offset);};
+        {return *get(offset);}
 };
 
 /**

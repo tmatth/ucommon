@@ -252,17 +252,17 @@ public:
         friend class ObjectPager;
 
         inline void set(member *node)
-            {Next = node;};
+            {Next = node;}
 
         inline void *get(void) const
-            {return mem;};
+            {return mem;}
 
         member(LinkedObject **root);
         member();
 
     public:
         inline void *operator*() const
-            {return mem;};
+            {return mem;}
     };
 
 private:
@@ -322,7 +322,7 @@ public:
      * @return first member of list or NULL if empty.
      */
     inline ObjectPager::member *begin(void)
-        {return static_cast<ObjectPager::member *>(root);};
+        {return static_cast<ObjectPager::member *>(root);}
 
     inline operator bool() const
         {return members > 0;}
@@ -335,7 +335,7 @@ public:
      * @return number of items stored.
      */
     inline unsigned count(void) const
-        {return members;};
+        {return members;}
 
     /**
      * Convenience typedef for iterative pointer.
@@ -395,17 +395,17 @@ public:
         friend class StringPager;
 
         inline void set(member *node)
-            {Next = node;};
+            {Next = node;}
 
         member(LinkedObject **root, const char *data);
         member(const char *data);
 
     public:
         inline const char *operator*() const
-            {return text;};
+            {return text;}
 
         inline const char *get(void) const
-            {return text;};
+            {return text;}
     };
 
     /**
@@ -421,7 +421,7 @@ public:
      * @return number of items stored.
      */
     inline unsigned count(void) const
-        {return members;};
+        {return members;}
 
     /**
      * Get string item from list.  This is useful when StringPager is
@@ -495,10 +495,10 @@ public:
      * @return text of item or NULL if invalid.
      */
     inline const char *operator[](unsigned item) const
-        {return get(item);};
+        {return get(item);}
 
     inline const char *at(unsigned item) const
-        {return get(item);};
+        {return get(item);}
 
     /**
      * Get root of pager list.  This is useful for externally enumerating
@@ -506,14 +506,14 @@ public:
      * @return first member of list or NULL if empty.
      */
     inline StringPager::member *begin(void) const
-        {return static_cast<StringPager::member *>(root);};
+        {return static_cast<StringPager::member *>(root);}
 
     /**
      * Convenience operator to add to pager and auto-sort.
      * @param text to add to list.
      */
     inline void operator+=(const char *text)
-        {add(text);};
+        {add(text);}
 
     /**
      * Convenience operator to add to pager.
@@ -565,7 +565,7 @@ public:
         {return pull();}
 
     inline operator char **()
-        {return list();};
+        {return list();}
 
     /**
      * Convenience typedef for iterative pointer.
@@ -619,16 +619,16 @@ public:
     void operator=(const char *path);
 
     inline const char *operator*() const
-        {return dir;};
+        {return dir;}
 
     inline operator bool() const
-        {return dir != NULL;};
+        {return dir != NULL;}
 
     inline bool operator!() const
-        {return dir == NULL;};
+        {return dir == NULL;}
 
     inline unsigned count(void) const
-        {return StringPager::count();};
+        {return StringPager::count();}
 
     /**
      * Return specified filename from directory list.  This is a convenience
@@ -637,13 +637,13 @@ public:
      * @return text of item or NULL if invalid.
      */
     inline const char *operator[](unsigned item) const
-        {return StringPager::get(item);};
+        {return StringPager::get(item);}
 
     inline const char *get(unsigned item) const
-        {return StringPager::get(item);};
+        {return StringPager::get(item);}
 
     inline const char *at(unsigned item) const
-        {return StringPager::get(item);};
+        {return StringPager::get(item);}
 
     inline size_t size(void)
         {return memalloc::size();}
@@ -739,7 +739,7 @@ public:
      * @param text to add to list.
      */
     inline bufpager& operator<<(const char *text)
-        {add(text); return *this;};
+        {add(text); return *this;}
 
     bufpager(size_t page = 0);
 
@@ -989,7 +989,7 @@ public:
      * @return number of associations stored.
      */
     inline unsigned count(void) const
-        {return keycount;};
+        {return keycount;}
 
     /**
      * Lookup the data pointer of a string by direct operation.
@@ -997,7 +997,7 @@ public:
      * @return pointer to data or NULL if not found.
      */
     inline void *operator()(const char *name)
-        {return locate(name);};
+        {return locate(name);}
 
     /**
      * Purge all associations and return allocated pages to heap.
@@ -1041,7 +1041,7 @@ template <class T, size_t P = 0>
 class listof : private ObjectPager
 {
 public:
-    inline listof() : ObjectPager(sizeof(T), P) {};
+    inline listof() : ObjectPager(sizeof(T), P) {}
 
     inline T& operator[](unsigned item) const
         {return (T&)ObjectPager::get(item);}
@@ -1088,20 +1088,20 @@ public:
     /**
      * Construct an associated pointer hash map based on the class template.
      */
-    inline mapof() : keyassoc(I, M, P) {};
+    inline mapof() : keyassoc(I, M, P) {}
 
     /**
      * Get the count of typed objects stored in our hash map.
      * @return typed objects in map.
      */
     inline unsigned count(void) const
-        {return keyassoc::count();};
+        {return keyassoc::count();}
 
     /**
      * Purge the hash map of typed objects.
      */
     inline void purge(void)
-        {keyassoc::purge();};
+        {keyassoc::purge();}
 
     /**
      * Lookup a typed object by name.
@@ -1120,7 +1120,7 @@ public:
      * @return typed object pointer or NULL if not found.
      */
     inline T *operator()(const char *name)
-        {return locate(name);};
+        {return locate(name);}
 
     /**
      * Create mapped entry from scratch.
@@ -1135,7 +1135,7 @@ public:
      * @param name to remove.
      */
     inline void unmap(const char *name)
-        {keyassoc::remove(name);};
+        {keyassoc::remove(name);}
 
     /**
      * Access to pager utilization stats.  This is needed because we
@@ -1143,7 +1143,7 @@ public:
      * @return pager utilization, 0-100.
      */
     inline unsigned utilization(void)
-        {return mempager::utilization();};
+        {return mempager::utilization();}
 
     /**
      * Access to number of pages allocated from heap for our associated
@@ -1152,7 +1152,7 @@ public:
      * @return count of heap pages used.
      */
     inline unsigned pages(void) const
-        {return mempager::pages();};
+        {return mempager::pages();}
 };
 
 /**
@@ -1169,7 +1169,7 @@ public:
     /**
      * Construct an associated pointer hash map based on the class template.
      */
-    inline assoc_pointer() : keyassoc(I, M, P) {};
+    inline assoc_pointer() : keyassoc(I, M, P) {}
 
     /**
      * Get the count of typed objects stored in our hash map.
@@ -1263,21 +1263,21 @@ public:
      * Construct a pager and optionally assign a private pager heap.
      * @param heap pager to use.  If NULL, uses global heap.
      */
-    inline pager(mempager *heap = NULL) : MemoryRedirect(heap), PagerPool() {};
+    inline pager(mempager *heap = NULL) : MemoryRedirect(heap), PagerPool() {}
 
     /**
      * Create a managed object by casting reference.
      * @return pointer to typed managed pager pool object.
      */
     inline T *operator()(void)
-        {return new(get(sizeof(T))) T;};
+        {return new(get(sizeof(T))) T;}
 
     /**
      * Create a managed object by pointer reference.
      * @return pointer to typed managed pager pool object.
      */
     inline T *operator*()
-        {return new(get(sizeof(T))) T;};
+        {return new(get(sizeof(T))) T;}
 };
 
 /**
@@ -1296,13 +1296,13 @@ public:
      * Create the object cache.
      * @param size of allocation units.
      */
-    inline keypager(size_t size) : mempager(size) {};
+    inline keypager(size_t size) : mempager(size) {}
 
     /**
      * Destroy the hash pager by purging the index chains and memory pools.
      */
     inline ~keypager()
-        {NamedObject::purge(idx, M); mempager::purge();};
+        {NamedObject::purge(idx, M); mempager::purge();}
 
     /**
      * Find a typed object derived from NamedObject in the hash map by name.
@@ -1325,7 +1325,7 @@ public:
      * @return true if found.
      */
     bool test(const char *name) const
-        {return NamedObject::map(idx, name, M) != NULL;};
+        {return NamedObject::map(idx, name, M) != NULL;}
 
     /**
      * Find a typed object derived from NamedObject in the hash map by name.
@@ -1334,14 +1334,14 @@ public:
      * @return typed object if found through map or NULL.
      */
     inline T *operator[](const char *name) const
-        {return get(name);};
+        {return get(name);}
 
     /**
      * Find first typed object in hash map to iterate.
      * @return first typed object or NULL if nothing in list.
      */
     inline T *begin(void) const
-        {return static_cast<T*>(NamedObject::skip(idx, NULL, M));};
+        {return static_cast<T*>(NamedObject::skip(idx, NULL, M));}
 
     /**
      * Find next typed object in hash map for iteration.
@@ -1349,14 +1349,14 @@ public:
      * @return next iterative object or NULL if past end of map.
      */
     inline T *next(T *current) const
-        {return static_cast<T*>(NamedObject::skip(idx, current, M));};
+        {return static_cast<T*>(NamedObject::skip(idx, current, M));}
 
     /**
      * Count the number of typed objects in our hash map.
      * @return count of typed objects.
      */
     inline unsigned count(void) const
-        {return NamedObject::count(idx, M);};
+        {return NamedObject::count(idx, M);}
 
     /**
      * Convert our hash map into a linear object pointer array.  The
@@ -1365,7 +1365,7 @@ public:
      * @return array of typed named object pointers.
      */
     inline T **index(void) const
-        {return NamedObject::index(idx, M);};
+        {return NamedObject::index(idx, M);}
 
     /**
      * Convert our hash map into an alphabetically sorted linear object
@@ -1374,7 +1374,7 @@ public:
      * @return sorted array of typed named object pointers.
      */
     inline T **sort(void) const
-        {return NamedObject::sort(NamedObject::index(idx, M));};
+        {return NamedObject::sort(NamedObject::index(idx, M));}
 
     /**
      * Convenience typedef for iterative pointer.

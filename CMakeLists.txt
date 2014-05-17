@@ -36,9 +36,6 @@ STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
 
 # when we override default install prefix, assume full path is used...
 
-set(INSTALL_INCLUDEDIR include)
-set(INSTALL_BINDIR bin)
-
 if(WIN32)
     set(MODULE_FLAGS "-module -shared -no-undefined")
     set(INSTALL_MANDIR man)
@@ -47,6 +44,8 @@ if(WIN32)
     set(INSTALL_LIBDIR bin)
     set(INSTALL_SBINDIR bin)
     set(INSTALL_INFODIR info)
+    set(INSTALL_INCLUDEDIR include)
+    set(INSTALL_BINDIR bin)
     set(SYSCONFDIR "etc" CACHE PATH "config directory")
     set(STATEDIR "var" CACHE PATH "state directory")
 else()
@@ -77,6 +76,14 @@ endif()
 
 if(NOT INSTALL_LIBDIR)
     set(INSTALL_LIBDIR lib${LIB_SUFFIX})
+endif()
+
+if(NOT INSTALL_INCLUDEDIR)
+    set(INSTALL_INCLUDEDIR include)
+endif()
+
+if(NOT INSTALL_BINDIR)
+    set(INSTALL_BINDIR bin)
 endif()
 
 set(UCOMMON_LOCALE ${CMAKE_INSTALL_PREFIX}/${INSTALL_LOCALE})

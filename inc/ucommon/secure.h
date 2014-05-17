@@ -73,7 +73,7 @@ protected:
      */
     error_t error;
 
-    inline secure() {error = OK;};
+    inline secure() {error = OK;}
 
 public:
     /**
@@ -248,7 +248,7 @@ public:
     bool _pending(void);
 
     inline bool is_secure(void)
-        {return bio != NULL;};
+        {return bio != NULL;}
 };
 
 /**
@@ -316,19 +316,19 @@ public:
         void clear(void);
 
         inline size_t size(void)
-            {return keysize;};
+            {return keysize;}
 
         inline size_t iosize(void)
-            {return blksize;};
+            {return blksize;}
 
         inline operator bool()
-            {return keysize > 0;};
+            {return keysize > 0;}
 
         inline bool operator!()
-            {return keysize == 0;};
+            {return keysize == 0;}
 
         inline Key& operator=(const char *pass)
-            {assign(pass); return *this;};
+            {assign(pass); return *this;}
 
         static void options(const unsigned char *salt = NULL, unsigned rounds = 1);
     };
@@ -406,13 +406,13 @@ public:
     size_t process(unsigned char *address, size_t size, bool flag = false);
 
     inline size_t size(void)
-        {return bufsize;};
+        {return bufsize;}
 
     inline size_t pos(void)
-        {return bufpos;};
+        {return bufpos;}
 
     inline size_t align(void)
-        {return keys.iosize();};
+        {return keys.iosize();}
 
     /**
      * Check if a specific cipher is supported.
@@ -453,7 +453,7 @@ public:
     ~Digest();
 
     inline bool puts(const char *str)
-        {return put(str, strlen(str));};
+        {return put(str, strlen(str));}
 
     inline Digest &operator<<(const char *str)
         {puts(str); return *this;}
@@ -470,17 +470,17 @@ public:
     bool put(const void *memory, size_t size);
 
     inline unsigned size() const
-        {return bufsize;};
+        {return bufsize;}
 
     const unsigned char *get(void);
 
     const char *c_str(void);
 
     inline String str(void)
-        {return String(c_str());};
+        {return String(c_str());}
 
     inline operator String()
-        {return String(c_str());};
+        {return String(c_str());}
 
     void set(const char *id);
 
@@ -488,19 +488,19 @@ public:
         {set(id);};
 
     inline bool operator *=(const char *text)
-        {return puts(text);};
+        {return puts(text);}
 
     inline bool operator +=(const char *text)
-        {return puts(text);};
+        {return puts(text);}
 
     inline const char *operator*()
-        {return c_str();};
+        {return c_str();}
 
     inline bool operator!() const
-        {return !bufsize && context == NULL;};
+        {return !bufsize && context == NULL;}
 
     inline operator bool() const
-        {return bufsize > 0 || context != NULL;};
+        {return bufsize > 0 || context != NULL;}
 
     /**
      * Finalize and recycle current digest to start a new
@@ -557,7 +557,7 @@ public:
     ~HMAC();
 
     inline bool puts(const char *str)
-        {return put(str, strlen(str));};
+        {return put(str, strlen(str));}
 
     inline HMAC &operator<<(const char *str)
         {puts(str); return *this;}
@@ -574,34 +574,34 @@ public:
     bool put(const void *memory, size_t size);
 
     inline unsigned size() const
-        {return bufsize;};
+        {return bufsize;}
 
     const unsigned char *get(void);
 
     const char *c_str(void);
 
     inline String str(void)
-        {return String(c_str());};
+        {return String(c_str());}
 
     inline operator String()
-        {return String(c_str());};
+        {return String(c_str());}
 
     void set(const char *digest, const char *key, size_t len);
 
     inline bool operator *=(const char *text)
-        {return puts(text);};
+        {return puts(text);}
 
     inline bool operator +=(const char *text)
-        {return puts(text);};
+        {return puts(text);}
 
     inline const char *operator*()
-        {return c_str();};
+        {return c_str();}
 
     inline bool operator!() const
-        {return !bufsize && context == NULL;};
+        {return !bufsize && context == NULL;}
 
     inline operator bool() const
-        {return bufsize > 0 || context != NULL;};
+        {return bufsize > 0 || context != NULL;}
 
     /**
      * Test to see if a specific digest type is supported.
@@ -791,7 +791,7 @@ private:
     /**
      * Disable copy constructor.
      */
-    inline keystring(const keystring& copy) {};
+    inline keystring(const keystring& copy) {}
 
 public:
     /**
@@ -908,7 +908,7 @@ private:
     /**
      * Disable copy constructor.
      */
-    inline keyrandom(const keyrandom& copy) {};
+    inline keyrandom(const keyrandom& copy) {}
 
 public:
     /**

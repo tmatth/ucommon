@@ -267,10 +267,10 @@ public:
     const char *getName(void);
 
     const char *operator++()
-        {return getName();};
+        {return getName();}
 
     const char *operator++(int)
-        {return getName();};
+        {return getName();}
 
     const char *operator*();
 
@@ -278,9 +278,9 @@ public:
 
     bool operator!()
 #ifndef _MSWINDOWS_
-        {return !dir;};
+        {return !dir;}
 #else
-        {return hDir != INVALID_HANDLE_VALUE;};
+        {return hDir != INVALID_HANDLE_VALUE;}
 #endif
 
     bool isValid(void);
@@ -425,7 +425,7 @@ protected:
      * @param err error string.
      */
     inline Error error(char *err)
-        {return error(errExtended, err);};
+        {return error(errExtended, err);}
 
     /**
      * Used to enable or disable throwing of exceptions on
@@ -434,7 +434,7 @@ protected:
      * @param enable true if errors will be thrown.
      */
     inline void setError(bool enable)
-        {flags.thrown = !enable;};
+        {flags.thrown = !enable;}
 
 #ifndef _MSWINDOWS_
     /**
@@ -454,7 +454,7 @@ protected:
      * @param enable true for marking as temporary.
      */
     inline void setTemporary(bool enable)
-        {flags.temp = enable;};
+        {flags.temp = enable;}
 
     /**
      * This method is used to initialize a newly created file as
@@ -510,7 +510,7 @@ public:
      * @return last error identifier set.
      */
     inline Error getErrorNumber(void)
-        {return errid;};
+        {return errid;}
 
     /**
      * Return current error string.
@@ -518,7 +518,7 @@ public:
      * @return last error string set.
      */
     inline char *getErrorString(void)
-        {return errstr;};
+        {return errstr;}
 
     bool operator!(void);
 };
@@ -571,7 +571,7 @@ public:
      * @return errSuccess if successful.
      */
     Error restart(void)
-        {return open(pathname);};
+        {return open(pathname);}
 
     /**
      * Lock and Fetch a portion of the file into physical memory.
@@ -736,7 +736,7 @@ public:
      * @param offset from start of mapped memory.
      */
     inline caddr_t fetch(size_t offset = 0)
-        {return ((char *)(fcb.address)) + offset;};
+        {return ((char *)(fcb.address)) + offset;}
 
     /**
      * Fetch and map a portion of a disk file to a logical memory
@@ -801,17 +801,17 @@ public:
      * @param filename pathname of object file to load.
      */
     DSO(const char *filename)
-        {loader(filename, true);};
+        {loader(filename, true);}
 
     DSO(const char *filename, bool resolve)
-        {loader(filename, resolve);};
+        {loader(filename, resolve);}
 
     /**
      * Retrieve error indicator associated with DSO failure.  This
      * is often used in catch handlers.
      */
     inline const char *getError(void)
-        {return err;};
+        {return err;}
 
     /**
      * Detach a DSO object from running memory.
@@ -892,9 +892,3 @@ public:
 
 #endif
 
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */

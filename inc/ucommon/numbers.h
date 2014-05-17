@@ -68,7 +68,7 @@ public:
      * @return string buffer.
      */
     inline const char *c_str() const
-        {return buffer;};
+        {return buffer;}
 
     /**
      * Get value of string buffer as a long integer.
@@ -81,21 +81,21 @@ public:
      * @return long integer value of string buffer.
      */
     inline long operator()()
-        {return get();};
+        {return get();}
 
     /**
      * Cast string as long integer and get value of buffer.
      * @return long integer value of string buffer.
      */
     inline operator long()
-        {return get();};
+        {return get();}
 
     /**
      * Cast object as a string to retrieve buffer.
      * @return string buffer of value.
      */
     inline operator char*()
-        {return buffer;};
+        {return buffer;}
 
     /**
      * Assign a value to the number.  This rewrites the string buffer.

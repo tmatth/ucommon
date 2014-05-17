@@ -146,31 +146,31 @@ protected:
      * Lock the conditional's supporting mutex.
      */
     inline void lock(void)
-        {pthread_mutex_lock(&mutex);};
+        {pthread_mutex_lock(&mutex);}
 
     /**
      * Unlock the conditional's supporting mutex.
      */
     inline void unlock(void)
-        {pthread_mutex_unlock(&mutex);};
+        {pthread_mutex_unlock(&mutex);}
 
     /**
      * Wait (block) until signalled.
      */
     inline void wait(void)
-        {pthread_cond_wait(&cond, &mutex);};
+        {pthread_cond_wait(&cond, &mutex);}
 
     /**
      * Signal the conditional to release one waiting thread.
      */
     inline void signal(void)
-        {pthread_cond_signal(&cond);};
+        {pthread_cond_signal(&cond);}
 
     /**
      * Signal the conditional to release all waiting threads.
      */
     inline void broadcast(void)
-        {pthread_cond_broadcast(&cond);};
+        {pthread_cond_broadcast(&cond);}
 #endif
 
     /**
@@ -191,7 +191,7 @@ public:
      * @return attributes to use for creating realtime conditionals.
      */
     static inline pthread_condattr_t *initializer(void)
-        {return &attr.attr;};
+        {return &attr.attr;}
 #endif
 
     /**
@@ -257,7 +257,7 @@ protected:
      * @param timeout to convert.
      */
     inline static void set(struct timespec *hires, timeout_t timeout)
-        {Conditional::set(hires, timeout);};
+        {Conditional::set(hires, timeout);}
 
 
 #ifdef  _MSWINDOWS_
@@ -281,38 +281,38 @@ protected:
      * Lock the conditional's supporting mutex.
      */
     inline void lock(void)
-        {pthread_mutex_lock(&mutex);};
+        {pthread_mutex_lock(&mutex);}
 
     /**
      * Unlock the conditional's supporting mutex.
      */
     inline void unlock(void)
-        {pthread_mutex_unlock(&mutex);};
+        {pthread_mutex_unlock(&mutex);}
 
     /**
      * Wait (block) until signalled.
      */
     inline void waitSignal(void)
-        {pthread_cond_wait(&cond, &mutex);};
+        {pthread_cond_wait(&cond, &mutex);}
 
     /**
      * Wait (block) until broadcast.
      */
     inline void waitBroadcast(void)
-        {pthread_cond_wait(&bcast, &mutex);};
+        {pthread_cond_wait(&bcast, &mutex);}
 
 
     /**
      * Signal the conditional to release one signalled thread.
      */
     inline void signal(void)
-        {pthread_cond_signal(&cond);};
+        {pthread_cond_signal(&cond);}
 
     /**
      * Signal the conditional to release all broadcast threads.
      */
     inline void broadcast(void)
-        {pthread_cond_broadcast(&bcast);};
+        {pthread_cond_broadcast(&bcast);}
 #endif
 public:
     /**
@@ -554,7 +554,7 @@ public:
          * @param pointer to object to guard.
          */
         inline void operator=(const void *pointer)
-            {set(pointer);};
+            {set(pointer);}
     };
 
     /**
@@ -605,7 +605,7 @@ public:
          * @param pointer to object to guard.
          */
         inline void operator=(const void *pointer)
-            {set(pointer);};
+            {set(pointer);}
     };
 
     /**
@@ -692,7 +692,7 @@ protected:
      * @return next object.
      */
     inline ReusableObject *next(ReusableObject *object)
-        {return object->getNext();};
+        {return object->getNext();}
 
     /**
      * Release resuable object
@@ -717,7 +717,7 @@ protected:
     class Context : public LinkedObject
     {
     public:
-        inline Context(LinkedObject **root) : LinkedObject(root) {};
+        inline Context(LinkedObject **root) : LinkedObject(root) {}
 
         pthread_t thread;
         unsigned count;
@@ -902,13 +902,13 @@ public:
      * Convenience operator to wait on a counting semaphore.
      */
     inline void operator++(void)
-        {wait();};
+        {wait();}
 
     /**
      * Convenience operator to release a counting semaphore.
      */
     inline void operator--(void)
-        {release();};
+        {release();}
 };
 
 /**
@@ -981,7 +981,7 @@ public:
          * @param pointer to object to guard.
          */
         inline void operator=(void *pointer)
-            {set(pointer);};
+            {set(pointer);}
     };
 
 
@@ -999,39 +999,39 @@ public:
      * Acquire mutex lock.  This is a blocking operation.
      */
     inline void acquire(void)
-        {pthread_mutex_lock(&mlock);};
+        {pthread_mutex_lock(&mlock);}
 
     /**
      * Acquire mutex lock.  This is a blocking operation.
      */
     inline void lock(void)
-        {pthread_mutex_lock(&mlock);};
+        {pthread_mutex_lock(&mlock);}
 
     /**
      * Release acquired lock.
      */
     inline void unlock(void)
-        {pthread_mutex_unlock(&mlock);};
+        {pthread_mutex_unlock(&mlock);}
 
     /**
      * Release acquired lock.
      */
     inline void release(void)
-        {pthread_mutex_unlock(&mlock);};
+        {pthread_mutex_unlock(&mlock);}
 
     /**
      * Convenience function to acquire os native mutex lock directly.
      * @param lock to acquire.
      */
     inline static void acquire(pthread_mutex_t *lock)
-        {pthread_mutex_lock(lock);};
+        {pthread_mutex_lock(lock);}
 
     /**
      * Convenience function to release os native mutex lock directly.
      * @param lock to release.
      */
     inline static void release(pthread_mutex_t *lock)
-        {pthread_mutex_unlock(lock);};
+        {pthread_mutex_unlock(lock);}
 
     /**
      * Specify hash table size for guard protection.  The default is 1.
@@ -1067,7 +1067,7 @@ class __EXPORT auto_protect
 {
 private:
     // cannot copy...
-    inline auto_protect(const auto_object &pointer) {};
+    inline auto_protect(const auto_object &pointer) {}
 
 protected:
     const void *object;
@@ -1097,14 +1097,14 @@ public:
      * @return true if the pointer is not referencing anything.
      */
     inline bool operator!() const
-        {return object == NULL;};
+        {return object == NULL;}
 
     /**
      * Test if the pointer is referencing an object.
      * @return true if the pointer is currently referencing an object.
      */
     inline operator bool() const
-        {return object != NULL;};
+        {return object != NULL;}
 
     /**
      * Set our pointer to a specific object.  If the pointer currently
@@ -1156,7 +1156,7 @@ protected:
      * @param object to assign.
      */
     inline void operator=(ObjectProtocol *object)
-        {replace(object);};
+        {replace(object);}
 };
 
 /**
@@ -1427,7 +1427,7 @@ public:
      * assumed to be off main thread, with a priority lowered by one.
      */
     inline void background(void)
-        {start(-1);};
+        {start(-1);}
 };
 
 /**
@@ -1604,7 +1604,7 @@ public:
     /**
      * Created shared locking for typed singleton pointer.
      */
-    inline shared_pointer() : SharedPointer() {};
+    inline shared_pointer() : SharedPointer() {}
 
     /**
      * Acquire a shared (duplocate) reference to the typed singleton object.
@@ -1614,7 +1614,7 @@ public:
      * @return typed shared object.
      */
     inline const T *dup(void)
-        {return static_cast<const T*>(SharedPointer::share());};
+        {return static_cast<const T*>(SharedPointer::share());}
 
     /**
      * Replace existing typed singleton instance with new one.  This happens
@@ -1623,21 +1623,21 @@ public:
      * @param object being set.
      */
     inline void replace(T *object)
-        {SharedPointer::replace(object);};
+        {SharedPointer::replace(object);}
 
     /**
      * Replace existing typed singleton object through assignment.
      * @param object to assign.
      */
     inline void operator=(T *object)
-        {replace(object);};
+        {replace(object);}
 
     /**
      * Access shared lock typed singleton object by pointer reference.
      * @return typed shared object.
      */
     inline T *operator*()
-        {return dup();};
+        {return dup();}
 };
 
 /**
@@ -1654,7 +1654,7 @@ public:
     /**
      * Create an instance of a typed locked pointer.
      */
-    inline locked_pointer() : LockedPointer() {};
+    inline locked_pointer() : LockedPointer() {}
 
     /**
      * Create a duplicate reference counted instance of the current typed
@@ -1662,21 +1662,21 @@ public:
      * @return duplicate reference counted typed object.
      */
     inline T* dup(void)
-        {return static_cast<T *>(LockedPointer::dup());};
+        {return static_cast<T *>(LockedPointer::dup());}
 
     /**
      * Replace existing typed object with a new one for next request.
      * @param object to register with pointer.
      */
     inline void replace(T *object)
-        {LockedPointer::replace(object);};
+        {LockedPointer::replace(object);}
 
     /**
      * Replace existing object through assignment.
      * @param object to assign.
      */
     inline void operator=(T *object)
-        {replace(object);};
+        {replace(object);}
 
     /**
      * Create a duplicate reference counted instance of the current typed
@@ -1684,7 +1684,7 @@ public:
      * @return duplicate reference counted typed object.
      */
     inline T *operator*()
-        {return dup();};
+        {return dup();}
 };
 
 /**
@@ -1699,34 +1699,34 @@ public:
     /**
      * Construct empty locked instance of typed object.
      */
-    inline locked_instance() : locked_release() {};
+    inline locked_instance() : locked_release() {}
 
     /**
      * Construct locked instance of typed object from matching locked_pointer.
      * @param pointer to get instance from.
      */
-    inline locked_instance(locked_pointer<T> &pointer) : locked_release(pointer) {};
+    inline locked_instance(locked_pointer<T> &pointer) : locked_release(pointer) {}
 
     /**
      * Extract instance of locked typed object by pointer reference.
      * @return instance of typed object.
      */
     inline T& operator*() const
-        {return *(static_cast<T&>(object));};
+        {return *(static_cast<T&>(object));}
 
     /**
      * Access member of instance of locked typed object by member reference.
      * @return instance of typed object.
      */
     inline T* operator->() const
-        {return static_cast<T*>(object);};
+        {return static_cast<T*>(object);}
 
     /**
      * Get pointer to instance of locked typed object.
      * @return instance of typed object.
      */
     inline T* get(void) const
-        {return static_cast<T*>(object);};
+        {return static_cast<T*>(object);}
 };
 
 /**
@@ -1741,34 +1741,34 @@ public:
     /**
      * Construct empty instance to reference shared typed singleton.
      */
-    inline shared_instance() : shared_release() {};
+    inline shared_instance() : shared_release() {}
 
     /**
      * Construct shared access instance of shared typed singleton from matching
      * shared_pointer.
      * @param pointer to get instance from.
      */
-    inline shared_instance(shared_pointer<T> &pointer) : shared_release(pointer) {};
+    inline shared_instance(shared_pointer<T> &pointer) : shared_release(pointer) {}
 
     /**
      * Access shared typed singleton object this instance locks and references.
      */
     inline const T& operator*() const
-        {return *(static_cast<const T&>(ptr->pointer));};
+        {return *(static_cast<const T&>(ptr->pointer));}
 
     /**
      * Access member of shared typed singleton object this instance locks and
      * references.
      */
     inline const T* operator->() const
-        {return static_cast<const T*>(ptr->pointer);};
+        {return static_cast<const T*>(ptr->pointer);}
 
     /**
      * Access pointer to typed singleton object this instance locks and
      * references.
      */
     inline const T* get(void) const
-        {return static_cast<const T*>(ptr->pointer);};
+        {return static_cast<const T*>(ptr->pointer);}
 };
 
 /**
@@ -1784,34 +1784,34 @@ public:
     /**
      * Create a pointer with no reference.
      */
-    inline mutex_pointer() : auto_protect() {};
+    inline mutex_pointer() : auto_protect() {}
 
     /**
      * Create a pointer with a reference to a heap object.
      * @param object we are referencing.
      */
-    inline mutex_pointer(T* object) : auto_protect(object) {};
+    inline mutex_pointer(T* object) : auto_protect(object) {}
 
     /**
      * Reference object we are pointing to through pointer indirection.
      * @return object we are pointing to.
      */
     inline T& operator*() const
-        {return *(static_cast<T&>(auto_protect::object));};
+        {return *(static_cast<T&>(auto_protect::object));}
 
     /**
      * Reference member of object we are pointing to.
      * @return reference to member of pointed object.
      */
     inline T* operator->() const
-        {return static_cast<T*>(auto_protect::object);};
+        {return static_cast<T*>(auto_protect::object);}
 
     /**
      * Get pointer to object.
      * @return pointer or NULL if we are not referencing an object.
      */
     inline T* get(void) const
-        {return static_cast<T*>(auto_protect::object);};
+        {return static_cast<T*>(auto_protect::object);}
 };
 
 /**

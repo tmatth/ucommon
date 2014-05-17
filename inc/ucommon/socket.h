@@ -46,6 +46,8 @@ extern "C" {
 #define SHUT_RDWR   SD_BOTH
 #define SHUT_WR     SD_SEND
 #define SHUT_RD     SD_RECV
+typedef uint16_t in_port_t;
+typedef uint32_t in_addr_t;
 #else
 #include <unistd.h>
 #include <sys/socket.h>
@@ -233,28 +235,28 @@ public:
      * @return name of cidr.
      */
     inline const char *getName(void) const
-        {return Name;};
+        {return Name;}
 
     /**
      * Get the address family of our cidr block object.
      * @return family of our cidr.
      */
     inline int getFamily(void) const
-        {return Family;};
+        {return Family;}
 
     /**
      * Get the network host base address of our cidr block.
      * @return binary network host address.
      */
     inline inethostaddr_t getNetwork(void) const
-        {return Network;};
+        {return Network;}
 
     /**
      * Get the effective network mask for our cidr block.
      * @return binary network mask for our cidr.
      */
     inline inethostaddr_t getNetmask(void) const
-        {return Netmask;};
+        {return Netmask;}
 
     /**
      * Get the broadcast host address represented by our cidr.
@@ -289,7 +291,7 @@ public:
      * @return true if address is within cidr.
      */
     inline bool operator==(const struct sockaddr *address) const
-        {return is_member(address);};
+        {return is_member(address);}
 
     /**
      * Test if a given socket address falls outside this cidr.
@@ -297,7 +299,7 @@ public:
      * @return true if address is outside cidr.
      */
     inline bool operator!=(const struct sockaddr *address) const
-        {return !is_member(address);};
+        {return !is_member(address);}
 };
 
 /**
@@ -416,7 +418,7 @@ public:
             {return !(*this==other);}
 
         inline bool equals(const address& other) const
-            {return *this == other;};
+            {return *this == other;}
 
         /**
          * Get the first socket address in our address list.
@@ -435,7 +437,7 @@ public:
          * @return first socket address we resolved or NULL if none.
          */
         inline operator struct sockaddr *() const
-            {return get();};
+            {return get();}
 
         /**
          * Get the first socket address of specified family from our list.
@@ -492,35 +494,35 @@ public:
          * @return addrinfo list we resolved or NULL if none.
          */
         inline struct addrinfo *getList(void) const
-            {return list;};
+            {return list;}
 
         /**
          * Get the full socket address list by casted reference.
          * @return addrinfo list we resolved or NULL if none.
          */
         inline operator struct addrinfo *() const
-            {return list;};
+            {return list;}
 
         /**
          * Return the full socket address list by pointer reference.
          * @return addrinfo list we resolved or NULL if none.
          */
         inline struct addrinfo *operator*() const
-            {return list;};
+            {return list;}
 
         /**
          * Test if the address list is valid.
          * @return true if we have an address list.
          */
         inline operator bool() const
-            {return list != NULL;};
+            {return list != NULL;}
 
         /**
          * Test if we have no address list.
          * @return true if we have no address list.
          */
         inline bool operator!() const
-            {return list == NULL;};
+            {return list == NULL;}
 
         /**
          * Test if the first socket address is ADDR_ANY:
@@ -804,7 +806,7 @@ public:
      * @return 0 if successful, -1 on error.
      */
     inline int nodelay(void) const
-        {return nodelay(so);};
+        {return nodelay(so);}
 
     /**
      * Test for pending input data.  This function can wait up to a specified
@@ -828,7 +830,7 @@ public:
      * @return bytes pending.
      */
     inline unsigned pending(void) const
-        {return pending(so);};
+        {return pending(so);}
 
     /**
      * Set socket for unicast mode broadcasts.
@@ -836,7 +838,7 @@ public:
      * @return 0 on success, -1 if error.
      */
     inline int broadcast(bool enable)
-        {return broadcast(so, enable);};
+        {return broadcast(so, enable);}
 
     /**
      * Set socket for keepalive packets.
@@ -844,7 +846,7 @@ public:
      * @return 0 on success, -1 if error.
      */
     inline int keepalive(bool enable)
-        {return keepalive(so, enable);};
+        {return keepalive(so, enable);}
 
     /**
      * Set socket blocking I/O mode.
@@ -852,7 +854,7 @@ public:
      * @return 0 on success, -1 if error.
      */
     inline int blocking(bool enable)
-        {return blocking(so, enable);};
+        {return blocking(so, enable);}
 
     /**
      * Set multicast mode and multicast broadcast range.
@@ -860,7 +862,7 @@ public:
      * @return 0 on success, -1 if error.
      */
     inline int multicast(unsigned ttl = 1)
-        {return multicast(so, ttl);};
+        {return multicast(so, ttl);}
 
     /**
      * Set loopback to read multicast packets we broadcast.
@@ -868,14 +870,14 @@ public:
      * @return 0 on success, -1 if error.
      */
     inline int loopback(bool enable)
-        {return loopback(so, enable);};
+        {return loopback(so, enable);}
 
     /**
      * Get socket error code.
      * @return socket error code.
      */
     inline int getError(void)
-        {return error(so);};
+        {return error(so);}
 
     /**
      * Set the time to live before packets expire.
@@ -883,7 +885,7 @@ public:
      * @return 0 on success, -1 on error.
      */
     inline int ttl(unsigned char time)
-        {return ttl(so, time);};
+        {return ttl(so, time);}
 
     /**
      * Set the size of the socket send buffer.
@@ -891,7 +893,7 @@ public:
      * @return 0 on success, -1 on error.
      */
     inline int sendsize(unsigned size)
-        {return sendsize(so, size);};
+        {return sendsize(so, size);}
 
     /**
      * Set the size to wait before sending.
@@ -899,7 +901,7 @@ public:
      * @return 0 on success, -1 on error.
      */
     inline int sendwait(unsigned size)
-        {return sendwait(so, size);};
+        {return sendwait(so, size);}
 
 
     /**
@@ -908,7 +910,7 @@ public:
      * @return 0 on success, -1 on error.
      */
     inline int recvsize(unsigned size)
-        {return recvsize(so, size);};
+        {return recvsize(so, size);}
 
     /**
      * Get the type of a socket.
@@ -938,7 +940,7 @@ public:
      * @return socket type.
      */
     inline int type(void)
-        {return type(so);};
+        {return type(so);}
 
     /**
      * Set segment size and get mtu of a socket.
@@ -946,7 +948,7 @@ public:
      * @return mtu size.
      */
     inline unsigned segsize(unsigned size)
-        {return segsize(so, size);};
+        {return segsize(so, size);}
 
     /**
      * Set ccid of dccp socket.
@@ -954,7 +956,7 @@ public:
      * @return true if success, false if not dccp or not supported ccid used.
      */
     inline bool ccid(uint8_t id)
-        {return ccid(so, id);};
+        {return ccid(so, id);}
 
     /**
      * Set the type of service field of outgoing packets.  Some useful
@@ -965,7 +967,7 @@ public:
      * @return 0 on success or -1 on error.
      */
     inline int tos(int type)
-        {return tos(so, type);};
+        {return tos(so, type);}
 
     /**
      * Set packet priority, 0 to 6 unless privileged.  Should be set before
@@ -974,13 +976,13 @@ public:
      * @return 0 on success, -1 on error.
      */
     inline int priority(int scheduling)
-        {return priority(so, scheduling);};
+        {return priority(so, scheduling);}
 
     /**
      * Shutdown the socket communication channel.
      */
     inline void shutdown(void)
-        {::shutdown(so, SHUT_RDWR);};
+        {::shutdown(so, SHUT_RDWR);}
 
     /**
      * Connect our socket to a remote host from an address list.
@@ -1134,14 +1136,14 @@ public:
      * @return socket descriptor of object.
      */
     inline operator socket_t() const
-        {return so;};
+        {return so;}
 
     /**
      * Get the socket descriptor by pointer reference.
      * @return socket descriptor of object.
      */
     inline socket_t operator*() const
-        {return so;};
+        {return so;}
 
     /**
      * Get the number of bytes pending in the receive buffer of a socket
@@ -1298,7 +1300,7 @@ public:
      * @return address family.
      */
     inline static int family(const struct sockaddr_storage& address)
-        {return ((const struct sockaddr *)&address)->sa_family;};
+        {return ((const struct sockaddr *)&address)->sa_family;}
 
     /**
      * Get the address family of an internet socket address object.
@@ -1306,7 +1308,7 @@ public:
      * @return address family.
      */
     inline static int family(const struct sockaddr_internet& address)
-        {return address.address.sa_family;};
+        {return address.address.sa_family;}
 
     /**
      * Get data waiting in receive queue.
@@ -1340,7 +1342,7 @@ public:
      * @return number of bytes sent, -1 if error.
      */
     inline static ssize_t replyto(socket_t socket, const void *buffer, size_t size, int flags, const struct sockaddr_storage *address)
-        {return sendto(socket, buffer, size, flags, (const struct sockaddr *)address);};
+        {return sendto(socket, buffer, size, flags, (const struct sockaddr *)address);}
 
     /**
      * Send to internet socket.
@@ -1352,7 +1354,7 @@ public:
      * @return number of bytes sent, -1 if error.
      */
     inline static ssize_t sendinet(socket_t socket, const void *buffer, size_t size, int flags, const struct sockaddr_internet *address)
-        {return sendto(socket, buffer, size, flags, (const struct sockaddr *)address);};
+        {return sendto(socket, buffer, size, flags, (const struct sockaddr *)address);}
 
     /**
      * Get internet data waiting in receive queue.
@@ -1503,7 +1505,7 @@ public:
      * @return number of bytes stored.
      */
     inline static unsigned store(struct sockaddr_storage *storage, const struct sockaddr *address)
-        {return copy((struct sockaddr*)storage, address);};
+        {return copy((struct sockaddr*)storage, address);}
 
     /**
      * Store an address into an internet address object.
@@ -1530,7 +1532,7 @@ public:
      * @return true if same family and equal.
      */
     inline static bool eq_from(const struct sockaddr_storage *address1, const struct sockaddr_storage *address2)
-        {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);};
+        {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);}
 
     /**
      * Compare socket addresses.  Test if the internet addresses received match.
@@ -1540,7 +1542,7 @@ public:
      * @return true if same family and equal.
      */
     inline static bool eq_inet(const struct sockaddr_internet *address1, const struct sockaddr_internet *address2)
-        {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);};
+        {return equal((const struct sockaddr *)address1, (const struct sockaddr *)address2);}
 
     /**
      * See if both addresses are in the same subnet.  This is only relevant
@@ -1582,7 +1584,7 @@ public:
      * @return service port number.
      */
     inline static short service(const struct sockaddr_internet *address)
-        {return service((const struct sockaddr *)address);};
+        {return service((const struct sockaddr *)address);}
 
     /**
      * Convert a socket address and service into a hash map index.
@@ -1716,7 +1718,7 @@ public:
      * @return true when acceptable connection is pending.
      */
     inline bool wait(timeout_t timeout = Timer::inf) const
-        {return Socket::wait(timeout);};
+        {return Socket::wait(timeout);}
 
     /**
      * Get the socket descriptor of the listener.
@@ -1796,76 +1798,76 @@ public:
         {ptr = NULL;}
 
     inline linked_pointer(Socket::address& list)
-        {ptr = list.getList();};
+        {ptr = list.getList();}
 
     /**
      * Get the full socket address list by casted reference.
      * @return addrinfo list we resolved or NULL if none.
      */
     inline operator struct sockaddr *() const
-        {return _getaddrinfo(ptr);};
+        {return _getaddrinfo(ptr);}
 
     /**
      * Return the full socket address list by pointer reference.
      * @return addrinfo list we resolved or NULL if none.
      */
     inline struct sockaddr *operator*() const
-        {return _getaddrinfo(ptr);};
+        {return _getaddrinfo(ptr);}
 
     inline operator struct sockaddr_in *() const
-        {return (struct sockaddr_in *)_getaddrinfo(ptr);};
+        {return (struct sockaddr_in *)_getaddrinfo(ptr);}
 
     inline struct sockaddr_in *in(void) const
-        {return (struct sockaddr_in *)_getaddrinfo(ptr);};
+        {return (struct sockaddr_in *)_getaddrinfo(ptr);}
 
 #ifdef  AF_INET6
     inline operator struct sockaddr_in6 *() const
-        {return (struct sockaddr_in6 *)_getaddrinfo(ptr);};
+        {return (struct sockaddr_in6 *)_getaddrinfo(ptr);}
 
     inline struct sockaddr_in6 *in6(void) const
-        {return (struct sockaddr_in6 *)_getaddrinfo(ptr);};
+        {return (struct sockaddr_in6 *)_getaddrinfo(ptr);}
 #endif
 
     /**
      * Get socket as expression operator.
      */
     inline socket_t operator()(void) const
-        {return _getaddrsock(ptr);};
+        {return _getaddrsock(ptr);}
 
     /**
      * Test if the address list is valid.
      * @return true if we have an address list.
      */
     inline operator bool() const
-        {return ptr != NULL;};
+        {return ptr != NULL;}
 
     /**
      * Assign our pointer from an address list.
      * @param pointer of linked list.
      */
     inline void operator=(struct addrinfo *list)
-        {ptr = list;};
+        {ptr = list;}
 
     /**
      * Assign our pointer from an address list.
      * @param pointer of linked list.
      */
     inline void operator=(Socket::address& list)
-        {ptr = list.getList();};
+        {ptr = list.getList();}
 
     /**
      * Assign our pointer from an address list.
      * @param pointer of linked list.
      */
     inline void set(struct addrinfo *list)
-        {ptr = list;};
+        {ptr = list;}
 
     /**
      * Assign our pointer from an address list.
      * @param pointer of linked list.
      */
     inline void set(Socket::address& list)
-        {ptr = list.getList();};
+        {ptr = list.getList();}
 
 
     /**
@@ -1873,17 +1875,17 @@ public:
      * @return evaluated member of object we point to.
      */
     inline struct sockaddr* operator->() const
-        {return _getaddrinfo(ptr);};
+        {return _getaddrinfo(ptr);}
 
     /**
      * Test if we have no address list.
      * @return true if we have no address list.
      */
     inline bool operator!() const
-        {return ptr == NULL;};
+        {return ptr == NULL;}
 
     inline void next(void)
-        {ptr = _nextaddrinfo(ptr);};
+        {ptr = _nextaddrinfo(ptr);}
 };
 
 /**

@@ -115,7 +115,7 @@ public:
         size_t size(unsigned member);
 
         inline size_t members(void)
-            {return count;};
+            {return count;}
 
         bool match(const char *text, unsigned flags = 0);
 
@@ -239,7 +239,7 @@ public:
     virtual int compare(const char *string) const;
 
     inline int collate(const char *string) const
-        {return compare(string);};
+        {return compare(string);}
 
 protected:
     /**
@@ -476,7 +476,7 @@ public:
      * @param count of characters to remove.
      */
     inline void trim(strsize_t count = 1)
-        {operator+=(count);};
+        {operator+=(count);}
 
     /**
      * Chop trailing characters from the string.
@@ -489,7 +489,7 @@ public:
      * @param count of characters to remove.
      */
     inline void chop(strsize_t count = 1)
-        {operator-=(count);};
+        {operator-=(count);}
 
     /**
      * Strip lead and trailing characters from the string.
@@ -701,14 +701,14 @@ public:
      * @return null terminated text of string.
      */
     inline operator const char *() const
-        {return c_str();};
+        {return c_str();}
 
     /**
      * Reference raw text buffer by pointer operator.
      * @return null terminated text of string.
      */
     inline const char *operator*() const
-        {return c_str();};
+        {return c_str();}
 
     /**
      * Test if the string's allocated space is all used up.
@@ -1122,7 +1122,7 @@ public:
     static int compare(const char *text1, const char *text2);
 
     static inline int collate(const char *text1, const char *text2)
-        {return compare(text1, text2);};
+        {return compare(text1, text2);}
 
     /**
      * Simple equal test for strings.
@@ -1299,7 +1299,7 @@ public:
      * @return token extracted from string or NULL if no more tokens found.
      */
     inline char *token(char **last, const char *list, const char *quote = NULL, const char *end = NULL)
-        {return token(c_mem(), last, list, quote, end);};
+        {return token(c_mem(), last, list, quote, end);}
 
     /**
      * Convert string to a double value.
@@ -1423,14 +1423,14 @@ public:
      * @param object to copy text from.
      */
     inline void operator=(String& object)
-        {set(object.c_str());};
+        {set(object.c_str());}
 
     /**
      * Assign null terminated text to our object.
      * @param text to copy.
      */
     inline void operator=(const char *text)
-        {set(text);};
+        {set(text);}
 
     /**
      * Create an instance of a memory string.
@@ -1529,14 +1529,14 @@ public:
      * @return pointer to text in object.
      */
     inline operator char *()
-        {return buffer;};
+        {return buffer;}
 
     /**
      * Get text by object pointer reference.
      * @return pointer to text in object.
      */
     inline char *operator*()
-        {return buffer;};
+        {return buffer;}
 
     /**
      * Array operator to get a character from the object.
@@ -1596,27 +1596,27 @@ public:
     /**
      * Create an empty instance of a string buffer.
      */
-    inline stringbuf() : memstring(buffer, S) {};
+    inline stringbuf() : memstring(buffer, S) {}
 
     /**
      * Create a string buffer from a null terminated string.
      * @param text to place in object.
      */
-    inline stringbuf(const char *text) : memstring(buffer, S) {set(text);};
+    inline stringbuf(const char *text) : memstring(buffer, S) {set(text);}
 
     /**
      * Assign a string buffer from a null terminated string.
      * @param text to assign to object.
      */
     inline void operator=(const char *text)
-        {set(text);};
+        {set(text);}
 
     /**
      * Assign a string buffer from another string object.
      * @param object to assign from.
      */
     inline void operator=(String& object)
-        {set(object.c_str());};
+        {set(object.c_str());}
 };
 
 #if !defined(_MSWINDOWS_) && !defined(__QNX__)
@@ -1773,7 +1773,7 @@ public:
         {return data;}
 
     inline const char *c_str(void) const
-        {return data;};
+        {return data;}
 
     inline const char *operator*() const
         {return data;}
