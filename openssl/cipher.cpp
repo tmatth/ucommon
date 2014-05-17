@@ -20,6 +20,8 @@
 static const unsigned char *_salt = NULL;
 static unsigned _rounds = 1;
 
+namespace ucommon {
+
 void Cipher::Key::assign(const char *text, size_t size)
 {
     assign(text, size, _salt, _rounds);
@@ -198,3 +200,4 @@ size_t Cipher::pad(const unsigned char *data, size_t size)
     return size;
 }
 
+} // namespace ucommon

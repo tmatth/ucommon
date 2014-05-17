@@ -54,7 +54,7 @@
 #define ENTER_CRITICAL  enterMutex();
 #define LEAVE_CRITICAL  leaveMutex();
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 class __EXPORT Mutex : protected ucommon::RecursiveMutex
 {
@@ -902,6 +902,6 @@ inline size_t put(Buffer &b, void *o, timeout_t t = 0)
 inline size_t peek(Buffer &b, void *o)
     {return b.peek(o);}
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

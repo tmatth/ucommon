@@ -43,7 +43,7 @@
 #include <commoncpp/string.h>
 #include <commoncpp/numbers.h>
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 char *newString(const char *src, size_t size)
 {
@@ -131,4 +131,4 @@ char *lsetField(char *dest, size_t size, const char *src, const char fill)
     return dest;
 }
 
-END_NAMESPACE
+} // namespace ost

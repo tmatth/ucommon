@@ -35,7 +35,7 @@
 typedef ucs4_t  wchar_t;
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 const char *utf8::nil = NULL;
 const unsigned utf8::ucsize = sizeof(wchar_t);
@@ -720,3 +720,4 @@ ucs4_t utf8_pointer::operator[](long offset) const
     return *ncp;
 }
 
+} // namespace ucommon

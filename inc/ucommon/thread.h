@@ -69,7 +69,7 @@
 #include <ucommon/memory.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 class SharedPointer;
 
@@ -2058,6 +2058,6 @@ inline bool _rw_release_(const void *obj)
 
 #define EXCLUSIVE(obj) for(bool _sync_flag_ = _rw_writer_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

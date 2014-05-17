@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 void Random::seed(void)
 {
     secure::init();
@@ -45,4 +47,4 @@ bool Random::status(void)
     return true;
 }
 
-
+} // namespace ucommon

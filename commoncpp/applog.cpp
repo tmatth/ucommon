@@ -60,8 +60,7 @@
 // local includes
 #include <commoncpp/applog.h>
 
-using namespace std;
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 class logStruct
 {
@@ -141,15 +140,12 @@ class logger : public ost::ThreadQueue
 
 };
 
-
 // mapping thread ID <-> logStruct (buffer)
 typedef std::map <cctid_t, logStruct> LogPrivateData;
 // map ident <-> levels
 typedef std::map <string, Slog::Level> IdentLevel;
 
-
-NAMESPACE_COMMONCPP
-class AppLogPrivate
+class __LOCAL AppLogPrivate
 {
   public:
     // subscription and unsubsciption must be protected as well
@@ -179,7 +175,6 @@ class AppLogPrivate
         delete _pLogger;
     }
 };
-END_NAMESPACE
 
 const levelNamePair AppLogPrivate::_values[] =
 {
@@ -1228,3 +1223,4 @@ AppLog& AppLog::operator<< (ostream& (*pfManipulator)(ostream&))
 
 #endif
 
+}

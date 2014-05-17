@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 bool Digest::has(const char *id)
 {
     return (EVP_get_digestbyname(id) != NULL);
@@ -125,9 +127,10 @@ const unsigned char *Digest::get(void)
 
     while(count < bufsize) {
         snprintf(textbuf + (count * 2), 3, "%2.2x",
-buffer[count]);
+        buffer[count]);
         ++count;
     }
     return buffer;
 }
 
+} // namespace ucommon

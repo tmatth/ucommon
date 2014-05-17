@@ -17,6 +17,8 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 void Digest::release(void)
 {
     if(context) {
@@ -29,7 +31,7 @@ void Digest::release(void)
     hashid = 0;
 }
 
-int context::map_digest(const char *type)
+int __context::map_digest(const char *type)
 {
     if(eq_case(type, "sha") || eq_case(type, "sha1")) 
         return GNUTLS_DIG_SHA1;
@@ -53,7 +55,7 @@ void Digest::set(const char *type)
 
     release();
 
-    hashid = context::map_digest(type);
+    hashid = __context::map_digest(type);
     
     if(!hashid || gnutls_hash_get_len((MD_ID)hashid) < 1) {
         hashid = 0;
@@ -65,7 +67,7 @@ void Digest::set(const char *type)
 
 bool Digest::has(const char *type)
 {
-    MD_ID id = (MD_ID)context::map_digest(type);
+    MD_ID id = (MD_ID)__context::map_digest(type);
 
     if(!id || (gnutls_hash_get_len(id) < 1))
         return false;
@@ -157,3 +159,4 @@ buffer[count]);
     return buffer;
 }
 
+} // namespace ucommon

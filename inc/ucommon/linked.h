@@ -40,7 +40,7 @@
 #include <ucommon/object.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 class OrderedObject;
 
@@ -1964,6 +1964,6 @@ typedef OrderedIndex objfifo_t;
  */
 typedef ObjectQueue objqueue_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

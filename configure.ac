@@ -130,8 +130,12 @@ if test "x$enable_stdcpp" = "xno" ; then
     UCOMMON_MODEL="CC"
     AC_MSG_RESULT(no)
     COMPAT=""
+    COMPAT_PC=""
+    COMPAT_CONFIG=""
 else
     COMPAT="commoncpp"
+    COMPAT_PC="commoncpp.pc"
+    COMPAT_CONFIG="commoncpp-config"
     AC_MSG_RESULT(yes)
 fi
 
@@ -761,6 +765,8 @@ AC_SUBST(SECURE_LOCAL)
 AC_SUBST(SECURE_LIBS)
 AC_SUBST(SECURE)
 AC_SUBST(COMPAT)
+AC_SUBST(COMPAT_PC)
+AC_SUBST(COMPAT_CONFIG)
 AC_SUBST(OPENSSL_LIBS)
 AC_SUBST(GNUTLS_LIBS)
 AC_SUBST(LT_VERSION)

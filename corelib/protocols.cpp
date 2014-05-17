@@ -32,7 +32,7 @@
 #undef  puts
 #undef  gets
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 void MemoryProtocol::fault(void) const
 {
@@ -739,3 +739,5 @@ PrintProtocol::~PrintProtocol()
 InputProtocol::~InputProtocol()
 {
 }
+
+} // namespace ucommon

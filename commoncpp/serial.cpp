@@ -75,7 +75,7 @@
 #include <cerrno>
 #include <iostream>
 
-NAMESPACE_COMMONCPP
+namespace ost {
 using std::streambuf;
 using std::iostream;
 using std::ios;
@@ -540,29 +540,6 @@ void Serial::close()
     dev = INVALID_HANDLE_VALUE;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 const int iAsync::getTimeOuts(unsigned long & readTimeout, unsigned long & writeTimeout)
 {
@@ -626,48 +603,48 @@ Serial::Error Serial::setSpeed(unsigned long speed)
 
     switch(speed) {
 #ifdef B115200
-        case 115200:
-                rate = B115200;
-                break;
+    case 115200:
+        rate = B115200;
+        break;
 #endif
 #ifdef B57600
-        case 57600:
-                rate = B57600;
-                break;
+    case 57600:
+        rate = B57600;
+        break;
 #endif
 #ifdef B38400
-        case 38400:
-                rate = B38400;
-                break;
+    case 38400:
+        rate = B38400;
+        break;
 #endif
-        case 19200:
-                rate = B19200;
-                break;
-        case 9600:
-                rate = B9600;
-                break;
-        case 4800:
-                rate = B4800;
-                break;
-        case 2400:
-                rate = B2400;
-                break;
-        case 1200:
-                rate = B1200;
-                break;
-        case 600:
-                rate = B600;
-                break;
-        case 300:
-                rate = B300;
-                break;
-        case 110:
-                rate = B110;
-                break;
+    case 19200:
+        rate = B19200;
+        break;
+    case 9600:
+        rate = B9600;
+        break;
+    case 4800:
+        rate = B4800;
+        break;
+    case 2400:
+        rate = B2400;
+        break;
+    case 1200:
+        rate = B1200;
+        break;
+    case 600:
+        rate = B600;
+        break;
+    case 300:
+        rate = B300;
+        break;
+    case 110:
+        rate = B110;
+        break;
 #ifdef  B0
-        case 0:
-                rate = B0;
-                break;
+    case 0:
+        rate = B0;
+        break;
 #endif
     default:
         return error(errSpeedInvalid);
@@ -689,7 +666,7 @@ Serial::Error Serial::setSpeed(unsigned long speed)
     tcsetattr(dev, TCSANOW, attr);
 #endif
     return errSuccess;
-    }
+}
 
 Serial::Error Serial::setFlowControl(Flow flow)
 {
@@ -744,7 +721,7 @@ Serial::Error Serial::setFlowControl(Flow flow)
 
 #endif
     return errSuccess;
-    }
+}
 
 Serial::Error Serial::setStopBits(int bits)
 {
@@ -779,7 +756,7 @@ Serial::Error Serial::setStopBits(int bits)
     tcsetattr(dev, TCSANOW, attr);
 #endif
     return errSuccess;
-    }
+}
 
 Serial::Error Serial::setCharBits(int bits)
 {
@@ -820,7 +797,7 @@ Serial::Error Serial::setCharBits(int bits)
     tcsetattr(dev, TCSANOW, attr);
 #endif
     return errSuccess;
-    }
+}
 
 Serial::Error Serial::setParity(Parity parity)
 {
@@ -860,7 +837,7 @@ Serial::Error Serial::setParity(Parity parity)
     tcsetattr(dev, TCSANOW, attr);
 #endif
     return errSuccess;
-    }
+}
 
 void Serial::sendBreak(void)
 {
@@ -871,7 +848,7 @@ void Serial::sendBreak(void)
 #else
     tcsendbreak(dev, 0);
 #endif
-    }
+}
 
 void Serial::toggleDTR(timeout_t millisec)
 {
@@ -895,7 +872,7 @@ void Serial::toggleDTR(timeout_t millisec)
         tcsetattr(dev, TCSANOW, &old);
     }
 #endif
-    }
+}
 
 bool Serial::isPending(Pending pending, timeout_t timeout)
 {
@@ -916,7 +893,7 @@ bool Serial::isPending(Pending pending, timeout_t timeout)
         case pendingError:
             return false;
         }
-        }
+    }
     else {
         OVERLAPPED ol;
         DWORD dwMask;
@@ -1032,11 +1009,7 @@ bool Serial::isPending(Pending pending, timeout_t timeout)
 #endif  //  WIN32
 
     return false;
-    }
-
-
-
-
+}
 
 TTYStream::TTYStream(const char *filename, timeout_t to)
     :   streambuf(),
@@ -1071,13 +1044,13 @@ TTYStream::TTYStream()
 #endif
     timeout = 0;
     gbuf = pbuf = NULL;
-            }
+}
 
 TTYStream::~TTYStream()
 {
     endStream();
     endSerial();
-            }
+}
 
 void TTYStream::endStream(void)
 {
@@ -1094,7 +1067,7 @@ void TTYStream::endStream(void)
     }
     bufsize = 0;
     clear();
-            }
+}
 
 void TTYStream::allocate(void)
 {
@@ -1123,7 +1096,7 @@ void TTYStream::allocate(void)
 
     setg(gbuf, gbuf + bufsize, gbuf + bufsize);
     setp(pbuf, pbuf + bufsize);
-            }
+}
 
 int TTYStream::doallocate()
 {
@@ -1132,7 +1105,7 @@ int TTYStream::doallocate()
 
     allocate();
     return 1;
-            }
+}
 
 void TTYStream::interactive(bool iflag)
 {
@@ -1164,7 +1137,7 @@ void TTYStream::interactive(bool iflag)
 
     if(bufsize < 2)
         allocate();
-            }
+}
 
 int TTYStream::uflow(void)
 {
@@ -1192,7 +1165,7 @@ int TTYStream::uflow(void)
         gbump(1);
         return ch;
     }
-            }
+}
 
 int TTYStream::underflow(void)
 {
@@ -1220,7 +1193,7 @@ int TTYStream::underflow(void)
 
     setg(eback(), eback(), eback() + rlen);
     return (unsigned char) *gptr();
-            }
+}
 
 int TTYStream::sync(void)
 {
@@ -1231,7 +1204,7 @@ int TTYStream::sync(void)
     }
     setg(gbuf, gbuf + bufsize, gbuf + bufsize);
     return 0;
-            }
+}
 
 int TTYStream::overflow(int c)
 {
@@ -1277,7 +1250,7 @@ int TTYStream::overflow(int c)
         pbump(1);
     }
     return c;
-            }
+}
 
 bool TTYStream::isPending(Pending pending, timeout_t timer)
 {
@@ -1287,7 +1260,7 @@ bool TTYStream::isPending(Pending pending, timeout_t timer)
 //      flush();
 
     return Serial::isPending(pending, timer);
-            }
+}
 
 
 
@@ -1298,14 +1271,14 @@ ttystream::ttystream() :
 TTYStream()
 {
     setError(false);
-            }
+}
 
 ttystream::ttystream(const char *name) :
 TTYStream()
 {
     setError(false);
     open(name);
-            }
+}
 
 void ttystream::close(void)
 {
@@ -1319,7 +1292,7 @@ void ttystream::close(void)
     endStream();
     restore();
     TTYStream::close();
-            }
+}
 
 void ttystream::open(const char *name)
 {
@@ -1429,20 +1402,20 @@ void ttystream::open(const char *name)
         }
         cp = strtok(NULL, ",");
     }
-            }
+}
 
 TTYSession::TTYSession(const char *filename, int pri, int stack) :
 Thread(pri, stack), TTYStream(filename)
 {
     setError(false);
-            }
+}
 
 
 TTYSession::~TTYSession()
 {
     terminate();
     endSerial();
-            }
+}
 
 #ifndef _MSWINDOWS_
 //  Not supporting this right now........
@@ -1467,7 +1440,7 @@ detect_disconnect(true)
         service = svc;
         svc->attach(this);
     }
-                }
+}
 
 SerialPort::~SerialPort()
 {
@@ -1475,35 +1448,35 @@ SerialPort::~SerialPort()
         service->detach(this);
 
     endSerial();
-                }
+}
 
 void SerialPort::expired(void)
 {
-                }
+}
 
 void SerialPort::pending(void)
 {
-                }
+}
 
 void SerialPort::disconnect(void)
 {
-                }
+}
 
 void SerialPort::output(void)
 {
-                }
+}
 
 void SerialPort::setTimer(timeout_t ptimer)
 {
     TimerPort::setTimer(ptimer);
     service->update();
-                }
+}
 
 void SerialPort::incTimer(timeout_t ptimer)
 {
     TimerPort::incTimer(ptimer);
     service->update();
-                }
+}
 
 
 void SerialPort::setDetectPending( bool val )
@@ -1521,7 +1494,7 @@ void SerialPort::setDetectPending( bool val )
 #endif
         service->update();
     }
-                }
+}
 
 void SerialPort::setDetectOutput( bool val )
 {
@@ -1538,7 +1511,7 @@ void SerialPort::setDetectOutput( bool val )
 #endif
         service->update();
     }
-                }
+}
 
 
 SerialService::SerialService(int pri, size_t stack, const char *id) :
@@ -1551,20 +1524,20 @@ Thread(pri, stack), Mutex()
     FD_ZERO(&connect);
     if(::pipe(iosync)) {
 #ifdef  CCXX_EXCEPTIONS
-                switch(Thread::getException()) {
-                case throwObject:
-                        throw(this);
-                        return;
+        switch(Thread::getException()) {
+        case throwObject:
+            throw(this);
+            return;
 #ifdef  COMMON_STD_EXCEPTION
-                case throwException:
-                        throw(ThrException("no service pipe"));
-                        return;
+        case throwException:
+            throw(ThrException("no service pipe"));
+            return;
 #endif
-                default:
-                        return;
-                        }
+        default:
+            return;
+        }
 #else
-                return;
+        return;
 #endif
     }
     hiwater = iosync[0] + 1;
@@ -1572,7 +1545,7 @@ Thread(pri, stack), Mutex()
 
     opt = fcntl(iosync[0], F_GETFL);
     fcntl(iosync[0], F_SETFL, opt | O_NDELAY);
-                }
+}
 
 SerialService::~SerialService()
 {
@@ -1581,19 +1554,19 @@ SerialService::~SerialService()
 
     while(first)
         delete first;
-                }
+}
 
 void SerialService::onUpdate(unsigned char flag)
 {
-                }
+}
 
 void SerialService::onEvent(void)
 {
-                }
+}
 
 void SerialService::onCallback(SerialPort *port)
 {
-                }
+}
 
 void SerialService::attach(SerialPort *port)
 {
@@ -1621,7 +1594,7 @@ void SerialService::attach(SerialPort *port)
         update();
         ++count;
     }
-                }
+}
 
 void SerialService::detach(SerialPort *port)
 {
@@ -1644,7 +1617,7 @@ void SerialService::detach(SerialPort *port)
     --count;
     leaveMutex();
     update();
-                }
+}
 
 void SerialService::update(unsigned char flag)
 {
@@ -1667,7 +1640,7 @@ void SerialService::update(unsigned char flag)
                 return;
 #endif
     }
-                }
+}
 
 
 void SerialService::run(void)
@@ -1849,15 +1822,8 @@ retry:
         select(hiwater, &inp, &out, &err, tvp);
 #endif
     }
-                }
+}
 
 #endif
 
-END_NAMESPACE
-
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 8
- * End:
- */
+} // namespace ost

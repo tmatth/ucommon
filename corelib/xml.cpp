@@ -22,12 +22,12 @@
 #include <ucommon/xml.h>
 #include <ctype.h>
 
-using namespace UCOMMON_NAMESPACE;
-
 static bool isElement(char c)
 {
     return isalnum(c) || c == ':' || c == '-' || c == '.' || c == '_';
 }
+
+namespace ucommon {
 
 XMLParser::XMLParser(unsigned size)
 {
@@ -553,3 +553,5 @@ void XMLParser::comment(caddr_t text, size_t len)
 void XMLParser::characters(caddr_t text, size_t len)
 {
 }
+
+} // namespace ucommon

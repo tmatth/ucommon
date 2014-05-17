@@ -51,7 +51,7 @@
 #include <commoncpp/socket.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 class MIMEMultipart;
 class MIMEItemPart;
@@ -211,7 +211,7 @@ public:
     MIMEFormData(MIMEMultipartForm *top, const char *name, const char *content);
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
 /** EMACS **

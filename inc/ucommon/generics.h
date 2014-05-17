@@ -45,7 +45,7 @@
 #define THROWS_ANY
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Generic smart pointer class.  This is the original Common C++ "Pointer"
@@ -570,6 +570,6 @@ inline T& (limit)(T& value, T& low, T& high)
     return (value < low) ? low : ((value > high) ? high : value);
 }
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

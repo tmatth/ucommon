@@ -19,10 +19,12 @@
 
 #if defined(OLD_STDCPP) || defined(NEW_STDCPP)
 
+namespace ucommon {
+
 sstream::sstream(secure::client_t scontext) :
 tcpstream()
 {
-    context *ctx = (context *)scontext;
+    __context *ctx = (__context *)scontext;
     ssl = NULL;
     bio = NULL;
     server = false;
@@ -34,7 +36,7 @@ tcpstream()
 sstream::sstream(const TCPServer *tcp, secure::server_t scontext, size_t size) :
 tcpstream(tcp, size)
 {
-    context *ctx = (context *)scontext;
+    __context *ctx = (__context *)scontext;
     ssl = NULL;
     bio = NULL;
     server = true;
@@ -132,5 +134,7 @@ int sstream::sync()
 
     return rtn;
 }
+
+} // namespace ucommon
 
 #endif

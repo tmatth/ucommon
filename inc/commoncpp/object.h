@@ -48,7 +48,7 @@
 #include <commoncpp/config.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 class MapObject;
 class MapIndex;
@@ -581,6 +581,6 @@ public:
     MapObject(const char *id);
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

@@ -30,7 +30,7 @@
 #include <ucommon/platform.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Automatic integer counting class.  This is an automatic counting object
@@ -207,6 +207,6 @@ typedef counter counter_t;
  */
 typedef toggle toggle_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

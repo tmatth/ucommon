@@ -19,7 +19,9 @@
 
 // for older/broken versions of gnutls_hmac_init headers
 
-class multicode
+namespace ucommon {
+
+class __LOCAL __multicode
 {
 public:
     int code;
@@ -43,7 +45,7 @@ void HMAC::release(void)
     hmacid = 0;
 }
 
-int context::map_hmac(const char *type)
+int __context::map_hmac(const char *type)
 {
     if(eq_case(type, "sha") || eq_case(type, "sha1")) 
         return GNUTLS_MAC_SHA1;
@@ -77,9 +79,9 @@ void HMAC::set(const char *digest, const char *key, size_t len)
     if(!len)
         return;
 
-    hmacid = context::map_hmac(digest);
+    hmacid = __context::map_hmac(digest);
 
-    multicode id;
+    __multicode id;
     id.code = hmacid;
 
     if(hmacid)
@@ -88,7 +90,7 @@ void HMAC::set(const char *digest, const char *key, size_t len)
 
 bool HMAC::has(const char *type)
 {
-    HMAC_ID id = (HMAC_ID)context::map_hmac(type);
+    HMAC_ID id = (HMAC_ID)__context::map_hmac(type);
 
     if(!id || (gnutls_hmac_get_len(id) < 1))
         return false;
@@ -128,3 +130,5 @@ buffer[count]);
     }
     return buffer;
 }
+
+} // namespace ucommon

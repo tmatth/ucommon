@@ -43,11 +43,8 @@
 #include <commoncpp/exception.h>
 #include <commoncpp/thread.h>
 #include <commoncpp/tokenizer.h>
-#include <cstdlib>
-#include <cstdio>
 
-NAMESPACE_COMMONCPP
-using namespace std;
+namespace ost {
 
 // sorted by the usual probability of occurence
 // see also: manpage of isspace()
@@ -137,11 +134,4 @@ const char * StringTokenizer::iterator::operator * () THROWS (StringTokenizer::N
     return token;
 }
 
-END_NAMESPACE
-
-/** EMACS **
- * Local variables:
- * mode: c++
- * c-basic-offset: 4
- * End:
- */
+} // namespace ost

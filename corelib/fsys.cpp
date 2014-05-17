@@ -83,7 +83,7 @@
 #include <sys/event.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 const fsys::offset_t fsys::end = (offset_t)(-1);
 
@@ -1791,3 +1791,5 @@ string_t fsys::prefix(void)
     string_t s = buf;
     return s;
 }
+
+} // namespace ucommon

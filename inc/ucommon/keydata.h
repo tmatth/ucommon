@@ -42,7 +42,7 @@
 #include <ucommon/memory.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 class keyfile;
 
@@ -254,6 +254,6 @@ public:
         {return errcode;}
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

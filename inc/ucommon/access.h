@@ -43,7 +43,7 @@
 #include <ucommon/protocols.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Common unlock protocol for locking protocol interface classes.
@@ -308,6 +308,6 @@ inline void release(shlock_t &reference)
 #define exclusive_locking(x) exlock_t __autolock__ = &x
 #define protected_locking(x) shlock_t __autolock__ = &x
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

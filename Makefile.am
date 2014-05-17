@@ -16,12 +16,13 @@ EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
 
 DIST_SUBDIRS = corelib commoncpp openssl gnutls nossl utils inc test
 SUBDIRS = corelib @SECURE@ @COMPAT@ utils inc test
+EXTRA_SCRIPTS = commoncpp-config
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = ucommon.pc commoncpp.pc
+pkgconfig_DATA = ucommon.pc @COMPAT_PC@
 
 scriptdir = $(bindir)
-script_SCRIPTS = ucommon-config commoncpp-config
+script_SCRIPTS = ucommon-config @COMPAT_CONFIG@
 
 man_MANS = ucommon-config.1 commoncpp-config.1
 

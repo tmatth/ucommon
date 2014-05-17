@@ -24,7 +24,9 @@ extern "C" {
     }
 }
 
-gnutls_priority_t context::priority_cache;
+namespace ucommon {
+
+gnutls_priority_t __context::priority_cache;
 
 bool secure::fips(void)
 {
@@ -40,7 +42,7 @@ bool secure::init(void)
         Socket::init();
 
         gnutls_global_init();
-        gnutls_priority_init (&context::priority_cache, "NORMAL", NULL);
+        gnutls_priority_init (&__context::priority_cache, "NORMAL", NULL);
         atexit(secure_shutdown);
         initialized = true;
     }
@@ -49,7 +51,7 @@ bool secure::init(void)
 
 secure::server_t secure::server(const char *certfile, const char *ca)
 {
-    context *ctx = new context;
+    __context *ctx = new __context;
 
     if(!ctx)
         return NULL;
@@ -76,7 +78,7 @@ secure::server_t secure::server(const char *certfile, const char *ca)
 
 secure::client_t secure::client(const char *ca)
 {
-    context *ctx = new context;
+    __context *ctx = new __context;
 
     if(!ctx)
         return NULL;
@@ -99,7 +101,7 @@ secure::client_t secure::client(const char *ca)
     return ctx;
 }
 
-context::~context()
+__context::~__context()
 {
     if(dh)
         gnutls_dh_params_deinit(dh);
@@ -123,7 +125,7 @@ secure::~secure()
 {
 }
 
-gnutls_session_t context::session(context *ctx)
+gnutls_session_t __context::session(__context *ctx)
 {
     SSL ssl = NULL;
     if(ctx && ctx->xcred && ctx->err() == secure::OK) {
@@ -133,7 +135,7 @@ gnutls_session_t context::session(context *ctx)
             gnutls_priority_set_direct(ssl, "PERFORMANCE", NULL);
             break;
         case GNUTLS_SERVER:
-            gnutls_priority_set(ssl, context::priority_cache);
+            gnutls_priority_set(ssl, __context::priority_cache);
             gnutls_certificate_server_set_request(ssl, GNUTLS_CERT_REQUEST);
             gnutls_session_enable_compatibility_mode(ssl);
         default:
@@ -144,4 +146,4 @@ gnutls_session_t context::session(context *ctx)
     return ssl;
 }
 
-
+} // namespace ucommon

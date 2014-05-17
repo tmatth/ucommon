@@ -88,7 +88,7 @@
 #define _PATH_TTY   "/dev/tty"
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 static shell::loglevel_t errlevel = shell::WARN;
 static shell::logmode_t errmode = shell::NONE;
@@ -2534,3 +2534,4 @@ String shell::path(path_t id, const char *dir)
     return result;
 }
 
+} // namespace ucommon

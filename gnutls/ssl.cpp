@@ -17,10 +17,12 @@
 
 #include "local.h"
 
+namespace ucommon {
+
 SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t scontext, size_t size) :
 TCPBuffer(tcp, size)
 {
-    ssl = context::session((context *)scontext);
+    ssl = __context::session((__context *)scontext);
     bio = NULL;
     server = true;
 
@@ -38,7 +40,7 @@ TCPBuffer(tcp, size)
 SSLBuffer::SSLBuffer(secure::client_t scontext) :
 TCPBuffer()
 {
-    ssl = context::session((context *)scontext);
+    ssl = __context::session((__context *)scontext);
     bio = NULL;
     server = false;
 }
@@ -128,3 +130,4 @@ size_t SSLBuffer::_pull(char *address, size_t size)
     return (size_t)result;
 }
 
+} // namespace ucommon

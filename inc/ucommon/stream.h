@@ -51,7 +51,7 @@
 
 #include <iostream>
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Common stream buffer for std C++ i/o classes.    This both binds the
@@ -476,7 +476,7 @@ inline std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
 inline std::istream& operator>> (std::istream& in, stringlist_t& list)
         {return _stream_operators::input(in, list);}
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif
 #endif

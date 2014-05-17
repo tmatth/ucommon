@@ -41,8 +41,10 @@
 #include <sys/resource.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
-using namespace std;
+namespace ucommon {
+using std::iostream;
+using std::streambuf;
+using std::ios;
 
 StreamBuffer::StreamBuffer() :
 streambuf(),
@@ -847,6 +849,8 @@ std::ostream& _stream_operators::print(std::ostream& out, const stringlist_t& li
     }
     return out;
 }
+
+} // namespace ucommon
 
 #endif
 

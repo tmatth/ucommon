@@ -96,7 +96,7 @@ typedef int socklen_t;
 #define _IORET64
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 DCCPSocket::DCCPSocket(Family fam) :
 Socket(fam, SOCK_DCCP, IPPROTO_DCCP)
@@ -701,5 +701,5 @@ size_t  DCCPSocket::available()
     return readsize;
 }
 
-
+} // namespace ost
 

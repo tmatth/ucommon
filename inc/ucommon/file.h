@@ -49,7 +49,7 @@
 
 #include <stdio.h>
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Access standard files through character protocol.  This can also be
@@ -239,7 +239,7 @@ public:
  */
 typedef file file_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif
 

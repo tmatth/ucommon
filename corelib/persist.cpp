@@ -22,8 +22,7 @@
 #include <ucommon/export.h>
 #include <ucommon/persist.h>
 
-using namespace UCOMMON_NAMESPACE;
-using namespace std;
+namespace ucommon {
 
 const uint32_t NullObject = 0xffffffff;
 
@@ -284,6 +283,8 @@ void PersistEngine::read(std::string& str) throw(PersistException)
   str = (char*)buffer;
   delete[] buffer;
 }
+
+} // namespace ucommon
 
 #endif
 #endif

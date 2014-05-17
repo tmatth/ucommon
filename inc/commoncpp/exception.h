@@ -60,7 +60,7 @@
 #include <exception>
 #include <stdexcept>
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * Mainline exception handler, this is the root for all Common C++
@@ -132,7 +132,7 @@ public:
     inline InterruptException() : ThrException("interrupted") {};
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
 

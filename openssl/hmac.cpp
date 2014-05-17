@@ -17,7 +17,7 @@
 
 #include "local.h"
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 bool HMAC::has(const char *id)
 {
@@ -91,4 +91,4 @@ buffer[count]);
     return buffer;
 }
 
-END_NAMESPACE
+} // namespace ucommon

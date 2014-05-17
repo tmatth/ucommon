@@ -50,7 +50,7 @@
 
 #if defined(CCXX_EXCEPTIONS)
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 Exception::Exception(const String& what_arg) throw():
 _what(what_arg)
@@ -111,5 +111,7 @@ const char* IOException::getSystemErrorString() const throw()
     return _systemErrorString;
 #endif
 }
+
+} // namespace ost
 
 #endif

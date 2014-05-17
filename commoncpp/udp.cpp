@@ -91,7 +91,7 @@ typedef int socklen_t;
 #define _IORET64
 #endif
 
-using namespace COMMONCPP_NAMESPACE;
+namespace ost {
 
 #ifdef  HAVE_GETADDRINFO
 
@@ -922,3 +922,4 @@ Socket::Error UDPDuplex::disconnect(void)
         return rtn2;
 }
 
+} // namespace ost

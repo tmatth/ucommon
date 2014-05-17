@@ -26,16 +26,12 @@
 #include <wincrypt.h>
 #endif
 
-#define NAMESPACE_LOCAL namespace __secure__ {
-#define LOCAL_NAMESPACE __secure__
+namespace ucommon {
 
-NAMESPACE_LOCAL
-using namespace UCOMMON_NAMESPACE;
-
-class __LOCAL context : public secure
+class __LOCAL __context : public secure
 {
 public:
-    ~context();
+    ~__context();
 
     unsigned int connect;
     gnutls_credentials_type_t xtype;
@@ -44,7 +40,7 @@ public:
 
     static gnutls_priority_t priority_cache;
 
-    static gnutls_session_t session(context *ctx);
+    static gnutls_session_t session(__context *ctx);
 
     static int map_digest(const char *type);
     static int map_cipher(const char *type);
@@ -59,9 +55,7 @@ typedef gnutls_hash_hd_t MD_CTX;
 typedef gnutls_cipher_hd_t CIPHER_CTX;
 typedef gnutls_cipher_algorithm_t CIPHER_ID;
 typedef gnutls_datum_t CIPHER_KEYDATA;
-typedef context *SSL_CTX;
+typedef __context *SSL_CTX;
 
-END_NAMESPACE
+} // namespace ucommon
 
-using namespace UCOMMON_NAMESPACE;
-using namespace LOCAL_NAMESPACE;

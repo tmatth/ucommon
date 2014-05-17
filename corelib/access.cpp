@@ -19,7 +19,7 @@
 #include <ucommon/export.h>
 #include <ucommon/access.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 UnlockAccess::~UnlockAccess()
 {
@@ -110,3 +110,4 @@ void shared_access::share(void)
     }
 }
 
+} // namespace ucommon

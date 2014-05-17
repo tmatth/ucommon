@@ -24,7 +24,7 @@
 #include <unistd.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 Number::Number(char *buf, unsigned width)
 {
@@ -172,3 +172,4 @@ long ZNumber::operator=(long value)
     return value;
 }
 
+} // namespace ucommon

@@ -29,7 +29,7 @@
 #include <ucommon/platform.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Generic atomic class for referencing atomic objects and static functions.
@@ -88,7 +88,7 @@ public:
          */
         spinlock();
 
-        /**
+        /**NAMESPACE_UCOMMON
          * Acquire the lock.  If the lock is not acquired, one "spins"
          * by doing something else.  One suggestion is using thread::yield.
          * @return true if acquired.
@@ -102,6 +102,6 @@ public:
     };
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

@@ -55,7 +55,7 @@
 #include <commoncpp/exception.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 // future definition of ipv4 specific classes, now defines
 
@@ -1035,6 +1035,6 @@ inline struct in6_addr getaddress(const IPV6Address &ia)
 
 #endif
 
-END_NAMESPACE
+} // namespace ost
 
 #endif

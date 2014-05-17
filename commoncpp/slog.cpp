@@ -52,6 +52,7 @@
 #include <syslog.h>
 #endif
 
+namespace ost {
 using std::streambuf;
 using std::ofstream;
 using std::ostream;
@@ -59,9 +60,7 @@ using std::clog;
 using std::endl;
 using std::ios;
 
-using namespace COMMONCPP_NAMESPACE;
-
-Slog ost::slog;
+Slog slog;
 
 Slog::Slog(void) :
 streambuf()
@@ -513,4 +512,5 @@ Slog &Slog::operator()(void)
     return *this;
 }
 
+} // namespace ost
 

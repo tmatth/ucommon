@@ -24,7 +24,7 @@
 #include <iostream>
 #include <cstdio>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
 static string testing("second test");
 

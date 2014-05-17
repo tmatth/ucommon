@@ -153,7 +153,7 @@ struct addrinfo {
 #define _listen_(so, count) ::listen(so, count)
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 typedef unsigned char   bit_t;
 
@@ -1073,6 +1073,23 @@ struct ::addrinfo *Socket::query(const char *hp, const char *svc, int type, int 
     return result;
 }
 
+bool
+Socket::address::operator==(const address& other) const
+{
+    struct addrinfo *node = list;
+    struct addrinfo *node_o = other.list;
+
+    while(node && node_o) {
+        if(!equal(node->ai_addr, node_o->ai_addr))
+            return false;
+        node = node->ai_next;
+        node_o = node_o->ai_next;
+    }
+    if(node || node_o)
+        return false;
+    return true;
+}
+
 void Socket::address::set(const char *host, unsigned port)
 {
     assert(host != NULL && *host != 0);
@@ -1167,6 +1184,20 @@ int Socket::address::family(void) const
     return ap->sa_family;
 }
 
+void Socket::address::setPort(in_port_t port)
+{
+    struct sockaddr *ap;
+    struct addrinfo *lp;
+
+    lp = list;
+
+    while(lp) {
+        ap = lp->ai_addr;
+        setPort(ap, port);
+        lp = lp->ai_next;
+    }
+}
+
 struct sockaddr *Socket::address::get(int family) const
 {
     struct sockaddr *ap;
@@ -1236,7 +1267,7 @@ unsigned Socket::address::remove(struct addrinfo *alist)
     return count;
 }
 
-bool Socket::address::insert(struct sockaddr *addr)
+bool Socket::address::insert(const struct sockaddr *addr)
 {
     assert(addr != NULL);
 
@@ -1276,6 +1307,132 @@ void Socket::address::copy(const struct addrinfo *addr)
             list = node;
         last = node;
     }
+}
+
+size_t Socket::address::getSize(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return 0;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return sizeof(sockaddr_in);
+    case AF_INET6:
+        return sizeof(sockaddr_in6);
+    default:
+        return 0;
+    }
+}
+
+in_port_t Socket::address::getPort(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return 0;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return ntohs(reinterpret_cast<const sockaddr_in* >(address)->sin_port);
+    case AF_INET6:
+        return ntohs(reinterpret_cast<const sockaddr_in6*>(address)->sin6_port);
+    default:
+        return 0;
+    }
+}
+
+void Socket::address::setPort(struct sockaddr *address, in_port_t port)
+{
+    if (address == NULL)
+        return;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        reinterpret_cast<sockaddr_in* >(address)->sin_port  = htons(port);
+        break;
+    case AF_INET6:
+        reinterpret_cast<sockaddr_in6*>(address)->sin6_port = htons(port);
+        break;
+    }
+}
+
+bool Socket::address::isAny(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return false;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return reinterpret_cast<const sockaddr_in*>(address)->sin_addr.s_addr == INADDR_ANY;
+    case AF_INET6:
+        return memcmp(
+            &reinterpret_cast<const sockaddr_in6*>(address)->sin6_addr, 
+            &in6addr_any, 
+            sizeof(in6addr_any)) == 0;
+    default:
+        return false;
+    }
+}
+
+bool Socket::address::isLoopback(const struct sockaddr *address)
+{
+    if (address == NULL)
+        return false;
+
+    switch (address->sa_family) {
+    case AF_INET:
+        return reinterpret_cast<const sockaddr_in*>(address)->sin_addr.s_addr == htonl(INADDR_LOOPBACK);
+    case AF_INET6:
+        return memcmp(
+            &reinterpret_cast<const sockaddr_in6*>(address)->sin6_addr, 
+            &in6addr_loopback, 
+            sizeof(in6addr_loopback)) == 0;
+    default:
+        return false;
+    }
+}
+
+void Socket::address::setAny(int sa_family)
+{
+    if(sa_family == AF_UNSPEC)
+        sa_family = family();
+    clear();
+    const sockaddr_storage sa = Socket::address::any(sa_family);
+    insert(reinterpret_cast<const sockaddr*>(&sa));
+}
+
+void Socket::address::setLoopback(int sa_family)
+{
+    if(sa_family == AF_UNSPEC)
+        sa_family = family();
+    clear();
+    const sockaddr_storage sa = Socket::address::loopback(sa_family);
+    insert(reinterpret_cast<const sockaddr*>(&sa));
+}
+
+sockaddr_storage Socket::address::any(int family)
+{
+    sockaddr_storage sa;
+    memset(&sa, 0, sizeof(sockaddr_storage));
+    reinterpret_cast<sockaddr*>(&sa)->sa_family = family;
+    return sa;
+}
+
+sockaddr_storage Socket::address::loopback(int family)
+{
+    sockaddr_storage sa = any(family);
+
+    switch (family) {
+    case AF_INET:
+        reinterpret_cast<sockaddr_in*>(&sa)->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        break;
+    case AF_INET6:
+        memcpy(
+            &reinterpret_cast<sockaddr_in6*>(&sa)->sin6_addr, 
+            &in6addr_loopback, 
+            sizeof(in6addr_loopback));
+        break;
+    }
+
+    return sa;
 }
 
 struct sockaddr_in *Socket::address::ipv4(struct sockaddr *addr)
@@ -3286,8 +3443,6 @@ String str(Socket& so, strsize_t size)
     return s;
 }
 
-NAMESPACE_UCOMMON
-
 struct sockaddr *_getaddrinfo(struct addrinfo *list)
 {
     return list->ai_addr;
@@ -3309,5 +3464,4 @@ socket_t _getaddrsock(struct addrinfo *list)
     return ::socket(list->ai_family, list->ai_socktype, list->ai_protocol);
 }
 
-END_NAMESPACE
-
+} // namespace ucommon

@@ -49,7 +49,7 @@
 #include <ucommon/thread.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Linked allocator helper for linked_allocator template.  This is used
@@ -685,6 +685,6 @@ typedef Stack stack_t;
  */
 typedef Queue fifo_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

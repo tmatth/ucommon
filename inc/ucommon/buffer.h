@@ -47,7 +47,7 @@
 #include <ucommon/shell.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A generic tcp socket class that offers i/o buffering.  All user i/o
@@ -134,6 +134,6 @@ protected:
  */
 typedef TCPBuffer tcp_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

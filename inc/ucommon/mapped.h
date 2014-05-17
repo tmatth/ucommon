@@ -45,7 +45,7 @@
 #include <signal.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Construct or access a named section of memory.  A logical name is used
@@ -507,6 +507,6 @@ public:
         {return (unsigned)(size / sizeof(T));};
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

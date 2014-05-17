@@ -62,7 +62,7 @@
 #define PGP_B64_WIDTH   64
 #define MIME_B64_WIDTH  76
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A convenience class for size of strings.
@@ -107,8 +107,8 @@ public:
         size_t count;
 
     public:
-        regex(const char *pattern, size_t slots = 1);
-        regex(size_t slots = 1);
+        regex(const char *pattern, size_t size = 1);
+        regex(size_t size = 1);
         ~regex();
 
         size_t offset(unsigned member);
@@ -1785,7 +1785,6 @@ public:
         {return data + size;}
 };
 
-
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

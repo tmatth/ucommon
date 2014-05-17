@@ -20,7 +20,9 @@
 static const unsigned char *_salt = NULL;
 static unsigned _rounds = 1;
 
-int context::map_cipher(const char *cipher)
+namespace ucommon {
+
+int __context::map_cipher(const char *cipher)
 {
     char algoname[64];
 
@@ -206,14 +208,14 @@ void Cipher::Key::set(const char *cipher, const char *digest)
 {
     set(cipher);
 
-    hashid = context::map_digest(digest);
+    hashid = __context::map_digest(digest);
 }
 
 void Cipher::Key::set(const char *cipher)
 {
     clear();
     
-    algoid = context::map_cipher(cipher);
+    algoid = __context::map_cipher(cipher);
 
     if(algoid) {
         blksize = gnutls_cipher_get_block_size((CIPHER_ID)algoid);
@@ -236,7 +238,7 @@ void Cipher::release(void)
 
 bool Cipher::has(const char *cipher)
 {
-    return context::map_cipher(cipher) != 0;
+    return __context::map_cipher(cipher) != 0;
 }
 
 void Cipher::set(const key_t key, mode_t mode, unsigned char *address, size_t size)
@@ -334,4 +336,4 @@ size_t Cipher::pad(const unsigned char *data, size_t size)
     return size;
 }
 
-
+} // namespace ucommon

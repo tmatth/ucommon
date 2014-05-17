@@ -144,7 +144,7 @@ struct sockaddr_storage
 #define DCCP_SOCKOPT_TX_CCID            14
 #define DCCP_SOCKOPT_RX_CCID            15
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * A class to hold internet segment routing rules.  This class can be used
@@ -406,6 +406,19 @@ public:
         ~address();
 
         /**
+         * Compare two address lists.
+         * @return true if the two lists are the same (same addresses
+         * in the same order).
+         */
+        bool operator==(const address& other) const;
+
+        inline bool operator!=(const address& other) const
+            {return !(*this==other);}
+
+        inline bool equals(const address& other) const
+            {return *this == other;};
+
+        /**
          * Get the first socket address in our address list.
          * @return first socket address or NULL if none.
          */
@@ -449,6 +462,26 @@ public:
         int family(void) const;
 
         /**
+         * Get the address size of the first address.
+         * @return size in bytes of first socket address or 0 if none.
+         */
+        inline size_t getSize(void) const
+            {return getSize(get());}
+
+        /**
+         * Get the port of the first address .
+         * @return port of first socket address or 0 if none.
+         */
+        inline in_port_t getPort(void) const
+            {return getPort(get());}
+
+        /**
+         * Set the port of all addresses in the list.
+         * @param port the port to set.
+         */
+        void setPort(in_port_t port);
+
+        /**
          * Find a specific socket address in our address list.
          * @return matching address from list or NULL if not found.
          */
@@ -489,6 +522,37 @@ public:
         inline bool operator!() const
             {return list == NULL;};
 
+        /**
+         * Test if the first socket address is ADDR_ANY:
+         *   0.0.0.0 or ::0
+         * @return true if the address is one of the above.
+         */
+        inline bool isAny() const
+            {return isAny(get());}
+
+        /**
+         * Clear the address list and set the first address to be the
+         * ADDR_ANY of the current family, or of the specified family
+         * (if set).
+         * @param family: address family to set.
+         */
+        void setAny(int family = AF_UNSPEC);
+
+        /**
+         * Test if the first socket address is ADDR_LOOPBACK:
+         *   127.0.0.1 or ::1
+         * @return true if the address is one of the above.
+         */
+        inline bool isLoopback() const
+            {return isLoopback(get());}
+
+        /**
+         * Clear the address list and set the first address to be the
+         * ADDR_LOOPBACK of the current family, or of the specified family
+         * (if set).
+         * @param family: address family to set.
+         */
+        void setLoopback(int family = AF_UNSPEC);
 
         /**
          * Clear current object.
@@ -553,7 +617,7 @@ public:
          * @param address to insert into list.
          * @return true if inserted, false if duplicate.
          */
-        bool insert(struct sockaddr *address);
+        bool insert(const struct sockaddr *address);
 
         /**
          * Copy an existing addrinfo into our object.  This is also used
@@ -574,6 +638,49 @@ public:
          * @param service port or 0.
          */
         void set(const char *hostname, unsigned service = 0);
+
+        /**
+         * Returns the size of the socket address according to the family.
+         * @return size in bytes of the valid part of the socket address.
+         */
+        static size_t getSize(const struct sockaddr *address);
+
+        /**
+         * Returns the port of the socket address.
+         * @return port associated to the socket address.
+         */
+        static in_port_t getPort(const struct sockaddr *address);
+
+        /**
+         * Set the port of the socket address.
+         * @param address to edit.
+         * @param port to associate to the socket address.
+         */
+        static void setPort(struct sockaddr *address, in_port_t port);
+
+        /**
+         * Test if the socket address is ADDR_ANY:
+         *   0.0.0.0 or ::0
+         * @return true if the address is one of the above.
+         */
+        static bool isAny(const struct sockaddr *address);
+
+        /**
+         * Get a ADDR_ANY socket address of the given family.
+         */
+        static sockaddr_storage any(int family);
+
+        /**
+         * Test if the socket address is ADDR_LOOPBACK:
+         *   127.0.0.1 or ::1
+         * @return true if the address is one of the above.
+         */
+        static bool isLoopback(const struct sockaddr *address);
+
+        /**
+         * Get a ADDR_LOOPBACK socket address of the given family.
+         */
+        static sockaddr_storage loopback(int family);
 
         /**
          * Duplicate a socket address.
@@ -1833,6 +1940,6 @@ String str(Socket& so, strsize_t size);
 
 typedef TCPServer   tcpserv_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

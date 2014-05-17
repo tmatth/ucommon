@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
 int main(int argc, char **argv)
 {

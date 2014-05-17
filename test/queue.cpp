@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
 static unsigned reused = 0;
 

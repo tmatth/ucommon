@@ -55,7 +55,7 @@
 #include <commoncpp/exception.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * The Serial class is used as the base for all serial I/O services
@@ -860,7 +860,7 @@ public:
 };
 #endif
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
 /** EMACS **

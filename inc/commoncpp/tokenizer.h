@@ -55,7 +55,7 @@
 #include <commoncpp/exception.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * Splits delimited string into tokens.
@@ -304,7 +304,7 @@ public:
         {return itEnd;}
 };
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
 

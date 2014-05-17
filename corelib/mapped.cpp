@@ -119,7 +119,7 @@ static key_t accessipc(const char *name, char mode)
 
 static  bool use_mapping = true;
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 void MappedMemory::disable(void)
 {
@@ -585,3 +585,4 @@ ReusableObject *MappedReuse::getTimed(timeout_t timeout)
     return obj;
 }
 
+} // namespace ucommon

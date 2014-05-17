@@ -38,7 +38,7 @@
 #include <string.h>
 #include <ctype.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 file file::cin(stdin);
 file file::cout(stdout);
@@ -346,3 +346,4 @@ bool file::good(void)
     return true;
 }
 
+} // namespace ucommon

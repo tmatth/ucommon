@@ -26,7 +26,7 @@
 #endif
 #include <limits.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
 #else
@@ -2316,3 +2316,4 @@ uint16_t String::crc16(uint8_t *binary, size_t size)
     return crc;
 }
 
+} // namespace ucommon

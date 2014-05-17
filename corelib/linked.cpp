@@ -21,7 +21,7 @@
 #include <ucommon/string.h>
 #include <ucommon/thread.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 // I am not sure if we ever use these...seemed like a good idea at the time
 const LinkedObject *LinkedObject::nil = (LinkedObject *)NULL;
@@ -1194,3 +1194,4 @@ LinkedObject *ObjectStack::pull(void)
     return obj;
 }
 
+} // namespace ucommon

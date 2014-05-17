@@ -23,7 +23,7 @@
 #include <ucommon/string.h>
 #include <ctype.h>
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
 keydata::keyvalue::keyvalue(keyfile *allocator, keydata *section, const char *kv, const char *dv) :
 OrderedObject(&section->index)
@@ -435,3 +435,4 @@ next:
     fclose(fp);
 }
 
+} // namespace ucommon

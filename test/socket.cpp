@@ -23,10 +23,12 @@
 
 #include <stdio.h>
 
-using namespace UCOMMON_NAMESPACE;
+using namespace ucommon;
 
+static Socket::address testing("0.0.0.0");
 static Socket::address localhost("127.0.0.1", 4444);
 #ifdef  AF_INET6
+static Socket::address any6("[::]:4242");
 static Socket::address testing6("44:022:66::1", 4444);
 static Socket::address localhost6("::1", 4444);
 #endif
@@ -45,10 +47,30 @@ extern "C" int main()
     assert(0 == strcmp(addrbuf, "127.0.0.1"));
     assert(eq((struct sockaddr *)&addr, localhost.get(AF_INET)));
     assert(eq_subnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
+    assert(localhost.isLoopback());
+    assert(localhost.getPort() == 4444);
+    assert(testing.isAny());
+    assert(testing.family() == AF_INET);
+    testing.setLoopback();
+    assert(testing.isLoopback());
+    assert(testing.family() == AF_INET);
+    testing.setPort(4444);
+    assert(testing.getPort() == 4444);
+    assert(testing == localhost);
+    localhost.setAny();
+    assert(localhost);
+    assert(localhost.isAny());
+    assert(localhost.family() == AF_INET);
+
 #ifdef  AF_INET6
     // we can only test if interface/ipv6 support is actually running
     // so we use getinterface to find out first.  it will return -1 for
     // localhost interface if ipv6 is down...
+    assert(any6.isAny());
+    assert(any6.getPort() == 4242);
+    assert(!testing6.isLoopback());
+    assert(localhost6.isLoopback());
+    assert(localhost6.getPort() == 4444);
     assert(localhost6.get(AF_INET6) != NULL);
     if(!Socket::via((struct sockaddr *)&addr, localhost6.get(AF_INET6))) {
         Socket::query((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));

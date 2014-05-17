@@ -46,7 +46,7 @@
 #include <ucommon/string.h>
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 class PagerPool;
 
@@ -1407,6 +1407,6 @@ inline void unshift(stringlist_t& list, const char *text)
 inline String str(StringPager& list, const char *prefix = NULL, const char *middle = NULL, const char *suffix = NULL)
     {return list.join(prefix, middle, suffix);}
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif

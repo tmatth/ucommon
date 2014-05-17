@@ -106,7 +106,7 @@
 #define S_ISLNK(mode)   (0)
 #endif
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Convenience type for loader operations.
@@ -828,7 +828,7 @@ inline bool is_link(const char *path)
 inline bool is_device(const char *path)
     {return fsys::is_device(path);}
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif
 

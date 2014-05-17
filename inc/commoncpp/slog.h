@@ -57,7 +57,7 @@
 #include <commoncpp/thread.h>
 #endif
 
-NAMESPACE_COMMONCPP
+namespace ost {
 
 /**
  * The slog class is used to stream messages to the system's logging facility (syslogd).
@@ -287,7 +287,7 @@ public:
 
 extern __EXPORT Slog    slog;
 
-END_NAMESPACE
+} // namespace ost
 
 #endif
 

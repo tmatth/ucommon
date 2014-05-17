@@ -38,7 +38,7 @@
 
 #include <time.h>
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /**
  * Timer class to use when scheduling realtime events.  The timer generally
@@ -416,7 +416,7 @@ typedef TimerQueue::event TQEvent;
  */
 typedef Timer timer_t;
 
-END_NAMESPACE
+} // namespace ucommon
 
 extern "C" {
 #if defined(WIN32)

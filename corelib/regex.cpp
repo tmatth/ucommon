@@ -30,9 +30,9 @@
 #include <regex.h>
 #endif
 
-using namespace UCOMMON_NAMESPACE;
+namespace ucommon {
 
-String::regex::regex(const char *pattern, size_t slots)
+String::regex::regex(const char *pattern, size_t size)
 {
 #ifdef  HAVE_REGEX_H
     regex_t *r = (regex_t *)malloc(sizeof(regex_t));
@@ -42,19 +42,19 @@ String::regex::regex(const char *pattern, size_t slots)
         r = NULL;
     }
     object = r;
-    count = slots;
-    results = (regmatch_t *)malloc(sizeof(regmatch_t) * slots);
+    count = size;
+    results = (regmatch_t *)malloc(sizeof(regmatch_t) * size);
 #else
     object = results = NULL;
     count = 0;
 #endif
 }
 
-String::regex::regex(size_t slots)
+String::regex::regex(size_t size)
 {
 #ifdef  HAVE_REGEX_H
-    count = slots;
-    results = (regmatch_t *)malloc(sizeof(regmatch_t) * slots);
+    count = size;
+    results = (regmatch_t *)malloc(sizeof(regmatch_t) * size);
     object = NULL;
 #else
     object = results = NULL;
@@ -247,3 +247,4 @@ unsigned StringPager::split(stringex_t& expr, const char *string, unsigned flags
     return count;
 }
 
+} // namespace ucommon

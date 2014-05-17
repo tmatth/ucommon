@@ -32,7 +32,7 @@
 
 #include <list> // example...
 
-NAMESPACE_UCOMMON
+namespace ucommon {
 
 /*
     In the future we may introduce optional classes which require and/or
@@ -40,7 +40,7 @@ NAMESPACE_UCOMMON
     where they may be added.
 */
 
-END_NAMESPACE
+} // namespace ucommon
 
 #endif
 #endif
