@@ -96,9 +96,9 @@ struct levelNamePair
   Slog::Level level;
 };
 
-#ifdef _MSWINDOWS_
-template class std::map<string, Slog::Level >;
-#endif
+//#ifdef _MSWINDOWS_
+//template class std::map<string, Slog::Level >;
+//#endif
 
 class LevelName : public std::map<string, Slog::Level>
 {

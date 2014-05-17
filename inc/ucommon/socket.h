@@ -46,6 +46,8 @@ extern "C" {
 #define SHUT_RDWR   SD_BOTH
 #define SHUT_WR     SD_SEND
 #define SHUT_RD     SD_RECV
+typedef uint16_t in_port_t;
+typedef uint32_t in_addr_t;
 #else
 #include <unistd.h>
 #include <sys/socket.h>

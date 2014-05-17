@@ -49,6 +49,8 @@ directive
 *.libs
 *.pc
 *.spec
+*.exe
+*.dll
 *~
 *.rpm
 *.tar.xz
