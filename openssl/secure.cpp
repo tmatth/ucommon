@@ -84,7 +84,7 @@ bool secure::init(void)
 
 void secure::cipher(secure *scontext, const char *ciphers)
 {
-    context *ctx = (context *)scontext;
+    __context *ctx = (__context *)scontext;
     if(!ctx)
         return;
 
@@ -93,7 +93,7 @@ void secure::cipher(secure *scontext, const char *ciphers)
 
 secure::client_t secure::client(const char *ca)
 {
-    context *ctx = new(context);
+    __context *ctx = new(__context);
     secure::init();
 
     if(!ctx)
@@ -124,7 +124,7 @@ secure::client_t secure::client(const char *ca)
 
 secure::server_t secure::server(const char *certfile, const char *ca)
 {
-    context *ctx = new(context);
+    __context *ctx = new(__context);
 
     if(!ctx)
         return NULL;
@@ -197,12 +197,9 @@ secure::~secure()
 {
 }
 
-namespace __secure__ {
-
-context::~context()
+__context::~__context()
 {
     if(ctx)
         SSL_CTX_free(ctx);
 }
 
-} // namespace __secure__

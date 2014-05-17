@@ -36,7 +36,6 @@
 #include <map>
 
 namespace ucommon {
-#define NS_PREFIX   ucc::
 
 // This typedef allows us to declare NewPersistObjectFunction now
 typedef class PersistObject* (*NewPersistObjectFunction) (void);
@@ -104,22 +103,22 @@ public:
 
 #define DECLARE_PERSISTENCE(ClassType)                  \
   public:                               \
-    friend NS_PREFIX PersistEngine& operator>>( NS_PREFIX PersistEngine& ar, ClassType *&ob);     \
-    friend NS_PREFIX PersistEngine& operator<<( NS_PREFIX PersistEngine& ar, ClassType const &ob);    \
-    friend NS_PREFIX PersistObject *createNew##ClassType();                \
+    friend ucommon::PersistEngine& operator>>( ucommon::PersistEngine& ar, ClassType *&ob);     \
+    friend ucommon::PersistEngine& operator<<( ucommon::PersistEngine& ar, ClassType const &ob);    \
+    friend ucommon::PersistObject *createNew##ClassType();                \
     virtual const char* getPersistenceID() const;           \
-    static NS_PREFIX TypeManager::Registration registrationFor##ClassType;
+    static ucommon::TypeManager::Registration registrationFor##ClassType;
 
 #define IMPLEMENT_PERSISTENCE(ClassType, FullyQualifiedName)              \
-  NS_PREFIX PersistObject *createNew##ClassType() { return new ClassType; }              \
+  ucommon::PersistObject *createNew##ClassType() { return new ClassType; }              \
   const char* ClassType::getPersistenceID() const {return FullyQualifiedName;} \
-  NS_PREFIX PersistEngine& operator>>(NS_PREFIX PersistEngine& ar, ClassType &ob)               \
-    { ar >> (NS_PREFIX PersistObject &) ob; return ar; }                     \
-  NS_PREFIX PersistEngine& operator>>(NS_PREFIX PersistEngine& ar, ClassType *&ob)                  \
-    { ar >> (NS_PREFIX PersistObject *&) ob; return ar; }                    \
-  NS_PREFIX PersistEngine& operator<<(NS_PREFIX PersistEngine& ar, ClassType const &ob)                 \
-    { ar << (NS_PREFIX PersistObject const *)&ob; return ar; }               \
-  NS_PREFIX TypeManager::Registration                             \
+  ucommon::PersistEngine& operator>>(ucommon::PersistEngine& ar, ClassType &ob)               \
+    { ar >> (ucommon::PersistObject &) ob; return ar; }                     \
+  ucommon::PersistEngine& operator>>(ucommon::PersistEngine& ar, ClassType *&ob)                  \
+    { ar >> (ucommon::PersistObject *&) ob; return ar; }                    \
+  ucommon::PersistEngine& operator<<(ucommon::PersistEngine& ar, ClassType const &ob)                 \
+    { ar << (ucommon::PersistObject const *)&ob; return ar; }               \
+  ucommon::TypeManager::Registration                             \
     ClassType::registrationFor##ClassType(FullyQualifiedName,         \
                           createNew##ClassType);
 

@@ -125,7 +125,7 @@ const unsigned char *Digest::get(void)
 
     while(count < bufsize) {
         snprintf(textbuf + (count * 2), 3, "%2.2x",
-buffer[count]);
+        buffer[count]);
         ++count;
     }
     return buffer;

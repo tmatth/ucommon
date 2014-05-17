@@ -27,22 +27,17 @@
 #include <wincrypt.h>
 #endif
 
-#define NAMESPACE_LOCAL namespace __secure__ {
-#define LOCAL_NAMESPACE __secure__
+namespace ucommon {
 
-namespace __secure__ {
-using namespace ucommon;
-
-class __LOCAL context : public secure
+class __LOCAL __context : public secure
 {
 public:
-    ~context();
+    ~__context();
 
     SSL_CTX *ctx;
 };
 
-END_NAMESPACE
+} // namespace ucommon
 
 using namespace ucommon;
-using namespace __secure__;
 

@@ -31,9 +31,9 @@
 #include <ucommon/thread.h>
 #endif
 
-typedef unsigned short vectorsize_t;
-
 namespace ucommon {
+
+typedef unsigned short vectorsize_t;
 
 /**
  * An array of reusable objects.  This class is used to support the

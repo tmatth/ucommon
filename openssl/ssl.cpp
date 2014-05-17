@@ -20,7 +20,7 @@
 SSLBuffer::SSLBuffer(secure::client_t scontext) :
 TCPBuffer()
 {
-    context *ctx = (context *)scontext;
+    __context *ctx = (__context *)scontext;
     ssl = NULL;
     bio = NULL;
     server = false;
@@ -32,7 +32,7 @@ TCPBuffer()
 SSLBuffer::SSLBuffer(const TCPServer *tcp, secure::server_t scontext, size_t size) :
 TCPBuffer(tcp, size)
 {
-    context *ctx = (context *)scontext;
+    __context *ctx = (__context *)scontext;
     ssl = NULL;
     bio = NULL;
     server = true;
