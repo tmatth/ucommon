@@ -26,7 +26,10 @@ script_SCRIPTS = ucommon-config @COMPAT_CONFIG@
 
 man_MANS = ucommon-config.1 commoncpp-config.1
 
-.phony:	doxy
+.phony:	doxy todo
+
+todo:
+	@grep --color=tty --exclude="Makefile*" --exclude-dir=.git -nrEI "/[*] TODO|/[*] FIXME|// TODO|// FIXME" .
 
 doxy:
 	-rm -rf doc
