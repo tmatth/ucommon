@@ -413,7 +413,10 @@ void keyfile::load(const char *path)
             if(!ep)
                 goto next;
             *ep = 0;
-            section = create(String::strip(++lp, " \t"));
+            lp = String::strip(++lp, " \t");
+            section = get(lp);
+            if (!section)
+                section = create(lp);
             goto next;
         }
         else if(!isalnum(*lp) || !strchr(lp, '='))
