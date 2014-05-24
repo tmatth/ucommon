@@ -1,3 +1,6 @@
+Changes from 6.1.4 to 6.1.5
+- key merge on load for 6.1.5
+
 Changes from 6.1.3 to 6.1.4
 - lots of namespace usage cleanup
 - Socket::address: add unit tests for new features

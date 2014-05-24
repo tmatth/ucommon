@@ -1,3 +1,9 @@
+ucommon (1:6.1.5-1) UNRELEASED; urgency=low
+
+  * Updated for merged keys
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 24 May 2014 12:07:52 -0400
+
 ucommon (1:6.1.4-1) UNRELEASED; urgency=low
 
   * Namespace and general cleanup in headers
