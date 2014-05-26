@@ -196,14 +196,14 @@ typedef struct timespec {
 } timespec_t;
 #endif
 
+inline void sleep(int seconds)
+    {::Sleep((seconds * 1000l));}
+
 extern "C" {
 
     #define SERVICE_MAIN(id, argc, argv) void WINAPI service_##id(DWORD argc, LPSTR *argv)
 
     typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
-
-    inline void sleep(int seconds)
-        {::Sleep((seconds * 1000l));}
 
     inline void pthread_exit(void *p)
         {_endthreadex((DWORD)0);}
