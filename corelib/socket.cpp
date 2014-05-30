@@ -964,6 +964,24 @@ Socket::address::address(int family, const char *host, const char *svc)
     getaddrinfo(host, svc, &hint, &list);
 }
 
+Socket::address::address(const in_addr& address, in_port_t port) : list(NULL)
+{
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr = address;
+    addr.sin_port = port;
+    insert((sockaddr&)addr);
+}
+
+Socket::address::address(const in6_addr& address, in_port_t port) : list(NULL)
+{
+    sockaddr_in6 addr;
+    addr.sin6_family = AF_INET6;
+    addr.sin6_addr = address;
+    addr.sin6_port = port;
+    insert((sockaddr&)addr);
+}
+
 Socket::address::address()
 {
     list = NULL;
@@ -1220,7 +1238,7 @@ void Socket::address::set(struct sockaddr *addr)
     add(addr);
 }
 
-bool Socket::address::remove(struct sockaddr *addr)
+bool Socket::address::remove(const struct sockaddr *addr)
 {
     assert(addr != NULL);
     struct addrinfo *node = list, *prior = NULL;
@@ -1245,7 +1263,7 @@ bool Socket::address::remove(struct sockaddr *addr)
     return true;
 }
 
-unsigned Socket::address::insert(struct addrinfo *alist)
+unsigned Socket::address::insert(const struct addrinfo *alist)
 {
     unsigned count = 0;
     while(alist) {
@@ -1256,7 +1274,7 @@ unsigned Socket::address::insert(struct addrinfo *alist)
     return count;
 }
 
-unsigned Socket::address::remove(struct addrinfo *alist)
+unsigned Socket::address::remove(const struct addrinfo *alist)
 {
     unsigned count = 0;
     while(alist) {

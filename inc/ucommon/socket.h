@@ -389,7 +389,29 @@ public:
          * @param hostname or address to use.
          * @param service port or 0.
          */
-        address(const char *hostname, unsigned service = 0);
+        address(const char *hostname, unsigned port = 0);
+
+        /**
+         * Construct a socket address from an IPv4 address and a port number.
+         */
+        address(const in_addr& address, in_port_t port);
+
+        /**
+         * Construct a socket address from an IPv6 address and a port number.
+         */
+        address(const in6_addr& address, in_port_t port);
+
+        /**
+         * Construct a socket address from a sockaddr object.
+         */
+        address(const sockaddr& address) : list(NULL)
+            {insert(address);}
+
+        /**
+         * Construct a socket address by copying a .
+         */
+        address(const addrinfo* list) : list(NULL)
+            {insert(list);}
 
         /**
          * Construct an empty address.
@@ -597,21 +619,21 @@ public:
          * @param address list to insert into list.
          * @return count of addresses added.
          */
-        unsigned insert(struct addrinfo *address);
+        unsigned insert(const struct addrinfo *address);
 
         /**
          * Remove members from another socket address list from ours.
          * @param address list to remove from list.
          * @return count of addresses removed.
          */
-        unsigned remove(struct addrinfo *address);
+        unsigned remove(const struct addrinfo *address);
 
         /**
          * Remove an individual socket address from our address list.
          * @param address to remove.
          * @return true if found and removed, false if not found.
          */
-        bool remove(struct sockaddr *address);
+        bool remove(const struct sockaddr *address);
 
         /**
          * Insert an individual socket address to our address list only if
@@ -620,6 +642,8 @@ public:
          * @return true if inserted, false if duplicate.
          */
         bool insert(const struct sockaddr *address);
+        inline bool insert(const struct sockaddr& address)
+            {return insert(&address);}
 
         /**
          * Copy an existing addrinfo into our object.  This is also used
