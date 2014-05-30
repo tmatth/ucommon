@@ -408,7 +408,7 @@ public:
             {insert(address);}
 
         /**
-         * Construct a socket address by copying a .
+         * Construct a socket address from an addrinfo structure.
          */
         address(const addrinfo* list) : list(NULL)
             {insert(list);}
