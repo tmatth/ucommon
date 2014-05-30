@@ -1309,21 +1309,6 @@ void Socket::address::copy(const struct addrinfo *addr)
     }
 }
 
-size_t Socket::address::getSize(const struct sockaddr *address)
-{
-    if (address == NULL)
-        return 0;
-
-    switch (address->sa_family) {
-    case AF_INET:
-        return sizeof(sockaddr_in);
-    case AF_INET6:
-        return sizeof(sockaddr_in6);
-    default:
-        return 0;
-    }
-}
-
 in_port_t Socket::address::getPort(const struct sockaddr *address)
 {
     if (address == NULL)

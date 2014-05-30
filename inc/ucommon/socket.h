@@ -467,8 +467,8 @@ public:
          * Get the address size of the first address.
          * @return size in bytes of first socket address or 0 if none.
          */
-        inline size_t getSize(void) const
-            {return getSize(get());}
+        inline size_t getLength(void) const
+            {return len(get());}
 
         /**
          * Get the port of the first address .
@@ -645,7 +645,8 @@ public:
          * Returns the size of the socket address according to the family.
          * @return size in bytes of the valid part of the socket address.
          */
-        static size_t getSize(const struct sockaddr *address);
+        static size_t getLength(const struct sockaddr *address)
+            {return len(address);}
 
         /**
          * Returns the port of the socket address.
