@@ -1216,6 +1216,13 @@ void Socket::address::setPort(in_port_t port)
     }
 }
 
+Socket::address Socket::address::withPort(in_port_t port) const
+{
+    Socket::address copy = *this;
+    copy.setPort(port);
+    return copy;
+}
+
 struct sockaddr *Socket::address::get(int family) const
 {
     struct sockaddr *ap;

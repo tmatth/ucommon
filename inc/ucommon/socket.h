@@ -506,6 +506,12 @@ public:
         void setPort(in_port_t port);
 
         /**
+         * Returns a copy of this address list with
+         * the specified port set.
+         */
+        address withPort(in_port_t port) const;
+
+        /**
          * Find a specific socket address in our address list.
          * @return matching address from list or NULL if not found.
          */
