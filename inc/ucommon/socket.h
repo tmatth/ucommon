@@ -539,6 +539,21 @@ public:
             {return list;}
 
         /**
+         * Print the first socket address as a human-readable string to the
+         * provided buffer and returns the printed string length.
+         * @param src Address to print.
+         * @param dst Destination buffer to print the socket address on.
+         * @param dst_sz Size of the provided buffer. Strongly recommended to be
+         *     at least INET6_ADDRSTRLEN (or INET_ADDRSTRLEN if compiled without IPv6).
+         * @param port If true, print port number with address.
+         *     If true, ipv6_brackets will also be forced to true.
+         * @param ipv6_brackets If true, force printing IPv6 brackets. Ignored if address is an IPv4.
+         * @return length (in bytes) of the printed string, excluding trailing zero.
+         */
+        size_t print(char* dst, size_t dst_sz, bool port=false, bool force_brackets=false) const
+            {return print(get(), dst, dst_sz, port, force_brackets);}
+
+        /**
          * Test if the address list is valid.
          * @return true if we have an address list.
          */
@@ -737,6 +752,20 @@ public:
          */
         static struct sockaddr_in6 *ipv6(struct sockaddr *address);
 #endif
+
+        /**
+         * Print socket address as a human-readable string to the provided
+         * buffer and returns the printed string length.
+         * @param src Address to print.
+         * @param dst Destination buffer to print the socket address on.
+         * @param dst_sz Size of the provided buffer. Strongly recommended to be
+         *     at least INET6_ADDRSTRLEN (or INET_ADDRSTRLEN if compiled without IPv6).
+         * @param port If true, print port number with address.
+         *     If true, ipv6_brackets will also be forced to true.
+         * @param ipv6_brackets If true, force printing IPv6 brackets. Ignored if address is an IPv4.
+         * @return length (in bytes) of the printed string, excluding trailing zero.
+         */
+        static size_t print(const struct sockaddr *src, char* dst, size_t dst_sz, bool port=false, bool ipv6_brackets=false);
     };
 
     friend class address;

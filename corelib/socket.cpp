@@ -1532,6 +1532,48 @@ struct sockaddr *Socket::address::find(const struct sockaddr *addr) const
     return NULL;
 }
 
+size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bool port, bool ipv6_brackets)
+{
+    if(!addr || !dst || !dst_sz)
+        return 0;
+    memset(dst, 0, dst_sz);
+    const char* ret = dst;
+    const int af = addr->sa_family;
+    if(port && af == AF_INET6)
+        ipv6_brackets = true;
+    if(ipv6_brackets && dst_sz) {
+        *dst++ = '[';
+        dst_sz--;
+    }
+    const char * res;
+    switch (af) {
+    case AF_INET:
+        res = inet_ntop(AF_INET, &reinterpret_cast<const sockaddr_in*>(addr)->sin_addr, dst, dst_sz);
+        break;
+#ifdef AF_INET6
+    case AF_INET6:
+        res = inet_ntop(AF_INET6, &reinterpret_cast<const sockaddr_in6*>(addr)->sin6_addr, dst, dst_sz);
+        break;
+#endif
+    default:
+        res = NULL;
+    }
+    if(!res)
+        return 0;
+    size_t addr_len = strlen(res);
+    dst += addr_len;
+    dst_sz -= addr_len;
+    if(ipv6_brackets && dst_sz) {
+        *dst++ = ']';
+        dst_sz--;
+    }
+    if(port && dst_sz) {
+        *dst++ = ':';
+        sprintf(dst, "%u", getPort(addr));
+    }
+    return strlen(ret);
+}
+
 Socket::Socket(const Socket &s)
 {
 #ifdef  _MSWINDOWS_
