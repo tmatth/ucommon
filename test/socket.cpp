@@ -47,6 +47,10 @@ extern "C" int main()
     assert(0 == strcmp(addrbuf, "127.0.0.1"));
     assert(eq((struct sockaddr *)&addr, localhost.get(AF_INET)));
     assert(eq_subnet((struct sockaddr *)&addr, localhost.get(AF_INET)));
+    memset(addrbuf, 0, sizeof(addrbuf));
+    size_t len = localhost.print(addrbuf, sizeof(addrbuf));
+    assert(len == strlen(addrbuf));
+    assert(0 == strcmp(addrbuf, "127.0.0.1"));
     assert(localhost.isLoopback());
     assert(localhost.getPort() == 4444);
     assert(testing.isAny());
@@ -72,6 +76,15 @@ extern "C" int main()
     assert(localhost6.isLoopback());
     assert(localhost6.getPort() == 4444);
     assert(localhost6.get(AF_INET6) != NULL);
+    len = localhost6.print(addrbuf, sizeof(addrbuf), true);
+    assert(len == 10);
+    assert(0 == strcmp(addrbuf, "[::1]:4444"));
+    len = localhost6.print(addrbuf, sizeof(addrbuf));
+    assert(len == 3);
+    assert(0 == strcmp(addrbuf, "::1"));
+    len = localhost6.print(addrbuf, sizeof(addrbuf), false, true);
+    assert(len == 5);
+    assert(0 == strcmp(addrbuf, "[::1]"));
     if(!Socket::via((struct sockaddr *)&addr, localhost6.get(AF_INET6))) {
         Socket::query((struct sockaddr *)&addr, addrbuf, sizeof(addrbuf));
         assert(0 == strcmp(addrbuf, "::1"));

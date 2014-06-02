@@ -389,7 +389,29 @@ public:
          * @param hostname or address to use.
          * @param service port or 0.
          */
-        address(const char *hostname, unsigned service = 0);
+        address(const char *hostname, unsigned port = 0);
+
+        /**
+         * Construct a socket address from an IPv4 address and a port number.
+         */
+        address(const in_addr& address, in_port_t port);
+
+        /**
+         * Construct a socket address from an IPv6 address and a port number.
+         */
+        address(const in6_addr& address, in_port_t port);
+
+        /**
+         * Construct a socket address from a sockaddr object.
+         */
+        address(const sockaddr& address) : list(NULL)
+            {insert(address);}
+
+        /**
+         * Construct a socket address from an addrinfo structure.
+         */
+        address(const addrinfo* list) : list(NULL)
+            {insert(list);}
 
         /**
          * Construct an empty address.
@@ -467,8 +489,8 @@ public:
          * Get the address size of the first address.
          * @return size in bytes of first socket address or 0 if none.
          */
-        inline size_t getSize(void) const
-            {return getSize(get());}
+        inline size_t getLength(void) const
+            {return len(get());}
 
         /**
          * Get the port of the first address .
@@ -482,6 +504,12 @@ public:
          * @param port the port to set.
          */
         void setPort(in_port_t port);
+
+        /**
+         * Returns a copy of this address list with
+         * the specified port set.
+         */
+        address withPort(in_port_t port) const;
 
         /**
          * Find a specific socket address in our address list.
@@ -509,6 +537,21 @@ public:
          */
         inline struct addrinfo *operator*() const
             {return list;}
+
+        /**
+         * Print the first socket address as a human-readable string to the
+         * provided buffer and returns the printed string length.
+         * @param src Address to print.
+         * @param dst Destination buffer to print the socket address on.
+         * @param dst_sz Size of the provided buffer. Strongly recommended to be
+         *     at least INET6_ADDRSTRLEN (or INET_ADDRSTRLEN if compiled without IPv6).
+         * @param port If true, print port number with address.
+         *     If true, ipv6_brackets will also be forced to true.
+         * @param ipv6_brackets If true, force printing IPv6 brackets. Ignored if address is an IPv4.
+         * @return length (in bytes) of the printed string, excluding trailing zero.
+         */
+        size_t print(char* dst, size_t dst_sz, bool port=false, bool force_brackets=false) const
+            {return print(get(), dst, dst_sz, port, force_brackets);}
 
         /**
          * Test if the address list is valid.
@@ -597,21 +640,21 @@ public:
          * @param address list to insert into list.
          * @return count of addresses added.
          */
-        unsigned insert(struct addrinfo *address);
+        unsigned insert(const struct addrinfo *address);
 
         /**
          * Remove members from another socket address list from ours.
          * @param address list to remove from list.
          * @return count of addresses removed.
          */
-        unsigned remove(struct addrinfo *address);
+        unsigned remove(const struct addrinfo *address);
 
         /**
          * Remove an individual socket address from our address list.
          * @param address to remove.
          * @return true if found and removed, false if not found.
          */
-        bool remove(struct sockaddr *address);
+        bool remove(const struct sockaddr *address);
 
         /**
          * Insert an individual socket address to our address list only if
@@ -620,6 +663,8 @@ public:
          * @return true if inserted, false if duplicate.
          */
         bool insert(const struct sockaddr *address);
+        inline bool insert(const struct sockaddr& address)
+            {return insert(&address);}
 
         /**
          * Copy an existing addrinfo into our object.  This is also used
@@ -645,7 +690,8 @@ public:
          * Returns the size of the socket address according to the family.
          * @return size in bytes of the valid part of the socket address.
          */
-        static size_t getSize(const struct sockaddr *address);
+        static size_t getLength(const struct sockaddr *address)
+            {return len(address);}
 
         /**
          * Returns the port of the socket address.
@@ -706,6 +752,20 @@ public:
          */
         static struct sockaddr_in6 *ipv6(struct sockaddr *address);
 #endif
+
+        /**
+         * Print socket address as a human-readable string to the provided
+         * buffer and returns the printed string length.
+         * @param src Address to print.
+         * @param dst Destination buffer to print the socket address on.
+         * @param dst_sz Size of the provided buffer. Strongly recommended to be
+         *     at least INET6_ADDRSTRLEN (or INET_ADDRSTRLEN if compiled without IPv6).
+         * @param port If true, print port number with address.
+         *     If true, ipv6_brackets will also be forced to true.
+         * @param ipv6_brackets If true, force printing IPv6 brackets. Ignored if address is an IPv4.
+         * @return length (in bytes) of the printed string, excluding trailing zero.
+         */
+        static size_t print(const struct sockaddr *src, char* dst, size_t dst_sz, bool port=false, bool ipv6_brackets=false);
     };
 
     friend class address;
