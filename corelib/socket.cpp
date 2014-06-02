@@ -1537,6 +1537,9 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     if(!addr || !dst || !dst_sz)
         return 0;
     memset(dst, 0, dst_sz);
+#ifdef	_MSWINDOWS_
+	DWORD slen = dst_sz;
+#endif
     const char* ret = dst;
     const int af = addr->sa_family;
     ipv6_brackets = (af == AF_INET6) ? ipv6_brackets || port : false;
@@ -1546,12 +1549,29 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     }
     const char * res;
     switch (af) {
+#ifdef  _MSWINDOWS_
     case AF_INET:
-        res = inet_ntop(AF_INET, &reinterpret_cast<const sockaddr_in*>(addr)->sin_addr, dst, dst_sz);
+        WSAAddressToString((struct sockaddr *)addr, sizeof(struct sockaddr_in), NULL, dst, &slen);
         break;
-#ifdef AF_INET6
+ #ifdef  AF_INET6
     case AF_INET6:
-        res = inet_ntop(AF_INET6, &reinterpret_cast<const sockaddr_in6*>(addr)->sin6_addr, dst, dst_sz);
+        WSAAddressToString((struct sockaddr *)addr, sizeof(struct sockaddr_in6), NULL, dst, &slen);
+        break;
+ #endif
+#elif  defined(HAVE_INET_NTOP)
+    case AF_INET:
+        res = ::inet_ntop(AF_INET, &reinterpret_cast<const sockaddr_in*>(addr)->sin_addr, dst, dst_sz);
+        break;
+ #ifdef AF_INET6
+    case AF_INET6:
+        res = ::inet_ntop(AF_INET6, &reinterpret_cast<const sockaddr_in6*>(addr)->sin6_addr, dst, dst_sz);
+        break;
+ #endif
+#else
+    case AF_INET:
+        ENTER_EXCLUSIVE
+        String::set(dst, dst_sz, inet_ntoa(((const struct sockaddr_in *)(addr))->sin_addr));
+        LEAVE_EXCLUSIVE
         break;
 #endif
     default:
