@@ -964,6 +964,24 @@ Socket::address::address(int family, const char *host, const char *svc)
     getaddrinfo(host, svc, &hint, &list);
 }
 
+Socket::address::address(const in_addr& address, in_port_t port) : list(NULL)
+{
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr = address;
+    addr.sin_port = port;
+    insert((sockaddr&)addr);
+}
+
+Socket::address::address(const in6_addr& address, in_port_t port) : list(NULL)
+{
+    sockaddr_in6 addr;
+    addr.sin6_family = AF_INET6;
+    addr.sin6_addr = address;
+    addr.sin6_port = port;
+    insert((sockaddr&)addr);
+}
+
 Socket::address::address()
 {
     list = NULL;
@@ -1198,6 +1216,13 @@ void Socket::address::setPort(in_port_t port)
     }
 }
 
+Socket::address Socket::address::withPort(in_port_t port) const
+{
+    Socket::address copy = *this;
+    copy.setPort(port);
+    return copy;
+}
+
 struct sockaddr *Socket::address::get(int family) const
 {
     struct sockaddr *ap;
@@ -1220,7 +1245,7 @@ void Socket::address::set(struct sockaddr *addr)
     add(addr);
 }
 
-bool Socket::address::remove(struct sockaddr *addr)
+bool Socket::address::remove(const struct sockaddr *addr)
 {
     assert(addr != NULL);
     struct addrinfo *node = list, *prior = NULL;
@@ -1245,7 +1270,7 @@ bool Socket::address::remove(struct sockaddr *addr)
     return true;
 }
 
-unsigned Socket::address::insert(struct addrinfo *alist)
+unsigned Socket::address::insert(const struct addrinfo *alist)
 {
     unsigned count = 0;
     while(alist) {
@@ -1256,7 +1281,7 @@ unsigned Socket::address::insert(struct addrinfo *alist)
     return count;
 }
 
-unsigned Socket::address::remove(struct addrinfo *alist)
+unsigned Socket::address::remove(const struct addrinfo *alist)
 {
     unsigned count = 0;
     while(alist) {
@@ -1306,21 +1331,6 @@ void Socket::address::copy(const struct addrinfo *addr)
         else
             list = node;
         last = node;
-    }
-}
-
-size_t Socket::address::getSize(const struct sockaddr *address)
-{
-    if (address == NULL)
-        return 0;
-
-    switch (address->sa_family) {
-    case AF_INET:
-        return sizeof(sockaddr_in);
-    case AF_INET6:
-        return sizeof(sockaddr_in6);
-    default:
-        return 0;
     }
 }
 
@@ -1520,6 +1530,48 @@ struct sockaddr *Socket::address::find(const struct sockaddr *addr) const
         node = node->ai_next;
     }
     return NULL;
+}
+
+size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bool port, bool ipv6_brackets)
+{
+    if(!addr || !dst || !dst_sz)
+        return 0;
+    memset(dst, 0, dst_sz);
+    const char* ret = dst;
+    const int af = addr->sa_family;
+    ipv6_brackets = (af == AF_INET6) ? ipv6_brackets || port : false;
+    if(ipv6_brackets) {
+        *dst++ = '[';
+        dst_sz--;
+    }
+    const char * res;
+    switch (af) {
+    case AF_INET:
+        res = inet_ntop(AF_INET, &reinterpret_cast<const sockaddr_in*>(addr)->sin_addr, dst, dst_sz);
+        break;
+#ifdef AF_INET6
+    case AF_INET6:
+        res = inet_ntop(AF_INET6, &reinterpret_cast<const sockaddr_in6*>(addr)->sin6_addr, dst, dst_sz);
+        break;
+#endif
+    default:
+        res = NULL;
+    }
+    if(!res)
+        return 0;
+    size_t addr_len = strlen(res);
+    dst += addr_len;
+    dst_sz -= addr_len;
+    if(ipv6_brackets && dst_sz) {
+        *dst++ = ']';
+        dst_sz--;
+    }
+    if(port && dst_sz) {
+        *dst++ = ':';
+        dst_sz--;
+        snprintf(dst, dst_sz, "%u", getPort(addr));
+    }
+    return strlen(ret);
 }
 
 Socket::Socket(const Socket &s)
