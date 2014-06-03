@@ -1542,11 +1542,13 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
 #endif
     const char* ret = dst;
     const int af = addr->sa_family;
+#if !defined(_MSWINDOWS_) && defined(AF_INET6) && defined(HAVE_INET_NTOP)
     ipv6_brackets = (af == AF_INET6) ? ipv6_brackets || port : false;
     if(ipv6_brackets) {
         *dst++ = '[';
         dst_sz--;
     }
+#endif
     const char * res;
     switch (af) {
 #ifdef  _MSWINDOWS_
@@ -1582,10 +1584,14 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     size_t addr_len = strlen(res);
     dst += addr_len;
     dst_sz -= addr_len;
+
+#if !defined(_MSWINDOWS_) && defined(AF_INET6) && defined(HAVE_INET_NTOP)
     if(ipv6_brackets && dst_sz) {
         *dst++ = ']';
         dst_sz--;
     }
+#endif
+
     if(port && dst_sz) {
         *dst++ = ':';
         dst_sz--;
