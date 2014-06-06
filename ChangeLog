@@ -1,3 +1,13 @@
+Changes from 6.1.5 to 6.1.6
+- some windows and mingw fixes
+- Socket::address::print(): minor fixes
+- Socket::address: fix constructor documentation
+- Socket::address: add unit tests for print()
+- Socket::address: add print() method
+- Socket::address: add withPort()
+- Socket::address: add constructors from standard addr types
+- Socket::address: use existing len() method.
+
 Changes from 6.1.4 to 6.1.5
 - key merge on load for 6.1.5
 

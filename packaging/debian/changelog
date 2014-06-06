@@ -1,3 +1,9 @@
+ucommon (1:6.1.6-1) UNRELEASED; urgency=low
+
+  * Improved socket api
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 06 Jun 2014 05:16:43 -0400
+
 ucommon (1:6.1.5-1) UNRELEASED; urgency=low
 
   * Updated for merged keys
