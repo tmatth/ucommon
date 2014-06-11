@@ -73,6 +73,30 @@
 #undef  HAVE_SHM_OPEN
 #endif
 
+#if defined(__ANDROID__)
+#include <sys/syscall.h>
+#include <linux/shm.h>
+
+static int shmget(key_t key, size_t size, int shmflg)
+{
+    return syscall(__NR_shmget, key, size, shmflg);
+}
+
+static int shmctl(int shmid, int cmd, struct shmid_ds *buf)
+{
+    return syscall(__NR_shmctl, shmid, cmd, buf);
+}
+
+static void *shmat(int shmid, const void *shmaddr, int shmflg)
+{
+    return (void *)syscall(__NR_shmat, shmid, shmaddr, shmflg);
+}
+static int shmdt(const void *shmaddr)
+{
+    return syscall(__NR_shmdt, shmaddr);
+}
+#endif
+
 #if defined(HAVE_FTOK) && !defined(HAVE_SHM_OPEN)
 
 static void ftok_name(const char *name, char *buf, size_t max)
