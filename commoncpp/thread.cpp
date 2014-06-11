@@ -53,6 +53,13 @@ namespace ost {
 extern int _posix_clocking;
 #endif
 
+#if defined(__ANDROID__)
+/* Missing from Android's pthread implementation, but the default values
+ * for newly created threads corresponds to PTHREAD_INHERIT_SCHED */
+#define PTHREAD_INHERIT_SCHED 0
+#define pthread_attr_setinheritsched(x, y)
+#endif
+
 static class __EXPORT MainThread : public Thread
 {
 private:
