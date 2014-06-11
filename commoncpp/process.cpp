@@ -82,10 +82,6 @@
 #include <stdio.h>
 #endif
 
-#if defined(__ANDROID__)
-#define endgrent()
-#endif
-
 namespace ost {
 
 bool Process::rtflag = false;
@@ -345,7 +341,9 @@ bool Process::setGroup(const char *id)
     group = ::getgrnam(id);
 #endif
     if(!group) {
+#if HAVE_ENDGRENT
         endgrent();
+#endif
         return false;
     }
 
@@ -353,11 +351,15 @@ bool Process::setGroup(const char *id)
     setegid(group->gr_gid);
 #endif
     if(setgid(group->gr_gid)) {
+#if HAVE_ENDGRENT
         endgrent();
+#endif
         return false;
     }
 
+#if HAVE_ENDGRENT
     endgrent();
+#endif
     return true;
 }
 
