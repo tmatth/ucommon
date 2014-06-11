@@ -103,7 +103,7 @@
 #undef  LOCK_SH
 #endif
 
-#ifdef  MACOSX
+#if defined(MACOSX) || defined(__ANDROID__)
 #define MISSING_LOCKF
 #endif
 
@@ -117,6 +117,10 @@ enum {
     F_TEST
 };
 
+#endif
+
+#if defined(MISSING_LOCKF)
+#define lockf(a, b, c) flock(a, b)
 #endif
 
 #endif // ndef WIN32
