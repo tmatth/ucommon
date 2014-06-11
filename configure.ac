@@ -344,6 +344,12 @@ if test "$threading" = "none" ; then
                 AC_CHECK_LIB($tlib,pthread_setschedprio,[
                     AC_DEFINE(HAVE_PTHREAD_SETSCHEDPRIO, [1], ["pthread scheduling"])
                 ])
+                # Missing from Android's pthread implementation but the default
+                # values for newly created threads corresponds to the one we set
+                AC_CHECK_LIB($tlib,pthread_attr_setinheritsched,[
+                    AC_DEFINE(HAVE_PTHREAD_ATTR_SETINHRITSCHED, [1],
+                              ["pthread inherit scheduling attribute"])
+                ])
             fi
         ],[
             AC_CHECK_HEADER(windows.h,, [

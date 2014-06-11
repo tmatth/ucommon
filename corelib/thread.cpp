@@ -33,13 +33,6 @@ static int realtime_policy = SCHED_FIFO;
 
 #undef  _POSIX_SPIN_LOCKS
 
-#if defined(__ANDROID__)
-/* Missing from Android's pthread implementation, but the default values
- * for newly created threads corresponds to PTHREAD_INHERIT_SCHED */
-#define PTHREAD_INHERIT_SCHED 0
-#define pthread_attr_setinheritsched(x, y)
-#endif
-
 static unsigned max_sharing = 0;
 
 namespace ucommon {
@@ -2058,7 +2051,9 @@ void JoinableThread::start(int adj)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+#if HAVE_PTHREAD_ATTR_SETINHRITSCHED
     pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+#endif
 #endif
 // we typically use "stack 1" for min stack...
 #ifdef  PTHREAD_STACK_MIN
@@ -2089,7 +2084,9 @@ void DetachedThread::start(int adj)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+#if HAVE_PTHREAD_ATTR_SETINHRITSCHED
     pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+#endif
 #endif
 // we typically use "stack 1" for min stack...
 #ifdef  PTHREAD_STACK_MIN
