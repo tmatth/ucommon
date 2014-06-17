@@ -344,7 +344,7 @@ void logger::_openFile()
       else
       {
         // create pipe
-        int err = mkfifo(_nomeFile.c_str(), S_IREAD | S_IWRITE);
+        int err = mkfifo(_nomeFile.c_str(), S_IRUSR | S_IWUSR);
         if (err == 0 || errno == EEXIST)
         {
           // and open it
@@ -482,7 +482,7 @@ AppLog::AppLog(const char* logFileName, bool logDirectly) :
     else
     {
       // create pipe
-      int err = mkfifo(d->_nomeFile.c_str(), S_IREAD | S_IWRITE);
+      int err = mkfifo(d->_nomeFile.c_str(), S_IRUSR | S_IWUSR);
       if (err == 0 || errno == EEXIST)
       {
         // and open it
@@ -587,7 +587,7 @@ void AppLog::logFileName(const char* FileName, bool logDirectly)
     else
     {
       // create pipe
-      int err = mkfifo(d->_nomeFile.c_str(), S_IREAD | S_IWRITE);
+      int err = mkfifo(d->_nomeFile.c_str(), S_IRUSR | S_IWUSR);
       if (err == 0 || errno == EEXIST)
       {
         // and open it

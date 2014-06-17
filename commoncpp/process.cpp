@@ -82,6 +82,10 @@
 #include <stdio.h>
 #endif
 
+#if defined(__ANDROID__)
+#define endgrent()
+#endif
+
 namespace ost {
 
 bool Process::rtflag = false;

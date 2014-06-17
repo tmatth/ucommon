@@ -56,6 +56,10 @@ typedef uint32_t in_addr_t;
 #include <netdb.h>
 #endif
 
+#if defined(__ANDROID__)
+typedef uint16_t in_port_t;
+#endif
+
 #include <errno.h>
 #include <stdio.h>
 

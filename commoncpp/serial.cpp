@@ -396,7 +396,7 @@ void Serial::waitOutput(void)
 #ifdef  _MSWINDOWS_
 
 #elif defined(HAVE_TERMIOS_H)
-    tcdrain(dev);
+    ioctl(dev, TCSBRK, 1);
 #endif
 }
 

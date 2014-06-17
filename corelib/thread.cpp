@@ -33,6 +33,13 @@ static int realtime_policy = SCHED_FIFO;
 
 #undef  _POSIX_SPIN_LOCKS
 
+#if defined(__ANDROID__)
+/* Missing from Android's pthread implementation, but the default values
+ * for newly created threads corresponds to PTHREAD_INHERIT_SCHED */
+#define PTHREAD_INHERIT_SCHED 0
+#define pthread_attr_setinheritsched(x, y)
+#endif
+
 static unsigned max_sharing = 0;
 
 namespace ucommon {
