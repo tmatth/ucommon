@@ -86,7 +86,7 @@
 
 // see if we are building for or using extended stdc++ runtime library support
 
-#if defined(NEW_STDCPP) || defined(OLD_STDCPP)
+#if defined(__ANDROID__) || defined(NEW_STDCPP) || defined(OLD_STDCPP)
 #define _UCOMMON_EXTENDED_
 #endif
 
