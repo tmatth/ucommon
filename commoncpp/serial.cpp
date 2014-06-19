@@ -396,7 +396,11 @@ void Serial::waitOutput(void)
 #ifdef  _MSWINDOWS_
 
 #elif defined(HAVE_TERMIOS_H)
+#if defined(__ANDROID__)
     ioctl(dev, TCSBRK, 1);
+#else
+    tcdrain(dev);
+#endif
 #endif
 }
 

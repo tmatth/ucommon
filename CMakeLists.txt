@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 PROJECT(ucommon)
-set (VERSION 6.1.7)
+set (VERSION 6.1.8)
 set (PACKAGE ucommon)
 
 set(RC_VERSION ${VERSION})
