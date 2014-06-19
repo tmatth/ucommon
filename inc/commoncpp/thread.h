@@ -54,6 +54,8 @@
 #define ENTER_CRITICAL  enterMutex();
 #define LEAVE_CRITICAL  leaveMutex();
 
+#include <time.h>
+
 namespace ost {
 
 class __EXPORT Mutex : protected ucommon::RecursiveMutex
@@ -583,6 +585,7 @@ public:
 struct  timespec *getTimeout(struct timespec *spec, timeout_t timeout);
 #endif
 
+#ifndef __WINPTHREAD__
 inline struct tm *localtime_r(const time_t *t, struct tm *b)
     {return SysTime::getLocalTime(t, b);}
 
@@ -594,6 +597,7 @@ inline struct tm *gmtime_r(const time_t *t, struct tm *b)
 
 inline char *asctime_r(const struct tm *tm, char *b)
     {return asctime(tm);}
+#endif
 
 inline Thread *getThread(void)
     {return Thread::get();}

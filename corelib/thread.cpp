@@ -1276,7 +1276,7 @@ TimedEvent::TimedEvent() :
 Timer()
 {
     event = CreateEvent(NULL, FALSE, FALSE, NULL);
-    InitializeCriticalSection(&mutex);
+    InitializeCriticalSection((LPCRITICAL_SECTION)&mutex);
     set();
 }
 
@@ -1286,21 +1286,21 @@ TimedEvent::~TimedEvent()
         CloseHandle(event);
         event = INVALID_HANDLE_VALUE;
     }
-    DeleteCriticalSection(&mutex);
+    DeleteCriticalSection((LPCRITICAL_SECTION)&mutex);
 }
 
 TimedEvent::TimedEvent(timeout_t timeout) :
 Timer(timeout)
 {
     event = CreateEvent(NULL, FALSE, FALSE, NULL);
-    InitializeCriticalSection(&mutex);
+    InitializeCriticalSection((LPCRITICAL_SECTION)&mutex);
 }
 
 TimedEvent::TimedEvent(time_t timer) :
 Timer(timer)
 {
     event = CreateEvent(NULL, FALSE, FALSE, NULL);
-    InitializeCriticalSection(&mutex);
+    InitializeCriticalSection((LPCRITICAL_SECTION)&mutex);
 }
 
 void TimedEvent::signal(void)
@@ -1323,9 +1323,9 @@ bool TimedEvent::sync(void)
     if(!timeout)
         return false;
 
-    LeaveCriticalSection(&mutex);
+    LeaveCriticalSection((LPCRITICAL_SECTION)&mutex);
     result = WaitForSingleObject(event, timeout);
-    EnterCriticalSection(&mutex);
+    EnterCriticalSection((LPCRITICAL_SECTION)&mutex);
     if(result != WAIT_OBJECT_0)
         return true;
     return false;
@@ -1727,7 +1727,7 @@ void barrier::wait(void)
 LockedPointer::LockedPointer()
 {
 #ifdef  _MSWINDOWS_
-    InitializeCriticalSection(&mutex);
+    InitializeCriticalSection((LPCRITICAL_SECTION)&mutex);
 #else
 #ifdef  __PTH__
     static pthread_mutex_t lock = PTH_MUTEX_INIT;
