@@ -53,13 +53,6 @@ namespace ost {
 extern int _posix_clocking;
 #endif
 
-#if defined(__ANDROID__)
-/* Missing from Android's pthread implementation, but the default values
- * for newly created threads corresponds to PTHREAD_INHERIT_SCHED */
-#define PTHREAD_INHERIT_SCHED 0
-#define pthread_attr_setinheritsched(x, y)
-#endif
-
 static class __EXPORT MainThread : public Thread
 {
 private:
@@ -245,7 +238,9 @@ void Thread::start(void)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+#if HAVE_PTHREAD_ATTR_SETINHRITSCHED
     pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+#endif
 #endif
 // we typically use "stack 1" for min stack...
 #ifdef  PTHREAD_STACK_MIN
@@ -277,7 +272,9 @@ void Thread::detach(void)
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+#if HAVE_PTHREAD_ATTR_SETINHRITSCHED
     pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
+#endif
 #endif
 // we typically use "stack 1" for min stack...
 #ifdef  PTHREAD_STACK_MIN

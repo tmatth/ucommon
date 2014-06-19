@@ -344,6 +344,12 @@ if test "$threading" = "none" ; then
                 AC_CHECK_LIB($tlib,pthread_setschedprio,[
                     AC_DEFINE(HAVE_PTHREAD_SETSCHEDPRIO, [1], ["pthread scheduling"])
                 ])
+                # Missing from Android's pthread implementation but the default
+                # values for newly created threads corresponds to the one we set
+                AC_CHECK_LIB($tlib,pthread_attr_setinheritsched,[
+                    AC_DEFINE(HAVE_PTHREAD_ATTR_SETINHRITSCHED, [1],
+                              ["pthread inherit scheduling attribute"])
+                ])
             fi
         ],[
             AC_CHECK_HEADER(windows.h,, [
@@ -365,7 +371,7 @@ if test "$threading" = "none" ; then
     fi
 fi
 
-for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r localtime_r gmtime_r posix_fadvise ftruncate pwrite setgroups setpgrp setlocale gettext execvp atexit realpath symlink readlink waitpid wait4 ; do
+for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r localtime_r gmtime_r posix_fadvise ftruncate pwrite setgroups setpgrp setlocale gettext execvp atexit realpath symlink readlink waitpid wait4 endgrent; do
     found="no"
     AC_CHECK_FUNC($func,[
         found=$func
@@ -450,6 +456,9 @@ for func in ftok shm_open nanosleep clock_nanosleep clock_gettime strerror_r loc
         ;;
     wait4)
         AC_DEFINE(HAVE_WAIT4, [1], [has wait4 in libc])
+        ;;
+    endgrent)
+        AC_DEFINE(HAVE_ENDGRENT, [1], [has endgrent in libc])
         ;;
     esac
 done
