@@ -91,7 +91,7 @@ private:
 #if defined(_MSCONDITIONAL_)
     CRITICAL_SECTION mutex;
     CONDITION_VARIABLE cond;
-#elif defined(_MSWINDOWS_)
+#elif defined(_MSTHREADS_)
     enum {SIGNAL = 0, BROADCAST = 1};
     HANDLE events[2];
     unsigned waiting;
@@ -130,7 +130,7 @@ protected:
      */
     bool wait(struct timespec *timeout);
 
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     inline void lock(void)
         {EnterCriticalSection(&mutex);};
 
@@ -184,7 +184,7 @@ protected:
     ~Conditional();
 
 public:
-#if !defined(_MSWINDOWS_) && !defined(__PTH__)
+#if !defined(_MSTHREADS_) && !defined(__PTH__)
     /**
      * Support function for getting conditional attributes for realtime
      * scheduling.
@@ -215,7 +215,7 @@ class __EXPORT ConditionalAccess : private Conditional
 protected:
 #if defined _MSCONDITIONAL_
     CONDITION_VARIABLE bcast;
-#elif !defined(_MSWINDOWS_)
+#elif !defined(_MSTHREADS_)
     pthread_cond_t bcast;
 #endif
 
@@ -260,7 +260,7 @@ protected:
         {Conditional::set(hires, timeout);}
 
 
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     inline void lock(void)
         {EnterCriticalSection(&mutex);};
 
@@ -365,7 +365,7 @@ public:
 class __EXPORT TimedEvent : public Timer
 {
 private:
-#ifdef _MSWINDOWS_
+#ifdef _MSTHREADS_
     HANDLE event;
 #else
     pthread_cond_t cond;
@@ -1247,7 +1247,7 @@ class __EXPORT Thread
 {
 protected:
 // may be used in future if we need cancelable threads...
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     HANDLE cancellor;
 #else
     void *cancellor;
@@ -1380,7 +1380,7 @@ public:
 class __EXPORT JoinableThread : public Thread
 {
 protected:
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     HANDLE running;
 #else
     volatile bool running;

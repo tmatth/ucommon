@@ -183,10 +183,11 @@ typedef int pid_t;
 #include <sys/stat.h>
 #include <io.h>
 
-#ifdef  __GNUC__
-#define __WINPTHREAD__
-#include <pthread.h>   // gnu libstdc++ now requires a win pthread!
+#if defined(__GNUC__) && defined(_UCOMMON_EXTENDED_)
+#include <pthread.h>   // gnu libstdc++ now requires a win pthread
+#undef  _MSCONDITIONALS_
 #else   
+#define _MSTHREADS_
 typedef DWORD pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
 #endif
@@ -210,7 +211,7 @@ extern "C" {
 
     typedef LPSERVICE_MAIN_FUNCTION cpr_service_t;
 
-#ifndef __WINPTHREAD__
+#ifdef _MSTHREADS_
     inline void pthread_exit(void *p)
         {_endthreadex((DWORD)0);}
 

@@ -85,7 +85,7 @@ static unsigned rwlock_indexing = 1;
 #ifdef  __PTH__
 static pth_key_t threadmap;
 #else
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
 static DWORD threadmap;
 #else
 static pthread_key_t threadmap;
@@ -107,7 +107,7 @@ rwlock_entry::rwlock_entry() : ThreadLock()
     count = 0;
 }
 
-#if !defined(_MSWINDOWS_) && !defined(__PTH__)
+#if !defined(_MSTHREADS_) && !defined(__PTH__)
 Conditional::attribute Conditional::attr;
 #endif
 
@@ -305,7 +305,7 @@ void Semaphore::set(unsigned value)
     }
 }
 
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
 
 bool Thread::equal(pthread_t t1, pthread_t t2)
 {
@@ -549,7 +549,7 @@ bool ConditionalAccess::waitSignal(struct timespec *ts)
     return waitSignal((timeout_t)(ts->tv_sec * 1000 + (ts->tv_nsec / 1000000l)));
 }
 
-#elif defined(_MSWINDOWS_)
+#elif defined(_MSTHREADS_)
 
 void ConditionalAccess::waitSignal(void)
 {
@@ -704,7 +704,7 @@ bool Thread::is_active(void)
 
 bool JoinableThread::is_active(void)
 {
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     return (running != INVALID_HANDLE_VALUE) && !joining;
 #else
     return running && !joining;
@@ -1270,7 +1270,7 @@ void Mutex::_unlock(void)
     pthread_mutex_unlock(&mlock);
 }
 
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
 
 TimedEvent::TimedEvent() :
 Timer()
@@ -1726,7 +1726,7 @@ void barrier::wait(void)
 
 LockedPointer::LockedPointer()
 {
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS__
     InitializeCriticalSection((LPCRITICAL_SECTION)&mutex);
 #else
 #ifdef  __PTH__
@@ -1799,7 +1799,7 @@ Thread::Thread(size_t size)
 {
     stack = size;
     priority = 0;
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     cancellor = INVALID_HANDLE_VALUE;
 #else
     cancellor = NULL;
@@ -1807,7 +1807,7 @@ Thread::Thread(size_t size)
     init();
 }
 
-#if defined(_MSWINDOWS_)
+#if defined(_MSTHREADS_)
 
 void Thread::setPriority(void)
 {
@@ -1862,7 +1862,7 @@ void Thread::setPriority(void) {}
 
 void Thread::concurrency(int level)
 {
-#if defined(HAVE_PTHREAD_SETCONCURRENCY) && !defined(_MSWINDOWS_)
+#if defined(HAVE_PTHREAD_SETCONCURRENCY) && !defined(_MSTHREADS_)
     pthread_setconcurrency(level);
 #endif
 }
@@ -1876,7 +1876,7 @@ void Thread::policy(int polid)
 
 JoinableThread::JoinableThread(size_t size)
 {
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     cancellor = INVALID_HANDLE_VALUE;
     running = INVALID_HANDLE_VALUE;
     joining = false;
@@ -1890,7 +1890,7 @@ JoinableThread::JoinableThread(size_t size)
 
 DetachedThread::DetachedThread(size_t size)
 {
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     cancellor = INVALID_HANDLE_VALUE;
 #else
     cancellor = NULL;
@@ -1913,7 +1913,7 @@ void Thread::sleep(timeout_t timeout)
     ts.tv_sec = timeout / 1000l;
     ts.tv_nsec = (timeout % 1000l) * 1000000l;
     pthread_delay_np(&ts);
-#elif defined(_MSWINDOWS_)
+#elif defined(_MSTHREADS_)
     ::Sleep(timeout);
 #else
     usleep(timeout * 1000);
@@ -1922,7 +1922,7 @@ void Thread::sleep(timeout_t timeout)
 
 void Thread::yield(void)
 {
-#if defined(_MSWINDOWS_)
+#if defined(_MSTHREADS_)
     SwitchToThread();
 #elif defined(__PTH__)
     pth_yield(NULL);
@@ -1955,7 +1955,7 @@ DetachedThread::~DetachedThread()
 }
 
 extern "C" {
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     static unsigned __stdcall exec_thread(void *obj) {
         assert(obj != NULL);
 
@@ -1979,7 +1979,7 @@ extern "C" {
 #endif
 }
 
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
 void JoinableThread::start(int adj)
 {
     if(running != INVALID_HANDLE_VALUE)
@@ -2226,7 +2226,7 @@ void Thread::map(void)
 #ifdef  __PTH__
     pth_key_setdata(threadmap, this);
 #else
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     TlsSetValue(threadmap, this);
 #else
     pthread_setspecific(threadmap, this);
@@ -2239,7 +2239,7 @@ Thread *Thread::get(void)
 #ifdef  __PTH__
     return (Thread *)pth_key_setdata(threadmap);
 #else
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     return (Thread *)TlsGetValue(threadmap);
 #else
     return (Thread *)pthread_getspecific(threadmap);
@@ -2257,7 +2257,7 @@ void Thread::init(void)
         pth_key_create(&threadmap, NULL);
         atexit(pthread_shutdown);
 #else
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
         threadmap = TlsAlloc();
 #else
         pthread_key_create(&threadmap, NULL);

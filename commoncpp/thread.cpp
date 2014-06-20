@@ -65,7 +65,7 @@ public:
 } _mainthread;
 
 extern "C" {
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
     static unsigned __stdcall exec_thread(void *obj) {
         assert(obj != NULL);
 
@@ -197,7 +197,7 @@ void Thread::notify(Thread *thread)
 {
 }
 
-#ifdef  _MSWINDOWS_
+#ifdef  _MSTHREADS_
 
 void Thread::start(void)
 {

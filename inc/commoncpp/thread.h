@@ -585,7 +585,7 @@ public:
 struct  timespec *getTimeout(struct timespec *spec, timeout_t timeout);
 #endif
 
-#ifndef __WINPTHREAD__
+#if !defined(_MSWINDOWS_) || defined(_MSTHREADS_)
 inline struct tm *localtime_r(const time_t *t, struct tm *b)
     {return SysTime::getLocalTime(t, b);}
 
