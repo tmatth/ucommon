@@ -183,8 +183,13 @@ typedef int pid_t;
 #include <sys/stat.h>
 #include <io.h>
 
-#if defined(__GNUC__) && defined(_UCOMMON_EXTENDED_)
+// gcc c++11 support on mingw requires pthread support library
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 7)) && defined(_UCOMMON_EXTENDED_) 
 #include <pthread.h>   // gnu libstdc++ now requires a win pthread
+#ifdef OLD_STDCPP
+#undef OLD_STDCPP
+#define NEW_STDCPP
+#endif
 #undef  _MSCONDITIONALS_
 #else   
 #define _MSTHREADS_
