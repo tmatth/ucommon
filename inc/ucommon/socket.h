@@ -1070,14 +1070,14 @@ public:
      * @param list of groups to join.
      * @return 0 on success, -1 on error.
      */
-    int join(const struct addrinfo *list);
+    int join(const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Drop socket from multicast group.
      * @param list of groups to drop.
      * @return 0 on success, -1 on error.
      */
-    int drop(const struct addrinfo *list);
+    int drop(const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Socket i/o timer setting.
@@ -1264,7 +1264,7 @@ public:
      * @param list of groups to drop.
      * @return 0 on success, -1 on error.
      */
-    static int drop(socket_t socket, const struct addrinfo *list);
+    static int drop(socket_t socket, const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Join socket descriptor to multicast group.
@@ -1272,7 +1272,7 @@ public:
      * @param list of groups to join.
      * @return 0 on success, -1 on error.
      */
-    static int join(socket_t socket, const struct addrinfo *list);
+    static int join(socket_t socket, const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Get socket error code of socket descriptor.

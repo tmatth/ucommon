@@ -2305,17 +2305,17 @@ int Socket::multicast(socket_t so, unsigned ttl)
     }
 }
 
-int Socket::join(const struct addrinfo *addr)
+int Socket::join(const struct addrinfo *addr, const int ifindex)
 {
-    int rtn = Socket::join(so, addr);
+    int rtn = Socket::join(so, addr, ifindex);
     if(rtn)
         ioerr = rtn;
     return rtn;
 }
 
-int Socket::drop(const struct addrinfo *addr)
+int Socket::drop(const struct addrinfo *addr, const int ifindex)
 {
-    int rtn = Socket::drop(so, addr);
+    int rtn = Socket::drop(so, addr, ifindex);
     if(rtn)
         ioerr = rtn;
     return rtn;
@@ -2393,7 +2393,7 @@ int Socket::disconnect(socket_t so)
     return err;
 }
 
-int Socket::join(socket_t so, const struct addrinfo *node)
+int Socket::join(socket_t so, const struct addrinfo *node, const int ifindex)
 {
     assert(node != NULL);
 
@@ -2417,7 +2417,7 @@ int Socket::join(socket_t so, const struct addrinfo *node)
         switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP) && defined(IPPROTO_IPV6)
         case AF_INET6:
-            mcast.ipv6.ipv6mr_interface = 0;
+            mcast.ipv6.ipv6mr_interface = ifindex;
             memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
             rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
             break;
@@ -2441,7 +2441,7 @@ int Socket::join(socket_t so, const struct addrinfo *node)
     return rtn;
 }
 
-int Socket::drop(socket_t so, const struct addrinfo *node)
+int Socket::drop(socket_t so, const struct addrinfo *node, const int ifindex)
 {
     assert(node != NULL);
 
@@ -2467,7 +2467,7 @@ int Socket::drop(socket_t so, const struct addrinfo *node)
         switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP) && defined(IPPROTO_IPV6)
         case AF_INET6:
-            mcast.ipv6.ipv6mr_interface = 0;
+            mcast.ipv6.ipv6mr_interface = ifindex;
             memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
             rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
             break;
