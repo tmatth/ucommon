@@ -1952,6 +1952,19 @@ public:
         {ptr = _nextaddrinfo(ptr);}
 };
 
+#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
+#ifdef  AF_INET6
+    char buf[INET6_ADDRSTRLEN];
+#else
+    char buf[INET_ADDRSTRLEN];
+#endif
+    size_t s = addr.print(buf, sizeof(buf), false, true);
+    os << std::string(buf, s);
+    return os;
+}
+#endif
+
 /**
  * A convenience function to convert a socket address list into an addrinfo.
  * @param address list object.
