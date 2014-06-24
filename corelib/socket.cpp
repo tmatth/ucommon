@@ -936,7 +936,7 @@ Socket::address::address(int family, const char *a, int type, int protocol)
     set(family, a, type, protocol);
 }
 
-Socket::address::address(const char *host, unsigned port)
+Socket::address::address(const char *host, in_port_t port)
 {
     assert(host != NULL && *host != 0);
 
@@ -1108,7 +1108,7 @@ Socket::address::operator==(const address& other) const
     return true;
 }
 
-void Socket::address::set(const char *host, unsigned port)
+void Socket::address::set(const char *host, in_port_t port)
 {
     assert(host != NULL && *host != 0);
 

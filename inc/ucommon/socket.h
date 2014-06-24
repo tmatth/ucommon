@@ -393,17 +393,17 @@ public:
          * @param hostname or address to use.
          * @param service port or 0.
          */
-        address(const char *hostname, unsigned port = 0);
+        address(const char *hostname, in_port_t port = 0);
 
         /**
          * Construct a socket address from an IPv4 address and a port number.
          */
-        address(const in_addr& address, in_port_t port);
+        address(const in_addr& address, in_port_t port = 0);
 
         /**
          * Construct a socket address from an IPv6 address and a port number.
          */
-        address(const in6_addr& address, in_port_t port);
+        address(const in6_addr& address, in_port_t port = 0);
 
         /**
          * Construct a socket address from a sockaddr object.
@@ -688,7 +688,7 @@ public:
          * @param hostname or address to use.
          * @param service port or 0.
          */
-        void set(const char *hostname, unsigned service = 0);
+        void set(const char *hostname, in_port_t service = 0);
 
         /**
          * Returns the size of the socket address according to the family.
