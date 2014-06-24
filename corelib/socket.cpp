@@ -3304,19 +3304,9 @@ unsigned Socket::store(struct sockaddr_internet *storage, const struct sockaddr 
     if(storage == NULL || address == NULL)
         return 0;
 
-    if(address->sa_family == AF_INET) {
-        memcpy(&storage->ipv4, address, sizeof(storage->ipv4));
-        return sizeof(storage->ipv4);
-    }
-
-#ifdef  AF_INET6
-    if(address->sa_family == AF_INET6) {
-        memcpy(&storage->ipv6, address, sizeof(storage->ipv6));
-        return sizeof(storage->ipv6);
-    }
-#endif
-
-    return 0;
+    socklen_t slen = len(address);
+    memcpy(storage, address, slen);
+    return slen;
 }
 
 unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
