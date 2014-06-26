@@ -1726,7 +1726,7 @@ void barrier::wait(void)
 
 LockedPointer::LockedPointer()
 {
-#ifdef  _MSTHREADS__
+#if defined(_MSTHREADS_)
     InitializeCriticalSection((LPCRITICAL_SECTION)&mutex);
 #else
 #ifdef  __PTH__
@@ -1903,6 +1903,8 @@ void Thread::sleep(timeout_t timeout)
 {
 #if defined(__PTH__)
     pth_usleep(timeout * 1000);
+#elif defined(_MSTHREADS_)
+	::Sleep(timeout);
 #elif defined(HAVE_PTHREAD_DELAY)
     timespec ts;
     ts.tv_sec = timeout / 1000l;
@@ -1913,8 +1915,6 @@ void Thread::sleep(timeout_t timeout)
     ts.tv_sec = timeout / 1000l;
     ts.tv_nsec = (timeout % 1000l) * 1000000l;
     pthread_delay_np(&ts);
-#elif defined(_MSTHREADS_)
-    ::Sleep(timeout);
 #else
     usleep(timeout * 1000);
 #endif
