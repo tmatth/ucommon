@@ -1,3 +1,6 @@
+Changes from 6.1.8 to 6.1.9
+- apparently winpthread gcc c++11 issue was only temporary
+
 Changes from 6.1.7 to 6.1.8
 - mingw libstdc++ c++11 support now requires winpthread
 - more android related updates
