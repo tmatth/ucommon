@@ -393,17 +393,17 @@ public:
          * @param hostname or address to use.
          * @param service port or 0.
          */
-        address(const char *hostname, unsigned port = 0);
+        address(const char *hostname, in_port_t port = 0);
 
         /**
          * Construct a socket address from an IPv4 address and a port number.
          */
-        address(const in_addr& address, in_port_t port);
+        address(const in_addr& address, in_port_t port = 0);
 
         /**
          * Construct a socket address from an IPv6 address and a port number.
          */
-        address(const in6_addr& address, in_port_t port);
+        address(const in6_addr& address, in_port_t port = 0);
 
         /**
          * Construct a socket address from a sockaddr object.
@@ -688,7 +688,7 @@ public:
          * @param hostname or address to use.
          * @param service port or 0.
          */
-        void set(const char *hostname, unsigned service = 0);
+        void set(const char *hostname, in_port_t service = 0);
 
         /**
          * Returns the size of the socket address according to the family.
@@ -1070,14 +1070,14 @@ public:
      * @param list of groups to join.
      * @return 0 on success, -1 on error.
      */
-    int join(const struct addrinfo *list);
+    int join(const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Drop socket from multicast group.
      * @param list of groups to drop.
      * @return 0 on success, -1 on error.
      */
-    int drop(const struct addrinfo *list);
+    int drop(const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Socket i/o timer setting.
@@ -1264,7 +1264,7 @@ public:
      * @param list of groups to drop.
      * @return 0 on success, -1 on error.
      */
-    static int drop(socket_t socket, const struct addrinfo *list);
+    static int drop(socket_t socket, const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Join socket descriptor to multicast group.
@@ -1272,7 +1272,7 @@ public:
      * @param list of groups to join.
      * @return 0 on success, -1 on error.
      */
-    static int join(socket_t socket, const struct addrinfo *list);
+    static int join(socket_t socket, const struct addrinfo *list, const int ifindex = 0);
 
     /**
      * Get socket error code of socket descriptor.
@@ -1951,6 +1951,19 @@ public:
     inline void next(void)
         {ptr = _nextaddrinfo(ptr);}
 };
+
+#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
+#ifdef  AF_INET6
+    char buf[INET6_ADDRSTRLEN];
+#else
+    char buf[INET_ADDRSTRLEN];
+#endif
+    size_t s = addr.print(buf, sizeof(buf), false, true);
+    os << std::string(buf, s);
+    return os;
+}
+#endif
 
 /**
  * A convenience function to convert a socket address list into an addrinfo.

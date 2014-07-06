@@ -936,7 +936,7 @@ Socket::address::address(int family, const char *a, int type, int protocol)
     set(family, a, type, protocol);
 }
 
-Socket::address::address(const char *host, unsigned port)
+Socket::address::address(const char *host, in_port_t port)
 {
     assert(host != NULL && *host != 0);
 
@@ -1108,7 +1108,7 @@ Socket::address::operator==(const address& other) const
     return true;
 }
 
-void Socket::address::set(const char *host, unsigned port)
+void Socket::address::set(const char *host, in_port_t port)
 {
     assert(host != NULL && *host != 0);
 
@@ -2305,17 +2305,17 @@ int Socket::multicast(socket_t so, unsigned ttl)
     }
 }
 
-int Socket::join(const struct addrinfo *addr)
+int Socket::join(const struct addrinfo *addr, const int ifindex)
 {
-    int rtn = Socket::join(so, addr);
+    int rtn = Socket::join(so, addr, ifindex);
     if(rtn)
         ioerr = rtn;
     return rtn;
 }
 
-int Socket::drop(const struct addrinfo *addr)
+int Socket::drop(const struct addrinfo *addr, const int ifindex)
 {
-    int rtn = Socket::drop(so, addr);
+    int rtn = Socket::drop(so, addr, ifindex);
     if(rtn)
         ioerr = rtn;
     return rtn;
@@ -2393,7 +2393,7 @@ int Socket::disconnect(socket_t so)
     return err;
 }
 
-int Socket::join(socket_t so, const struct addrinfo *node)
+int Socket::join(socket_t so, const struct addrinfo *node, const int ifindex)
 {
     assert(node != NULL);
 
@@ -2417,7 +2417,7 @@ int Socket::join(socket_t so, const struct addrinfo *node)
         switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_ADD_MEMBERSHIP) && defined(IPPROTO_IPV6)
         case AF_INET6:
-            mcast.ipv6.ipv6mr_interface = 0;
+            mcast.ipv6.ipv6mr_interface = ifindex;
             memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
             rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
             break;
@@ -2441,7 +2441,7 @@ int Socket::join(socket_t so, const struct addrinfo *node)
     return rtn;
 }
 
-int Socket::drop(socket_t so, const struct addrinfo *node)
+int Socket::drop(socket_t so, const struct addrinfo *node, const int ifindex)
 {
     assert(node != NULL);
 
@@ -2467,7 +2467,7 @@ int Socket::drop(socket_t so, const struct addrinfo *node)
         switch(addr.address.sa_family) {
 #if defined(AF_INET6) && defined(IPV6_DROP_MEMBERSHIP) && defined(IPPROTO_IPV6)
         case AF_INET6:
-            mcast.ipv6.ipv6mr_interface = 0;
+            mcast.ipv6.ipv6mr_interface = ifindex;
             memcpy(&mcast.ipv6.ipv6mr_multiaddr, &target->ipv6.sin6_addr, sizeof(target->ipv6.sin6_addr));
             rtn = ::setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mcast, sizeof(mcast.ipv6));
             break;
@@ -3304,19 +3304,9 @@ unsigned Socket::store(struct sockaddr_internet *storage, const struct sockaddr 
     if(storage == NULL || address == NULL)
         return 0;
 
-    if(address->sa_family == AF_INET) {
-        memcpy(&storage->ipv4, address, sizeof(storage->ipv4));
-        return sizeof(storage->ipv4);
-    }
-
-#ifdef  AF_INET6
-    if(address->sa_family == AF_INET6) {
-        memcpy(&storage->ipv6, address, sizeof(storage->ipv6));
-        return sizeof(storage->ipv6);
-    }
-#endif
-
-    return 0;
+    socklen_t slen = len(address);
+    memcpy(storage, address, slen);
+    return slen;
 }
 
 unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
