@@ -1952,7 +1952,7 @@ public:
         {ptr = _nextaddrinfo(ptr);}
 };
 
-#if defined(OLD_STDCPP) || defined(NEW_STDCPP)
+#if (defined(OLD_STDCPP) || defined(NEW_STDCPP)) && !defined(_MSC_VER)
 inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
 #ifdef  AF_INET6
     char buf[INET6_ADDRSTRLEN];

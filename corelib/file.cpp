@@ -265,6 +265,7 @@ int file::close(void)
     return error;
 }
 
+#if !defined(_MSC_VER)
 size_t file::scanf(const char *format, ...)
 {
     if(!fp)
@@ -278,6 +279,7 @@ size_t file::scanf(const char *format, ...)
         result = 0;
     return result;
 }
+#endif
 
 size_t file::printf(const char *format, ...)
 {

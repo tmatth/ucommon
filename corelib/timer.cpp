@@ -60,6 +60,7 @@ static void adj(struct timeval *ts)
 
 #ifdef  WIN32
 #ifdef  _WIN32_WCE
+} // namespace ucommon
 extern "C" int gettimeofday(struct timeval *tv_,  void *tz_)
 {
     assert(tv_ != NULL);
@@ -72,11 +73,12 @@ extern "C" int gettimeofday(struct timeval *tv_,  void *tz_)
     tv_->tv_usec = ms * 1000;
     return 0;
 }
+namespace ucommon {
 #else
+} // namespace ucommon
 #ifdef  HAVE_SYS_TIMEB_H
 #include <sys/timeb.h>
 #endif
-
 extern "C" int gettimeofday(struct timeval *tv_, void *tz_)
 {
     assert(tv_ != NULL);
@@ -97,6 +99,7 @@ extern "C" int gettimeofday(struct timeval *tv_, void *tz_)
     tv_->tv_usec = tb.millitm * 1000;
     return 0;
 }
+namespace ucommon {
 #endif
 #endif
 

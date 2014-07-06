@@ -74,7 +74,9 @@ private:
 public:
     typedef ::fpos_t bookmark_t;
 
-    static file cin, cout, cerr;
+    static file cin;
+    static file cout;
+    static file cerr;
 
     /**
      * Construct a file from an existing FILE pointer.

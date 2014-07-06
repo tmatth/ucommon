@@ -1110,7 +1110,7 @@ extern "C" {
 
         t.tm_isdst = 0;
         t2 = mktime(&t);
-        return (time_t)difftime(t1, t2);
+        return (long)difftime(t1, t2);
     } 
 }
 

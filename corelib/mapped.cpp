@@ -464,6 +464,7 @@ void MappedMemory::release(void)
 void *MappedMemory::invalid(void) const
 {
     abort();
+    return NULL;
 }
 
 void MappedMemory::fault(void) const

@@ -1404,7 +1404,7 @@ class __EXPORT memstring : public String
 {
 public:
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
-    const static size_t header = sizeof(string::cstring);
+    const static size_t header = sizeof(String::cstring);
 #else
     static const size_t header;
 #endif
