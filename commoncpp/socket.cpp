@@ -1,5 +1,6 @@
 // Copyright (C) 1999-2005 Open Source Telecom Corporation.
 // Copyright (C) 2006-2014 David Sugar, Tycho Softworks.
+// Copyright (C) 2014 Savoir-Faire Linux Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -485,9 +486,9 @@ Socket::Error Socket::setLoopbackByFamily(bool enable, Family family)
     }
 }
 
-Socket::Error Socket::join(const ucommon::Socket::address &ia)
+Socket::Error Socket::join(const ucommon::Socket::address &ia, int iface)
 {
-    switch(ucommon::Socket::join(ia)) {
+    switch(ucommon::Socket::join(ia, iface)) {
     case 0:
         return errSuccess;
     case ENOSYS:
@@ -500,52 +501,9 @@ Socket::Error Socket::join(const ucommon::Socket::address &ia)
     }
 }
 
-Socket::Error Socket::join(const IPV4Multicast &ia)
+Socket::Error Socket::drop(const ucommon::Socket::address &ia, int iface)
 {
-#ifdef  IP_ADD_MEMBERSHIP
-    struct ip_mreq group;
-    struct sockaddr_in myaddr;
-    socklen_t len = sizeof(myaddr);
-
-    if(!flags.multicast)
-        return error(errMulticastDisabled,(char *)"Multicast not enabled on socket");
-
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    group.imr_interface.s_addr = INADDR_ANY;
-    group.imr_multiaddr = ia.getAddress();
-    setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-#else
-    return error(errServiceUnavailable,(char *)"Multicast not supported");
-#endif
-}
-
-#ifdef  CCXX_IPV6
-Socket::Error Socket::join(const IPV6Multicast &ia)
-{
-#ifdef  IPV6_ADD_MEMBERSHIP
-    struct ipv6_mreq group;
-    struct sockaddr_in6 myaddr;
-    socklen_t len = sizeof(myaddr);
-
-    if(!flags.multicast)
-        return error(errMulticastDisabled,(char *)"Multicast not enabled on socket");
-
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    group.ipv6mr_interface = 0;
-    group.ipv6mr_multiaddr = ia.getAddress();
-    setsockopt(so, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-#else
-    return error(errServiceUnavailable,(char *)"Multicast not supported");
-#endif
-}
-
-#endif
-
-Socket::Error Socket::drop(const ucommon::Socket::address &ia)
-{
-    switch(ucommon::Socket::drop(ia)) {
+    switch(ucommon::Socket::drop(ia, iface)) {
     case 0:
         return errSuccess;
     case ENOSYS:
@@ -557,48 +515,6 @@ Socket::Error Socket::drop(const ucommon::Socket::address &ia)
         return error(errNotConnected,(char *)"Invalid socket operation");
     }
 }
-
-Socket::Error Socket::drop(const IPV4Multicast &ia)
-{
-#ifdef  IP_DROP_MEMBERSHIP
-    struct ip_mreq group;
-    struct sockaddr_in myaddr;
-    socklen_t len = sizeof(myaddr);
-
-    if(!flags.multicast)
-        return error(errMulticastDisabled,(char *)"Multicast not enabled on socket");
-
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    group.imr_interface.s_addr = INADDR_ANY;
-    group.imr_multiaddr = ia.getAddress();
-    setsockopt(so, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-#else
-    return error(errServiceUnavailable,(char *)"Multicast not supported");
-#endif
-}
-
-#ifdef  CCXX_IPV6
-Socket::Error Socket::drop(const IPV6Multicast &ia)
-{
-#ifdef  IPV6_DROP_MEMBERSHIP
-    struct ipv6_mreq group;
-    struct sockaddr_in6 myaddr;
-    socklen_t len = sizeof(myaddr);
-
-    if(!flags.multicast)
-        return error(errMulticastDisabled,(char *)"Multicast not enabled on socket");
-
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    group.ipv6mr_interface = 0;
-    group.ipv6mr_multiaddr = ia.getAddress();
-    setsockopt(so, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-#else
-    return error(errServiceUnavailable,(char *)"Multicast not supported");
-#endif
-}
-#endif
 
 Socket::Error Socket::setRouting(bool enable)
 {
