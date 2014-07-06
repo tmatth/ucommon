@@ -95,6 +95,10 @@
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
 #define _MSWINDOWS_
 
+#if defined(_MSC_VER)
+#define NOMINMAX
+#endif
+
 #if defined(_M_X64) || defined(_M_ARM)
 #define _MSCONDITIONALS_
 #ifndef _WIN32_WINNT
