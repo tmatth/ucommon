@@ -1,7 +1,10 @@
 Changes from 6.1.8 to 6.1.9
-- apparently winpthread gcc c++11 issue was only temporary
-- mingw back to native thread support by default
-- contributed upstream improvements in socket support
+- ost::Socket: use ucommon::Socket for join(), drop() implementations
+- back to native threading model for mingw
+- Socket::store: use existing len method
+- Socket::address: allow printing to std::ostream
+- Socket::address: use in_port_t for port numbers
+- Socket::join, ::drop: allow to set interface index for IPv6
 
 Changes from 6.1.7 to 6.1.8
 - mingw libstdc++ c++11 support now requires winpthread
