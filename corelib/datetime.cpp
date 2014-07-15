@@ -721,7 +721,7 @@ DateTime::DateTime(const char *a_str, size_t size)
         Date::set(str, 10);
         Time::set(timestr,8);
     }
-    delete str;
+    delete[] str;
 }
 
 
