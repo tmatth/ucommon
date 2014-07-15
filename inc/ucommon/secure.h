@@ -196,7 +196,7 @@ public:
 
     template <typename T>
     inline static void erase(T *object)
-        {memset(object, 0, sizeof(object)); delete object;}
+        {memset(object, 0, sizeof(T)); delete object;}
 
     inline operator bool()
         {return is_valid();}
