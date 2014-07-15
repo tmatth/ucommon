@@ -162,7 +162,7 @@ size_t utf8::count(const char *string)
     if(!string)
         return 0;
 
-    while(*string && (codesize = size(string) != 0)) {
+    while(*string && (codesize = size(string)) != 0) {
         pos += codesize;
         string += codesize;
     }
