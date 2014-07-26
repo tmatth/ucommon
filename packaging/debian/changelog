@@ -1,3 +1,9 @@
+ucommon (1:6.1.10-1) UNRELEASED; urgency=medium
+
+  * Bug fix release
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 26 Jul 2014 08:46:58 -0400
+
 ucommon (1:6.1.9-1) UNRELEASED; urgency=low
 
   * Updated for latest merge of ucommon features with commoncpp

@@ -1,3 +1,10 @@
+Changes from 6.1.9 to 6.1.10
+- for next release
+- iso cleaness
+- Fix memory leak in DateTime ctor
+- Fix utf8::count()
+- secure::erase() should be more secure
+
 Changes from 6.1.8 to 6.1.9
 - ost::Socket: use ucommon::Socket for join(), drop() implementations
 - back to native threading model for mingw
