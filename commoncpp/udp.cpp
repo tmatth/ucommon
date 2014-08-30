@@ -102,16 +102,7 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
     struct addrinfo hint, *list = NULL, *first;
 
     family = fam;
-
-    switch(fam) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        peer.ipv6.sin6_family = family;
-        break;
-#endif
-    case IPV4:
-        peer.ipv4.sin_family = family;
-    }
+    peer.setAny(fam);
 
     snprintf(namebuf, sizeof(namebuf), "%s", name);
     cp = strrchr(namebuf, '/');
@@ -175,9 +166,9 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
     tpport_t port = 0;
     struct servent *svc = NULL;
     socklen_t alen = 0;
-    struct sockaddr *addr = NULL;
 
     family = fam;
+    peer.setAny(fam);
 
     snprintf(namebuf, sizeof(namebuf), "%s", name);
     cp = strrchr(namebuf, '/');
@@ -208,34 +199,7 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
         }
     }
 
-    struct sockaddr_in addr4;
-    IPV4Address ia4(name);
-#ifdef  CCXX_IPV6
-    struct sockaddr_in6 addr6;
-    IPV6Address ia6(name);
-#endif
-
-    switch(family) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        peer.ipv6.sin6_family = family;
-        memset(&addr6, 0, sizeof(addr6));
-        addr6.sin6_family = family;
-        addr6.sin6_addr = ia6.getAddress();
-        addr6.sin6_port = htons(port);
-        alen = sizeof(addr6);
-        addr = (struct sockaddr *)&addr6;
-        break;
-#endif
-    case IPV4:
-        peer.ipv4.sin_family = family;
-        memset(&addr4, 0, sizeof(addr4));
-        addr4.sin_family = family;
-        addr4.sin_addr = ia4.getAddress();
-        addr4.sin_port = htons(port);
-        alen = sizeof(&addr4);
-        addr = (struct sockaddr *)&addr4;
-    }
+    Socket::address addr(name);
 
 #if defined(SO_REUSEADDR)
     int opt = 1;
@@ -243,7 +207,7 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
         (socklen_t)sizeof(opt));
 #endif
 
-    if(addr && !bind(so, addr, alen))
+    if(addr && !bind(so, addr, addr.getLength()))
         state = BOUND;
 
     if(state != BOUND) {
@@ -259,31 +223,34 @@ UDPSocket::UDPSocket(Family fam) :
 Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
 {
     family = fam;
-    memset(&peer, 0, sizeof(peer));
-    switch(fam) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        peer.ipv6.sin6_family = family;
-        break;
-#endif
-    case IPV4:
-        peer.ipv4.sin_family = family;
-    }
+    peer.setAny(fam);
 }
 
-UDPSocket::UDPSocket(const IPV4Address &ia, tpport_t port) :
-Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+UDPSocket::UDPSocket(const ucommon::Socket::address &ia) :
+Socket(ia.family(), SOCK_DGRAM, IPPROTO_UDP)
 {
-    family = IPV4;
-    memset(&peer.ipv4, 0, sizeof(peer));
-    peer.ipv4.sin_family = AF_INET;
-    peer.ipv4.sin_addr = ia.getAddress();
-    peer.ipv4.sin_port = htons(port);
+    family = ia.family() == AF_INET6 ? IPV6 : IPV4;
+    peer = ia;
 #if defined(SO_REUSEADDR)
     int opt = 1;
     setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, (socklen_t)sizeof(opt));
 #endif
-    if(bind(so, (struct sockaddr *)&peer.ipv4, sizeof(peer.ipv4))) {
+    if(bind(so, peer, peer.getLength())) {
+        endSocket();
+        error(errBindingFailed,(char *)"Could not bind socket",socket_errno);
+        return;
+    }
+    state = BOUND;
+}
+
+UDPSocket::UDPSocket(const IPV4Address &ia, tpport_t port) :
+Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP), family(IPV4), peer(ia.getAddress(), port)
+{
+#if defined(SO_REUSEADDR)
+    int opt = 1;
+    setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, (socklen_t)sizeof(opt));
+#endif
+    if(bind(so, peer, sizeof(sockaddr_in))) {
         endSocket();
         error(errBindingFailed,(char *)"Could not bind socket",socket_errno);
         return;
@@ -293,18 +260,13 @@ Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
 
 #ifdef  CCXX_IPV6
 UDPSocket::UDPSocket(const IPV6Address &ia, tpport_t port) :
-Socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)
+Socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP), family(IPV6), peer(ia.getAddress(), port)
 {
-    family = IPV6;
-    memset(&peer.ipv6, 0, sizeof(peer));
-    peer.ipv6.sin6_family = AF_INET6;
-    peer.ipv6.sin6_addr = ia.getAddress();
-    peer.ipv6.sin6_port = htons(port);
 #if defined(SO_REUSEADDR)
     int opt = 1;
     setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, (socklen_t)sizeof(opt));
 #endif
-    if(bind(so, (struct sockaddr *)&peer.ipv6, sizeof(peer.ipv6))) {
+    if(bind(so, peer, sizeof(sockaddr_in6))) {
         endSocket();
         error(errBindingFailed,(char *)"Could not bind socket",socket_errno);
         return;
@@ -320,24 +282,8 @@ UDPSocket::~UDPSocket()
 
 ssize_t UDPSocket::send(const void *buf, size_t len)
 {
-    struct sockaddr *addr = NULL;
-    socklen_t alen = 0;
-
-    switch(family) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        addr = (struct sockaddr *)&peer.ipv6;
-        alen = sizeof(struct sockaddr_in6);
-        break;
-#endif
-    case IPV4:
-        addr = (struct sockaddr *)&peer.ipv4;
-        alen = sizeof(struct sockaddr_in);
-        break;
-    default:
-        return -1;
-    }
-
+    struct sockaddr *addr = peer;
+    socklen_t alen = peer.getLength();
     if(isConnected()) {
         addr = NULL;
         alen = 0;
@@ -348,24 +294,9 @@ ssize_t UDPSocket::send(const void *buf, size_t len)
 
 ssize_t UDPSocket::receive(void *buf, size_t len, bool reply)
 {
-    struct sockaddr *addr = NULL;
-    struct sockaddr_in senderAddress;  // DMC 2/7/05 ADD for use below.
-    socklen_t alen = 0;
-
-    switch(family) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        addr = (struct sockaddr *)&peer.ipv6;
-        alen = sizeof(struct sockaddr_in6);
-        break;
-#endif
-    case IPV4:
-        addr = (struct sockaddr *)&peer.ipv4;
-        alen = sizeof(struct sockaddr_in);
-        break;
-    default:
-        return -1;
-    }
+    struct sockaddr *addr = peer;
+    socklen_t alen = peer.getLength();
+    struct sockaddr_in6 senderAddress;  // DMC 2/7/05 ADD for use below.
 
     if(isConnected() || !reply) {
         // DMC 2/7/05 MOD to use senderAddress instead of NULL, to prevent 10014 error
@@ -373,7 +304,7 @@ ssize_t UDPSocket::receive(void *buf, size_t len, bool reply)
         //addr = NULL;
         //alen = 0;
         addr = (struct sockaddr*)(&senderAddress);
-        alen = sizeof(struct sockaddr_in);
+        alen = sizeof(struct sockaddr_in6);
     }
 
     int bytes = ::recvfrom(so, (char *)buf, _IOLEN64 len, 0, addr, &alen);
@@ -390,60 +321,16 @@ ssize_t UDPSocket::receive(void *buf, size_t len, bool reply)
 
 Socket::Error UDPSocket::join(const IPV4Multicast &ia,int InterfaceIndex)
 {
-
-#if defined(_MSWINDOWS_) && defined(IP_ADD_MEMBERSHIP)
-
-        // DMC 2/7/05: Added WIN32 block.  Win32 does not define the ip_mreqn structure,
-        // so we must use ip_mreq with INADDR_ANY.
-        struct ip_mreq      group;
-    struct sockaddr_in   myaddr;
-    socklen_t            len = sizeof(myaddr);
-
-    if(!flags.multicast)
-      return error(errMulticastDisabled);
-
-    memset(&group, 0, sizeof(group));
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    group.imr_multiaddr.s_addr = ia.getAddress().s_addr;
-    group.imr_interface.s_addr = INADDR_ANY;
-    setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-
-#elif defined(IP_ADD_MEMBERSHIP) && defined(SIOCGIFINDEX) && !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__) && !defined(_OSF_SOURCE) && !defined(__hpux) && !defined(__GNU__)
-
-        struct ip_mreqn      group;
-    struct sockaddr_in   myaddr;
-    socklen_t            len = sizeof(myaddr);
-
-    if(!flags.multicast)
-      return error(errMulticastDisabled);
-
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    memset(&group, 0, sizeof(group));
-    memcpy(&group.imr_address, &myaddr.sin_addr, sizeof(myaddr.sin_addr));
-    group.imr_multiaddr = ia.getAddress();
-    group.imr_ifindex   = InterfaceIndex;
-    setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-#elif defined(IP_ADD_MEMBERSHIP)
-    // if no by index, use INADDR_ANY
-    struct ip_mreq group;
-    struct sockaddr_in myaddr;
-    socklen_t len = sizeof(myaddr);
-
-    if(!flags.multicast)
-        return error(errMulticastDisabled);
-
-    getsockname(so, (struct sockaddr *)&myaddr, &len);
-    memset(&group, sizeof(group), 0);
-    group.imr_multiaddr.s_addr = ia.getAddress().s_addr;
-    group.imr_interface.s_addr = INADDR_ANY;
-    setsockopt(so, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
-    return errSuccess;
-#else
-    return error(errServiceUnavailable);
-#endif
+    join(Socket::address(getaddress(ia)), InterfaceIndex);
 }
+
+
+
+Socket::Error UDPSocket::join(const ucommon::Socket::address &ia, int InterfaceIndex)
+{
+    return Socket::join(ia, InterfaceIndex);
+}
+
 
 Socket::Error UDPSocket::getInterfaceIndex(const char *DeviceName,int& InterfaceIndex)
 {
@@ -514,12 +401,24 @@ Socket::Error UDPSocket::disconnect(void)
 }
 #endif
 
+void UDPSocket::setPeer(const ucommon::Socket::address &host)
+{
+    peer = host;
+}
+
+void UDPSocket::connect(const ucommon::Socket::address &host)
+{
+    peer = host;
+    if(so == INVALID_SOCKET)
+        return;
+
+    if(!::connect(so, host, host.getLength()))
+        Socket::state = CONNECTED;
+}
+
 void UDPSocket::setPeer(const IPV4Host &ia, tpport_t port)
 {
-    memset(&peer.ipv4, 0, sizeof(peer.ipv4));
-    peer.ipv4.sin_family = AF_INET;
-    peer.ipv4.sin_addr = ia.getAddress();
-    peer.ipv4.sin_port = htons(port);
+    peer = ucommon::Socket::address(ia.getAddress(), port);
 }
 
 void UDPSocket::connect(const IPV4Host &ia, tpport_t port)
@@ -535,10 +434,7 @@ void UDPSocket::connect(const IPV4Host &ia, tpport_t port)
 #ifdef  CCXX_IPV6
 void UDPSocket::setPeer(const IPV6Host &ia, tpport_t port)
 {
-    memset(&peer.ipv6, 0, sizeof(peer.ipv6));
-    peer.ipv6.sin6_family = AF_INET6;
-    peer.ipv6.sin6_addr = ia.getAddress();
-    peer.ipv6.sin6_port = htons(port);
+    peer = ucommon::Socket::address(ia.getAddress(), port);
 }
 
 void UDPSocket::connect(const IPV6Host &ia, tpport_t port)
@@ -555,86 +451,12 @@ void UDPSocket::connect(const IPV6Host &ia, tpport_t port)
 
 #endif
 
-#ifdef  HAVE_GETADDRINFO
-
 void UDPSocket::setPeer(const char *name)
 {
-    char namebuf[128], *cp;
-    struct addrinfo hint, *list;
-
-    snprintf(namebuf, sizeof(namebuf), "%s", name);
-    cp = strrchr(namebuf, '/');
-    if(!cp)
-        cp = strrchr(namebuf, ':');
-
-    if(!cp)
-        return;
-
-    memset(&hint, 0, sizeof(hint));
-    hint.ai_family = family;
-    hint.ai_socktype = SOCK_DGRAM;
-    hint.ai_protocol = IPPROTO_UDP;
-
-    if(getaddrinfo(namebuf, cp, &hint, &list) || !list)
-        return;
-
-    switch(family) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        memcpy(&peer.ipv6, list->ai_addr, sizeof(peer.ipv6));
-        break;
-#endif
-    case IPV4:
-        memcpy(&peer.ipv4, list->ai_addr, sizeof(peer.ipv4));
-        break;
-    }
-
+    struct addrinfo *list = ucommon::Socket::query(name, NULL, SOCK_DGRAM, IPPROTO_UDP);
+    peer = ucommon::Socket::address(list);
     freeaddrinfo(list);
 }
-
-#else
-
-void UDPSocket::setPeer(const char *name)
-{
-    char namebuf[128], *cp;
-    struct servent *svc;
-    tpport_t port;
-
-    snprintf(namebuf, sizeof(namebuf), "%s", name);
-    cp = strrchr(namebuf, '/');
-    if(!cp)
-        cp = strrchr(namebuf, ':');
-
-    if(!cp)
-        return;
-
-    if(isdigit(*cp))
-        port = atoi(cp);
-    else {
-        mutex.enter();
-        svc = getservbyname(cp, "udp");
-        if(svc)
-            port = ntohs(svc->s_port);
-        mutex.leave();
-        if(!svc)
-            return;
-    }
-
-    memset(&peer, 0, sizeof(peer));
-
-    switch(family) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        setPeer(IPV6Host(namebuf), port);
-        break;
-#endif
-    case IPV4:
-        setPeer(IPV4Host(namebuf), port);
-        break;
-    }
-}
-
-#endif
 
 void UDPSocket::connect(const char *service)
 {
@@ -645,79 +467,47 @@ void UDPSocket::connect(const char *service)
     if(so == INVALID_SOCKET)
         return;
 
-    switch(family) {
-#ifdef  CCXX_IPV6
-    case IPV6:
-        rtn = ::connect(so, (struct sockaddr *)&peer.ipv6, sizeof(struct sockaddr_in6));
-        break;
-#endif
-    case IPV4:
-        rtn = ::connect(so, (struct sockaddr *)&peer.ipv4, sizeof(struct sockaddr_in));
-        break;
-    }
+    rtn = ::connect(so, peer, peer.getLength());
     if(!rtn)
         Socket::state = CONNECTED;
 }
 
-IPV4Host UDPSocket::getIPV4Peer(tpport_t *port) const
+ucommon::Socket::address UDPSocket::getPeer()
 {
-    // FIXME: insufficient buffer
-    //        how to retrieve peer ??
-    char buf;
-    socklen_t len = sizeof(peer.ipv4);
-    int rtn = ::recvfrom(so, &buf, 1, MSG_PEEK, (struct sockaddr *)&peer.ipv4, &len);
+    ucommon::Socket::address addr = getPeer();
+    setPeer(addr);
+    return addr;
+}
 
-#ifdef _MSWINDOWS_
-    if(rtn < 1 && WSAGetLastError() != WSAEMSGSIZE) {
+IPV4Host UDPSocket::getIPV4Peer(tpport_t *port)
+{
+    ucommon::Socket::address addr = getPeer();
+    if (addr) {
+        if(port)
+            *port = peer.getPort();
+    } else {
+        peer.setAny();
         if(port)
             *port = 0;
+    }
 
-        memset((void*) &peer.ipv4, 0, sizeof(peer.ipv4));
-    }
-#else
-    if(rtn < 1) {
-        if(port)
-            *port = 0;
-
-        memset((void*) &peer.ipv4, 0, sizeof(peer.ipv4));
-    }
-#endif
-    else {
-        if(port)
-            *port = ntohs(peer.ipv4.sin_port);
-    }
-    return IPV4Host(peer.ipv4.sin_addr);
+    return IPV4Host(ucommon::Socket::address::ipv4(addr)->sin_addr);
 }
 
 #ifdef  CCXX_IPV6
-IPV6Host UDPSocket::getIPV6Peer(tpport_t *port) const
+IPV6Host UDPSocket::getIPV6Peer(tpport_t *port)
 {
-    // FIXME: insufficient buffer
-    //        how to retrieve peer ??
-    char buf;
-    socklen_t len = sizeof(peer.ipv6);
-    int rtn = ::recvfrom(so, &buf, 1, MSG_PEEK, (struct sockaddr *)&peer.ipv6, &len);
-
-#ifdef _MSWINDOWS_
-    if(rtn < 1 && WSAGetLastError() != WSAEMSGSIZE) {
+    ucommon::Socket::address addr = getPeer();
+    if (addr) {
+        if(port)
+            *port = peer.getPort();
+    } else {
+        peer.setAny();
         if(port)
             *port = 0;
+    }
 
-        memset((void*) &peer.ipv6, 0, sizeof(peer.ipv6));
-    }
-#else
-    if(rtn < 1) {
-        if(port)
-            *port = 0;
-
-        memset((void*) &peer.ipv6, 0, sizeof(peer.ipv6));
-    }
-#endif
-    else {
-        if(port)
-            *port = ntohs(peer.ipv6.sin6_port);
-    }
-    return IPV6Host(peer.ipv6.sin6_addr);
+    return IPV6Host(ucommon::Socket::address::ipv6(addr)->sin6_addr);
 }
 #endif
 
@@ -730,10 +520,15 @@ UDPSocket(ia, port)
 
 void UDPBroadcast::setPeer(const IPV4Broadcast &ia, tpport_t port)
 {
-    memset(&peer.ipv4, 0, sizeof(peer.ipv4));
-    peer.ipv4.sin_family = AF_INET;
-    peer.ipv4.sin_addr = ia.getAddress();
-    peer.ipv4.sin_port = htons(port);
+    peer = ucommon::Socket::address(ia.getAddress(), port);
+}
+
+UDPTransmit::UDPTransmit(const ucommon::Socket::address &ia) :
+UDPSocket(ia)
+{
+    disconnect();   // assure not started live
+    ::shutdown(so, 0);
+    receiveBuffer(0);
 }
 
 UDPTransmit::UDPTransmit(const IPV4Address &ia, tpport_t port) :
@@ -761,38 +556,26 @@ UDPTransmit::UDPTransmit(Family family) : UDPSocket(family)
     receiveBuffer(0);
 }
 
-Socket::Error UDPTransmit::cConnect(const IPV4Address &ia, tpport_t port)
+Socket::Error UDPTransmit::connect(const ucommon::Socket::address &host)
 {
-    int len = sizeof(peer.ipv4);
-
-    peer.ipv4.sin_family = AF_INET;
-    peer.ipv4.sin_addr = ia.getAddress();
-    peer.ipv4.sin_port = htons(port);
-    // Win32 will crash if you try to connect to INADDR_ANY.
-    if ( INADDR_ANY == peer.ipv4.sin_addr.s_addr )
-        peer.ipv4.sin_addr.s_addr = INADDR_LOOPBACK;
-    if(::connect(so, (sockaddr *)&peer.ipv4, len))
+    peer = host;
+    if(peer.isAny())
+        peer.setLoopback();
+    if(::connect(so, peer, peer.getLength()))
         return connectError();
     return errSuccess;
 }
 
+Socket::Error UDPTransmit::cConnect(const IPV4Address &ia, tpport_t port)
+{
+    return connect(ucommon::Socket::address(ia.getAddress(), port));
+}
 
 #ifdef  CCXX_IPV6
 
 Socket::Error UDPTransmit::connect(const IPV6Address &ia, tpport_t port)
 {
-    int len = sizeof(peer.ipv6);
-
-    peer.ipv6.sin6_family = AF_INET6;
-    peer.ipv6.sin6_addr = ia.getAddress();
-    peer.ipv6.sin6_port = htons(port);
-    // Win32 will crash if you try to connect to INADDR_ANY.
-    if(!memcmp(&peer.ipv6.sin6_addr, &in6addr_any, sizeof(in6addr_any)))
-        memcpy(&peer.ipv6.sin6_addr, &in6addr_loopback,
-            sizeof(in6addr_loopback));
-    if(::connect(so, (struct sockaddr *)&peer.ipv6, len))
-        return connectError();
-    return errSuccess;
+    return connect(ucommon::Socket::address(ia.getAddress(), port));
 }
 #endif
 
@@ -832,6 +615,13 @@ Socket::Error UDPTransmit::connect(const IPV6Multicast &group, tpport_t port)
 }
 #endif
 
+UDPReceive::UDPReceive(const ucommon::Socket::address &ia) :
+UDPSocket(ia)
+{
+    ::shutdown(so, 1);
+    sendBuffer(0);
+}
+
 UDPReceive::UDPReceive(const IPV4Address &ia, tpport_t port) :
 UDPSocket(ia, port)
 {
@@ -848,37 +638,35 @@ UDPSocket(ia, port)
 }
 #endif
 
-Socket::Error UDPReceive::connect(const IPV4Host &ia, tpport_t port)
+Socket::Error UDPReceive::connect(const ucommon::Socket::address &ia)
 {
-    int len = sizeof(peer.ipv4);
+    ucommon::Socket::address host = ia;
+    setPeer(host);
 
-    peer.ipv4.sin_family = AF_INET;
-    peer.ipv4.sin_addr = ia.getAddress();
-    peer.ipv4.sin_port = htons(port);
     // Win32 will crash if you try to connect to INADDR_ANY.
-    if ( INADDR_ANY == peer.ipv4.sin_addr.s_addr )
-        peer.ipv4.sin_addr.s_addr = INADDR_LOOPBACK;
-    if(::connect(so, (struct sockaddr *)&peer.ipv4, len))
+    if(host.isAny())
+        host.setLoopback();
+
+    if(::connect(so, host, host.getLength()))
         return connectError();
     return errSuccess;
+}
+
+Socket::Error UDPReceive::connect(const IPV4Host &ia, tpport_t port)
+{
+    return connect(ucommon::Socket::address(ia.getAddress(), port));
 }
 
 #ifdef  CCXX_IPV6
 Socket::Error UDPReceive::connect(const IPV6Host &ia, tpport_t port)
 {
-    int len = sizeof(peer.ipv6);
-
-    peer.ipv6.sin6_family = AF_INET6;
-    peer.ipv6.sin6_addr = ia.getAddress();
-    peer.ipv6.sin6_port = htons(port);
-    // Win32 will crash if you try to connect to INADDR_ANY.
-    if(!memcmp(&peer.ipv6.sin6_addr, &in6addr_any, sizeof(in6addr_any)))
-        memcpy(&peer.ipv6.sin6_addr, &in6addr_loopback, sizeof(in6addr_loopback));
-    if(::connect(so, (sockaddr *)&peer.ipv6, len))
-        return connectError();
-    return errSuccess;
+    return connect(ucommon::Socket::address(ia.getAddress(), port));
 }
 #endif
+
+UDPDuplex::UDPDuplex(const ucommon::Socket::address &bind) :
+UDPTransmit(bind.withPort(bind.getPort() + 1)), UDPReceive(bind)
+{}
 
 UDPDuplex::UDPDuplex(const IPV4Address &bind, tpport_t port) :
 UDPTransmit(bind, port + 1), UDPReceive(bind, port)
@@ -889,6 +677,17 @@ UDPDuplex::UDPDuplex(const IPV6Address &bind, tpport_t port) :
 UDPTransmit(bind, port + 1), UDPReceive(bind, port)
 {}
 #endif
+
+Socket::Error UDPDuplex::connect(const ucommon::Socket::address &host)
+{
+    Error rtn = UDPTransmit::connect(host);
+    if(rtn) {
+        UDPTransmit::disconnect();
+        UDPReceive::disconnect();
+        return rtn;
+    }
+    return UDPReceive::connect(host.withPort(host.getPort() + 1));
+}
 
 Socket::Error UDPDuplex::connect(const IPV4Host &host, tpport_t port)
 {
