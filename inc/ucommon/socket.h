@@ -718,6 +718,12 @@ public:
         static bool isAny(const struct sockaddr *address);
 
         /**
+         * Set the socket address to ADDR_ANY:
+         *   0.0.0.0 or ::0
+         */
+        static void setAny(struct sockaddr *sa);
+
+        /**
          * Get a ADDR_ANY socket address of the given family.
          */
         static sockaddr_storage any(int family);
@@ -728,6 +734,13 @@ public:
          * @return true if the address is one of the above.
          */
         static bool isLoopback(const struct sockaddr *address);
+
+        /**
+         * Set the socket address to ADDR_LOOPBACK:
+         *   127.0.0.1 or ::1
+         * depending on the family of the pointed address.
+         */
+        static void setLoopback(struct sockaddr *sa);
 
         /**
          * Get a ADDR_LOOPBACK socket address of the given family.
