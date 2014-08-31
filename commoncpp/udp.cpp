@@ -163,10 +163,6 @@ UDPSocket::UDPSocket(const char *name, Family fam) :
 Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
 {
     char namebuf[128], *cp;
-    tpport_t port = 0;
-    struct servent *svc = NULL;
-    socklen_t alen = 0;
-
     family = fam;
     peer.setAny(fam);
 
@@ -184,22 +180,7 @@ Socket(fam, SOCK_DGRAM, IPPROTO_UDP)
         *(cp++) = 0;
     }
 
-    if(isdigit(*cp))
-        port = atoi(cp);
-    else {
-        mutex.enter();
-        svc = getservbyname(cp, "udp");
-        if(svc)
-            port = ntohs(svc->s_port);
-        mutex.leave();
-        if(!svc) {
-            error(errBindingFailed, (char *)"Could not find service", errno);
-            endSocket();
-            return;
-        }
-    }
-
-    Socket::address addr(name);
+    Socket::address addr(namebuf, cp, SOCK_DGRAM);
 
 #if defined(SO_REUSEADDR)
     int opt = 1;
