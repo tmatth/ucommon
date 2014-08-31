@@ -407,7 +407,7 @@ public:
     }
 
     ~linked_allocator()
-        {delete[] array;};
+        {delete[] array;}
 
     inline T *get(void)
         {return static_cast<T *>(LinkedAllocator::get());}
@@ -463,7 +463,7 @@ public:
      * @param object to copy into the buffer.
      */
     inline void put(T *object)
-        {put(object);};
+        {put(object);}
 
     /**
      * Put (copy) an object into the buffer.

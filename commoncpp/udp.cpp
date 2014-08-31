@@ -244,7 +244,7 @@ Socket(ia.family(), SOCK_DGRAM, IPPROTO_UDP)
 }
 
 UDPSocket::UDPSocket(const IPV4Address &ia, tpport_t port) :
-Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP), family(IPV4), peer(ia.getAddress(), port)
+Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP), peer(ia.getAddress(), port), family(IPV4)
 {
 #if defined(SO_REUSEADDR)
     int opt = 1;
@@ -260,7 +260,7 @@ Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP), family(IPV4), peer(ia.getAddress(), po
 
 #ifdef  CCXX_IPV6
 UDPSocket::UDPSocket(const IPV6Address &ia, tpport_t port) :
-Socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP), family(IPV6), peer(ia.getAddress(), port)
+Socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP), peer(ia.getAddress(), port), family(IPV6)
 {
 #if defined(SO_REUSEADDR)
     int opt = 1;
@@ -321,7 +321,7 @@ ssize_t UDPSocket::receive(void *buf, size_t len, bool reply)
 
 Socket::Error UDPSocket::join(const IPV4Multicast &ia,int InterfaceIndex)
 {
-    join(Socket::address(getaddress(ia)), InterfaceIndex);
+    return join(Socket::address(getaddress(ia)), InterfaceIndex);
 }
 
 
@@ -340,7 +340,7 @@ Socket::Error UDPSocket::getInterfaceIndex(const char *DeviceName,int& Interface
     struct ip_mreqn  mreqn;
     struct ifreq       m_ifreq;
     int            i;
-    sockaddr_in*          in4 = (sockaddr_in*) &peer.ipv4;
+    sockaddr_in*          in4 = (sockaddr_in*)peer.get(AF_INET);
     InterfaceIndex = -1;
 
     memset(&mreqn, 0, sizeof(mreqn));
@@ -427,7 +427,7 @@ void UDPSocket::connect(const IPV4Host &ia, tpport_t port)
     if(so == INVALID_SOCKET)
         return;
 
-    if(!::connect(so, (struct sockaddr *)&peer.ipv4, sizeof(struct sockaddr_in)))
+    if(!::connect(so, (struct sockaddr *)peer.get(AF_INET), sizeof(struct sockaddr_in)))
         Socket::state = CONNECTED;
 }
 
@@ -444,7 +444,7 @@ void UDPSocket::connect(const IPV6Host &ia, tpport_t port)
     if(so == INVALID_SOCKET)
         return;
 
-    if(!::connect(so, (struct sockaddr *)&peer.ipv6, sizeof(struct sockaddr_in6)))
+    if(!::connect(so, (struct sockaddr *)peer.get(AF_INET6), sizeof(struct sockaddr_in6)))
         Socket::state = CONNECTED;
 
 }

@@ -157,14 +157,14 @@ public:
      * @return true if is not locking an object.
      */
     inline bool operator!() const
-        {return lock == NULL;};
+        {return lock == NULL;}
 
     /**
      * Test if the reference holds an active lock.
      * @return true if locking an object.
      */
     inline operator bool() const
-        {return lock != NULL;};
+        {return lock != NULL;}
 
     /**
      * Release a held lock programmatically.  This can be used to de-reference
@@ -205,14 +205,14 @@ public:
      * @return true if is not locking an object.
      */
     inline bool operator!() const
-        {return lock == NULL;};
+        {return lock == NULL;}
 
     /**
      * Test if the reference holds an active lock.
      * @return true if locking an object.
      */
     inline operator bool() const
-        {return lock != NULL;};
+        {return lock != NULL;}
 
     /**
      * Release a held lock programmatically.  This can be used to de-reference

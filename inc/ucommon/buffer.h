@@ -71,7 +71,7 @@ protected:
      * @return socket we are using.
      */
     inline socket_t getsocket(void) const
-        {return so;};
+        {return so;}
 
 public:
     /**
