@@ -1418,30 +1418,40 @@ void Socket::address::setLoopback(int sa_family)
     insert(reinterpret_cast<const sockaddr*>(&sa));
 }
 
+void Socket::address::setAny(struct sockaddr *sa)
+{
+    int family = sa->sa_family;
+    memset(sa, 0, Socket::len(sa));
+    sa->sa_family = family;
+}
+
+void Socket::address::setLoopback(struct sockaddr *sa)
+{
+    switch (sa->sa_family) {
+    case AF_INET:
+        reinterpret_cast<sockaddr_in*>(sa)->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        break;
+    case AF_INET6:
+        memcpy(
+            &reinterpret_cast<sockaddr_in6*>(sa)->sin6_addr,
+            &in6addr_loopback,
+            sizeof(in6addr_loopback));
+        break;
+    }
+}
+
 sockaddr_storage Socket::address::any(int family)
 {
     sockaddr_storage sa;
     memset(&sa, 0, sizeof(sockaddr_storage));
-    reinterpret_cast<sockaddr*>(&sa)->sa_family = family;
+    sa.ss_family = family;
     return sa;
 }
 
 sockaddr_storage Socket::address::loopback(int family)
 {
     sockaddr_storage sa = any(family);
-
-    switch (family) {
-    case AF_INET:
-        reinterpret_cast<sockaddr_in*>(&sa)->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        break;
-    case AF_INET6:
-        memcpy(
-            &reinterpret_cast<sockaddr_in6*>(&sa)->sin6_addr, 
-            &in6addr_loopback, 
-            sizeof(in6addr_loopback));
-        break;
-    }
-
+    setLoopback((struct sockaddr*)&sa);
     return sa;
 }
 

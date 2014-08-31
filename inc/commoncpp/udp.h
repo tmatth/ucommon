@@ -102,16 +102,7 @@ private:
         {return Socket::setKeepAlive(enable);}
 
 protected:
-#ifdef  CCXX_IPV6
-    union {
-        struct sockaddr_in6 ipv6;
-        struct sockaddr_in ipv4;
-    }   peer;
-#else
-    union {
-        struct sockaddr_in ipv4;
-    }   peer;
-#endif
+    Socket::address peer;
 
     Family family;
 
@@ -135,6 +126,7 @@ public:
      * @param bind address to bind this socket to.
      * @param port number to bind this socket to.
      */
+    UDPSocket(const ucommon::Socket::address &bind);
     UDPSocket(const IPV4Address &bind, tpport_t port);
 #ifdef  CCXX_IPV6
     UDPSocket(const IPV6Address &bind, tpport_t port);
@@ -170,6 +162,9 @@ public:
      * @param host address to send packets to.
      * @param port number to deliver packets to.
      */
+    void setPeer(const ucommon::Socket::address &host);
+    void connect(const ucommon::Socket::address &host);
+
     void setPeer(const IPV4Host &host, tpport_t port);
     void connect(const IPV4Host &host, tpport_t port);
 #ifdef  CCXX_IPV6
@@ -194,6 +189,7 @@ public:
      * getInterfaceIndex
      * @todo Win32 and ipv6 specific implementation.
      */
+    Socket::Error join(const ucommon::Socket::address &ia, int InterfaceIndex=0);
     Socket::Error join(const IPV4Multicast &ia,int InterfaceIndex);
 
     /**
@@ -223,12 +219,14 @@ public:
      *
      * @param port pointer to hold port number.
      */
-    IPV4Host getIPV4Peer(tpport_t *port = NULL) const;
-    inline IPV4Host getPeer(tpport_t *port = NULL) const
+    ucommon::Socket::address getPeer();
+
+    IPV4Host getIPV4Peer(tpport_t *port = NULL);
+    inline IPV4Host getPeer(tpport_t *port)
         {return getIPV4Peer(port);}
 
 #ifdef  CCXX_IPV6
-    IPV6Host getIPV6Peer(tpport_t *port = NULL) const;
+    IPV6Host getIPV6Peer(tpport_t *port = NULL);
 #endif
 
     /**
@@ -323,8 +321,11 @@ protected:
      * only used to build the UDP Duplex.
      *
      * @param bind address to bind this socket to.
-     * @param port number to bind this socket to.
+     * @param port number to bind this socket to. If 0 or not specified,
+     *        the bind socket address port is used.
      */
+    UDPTransmit(const ucommon::Socket::address &bind);
+
     UDPTransmit(const IPV4Address &bind, tpport_t port = 5005);
 #ifdef  CCXX_IPV6
     UDPTransmit(const IPV6Address &bind, tpport_t port = 5005);
@@ -339,6 +340,8 @@ protected:
      * @param host address to connect socket to.
      * @param port to connect socket to.
      */
+    Error connect(const ucommon::Socket::address &host);
+
     Error connect(const IPV4Host &host, tpport_t port);
 #ifdef  CCXX_IPV6
     Error connect(const IPV6Address &host, tpport_t port);
@@ -449,8 +452,8 @@ protected:
      * On failure to bind, an exception is thrown.
      *
      * @param bind address to bind this socket to.
-     * @param port number to bind this socket to.
      */
+    UDPReceive(const ucommon::Socket::address &bind);
     UDPReceive(const IPV4Address &bind, tpport_t port);
 #ifdef  CCXX_IPV6
     UDPReceive(const IPV6Address &bind, tpport_t port);
@@ -465,6 +468,7 @@ protected:
      * @param host host network address to connect socket to.
      * @param port host transport port to connect socket to.
      */
+    Error connect(const ucommon::Socket::address &host);
     Error connect(const IPV4Host &host, tpport_t port);
 #ifdef  CCXX_IPV6
     Error connect(const IPV6Host &host, tpport_t port);
@@ -493,6 +497,9 @@ protected:
 
     inline Error setMulticast(bool enable)
         {return Socket::setMulticastByFamily(enable, family);}
+
+    inline Error join(const ucommon::Socket::address &ia)
+            {return Socket::join(ia);}
 
     inline Error join(const IPV4Multicast &ia)
         {return Socket::join(ia);}
@@ -551,6 +558,7 @@ public:
      * @param bind address to bind this socket to.
      * @param port number to bind sender.
      */
+    UDPDuplex(const ucommon::Socket::address &bind);
     UDPDuplex(const IPV4Address &bind, tpport_t port);
 #ifdef  CCXX_IPV6
     UDPDuplex(const IPV6Address &bind, tpport_t port);
@@ -565,6 +573,7 @@ public:
      * @param host address to connect socket to.
      * @param port number to connect socket to.
      */
+    Error connect(const ucommon::Socket::address &host);
     Error connect(const IPV4Host &host, tpport_t port);
 #ifdef  CCXX_IPV6
     Error connect(const IPV6Host &host, tpport_t port);
