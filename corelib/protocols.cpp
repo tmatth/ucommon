@@ -569,6 +569,24 @@ ObjectProtocol::~ObjectProtocol()
 {
 }
 
+KeyProtocol::~KeyProtocol()
+{
+}
+
+bool KeyProtocol::equal(const KeyProtocol& key) const
+{
+    if(keytype() != key.keytype())
+        return false;
+
+    if(keysize() != key.keysize() || !keysize())
+        return false;
+
+    if(memcmp(keydata(), key.keydata(), keysize()))
+        return false;
+
+    return true;
+}
+
 ObjectProtocol *ObjectProtocol::copy(void)
 {
     retain();

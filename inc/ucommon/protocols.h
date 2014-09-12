@@ -578,6 +578,33 @@ public:
 };
 
 /**
+ * Key data protocol used for things like maps and ordered lists.
+ */
+class __EXPORT KeyProtocol
+{
+protected:
+    virtual int keytype(void) const = 0;
+
+    /**
+     * Size of key data.
+     */
+    virtual size_t keysize(void) const = 0;
+
+    /**
+     * Buffer of key value.
+     */
+    virtual void *keydata(void) const = 0;
+
+    virtual bool equal(const KeyProtocol& compare) const;
+
+    inline bool operator!=(const KeyProtocol& compare) const {
+        return !equal(compare);
+    }
+
+    virtual ~KeyProtocol();
+};
+
+/**
  * At least with gcc, linking of stream operators was broken.  This provides
  * an auxillory class to solve the issue.
  */
