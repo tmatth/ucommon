@@ -459,22 +459,22 @@ public:
 };
 
 inline std::ostream& operator<< (std::ostream& out, const PrintProtocol& format)
-        {return _stream_operators::print(out, format);}
+    {return _stream_operators::print(out, format);}
 
 inline std::istream& operator>> (std::istream& inp, InputProtocol& format)
-        {return _stream_operators::input(inp, format);}
+    {return _stream_operators::input(inp, format);}
 
 inline std::ostream& operator<< (std::ostream& out, const string_t& str)
-        {return _stream_operators::print(out, str);}
+    {return _stream_operators::print(out, str);}
 
 inline std::istream& operator>> (std::istream& inp, string_t& str)
-        {return _stream_operators::input(inp, str);}
+    {return _stream_operators::input(inp, str);}
 
 inline std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
-        {return _stream_operators::print(out, list);}
+    {return _stream_operators::print(out, list);}
 
 inline std::istream& operator>> (std::istream& in, stringlist_t& list)
-        {return _stream_operators::input(in, list);}
+    {return _stream_operators::input(in, list);}
     
 inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
 #ifdef  AF_INET6
