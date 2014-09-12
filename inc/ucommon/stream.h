@@ -475,6 +475,17 @@ inline std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
 
 inline std::istream& operator>> (std::istream& in, stringlist_t& list)
         {return _stream_operators::input(in, list);}
+    
+inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
+#ifdef  AF_INET6
+    char buf[INET6_ADDRSTRLEN];
+#else
+    char buf[INET_ADDRSTRLEN];
+#endif
+    size_t s = addr.print(buf, sizeof(buf), false, true);
+    os << std::string(buf, s);
+    return os;
+}
 
 } // namespace ucommon
 
