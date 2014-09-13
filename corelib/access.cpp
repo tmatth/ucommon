@@ -46,6 +46,7 @@ shared_access::shared_access(SharedAccess *obj)
     assert(obj != NULL);
     lock = obj;
     modify = false;
+    state = 0;
     lock->shared_lock();
 }
 

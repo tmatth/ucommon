@@ -75,10 +75,8 @@ streambuf()
 #endif
     _enable = true;
     _level = levelDebug;
-        _clogEnable = true;
-#ifndef HAVE_SYSLOG_H
+    _clogEnable = true;
     syslog = NULL;
-#endif
 }
 
 Slog::~Slog(void)
@@ -93,21 +91,22 @@ Slog::~Slog(void)
 
 void Slog::close(void)
 {
+pthread_mutex_lock(&lock);
 #ifdef  HAVE_SYSLOG_H
     closelog();
 #else
-    pthread_mutex_lock(&lock);
     if(syslog)
         fclose(syslog);
     syslog = NULL;
-    pthread_mutex_unlock(&lock);
 #endif
+    pthread_mutex_unlock(&lock);
 }
 
 void Slog::open(const char *ident, Class grp)
 {
     const char *cp;
 
+    pthread_mutex_lock(&lock);
 #ifdef  HAVE_SYSLOG_H
     cp = strrchr(ident, '/');
     if(cp)
@@ -171,12 +170,10 @@ void Slog::open(const char *ident, Class grp)
     }
     openlog(ident, 0, fac);
 #else
-    char *buf;
-
-    pthread_mutex_lock(&lock);
     if(syslog)
             fclose(syslog);
-    buf = new char[strlen(ident) + 1];
+    
+    char *buf = new char[strlen(ident) + 1];
     strcpy(buf, ident);
     cp = (const char *)buf;
     buf = strrchr(buf, '.');
@@ -185,9 +182,8 @@ void Slog::open(const char *ident, Class grp)
             strcpy(buf, ".log");
     }
     syslog = fopen(cp, "a");
-    delete[] (char *)cp;
-    pthread_mutex_unlock(&lock);
 #endif
+    pthread_mutex_unlock(&lock);
 }
 
 void Slog::error(const char *format, ...)
@@ -338,6 +334,7 @@ int Slog::overflow(int c)
             return c;
 
         thread->msgbuf[thread->msgpos] = 0;
+        pthread_mutex_lock(&lock);
         if (_enable)
 #ifdef  HAVE_SYSLOG_H
             ::syslog(priority, "%s", thread->msgbuf);
@@ -376,7 +373,6 @@ int Slog::overflow(int c)
                 break;
             }
 
-            pthread_mutex_lock(&lock);
             snprintf(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d:%02d [%s] %s\n",
                 dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday,
                 dt->tm_hour, dt->tm_min, dt->tm_sec,
@@ -384,9 +380,9 @@ int Slog::overflow(int c)
             if(syslog)
                 fputs(buf, syslog);
 //              syslog << "[" << priority << "] " << thread->msgbuf << endl;
-            pthread_mutex_unlock(&lock);
         }
 #endif
+        pthread_mutex_unlock(&lock);
         thread->msgpos = 0;
 
         if ( _enable && _clogEnable

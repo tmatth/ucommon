@@ -1406,8 +1406,7 @@ char *File::getDirname(const char *path, char *buffer, size_t size)
 
     if(!cp)
         return buffer;
-
-    if(cp)
+    else
         len = cp - path;
 
     if(len >= size)
