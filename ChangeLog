@@ -1,3 +1,13 @@
+Changes from 6.1.10 to 6.1.11
+- any addr and overloads in commoncpp
+- cmake abi fix and other apple specific issues
+- stream fixes, sflphone recommended changes, and other updates
+- key protocol added
+- cleaner build for binding without resolver
+- cleanup and fixes for commoncpp peering...
+- UDPSocket: use ucommon::Socket::address
+- Socket::address: add setAny(sockaddr*), setLoopback(sockaddr*)
+
 Changes from 6.1.9 to 6.1.10
 - for next release
 - iso cleaness

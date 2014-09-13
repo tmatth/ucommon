@@ -1,3 +1,9 @@
+ucommon (1:6.1.11-1) UNRELEASED; urgency=medium
+
+  * Bug fix release, stream and string fixes
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 13 Sep 2014 12:53:55 -0400
+
 ucommon (1:6.1.10-1) UNRELEASED; urgency=medium
 
   * Bug fix release
