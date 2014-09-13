@@ -868,10 +868,13 @@ ucommon::Socket::address Socket::getSender() const
 IPV4Host Socket::getIPV4Sender(tpport_t *port) const
 {
     sockaddr_in* from = getSender();
+    struct in_addr any;
+    any.s_addr = INADDR_ANY;
+
     if (from == NULL) {
         if (port)
             port = 0;
-        return IPV4Host(INADDR_ANY);
+        return IPV4Host(any);
     }
 
     if (port)
@@ -912,10 +915,13 @@ ucommon::Socket::address Socket::getLocal() const
 IPV4Host Socket::getIPV4Local(tpport_t *port) const
 {
     sockaddr_in* from = getLocal();
+    struct in_addr any;
+    any.s_addr = INADDR_ANY;
+
     if (from == NULL) {
         if (port)
             port = 0;
-        return IPV4Host(INADDR_ANY);
+        return IPV4Host(any);
     }
 
     if (port)
@@ -962,10 +968,13 @@ ucommon::Socket::address Socket::getPeer() const
 IPV4Host Socket::getIPV4Peer(tpport_t *port) const
 {
     sockaddr_in* from = getPeer();
+    struct in_addr any;
+    any.s_addr = INADDR_ANY;
+
     if (from == NULL) {
         if (port)
             port = 0;
-        return IPV4Host(INADDR_ANY);
+        return IPV4Host(any);
     }
 
     if (port)
