@@ -850,6 +850,18 @@ std::ostream& _stream_operators::print(std::ostream& out, const stringlist_t& li
     return out;
 }
 
+std::string& _stream_operators::append(std::string& target, String& source)
+{
+    size_t size = source.count();
+    if(!size)
+        return target;
+
+    const char *buf = source.c_str();
+    std::string tmp(buf, size);
+    target += tmp;
+    return target;
+}
+
 } // namespace ucommon
 
 #endif

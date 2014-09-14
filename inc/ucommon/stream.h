@@ -456,6 +456,7 @@ public:
 
     static std::istream& input(std::istream& in, stringlist_t& list);
 
+    static std::string& append(std::string& target, String& source);
 };
 
 inline std::ostream& operator<< (std::ostream& out, const PrintProtocol& format)
@@ -475,7 +476,13 @@ inline std::ostream& operator<< (std::ostream& out, const stringlist_t& list)
 
 inline std::istream& operator>> (std::istream& in, stringlist_t& list)
     {return _stream_operators::input(in, list);}
-    
+
+inline std::string& operator+(std::string& target, String& source)
+    {return _stream_operators::append(target, source);}
+
+inline std::string& operator+=(std::string& target, String& source)
+    {return _stream_operators::append(target, source);}
+ 
 inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
 #ifdef  AF_INET6
     char buf[INET6_ADDRSTRLEN];
