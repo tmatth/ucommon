@@ -490,7 +490,7 @@ inline std::ostream& operator<<(std::ostream& os, Socket::address& addr) {
     char buf[INET_ADDRSTRLEN];
 #endif
     size_t s = addr.print(buf, sizeof(buf), false, true);
-    os << std::string(buf, s);
+    os << buf;
     return os;
 }
 
