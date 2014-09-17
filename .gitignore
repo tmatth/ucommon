@@ -16,6 +16,7 @@ stamp-h1
 cmake_*
 CMakeCache.txt
 CTest*
+*.user
 Dart*
 config.h
 args
