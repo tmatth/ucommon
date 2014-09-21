@@ -2,9 +2,17 @@ build/
 doc/
 autoconf/
 autom4te.cache/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
 CMakeFiles/
+CMakeScripts/
+CPack*.cmake
 Testing/
+ucommon.build/
 INSTALL
+*.xcodeproj/
 demo-*
 test-*
 configure
@@ -15,6 +23,7 @@ libtool
 stamp-h1
 cmake_*
 CMakeCache.txt
+install_manifest.txt
 CTest*
 Dart*
 config.h
