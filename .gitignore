@@ -25,6 +25,7 @@ cmake_*
 CMakeCache.txt
 install_manifest.txt
 CTest*
+*.user
 Dart*
 config.h
 args
