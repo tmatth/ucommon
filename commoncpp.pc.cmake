@@ -1,6 +1,6 @@
-prefix=${CMAKE_INSTALL_PREFIX}
-libdir=${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
-includedir=${CMAKE_INSTALL_PREFIX}/include
+prefix="${CMAKE_INSTALL_PREFIX}"
+libdir="${CMAKE_INSTALL_FULL_LIBDIR}"
+includedir="${CMAKE_INSTALL_FULL_INCLUDEDIR}"
 modflags="${MODULE_FLAGS}"
 
 Name: commoncpp
