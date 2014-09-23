@@ -531,7 +531,7 @@ if (DOXYGEN_FOUND)
                     #MESSAGE("DBG ${PROJECT_BINARY_DIR}/Doc/html/index.chm \n${OUT}")
                     # create target used by install and package commands
                     INSTALL(FILES "${PROJECT_BINARY_DIR}/Doc/html/index.chm"
-                        DESTINATION ${INSTALL_DOCDIR} RENAME "${OUT}")
+                        DESTINATION ${CMAKE_INSTALL_DOCDIR} RENAME "${OUT}")
                 ENDIF(EXISTS "${PROJECT_BINARY_DIR}/Doc/html/index.chm")
             ENDIF(NOT TARGET_DOC_SKIP_INSTALL)
 
