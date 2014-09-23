@@ -60,16 +60,7 @@ html browsable.
 %prep
 %setup -q
 %build
-%cmake \
-      -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-      -DSYSCONFDIR=%{_sysconfdir} \
-      -DINSTALL_MANDIR=%{_mandir} \
-      -DINSTALL_INCLUDEDIR=%{_includedir} \
-      -DINSTALL_BINDIR=%{_bindir} \
-      -DINSTALL_SBINDIR=%{_sbindir} \
-      -DINSTALL_LIBEXEC=%{_libexecdir} \
-      -DINSTALL_LIBDIR=%{_libdir} \
-      .
+%cmake .
 
 %{__make} %{?_smp_mflags}
 %{__rm} -rf doc/html
