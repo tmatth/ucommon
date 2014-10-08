@@ -15,7 +15,10 @@ EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
     ucommon-config.h.cmake doxy.config.cmake directive.in
 
 DIST_SUBDIRS = corelib commoncpp openssl gnutls nossl utils inc test
-SUBDIRS = corelib @SECURE@ @COMPAT@ utils inc test
+SUBDIRS = corelib @SECURE@ @COMPAT@ inc test
+if BUILD_UTILS
+SUBDIRS += utils
+endif
 EXTRA_SCRIPTS = commoncpp-config
 
 pkgconfigdir = $(libdir)/pkgconfig
