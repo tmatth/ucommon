@@ -36,6 +36,10 @@
 #include <ucommon/string.h>
 #endif
 
+#ifdef nil
+#undef nil
+#endif
+
 namespace ucommon {
 
 /**
