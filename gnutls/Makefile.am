@@ -10,7 +10,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION)
-AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc @UCOMMON_FLAGS@ @GNUTLS_CFLAGS@
 
 noinst_HEADERS = local.h
 

@@ -23,6 +23,9 @@ for lt in glibtoolize libtoolize15 libtoolize14 libtoolize13 ; do
     if test -x /usr/local/bin/$lt ; then
         libtoolize=$lt ; break
     fi
+    if test -x /opt/local/bin/$lt ; then
+        libtoolize=$lt ; break
+    fi    
 done
 $libtoolize --copy --force
 

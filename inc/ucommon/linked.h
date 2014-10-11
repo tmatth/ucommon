@@ -40,6 +40,10 @@
 #include <ucommon/object.h>
 #endif
 
+#ifdef nil
+#undef nil
+#endif
+
 namespace ucommon {
 
 class OrderedObject;
