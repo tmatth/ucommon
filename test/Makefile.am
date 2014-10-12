@@ -17,10 +17,6 @@ TESTS = ucommonLinked ucommonSocket ucommonStrings ucommonThreads \
 	ucommonMemory ucommonKeydata ucommonStream ucommonUnicode \
 	ucommonQueue ucommonDatetime ucommonShell ucommonDigest ucommonCipher
 
-noinst_PROGRAMS = demoSSL
-demoSSL_SOURCES = ssl.cpp
-demoSSL_LDFLAGS = @SECURE_LOCAL@
-
 check_PROGRAMS = $(TESTS)
 
 testing:	$(TESTS)
