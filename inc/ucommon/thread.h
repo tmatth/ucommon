@@ -189,16 +189,28 @@ public:
     class __EXPORT autolock
     {
     private:
+#ifdef  _MSTHREADS_
+        CRITICAL_SECTION *mutex;
+#else
         pthread_mutex_t *mutex;
+#endif
 
     public:
         inline autolock(const Conditional* object) {
             mutex = &object->mutex;
-            pthread_mutex_lock(this->mutex);
+#ifdef _MSTHREADS_
+            EnterCriticalSection(mutex);
+#else
+            pthread_mutex_lock(mutex);
+#endif
         }
 
         inline ~autolock() {
-            pthread_mutex_unlock(this->mutex);
+#ifdef  _MSTHREADS_
+            LeaveCriticalSection(mutex);
+#else
+            pthread_mutex_unlock(mutex);
+#endif
         }
     };
 
