@@ -131,10 +131,10 @@ protected:
     bool wait(struct timespec *timeout);
 
 #ifdef  _MSTHREADS_
-    inline void lock(void) const
+    inline void lock(void)
         {EnterCriticalSection(&mutex);};
 
-    inline void unlock(void) const
+    inline void unlock(void)
         {LeaveCriticalSection(&mutex);};
 
     void wait(void);
@@ -145,13 +145,13 @@ protected:
     /**
      * Lock the conditional's supporting mutex.
      */
-    inline void lock(void) const
+    inline void lock(void)
         {pthread_mutex_lock(&mutex);}
 
     /**
      * Unlock the conditional's supporting mutex.
      */
-    inline void unlock(void) const
+    inline void unlock(void)
         {pthread_mutex_unlock(&mutex);}
 
     /**
@@ -184,6 +184,24 @@ protected:
     ~Conditional();
 
 public:
+    friend class autolock;
+
+    class __EXPORT autolock
+    {
+    private:
+        pthread_mutex_t *mutex;
+
+    public:
+        inline autolock(const Conditional* object) {
+            mutex = &object->mutex;
+            pthread_mutex_lock(this->mutex);
+        }
+
+        inline ~autolock() {
+            pthread_mutex_unlock(this->mutex);
+        }
+    };
+
 #if !defined(_MSTHREADS_) && !defined(__PTH__)
     /**
      * Support function for getting conditional attributes for realtime
@@ -933,6 +951,24 @@ protected:
     virtual void _unlock(void);
 
 public:
+    friend class autolock;
+
+    class __EXPORT autolock
+    {
+    private:
+        pthread_mutex_t *mutex;
+
+    public:
+        inline autolock(const Mutex *object) {
+            mutex = &object->mlock;
+            pthread_mutex_lock(this->mutex);
+        }
+
+        inline ~autolock() {
+            pthread_mutex_unlock(this->mutex);
+        }
+    };
+
     /**
      * Guard class to apply scope based mutex locking to objects.  The mutex
      * is located from the mutex pool rather than contained in the target
