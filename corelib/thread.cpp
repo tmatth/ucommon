@@ -1176,13 +1176,13 @@ bool ThreadLock::writer(const void *ptr, timeout_t timeout)
     return false;
 }
 
-void Mutex::protect(const void *ptr)
+bool Mutex::protect(const void *ptr)
 {
     mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
     mutex_entry *entry, *empty = NULL;
 
     if(!ptr)
-        return;
+        return false;
 
     index->acquire();
     entry = index->list;
@@ -1209,15 +1209,16 @@ void Mutex::protect(const void *ptr)
 //  printf("ACQUIRE %p, THREAD %d, POINTER %p, COUNT %d\n", entry, Thread::self(), entry->pointer, entry->count);
     index->release();
     pthread_mutex_lock(&entry->mutex);
+	return true;
 }
 
-void ThreadLock::release(const void *ptr)
+bool ThreadLock::release(const void *ptr)
 {
     rwlock_index *index = &rwlock_table[hash_address(ptr, rwlock_indexing)];
     rwlock_entry *entry;
 
     if(!ptr)
-        return;
+        return false;
 
     index->acquire();
     entry = index->list;
@@ -1227,21 +1228,23 @@ void ThreadLock::release(const void *ptr)
         entry = entry->next;
     }
 
-    assert(entry);
+	bool rtn = false;
     if(entry) {
+		rtn = true;
         entry->release();
         --entry->count;
     }
     index->release();
+	return rtn;
 }
 
-void Mutex::release(const void *ptr)
+bool Mutex::release(const void *ptr)
 {
     mutex_index *index = &mutex_table[hash_address(ptr, mutex_indexing)];
     mutex_entry *entry;
 
     if(!ptr)
-        return;
+        return false;
 
     index->acquire();
     entry = index->list;
@@ -1251,13 +1254,15 @@ void Mutex::release(const void *ptr)
         entry = entry->next;
     }
 
-    assert(entry);
+	bool rtn = false;
     if(entry) {
 //      printf("RELEASE %p, THREAD %d, POINTER %p COUNT %d\n", entry, Thread::self(), entry->pointer, entry->count);
         pthread_mutex_unlock(&entry->mutex);
         --entry->count;
+		rtn = true;
     }
     index->release();
+	return rtn;
 }
 
 void Mutex::_lock(void)

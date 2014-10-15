@@ -687,7 +687,7 @@ public:
      * Release an arbitrary object that has been protected by a rwlock.
      * @param object to release.
      */
-    static void release(const void *object);
+    static bool release(const void *object);
 
     /**
      * Release the lock.
@@ -1094,13 +1094,13 @@ public:
      * dynamically managed mutex.
      * @param pointer to protect.
      */
-    static void protect(const void *pointer);
+    static bool protect(const void *pointer);
 
     /**
      * Specify a pointer/object/resource to release.
      * @param pointer to release.
      */
-    static void release(const void *pointer);
+    static bool release(const void *pointer);
 };
 
 /**
@@ -2063,36 +2063,6 @@ inline void lock(rexlock_t &lock)
 inline void release(rexlock_t &lock)
     {lock.release();}
 
-inline bool _sync_protect_(const void *obj)
-{
-    Mutex::protect(obj);
-    return true;
-}
-
-inline bool _sync_release_(const void *obj)
-{
-    Mutex::release(obj);
-    return false;
-}
-
-inline bool _rw_reader_(const void *obj)
-{
-    ThreadLock::reader(obj);
-    return true;
-}
-
-inline bool _rw_writer_(const void *obj)
-{
-    ThreadLock::writer(obj);
-    return true;
-}
-
-inline bool _rw_release_(const void *obj)
-{
-    ThreadLock::release(obj);
-    return false;
-}
-
 #define ENTER_EXCLUSIVE \
     do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
         pthread_mutex_lock(&__sync__);
@@ -2100,11 +2070,11 @@ inline bool _rw_release_(const void *obj)
 #define LEAVE_EXCLUSIVE \
     pthread_mutex_unlock(&__sync__);} while(0);
 
-#define SYNC(obj) for(bool _sync_flag_ = _sync_protect_(obj); _sync_flag_; _sync_flag_ = _sync_release_(obj))
+#define SYNC(obj) for(bool _sync_flag_ = Mutex::protect(obj); _sync_flag_; _sync_flag_ = !Mutex::release(obj))
 
-#define SHARED(obj) for(bool _sync_flag_ = _rw_reader_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
+#define SHARED(obj) for(bool _sync_flag_ = ThreadLock::reader(obj); _sync_flag_; _sync_flag_ = !ThreadLock::release(obj))
 
-#define EXCLUSIVE(obj) for(bool _sync_flag_ = _rw_writer_(obj); _sync_flag_; _sync_flag_ = _rw_release_(obj))
+#define EXCLUSIVE(obj) for(bool _sync_flag_ = ThreadLock::writer(obj); _sync_flag_; _sync_flag_ = ThreadLock::release(obj))
 
 } // namespace ucommon
 
