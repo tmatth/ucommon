@@ -109,8 +109,8 @@ private:
     __LOCAL static attribute attr;
 #endif
 
-    pthread_cond_t cond;
-    pthread_mutex_t mutex;
+    mutable pthread_cond_t cond;
+    mutable pthread_mutex_t mutex;
 #endif
 
 protected:
@@ -131,10 +131,10 @@ protected:
     bool wait(struct timespec *timeout);
 
 #ifdef  _MSTHREADS_
-    inline void lock(void)
+    inline void lock(void) const
         {EnterCriticalSection(&mutex);};
 
-    inline void unlock(void)
+    inline void unlock(void) const
         {LeaveCriticalSection(&mutex);};
 
     void wait(void);
@@ -145,13 +145,13 @@ protected:
     /**
      * Lock the conditional's supporting mutex.
      */
-    inline void lock(void)
+    inline void lock(void) const
         {pthread_mutex_lock(&mutex);}
 
     /**
      * Unlock the conditional's supporting mutex.
      */
-    inline void unlock(void)
+    inline void unlock(void) const
         {pthread_mutex_unlock(&mutex);}
 
     /**
@@ -216,7 +216,7 @@ protected:
 #if defined _MSCONDITIONAL_
     CONDITION_VARIABLE bcast;
 #elif !defined(_MSTHREADS_)
-    pthread_cond_t bcast;
+    mutable pthread_cond_t bcast;
 #endif
 
     unsigned pending, waiting, sharing;
@@ -368,10 +368,10 @@ private:
 #ifdef _MSTHREADS_
     HANDLE event;
 #else
-    pthread_cond_t cond;
+    mutable pthread_cond_t cond;
     bool signalled;
 #endif
-    pthread_mutex_t mutex;
+    mutable pthread_mutex_t mutex;
 
 protected:
     /**
@@ -927,7 +927,7 @@ public:
 class __EXPORT Mutex : public ExclusiveAccess
 {
 protected:
-    pthread_mutex_t mlock;
+    mutable pthread_mutex_t mlock;
 
     virtual void _lock(void);
     virtual void _unlock(void);
@@ -1130,7 +1130,7 @@ class __EXPORT LockedPointer
 {
 private:
     friend class locked_release;
-    pthread_mutex_t mutex;
+    mutable pthread_mutex_t mutex;
     ObjectProtocol *pointer;
 
 protected:
@@ -1274,7 +1274,7 @@ protected:
     /**
      * Check if running.
      */
-    virtual bool is_active(void);
+    virtual bool is_active(void) const;
 
 public:
     /**
@@ -1357,13 +1357,13 @@ public:
      */
     static pthread_t self(void);
 
-    inline operator bool()
+    inline operator bool() const
         {return is_active();}
 
-    inline bool operator!()
+    inline bool operator!() const
         {return !is_active();}
 
-    inline bool isRunning(void)
+    inline bool isRunning(void) const
         {return is_active();}
 };
 
@@ -1406,7 +1406,7 @@ protected:
      */
     void join(void);
 
-    bool is_active(void);
+    bool is_active(void) const;
 
     virtual void run(void) = 0;
 
@@ -1465,7 +1465,7 @@ protected:
      */
     void exit(void);
 
-    bool is_active(void);
+    bool is_active(void) const;
 
     virtual void run(void) = 0;
 

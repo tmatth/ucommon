@@ -2451,7 +2451,7 @@ void shell::restart(char *argv0, char **argv, char **list)
 
 #endif
 
-bool shell::is_sym(const char *name)
+bool shell::is_sym(const char *name) const
 {
     symlock.acquire();
 

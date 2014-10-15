@@ -131,7 +131,7 @@ public:
     } Level;
 
 private:
-    pthread_mutex_t lock;
+    mutable pthread_mutex_t lock;
     FILE *syslog;
     int priority;
     Level  _level;

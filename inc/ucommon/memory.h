@@ -175,7 +175,7 @@ public:
 class __EXPORT mempager : public memalloc, public LockingProtocol
 {
 private:
-    pthread_mutex_t mutex;
+    mutable pthread_mutex_t mutex;
 
 protected:
     /**
@@ -866,7 +866,7 @@ class __EXPORT PagerPool : public MemoryProtocol
 {
 private:
     LinkedObject *freelist;
-    pthread_mutex_t mutex;
+    mutable pthread_mutex_t mutex;
 
 protected:
     PagerPool();

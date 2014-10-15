@@ -240,16 +240,16 @@ public:
     public:
         flagopt(char short_option, const char *long_option = NULL, const char *help = NULL, bool single_use = true);
 
-        inline operator bool()
+        inline operator bool() const
             {return counter > 0;}
 
-        inline bool operator!()
+        inline bool operator!() const
             {return counter == 0;}
 
-        inline operator unsigned()
+        inline operator unsigned() const
             {return counter;}
 
-        inline unsigned operator*()
+        inline unsigned operator*() const
             {return counter;}
 
         inline void set(unsigned value = 1)
@@ -292,16 +292,16 @@ public:
         inline void set(const char *string)
             {text = string;}
 
-        inline operator bool()
+        inline operator bool() const
             {return used;}
 
-        inline bool operator!()
+        inline bool operator!() const
             {return !used;}
 
-        inline operator const char *()
+        inline operator const char *() const
             {return text;}
 
-        inline const char *operator*()
+        inline const char *operator*() const
             {return text;}
     };
 
@@ -327,16 +327,16 @@ public:
         inline void set(char value)
             {code = value;}
 
-        inline operator bool()
+        inline operator bool() const
             {return used;}
 
-        inline bool operator!()
+        inline bool operator!() const
             {return !used;}
 
-        inline operator char()
+        inline operator char() const
             {return code;}
 
-        inline char operator*()
+        inline char operator*() const
             {return code;}
     };
 
@@ -362,16 +362,16 @@ public:
         inline void set(long value)
             {number = value;}
 
-        inline operator bool()
+        inline operator bool() const
             {return used;}
 
-        inline bool operator!()
+        inline bool operator!() const
             {return !used;}
 
-        inline operator long()
+        inline operator long() const
             {return number;}
 
-        inline long operator*()
+        inline long operator*() const
             {return number;}
     };
 
@@ -399,16 +399,16 @@ public:
         inline void set(long value)
             {number = value;}
 
-        inline operator bool()
+        inline operator bool() const
             {return used;}
 
-        inline bool operator!()
+        inline bool operator!() const
             {return !used;}
 
-        inline operator long()
+        inline operator long() const
             {return number;}
 
-        inline long operator*()
+        inline long operator*() const
             {return number;}
     };
 
@@ -577,7 +577,7 @@ public:
      * @param name of symbol.
      * @return true if found.
      */
-    bool is_sym(const char *name);
+    bool is_sym(const char *name) const;
 
     /**
      * Parse and extract the argv0 filename alone.
@@ -777,7 +777,7 @@ public:
      * Return argc count.
      * @return argc count.
      */
-    inline unsigned operator()(void)
+    inline unsigned operator()(void) const
         {return _argc;}
 
     /**

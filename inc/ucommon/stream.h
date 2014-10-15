@@ -88,13 +88,13 @@ public:
      */
     int sync(void);
 
-    inline bool is_open(void)
+    inline bool is_open(void) const
         {return bufsize > 0;}
 
-    inline operator bool()
+    inline operator bool() const
         {return bufsize > 0;}
 
-    inline bool operator!()
+    inline bool operator!() const
         {return bufsize == 0;}
 };
 

@@ -75,13 +75,13 @@ public:
      * Test if there is still objects in the free list.
      * @return true if there are objects.
      */
-    operator bool();
+    operator bool() const;
 
     /**
      * Test if the free list is empty.
      * @return true if the free list is empty.
      */
-    bool operator!();
+    bool operator!() const;
 };
 
 /**
@@ -181,25 +181,25 @@ public:
      * Get the size of the buffer.
      * @return size of the buffer.
      */
-    unsigned size(void);
+    unsigned size(void) const;
 
     /**
      * Get the number of objects in the buffer currently.
      * @return number of objects buffered.
      */
-    unsigned count(void);
+    unsigned count(void) const;
 
     /**
      * Test if there is data waiting in the buffer.
      * @return true if buffer has data.
      */
-    operator bool();
+    operator bool() const;
 
     /**
      * Test if the buffer is empty.
      * @return true if the buffer is empty.
      */
-    bool operator!();
+    bool operator!() const;
 };
 
 /**
@@ -296,7 +296,7 @@ public:
      * Get number of object points currently in the queue.
      * @return number of objects in queue.
      */
-    size_t count(void);
+    size_t count(void) const;
 };
 
 /**
@@ -381,7 +381,7 @@ public:
      * Get number of object points currently in the stack.
      * @return number of objects in stack.
      */
-    size_t count(void);
+    size_t count(void) const;
 
     const ObjectProtocol *peek(timeout_t timeout = 0);
 };

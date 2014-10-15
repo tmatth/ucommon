@@ -77,7 +77,7 @@ void LinkedAllocator::release(LinkedObject *node)
     unlock();
 }
 
-LinkedAllocator::operator bool()
+LinkedAllocator::operator bool() const
 {
     bool rtn = false;
 
@@ -88,7 +88,7 @@ LinkedAllocator::operator bool()
     return rtn;
 }
 
-bool LinkedAllocator::operator!()
+bool LinkedAllocator::operator!() const
 {
     bool rtn = false;
 
@@ -126,7 +126,7 @@ Buffer::~Buffer()
     buf = NULL;
 }
 
-unsigned Buffer::count(void)
+unsigned Buffer::count(void) const
 {
     unsigned bcount = 0;
 
@@ -139,7 +139,7 @@ unsigned Buffer::count(void)
     return bcount;
 }
 
-unsigned Buffer::size(void)
+unsigned Buffer::size(void) const
 {
     return bufsize / objsize;
 }
@@ -283,7 +283,7 @@ bool Buffer::put(void *dbuf, timeout_t timeout)
 }
 
 
-Buffer::operator bool()
+Buffer::operator bool() const
 {
     bool rtn = false;
 
@@ -294,7 +294,7 @@ Buffer::operator bool()
     return rtn;
 }
 
-bool Buffer::operator!()
+bool Buffer::operator!() const
 {
     bool rtn = false;
 
@@ -510,7 +510,7 @@ bool Queue::post(ObjectProtocol *object, timeout_t timeout)
     return true;
 }
 
-size_t Queue::count(void)
+size_t Queue::count(void) const
 {
     size_t qcount;
     lock();
@@ -727,7 +727,7 @@ bool Stack::push(ObjectProtocol *object, timeout_t timeout)
     return true;
 }
 
-size_t Stack::count(void)
+size_t Stack::count(void) const
 {
     size_t scount;
     lock();

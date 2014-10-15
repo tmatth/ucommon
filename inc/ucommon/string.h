@@ -114,7 +114,7 @@ public:
         size_t offset(unsigned member);
         size_t size(unsigned member);
 
-        inline size_t members(void)
+        inline size_t members(void) const
             {return count;}
 
         bool match(const char *text, unsigned flags = 0);
@@ -123,10 +123,10 @@ public:
 
         bool operator*=(const char *string);
 
-        operator bool()
+        operator bool() const
             {return object != NULL;}
 
-        bool operator!()
+        bool operator!() const
             {return object == NULL;}
     };
 
@@ -275,7 +275,7 @@ protected:
      */
     virtual void cow(strsize_t size = 0);
 
-    strsize_t getStringSize(void);
+    strsize_t getStringSize(void) const;
 
 public:
     /**
