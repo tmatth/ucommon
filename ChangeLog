@@ -1,10 +1,11 @@
-Changes from 6.1.11 to 6.1.12
+Changes from 6.1.11 to 6.2.0
 - standardized cmake paths and stand-alone usages
 - gnutls support in cmake
 - unified openssl checks, even works for windows
 - improved openssl support, new static crypto option
 - pkgconfig usable in win32, other win32 fixes
 - fixes for mac build & optional disable of utils
+- upticked abi version to 7, should have happened with 10/11?
 
 Changes from 6.1.10 to 6.1.11
 - any addr and overloads in commoncpp
