@@ -164,7 +164,7 @@ void BufferProtocol::allocate(size_t size, mode_t mode)
         end = false;
 }
 
-bool BufferProtocol::_blocking(void)
+bool BufferProtocol::_blocking(void) const
 {
     return false;
 }
@@ -532,7 +532,7 @@ bool BufferProtocol::eof(void)
     return false;
 }
 
-bool BufferProtocol::_pending(void)
+bool BufferProtocol::_pending(void) const
 {
     if(!input)
         return false;

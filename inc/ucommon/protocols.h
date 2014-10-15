@@ -386,12 +386,12 @@ protected:
     /**
      * Return true if blocking.
      */
-    virtual bool _blocking(void);
+    virtual bool _blocking(void) const;
 
     /**
      * Check if data is pending.
      */
-    virtual bool _pending(void);
+    virtual bool _pending(void) const;
 
     /**
      * Flush buffer to physical i/o.
@@ -407,18 +407,18 @@ protected:
      * a "tell" offset.
      * @return offset of input buffer.
      */
-    inline size_t input_pending(void)
+    inline size_t input_pending(void) const
         {return bufpos;}
 
     /**
      * Get current output position.  Sometimes used to help compute a
      * "trunc" operation.
      */
-    inline size_t output_waiting(void)
+    inline size_t output_waiting(void) const
         {return outsize;}
 
 public:
-    const char *endl(void)
+    const char *endl(void) const
         {return eol;}
 
     /**
@@ -473,42 +473,42 @@ public:
      * See if buffer open.
      * @return true if buffer active.
      */
-    inline operator bool()
+    inline operator bool() const
         {return buffer != NULL;}
 
     /**
      * See if buffer closed.
      * @return true if buffer inactive.
      */
-    inline bool operator!()
+    inline bool operator!() const
         {return buffer == NULL;}
 
     /**
      * See if buffer open.
      * @return true if buffer active.
      */
-    inline bool is_open(void)
+    inline bool is_open(void) const
         {return buffer != NULL;}
 
     /**
      * See if input active.
      * @return true if input active.
      */
-    inline bool is_input(void)
+    inline bool is_input(void) const
         {return input != NULL;}
 
     /**
      * See if output active.
      * @return true if output active.
      */
-    inline bool is_output(void)
+    inline bool is_output(void) const
         {return output != NULL;}
 
     /**
      * See if pending input.
      * @return true if input pending.
      */
-    inline bool is_pending(void)
+    inline bool is_pending(void) const
         {return _pending();}
 
     /**
@@ -517,7 +517,7 @@ public:
     inline void seteof(void)
         {end = true;}
 
-    inline int err(void)
+    inline int err(void) const
         {return _err();}
 
     template<typename T> inline size_t write(const T& data)
