@@ -89,14 +89,14 @@ private:
     friend class ConditionalAccess;
 
 #if defined(_MSCONDITIONAL_)
-    CRITICAL_SECTION mutex;
-    CONDITION_VARIABLE cond;
+    mutable CRITICAL_SECTION mutex;
+    mutable CONDITION_VARIABLE cond;
 #elif defined(_MSTHREADS_)
     enum {SIGNAL = 0, BROADCAST = 1};
     HANDLE events[2];
     unsigned waiting;
-    CRITICAL_SECTION mlock;
-    CRITICAL_SECTION mutex;
+    mutable CRITICAL_SECTION mlock;
+    mutable CRITICAL_SECTION mutex;
 #else
 #ifndef __PTH__
     class __LOCAL attribute
