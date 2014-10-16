@@ -141,7 +141,7 @@ protected:
      * End of document check.
      * @return true if end of document.
      */
-    bool end(void)
+    bool end(void) const
         {return state == END;}
 };
 

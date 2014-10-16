@@ -270,7 +270,7 @@ bool Timer::update(void)
     return rtn;
 }
 
-bool Timer::is_active(void)
+bool Timer::is_active(void) const
 {
 #if _POSIX_TIMERS > 0 && defined(POSIX_TIMERS)
     if(!timer.tv_sec && !timer.tv_nsec)

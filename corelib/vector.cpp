@@ -498,13 +498,13 @@ ArrayReuse::~ArrayReuse()
     }
 }
 
-bool ArrayReuse::avail(void)
+bool ArrayReuse::avail(void) const
 {
+    autolock exclusive(this);
+
     bool rtn = false;
-    lock();
     if(count < limit)
         rtn = true;
-    unlock();
     return rtn;
 }
 
@@ -517,7 +517,7 @@ ReusableObject *ArrayReuse::get(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    lock();
+    autolock exclusive(this);
     while(!freelist && used >= limit && rtn) {
         ++waiting;
         if(timeout == Timer::inf)
@@ -530,7 +530,6 @@ ReusableObject *ArrayReuse::get(timeout_t timeout)
     }
 
     if(!rtn) {
-        unlock();
         return NULL;
     }
 
@@ -543,7 +542,6 @@ ReusableObject *ArrayReuse::get(timeout_t timeout)
     }
     if(obj)
         ++count;
-    unlock();
     return obj;
 }
 
@@ -556,7 +554,7 @@ ReusableObject *ArrayReuse::request(void)
 {
     ReusableObject *obj = NULL;
 
-    lock();
+    autolock exclusive(this);
     if(freelist) {
         obj = freelist;
         freelist = next(obj);
@@ -567,7 +565,6 @@ ReusableObject *ArrayReuse::request(void)
     }
     if(obj)
         ++count;
-    unlock();
     return obj;
 }
 
@@ -595,24 +592,24 @@ PagerReuse::~PagerReuse()
 {
 }
 
-bool PagerReuse::avail(void)
+bool PagerReuse::avail(void) const
 {
+    autolock exclusive(this);
     bool rtn = false;
 
     if(!limit)
         return true;
 
-    lock();
     if(count < limit)
         rtn = true;
-    unlock();
     return rtn;
 }
 
 ReusableObject *PagerReuse::request(void)
 {
     ReusableObject *obj = NULL;
-    lock();
+
+    autolock exclusive(this);
     if(!limit || count < limit) {
         if(freelist) {
             ++count;
@@ -621,11 +618,9 @@ ReusableObject *PagerReuse::request(void)
         }
         else {
             ++count;
-            unlock();
             return (ReusableObject *)_alloc(osize);
         }
     }
-    unlock();
     return obj;
 }
 
@@ -643,7 +638,7 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    lock();
+    autolock exclusive(this);
     while(rtn && limit && count >= limit) {
         ++waiting;
         if(timeout == Timer::inf)
@@ -655,7 +650,6 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
         --waiting;
     }
     if(!rtn) {
-        unlock();
         return NULL;
     }
     if(freelist) {
@@ -664,12 +658,10 @@ ReusableObject *PagerReuse::get(timeout_t timeout)
     }
     else {
         ++count;
-        unlock();
         return (ReusableObject *)_alloc(osize);
     }
     if(obj)
         ++count;
-    unlock();
     return obj;
 }
 

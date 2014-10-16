@@ -60,7 +60,7 @@ public:
     ~ArrayReuse();
 
 protected:
-    bool avail(void);
+    bool avail(void) const;
 
     ReusableObject *get(timeout_t timeout);
     ReusableObject *get(void);
@@ -84,7 +84,7 @@ protected:
     PagerReuse(mempager *pager, size_t objsize, unsigned count);
     ~PagerReuse();
 
-    bool avail(void);
+    bool avail(void) const;
     ReusableObject *get(void);
     ReusableObject *get(timeout_t timeout);
     ReusableObject *request(void);

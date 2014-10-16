@@ -72,7 +72,7 @@ protected:
      * Check if timer active.
      * @return true if active.
      */
-    bool is_active(void);
+    bool is_active(void) const;
 
 public:
 #if _MSC_VER > 1400        // windows broken dll linkage issue...
@@ -353,7 +353,7 @@ public:
          * Get the timer queue we are attached to.
          * @return timer queue or NULL if not attached.
          */
-        inline TimerQueue *list(void)
+        inline TimerQueue *list(void) const
             {return static_cast<TimerQueue*>(Root);}
     };
 
