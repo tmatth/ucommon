@@ -2069,7 +2069,7 @@ inline void release(rexlock_t &lock)
 
 #define SHARED(obj) for(bool _sync_flag_ = ThreadLock::reader(obj); _sync_flag_; _sync_flag_ = !ThreadLock::release(obj))
 
-#define EXCLUSIVE(obj) for(bool _sync_flag_ = ThreadLock::writer(obj); _sync_flag_; _sync_flag_ = ThreadLock::release(obj))
+#define EXCLUSIVE(obj) for(bool _sync_flag_ = ThreadLock::writer(obj); _sync_flag_; _sync_flag_ = !ThreadLock::release(obj))
 
 } // namespace ucommon
 
