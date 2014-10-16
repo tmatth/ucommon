@@ -304,7 +304,7 @@ public:
      * See if current file stream is a tty device.
      * @return true if device.
      */
-    bool is_tty(void);
+    bool is_tty(void) const;
 
     /**
      * See if the file handle is a tty device.
@@ -702,10 +702,10 @@ public:
     inline addr_t operator()(const char *symbol) const
         {return find(symbol);}
 
-    inline operator bool()
+    inline operator bool() const
         {return ptr != NULL;}
 
-    inline bool operator!()
+    inline bool operator!() const
         {return ptr == NULL;}
 };
 

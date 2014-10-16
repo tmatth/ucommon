@@ -334,7 +334,7 @@ int file::_putch(int code)
     return fputc(code, fp);
 }
 
-bool file::good(void)
+bool file::good(void) const
 {
     if(!fp)
         return false;

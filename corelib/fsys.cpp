@@ -323,7 +323,7 @@ bool fsys::is_tty(fd_t fd)
     return false;
 }
 
-bool fsys::is_tty(void)
+bool fsys::is_tty(void) const
 {
     error = 0;
     if(fd == INVALID_HANDLE_VALUE)
@@ -802,7 +802,7 @@ bool fsys::is_tty(fd_t fd)
     return false;
 }
 
-bool fsys::is_tty(void)
+bool fsys::is_tty(void) const
 {
     if(isatty(fd))
         return true;

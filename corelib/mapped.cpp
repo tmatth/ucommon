@@ -524,28 +524,27 @@ ReusableAllocator(), MappedMemory()
     reading = 0;
 }
 
-bool MappedReuse::avail(void)
+bool MappedReuse::avail(void) const
 {
+    autolock exclusive(this);
+
     bool rtn = false;
-    lock();
     if(freelist || used < size)
         rtn = true;
-    unlock();
     return rtn;
 }
 
 ReusableObject *MappedReuse::request(void)
 {
     ReusableObject *obj = NULL;
+    autolock exclusive(this);
 
-    lock();
     if(freelist) {
         obj = freelist;
         freelist = next(obj);
     }
     else if(used + objsize <= size)
         obj = (ReusableObject *)sbrk(objsize);
-    unlock();
     return obj;
 }
 
@@ -585,7 +584,7 @@ ReusableObject *MappedReuse::getTimed(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    lock();
+    autolock exclusive(this);
     while(rtn && (!freelist || (freelist && reading)) && used >= size) {
         ++waiting;
         if(timeout == Timer::inf)
@@ -597,7 +596,6 @@ ReusableObject *MappedReuse::getTimed(timeout_t timeout)
         --waiting;
     }
     if(!rtn) {
-        unlock();
         return NULL;
     }
     if(freelist) {
@@ -606,7 +604,6 @@ ReusableObject *MappedReuse::getTimed(timeout_t timeout)
     }
     else if(used + objsize <= size)
         obj = (ReusableObject *)sbrk(objsize);
-    unlock();
     return obj;
 }
 

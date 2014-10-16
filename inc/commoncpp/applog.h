@@ -99,16 +99,14 @@ class __EXPORT HEXdump
      * const char* cast provided for conveneince.
      */
 
-    const char * c_str() const
-    {
+    const char * c_str() const {
       return _str.c_str();
     }
 
     /**
      * string cast provided for conveneince.
      */
-    std::string str()
-    {
+    std::string str() {
       return _str;
     }
 
@@ -228,7 +226,7 @@ class __EXPORT AppLog : protected streambuf, public ostream
         /**
          * const char* cast provided for conveneince.
          */
-        const char* c_str() {return _ident.c_str();}
+        const char* c_str() const {return _ident.c_str();}
     };
 
 #ifndef _MSWINDOWS_
@@ -392,8 +390,7 @@ class __EXPORT AppLog : protected streambuf, public ostream
      * @param ident ident (module name for instance)
      * @return application logger stream
      */
-    inline AppLog& operator()(Ident &ident)
-    {
+    inline AppLog& operator()(const Ident &ident) {
       open(ident.c_str());
       return *this;
     }

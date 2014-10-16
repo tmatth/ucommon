@@ -90,21 +90,21 @@ public:
      * one object has a reference to our object.
      * @return true if referenced by more than one object.
      */
-    inline bool is_copied(void)
+    inline bool is_copied(void) const
         {return count > 1;}
 
     /**
      * Test if the object has been referenced (retained) by anyone yet.
      * @return true if retained.
      */
-    inline bool is_retained(void)
+    inline bool is_retained(void) const
         {return count > 0;}
 
     /**
      * Return the number of active references (retentions) to our object.
      * @return number of references to our object.
      */
-    inline unsigned copied(void)
+    inline unsigned copied(void) const
         {return count;}
 
     /**
@@ -294,7 +294,7 @@ public:
     inline T& operator[](unsigned offset)
         {return get(offset);}
 
-    inline const T* at(unsigned offset)
+    inline const T* at(unsigned offset) const
         {return static_cast<const T&>(SparseObjects::get(offset));}
 
 private:
@@ -448,13 +448,13 @@ public:
     /**
      * See if pointer is set.
      */
-    inline operator bool()
+    inline operator bool() const
         {return P::object != NULL;}
 
     /**
      * See if pointer is not set.
      */
-    inline bool operator!()
+    inline bool operator!() const
         {return P::object == NULL;}
 };
 

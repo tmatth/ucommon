@@ -104,7 +104,7 @@ public:
      * Create a julian date from a local or gmt date and time.
      * @param object from DateTime::glt() or gmt().
      */
-    Date(struct tm *object);
+    Date(const struct tm *object);
 
     /**
      * Create a julian date from a ISO date string of a specified size.
@@ -377,13 +377,13 @@ public:
      * Create a time from the time portion of a time_t.
      * @param value of time_t to use.
      */
-    Time(time_t value);
+    Time(const time_t value);
 
     /**
      * Create a time from the time portion of a date and time object.
      * @param object from DateTime::glt() or gmt().
      */
-    Time(tm_t *object);
+    Time(const tm_t *object);
 
     /**
      * Create a time from a hh:mm:ss formatted time string.
@@ -504,7 +504,7 @@ public:
      * Get time in seconds.
      * @return seconds.
      */
-    inline operator long()
+    inline operator long() const
         {return get();}
 
     /**
@@ -620,13 +620,13 @@ public:
      * Construct a date and time from C library time_t type.
      * @param time type to make date and time from.
      */
-    DateTime(time_t time);
+    DateTime(const time_t time);
 
     /**
      * Construct a date and time from C library time structure.
      * @param tm structure from C library (from glt or gmt).
      */
-    DateTime(tm_t *tm);
+    DateTime(const tm_t *tm);
 
     /**
      * Construct a date and time from ISO string buffer.
@@ -829,7 +829,7 @@ public:
      * @param time object or NULL if using current time.
      * @return locked instance of struct tm object.
      */
-    static tm_t *local(time_t *time = NULL);
+    static tm_t *local(const time_t *time = NULL);
 
     /**
      * Fetch an instance of time converted to gmt.  If the gmtime abi
@@ -839,7 +839,7 @@ public:
      * @param time object or NULL if using current time.
      * @return locked instance of struct tm object.
      */
-    static tm_t *gmt(time_t *time = NULL);
+    static tm_t *gmt(const time_t *time = NULL);
 
     /**
      * Release a struct tm object from glt or gmt.
@@ -877,13 +877,13 @@ public:
      * Construct a date and time from C libraray time_t type.
      * @param time type to make date and time from.
      */
-    DateTimeString(time_t time);
+    DateTimeString(const time_t time);
 
     /**
      * Construct a date and time from C library time structure.
      * @param tm structure from C library (from glt or gmt).
      */
-    DateTimeString(tm_t *tm);
+    DateTimeString(const tm_t *tm);
 
     /**
      * Construct a date and time from ISO string buffer.
@@ -925,7 +925,7 @@ public:
      *
      * @return string of datetime.
      */
-    inline const char *c_str(void)
+    inline const char *c_str(void) const
         {return buffer;}
 
     /**
@@ -933,7 +933,7 @@ public:
      *
      * @return string of datetime.
      */
-    inline operator const char *(void)
+    inline operator const char *(void) const
         {return buffer;}
 
     /**

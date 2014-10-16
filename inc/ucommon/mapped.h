@@ -167,7 +167,7 @@ public:
      * Get size of mapped segment.
      * @return size of mapped segment.
      */
-    inline size_t len(void)
+    inline size_t len(void) const
         {return size;}
 
     /**
@@ -228,7 +228,7 @@ public:
      * Check whether there are objects available to be allocated.
      * @return true if objects are available.
      */
-    bool avail(void);
+    bool avail(void) const;
 
     /**
      * Request a reusable object from the free list or mapped space.
@@ -335,7 +335,7 @@ public:
      * Get member size of typed objects that can be held in mapped vector.
      * @return members mapped in segment.
      */
-    inline unsigned max(void)
+    inline unsigned max(void) const
         {return (unsigned)(size / sizeof(T));}
 };
 
@@ -503,7 +503,7 @@ public:
      * Get count of typed member objects held in this map.
      * @return count of typed member objects.
      */
-    inline unsigned count(void)
+    inline unsigned count(void) const
         {return (unsigned)(size / sizeof(T));}
 };
 

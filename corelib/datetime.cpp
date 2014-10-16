@@ -46,7 +46,7 @@ const size_t DateTime::sz_string = 20;
 
 #ifdef  HAVE_LOCALTIME_R
 
-tm_t *DateTime::local(time_t *now)
+tm_t *DateTime::local(const time_t *now)
 {
     tm_t *result, *dt = new tm_t;
     time_t tmp;
@@ -63,7 +63,7 @@ tm_t *DateTime::local(time_t *now)
     return NULL;
 }
 
-tm_t *DateTime::gmt(time_t *now)
+tm_t *DateTime::gmt(const time_t *now)
 {
     tm_t *result, *dt = new tm_t;
     time_t tmp;
@@ -143,12 +143,12 @@ Date::Date(const Date& copy)
     julian = copy.julian;
 }
 
-Date::Date(tm_t *dt)
+Date::Date(const tm_t *dt)
 {
     set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
 }
 
-Date::Date(time_t tm)
+Date::Date(const time_t tm)
 {
     tm_t *dt = DateTime::local(&tm);
     set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
@@ -447,12 +447,12 @@ Time::Time(const Time& copy)
     seconds = copy.seconds;
 }
 
-Time::Time(tm_t *dt)
+Time::Time(const tm_t *dt)
 {
     set(dt->tm_hour, dt->tm_min, dt->tm_sec);
 }
 
-Time::Time(time_t tm)
+Time::Time(const time_t tm)
 {
     tm_t *dt = DateTime::local(&tm);
     set(dt->tm_hour, dt->tm_min, dt->tm_sec);
@@ -668,7 +668,7 @@ Time& Time::operator=(const Time& time)
     return *this;
 }
 
-DateTime::DateTime(time_t tm)
+DateTime::DateTime(const time_t tm)
 {
     tm_t *dt = DateTime::local();
     Date::set(dt->tm_year + 1900, dt->tm_mon + 1, dt->tm_mday);
@@ -676,7 +676,7 @@ DateTime::DateTime(time_t tm)
     DateTime::release(dt);
 }
 
-DateTime::DateTime(tm_t *dt) :
+DateTime::DateTime(const tm_t *dt) :
 Date(dt), Time(dt)
 {}
 
@@ -948,7 +948,7 @@ void DateNumber::set(void)
     update();
 }
 
-DateTimeString::DateTimeString(time_t t) :
+DateTimeString::DateTimeString(const time_t t) :
 DateTime(t)
 {
     mode = BOTH;
@@ -959,7 +959,7 @@ DateTimeString::~DateTimeString()
 {
 }
 
-DateTimeString::DateTimeString(tm_t *dt) :
+DateTimeString::DateTimeString(const tm_t *dt) :
 DateTime(dt)
 {
     mode = BOTH;

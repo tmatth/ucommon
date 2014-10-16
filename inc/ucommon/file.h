@@ -115,17 +115,17 @@ public:
      * Test if file is opened.
      * @return true if opened.
      */
-    inline operator bool()
+    inline operator bool() const
         {return fp != NULL;}
 
     /**
      * Test if file is not opened.
      * @return true if not opened.
      */
-    inline bool operator !()
+    inline bool operator !() const
         {return fp == NULL;}
 
-    inline operator FILE *()
+    inline operator FILE *() const
         {return fp;}
 
     /**
@@ -160,7 +160,7 @@ public:
      * Check if file is good, no error or eof...
      * @return bool if file stream is good.
      */
-    bool good(void);
+    bool good(void) const;
 
     /**
      * Cancel pipe and close file.

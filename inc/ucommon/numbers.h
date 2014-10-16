@@ -80,21 +80,21 @@ public:
      * Get value of string buffer as expression of object.
      * @return long integer value of string buffer.
      */
-    inline long operator()()
+    inline long operator()() const
         {return get();}
 
     /**
      * Cast string as long integer and get value of buffer.
      * @return long integer value of string buffer.
      */
-    inline operator long()
+    inline operator long() const
         {return get();}
 
     /**
      * Cast object as a string to retrieve buffer.
      * @return string buffer of value.
      */
-    inline operator char*()
+    inline operator char*() const
         {return buffer;}
 
     /**

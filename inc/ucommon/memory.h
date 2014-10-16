@@ -572,10 +572,10 @@ public:
      */
     typedef linked_pointer<StringPager::member> iterator;
 
-    inline size_t size(void)
+    inline size_t size(void) const
         {return memalloc::size();}
 
-    inline unsigned pages(void)
+    inline unsigned pages(void) const
         {return memalloc::pages();}
 
 private:
@@ -645,10 +645,10 @@ public:
     inline const char *at(unsigned item) const
         {return StringPager::get(item);}
 
-    inline size_t size(void)
+    inline size_t size(void) const
         {return memalloc::size();}
 
-    inline unsigned pages(void)
+    inline unsigned pages(void) const
         {return memalloc::pages();}
 };
 
@@ -768,14 +768,14 @@ public:
      * Check if can still save into buffer.
      * @return true if buffer is full.
      */
-    inline bool operator!()
+    inline bool operator!() const
         {return eom;}
 
     /**
      * Check if can still save into buffer.  Used for is() function.
      * @return true if pager can still store more.
      */
-    inline operator bool()
+    inline operator bool() const
         {return !eom;}
 };
 
@@ -1142,7 +1142,7 @@ public:
      * inherit keyassoc privately.
      * @return pager utilization, 0-100.
      */
-    inline unsigned utilization(void)
+    inline unsigned utilization(void) const
         {return mempager::utilization();}
 
     /**

@@ -593,7 +593,7 @@ protected:
     /**
      * Buffer of key value.
      */
-    virtual void *keydata(void) const = 0;
+    virtual const void *keydata(void) const = 0;
 
     virtual bool equal(const KeyProtocol& compare) const;
 

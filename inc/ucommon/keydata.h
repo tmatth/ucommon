@@ -250,7 +250,7 @@ public:
      */
     typedef linked_pointer<keydata> iterator;
 
-    inline int err(void)
+    inline int err(void) const
         {return errcode;}
 };
 
