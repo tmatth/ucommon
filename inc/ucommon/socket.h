@@ -809,7 +809,7 @@ public:
      * type of socket created is based on the type we are connecting to.
      * @param address list to connect with.
      */
-    Socket(struct addrinfo *address);
+    Socket(const struct addrinfo *address);
 
     /**
      * Create an unbound socket of a specific type.

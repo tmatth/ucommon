@@ -1641,14 +1641,14 @@ Socket::Socket()
     ioerr = 0;
 }
 
-Socket::Socket(socket_t s)
+Socket::Socket(const socket_t s)
 {
     so = s;
     iowait = Timer::inf;
     ioerr = 0;
 }
 
-Socket::Socket(struct addrinfo *addr)
+Socket::Socket(const struct addrinfo *addr)
 {
 #ifdef  _MSWINDOWS_
     init();
