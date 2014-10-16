@@ -147,7 +147,7 @@ void TCPBuffer::_clear(void)
     ioerr = 0;
 }
 
-bool TCPBuffer::_blocking(void) const
+bool TCPBuffer::_blocking(void)
 {
     if(iowait)
         return true;
@@ -178,7 +178,7 @@ size_t TCPBuffer::_pull(char *address, size_t len)
     return (size_t)result;
 }
 
-bool TCPBuffer::_pending(void) const
+bool TCPBuffer::_pending(void)
 {
     if(input_pending())
         return true;

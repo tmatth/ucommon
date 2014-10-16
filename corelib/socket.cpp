@@ -2662,7 +2662,7 @@ bool Socket::connected(void) const
     return true;
 }
 
-bool Socket::is_pending(unsigned qio) const
+bool Socket::is_pending(unsigned qio)
 {
     if(pending() >= qio)
         return true;

@@ -183,7 +183,7 @@ public:
      * Get last error code associated with the security context.
      * @return last error code or 0/OK if none.
      */
-    inline error_t err(void)
+    inline error_t err(void) const
         {return error;};
 
     /**
@@ -198,10 +198,10 @@ public:
     inline static void erase(T *object)
         {memset(object, 0, sizeof(T)); delete object;}
 
-    inline operator bool()
+    inline operator bool() const
         {return is_valid();}
 
-    inline bool operator!()
+    inline bool operator!() const
         {return !is_valid();}
 
 };
@@ -247,7 +247,7 @@ public:
 
     bool _pending(void);
 
-    inline bool is_secure(void)
+    inline bool is_secure(void) const
         {return bio != NULL;}
 };
 
@@ -315,16 +315,16 @@ public:
 
         void clear(void);
 
-        inline size_t size(void)
+        inline size_t size(void) const
             {return keysize;}
 
-        inline size_t iosize(void)
+        inline size_t iosize(void) const
             {return blksize;}
 
-        inline operator bool()
+        inline operator bool() const
             {return keysize > 0;}
 
-        inline bool operator!()
+        inline bool operator!() const
             {return keysize == 0;}
 
         inline Key& operator=(const char *pass)
@@ -405,13 +405,13 @@ public:
      */
     size_t process(unsigned char *address, size_t size, bool flag = false);
 
-    inline size_t size(void)
+    inline size_t size(void) const
         {return bufsize;}
 
-    inline size_t pos(void)
+    inline size_t pos(void) const
         {return bufpos;}
 
-    inline size_t align(void)
+    inline size_t align(void) const
         {return keys.iosize();}
 
     /**
@@ -770,7 +770,7 @@ public:
     inline void flush(void)
         {sync();}
 
-    inline bool is_secure(void)
+    inline bool is_secure(void) const
         {return bio != NULL;}
 };
 

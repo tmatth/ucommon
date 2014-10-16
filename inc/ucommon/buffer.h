@@ -64,7 +64,7 @@ protected:
     virtual size_t _pull(char *address, size_t size);
     int _err(void) const;
     void _clear(void);
-    bool _blocking(void) const;
+    bool _blocking(void);
 
     /**
      * Get the low level socket object.
@@ -126,7 +126,7 @@ protected:
      * Check for pending tcp or ssl data.
      * @return true if data pending.
      */
-    virtual bool _pending(void) const;
+    virtual bool _pending(void);
 };
 
 /**

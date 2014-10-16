@@ -862,7 +862,7 @@ public:
      * @param value to test for.
      * @return true if at least that many bytes waiting in receive queue.
      */
-    bool is_pending(unsigned value) const;
+    bool is_pending(unsigned value);
 
     /**
      * Test if socket is connected.

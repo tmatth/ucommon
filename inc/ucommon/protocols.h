@@ -386,12 +386,12 @@ protected:
     /**
      * Return true if blocking.
      */
-    virtual bool _blocking(void) const;
+    virtual bool _blocking(void);
 
     /**
      * Check if data is pending.
      */
-    virtual bool _pending(void) const;
+    virtual bool _pending(void);
 
     /**
      * Flush buffer to physical i/o.
@@ -508,7 +508,7 @@ public:
      * See if pending input.
      * @return true if input pending.
      */
-    inline bool is_pending(void) const
+    inline bool is_pending(void)
         {return _pending();}
 
     /**
