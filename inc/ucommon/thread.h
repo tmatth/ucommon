@@ -2065,11 +2065,11 @@ inline void release(rexlock_t &lock)
 
 #define __AUTOLOCK__    autolock __autolock__(this);
 
-#define SYNC(obj) for(bool _sync_flag_ = Mutex::protect(obj); _sync_flag_; _sync_flag_ = !Mutex::release(obj))
+#define __SYNC__ for(bool _sync_flag_ = Mutex::protect(this); _sync_flag_; _sync_flag_ = !Mutex::release(this))
 
-#define SHARED(obj) for(bool _sync_flag_ = ThreadLock::reader(obj); _sync_flag_; _sync_flag_ = !ThreadLock::release(obj))
+#define __SHARED__ for(bool _sync_flag_ = ThreadLock::reader(this); _sync_flag_; _sync_flag_ = !ThreadLock::release(this))
 
-#define EXCLUSIVE(obj) for(bool _sync_flag_ = ThreadLock::writer(obj); _sync_flag_; _sync_flag_ = !ThreadLock::release(obj))
+#define ___EXCLUSIVE__ for(bool _sync_flag_ = ThreadLock::writer(this); _sync_flag_; _sync_flag_ = !ThreadLock::release(this))
 
 } // namespace ucommon
 
