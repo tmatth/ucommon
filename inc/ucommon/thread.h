@@ -2063,12 +2063,7 @@ inline void lock(rexlock_t &lock)
 inline void release(rexlock_t &lock)
     {lock.release();}
 
-#define ENTER_EXCLUSIVE \
-    do { static pthread_mutex_t __sync__ = PTHREAD_MUTEX_INITIALIZER; \
-        pthread_mutex_lock(&__sync__);
-
-#define LEAVE_EXCLUSIVE \
-    pthread_mutex_unlock(&__sync__);} while(0);
+#define __AUTOLOCK__    autolock __autolock__(this);
 
 #define SYNC(obj) for(bool _sync_flag_ = Mutex::protect(obj); _sync_flag_; _sync_flag_ = !Mutex::release(obj))
 
