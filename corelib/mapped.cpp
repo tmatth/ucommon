@@ -74,26 +74,67 @@
 #endif
 
 #if defined(__ANDROID__)
-#include <sys/syscall.h>
+
+#include <stdio.h>
+#include <linux/ashmem.h>
 #include <linux/shm.h>
+#include <sys/mman.h>
+
+#define ASHMEM_DEVICE "/dev/ashmem"
 
 static int shmget(key_t key, size_t size, int shmflg)
 {
-    return syscall(__NR_shmget, key, size, shmflg);
+    int fd, ret;
+    char key_str[11];
+
+    fd = open(ASHMEM_DEVICE, O_RDWR);
+    if (fd < 0)
+        return fd;
+
+    sprintf(key_str, "%d", key);
+    ret = ioctl(fd, ASHMEM_SET_NAME, key_str);
+    if (ret < 0)
+        goto error;
+
+    ret = ioctl(fd, ASHMEM_SET_SIZE, size);
+    if (ret < 0)
+        goto error;
+
+    return fd;
+
+error:
+    close(fd);
+    return ret;
 }
 
 static int shmctl(int shmid, int cmd, struct shmid_ds *buf)
 {
-    return syscall(__NR_shmctl, shmid, cmd, buf);
+    int ret = 0;
+    if (cmd == IPC_RMID)
+    {
+        int length = ioctl(shmid, ASHMEM_GET_SIZE, NULL);
+        struct ashmem_pin pin = {0, length};
+        ret = ioctl(shmid, ASHMEM_UNPIN, &pin);
+        close(shmid);
+    }
+    return ret;
 }
 
 static void *shmat(int shmid, const void *shmaddr, int shmflg)
 {
-    return (void *)syscall(__NR_shmat, shmid, shmaddr, shmflg);
+    size_t *ptr, size = ioctl(shmid, ASHMEM_GET_SIZE, NULL);
+    ptr = (size_t *) mmap(NULL, size + sizeof(size_t), PROT_READ | PROT_WRITE, MAP_SHARED, shmid, 0);
+    *ptr = size;    // save size at beginning of buffer, for use with munmap
+    return (void *) &ptr[1];
 }
+
 static int shmdt(const void *shmaddr)
 {
-    return syscall(__NR_shmdt, shmaddr);
+    size_t *ptr, size;
+    ptr = (size_t *) shmaddr;
+    ptr--;
+    size = *ptr;    // find mmap size which we stored at the beginning of the buffer
+    return munmap((void *) ptr, size + sizeof(size_t));
 }
 #endif
 
