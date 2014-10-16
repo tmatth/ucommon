@@ -567,9 +567,10 @@ ReusableAllocator(), MappedMemory()
 
 bool MappedReuse::avail(void) const
 {
-    autolock exclusive(this);
-
     bool rtn = false;
+
+    __AUTOLOCK__
+
     if(freelist || used < size)
         rtn = true;
     return rtn;
@@ -578,7 +579,8 @@ bool MappedReuse::avail(void) const
 ReusableObject *MappedReuse::request(void)
 {
     ReusableObject *obj = NULL;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(freelist) {
         obj = freelist;
@@ -625,7 +627,8 @@ ReusableObject *MappedReuse::getTimed(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(rtn && (!freelist || (freelist && reading)) && used >= size) {
         ++waiting;
         if(timeout == Timer::inf)

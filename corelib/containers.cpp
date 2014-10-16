@@ -34,7 +34,9 @@ LinkedAllocator::LinkedAllocator() : Conditional()
 LinkedObject *LinkedAllocator::get(void)
 {
     LinkedObject *node;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
+
     node = freelist;
     if(node)
         freelist = freelist->getNext();
@@ -50,7 +52,8 @@ LinkedObject *LinkedAllocator::get(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(!freelist && rtn) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -69,7 +72,8 @@ LinkedObject *LinkedAllocator::get(timeout_t timeout)
 
 void LinkedAllocator::release(LinkedObject *node)
 {
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     node->enlist(&freelist);
     signal();
 }
@@ -77,7 +81,8 @@ void LinkedAllocator::release(LinkedObject *node)
 LinkedAllocator::operator bool() const
 {
     bool rtn = false;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(freelist)
         rtn = true;
@@ -87,7 +92,8 @@ LinkedAllocator::operator bool() const
 bool LinkedAllocator::operator!() const
 {
     bool rtn = false;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(!freelist)
         rtn = true;
@@ -124,7 +130,8 @@ Buffer::~Buffer()
 unsigned Buffer::count(void) const
 {
     unsigned bcount = 0;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(tail > head)
         bcount = (unsigned)((size_t)(tail - head) / objsize);
@@ -141,7 +148,8 @@ unsigned Buffer::size(void) const
 void *Buffer::get(void)
 {
     caddr_t dbuf;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     while(!objcount)
         wait();
@@ -157,7 +165,8 @@ void *Buffer::invalid(void) const
 void *Buffer::peek(unsigned offset)
 {
     caddr_t dbuf;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(offset >= objcount) {
         return invalid();
@@ -200,7 +209,8 @@ void *Buffer::get(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(!objcount && rtn) {
         if(timeout == Timer::inf)
             wait();
@@ -216,7 +226,8 @@ void *Buffer::get(timeout_t timeout)
 
 void Buffer::release(void)
 {
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     head += objsize;
     if(head >= buf + bufsize)
         head = buf;
@@ -228,13 +239,17 @@ void Buffer::put(void *dbuf)
 {
     assert(dbuf != NULL);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(objcount == limit)
         wait();
+
     memcpy(tail, dbuf, objsize);
     tail += objsize;
+
     if(tail >= (buf + bufsize))
         tail = buf;
+
     ++objcount;
     signal();
 }
@@ -249,7 +264,8 @@ bool Buffer::put(void *dbuf, timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(objcount == limit && rtn) {
         if(timeout == Timer::inf)
             wait();
@@ -273,7 +289,8 @@ bool Buffer::put(void *dbuf, timeout_t timeout)
 Buffer::operator bool() const
 {
     bool rtn = false;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(buf && head != tail)
         rtn = true;
@@ -283,7 +300,8 @@ Buffer::operator bool() const
 bool Buffer::operator!() const
 {
     bool rtn = false;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     if(!buf || head == tail)
         rtn = true;
@@ -339,7 +357,8 @@ bool Queue::remove(ObjectProtocol *o)
 
     bool rtn = false;
     linked_pointer<member> node;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     node = begin();
     while(node) {
@@ -367,7 +386,8 @@ ObjectProtocol *Queue::lifo(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(!tail && rtn) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -398,7 +418,8 @@ ObjectProtocol *Queue::fifo(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(rtn && !head) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -431,7 +452,8 @@ ObjectProtocol *Queue::get(unsigned back)
 {
     linked_pointer<member> node;
     ObjectProtocol *obj;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
 
     node = begin();
 
@@ -459,7 +481,8 @@ bool Queue::post(ObjectProtocol *object, timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(rtn && limit && used == limit) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -492,7 +515,8 @@ bool Queue::post(ObjectProtocol *object, timeout_t timeout)
 size_t Queue::count(void) const
 {
     size_t qcount;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
     qcount = used;
     return qcount;
 }
@@ -547,7 +571,9 @@ bool Stack::remove(ObjectProtocol *o)
 
     bool rtn = false;
     linked_pointer<member> node;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
+
     node = static_cast<member*>(usedlist);
     while(node) {
         if(node->object == o)
@@ -574,7 +600,8 @@ ObjectProtocol *Stack::get(unsigned back)
     linked_pointer<member> node;
     ObjectProtocol *obj;
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     node = usedlist;
 
     do {
@@ -600,7 +627,8 @@ const ObjectProtocol *Stack::peek(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(rtn && !usedlist) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -609,6 +637,7 @@ const ObjectProtocol *Stack::peek(timeout_t timeout)
         else
             rtn = false;
     }
+
     if(!rtn) {
         return NULL;
     }
@@ -631,7 +660,8 @@ ObjectProtocol *Stack::pull(timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(rtn && !usedlist) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -665,7 +695,8 @@ bool Stack::push(ObjectProtocol *object, timeout_t timeout)
     if(timeout && timeout != Timer::inf)
         set(&ts, timeout);
 
-    autolock exclusive(this);
+    __AUTOLOCK__
+
     while(rtn && limit && used == limit) {
         if(timeout == Timer::inf)
             Conditional::wait();
@@ -700,7 +731,9 @@ bool Stack::push(ObjectProtocol *object, timeout_t timeout)
 size_t Stack::count(void) const
 {
     size_t scount;
-    autolock exclusive(this);
+
+    __AUTOLOCK__
+
     scount = used;
     return scount;
 }
