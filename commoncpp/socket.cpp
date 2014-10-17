@@ -115,8 +115,6 @@ socket_t Socket::dupSocket(socket_t so, State state)
 }
 #endif
 
-Mutex Socket::mutex;
-
 void Socket::setSocket(void)
 {
     flags.thrown    = false;

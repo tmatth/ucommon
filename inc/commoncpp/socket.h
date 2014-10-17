@@ -171,8 +171,6 @@ private:
 protected:
     static socket_t dupSocket(socket_t s,Socket::State state);
 
-    static Mutex mutex;
-
     mutable struct {
         bool thrown: 1;
         bool broadcast: 1;
