@@ -1,3 +1,9 @@
+ucommon (1:6.2.0-1) UNRELEASED; urgency=low
+
+  * Updated abi
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sat, 18 Oct 2014 06:50:01 -0400
+
 ucommon (1:6.1.11-1) UNRELEASED; urgency=medium
 
   * Bug fix release, stream and string fixes
