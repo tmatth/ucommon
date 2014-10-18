@@ -121,10 +121,10 @@ if test "x$enable_posix_timers" = "xyes" ; then
 fi
 
 AC_ARG_ENABLE(utils, [  --disable-utils Do not build the utilities])
-if test "$enableval" != no; then
-    AM_CONDITIONAL([BUILD_UTILS], true),
+if test x"$enable_utils" == "xno"; then
+    AM_CONDITIONAL([BUILD_UTILS], false),
 else
-    AM_CONDITIONAL([BUILD_UTILS], false)
+    AM_CONDITIONAL([BUILD_UTILS], true)
 fi
 
 AC_ARG_ENABLE(stdcpp,
