@@ -1,3 +1,9 @@
+ucommon (1:6.2.0-2) UNRELEASED; urgency=low
+
+  * Updated for multi-arch
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 19 Oct 2014 08:10:56 -0400
+
 ucommon (1:6.2.0-1) UNRELEASED; urgency=low
 
   * Updated abi
