@@ -160,14 +160,22 @@ inline void *operator new(size_t size, caddr_t address, size_t known)
  * Delete an object from the heap.
  * @param object to delete.
  */
+#if __cplusplus <= 199711L
 inline void operator delete(void *object)
+#else
+inline void operator delete(void *object) noexcept (true)
+#endif
     {free(object);}
 
 /**
  * Delete an array from the heap.  All array element destructors are called.
  * @param array to delete.
  */
+#if __cplusplus <= 199711L
 inline void operator delete[](void *array)
+#else
+inline void operator delete[](void *array) noexcept(true)
+#endif
     {free(array);}
 
 #ifdef  __GNUC__
