@@ -82,7 +82,7 @@ extern "C" __EXPORT void cpr_memswap(void *mem1, void *mem2, size_t size);
  * @param size of object being constructed.
  * @return memory allocated from heap.
  */
-inline void *operator new(size_t size)
+void *operator new(size_t size)
     {return cpr_memalloc(size);}
 
 /**
@@ -90,7 +90,7 @@ inline void *operator new(size_t size)
  * @param size of memory needed for object array.
  * @return memory allocated from heap.
  */
-inline void *operator new[](size_t size)
+void *operator new[](size_t size)
     {return cpr_memalloc(size);}
 #endif
 
@@ -103,7 +103,7 @@ inline void *operator new[](size_t size)
  * @param address where to place object array.
  * @return memory we placed object array.
  */
-inline void *operator new[](size_t size, caddr_t address)
+void *operator new[](size_t size, caddr_t address)
     {return cpr_memassign(size, address, size);}
 
 /**
@@ -115,7 +115,7 @@ inline void *operator new[](size_t size, caddr_t address)
  * @param known size of location we are placing array.
  * @return memory we placed object array.
  */
-inline void *operator new[](size_t size, caddr_t address, size_t known)
+void *operator new[](size_t size, caddr_t address, size_t known)
     {return cpr_memassign(size, address, known);}
 #endif
 
@@ -128,7 +128,7 @@ inline void *operator new[](size_t size, caddr_t address, size_t known)
  * @param size of object.
  * @param extra heap space needed for data.
  */
-inline void *operator new(size_t size, size_t extra)
+void *operator new(size_t size, size_t extra)
     {return cpr_memalloc(size + extra);}
 
 /**
@@ -139,7 +139,7 @@ inline void *operator new(size_t size, size_t extra)
  * @param address where to place object.
  * @return memory we placed object.
  */
-inline void *operator new(size_t size, caddr_t address)
+void *operator new(size_t size, caddr_t address)
     {return cpr_memassign(size, address, size);}
 
 /**
@@ -152,7 +152,7 @@ inline void *operator new(size_t size, caddr_t address)
  * @return memory we placed object.
  */
 
-inline void *operator new(size_t size, caddr_t address, size_t known)
+void *operator new(size_t size, caddr_t address, size_t known)
     {return cpr_memassign(size, address, known);}
 
 #ifndef _UCOMMON_EXTENDED_
@@ -161,9 +161,9 @@ inline void *operator new(size_t size, caddr_t address, size_t known)
  * @param object to delete.
  */
 #if __cplusplus <= 199711L
-inline void operator delete(void *object)
+void operator delete(void *object)
 #else
-inline void operator delete(void *object) noexcept (true)
+void operator delete(void *object) noexcept (true)
 #endif
     {free(object);}
 
@@ -172,9 +172,9 @@ inline void operator delete(void *object) noexcept (true)
  * @param array to delete.
  */
 #if __cplusplus <= 199711L
-inline void operator delete[](void *array)
+void operator delete[](void *array)
 #else
-inline void operator delete[](void *array) noexcept(true)
+void operator delete[](void *array) noexcept(true)
 #endif
     {free(array);}
 
