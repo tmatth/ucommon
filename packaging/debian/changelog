@@ -1,3 +1,9 @@
+ucommon (1:6.2.1-1) UNRELEASED; urgency=low
+
+  * Updated abi for placement new
+
+ -- David Sugar <dyfet@gnutelephony.org>  Wed, 29 Oct 2014 04:13:17 -0400
+
 ucommon (1:6.2.0-2) UNRELEASED; urgency=low
 
   * Updated for multi-arch

@@ -82,14 +82,14 @@ extern "C" __EXPORT void cpr_memswap(void *mem1, void *mem2, size_t size);
  * @param size of object being constructed.
  * @return memory allocated from heap.
  */
-void *operator new(size_t size);
+__EXPORT void *operator new(size_t size);
 
 /**
  * Our generic new array operator.  Uses our heap memory allocator.
  * @param size of memory needed for object array.
  * @return memory allocated from heap.
  */
-void *operator new[](size_t size);
+__EXPORT void *operator new[](size_t size);
 #endif
 
 #ifndef _UCOMMON_EXTENDED_
@@ -101,7 +101,7 @@ void *operator new[](size_t size);
  * @param address where to place object array.
  * @return memory we placed object array.
  */
-void *operator new[](size_t size, caddr_t address);
+__EXPORT void *operator new[](size_t size, caddr_t address);
 
 /**
  * A placement new array operator where we know the allocated size.  We
@@ -112,7 +112,7 @@ void *operator new[](size_t size, caddr_t address);
  * @param known size of location we are placing array.
  * @return memory we placed object array.
  */
-void *operator new[](size_t size, caddr_t address, size_t known);
+__EXPORT void *operator new[](size_t size, caddr_t address, size_t known);
 #endif
 
 /**
@@ -124,7 +124,7 @@ void *operator new[](size_t size, caddr_t address, size_t known);
  * @param size of object.
  * @param extra heap space needed for data.
  */
-void *operator new(size_t size, size_t extra);
+__EXPORT void *operator new(size_t size, size_t extra);
 
 /**
  * A placement new operator where we assume the size of memory is good.
@@ -134,7 +134,7 @@ void *operator new(size_t size, size_t extra);
  * @param address where to place object.
  * @return memory we placed object.
  */
-void *operator new(size_t size, caddr_t address);
+__EXPORT void *operator new(size_t size, caddr_t address);
 
 /**
  * A placement new operator where we know the allocated size.  We
@@ -146,7 +146,7 @@ void *operator new(size_t size, caddr_t address);
  * @return memory we placed object.
  */
 
-void *operator new(size_t size, caddr_t address, size_t known);
+__EXPORT void *operator new(size_t size, caddr_t address, size_t known);
 
 #ifndef _UCOMMON_EXTENDED_
 /**
@@ -154,9 +154,9 @@ void *operator new(size_t size, caddr_t address, size_t known);
  * @param object to delete.
  */
 #if __cplusplus <= 199711L
-void operator delete(void *object);
+__EXPORT void operator delete(void *object);
 #else
-void operator delete(void *object) noexcept (true);
+__EXPORT void operator delete(void *object) noexcept (true);
 #endif
 
 /**
@@ -164,9 +164,9 @@ void operator delete(void *object) noexcept (true);
  * @param array to delete.
  */
 #if __cplusplus <= 199711L
-void operator delete[](void *array);
+__EXPORT void operator delete[](void *array);
 #else
-void operator delete[](void *array) noexcept(true);
+__EXPORT void operator delete[](void *array) noexcept(true);
 #endif
 
 #ifdef  __GNUC__
