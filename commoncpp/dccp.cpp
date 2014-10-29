@@ -223,11 +223,9 @@ Socket(fam, SOCK_DCCP, IPPROTO_DCCP)
     if(isdigit(*cp))
         addr.sin_port = htons(atoi(cp));
     else {
-        mutex.enter();
         svc = getservbyname(cp, "dccp");
         if(svc)
             addr.sin_port = svc->s_port;
-        mutex.leave();
         if(!svc) {
             endSocket();
             error(errBindingFailed, "Could not find service", errno);
@@ -458,11 +456,9 @@ void DCCPSocket::connect(const char *target)
     if(isdigit(*cp))
         port = atoi(cp);
     else {
-        mutex.enter();
         svc = getservbyname(cp, "dccp");
         if(svc)
             port = ntohs(svc->s_port);
-        mutex.leave();
         if(!svc) {
             connectError();
             return;

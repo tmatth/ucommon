@@ -197,11 +197,9 @@ Socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
     if(isdigit(*cp))
         addr.sin_port = htons(atoi(cp));
     else {
-        mutex.enter();
         svc = getservbyname(cp, "tcp");
         if(svc)
             addr.sin_port = svc->s_port;
-        mutex.leave();
         if(!svc) {
                     endSocket();
                     error(errBindingFailed, "Could not find service", errno);
@@ -605,11 +603,9 @@ void TCPStream::connect(const char *target, unsigned mss)
     if(isdigit(*cp))
         port = atoi(cp);
     else {
-        mutex.enter();
         svc = getservbyname(cp, "tcp");
         if(svc)
             port = ntohs(svc->s_port);
-        mutex.leave();
         if(!svc) {
             endStream();
             connectError();
