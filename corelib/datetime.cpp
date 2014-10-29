@@ -89,7 +89,7 @@ void DateTime::release(tm_t *dt)
 #else
 static mutex_t lockflag;
 
-tm_t *DateTime::local(time_t *now)
+tm_t *DateTime::local(const time_t *now)
 {
     tm_t *dt;
     time_t tmp;
@@ -107,7 +107,7 @@ tm_t *DateTime::local(time_t *now)
     return NULL;
 }
 
-tm_t *DateTime::gmt(time_t *now)
+tm_t *DateTime::gmt(const time_t *now)
 {
     tm_t *dt;
     time_t tmp;

@@ -125,7 +125,7 @@ class __EXPORT fsys
 {
 protected:
     fd_t    fd;
-    int     error;
+    mutable int     error;
 
 public:
     /**
