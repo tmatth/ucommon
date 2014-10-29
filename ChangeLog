@@ -1,3 +1,9 @@
+Changes from 6.2.0 to 6.2.1
+- datetime: fix const inconsistency
+- fsys: cached error variable must be mutable
+- replacment new/delete cannot be declared inline
+- fix exception specifier clash for c++11
+
 Changes from 6.1.11 to 6.2.0
 - standardized cmake paths and stand-alone usages
 - gnutls support in cmake

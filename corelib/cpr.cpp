@@ -176,3 +176,61 @@ extern "C" void __cxa_pure_virtual(void)
 
 #endif
 
+#ifndef _UCOMMON_EXTENDED_
+
+void *operator new(size_t size)
+{
+    return cpr_memalloc(size);
+}
+
+void *operator new[](size_t size)
+{
+    return cpr_memalloc(size);
+}
+
+void *operator new[](size_t size, caddr_t address)
+{
+    return cpr_memassign(size, address, size);
+}
+
+void *operator new[](size_t size, caddr_t address, size_t known)
+{
+    return cpr_memassign(size, address, known);
+}
+
+#if __cplusplus <= 199711L
+void operator delete(void *object)
+#else
+void operator delete(void *object) noexcept (true)
+#endif
+{
+    free(object);
+}
+
+#if __cplusplus <= 199711L
+void operator delete[](void *array)
+#else
+void operator delete[](void *array) noexcept(true)
+#endif
+{
+    free(array);
+}
+
+#endif
+
+void *operator new(size_t size, size_t extra)
+{
+    return cpr_memalloc(size + extra);
+}
+
+void *operator new(size_t size, caddr_t address)
+{
+    return cpr_memassign(size, address, size);
+}
+
+void *operator new(size_t size, caddr_t address, size_t known)
+{
+    return cpr_memassign(size, address, known);
+}
+
+
