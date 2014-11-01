@@ -1556,8 +1556,12 @@ SerialService::~SerialService()
     update(0);
     terminate();
 
-    while(first)
-        delete first;
+    SerialPort *port = first;
+    while (port) {
+        SerialPort *tmp = port;
+        port = port->next;
+        delete tmp;
+    }
 }
 
 void SerialService::onUpdate(unsigned char flag)
