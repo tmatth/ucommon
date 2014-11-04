@@ -8,6 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+ACLOCAL_AMFLAGS = -I m4
+
 EXTRA_DIST = autogen.sh README* *.pc.in *.spec.in *.spec *-config.in \
     *-config.1 Doxyfile cmodel.sh BUILDS SUPPORT COPYING* COPYRIGHT \
     CMakeLists.txt ucommon-config.cmake ucommon.pc.cmake cmake-abi.sh \
