@@ -440,8 +440,8 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
     socklen_t len;
     unsigned slen = strlen(path);
 
-    if(slen > sizeof(struct sockaddr_storage) - 8)
-        slen = sizeof(struct sockaddr_storage) - 8;
+    if(slen > sizeof(addr->sun_path))
+        slen = sizeof(addr->sun_path);
 
     memset(addr, 0, sizeof(struct sockaddr_storage));
     addr->sun_family = AF_UNIX;
