@@ -3068,6 +3068,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
         struct ifreq ifr;
         memset(&ifr, 0, sizeof(ifr));
         strncpy(ifr.ifr_ifrn.ifrn_name, host, IFNAMSIZ);
+        ifr.ifr_name[IFNAMSIZ - 1] = '\0';
         setsockopt(so, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof(ifr));
         host = NULL;
     }
