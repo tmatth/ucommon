@@ -3049,7 +3049,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
     setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (caddr_t)&reuse, sizeof(reuse));
 
 #ifdef AF_UNIX
-    if(strchr(host, '/')) {
+    if(host && strchr(host, '/')) {
         struct sockaddr_storage uaddr;
         socklen_t len = unixaddr((struct sockaddr_un *)&uaddr, host);
         rtn = _bind_(so, (struct sockaddr *)&uaddr, len);
