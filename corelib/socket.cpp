@@ -443,7 +443,7 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
     if(slen > sizeof(addr->sun_path))
         slen = sizeof(addr->sun_path);
 
-    memset(addr, 0, sizeof(struct sockaddr_storage));
+    memset(addr, 0, sizeof(*addr));
     addr->sun_family = AF_UNIX;
     memcpy(addr->sun_path, path, slen);
 
