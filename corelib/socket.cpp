@@ -1331,6 +1331,7 @@ void Socket::address::copy(const struct addrinfo *addr)
         else
             list = node;
         last = node;
+        addr = addr->ai_next;
     }
 }
 
