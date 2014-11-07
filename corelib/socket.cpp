@@ -3326,7 +3326,7 @@ unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
         return 0;
 
     socklen_t slen = len(s1);
-    if(len > 0) {
+    if(slen > 0) {
         memcpy(s1, s2, slen);
         return slen;
     }
