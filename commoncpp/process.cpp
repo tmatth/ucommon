@@ -833,6 +833,8 @@ bool Lockfile::lock(const char *name)
         Thread::sleep(2000);
         status = ::read(fd, buffer, sizeof(buffer) - 1);
         if(status < 1) {
+            // ensure that buffer is null-terminated before continuing
+            buffer[sizeof(buffer) - 1] = '\0';
             ::close(fd);
             continue;
         }
