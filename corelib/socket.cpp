@@ -1734,7 +1734,7 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 #endif
 
 #if defined(AF_UNIX) && !defined(_MSWINDOWS_)
-    if(strchr(iface, '/')) {
+    if(iface && strchr(iface, '/')) {
         struct sockaddr_storage uaddr;
         socklen_t len = unixaddr((struct sockaddr_un *)&uaddr, iface);
         if(!type)
