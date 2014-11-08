@@ -193,8 +193,10 @@ void Slog::error(const char *format, ...)
     va_start(args, format);
     overflow(EOF);
 
-    if(!thread)
+    if(!thread) {
+        va_end(args);
         return;
+    }
 
     error();
 
