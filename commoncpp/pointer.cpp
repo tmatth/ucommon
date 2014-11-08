@@ -70,10 +70,9 @@ RefPointer::RefPointer(RefObject *obj)
     ref = obj;
 }
 
-RefPointer::RefPointer(const RefPointer &ptr)
+RefPointer::RefPointer(const RefPointer &ptr) : ref(ptr.ref)
 {
     detach();
-    ref = ptr.ref;
     if(ref) {
         enterLock();
         ++ref->refCount;

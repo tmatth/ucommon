@@ -440,10 +440,10 @@ static socklen_t unixaddr(struct sockaddr_un *addr, const char *path)
     socklen_t len;
     unsigned slen = strlen(path);
 
-    if(slen > sizeof(struct sockaddr_storage) - 8)
-        slen = sizeof(struct sockaddr_storage) - 8;
+    if(slen > sizeof(addr->sun_path))
+        slen = sizeof(addr->sun_path);
 
-    memset(addr, 0, sizeof(struct sockaddr_storage));
+    memset(addr, 0, sizeof(*addr));
     addr->sun_family = AF_UNIX;
     memcpy(addr->sun_path, path, slen);
 
@@ -1331,6 +1331,7 @@ void Socket::address::copy(const struct addrinfo *addr)
         else
             list = node;
         last = node;
+        addr = addr->ai_next;
     }
 }
 
@@ -1733,7 +1734,7 @@ socket_t Socket::create(const char *iface, const char *port, int family, int typ
 #endif
 
 #if defined(AF_UNIX) && !defined(_MSWINDOWS_)
-    if(strchr(iface, '/')) {
+    if(iface && strchr(iface, '/')) {
         struct sockaddr_storage uaddr;
         socklen_t len = unixaddr((struct sockaddr_un *)&uaddr, iface);
         if(!type)
@@ -3048,7 +3049,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
     setsockopt(so, SOL_SOCKET, SO_REUSEADDR, (caddr_t)&reuse, sizeof(reuse));
 
 #ifdef AF_UNIX
-    if(strchr(host, '/')) {
+    if(host && strchr(host, '/')) {
         struct sockaddr_storage uaddr;
         socklen_t len = unixaddr((struct sockaddr_un *)&uaddr, host);
         rtn = _bind_(so, (struct sockaddr *)&uaddr, len);
@@ -3068,6 +3069,7 @@ int Socket::bindto(socket_t so, const char *host, const char *svc, int protocol)
         struct ifreq ifr;
         memset(&ifr, 0, sizeof(ifr));
         strncpy(ifr.ifr_ifrn.ifrn_name, host, IFNAMSIZ);
+        ifr.ifr_name[IFNAMSIZ - 1] = '\0';
         setsockopt(so, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof(ifr));
         host = NULL;
     }
@@ -3325,7 +3327,7 @@ unsigned Socket::copy(struct sockaddr *s1, const struct sockaddr *s2)
         return 0;
 
     socklen_t slen = len(s1);
-    if(len > 0) {
+    if(slen > 0) {
         memcpy(s1, s2, slen);
         return slen;
     }

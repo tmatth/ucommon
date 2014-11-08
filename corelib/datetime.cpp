@@ -544,7 +544,7 @@ void Time::set(const char *str, size_t size)
 
 String Time::operator()() const
 {
-    char buf[7];
+    char buf[9];
 
     put(buf);
     String strTime(buf);
