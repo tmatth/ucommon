@@ -688,7 +688,7 @@ void StringPager::sort(void)
     while(pos)
         list[--pos]->enlist(&root);
 
-    delete list;
+    delete[] list;
     index = NULL;
 }
 

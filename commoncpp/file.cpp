@@ -1356,7 +1356,7 @@ char *File::getFilename(const char *path, char *buffer, size_t size)
 
 char *File::getDirname(const char *path, char *buffer, size_t size)
 {
-    size_t len;
+    size_t len = 0;
     const char *cp = strrchr(path, '\\');
 
     snprintf(buffer, size, "%s", path);

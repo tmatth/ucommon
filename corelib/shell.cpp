@@ -1208,8 +1208,8 @@ shell::pid_t shell::spawn(const char *path, char **argv, char **envp, fd_t *stdi
 
 exit:
     if(ep)
-        delete ep;
-    delete args;
+        delete[] ep;
+    delete[] args;
     for(pos = 0; pos < 3; ++pos) {
         if(dups[pos] != INVALID_HANDLE_VALUE)
             CloseHandle(dups[pos]);
@@ -1255,7 +1255,7 @@ void shell::detach(mainproc_t entry)
     if(_domain)
         name = _domain;
 
-    name = strdup(name);
+    name = shell::strdup(name);
 
     if(entry == NULL)
         return;
@@ -1364,8 +1364,8 @@ int shell::detach(const char *path, char **argv, char **envp, fd_t *stdio)
 
 exit:
     if(ep)
-        delete ep;
-    delete args;
+        delete[] ep;
+    delete[] args;
     for(pos = 0; pos < 3; ++pos) {
         if(dups[pos] != INVALID_HANDLE_VALUE)
             CloseHandle(dups[pos]);
