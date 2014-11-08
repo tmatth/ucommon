@@ -1208,8 +1208,8 @@ shell::pid_t shell::spawn(const char *path, char **argv, char **envp, fd_t *stdi
 
 exit:
     if(ep)
-        delete ep;
-    delete args;
+        delete[] ep;
+    delete[] args;
     for(pos = 0; pos < 3; ++pos) {
         if(dups[pos] != INVALID_HANDLE_VALUE)
             CloseHandle(dups[pos]);
