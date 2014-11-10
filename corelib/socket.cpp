@@ -993,6 +993,17 @@ Socket::address::address(const address& from)
     copy(from.list);
 }
 
+Socket::address&
+Socket::address::operator=(const address& rhs)
+{
+    if (*this != rhs)
+    {
+        list = NULL;
+        copy(rhs.list);
+    }
+    return *this;
+}
+
 Socket::address::address(const char *host, const char *service, int type)
 {
     list = NULL;

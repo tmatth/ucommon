@@ -429,6 +429,12 @@ public:
         address(const address& reference);
 
         /**
+         * Assignment operator.
+         * @param reference to object to copy from.
+         */
+        address& operator=(const address& rhs);
+
+        /**
          * Destroy address.  Deallocate addrinfo structure.
          */
         ~address();
