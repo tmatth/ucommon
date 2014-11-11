@@ -79,5 +79,8 @@ extern "C" int main()
     char *cdup = dup<char>(test[6]);
     assert(eq(cdup, "test13"));
 
+    delete[] test;
+    delete[] cdup;
+
     return 0;
 }

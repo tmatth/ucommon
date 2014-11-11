@@ -969,7 +969,7 @@ Socket::address::address(const in_addr& address, in_port_t port) : list(NULL)
     sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_addr = address;
-    addr.sin_port = port;
+    addr.sin_port = htons(port);
     insert((sockaddr&)addr);
 }
 
@@ -978,7 +978,7 @@ Socket::address::address(const in6_addr& address, in_port_t port) : list(NULL)
     sockaddr_in6 addr;
     addr.sin6_family = AF_INET6;
     addr.sin6_addr = address;
-    addr.sin6_port = port;
+    addr.sin6_port = htons(port);
     insert((sockaddr&)addr);
 }
 
@@ -991,6 +991,17 @@ Socket::address::address(const address& from)
 {
     list = NULL;
     copy(from.list);
+}
+
+Socket::address&
+Socket::address::operator=(const address& rhs)
+{
+    if (*this != rhs)
+    {
+        list = NULL;
+        copy(rhs.list);
+    }
+    return *this;
 }
 
 Socket::address::address(const char *host, const char *service, int type)
