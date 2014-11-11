@@ -128,6 +128,24 @@ extern "C" void msb_setlong(uint8_t *b, uint32_t v)
     b[0] = (uint8_t)((v / 16777216l) & 0xff);
 }
 
+extern "C" void *cpr_newp(void **handle, size_t size)
+{
+    assert(handle != NULL);
+    if(*handle)
+        free(*handle);
+    *handle = malloc(size);
+    return *handle;
+}
+
+extern "C" void cpr_freep(void **handle)
+{
+    assert(handle != NULL);
+    if(*handle) {
+        free(*handle);
+        *handle = NULL;
+    }
+}
+
 extern "C" void cpr_memswap(void *s1, void *s2, size_t size)
 {
     assert(s1 != NULL);

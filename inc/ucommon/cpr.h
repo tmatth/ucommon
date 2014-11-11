@@ -49,6 +49,10 @@ extern "C" {
  */
 __EXPORT void cpr_runtime_error(const char *text);
 
+extern "C" __EXPORT void *cpr_newp(void **handle, size_t size);
+
+extern "C" __EXPORT void cpr_freep(void **handle);
+
 /**
  * Portable memory allocation helper function.  Handles out of heap error
  * as a runtime error.
@@ -184,6 +188,16 @@ extern "C" {
     __EXPORT void lsb_setlong(uint8_t *b, uint32_t v);
     __EXPORT void msb_setshort(uint8_t *b, uint16_t v);
     __EXPORT void msb_setlong(uint8_t *b, uint32_t v);
+}
+
+template <typename T>
+T *newp(T **handle, size_t size) {
+    return (T*)cpr_newp(handle, size);
+}
+
+template <typename T>
+void freep(T **handle) {
+    cpr_freep(handle);
 }
 
 #endif
