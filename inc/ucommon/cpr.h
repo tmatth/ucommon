@@ -191,8 +191,8 @@ extern "C" {
 }
 
 template <typename T>
-T *newp(T **handle, size_t size) {
-    return (T*)cpr_newp(handle, size);
+T *newp(T **handle) {
+    return (T*)cpr_newp(handle, sizeof(T));
 }
 
 template <typename T>
