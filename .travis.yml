@@ -1,0 +1,19 @@
+env:
+  global:
+  - secure: csN189dw_KfUAeGLGfKnxw
+  - secure: TqxiZEjZXOr+MHZl2ZoMSGaLDjSHqZvDc7cjP1+9fY31d3XkbGbt3W2lA/89xP4vu70K8VAXlXqfXGCRsat1aWIcKzzKVWDf98QXxNSsekfXbYTWZ93UlOeYapQeh8t+ZMV2yB7cp/wAVNJlqmvFTqrUA1zeJULxYlPe54UZG7o=
+addons:
+  coverity_scan:
+    project:
+      name: ucommon
+      version: 6.2.1
+      description: ucommon
+    notification_email: le.businessman@gmail.com
+    build_command_prepend: ./configure
+    build_command: make
+    branch_pattern: coverity_scan
+language: cpp
+before_script:
+- sudo apt-get install libgnutls28-dev
+- ./autogen.sh
+script: ./configure --with-pkg-config && make && make check
