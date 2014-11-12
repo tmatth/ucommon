@@ -1322,7 +1322,7 @@ String &String::operator|(const char *s)
 String String::operator+(const char *s)
 {
     String tmp;
-    if(str && str->text)
+    if(str && str->text[0])
         tmp.set(str->text);
 
     if(s && *s)
@@ -2037,7 +2037,7 @@ String &String::operator%(unsigned short& value)
 {
     unsigned long temp = USHRT_MAX + 1;
     char *ep;
-    if(!str || !str->text)
+    if(!str || !str->text[0])
         return *this;
 
     value = 0;
@@ -2060,7 +2060,7 @@ String &String::operator%(short& value)
 {
     long temp = SHRT_MAX + 1;
     char *ep;
-    if(!str || !str->text)
+    if(!str || !str->text[0])
         return *this;
 
     value = 0;
@@ -2086,7 +2086,7 @@ String &String::operator%(long& value)
 {
     value = 0;
     char *ep;
-    if(!str || !str->text)
+    if(!str || !str->text[0])
         return *this;
 
     value = strtol(str->text, &ep, 0);
@@ -2102,7 +2102,7 @@ String &String::operator%(unsigned long& value)
 {
     value = 0;
     char *ep;
-    if(!str || !str->text)
+    if(!str || !str->text[0])
         return *this;
 
     value = strtoul(str->text, &ep, 0);
@@ -2118,7 +2118,7 @@ String &String::operator%(double& value)
 {
     value = 0;
     char *ep;
-    if(!str || !str->text)
+    if(!str || !str->text[0])
         return *this;
 
     value = strtod(str->text, &ep);
@@ -2132,7 +2132,7 @@ String &String::operator%(double& value)
 
 String &String::operator%(const char *get)
 {
-    if(!str || !str->text || !get)
+    if(!str || !str->text[0] || !get)
         return *this;
 
     unsigned len = strlen(get);
