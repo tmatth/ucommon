@@ -903,14 +903,15 @@ void String::paste(strsize_t offset, const char *cp, strsize_t size)
     if(!size)
         return;
 
-    cow(size);
-
     if(!str) {
+        str = create(size);
         String::set(str->text, ++size, cp);
         str->len = --size;
         str->fix();
         return;
     }
+
+    cow(size);
 
     if(offset >= str->len)
         String::set(str->text + str->len, size + 1, cp);
