@@ -62,7 +62,7 @@
 namespace ost {
 using std::ostream;
 
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
 enum {
     MCAST_VALID_MASK = 0xF0000000,
     MCAST_VALID_VALUE = 0xE0000000
