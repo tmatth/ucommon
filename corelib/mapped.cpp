@@ -196,6 +196,7 @@ MappedMemory::MappedMemory(const char *fn, size_t len)
     assert(fn != NULL && *fn != 0);
     assert(len > 0);
 
+    size = len;
     erase = true;
     String::set(idname, sizeof(idname), fn);
     create(fn, size);
