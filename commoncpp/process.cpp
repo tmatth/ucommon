@@ -809,7 +809,7 @@ bool Lockfile::lock(const char *name)
 
     for(;;) {
         fd = ::open(_path, O_WRONLY | O_CREAT | O_EXCL, 0660);
-        if(fd > 0) {
+        if(fd >= 0) {
             pid = getpid();
             snprintf(buffer, sizeof(buffer), "%d\n", pid);
             if(::write(fd, buffer, strlen(buffer)))

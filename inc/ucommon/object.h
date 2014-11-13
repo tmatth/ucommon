@@ -328,7 +328,7 @@ public:
     /**
      * Construct composite value object.
      */
-    inline object_value() : O() {}
+    inline object_value() : O(), value() {}
 
     /**
      * Construct composite value object and assign from existing data value.

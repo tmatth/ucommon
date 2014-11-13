@@ -201,6 +201,7 @@ static void encodefile(const char *path, const char *name)
         if(!encode(name, fp))
             break;
     }
+    fclose(fp);
 }
 
 static void final(void)
