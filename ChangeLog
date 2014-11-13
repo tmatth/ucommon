@@ -1,3 +1,9 @@
+Changes from 6.2.1 to 6.2.2
+- bumped gnutls to 3.0.0 or later...
+- lots of bug fixes and general cleanup
+- socket endian issues and other things for ccrtp
+- templated newp and freep handle management
+
 Changes from 6.2.0 to 6.2.1
 - datetime: fix const inconsistency
 - fsys: cached error variable must be mutable
