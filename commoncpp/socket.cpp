@@ -865,7 +865,8 @@ ucommon::Socket::address Socket::getSender() const
 
 IPV4Host Socket::getIPV4Sender(tpport_t *port) const
 {
-    sockaddr_in* from = getSender();
+    ucommon::Socket::address addr = getSender();
+    sockaddr_in* from = addr;
     struct in_addr any;
     any.s_addr = INADDR_ANY;
 
@@ -883,7 +884,8 @@ IPV4Host Socket::getIPV4Sender(tpport_t *port) const
 #ifdef  CCXX_IPV6
 IPV6Host Socket::getIPV6Sender(tpport_t *port) const
 {
-    sockaddr_in6* from = getSender();
+    ucommon::Socket::address addr = getSender();
+    sockaddr_in6* from = addr;
     if (from == NULL) {
         if (port)
             port = 0;
