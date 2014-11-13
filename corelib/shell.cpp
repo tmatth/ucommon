@@ -1255,7 +1255,8 @@ void shell::detach(mainproc_t entry)
     if(_domain)
         name = _domain;
 
-    name = shell::strdup(name);
+    // detach only called once, keeps persistent name...
+    name = ::strdup(name);
 
     if(entry == NULL)
         return;
