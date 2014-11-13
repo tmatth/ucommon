@@ -334,7 +334,7 @@ if(OPENSSL_FOUND)
     set(HAVE_OPENSSL TRUE)
     check_include_files(openssl/fips.h HAVE_OPENSSL_FIPS_H)
 elseif(PKGCONFIG_FOUND)
-    pkg_check_modules(GNUTLS gnutls>=2.8.0)
+    pkg_check_modules(GNUTLS gnutls>=3.0.0)
 endif()
 
 # common build options can be passed to cmake using WITH_CFLAGS, WITH_LIBS,
