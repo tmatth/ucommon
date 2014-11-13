@@ -180,7 +180,7 @@ void Thread::exit(void)
 
     if(detached && equal(tid, self)) {
         delete this;
-        ucommon::Thread::exit();
+        pthread_exit(NULL);
     }
     terminate();
 }

@@ -79,6 +79,13 @@ extern "C" int main()
     char *cdup = dup<char>(test[6]);
     assert(eq(cdup, "test13"));
 
+    String paste_test = "foo";
+    paste_test.paste(3, "bar", 3);
+    String paste_test_empty;
+    paste_test_empty.paste(3, "bar", 3);
+    assert(eq(paste_test, "foobar"));
+    assert(eq(paste_test_empty, "bar"));
+
     delete[] test;
     delete[] cdup;
 

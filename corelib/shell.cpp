@@ -1855,7 +1855,7 @@ void shell::release(int exit_code)
 #endif
     if(dev && *dev) {
         fd = open(dev, O_RDWR);
-        if(fd > 0)
+        if(fd >= 0)
             dup2(fd, 0);
         if(fd != 1)
             dup2(fd, 1);
