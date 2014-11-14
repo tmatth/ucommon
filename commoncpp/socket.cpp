@@ -865,13 +865,14 @@ ucommon::Socket::address Socket::getSender() const
 
 IPV4Host Socket::getIPV4Sender(tpport_t *port) const
 {
-    sockaddr_in* from = getSender();
+    ucommon::Socket::address addr = getSender();
+    sockaddr_in* from = addr;
     struct in_addr any;
     any.s_addr = INADDR_ANY;
 
     if (from == NULL) {
         if (port)
-            port = 0;
+            *port = 0;
         return IPV4Host(any);
     }
 
@@ -883,10 +884,11 @@ IPV4Host Socket::getIPV4Sender(tpport_t *port) const
 #ifdef  CCXX_IPV6
 IPV6Host Socket::getIPV6Sender(tpport_t *port) const
 {
-    sockaddr_in6* from = getSender();
+    ucommon::Socket::address addr = getSender();
+    sockaddr_in6* from = addr;
     if (from == NULL) {
         if (port)
-            port = 0;
+            *port = 0;
         return IPV6Host(in6addr_any);
     }
 
@@ -918,7 +920,7 @@ IPV4Host Socket::getIPV4Local(tpport_t *port) const
 
     if (from == NULL) {
         if (port)
-            port = 0;
+            *port = 0;
         return IPV4Host(any);
     }
 
@@ -933,7 +935,7 @@ IPV6Host Socket::getIPV6Local(tpport_t *port) const
     sockaddr_in6* from = getLocal();
     if (from == NULL) {
         if (port)
-            port = 0;
+            *port = 0;
         return IPV6Host(in6addr_any);
     }
 
@@ -971,7 +973,7 @@ IPV4Host Socket::getIPV4Peer(tpport_t *port) const
 
     if (from == NULL) {
         if (port)
-            port = 0;
+            *port = 0;
         return IPV4Host(any);
     }
 
@@ -986,7 +988,7 @@ IPV6Host Socket::getIPV6Peer(tpport_t *port) const
     sockaddr_in6* from = getPeer();
     if (from == NULL) {
         if (port)
-            port = 0;
+            *port = 0;
         return IPV6Host(in6addr_any);
     }
 
