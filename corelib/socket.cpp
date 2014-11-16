@@ -1562,7 +1562,7 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     memset(dst, 0, dst_sz);
     const char* ret = dst;
     const int af = addr->sa_family;
-    char *res = dst;
+    const char *res = dst;
 #if defined(AF_INET6)
     ipv6_brackets = (af == AF_INET6) ? ipv6_brackets || port : false;
     if(ipv6_brackets) {
@@ -1615,7 +1615,7 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     if(!res)
         return 0;
     size_t addr_len = strlen(res);
-    dst = res + addr_len;
+    dst = (char *)res + addr_len;
     dst_sz -= addr_len;
 
 #if defined(AF_INET6)
