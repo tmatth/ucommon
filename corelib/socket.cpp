@@ -1562,7 +1562,7 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     memset(dst, 0, dst_sz);
     const char* ret = dst;
     const int af = addr->sa_family;
-    const char *res = dst;
+    const char *res = NULL;
 #if defined(AF_INET6)
     ipv6_brackets = (af == AF_INET6) ? ipv6_brackets || port : false;
     if(ipv6_brackets) {
@@ -1577,8 +1577,8 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
 		memset(&in, 0, sizeof(in));
 		in.sin_family = AF_INET;
 		memcpy(&in.sin_addr, &reinterpret_cast<const struct sockaddr_in*>(addr)->sin_addr, sizeof(struct in_addr));
-		if(getnameinfo((struct sockaddr *)&in, sizeof(struct sockaddr_in), dst, dst_sz, NULL, 0, NI_NUMERICHOST)) {
-			res = NULL;
+		if(!getnameinfo((struct sockaddr *)&in, sizeof(struct sockaddr_in), dst, dst_sz, NULL, 0, NI_NUMERICHOST)) {
+			res = dst;
 		}
         break;
  #ifdef  AF_INET6
@@ -1588,8 +1588,8 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
 		in6.sin6_family = AF_INET6;
 		memcpy(&in6.sin6_addr, &reinterpret_cast<const struct sockaddr_in6*>(addr)->sin6_addr, sizeof(struct in_addr6));
 
-		if(getnameinfo((struct sockaddr *)&in6, sizeof(struct sockaddr_in6), dst, dst_sz, NULL, 0, NI_NUMERICHOST)) {
-			res = NULL;
+		if(!getnameinfo((struct sockaddr *)&in6, sizeof(struct sockaddr_in6), dst, dst_sz, NULL, 0, NI_NUMERICHOST)) {
+			res = dst;
 		}
         break;
  #endif
@@ -1615,7 +1615,7 @@ size_t Socket::address::print(const sockaddr* addr, char *dst, size_t dst_sz, bo
     if(!res)
         return 0;
     size_t addr_len = strlen(res);
-    dst = (char *)res + addr_len;
+    dst = dst + addr_len;
     dst_sz -= addr_len;
 
 #if defined(AF_INET6)
